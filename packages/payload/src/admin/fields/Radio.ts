@@ -40,16 +40,11 @@ export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType>
 export type RadioFieldServerProps = RadioFieldBaseServerProps &
   ServerFieldBase<RadioField, RadioFieldClientWithoutType>
 
-export type RadioFieldServerComponent = FieldServerComponent<
-  RadioField,
-  RadioFieldClientWithoutType,
-  RadioFieldBaseServerProps
->
+export type RadioFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<RadioField, RadioFieldClientWithoutType, RadioFieldBaseServerProps & T>
 
-export type RadioFieldClientComponent = FieldClientComponent<
-  RadioFieldClientWithoutType,
-  RadioFieldBaseClientProps
->
+export type RadioFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<RadioFieldClientWithoutType, RadioFieldBaseClientProps & T>
 
 type OnChange<T = string> = (value: T) => void
 

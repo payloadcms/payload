@@ -31,15 +31,15 @@ export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
 
 export type JoinFieldServerProps = JoinFieldBaseServerProps & ServerFieldBase<JoinField>
 
-export type JoinFieldServerComponent = FieldServerComponent<
+export type JoinFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
   JoinField,
   JoinFieldClientWithoutType,
-  JoinFieldBaseServerProps
+  JoinFieldBaseServerProps & T
 >
 
-export type JoinFieldClientComponent = FieldClientComponent<
+export type JoinFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   JoinFieldClientWithoutType,
-  JoinFieldBaseClientProps
+  JoinFieldBaseClientProps & T
 >
 
 export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>

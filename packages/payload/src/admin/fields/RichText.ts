@@ -46,16 +46,15 @@ export type RichTextFieldClientProps<
 export type RichTextFieldServerProps = RichTextFieldBaseServerProps &
   ServerFieldBase<RichTextField, RichTextFieldClientWithoutType>
 
-export type RichTextFieldServerComponent = FieldServerComponent<
-  RichTextField,
-  RichTextFieldClientWithoutType,
-  RichTextFieldBaseServerProps
->
+export type RichTextFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<
+    RichTextField,
+    RichTextFieldClientWithoutType,
+    RichTextFieldBaseServerProps & T
+  >
 
-export type RichTextFieldClientComponent = FieldClientComponent<
-  RichTextFieldClientWithoutType,
-  RichTextFieldBaseClientProps
->
+export type RichTextFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<RichTextFieldClientWithoutType, RichTextFieldBaseClientProps & T>
 
 export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<
   RichTextField,

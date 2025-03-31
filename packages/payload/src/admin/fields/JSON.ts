@@ -34,15 +34,15 @@ export type JSONFieldClientProps = ClientFieldBase<JSONFieldClientWithoutType> &
 export type JSONFieldServerProps = JSONFieldBaseServerProps &
   ServerFieldBase<JSONField, JSONFieldClientWithoutType>
 
-export type JSONFieldServerComponent = FieldServerComponent<
+export type JSONFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
   JSONField,
   JSONFieldClientWithoutType,
-  JSONFieldBaseServerProps
+  JSONFieldBaseServerProps & T
 >
 
-export type JSONFieldClientComponent = FieldClientComponent<
+export type JSONFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   JSONFieldClientWithoutType,
-  JSONFieldBaseClientProps
+  JSONFieldBaseClientProps & T
 >
 
 export type JSONFieldLabelServerComponent = FieldLabelServerComponent<
