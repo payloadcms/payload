@@ -30,13 +30,13 @@
       "default": "./src/exports/postgres.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
@@ -81,9 +81,9 @@
         "default": "./dist/exports/postgres.js"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "import": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts",
+        "default": "./dist/exports/types-deprecated.js"
       }
     },
     "main": "./dist/index.js",

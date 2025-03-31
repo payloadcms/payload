@@ -25,9 +25,9 @@
       "types": "./src/index.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "require": "./src/types.ts",
-      "types": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "require": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
@@ -56,7 +56,7 @@
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
@@ -99,9 +99,9 @@
         "types": "./dist/index.d.ts"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "require": "./dist/types.js",
-        "types": "./dist/types.d.ts"
+        "import": "./dist/exports/types-deprecated.js",
+        "require": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",
