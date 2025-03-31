@@ -53,7 +53,9 @@ export const assertResponseBody = async <T>(
     await options.action,
   ])
 
-  console.log('Response:', response.url(), response.status(), await response.text())
+  if (!response) {
+    throw new Error('No response received')
+  }
 
   const responseBody = await response.text()
   const responseType = response.headers()['content-type']?.split(';')[0]

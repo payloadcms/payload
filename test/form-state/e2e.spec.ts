@@ -182,7 +182,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('should not cause nested custom fields to disappear when queuing form state (1)', async () => {
+  test('should not unnecessarily re-render custom components when adding a row and then editing a field', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -193,12 +193,75 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
-    // Add a row and immediately type into another field
-    // Test that:
-    // 1. The rich text field within the row does not disappear
-    // 2. The rich text in row 1 is rendered on the first request
-    // 3. The rich text in row 1 is not rendered on the second request
-    // 4. The rich text in row 2 is rendered on the second request
+    // Add a row and immediately type into another field and test that:
+    //  1. The rich text in row 1 is rendered on the first request
+    //  2. The rich text in row 1 is not rendered on the second request
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        // Ensure the response contains rendered components for the first row
+        await assertResponseBody<{ state: FormState }>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          url: '/admin/collections/posts/create',
+          expect: (body) =>
+            Boolean(
+              body.state?.array?.lastRenderedPath === 'array' &&
+                body.state?.['array.0.richText'] &&
+                ['lastRenderedPath', 'customComponents'].every(
+                  (key) =>
+                    body.state?.['array.0.richText'] && key in body.state['array.0.richText'],
+                ),
+            ),
+        })
+
+        // Ensure the response does _not_ contain rendered components for the first row
+        await assertResponseBody<{ state: FormState }>(page, {
+          action: page.locator('#field-title').fill('Title 2'),
+          url: '/admin/collections/posts/create',
+          expect: (body) =>
+            Boolean(
+              body.state?.array?.lastRenderedPath === 'array' &&
+                // ensure first row _DOES NOT_ have rendered components
+                body.state?.['array.0.richText'] &&
+                !['lastRenderedPath', 'customComponents'].every(
+                  (key) =>
+                    body.state?.['array.0.richText'] && key in body.state['array.0.richText'],
+                ),
+            ),
+        })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('should not unnecessarily re-render custom components when adding rows back-to-back', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    // Add two rows back-to-back and test that:
+    //  1. The rich text in row 1 is rendered on the first request
+    //  2. The rich text in row 1 is not rendered on the second request
+    //  3. The rich text in row 2 is rendered on the second request
     await assertNetworkRequests(
       page,
       postsUrl.create,
@@ -239,6 +302,40 @@ test.describe('Form State', () => {
                 ),
             ),
         })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('should not cause nested custom fields to disappear when adding a row and the editing a field', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        await page.locator('#field-array .array-field__add-row').click()
+        await page.locator('#field-title').fill('Title 2')
 
         // use `waitForSelector` to ensure the element doesn't appear and then disappear
         // eslint-disable-next-line playwright/no-wait-for-selector
@@ -266,7 +363,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('should not cause nested custom fields to disappear when queuing form state (2)', async () => {
+  test('should not cause nested custom fields to disappear when adding rows back-to-back', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
