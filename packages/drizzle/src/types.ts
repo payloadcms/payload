@@ -376,6 +376,6 @@ export type RelationMap = Map<
 >
 
 /**
- * query + $dynamic() should be preferred instead: https://orm.drizzle.team/docs/dynamic-query-building
+ * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
  */
 export type { ChainedMethods } from './find/chainMethods.js'
