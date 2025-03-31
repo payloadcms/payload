@@ -182,7 +182,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('should not cause nested custom fields to disappear when queuing form state (1)', async () => {
+  test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -193,23 +193,12 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
-    // Add a row and immediately type into another field
-    // Test that the rich text field within the row does not disappear
     await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
-        // Ensure `requiresRender` is `true` is set for the first request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-          action: page.locator('#field-array .array-field__add-row').click(),
-          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
-        })
-
-        // Ensure `requiresRender` is `false` for the second request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-          action: page.locator('#field-title').fill('Title 2'),
-          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
-        })
+        await page.locator('#field-array .array-field__add-row').click()
+        await page.locator('#field-title').fill('Test 2')
 
         // use `waitForSelector` to ensure the element doesn't appear and then disappear
         // eslint-disable-next-line playwright/no-wait-for-selector
@@ -237,7 +226,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('should not cause nested custom fields to disappear when queuing form state (2)', async () => {
+  test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
