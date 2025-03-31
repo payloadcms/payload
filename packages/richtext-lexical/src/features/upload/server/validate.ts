@@ -2,7 +2,7 @@ import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToForm
 import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { UploadFeatureProps } from './feature.server.js'
+import type { UploadFeatureProps } from './index.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
 export const uploadValidation = (

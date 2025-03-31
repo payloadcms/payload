@@ -286,7 +286,7 @@ The `afterError` Hook is triggered when an error occurs in the Payload applicati
 ```ts
 import type { CollectionAfterErrorHook } from 'payload';
 
-const afterDeleteHook: CollectionAfterErrorHook = async ({
+const afterErrorHook: CollectionAfterErrorHook = async ({
   req,
   id,
   doc,

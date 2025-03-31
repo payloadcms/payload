@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -312,12 +313,30 @@ export interface Diff {
       }[]
     | null;
   blocks?:
-    | {
-        textInBlock?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'TextBlock';
-      }[]
+    | (
+        | {
+            textInBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'TextBlock';
+          }
+        | {
+            textInCollapsibleInCollapsibleBlock?: string | null;
+            textInRowInCollapsibleBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'CollapsibleBlock';
+          }
+        | {
+            namedTab1InBlock?: {
+              textInNamedTab1InBlock?: string | null;
+            };
+            textInUnnamedTab2InBlock?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'TabsBlock';
+          }
+      )[]
     | null;
   checkbox?: boolean | null;
   code?: string | null;
@@ -769,6 +788,26 @@ export interface DiffSelect<T extends boolean = true> {
           | T
           | {
               textInBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+        CollapsibleBlock?:
+          | T
+          | {
+              textInCollapsibleInCollapsibleBlock?: T;
+              textInRowInCollapsibleBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+        TabsBlock?:
+          | T
+          | {
+              namedTab1InBlock?:
+                | T
+                | {
+                    textInNamedTab1InBlock?: T;
+                  };
+              textInUnnamedTab2InBlock?: T;
               id?: T;
               blockName?: T;
             };

@@ -244,6 +244,7 @@ export const renderField: RenderFieldMethod = ({
       fieldState.customComponents.Description = (
         <FieldDescription
           description={fieldConfig.admin?.description({
+            i18n: req.i18n,
             t: req.i18n.t,
           })}
           path={path}

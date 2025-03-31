@@ -1,5 +1,6 @@
 /* eslint-disable jest/require-top-level-describe */
-import { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+
 import { cosineDistance, desc, gt, sql } from 'drizzle-orm'
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'

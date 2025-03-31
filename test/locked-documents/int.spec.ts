@@ -5,35 +5,29 @@ import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Menu, Page, Post, User } from './payload-types.js'
+import type { Post, User } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './collections/Pages/index.js'
-import { postsSlug } from './collections/Posts/index.js'
 import { menuSlug } from './globals/Menu/index.js'
+import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
 let payload: Payload
-let token: string
-let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Locked documents', () => {
   let post: Post
-  let page: Page
-  let menu: Menu
   let user: any
   let user2: any
   let postConfig: SanitizedCollectionConfig
 
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt(dirname))
 
     postConfig = payload.config.collections.find(
       ({ slug }) => slug === postsSlug,
@@ -48,8 +42,6 @@ describe('Locked documents', () => {
     })
 
     user = loginResult.user
-
-    token = loginResult.token as string
 
     user2 = await payload.create({
       collection: 'users',
@@ -66,14 +58,14 @@ describe('Locked documents', () => {
       },
     })
 
-    page = await payload.create({
+    await payload.create({
       collection: pagesSlug,
       data: {
         text: 'some page',
       },
     })
 
-    menu = await payload.updateGlobal({
+    await payload.updateGlobal({
       slug: menuSlug,
       data: {
         globalText: 'global text',

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.28.1",
+  "version": "3.31.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -87,6 +87,8 @@
     "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:build-template-with-local-pkgs": "pnpm --filter scripts build-template-with-local-pkgs",
     "script:gen-templates": "pnpm --filter scripts gen-templates",
+    "script:gen-templates:build": "pnpm --filter scripts gen-templates --build",
+    "script:license-check": "pnpm --filter scripts license-check",
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
     "pretest": "pnpm build",
@@ -133,7 +135,7 @@
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
     "@types/node": "22.5.4",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "@types/shelljs": "0.8.15",
     "chalk": "^4.1.2",

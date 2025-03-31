@@ -37,9 +37,10 @@ export async function VersionView(props: DocumentViewServerProps) {
   const localeCodesFromParams = searchParams.localeCodes
     ? JSON.parse(searchParams.localeCodes as string)
     : null
+
   const comparisonVersionIDFromParams: string = searchParams.compareValue as string
 
-  const modifiedOnly: boolean = searchParams.modifiedOnly === 'true'
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
   const { localization } = config
 
@@ -88,7 +89,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }
@@ -129,7 +130,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }

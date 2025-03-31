@@ -31,7 +31,7 @@ export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | Serializ
           ${
             hasSubLists
               ? children
-              : `<input checked="${node.checked}" id="${uuid}" readOnly="true" type="checkbox" />
+              : `<input${node.checked ? ' checked' : ''} id="${uuid}" readOnly="true" type="checkbox" />
             <label htmlFor="${uuid}">${children}</label>
             <br />`
           }

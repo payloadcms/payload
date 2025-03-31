@@ -191,9 +191,6 @@ export const LinkFeature = createServerFeature<
                       showHiddenFields,
                     })
 
-                    const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-                    const target: string = node.fields.newTab ? ' target="_blank"' : ''
-
                     let href: string = node.fields.url ?? ''
                     if (node.fields.linkType === 'internal') {
                       href =
@@ -202,7 +199,7 @@ export const LinkFeature = createServerFeature<
                           : String(node.fields.doc?.value?.id)
                     }
 
-                    return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+                    return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
                   },
                   nodeTypes: [AutoLinkNode.getType()],
                 },
@@ -240,15 +237,12 @@ export const LinkFeature = createServerFeature<
                   showHiddenFields,
                 })
 
-                const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-                const target: string = node.fields.newTab ? ' target="_blank"' : ''
-
                 const href: string =
                   node.fields.linkType === 'custom'
                     ? escapeHTML(node.fields.url)
                     : (node.fields.doc?.value as string)
 
-                return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+                return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
               },
               nodeTypes: [LinkNode.getType()],
             },

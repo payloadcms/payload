@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -92,9 +93,11 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
       defaultDrizzleSnapshot,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       features: {
         json: true,
@@ -112,6 +115,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       logger: args.logger,
       operators,
       prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},
       rawTables: {},
@@ -122,7 +126,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -160,6 +166,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       find,
       findGlobal,
       findGlobalVersions,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -175,8 +182,10 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,

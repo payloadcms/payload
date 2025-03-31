@@ -606,6 +606,27 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
+    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: { _status: 'draft' },
+        draft: true,
+      })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { _status: 'draft', categoryVersion: category.id },
+        draft: true,
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: true,
+      })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 

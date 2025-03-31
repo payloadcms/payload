@@ -42,6 +42,23 @@ export const LexicalInBlock: CollectionConfig = {
             {
               name: 'lexical',
               type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  BlocksFeature({
+                    inlineBlocks: [
+                      {
+                        slug: 'inlineBlockInLexical',
+                        fields: [
+                          {
+                            name: 'text',
+                            type: 'text',
+                          },
+                        ],
+                      },
+                    ],
+                  }),
+                ],
+              }),
             },
           ],
         },

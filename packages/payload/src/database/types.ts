@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug } from '../index.js'
+import type { BaseJob, CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -147,6 +147,8 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
+  updateJobs: UpdateJobs
+
   updateMany: UpdateMany
 
   updateOne: UpdateOne
@@ -206,6 +208,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   locale?: string
   req?: Partial<PayloadRequest>
@@ -217,6 +220,7 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null 
 
 export type FindArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
@@ -532,10 +536,37 @@ export type UpdateManyArgs = {
    */
   returning?: boolean
   select?: SelectType
+  sort?: Sort
   where: Where
 }
 
 export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
+
+export type UpdateJobsArgs = {
+  data: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
+} & (
+  | {
+      id: number | string
+      limit?: never
+      sort?: never
+      where?: never
+    }
+  | {
+      id?: never
+      limit?: number
+      sort?: Sort
+      where: Where
+    }
+)
+
+export type UpdateJobs = (args: UpdateJobsArgs) => Promise<BaseJob[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.28.1",
+  "version": "3.31.0",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -85,6 +85,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
+    "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

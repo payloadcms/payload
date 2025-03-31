@@ -101,6 +101,7 @@ export interface Config {
     'media-without-relation-preview': MediaWithoutRelationPreview;
     'relation-preview': RelationPreview;
     'hide-file-input-on-create': HideFileInputOnCreate;
+    'best-fit': BestFit;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +143,7 @@ export interface Config {
     'media-without-relation-preview': MediaWithoutRelationPreviewSelect<false> | MediaWithoutRelationPreviewSelect<true>;
     'relation-preview': RelationPreviewSelect<false> | RelationPreviewSelect<true>;
     'hide-file-input-on-create': HideFileInputOnCreateSelect<false> | HideFileInputOnCreateSelect<true>;
+    'best-fit': BestFitSelect<false> | BestFitSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1262,6 +1264,19 @@ export interface RelationPreview {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "best-fit".
+ */
+export interface BestFit {
+  id: string;
+  withAdminThumbnail?: (string | null) | AdminThumbnailFunction;
+  withinRange?: (string | null) | Enlarge;
+  nextSmallestOutOfRange?: (string | null) | FocalOnly;
+  original?: (string | null) | FocalOnly;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1419,6 +1434,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hide-file-input-on-create';
         value: string | HideFileInputOnCreate;
+      } | null)
+    | ({
+        relationTo: 'best-fit';
+        value: string | BestFit;
       } | null)
     | ({
         relationTo: 'users';
@@ -2631,6 +2650,18 @@ export interface HideFileInputOnCreateSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "best-fit_select".
+ */
+export interface BestFitSelect<T extends boolean = true> {
+  withAdminThumbnail?: T;
+  withinRange?: T;
+  nextSmallestOutOfRange?: T;
+  original?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
