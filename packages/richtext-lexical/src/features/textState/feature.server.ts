@@ -1,7 +1,7 @@
 import type { PropertiesHyphenFallback } from 'csstype'
 import type { Prettify } from 'ts-essentials'
 
-import { createServerFeature } from '../../index.js'
+import { createServerFeature } from '../../utilities/createServerFeature.js'
 
 // extracted from https://github.com/facebook/lexical/pull/7294
 export type StyleObject = Prettify<{

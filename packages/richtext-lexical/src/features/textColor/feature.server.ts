@@ -1,4 +1,4 @@
-import { createServerFeature } from '../../index.js'
+import { createServerFeature } from '../../utilities/createServerFeature.js'
 import { payloadDefaultColors } from './defaultColors.js'
 
 type Color = { dark: string; label?: string; light: string; name: string }
