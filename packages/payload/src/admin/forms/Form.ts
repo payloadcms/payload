@@ -46,8 +46,16 @@ export type FieldState = {
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
+  /**
+   * The path of the field when its custom components were last rendered.
+   * This is used to denote if a field has been rendered, and if so,
+   * what path it was rendered under last.
+   *
+   * If this path is undefined, or, if it is different
+   * from the current path of a given field, the field's components will be re-rendered.
+   */
+  lastRenderedPath?: string
   passesCondition?: boolean
-  requiresRender?: boolean
   rows?: Row[]
   valid?: boolean
   validate?: Validate

@@ -148,7 +148,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     )
   }
 
-  const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
+  const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
@@ -299,7 +300,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   fieldPermissions === true ? fieldPermissions : fieldPermissions?.fields || {},
                 preferences,
                 previousFormState,
-                renderAllFields: requiresRender,
+                renderAllFields,
                 renderFieldFn,
                 req,
                 select: typeof arraySelect === 'object' ? arraySelect : undefined,
@@ -355,10 +356,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         if (rows) {
           fieldState.rows = rows
         }
-
-        // Unset requiresRender
-        // so it will be removed from form state
-        fieldState.requiresRender = false
 
         // Add values to field state
         if (data[field.name] !== null) {
@@ -483,7 +480,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                         : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
-                  renderAllFields: requiresRender,
+                  renderAllFields,
                   renderFieldFn,
                   req,
                   select: typeof blockSelect === 'object' ? blockSelect : undefined,
@@ -535,10 +532,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         fieldState.rows = rowMetadata
-
-        // Unset requiresRender
-        // so it will be removed from form state
-        fieldState.requiresRender = false
 
         // Add field to state
         if (!omitParents && (!filter || filter(args))) {

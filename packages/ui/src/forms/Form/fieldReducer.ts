@@ -53,14 +53,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [`${path}.${rowIndex}.id`]: {
           initialValue: newRow.id,
           passesCondition: true,
-          requiresRender: true,
           valid: true,
           value: newRow.id,
         },
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -169,7 +167,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -198,7 +195,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, topLevelRows),
         [path]: {
           ...state[path],
-          requiresRender: true,
           rows: rowsWithinField,
         },
       }
@@ -250,7 +246,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },

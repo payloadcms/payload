@@ -53,6 +53,11 @@ export const renderField: RenderFieldMethod = ({
         importMap: req.payload.importMap,
       })
 
+  /**
+   * Set the lastRenderedPath equal to the new path of the field
+   */
+  fieldState.lastRenderedPath = path
+
   if (fieldIsHiddenOrDisabled(clientField)) {
     return
   }
