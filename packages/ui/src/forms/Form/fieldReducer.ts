@@ -63,25 +63,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
-          /**
-           * The `ignoreServerProps` obj is used to prevent the various properties from being overridden across form state requests.
-           * This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
-           * For example:
-           *   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
-           *   2. Another "add row" action will set `requiresRender: true` and queue a form state request
-           *   3. The first request will return with `requiresRender: false`
-           *   4. The second request will be dispatched with `requiresRender: false` but should be `true`
-           * To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
-           * See the `mergeServerFormState` function for implementation details.
-           */
           ...(state[path]?.requiresRender === true
             ? {
-                ignoreServerProps: {
-                  ...(state[path]?.ignoreServerProps || {}),
-                  requiresRender: true,
-                },
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
               }
-            : state[path]?.ignoreServerProps || ({} as any)),
+            : state[path]?.serverPropsToIgnore || []),
         },
       }
 
@@ -191,15 +180,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
-          // See note above about `ignoreServerProps`
           ...(state[path]?.requiresRender === true
             ? {
-                ignoreServerProps: {
-                  ...(state[path]?.ignoreServerProps || {}),
-                  requiresRender: true,
-                },
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
               }
-            : state[path]?.ignoreServerProps || ({} as any)),
+            : state[path]?.serverPropsToIgnore || ([] as any)),
         },
       }
 
@@ -228,15 +216,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           ...state[path],
           requiresRender: true,
           rows: rowsWithinField,
-          // See note above about `ignoreServerProps`
           ...(state[path]?.requiresRender === true
             ? {
-                ignoreServerProps: {
-                  ...(state[path]?.ignoreServerProps || {}),
-                  requiresRender: true,
-                },
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
               }
-            : state[path]?.ignoreServerProps || ({} as any)),
+            : state[path]?.serverPropsToIgnore || ([] as any)),
         },
       }
 
@@ -289,15 +276,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
-          // See note above about `ignoreServerProps`
           ...(state[path]?.requiresRender === true
             ? {
-                ignoreServerProps: {
-                  ...(state[path]?.ignoreServerProps || {}),
-                  requiresRender: true,
-                },
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
               }
-            : state[path]?.ignoreServerProps || ({} as any)),
+            : state[path]?.serverPropsToIgnore || []),
         },
         ...flattenRows(path, rows),
       }
@@ -337,15 +323,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           disableFormData: true,
           rows: rowsMetadata,
           value: siblingRows.length,
-          // See note above about `ignoreServerProps`
           ...(state[path]?.requiresRender === true
             ? {
-                ignoreServerProps: {
-                  ...(state[path]?.ignoreServerProps || {}),
-                  requiresRender: true,
-                },
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
               }
-            : state[path]?.ignoreServerProps || ({} as any)),
+            : state[path]?.serverPropsToIgnore || []),
         },
       }
 
