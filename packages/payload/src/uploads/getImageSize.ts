@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import fs from 'fs'
+import fs from 'fs/promises'
 import sizeOfImport from 'image-size'
 import { promisify } from 'util'
 
@@ -21,7 +21,7 @@ export async function getImageSize(file: PayloadRequest['file']): Promise<Probed
   if (file.mimetype === 'image/tiff') {
     const dimensions = await temporaryFileTask(
       async (filepath: string) => {
-        fs.writeFileSync(filepath, file.data)
+        await fs.writeFile(filepath, file.data)
         return imageSizePromise(filepath)
       },
       { extension: 'tiff' },

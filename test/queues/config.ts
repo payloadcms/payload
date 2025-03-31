@@ -25,6 +25,7 @@ import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAn
 import { workflowRetries2TasksRetries0Workflow } from './workflows/workflowRetries2TasksRetries0.js'
 import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workflowRetries2TasksRetriesUndefined.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
+import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -387,6 +388,7 @@ export default buildConfigWithDefaults({
       subTaskWorkflow,
       subTaskFailsWorkflow,
       longRunningWorkflow,
+      parallelTaskWorkflow,
     ],
   },
   editor: lexicalEditor(),

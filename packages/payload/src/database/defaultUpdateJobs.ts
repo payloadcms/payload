@@ -2,7 +2,6 @@ import type { BaseJob, DatabaseAdapter } from '../index.js'
 import type { UpdateJobs } from './types.js'
 
 import { jobsCollectionSlug } from '../queues/config/index.js'
-import { sanitizeUpdateData } from '../queues/utilities/sanitizeUpdateData.js'
 
 export const defaultUpdateJobs: UpdateJobs = async function updateMany(
   this: DatabaseAdapter,
@@ -42,7 +41,7 @@ export const defaultUpdateJobs: UpdateJobs = async function updateMany(
     const updatedJob = await this.updateOne({
       id: job.id,
       collection: jobsCollectionSlug,
-      data: sanitizeUpdateData({ data: updateData }),
+      data: updateData,
       req,
       returning,
     })
