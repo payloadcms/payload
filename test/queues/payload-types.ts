@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -102,6 +103,9 @@ export interface Config {
       CreateSimpleRetries0: TaskCreateSimpleRetries0;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
+      ThrowError: TaskThrowError;
+      ReturnError: TaskReturnError;
+      ReturnCustomError: TaskReturnCustomError;
       inline: {
         input: unknown;
         output: unknown;
@@ -124,6 +128,7 @@ export interface Config {
       subTask: WorkflowSubTask;
       subTaskFails: WorkflowSubTaskFails;
       longRunning: WorkflowLongRunning;
+      parallelTask: WorkflowParallelTask;
     };
   };
 }
@@ -259,7 +264,10 @@ export interface PayloadJob {
           | 'CreateSimpleRetriesUndefined'
           | 'CreateSimpleRetries0'
           | 'CreateSimpleWithDuplicateMessage'
-          | 'ExternalTask';
+          | 'ExternalTask'
+          | 'ThrowError'
+          | 'ReturnError'
+          | 'ReturnCustomError';
         taskID: string;
         input?:
           | {
@@ -310,6 +318,7 @@ export interface PayloadJob {
         | 'subTask'
         | 'subTaskFails'
         | 'longRunning'
+        | 'parallelTask'
       )
     | null;
   taskSlug?:
@@ -322,6 +331,9 @@ export interface PayloadJob {
         | 'CreateSimpleRetries0'
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
+        | 'ThrowError'
+        | 'ReturnError'
+        | 'ReturnCustomError'
       )
     | null;
   queue?: string | null;
@@ -585,6 +597,32 @@ export interface TaskExternalTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskThrowError".
+ */
+export interface TaskThrowError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnError".
+ */
+export interface TaskReturnError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnCustomError".
+ */
+export interface TaskReturnCustomError {
+  input: {
+    errorMessage: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyUpdatePostWorkflowType".
  */
 export interface MyUpdatePostWorkflowType {
@@ -725,6 +763,13 @@ export interface WorkflowSubTaskFails {
  * via the `definition` "WorkflowLongRunning".
  */
 export interface WorkflowLongRunning {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowParallelTask".
+ */
+export interface WorkflowParallelTask {
   input?: unknown;
 }
 /**
