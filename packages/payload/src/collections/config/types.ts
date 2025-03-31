@@ -64,8 +64,8 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
-  Record<`${string}_order`, number | undefined> & TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt' | `${string}_order`
+  Record<`${string}_order`, string | undefined> & TData,
+  'createdAt' | 'id' | 'sizes' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
