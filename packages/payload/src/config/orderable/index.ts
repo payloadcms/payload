@@ -84,7 +84,6 @@ export const addOrderableFieldsAndHook = (
         readOnly: true,
       },
       index: true,
-      required: true,
       unique: true,
     }
 
