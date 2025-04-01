@@ -56,7 +56,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   disableVerificationEmail?: boolean
   /**
-   * @deprecated this property has no effect on the operation. In order to control the draft status of the document, you can pass _status: 'draft' or _status: 'published' in the data object.
+   * @deprecated this property has no effect on the published status of the created document. It will only control whether validation runs or not. In order to control the draft status of the document, you can pass _status: 'draft' or _status: 'published' in the data object.
    * By default, draft-enabled collections will create documents with _status: 'draft'.
    */
   draft?: boolean
