@@ -84,6 +84,14 @@ export const addOrderableFieldsAndHook = (
         readOnly: true,
       },
       index: true,
+      required: true,
+      // override the schema to make order fields optional for payload.create()
+      typescriptSchema: [
+        () => ({
+          type: 'string',
+          required: false,
+        }),
+      ],
       unique: true,
     }
 

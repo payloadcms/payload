@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -190,9 +191,9 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _orderable_orderableJoinField2_order: string;
-  _orderable_orderableJoinField1_order: string;
-  _order: string;
+  _orderable_orderableJoinField2_order?: string;
+  _orderable_orderableJoinField1_order?: string;
+  _order?: string;
   title?: string | null;
   orderableField?: (string | null) | OrderableJoin;
   updatedAt: string;
