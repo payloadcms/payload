@@ -577,7 +577,7 @@ export function generateLexicalData(args: {
           format: '',
           id: '67d8693c76b36f346ecffd8',
           relationTo: mediaCollectionSlug,
-          value: String(args.mediaID),
+          value: args.mediaID,
         },
         {
           children: [
@@ -602,7 +602,7 @@ export function generateLexicalData(args: {
           version: 2,
           format: '',
           relationTo: textCollectionSlug,
-          value: String(args.textID),
+          value: args.textID,
         },
         {
           type: 'block',
