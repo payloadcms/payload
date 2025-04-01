@@ -34,6 +34,7 @@ export const renderField: RenderFieldMethod = ({
   fieldState,
   formState,
   indexPath,
+  mockRSCs,
   operation,
   parentPath,
   parentSchemaPath,
@@ -126,19 +127,21 @@ export const renderField: RenderFieldMethod = ({
             fieldState.customComponents.RowLabels = []
           }
 
-          fieldState.customComponents.RowLabels[rowIndex] = RenderServerComponent({
-            clientProps,
-            Component: fieldConfig.admin.components.RowLabel,
-            importMap: req.payload.importMap,
-            key: `${rowIndex}`,
-            serverProps: {
-              ...serverProps,
-              rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            },
-          })
+          fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component: fieldConfig.admin.components.RowLabel,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: {
+                  ...serverProps,
+                  rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                    rowIndex + 1,
+                  ).padStart(2, '0')}`,
+                  rowNumber: rowIndex + 1,
+                },
+              })
+            : 'Mock'
         }
       })
 
@@ -163,20 +166,22 @@ export const renderField: RenderFieldMethod = ({
             fieldState.customComponents.RowLabels = []
           }
 
-          fieldState.customComponents.RowLabels[rowIndex] = RenderServerComponent({
-            clientProps,
-            Component: blockConfig.admin.components.Label,
-            importMap: req.payload.importMap,
-            key: `${rowIndex}`,
-            serverProps: {
-              ...serverProps,
-              blockType: row.blockType,
-              rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            },
-          })
+          fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component: blockConfig.admin.components.Label,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: {
+                  ...serverProps,
+                  blockType: row.blockType,
+                  rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
+                    rowIndex + 1,
+                  ).padStart(2, '0')}`,
+                  rowNumber: rowIndex + 1,
+                },
+              })
+            : 'Mock'
         }
       })
 
@@ -200,7 +205,7 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      fieldState.customComponents.Field = (
+      fieldState.customComponents.Field = !mockRSCs ? (
         <WatchCondition path={path}>
           {RenderServerComponent({
             clientProps,
@@ -209,6 +214,8 @@ export const renderField: RenderFieldMethod = ({
             serverProps,
           })}
         </WatchCondition>
+      ) : (
+        'Mock'
       )
 
       break
@@ -224,13 +231,15 @@ export const renderField: RenderFieldMethod = ({
 
           const Component = fieldConfig.admin.components[key]
 
-          fieldState.customComponents[key] = RenderServerComponent({
-            clientProps,
-            Component,
-            importMap: req.payload.importMap,
-            key: `field.admin.components.${key}`,
-            serverProps,
-          })
+          fieldState.customComponents[key] = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component,
+                importMap: req.payload.importMap,
+                key: `field.admin.components.${key}`,
+                serverProps,
+              })
+            : 'Mock'
         }
       }
       break
@@ -246,7 +255,7 @@ export const renderField: RenderFieldMethod = ({
       'description' in fieldConfig.admin &&
       typeof fieldConfig.admin?.description === 'function'
     ) {
-      fieldState.customComponents.Description = (
+      fieldState.customComponents.Description = !mockRSCs ? (
         <FieldDescription
           description={fieldConfig.admin?.description({
             i18n: req.i18n,
@@ -254,62 +263,74 @@ export const renderField: RenderFieldMethod = ({
           })}
           path={path}
         />
+      ) : (
+        'Mock'
       )
     }
 
     if (fieldConfig.admin?.components) {
       if ('afterInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.AfterInput = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.afterInput,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.afterInput',
-          serverProps,
-        })
+        fieldState.customComponents.AfterInput = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.afterInput,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.afterInput',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('beforeInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.BeforeInput = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.beforeInput,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.beforeInput',
-          serverProps,
-        })
+        fieldState.customComponents.BeforeInput = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.beforeInput,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.beforeInput',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Description' in fieldConfig.admin.components) {
-        fieldState.customComponents.Description = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Description,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Description',
-          serverProps,
-        })
+        fieldState.customComponents.Description = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Description,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Description',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Error' in fieldConfig.admin.components) {
-        fieldState.customComponents.Error = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Error,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Error',
-          serverProps,
-        })
+        fieldState.customComponents.Error = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Error,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Error',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Label' in fieldConfig.admin.components) {
-        fieldState.customComponents.Label = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Label,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Label',
-          serverProps,
-        })
+        fieldState.customComponents.Label = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Label,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Label',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Field' in fieldConfig.admin.components) {
-        fieldState.customComponents.Field = (
+        fieldState.customComponents.Field = !mockRSCs ? (
           <WatchCondition path={path}>
             {RenderServerComponent({
               clientProps,
@@ -319,6 +340,8 @@ export const renderField: RenderFieldMethod = ({
               serverProps,
             })}
           </WatchCondition>
+        ) : (
+          'Mock'
         )
       }
     }

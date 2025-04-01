@@ -21,11 +21,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Form State', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, false))
+    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true))
 
     const data = await restClient
       .POST('/users/login', {
@@ -57,6 +54,7 @@ describe('Form State', () => {
     })
 
     const { state } = await buildFormState({
+      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -113,6 +111,7 @@ describe('Form State', () => {
     })
 
     const { state } = await buildFormState({
+      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -134,6 +133,7 @@ describe('Form State', () => {
       title: {
         value: postData.title,
         initialValue: postData.title,
+        lastRenderedPath: 'title',
       },
     })
   })
@@ -142,6 +142,7 @@ describe('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const { state: stateWithRow } = await buildFormState({
+      mockRSCs: true,
       collectionSlug: postsSlug,
       formState: {
         array: {
@@ -168,11 +169,11 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 returns with rendered components
-    expect(stateWithRow['array']?.lastRenderedPath).toStrictEqual('array')
-    expect(stateWithRow['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
-    expect(stateWithRow['array.0.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWithRow?.['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
+    expect(stateWithRow?.['array.0.richText']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
+      mockRSCs: true,
       collectionSlug: postsSlug,
       formState: {
         title: {
@@ -208,20 +209,20 @@ describe('Form State', () => {
       documentFormState: undefined,
       operation: 'update',
       renderAllFields: false,
-      req,
       schemaPath: postsSlug,
+      req,
     })
 
     // Ensure that row 1 DOES NOT return with rendered components
-    expect(stateWithTitle['array']?.lastRenderedPath).toStrictEqual('array')
-    expect(stateWithTitle['array.0.richText']).not.toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle['array.0.richText']).not.toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('customComponents')
   })
 
   it('should not unnecessarily re-render custom components when adding rows back-to-back', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const { state: stateWith1Row } = await buildFormState({
+      mockRSCs: true,
       collectionSlug: postsSlug,
       formState: {
         array: {
@@ -243,16 +244,16 @@ describe('Form State', () => {
       documentFormState: undefined,
       operation: 'update',
       renderAllFields: false,
-      req,
       schemaPath: postsSlug,
+      req,
     })
 
     // Ensure that row 1 returns rendered components
-    expect(stateWith1Row['array']?.lastRenderedPath).toStrictEqual('array')
-    expect(stateWith1Row['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
-    expect(stateWith1Row['array.0.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWith1Row?.['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
+    expect(stateWith1Row?.['array.0.richText']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWith2Rows } = await buildFormState({
+      mockRSCs: true,
       collectionSlug: postsSlug,
       formState: {
         array: {
@@ -285,16 +286,15 @@ describe('Form State', () => {
       documentFormState: undefined,
       operation: 'update',
       renderAllFields: false,
-      req,
       schemaPath: postsSlug,
+      req,
     })
 
     // Ensure that row 1 DOES NOT return rendered components
     // But row 2 DOES return rendered components
-    expect(stateWith2Rows['array']?.lastRenderedPath).toStrictEqual('array')
-    expect(stateWith2Rows['array.0.richText']).not.toHaveProperty('lastRenderedPath')
-    expect(stateWith2Rows['array.0.richText']).not.toHaveProperty('customComponents')
-    expect(stateWith2Rows['array.1.richText']?.lastRenderedPath).toStrictEqual('array.1.richText')
-    expect(stateWith2Rows['array.1.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWith2Rows?.['array.0.richText']).not.toHaveProperty('lastRenderedPath')
+    expect(stateWith2Rows?.['array.0.richText']).not.toHaveProperty('customComponents')
+    expect(stateWith2Rows?.['array.1.richText']?.lastRenderedPath).toStrictEqual('array.1.richText')
+    expect(stateWith2Rows?.['array.1.richText']?.customComponents?.Field).toBeDefined()
   })
 })

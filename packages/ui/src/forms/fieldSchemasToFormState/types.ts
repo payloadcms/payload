@@ -21,6 +21,7 @@ export type RenderFieldArgs = {
   formState: FormState
   id?: number | string
   indexPath: string
+  mockRSCs?: boolean
   operation: Operation
   parentPath: string
   parentSchemaPath: string

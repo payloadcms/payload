@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { buildFormStateEndpoint } from './endpoints/buildFormState.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -15,6 +16,13 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  endpoints: [
+    {
+      handler: buildFormStateEndpoint,
+      method: 'get',
+      path: '/form-state',
+    },
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

@@ -103,6 +103,7 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
+  mockRSCs?: boolean
   operation?: 'create' | 'update'
   /*
     If true, will render field components within their state object
