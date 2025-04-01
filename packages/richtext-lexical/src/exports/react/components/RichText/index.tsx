@@ -6,7 +6,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../nodeTypes.js'
+} from '../../../../nodeTypes.js'
 import type { JSXConverters } from './converter/types.js'
 
 import { defaultJSXConverters } from './converter/defaultConverters.js'

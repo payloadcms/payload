@@ -2,10 +2,10 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import React from 'react'
 
-import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
+import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../../nodeTypes.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
-import { hasText } from '../../../../validate/hasText.js'
+import { hasText } from '../../../../../validate/hasText.js'
 
 export type ConvertLexicalToHTMLArgs = {
   converters: JSXConverters

@@ -4,7 +4,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../../nodeTypes.js'
 export type JSXConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
   (args: {
     childIndex: number

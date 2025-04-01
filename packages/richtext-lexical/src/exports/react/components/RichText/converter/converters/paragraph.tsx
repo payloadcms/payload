@@ -1,4 +1,4 @@
-import type { SerializedParagraphNode } from '../../../../../nodeTypes.js'
+import type { SerializedParagraphNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const ParagraphJSXConverter: JSXConverters<SerializedParagraphNode> = {

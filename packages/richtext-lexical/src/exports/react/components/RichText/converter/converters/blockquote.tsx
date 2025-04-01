@@ -1,4 +1,4 @@
-import type { SerializedQuoteNode } from '../../../../../nodeTypes.js'
+import type { SerializedQuoteNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const BlockquoteJSXConverter: JSXConverters<SerializedQuoteNode> = {

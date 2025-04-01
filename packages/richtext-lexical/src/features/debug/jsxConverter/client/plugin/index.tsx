@@ -3,8 +3,8 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useEffect, useState } from 'react'
 
-import { defaultJSXConverters } from '../../../../converters/jsx/converter/defaultConverters.js'
-import { RichText } from '../../../../converters/jsx/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { defaultJSXConverters, RichText } from '../../../../../exports/react/index.js'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()

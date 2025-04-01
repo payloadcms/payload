@@ -2,7 +2,7 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../../nodeTypes.js'
+} from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const TableJSXConverter: JSXConverters<

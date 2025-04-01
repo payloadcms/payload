@@ -1,9 +1,9 @@
 import React from 'react'
 
-import type { SerializedTextNode } from '../../../../../nodeTypes.js'
+import type { SerializedTextNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
-import { NodeFormat } from '../../../../../lexical/utils/nodeFormat.js'
+import { NodeFormat } from '../../../../../../lexical/utils/nodeFormat.js'
 
 export const TextJSXConverter: JSXConverters<SerializedTextNode> = {
   text: ({ node }) => {

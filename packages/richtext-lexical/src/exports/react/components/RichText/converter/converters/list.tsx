@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import type { SerializedListItemNode, SerializedListNode } from '../../../../../nodeTypes.js'
+import type { SerializedListItemNode, SerializedListNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const ListJSXConverter: JSXConverters<SerializedListItemNode | SerializedListNode> = {

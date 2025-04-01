@@ -1,6 +1,6 @@
 import type { FileData, FileSize, TypeWithID } from 'payload'
 
-import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
+import type { SerializedUploadNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
