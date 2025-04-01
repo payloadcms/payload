@@ -24,6 +24,8 @@ import { updatePostJSONWorkflow } from './workflows/updatePostJSON.js'
 import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAndTasksRetriesUndefined.js'
 import { workflowRetries2TasksRetries0Workflow } from './workflows/workflowRetries2TasksRetries0.js'
 import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workflowRetries2TasksRetriesUndefined.js'
+import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
+import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -102,6 +104,11 @@ export default buildConfigWithDefaults({
           hidden: false,
         },
       }
+    },
+    processingOrder: {
+      queues: {
+        lifo: '-createdAt',
+      },
     },
     tasks: [
       {
@@ -375,11 +382,13 @@ export default buildConfigWithDefaults({
       workflowRetries2TasksRetriesUndefinedWorkflow,
       workflowRetries2TasksRetries0Workflow,
       inlineTaskTestWorkflow,
+      inlineTaskTestDelayedWorkflow,
       externalWorkflow,
       retriesBackoffTestWorkflow,
       subTaskWorkflow,
       subTaskFailsWorkflow,
       longRunningWorkflow,
+      parallelTaskWorkflow,
     ],
   },
   editor: lexicalEditor(),

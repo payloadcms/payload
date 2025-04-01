@@ -40,7 +40,7 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const comparisonVersionIDFromParams: string = searchParams.compareValue as string
 
-  const modifiedOnly: boolean = searchParams.modifiedOnly === 'true'
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
   const { localization } = config
 

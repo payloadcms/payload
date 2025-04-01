@@ -3,7 +3,6 @@ import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 import { inArray } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
-import type { ChainedMethods } from './chainMethods.js'
 
 import buildQuery from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
@@ -62,15 +61,6 @@ export const findMany = async function find({
   const orderedIDMap: Record<number | string, number> = {}
   let orderedIDs: (number | string)[]
 
-  const selectDistinctMethods: ChainedMethods = []
-
-  if (orderBy) {
-    selectDistinctMethods.push({
-      args: [() => orderBy.map(({ column, order }) => order(column))],
-      method: 'orderBy',
-    })
-  }
-
   const findManyArgs = buildFindManyArgs({
     adapter,
     collectionSlug,
@@ -84,15 +74,16 @@ export const findMany = async function find({
     tableName,
     versions,
   })
-
-  selectDistinctMethods.push({ args: [offset], method: 'offset' })
-  selectDistinctMethods.push({ args: [limit], method: 'limit' })
-
   const selectDistinctResult = await selectDistinct({
     adapter,
-    chainedMethods: selectDistinctMethods,
     db,
     joins,
+    query: ({ query }) => {
+      if (orderBy) {
+        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+      }
+      return query.offset(offset).limit(limit)
+    },
     selectFields,
     tableName,
     where,

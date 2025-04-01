@@ -3,9 +3,8 @@ import type { UpdateMany } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { ChainedMethods, DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
-import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
@@ -45,16 +44,10 @@ export const updateMany: UpdateMany = async function updateMany(
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: orderBy
-      ? [
-          {
-            args: [() => orderBy.map(({ column, order }) => order(column))],
-            method: 'orderBy',
-          },
-        ]
-      : [],
     db,
     joins,
+    query: ({ query }) =>
+      orderBy ? query.orderBy(() => orderBy.map(({ column, order }) => order(column))) : query,
     selectFields,
     tableName,
     where,
@@ -69,28 +62,17 @@ export const updateMany: UpdateMany = async function updateMany(
 
     const table = this.tables[tableName]
 
-    const query = _db.select({ id: table.id }).from(table).where(where)
-
-    const chainedMethods: ChainedMethods = []
+    let query = _db.select({ id: table.id }).from(table).where(where).$dynamic()
 
     if (typeof limit === 'number' && limit > 0) {
-      chainedMethods.push({
-        args: [limit],
-        method: 'limit',
-      })
+      query = query.limit(limit)
     }
 
     if (orderBy) {
-      chainedMethods.push({
-        args: [() => orderBy.map(({ column, order }) => order(column))],
-        method: 'orderBy',
-      })
+      query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
     }
 
-    const docsToUpdate = await chainMethods({
-      methods: chainedMethods,
-      query,
-    })
+    const docsToUpdate = await query
 
     idsToUpdate = docsToUpdate?.map((doc) => doc.id)
   }
