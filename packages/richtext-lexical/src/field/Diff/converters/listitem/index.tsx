@@ -1,4 +1,4 @@
-import { CheckIcon } from '@payloadcms/ui/shared'
+import { CheckIcon } from '@payloadcms/ui/rsc'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedListItemNode } from '../../../../nodeTypes.js'
