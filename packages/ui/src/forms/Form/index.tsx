@@ -121,11 +121,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
-  const [fields, dispatchFields] = fieldsReducer
+  const [formState, dispatchFields] = fieldsReducer
 
-  contextRef.current.fields = fields
+  contextRef.current.fields = formState
 
-  const prevFields = useRef(fields)
+  const prevFormState = useRef(formState)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -611,9 +611,25 @@ export const Form: React.FC<FormProps> = (props) => {
     [dispatchFields, getDataByPath],
   )
 
+  const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
+    ({ moveFromIndex, moveToIndex, path }) => {
+      dispatchFields({
+        type: 'MOVE_ROW',
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
+
+      setModified(true)
+    },
+    [dispatchFields],
+  )
+
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
     ({ path, rowIndex }) => {
       dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
+
+      setModified(true)
     },
     [dispatchFields],
   )
@@ -672,6 +688,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.dispatchFields = dispatchFields
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
+  contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
@@ -710,7 +727,7 @@ export const Form: React.FC<FormProps> = (props) => {
       refreshCookie()
     },
     15000,
-    [fields],
+    [formState],
   )
 
   useEffect(() => {
@@ -743,7 +760,7 @@ export const Form: React.FC<FormProps> = (props) => {
         })
 
         if (changed) {
-          prevFields.current = newState
+          prevFormState.current = newState
 
           dispatchFields({
             type: 'REPLACE_STATE',
@@ -757,14 +774,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
+      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
         executeOnChange(submitted)
       }
 
-      prevFields.current = fields
+      prevFormState.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, fields],
+    [modified, submitted, formState],
     250,
   )
 
@@ -793,7 +810,7 @@ export const Form: React.FC<FormProps> = (props) => {
         <FormContext value={contextRef.current}>
           <FormWatchContext
             value={{
-              fields,
+              fields: formState,
               ...contextRef.current,
             }}
           >

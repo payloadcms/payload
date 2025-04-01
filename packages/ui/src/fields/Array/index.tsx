@@ -58,7 +58,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -153,18 +153,20 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
-      setModified(true)
+      removeFieldRow({ path, rowIndex })
     },
-    [dispatchFields, path, setModified],
+    [removeFieldRow, path],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
     },
-    [dispatchFields, path, setModified],
+    [path, moveFieldRow],
   )
 
   const toggleCollapseAll = useCallback(

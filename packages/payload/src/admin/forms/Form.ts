@@ -49,6 +49,18 @@ export type FieldState = {
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
+  /**
+   * The `serverPropsToIgnore` obj is used to prevent the various properties from being overridden across form state requests.
+   * This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
+   * For example:
+   *   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
+   *   2. Another "add row" action will set `requiresRender: true` and queue a form state request
+   *   3. The first request will return with `requiresRender: false`
+   *   4. The second request will be dispatched with `requiresRender: false` but should be `true`
+   * To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
+   * See the `mergeServerFormState` function for implementation details.
+   */
+  serverPropsToIgnore?: Array<keyof FieldState>
   valid?: boolean
   validate?: Validate
   value?: unknown

@@ -356,8 +356,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.rows = rows
         }
 
-        // Unset requiresRender
-        // so it will be removed from form state
         fieldState.requiresRender = false
 
         // Add values to field state
