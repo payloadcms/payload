@@ -24,6 +24,10 @@
         border-color: var(--diff-create-pill-border);
         color: var(--diff-create-parent-color);
 
+        .lexical-relationship-diff__collectionLabel {
+          color: var(--diff-create-link-color);
+        }
+
         [data-match-type='create'] {
           color: var(--diff-create-parent-color);
         }
@@ -34,6 +38,10 @@
         color: var(--diff-delete-parent-color);
         text-decoration-line: none;
         background-color: var(--diff-delete-pill-bg);
+
+        .lexical-relationship-diff__collectionLabel {
+          color: var(--diff-delete-link-color);
+        }
 
         [data-match-type='delete'] {
           text-decoration-line: none;

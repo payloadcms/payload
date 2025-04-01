@@ -27,6 +27,13 @@
           color: var(--diff-create-parent-color);
         }
 
+        .lexical-upload-diff__meta {
+          color: var(--diff-create-link-color);
+          * {
+            color: var(--diff-create-link-color);
+          }
+        }
+
         .lexical-upload-diff__thumbnail {
           border-radius: 0px;
           border-color: var(--diff-create-pill-border);
@@ -37,12 +44,19 @@
       &[data-match-type='delete'] {
         border-color: var(--diff-delete-pill-border);
         text-decoration-line: none;
-        color: var(--diff-delete-parent-colo);
+        color: var(--diff-delete-parent-color);
         background-color: var(--diff-delete-pill-bg);
+
+        .lexical-upload-diff__meta {
+          color: var(--diff-delete-link-color);
+          * {
+            color: var(--diff-delete-link-color);
+          }
+        }
 
         * {
           text-decoration-line: none;
-          color: var(--diff-delete-parent-colo);
+          color: var(--diff-delete-parent-color);
         }
 
         .lexical-upload-diff__thumbnail {
