@@ -10,15 +10,22 @@ export const getParents = async (
   docs: Array<Record<string, unknown>> = [],
 ): Promise<Array<Record<string, unknown>>> => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const parent = doc[parentSlug]
+  let parentCollectionSlug = collection.slug
+  let parent = doc[parentSlug]
   let retrievedParent
 
+  // If relationship is polymorphic
+  if (typeof parent === 'object' && 'relationTo' in parent && 'value' in parent) {
+    parentCollectionSlug = parent.relationTo
+    parent = parent.value
+  }
+  
   if (parent) {
     // If not auto-populated, and we have an ID
     if (typeof parent === 'string' || typeof parent === 'number') {
       retrievedParent = await req.payload.findByID({
         id: parent,
-        collection: collection.slug,
+        collection: parentCollectionSlug,
         depth: 0,
         disableErrors: true,
         req,
