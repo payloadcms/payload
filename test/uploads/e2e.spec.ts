@@ -66,6 +66,7 @@ let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
+let bestFitURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -99,6 +100,7 @@ describe('Uploads', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
+    bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1348,5 +1350,54 @@ describe('Uploads', () => {
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
+  })
+
+  describe('imageSizes best fit', () => {
+    test('should select adminThumbnail if one exists', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withAdminThumbnail button.upload__listToggler').click()
+      await page.locator('tr.row-1 td.cell-filename button.default-cell__first-cell').click()
+      const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        'https://payloadcms.com/images/universal-truth.jpg',
+      )
+    })
+
+    test('should select an image within target range', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withinRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+    })
+
+    test('should select next smallest image outside of range but smaller than original', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-nextSmallestOutOfRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+    })
+
+    test('should select original if smaller than next available size', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-original button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'small.png'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-original div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+    })
   })
 })

@@ -83,10 +83,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
     }
 
-    if (!modifiedOnly) {
-      current.delete('modifiedOnly')
+    if (modifiedOnly === false) {
+      current.set('modifiedOnly', 'false')
     } else {
-      current.set('modifiedOnly', 'true')
+      current.delete('modifiedOnly')
     }
 
     const search = current.toString()

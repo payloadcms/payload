@@ -63,6 +63,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
+          ...(state[path]?.requiresRender === true
+            ? {
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
+              }
+            : state[path]?.serverPropsToIgnore || []),
         },
       }
 
@@ -172,6 +180,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
+          ...(state[path]?.requiresRender === true
+            ? {
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
+              }
+            : state[path]?.serverPropsToIgnore || ([] as any)),
         },
       }
 
@@ -200,6 +216,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           ...state[path],
           requiresRender: true,
           rows: rowsWithinField,
+          ...(state[path]?.requiresRender === true
+            ? {
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
+              }
+            : state[path]?.serverPropsToIgnore || ([] as any)),
         },
       }
 
@@ -218,9 +242,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
         const copyOfMovingLabel = customComponents.RowLabels[moveFromIndex]
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         customComponents.RowLabels.splice(moveFromIndex, 1)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+
         customComponents.RowLabels.splice(moveToIndex, 0, copyOfMovingLabel)
 
         newState[path].customComponents = customComponents
@@ -253,6 +276,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
+          ...(state[path]?.requiresRender === true
+            ? {
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
+              }
+            : state[path]?.serverPropsToIgnore || []),
         },
         ...flattenRows(path, rows),
       }
@@ -292,6 +323,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           disableFormData: true,
           rows: rowsMetadata,
           value: siblingRows.length,
+          ...(state[path]?.requiresRender === true
+            ? {
+                serverPropsToIgnore: [
+                  ...(state[path]?.serverPropsToIgnore || []),
+                  'requiresRender',
+                ],
+              }
+            : state[path]?.serverPropsToIgnore || []),
         },
       }
 
@@ -327,7 +366,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      //TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
       if (action.sanitize) {
         for (const field of Object.values(action.state)) {
           if (field.valid !== false) {

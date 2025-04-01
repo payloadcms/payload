@@ -528,6 +528,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"label" varchar,
   	"width" numeric,
   	"default_value" varchar,
+  	"placeholder" varchar,
   	"required" boolean,
   	"block_name" varchar
   );

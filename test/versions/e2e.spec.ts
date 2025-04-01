@@ -981,6 +981,8 @@ describe('Versions', () => {
       // Fill with invalid data again, then reload and accept the warning, should contain previous data
       await titleField.fill('')
 
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
       await page.reload()
 
       await expect(titleField).toBeEnabled()
@@ -1197,11 +1199,11 @@ describe('Versions', () => {
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
-      await expect(textInArrayES).toContainText('No Array Localizeds found')
+      await expect(textInArrayES).toBeHidden()
 
       await page.locator('#modifiedOnly').click()
 
-      await expect(textInArrayES).toBeHidden()
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
     })
 
     test('correctly renders diff for block fields', async () => {
