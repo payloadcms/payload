@@ -4,7 +4,7 @@ import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import config from '@/payload.config'
+import config from '@payload-config'
 
 export async function logout() {
   try {
