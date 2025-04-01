@@ -569,7 +569,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersion: category.id },
+        data: { title: 'version', categoryVersion: category.id },
       })
 
       const res = await payload.find({ collection: 'categories-versions', draft: false })
@@ -582,7 +582,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersions: [category.id] },
+        data: { title: 'version', categoryVersions: [category.id] },
       })
 
       const res = await payload.find({ collection: 'categories-versions', draft: false })
@@ -595,7 +595,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersion: category.id },
+        data: { title: 'version', categoryVersion: category.id },
       })
 
       const res = await payload.find({
@@ -615,7 +615,14 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { _status: 'draft', categoryVersion: category.id },
+        data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: 'versions',
+        id: version.id,
+        data: { title: 'updated-title' },
         draft: true,
       })
 
@@ -625,6 +632,7 @@ describe('Joins Field', () => {
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+      expect(res.docs[0].relatedVersions.docs[0].title).toBe('updated-title')
     })
 
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
@@ -632,7 +640,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersions: [category.id] },
+        data: { categoryVersions: [category.id], title: 'version' },
       })
 
       const res = await payload.find({
@@ -929,6 +937,52 @@ describe('Joins Field', () => {
       )
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
         unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
+      )
+    })
+
+    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: { _status: 'draft' },
+        draft: true,
+      })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: 'versions',
+        draft: true,
+        id: version.id,
+        data: { title: 'updated-title' },
+      })
+
+      const query = `query {
+        CategoriesVersions(draft: true) {
+              docs {
+                  relatedVersions(
+                    limit: 1
+                  ) {
+                    docs {
+                      id,
+                      title
+                    }
+                    hasNextPage
+                  }
+                }
+            }
+          }`
+
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(res.data.CategoriesVersions.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+      expect(res.data.CategoriesVersions.docs[0].relatedVersions.docs[0].title).toBe(
+        'updated-title',
       )
     })
 
