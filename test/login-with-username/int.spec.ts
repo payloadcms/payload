@@ -13,7 +13,7 @@ const dirname = path.dirname(filename)
 
 describe('Login With Username Feature', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

@@ -16,7 +16,7 @@ const dirname = path.dirname(filename)
 describe('Sort', () => {
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

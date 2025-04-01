@@ -13,9 +13,9 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
-import config from './config.js'
 
 import { Pages } from './collections/Pages.js'
+import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,7 +41,7 @@ describe('Collections - Live Preview', () => {
   let media: Media
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     tenant = await payload.create({
       collection: tenantsSlug,

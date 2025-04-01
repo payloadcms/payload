@@ -38,7 +38,7 @@ describe('Access Control', () => {
   let restricted: FullyRestricted
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   beforeEach(async () => {

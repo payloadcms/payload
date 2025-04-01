@@ -21,11 +21,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Form State', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
+<<<<<<< Updated upstream
     ;({ payload, restClient } = await initPayloadInt(dirname))
+=======
+    ;({ payload, restClient } = await initPayloadInt({ dirname, startNext: true }))
+>>>>>>> Stashed changes
 
     const data = await restClient
       .POST('/users/login', {
@@ -134,6 +135,7 @@ describe('Form State', () => {
       title: {
         value: postData.title,
         initialValue: postData.title,
+        lastRenderedPath: 'title',
       },
     })
   })

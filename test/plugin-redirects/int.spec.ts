@@ -16,7 +16,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-redirects', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
 
     page = await payload.create({
       collection: 'pages',

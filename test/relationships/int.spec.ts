@@ -43,7 +43,7 @@ const mongoIt = process.env.PAYLOAD_DATABASE === 'mongodb' ? it : it.skip
 
 describe('Relationships', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     await restClient.login({ slug: usersSlug })
   })

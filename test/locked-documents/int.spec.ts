@@ -27,7 +27,7 @@ describe('Locked documents', () => {
 
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
 
     postConfig = payload.config.collections.find(
       ({ slug }) => slug === postsSlug,

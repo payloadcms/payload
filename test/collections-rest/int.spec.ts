@@ -29,7 +29,7 @@ let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

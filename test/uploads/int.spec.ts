@@ -31,7 +31,7 @@ let payload: Payload
 
 describe('Collections - Uploads', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     await restClient.login({ slug: usersSlug })
   })

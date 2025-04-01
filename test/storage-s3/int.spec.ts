@@ -17,7 +17,7 @@ describe('@payloadcms/storage-s3', () => {
   let client: AWS.S3Client
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
     TEST_BUCKET = process.env.S3_BUCKET
 
     client = new AWS.S3({

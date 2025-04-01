@@ -19,7 +19,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-form-builder', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',

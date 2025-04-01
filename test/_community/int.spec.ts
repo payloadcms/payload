@@ -22,7 +22,7 @@ describe('_Community Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
+    const initialized = await initPayloadInt({ dirname })
     ;({ payload, restClient } = initialized)
 
     const data = await restClient

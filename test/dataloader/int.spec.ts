@@ -19,7 +19,7 @@ const dirname = path.dirname(filename)
 
 describe('dataloader', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     const loginResult = await payload.login({
       collection: 'users',

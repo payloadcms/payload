@@ -44,7 +44,7 @@ export async function initDevAndTest(
   const testDir = path.resolve(dirname, testSuiteArg)
   console.log('Generating import map for config:', testDir)
 
-  const configUrl = pathToFileURL(path.resolve(testDir, 'config.ts')).href
+  const configUrl = path.resolve(testDir, 'config.ts')
   const config: SanitizedConfig = await (await import(configUrl)).default
 
   process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir

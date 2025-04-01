@@ -37,7 +37,7 @@ describe('Joins Field', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     const data = await restClient
       .POST('/users/login', {

@@ -23,6 +23,10 @@
       "types": "./src/index.js",
       "default": "./src/index.js"
     },
+    "./css": {
+      "import": "./src/scss/app.scss",
+      "default": "./src/scss/app.scss"
+    },
     "./withPayload": {
       "import": "./src/withPayload.js",
       "default": "./src/withPayload.js"

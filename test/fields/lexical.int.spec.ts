@@ -50,7 +50,7 @@ const dirname = path.dirname(filename)
 describe('Lexical', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   beforeEach(async () => {

@@ -18,7 +18,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-search', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     const data = await restClient
       .POST('/users/login', {

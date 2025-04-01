@@ -19,7 +19,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
     user = await payload.login({
       collection: 'users',
       data: {

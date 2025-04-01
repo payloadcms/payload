@@ -21,7 +21,7 @@ const dirname = path.dirname(filename)
 describe('Query Presets', () => {
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
 
     user = await payload
       .login({

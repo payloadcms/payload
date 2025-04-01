@@ -34,7 +34,7 @@ const dirname = path.dirname(filename)
 
 describe('Hooks', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

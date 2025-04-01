@@ -36,7 +36,7 @@ const dirname = path.dirname(filename)
 
 describe('Auth', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

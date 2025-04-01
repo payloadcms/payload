@@ -4,7 +4,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-
     "noEmit": true,
     "rootDir": ".",
     "target": "ES2022",
@@ -15,10 +14,18 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["jest", "node", "@types/jest"],
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
+    ],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -28,7 +35,9 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./_community/config.ts"]
+      "@payload-config": [
+        "./form-state/config.ts"
+      ]
     }
   },
   "exclude": [
@@ -39,6 +48,12 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "setup.js"
+  ],
   "references": []
 }

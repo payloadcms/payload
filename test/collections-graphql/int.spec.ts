@@ -22,7 +22,7 @@ const dirname = path.dirname(filename)
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

@@ -20,7 +20,7 @@ const dirname = path.dirname(filename)
 describe('Queues', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {
@@ -1390,7 +1390,7 @@ describe('Queues', () => {
       limit: amount,
       depth: 0,
     })
-    expect(simpleDocs.docs.length).toBe(amount)
+    expect(simpleDocs.docs).toHaveLength(amount)
 
     // Ensure all docs are created (= all tasks are run once)
     for (let i = 1; i <= simpleDocs.docs.length; i++) {

@@ -23,7 +23,7 @@ const dirname = path.dirname(filename)
 
 describe('globals', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

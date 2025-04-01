@@ -20,7 +20,7 @@ const dirname = path.dirname(filename)
 
 describe('Relationship Fields', () => {
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
+    const initialized = await initPayloadInt({ dirname })
     ;({ payload, restClient } = initialized)
 
     await restClient.login({

@@ -29,7 +29,7 @@ describe('Select', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
+    const initialized = await initPayloadInt({ dirname })
     assert(initialized.payload)
     assert(initialized.restClient)
     ;({ payload, restClient } = initialized)

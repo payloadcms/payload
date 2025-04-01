@@ -12,7 +12,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-sentry', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
   })
 
   afterAll(async () => {

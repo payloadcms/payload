@@ -8,18 +8,17 @@ import type {
 import type { RichTextField, SanitizedConfig } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
+import { writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
+import { codeTest1 } from './tests/code1.test.js'
+import { defaultTests } from './tests/default.test.js'
 import { restExamplesTest1 } from './tests/restExamples.test.js'
 import { restExamplesTest2 } from './tests/restExamples2.test.js'
-
-import { defaultTests } from './tests/default.test.js'
-import { writeFileSync } from 'fs'
-import { codeTest1 } from './tests/code1.test.js'
 
 let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
@@ -34,14 +33,14 @@ export type Test = {
     MarkOptional<SerializedBlockNode, 'children' | 'fields' | 'format' | 'type' | 'version'>,
     'fields'
   >
+  convertFromEditorJSON?: boolean
+  convertToEditorJSON?: boolean
   debugFlag?: boolean
   description?: string
   ignoreSpacesAndNewlines?: boolean
   input: string
   inputAfterConvertFromEditorJSON?: string
   rootChildren?: any[]
-  convertToEditorJSON?: boolean
-  convertFromEditorJSON?: boolean
 }
 type Tests = Array<Test>
 
@@ -50,7 +49,7 @@ describe('Lexical MDX', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { config: incomingConfig } = await initPayloadInt(dirname, undefined, false)
+    const { config: incomingConfig } = await initPayloadInt({ dirname, initializePayload: false })
     config = incomingConfig
 
     const richTextField: RichTextField = config.collections

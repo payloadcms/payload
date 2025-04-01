@@ -46,7 +46,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 describe('database', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt({ dirname }))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     await seed(payload)

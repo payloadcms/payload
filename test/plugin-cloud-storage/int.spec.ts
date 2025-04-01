@@ -20,7 +20,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
   let TEST_BUCKET: string
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt({ dirname }))
     TEST_BUCKET = process.env.S3_BUCKET
   })
 
