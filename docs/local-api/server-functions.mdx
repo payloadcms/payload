@@ -8,17 +8,11 @@ keywords: server functions, local API, Payload, CMS, server-side logic, custom w
 
 ## **Reusable Payload Server Functions**
 
-We have introduced three new exportable server functions: `login`, `logout`, and `refresh`, to simplify authentication when using the Local API. These functions handle authentication tokens and cookies internally, reducing the complexity for developers.
+Managing authentication with the Local API can be tricky as you have to handle cookies and tokens yourself, and there aren't built-in logout or refresh functions since these only modify cookies. To make this easier, we provide `login`, `logout`, and `refresh` as ready-to-use server functions. They take care of the underlying complexity so you don't have to.
 
-## Why Use These Functions?
+### `login`
 
-When working with the Local API, authentication isn't as simple as just making an API call. Developers must manage cookies and tokens manually, which can be complex and error-prone. These new functions abstract that process, making authentication more straightforward.
-
-## Available Functions
-
-### 1. `login`
-
-Logs in a user by verifying credentials and setting the authentication cookie.
+Logs in a user by verifying credentials and setting the authentication cookie. This function allows login via username or email, depending on the collection auth configuration.
 
 #### Importing the `login` function
 
@@ -41,7 +35,11 @@ export default function LoginForm() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const response = await login({ collection: 'users', email, password })
+      const response = await login({
+        collection: 'users',
+        email, // or username
+        password,
+      })
       console.log('Logged in:', response)
     } catch (err) {
       setError(err.message)
@@ -71,7 +69,7 @@ export default function LoginForm() {
 }
 ```
 
-### 2. `logout`
+### `logout`
 
 Logs out the current user by clearing the authentication cookie.
 
@@ -97,9 +95,9 @@ export default LogoutButton = () => {
 }
 ```
 
-### 3. `refresh`
+### `refresh`
 
-Refreshes the authentication token if the user is still authenticated.
+Refreshes the authentication token for the logged-in user.
 
 #### Importing the `refresh` function
 
