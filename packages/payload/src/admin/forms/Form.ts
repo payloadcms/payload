@@ -103,6 +103,12 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
+  /**
+   * If true, will not render RSCs and instead return a simple string in their place.
+   * This is useful for environments that lack RSC support, such as Jest.
+   * Form state can still be built, but any server components will be omitted.
+   * @default false
+   */
   mockRSCs?: boolean
   operation?: 'create' | 'update'
   /*

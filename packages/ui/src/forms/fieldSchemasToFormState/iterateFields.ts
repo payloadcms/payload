@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -46,7 +47,7 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
-  mockRSCs?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */

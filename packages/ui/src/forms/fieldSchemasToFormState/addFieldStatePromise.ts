@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -68,7 +69,7 @@ export type AddFieldStatePromiseArgs = {
    */
   includeSchema?: boolean
   indexPath: string
-  mockRSCs?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */

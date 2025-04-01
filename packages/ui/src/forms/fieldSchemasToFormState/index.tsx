@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -56,7 +57,7 @@ type Args = {
    * the initial block data here, which will be used as `blockData` for the top-level fields, until the first block is encountered.
    */
   initialBlockData?: Data
-  mockRSCs?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
