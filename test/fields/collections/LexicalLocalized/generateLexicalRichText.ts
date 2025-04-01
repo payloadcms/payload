@@ -34,7 +34,7 @@ export function generateLexicalLocalizedRichText(text1: string, text2: string, b
             blockName: '',
             textLocalized: text2,
             counter: 1,
-            blockType: 'block',
+            blockType: 'blockLexicalLocalized',
           },
         },
       ],

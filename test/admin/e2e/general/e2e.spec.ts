@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
@@ -6,12 +6,11 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
+  // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -33,12 +32,14 @@ import {
 } from '../../shared.js'
 import {
   customViews2CollectionSlug,
+  disableCopyToLocale as disableCopyToLocaleSlug,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   notInViewCollectionSlug,
   postsCollectionSlug,
   settingsGlobalSlug,
+  uploadTwoCollectionSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -50,6 +51,7 @@ let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -64,13 +66,16 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('General', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let context: BrowserContext
   let geoUrl: AdminUrlUtil
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableCopyToLocale: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
+  let uploadsTwo: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -87,9 +92,11 @@ describe('General', () => {
     notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableCopyToLocale = new AdminUrlUtil(serverURL, disableCopyToLocaleSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -99,6 +106,12 @@ describe('General', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'adminTests',
@@ -141,6 +154,16 @@ describe('General', () => {
         await page.goto(`${serverURL}/admin/custom-minimal-view`)
         const pattern = new RegExp(`^${customRootViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
+      })
+    })
+
+    describe('robots', () => {
+      test('should apply default robots meta tag', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+          'content',
+          /noindex, nofollow/,
+        )
       })
     })
 
@@ -226,7 +249,6 @@ describe('General', () => {
     describe('document meta', () => {
       test('should render custom meta title from collection config', async () => {
         await page.goto(customViewsURL.list)
-        await page.waitForURL(customViewsURL.list)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -241,7 +263,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const versionsURL = `${page.url()}/versions`
         await page.goto(versionsURL)
-        await page.waitForURL(versionsURL)
         const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -250,7 +271,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const customTabURL = `${page.url()}/custom-tab-view`
         await page.goto(customTabURL)
-        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -259,7 +279,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const customTabURL = `${page.url()}${customTabViewPath}`
         await page.goto(customTabURL)
-        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -269,10 +288,8 @@ describe('General', () => {
   describe('theme', () => {
     test('should render light theme by default', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
@@ -280,7 +297,6 @@ describe('General', () => {
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-light"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).toBeChecked()
@@ -293,7 +309,6 @@ describe('General', () => {
 
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -303,7 +318,6 @@ describe('General', () => {
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-dark"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -316,7 +330,6 @@ describe('General', () => {
 
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -350,7 +363,6 @@ describe('General', () => {
   describe('navigation', () => {
     test('nav — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const anchor = page.locator(`#nav-${postsCollectionSlug}`)
       const anchorHref = await anchor.getAttribute('href')
@@ -360,7 +372,6 @@ describe('General', () => {
 
     test('nav — should navigate to a global', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const anchor = page.locator(`#nav-global-${globalSlug}`)
       const anchorHref = await anchor.getAttribute('href')
@@ -370,7 +381,6 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
@@ -379,7 +389,6 @@ describe('General', () => {
 
     test('nav — should collapse and expand collection groups', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
       await expect(navGroup).toContainText('One')
@@ -406,11 +415,49 @@ describe('General', () => {
 
     test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       await page.locator('#nav-group-One .nav-group__toggle').click()
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
+    })
+
+    test('should disable active nav item', async () => {
+      await page.goto(postsUrl.list)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('div')
+    })
+
+    test('should keep active nav item enabled in the edit view', async () => {
+      await page.goto(postsUrl.create)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('a')
+    })
+
+    test('should only have one nav item active at a time', async () => {
+      await page.goto(uploadsTwo.list)
+      await openNav(page)
+
+      // Locate "uploads" and "uploads-two" nav items
+      const uploadsNavItem = page.locator('.nav-group__content #nav-uploads')
+      const uploadsTwoNavItem = page.locator('.nav-group__content #nav-uploads-two')
+
+      // Ensure both exist before continuing
+      await expect(uploadsNavItem).toBeVisible()
+      await expect(uploadsTwoNavItem).toBeVisible()
+
+      // Locate all nav items containing the nav__link-indicator
+      const activeNavItems = page.locator(
+        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
+      )
+
+      // Expect exactly one nav item to have the indicator
+      await expect(activeNavItems).toHaveCount(1)
     })
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
@@ -429,25 +476,33 @@ describe('General', () => {
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(postsUrl.list)
     })
+
+    test('should replace history when adding query params to the URL and not push a new entry', async () => {
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard__card-list .card').first().click()
+      // wait for the search params to get injected into the URL
+      const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(pattern)
+      await page.goBack()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(postsUrl.admin)
+    })
   })
 
   describe('hidden entities', () => {
     test('nav — should not show hidden collections and globals', async () => {
       await page.goto(postsUrl.admin)
-      // nav menu
       await expect(page.locator('#nav-hidden-collection')).toBeHidden()
       await expect(page.locator('#nav-hidden-global')).toBeHidden()
     })
 
     test('dashboard — should not show hidden collections and globals', async () => {
       await page.goto(postsUrl.admin)
-      // dashboard
       await expect(page.locator('#card-hidden-collection')).toBeHidden()
       await expect(page.locator('#card-hidden-global')).toBeHidden()
     })
 
     test('routing — should 404 on hidden collections and globals', async () => {
-      // routing
       await page.goto(postsUrl.collection('hidden-collection'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(postsUrl.global('hidden-global'))
@@ -456,31 +511,35 @@ describe('General', () => {
 
     test('nav — should not show group: false collections and globals', async () => {
       await page.goto(notInViewUrl.admin)
-      // nav menu
       await expect(page.locator('#nav-not-in-view-collection')).toBeHidden()
       await expect(page.locator('#nav-global-not-in-view-global')).toBeHidden()
     })
 
     test('dashboard — should not show group: false collections and globals', async () => {
       await page.goto(notInViewUrl.admin)
-      // dashboard
       await expect(page.locator('#card-not-in-view-collection')).toBeHidden()
       await expect(page.locator('#card-not-in-view-global')).toBeHidden()
     })
 
     test('routing — should not 404 on group: false collections and globals', async () => {
-      // routing
       await page.goto(notInViewUrl.collection('not-in-view-collection'))
       await expect(page.locator('.list-header h1')).toContainText('Not In View Collections')
       await page.goto(notInViewUrl.global('not-in-view-global'))
       await expect(page.locator('.render-title')).toContainText('Not In View Global')
+    })
+
+    test('should hide Copy To Locale button when disableCopyToLocale: true', async () => {
+      await page.goto(disableCopyToLocale.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
 
   describe('custom CSS', () => {
     test('should see custom css in admin UI', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const navControls = page.locator('#custom-css')
       await expect(navControls).toHaveCSS('font-family', 'monospace')
@@ -506,7 +565,6 @@ describe('General', () => {
   describe('custom root views', () => {
     test('should render custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
@@ -520,12 +578,13 @@ describe('General', () => {
 
     test('should render public custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+
+      // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
 
@@ -538,7 +597,6 @@ describe('General', () => {
       await saveDocAndAssert(page)
 
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
   })
@@ -717,168 +775,9 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator(`[id=delete-${id}] #confirm-action`).click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
-    })
-
-    test('should bulk delete all on page', async () => {
-      await deleteAllPosts()
-      await Promise.all([createPost(), createPost(), createPost()])
-      await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Deleted 3 Posts successfully.',
-      )
-
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
-    })
-
-    test('should bulk delete with filters and across pages', async () => {
-      await deleteAllPosts()
-      await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
-      await page.goto(postsUrl.list)
-      await page.locator('#search-filter-input').fill('Post 1')
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
-      await page.locator('input#select-all').check()
-      await page.locator('button.list-selection__button').click()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Deleted 1 Post successfully.',
-      )
-
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
-    })
-
-    test('should bulk update', async () => {
-      // First, delete all posts created by the seed
-      await deleteAllPosts()
-      const post1Title = 'Post'
-      const updatedPostTitle = `${post1Title} (Updated)`
-      await Promise.all([createPost({ title: post1Title }), createPost(), createPost()])
-      await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-
-      const titleOption = page.locator('.field-select .rs__option', {
-        hasText: exactText('Title'),
-      })
-
-      await expect(titleOption).toBeVisible()
-      await titleOption.click()
-      const titleInput = page.locator('#field-title')
-      await expect(titleInput).toBeVisible()
-      await titleInput.fill(updatedPostTitle)
-      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Updated 3 Posts successfully.',
-      )
-
-      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
-      await expect(page.locator('.row-2 .cell-title')).toContainText(updatedPostTitle)
-      await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
-    })
-
-    test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
-      await deleteAllPosts()
-      const post1Title = 'Post'
-      const postData = {
-        title: 'Post',
-        arrayOfFields: [
-          {
-            optional: 'some optional array field',
-            innerArrayOfFields: [
-              {
-                innerOptional: 'some inner optional array field',
-              },
-            ],
-          },
-        ],
-        group: {
-          defaultValueField: 'not the group default value',
-          title: 'some title',
-        },
-        someBlock: [
-          {
-            textFieldForBlock: 'some text for block text',
-            blockType: 'textBlock',
-          },
-        ],
-        defaultValueField: 'not the default value',
-      }
-      const updatedPostTitle = `${post1Title} (Updated)`
-      await createPost(postData)
-      await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-
-      const titleOption = page.locator('.field-select .rs__option', {
-        hasText: exactText('Title'),
-      })
-
-      await expect(titleOption).toBeVisible()
-      await titleOption.click()
-      const titleInput = page.locator('#field-title')
-      await expect(titleInput).toBeVisible()
-      await titleInput.fill(updatedPostTitle)
-      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Updated 1 Post successfully.',
-      )
-
-      const updatedPost = await payload.find({
-        collection: 'posts',
-        limit: 1,
-      })
-
-      expect(updatedPost.docs[0].title).toBe(updatedPostTitle)
-      expect(updatedPost.docs[0].arrayOfFields.length).toBe(1)
-      expect(updatedPost.docs[0].arrayOfFields[0].optional).toBe('some optional array field')
-      expect(updatedPost.docs[0].arrayOfFields[0].innerArrayOfFields.length).toBe(1)
-      expect(updatedPost.docs[0].someBlock[0].textFieldForBlock).toBe('some text for block text')
-      expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
-    })
-
-    test('should bulk update with filters and across pages', async () => {
-      // First, delete all posts created by the seed
-      await deleteAllPosts()
-      const post1Title = 'Post 1'
-      await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
-      const updatedPostTitle = `${post1Title} (Updated)`
-      await page.goto(postsUrl.list)
-      await page.locator('#search-filter-input').fill('Post 1')
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
-      await page.locator('input#select-all').check()
-      await page.locator('button.list-selection__button').click()
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-
-      const titleOption = page.locator('.field-select .rs__option', {
-        hasText: exactText('Title'),
-      })
-
-      await expect(titleOption).toBeVisible()
-      await titleOption.click()
-      const titleInput = page.locator('#field-title')
-      await expect(titleInput).toBeVisible()
-      await titleInput.fill(updatedPostTitle)
-
-      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Updated 1 Post successfully.',
-      )
-
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
-      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
     })
 
     test('should save globals', async () => {
@@ -909,18 +808,50 @@ describe('General', () => {
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
 
-      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+      await page.locator(`header.app-header a[href="/admin/collections/posts"]`).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
+  })
+
+  test('should not open leave-without-saving modal if opening a new tab', async () => {
+    const title = 'title'
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+
+    const newTitle = 'new title'
+    await page.locator('#field-title').fill(newTitle)
+
+    // Open link in a new tab by holding down the Meta or Control key
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      page
+        .locator(`header.app-header a[href="/admin/collections/posts"]`)
+        .click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    // Wait for navigation to complete in the new tab and ensure correct URL
+    await expect(newPage.locator('.list-header')).toBeVisible()
+    // using contain here, because after load the lists view will add query params like "?limit=10"
+    expect(newPage.url()).toContain(postsUrl.list)
+
+    // Locate the modal container and ensure it is not visible
+    const modalContainer = page.locator('.payload__modal-container')
+    await expect(modalContainer).toBeHidden()
+
+    // Ensure the original page is the correct URL
+    expect(page.url()).toBe(postsUrl.create)
   })
 
   describe('preferences', () => {
@@ -938,11 +869,15 @@ describe('General', () => {
       await expect(toast).toBeVisible()
     })
   })
-})
 
-async function deleteAllPosts() {
-  await payload.delete({ collection: postsCollectionSlug, where: { id: { exists: true } } })
-}
+  describe('progress bar', () => {
+    test('should show progress bar on page navigation', async () => {
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard__card-list .card').first().click()
+      await expect(page.locator('.progress-bar')).toBeVisible()
+    })
+  })
+})
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({

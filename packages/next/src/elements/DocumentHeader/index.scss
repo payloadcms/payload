@@ -34,8 +34,6 @@
     }
 
     @include mid-break {
-      padding-left: 0;
-      padding-right: 0;
       margin-top: base(0.25);
       padding-bottom: calc(var(--base) / 1.5);
       flex-direction: column;

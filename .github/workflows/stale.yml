@@ -2,8 +2,8 @@ name: stale
 
 on:
   schedule:
-    # Run nightly at 1am EST
-    - cron: '0 5 * * *'
+    # Run nightly at 1am EST, staggered with lock-issues workflow
+    - cron: '0 6 * * *'
 
   workflow_dispatch:
     inputs:

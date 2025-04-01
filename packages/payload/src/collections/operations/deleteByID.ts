@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
@@ -18,6 +19,7 @@ import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
@@ -47,10 +49,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -59,9 +59,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             operation: 'delete',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     const {
       id,
@@ -77,7 +76,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -94,16 +93,16 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeDelete - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      return hook({
-        id,
-        collection: collectionConfig,
-        context: req.context,
-        req,
-      })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeDelete?.length) {
+      for (const hook of collectionConfig.hooks.beforeDelete) {
+        await hook({
+          id,
+          collection: collectionConfig,
+          context: req.context,
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Retrieve document
@@ -168,6 +167,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       })
     }
 
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
@@ -214,34 +218,34 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterDelete - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          id,
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterDelete?.length) {
+      for (const hook of collectionConfig.hooks.afterDelete) {
+        result =
+          (await hook({
+            id,
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

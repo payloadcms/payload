@@ -6,10 +6,65 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     'hooks-users': HooksUserAuthOperations;
   };
+  blocks: {};
   collections: {
     'before-change-hooks': BeforeChangeHook;
     'before-validate': BeforeValidate;
@@ -23,6 +78,7 @@ export interface Config {
     'hooks-users': HooksUser;
     'data-hooks': DataHook;
     'field-paths': FieldPath;
+    'value-hooks': ValueHook;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -41,6 +97,7 @@ export interface Config {
     'hooks-users': HooksUsersSelect<false> | HooksUsersSelect<true>;
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
     'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
+    'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -99,6 +156,8 @@ export interface BeforeValidate {
   id: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
+  cannotMutate?: string | null;
+  canMutate?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -254,6 +313,7 @@ export interface FieldPath {
               id?: string | null;
             }[]
           | null;
+        fieldWithinRowWithinArray?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -363,6 +423,42 @@ export interface FieldPath {
     | boolean
     | null;
   fieldWithinNestedArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?:
     | {
         [k: string]: unknown;
       }
@@ -520,6 +616,18 @@ export interface FieldPath {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-hooks".
+ */
+export interface ValueHook {
+  id: string;
+  slug?: string | null;
+  beforeValidate_value?: string | null;
+  beforeChange_value?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -572,6 +680,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-paths';
         value: string | FieldPath;
+      } | null)
+    | ({
+        relationTo: 'value-hooks';
+        value: string | ValueHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -631,6 +743,8 @@ export interface BeforeChangeHooksSelect<T extends boolean = true> {
 export interface BeforeValidateSelect<T extends boolean = true> {
   title?: T;
   selection?: T;
+  cannotMutate?: T;
+  canMutate?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -772,6 +886,7 @@ export interface FieldPathsSelect<T extends boolean = true> {
               fieldWithinNestedArray?: T;
               id?: T;
             };
+        fieldWithinRowWithinArray?: T;
         id?: T;
       };
   fieldWithinRow?: T;
@@ -794,6 +909,10 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNestedArray_beforeChange_FieldPaths?: T;
   fieldWithinNestedArray_afterRead_FieldPaths?: T;
   fieldWithinNestedArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?: T;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?: T;
   fieldWithinRow_beforeValidate_FieldPaths?: T;
   fieldWithinRow_beforeChange_FieldPaths?: T;
   fieldWithinRow_afterRead_FieldPaths?: T;
@@ -810,6 +929,17 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNamedTab_beforeChange_FieldPaths?: T;
   fieldWithinNamedTab_afterRead_FieldPaths?: T;
   fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "value-hooks_select".
+ */
+export interface ValueHooksSelect<T extends boolean = true> {
+  slug?: T;
+  beforeValidate_value?: T;
+  beforeChange_value?: T;
   updatedAt?: T;
   createdAt?: T;
 }

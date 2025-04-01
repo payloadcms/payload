@@ -22,6 +22,7 @@ export async function createVersion<T extends TypeWithID>(
     snapshot,
     updatedAt,
     versionData,
+    returning,
   }: CreateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
@@ -70,6 +71,10 @@ export async function createVersion<T extends TypeWithID>(
           AND ${table.updatedAt} < ${result.updatedAt}
       `,
     })
+  }
+
+  if (returning === false) {
+    return null
   }
 
   return result

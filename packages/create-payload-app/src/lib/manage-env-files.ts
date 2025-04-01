@@ -54,6 +54,7 @@ const generateEnvContent = (
     .filter((line) => line.includes('=') && !line.startsWith('#'))
     .forEach((line) => {
       const [key, value] = line.split('=')
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       envVars[key] = value
     })
 

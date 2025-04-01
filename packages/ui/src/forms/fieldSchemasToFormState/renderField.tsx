@@ -1,4 +1,10 @@
-import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
+import type {
+  ClientComponentProps,
+  ClientField,
+  FieldPaths,
+  FlattenedBlock,
+  ServerComponentProps,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
@@ -119,6 +125,7 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.admin.components.RowLabel,
             importMap: req.payload.importMap,
+            key: `${rowIndex}`,
             serverProps: {
               ...serverProps,
               rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
@@ -135,7 +142,12 @@ export const renderField: RenderFieldMethod = ({
 
     case 'blocks': {
       fieldState?.rows?.forEach((row, rowIndex) => {
-        const blockConfig = fieldConfig.blocks.find((block) => block.slug === row.blockType)
+        const blockTypeToMatch: string = row.blockType
+        const blockConfig =
+          req.payload.blocks[blockTypeToMatch] ??
+          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+          ) as FlattenedBlock | undefined)
 
         if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
           if (!fieldState.customComponents) {
@@ -150,6 +162,7 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: blockConfig.admin.components.Label,
             importMap: req.payload.importMap,
+            key: `${rowIndex}`,
             serverProps: {
               ...serverProps,
               blockType: row.blockType,
@@ -231,6 +244,7 @@ export const renderField: RenderFieldMethod = ({
       fieldState.customComponents.Description = (
         <FieldDescription
           description={fieldConfig.admin?.description({
+            i18n: req.i18n,
             t: req.i18n.t,
           })}
           path={path}

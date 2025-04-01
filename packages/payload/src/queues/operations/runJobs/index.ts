@@ -1,5 +1,5 @@
-import type { PaginatedDocs } from '../../../database/types.js'
-import type { PayloadRequest, Where } from '../../../types/index.js'
+// @ts-strict-ignore
+import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
   BaseJob,
@@ -11,6 +11,8 @@ import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
+import { jobsCollectionSlug } from '../../config/index.js'
+import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
 import { runJob } from './runJob/index.js'
@@ -23,8 +25,21 @@ export type RunJobsArgs = {
   id?: number | string
   limit?: number
   overrideAccess?: boolean
+  /**
+   * Adjust the job processing order
+   *
+   * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+   *
+   * @default all jobs for all queues will be executed in FIFO order.
+   */
+  processingOrder?: Sort
   queue?: string
   req: PayloadRequest
+  /**
+   * By default, jobs are run in parallel.
+   * If you want to run them in sequence, set this to true.
+   */
+  sequential?: boolean
   where?: Where
 }
 
@@ -40,14 +55,18 @@ export type RunJobsResult = {
   remainingJobsFromQueried: number
 }
 
-export const runJobs = async ({
-  id,
-  limit = 10,
-  overrideAccess,
-  queue,
-  req,
-  where: whereFromProps,
-}: RunJobsArgs): Promise<RunJobsResult> => {
+export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
+  const {
+    id,
+    limit = 10,
+    overrideAccess,
+    processingOrder,
+    queue,
+    req,
+    sequential,
+    where: whereFromProps,
+  } = args
+
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
     if (!hasAccess) {
@@ -104,40 +123,61 @@ export const runJobs = async ({
   // the same job being picked up by another worker
   const jobsQuery: {
     docs: BaseJob[]
-  } = id
-    ? {
-        docs: [
-          (await req.payload.update({
-            id,
-            collection: 'payload-jobs',
-            data: {
-              processing: true,
-              seenByWorker: true,
-            },
-            depth: req.payload.config.jobs.depth,
-            disableTransaction: true,
-            showHiddenFields: true,
-          })) as BaseJob,
-        ],
-      }
-    : ((await req.payload.update({
-        collection: 'payload-jobs',
+  } = { docs: [] }
+
+  if (id) {
+    // Only one job to run
+    jobsQuery.docs = [
+      await updateJob({
+        id,
         data: {
           processing: true,
-          seenByWorker: true,
         },
         depth: req.payload.config.jobs.depth,
         disableTransaction: true,
-        limit,
-        showHiddenFields: true,
-        where,
-      })) as unknown as PaginatedDocs<BaseJob>)
+        req,
+        returning: true,
+      }),
+    ]
+  } else {
+    let defaultProcessingOrder: Sort =
+      req.payload.collections[jobsCollectionSlug].config.defaultSort ?? 'createdAt'
+
+    const processingOrderConfig = req.payload.config.jobs?.processingOrder
+    if (typeof processingOrderConfig === 'function') {
+      defaultProcessingOrder = await processingOrderConfig(args)
+    } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
+      if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
+        defaultProcessingOrder = processingOrderConfig.queues[queue]
+      } else if (processingOrderConfig.default) {
+        defaultProcessingOrder = processingOrderConfig.default
+      }
+    } else if (typeof processingOrderConfig === 'string') {
+      defaultProcessingOrder = processingOrderConfig
+    }
+    const updatedDocs = await updateJobs({
+      data: {
+        processing: true,
+      },
+      depth: req.payload.config.jobs.depth,
+      disableTransaction: true,
+      limit,
+      req,
+      returning: true,
+      sort: processingOrder ?? defaultProcessingOrder,
+      where,
+    })
+
+    if (updatedDocs) {
+      jobsQuery.docs = updatedDocs
+    }
+  }
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
    * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
    */
-  const { newJobs } = jobsQuery.docs.reduce(
+  const { existingJobs, newJobs } = jobsQuery.docs.reduce(
     (acc, job) => {
       if (job.totalTried > 0) {
         acc.existingJobs.push(job)
@@ -157,13 +197,17 @@ export const runJobs = async ({
   }
 
   if (jobsQuery?.docs?.length) {
-    req.payload.logger.info(`Running ${jobsQuery.docs.length} jobs.`)
+    req.payload.logger.info({
+      msg: `Running ${jobsQuery.docs.length} jobs.`,
+      new: newJobs?.length,
+      retrying: existingJobs?.length,
+    })
   }
   const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
     ? []
     : undefined
 
-  const jobPromises = jobsQuery.docs.map(async (job) => {
+  const runSingleJob = async (job) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -245,17 +289,36 @@ export const runJobs = async ({
 
       return { id: job.id, result }
     }
-  })
+  }
 
-  const resultsArray = await Promise.all(jobPromises)
+  let resultsArray: { id: number | string; result: RunJobResult }[] = []
+  if (sequential) {
+    for (const job of jobsQuery.docs) {
+      const result = await runSingleJob(job)
+      if (result !== null) {
+        resultsArray.push(result)
+      }
+    }
+  } else {
+    const jobPromises = jobsQuery.docs.map(runSingleJob)
+    resultsArray = await Promise.all(jobPromises)
+  }
 
   if (jobsToDelete && jobsToDelete.length > 0) {
     try {
-      await req.payload.delete({
-        collection: 'payload-jobs',
-        req,
-        where: { id: { in: jobsToDelete } },
-      })
+      if (req.payload.config.jobs.runHooks) {
+        await req.payload.delete({
+          collection: jobsCollectionSlug,
+          depth: 0, // can be 0 since we're not returning anything
+          disableTransaction: true,
+          where: { id: { in: jobsToDelete } },
+        })
+      } else {
+        await req.payload.db.deleteMany({
+          collection: jobsCollectionSlug,
+          where: { id: { in: jobsToDelete } },
+        })
+      }
     } catch (err) {
       req.payload.logger.error({
         err,

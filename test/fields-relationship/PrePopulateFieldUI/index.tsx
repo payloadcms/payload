@@ -2,7 +2,7 @@
 import { useField } from '@payloadcms/ui'
 import * as React from 'react'
 
-import { collection1Slug } from '../collectionSlugs.js'
+import { collection1Slug } from '../slugs.js'
 
 export const PrePopulateFieldUI: React.FC<{
   hasMany?: boolean

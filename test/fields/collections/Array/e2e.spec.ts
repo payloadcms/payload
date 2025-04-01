@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -56,7 +57,7 @@ describe('Array', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -71,6 +72,7 @@ describe('Array', () => {
     await page.goto(url.create)
     const field = page.locator('#field-readOnly__0__text')
     await expect(field).toBeDisabled()
+    await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
   })
 
   test('should have defaultValue', async () => {
@@ -112,7 +114,6 @@ describe('Array', () => {
     await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
-  // eslint-disable-next-line playwright/expect-expect
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
@@ -123,14 +124,22 @@ describe('Array', () => {
     await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Array With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Array With Min Rows'],
+    })
   })
 
   test('should show singular label for array rows', async () => {
     await page.goto(url.create)
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
+  })
+
+  test('ensure functions passed to array field labels property are respected', async () => {
+    await page.goto(url.create)
+
+    const arrayWithLabelsField = page.locator('#field-arrayWithLabels')
+    await expect(arrayWithLabelsField.locator('.array-field__add-row')).toHaveText('Add Account')
   })
 
   describe('row manipulation', () => {

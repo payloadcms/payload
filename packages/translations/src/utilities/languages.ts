@@ -18,9 +18,11 @@ export const acceptedLanguages = [
   'he',
   'hr',
   'hu',
+  'hy',
   'it',
   'ja',
   'ko',
+  'lt',
   'my',
   'nb',
   'nl',
@@ -72,7 +74,6 @@ export const acceptedLanguages = [
    * 'gu',
    * 'ha-Latn',
    * 'hi',
-   * 'hy',
    * 'id',
    * 'ig-Latn',
    * 'is',
@@ -85,7 +86,6 @@ export const acceptedLanguages = [
    * 'ku-Arab',
    * 'ky-Cyrl',
    * 'lb',
-   * 'lt',
    * 'lv',
    * 'mi-Latn',
    * 'mk',
@@ -152,7 +152,7 @@ function parseAcceptLanguage(acceptLanguageHeader: string): LanguagePreference[]
 export function extractHeaderLanguage(acceptLanguageHeader: string): AcceptedLanguages | undefined {
   const parsedHeader = parseAcceptLanguage(acceptLanguageHeader)
 
-  let matchedLanguage: AcceptedLanguages
+  let matchedLanguage: AcceptedLanguages | undefined
 
   for (const { language } of parsedHeader) {
     if (!matchedLanguage && acceptedLanguages.includes(language)) {

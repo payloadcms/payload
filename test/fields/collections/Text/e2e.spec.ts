@@ -3,8 +3,8 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -65,7 +65,7 @@ describe('Text', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -79,7 +79,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
       await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {
@@ -105,7 +105,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-disabledTextField')).toBeHidden()
       await expect(page.locator('#heading-disabledTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {
@@ -133,7 +133,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-adminHiddenTextField').first()).toBeVisible()
       await expect(page.locator('#heading-adminHiddenTextField')).toBeVisible()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {
@@ -165,7 +165,7 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    await upsertPrefs<Config, GeneratedTypes<any>>({
+    await upsertPreferences<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
       key: 'text-fields-list',
@@ -198,6 +198,7 @@ describe('Text', () => {
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
+      columnName: 'localizedText',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')
@@ -239,5 +240,45 @@ describe('Text', () => {
     await saveDocAndAssert(page)
     await expect(field.locator('.rs__value-container')).toContainText(input)
     await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
+  })
+
+  test('should allow editing hasMany text field values by clicking', async () => {
+    const originalText = 'original'
+    const newText = 'new'
+
+    await page.goto(url.create)
+
+    // fill required field
+    const requiredField = page.locator('#field-text')
+    await requiredField.fill(String(originalText))
+
+    const field = page.locator('.field-hasMany')
+
+    // Add initial value
+    await field.click()
+    await page.keyboard.type(originalText)
+    await page.keyboard.press('Enter')
+
+    // Click to edit existing value
+    const value = field.locator('.multi-value-label__text')
+    await value.click()
+    await value.dblclick()
+    await page.keyboard.type(newText)
+    await page.keyboard.press('Enter')
+
+    await saveDocAndAssert(page)
+    await expect(field.locator('.rs__value-container')).toContainText(`${newText}`)
+  })
+
+  test('should not allow editing hasMany text field values when disabled', async () => {
+    await page.goto(url.create)
+    const field = page.locator('.field-readOnlyHasMany')
+
+    // Try to click to edit
+    const value = field.locator('.multi-value-label__text')
+    await value.click({ force: true })
+
+    // Verify it does not become editable
+    await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
   })
 })

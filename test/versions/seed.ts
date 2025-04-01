@@ -6,8 +6,12 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { titleToDelete } from './shared.js'
-import { diffCollectionSlug, draftCollectionSlug, mediaCollectionSlug } from './slugs.js'
+import {
+  autosaveWithValidateCollectionSlug,
+  diffCollectionSlug,
+  draftCollectionSlug,
+  mediaCollectionSlug,
+} from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -109,29 +113,42 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: draftCollectionSlug,
+    collection: autosaveWithValidateCollectionSlug,
     data: {
-      blocksField,
-      description: 'Description',
-      title: titleToDelete,
+      title: 'Initial seeded title',
     },
-    depth: 0,
-    overrideAccess: true,
-    draft: true,
   })
 
   const diffDoc = await _payload.create({
     collection: diffCollectionSlug,
+    locale: 'en',
     data: {
       array: [
         {
           textInArray: 'textInArray',
         },
       ],
+      arrayLocalized: [
+        {
+          textInArrayLocalized: 'textInArrayLocalized',
+        },
+      ],
       blocks: [
         {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock',
+        },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
         },
       ],
       checkbox: true,
@@ -164,16 +181,34 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const updatedDiffDoc = await _payload.update({
     id: diffDoc.id,
     collection: diffCollectionSlug,
+    locale: 'en',
     data: {
       array: [
         {
           textInArray: 'textInArray2',
         },
       ],
+      arrayLocalized: [
+        {
+          textInArrayLocalized: 'textInArrayLocalized2',
+        },
+      ],
       blocks: [
         {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock2',
+        },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock2',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock2',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
         },
       ],
       checkbox: false,

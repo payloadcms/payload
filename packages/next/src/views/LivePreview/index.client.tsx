@@ -28,19 +28,20 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useRouteTransition,
   useServerFunctions,
   useTranslation,
   useUploadEdits,
 } from '@payloadcms/ui'
 import {
   abortAndIgnore,
-  formatAdminURL,
   handleAbortRef,
   handleBackToDashboard,
   handleGoBack,
   handleTakeOver,
 } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useLivePreviewContext } from './Context/context.js'
@@ -60,6 +61,14 @@ type Props = {
   readonly schemaPath: string
   readonly serverURL: string
 } & DocumentSlots
+
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
+}
 
 const PreviewView: React.FC<Props> = ({
   collectionConfig,
@@ -123,6 +132,7 @@ const PreviewView: React.FC<Props> = ({
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const docConfig = collectionConfig || globalConfig
 
@@ -203,7 +213,8 @@ const PreviewView: React.FC<Props> = ({
           adminRoute,
           path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -261,6 +272,7 @@ const PreviewView: React.FC<Props> = ({
       router,
       setDocumentIsLocked,
       updateSavedDocumentData,
+      startRouteTransition,
       user,
       userSlug,
       autosaveEnabled,
@@ -552,7 +564,7 @@ export const LivePreviewClient: React.FC<
     readonly url: string
   } & DocumentSlots
 > = (props) => {
-  const { breakpoints, url } = props
+  const { breakpoints, url: incomingUrl } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
@@ -563,6 +575,11 @@ export const LivePreviewClient: React.FC<
     },
     getEntityConfig,
   } = useConfig()
+
+  const url =
+    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+      ? incomingUrl
+      : getAbsoluteUrl(incomingUrl)
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',

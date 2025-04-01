@@ -276,7 +276,7 @@ describe('Localization', () => {
           expect(localized.title.es).toEqual(spanishTitle)
         })
 
-        it('REST all locales with all', async () => {
+        it('rest all locales with all', async () => {
           const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
             query: {
               locale: 'all',
@@ -290,7 +290,7 @@ describe('Localization', () => {
           expect(localized.title.es).toEqual(spanishTitle)
         })
 
-        it('REST all locales with asterisk', async () => {
+        it('rest all locales with asterisk', async () => {
           const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
             query: {
               locale: '*',
@@ -1869,14 +1869,16 @@ describe('Localization', () => {
       })
     })
 
+    // Nested localized fields do no longer have their localized property stripped in
+    // this monorepo, as this is handled at runtime.
     describe('nested localized field sanitization', () => {
-      it('should sanitize nested localized fields', () => {
+      it('ensure nested localized fields keep localized property in monorepo', () => {
         const collection = payload.collections['localized-within-localized'].config
 
-        expect(collection.fields[0].tabs[0].fields[0].localized).toBeUndefined()
-        expect(collection.fields[1].fields[0].localized).toBeUndefined()
-        expect(collection.fields[2].blocks[0].fields[0].localized).toBeUndefined()
-        expect(collection.fields[3].fields[0].localized).toBeUndefined()
+        expect(collection.fields[0].tabs[0].fields[0].localized).toBeDefined()
+        expect(collection.fields[1].fields[0].localized).toBeDefined()
+        expect(collection.fields[2].blocks[0].fields[0].localized).toBeDefined()
+        expect(collection.fields[3].fields[0].localized).toBeDefined()
       })
     })
 

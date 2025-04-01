@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 import { useFormFields } from '../../../forms/Form/context.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatDocTitle } from '../../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../../utilities/formatDocTitle/index.js'
 
 export const SetDocumentTitle: React.FC<{
   collectionConfig?: ClientCollectionConfig

@@ -10,7 +10,7 @@ import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { TableMarkdownTransformer } from '../markdownTransformer.js'
 
@@ -101,7 +101,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
                   req,
                   showHiddenFields,
                 })
-                return `<table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table>`
+                return `<div class="lexical-table-container"><table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table></div>`
               },
               nodeTypes: [TableNode.getType()],
             },

@@ -175,12 +175,45 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
     })
 
-    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
+    expect(categoryWithPosts).toStrictEqual({
+      id: categoryWithPosts.id,
+      group: categoryWithPosts.group,
+    })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('title')
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
+  })
+
+  it('should count joins', async () => {
+    let categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+          count: true,
+        },
+      },
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
+
+    // With limit 1
+    categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+          count: true,
+          limit: 1,
+        },
+      },
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
   it('should populate relationships in joins', async () => {
@@ -213,6 +246,7 @@ describe('Joins Field', () => {
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+    expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with localized array relationships', async () => {
@@ -572,6 +606,27 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
+    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: { _status: 'draft' },
+        draft: true,
+      })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { _status: 'draft', categoryVersion: category.id },
+        draft: true,
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: true,
+      })
+
+      expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
@@ -615,6 +670,46 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.docs).toHaveLength(15)
       expect(unlimited.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should have simple paginate with page for joins', async () => {
+      const query = {
+        depth: 1,
+        where: {
+          name: { equals: 'paginate example' },
+        },
+        joins: {
+          relatedPosts: {
+            sort: 'createdAt',
+            limit: 2,
+            page: 1,
+          },
+        },
+      }
+      let pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      query.joins.relatedPosts.limit = 0
+      const unlimited = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[0].id,
+      )
+      expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[1].id,
+      )
+      query.joins.relatedPosts.limit = 2
+      query.joins.relatedPosts.page = 2
+
+      pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[2].id,
+      )
+      expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[3].id,
+      )
     })
 
     it('should respect access control for join collections', async () => {
@@ -747,6 +842,94 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs).toHaveLength(15)
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should have simple paginate with page for joins', async () => {
+      let queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 2
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      let pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[0].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[1].id,
+      )
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                relatedPosts(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 2,
+                ) {
+                  docs {
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[2].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
+      )
     })
 
     it('should have simple paginate for joins inside groups', async () => {
@@ -1023,6 +1206,187 @@ describe('Joins Field', () => {
     const joinedDoc2 = joinedDoc.joins.docs[0] as DepthJoins3
 
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
+  })
+
+  describe('Array of collection', () => {
+    it('should join across multiple collections', async () => {
+      let parent = await payload.create({
+        collection: 'multiple-collections-parents',
+        depth: 0,
+        data: {},
+      })
+
+      const child_1 = await payload.create({
+        collection: 'multiple-collections-1',
+        depth: 0,
+        data: {
+          parent,
+          title: 'doc-1',
+        },
+      })
+
+      const child_2 = await payload.create({
+        collection: 'multiple-collections-2',
+        depth: 0,
+        data: {
+          parent,
+          title: 'doc-2',
+        },
+      })
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 0,
+      })
+
+      expect(parent.children.docs[0].value).toBe(child_2.id)
+      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
+      expect(parent.children.docs[1]?.value).toBe(child_1.id)
+      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+      })
+
+      expect(parent.children.docs[0].value.id).toBe(child_2.id)
+      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
+      expect(parent.children.docs[1]?.value.id).toBe(child_1.id)
+      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+
+      // Pagination across collections
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            limit: 1,
+            sort: 'title',
+          },
+        },
+      })
+
+      expect(parent.children.docs).toHaveLength(1)
+      expect(parent.children?.hasNextPage).toBe(true)
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            limit: 2,
+            sort: 'title',
+          },
+        },
+      })
+
+      expect(parent.children.docs).toHaveLength(2)
+      expect(parent.children?.hasNextPage).toBe(false)
+
+      // Sorting across collections
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            sort: 'title',
+          },
+        },
+      })
+
+      expect(parent.children.docs[0]?.value.title).toBe('doc-1')
+      expect(parent.children.docs[1]?.value.title).toBe('doc-2')
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            sort: '-title',
+          },
+        },
+      })
+
+      expect(parent.children.docs[0]?.value.title).toBe('doc-2')
+      expect(parent.children.docs[1]?.value.title).toBe('doc-1')
+
+      // WHERE across collections
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              title: {
+                equals: 'doc-1',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.docs).toHaveLength(1)
+      expect(parent.children.docs[0]?.value.title).toBe('doc-1')
+
+      // WHERE by _relationTo (join for specific collectionSlug)
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.docs).toHaveLength(1)
+      expect(parent.children.docs[0]?.value.title).toBe('doc-2')
+
+      // counting
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+      })
+
+      expect(parent.children?.totalDocs).toBe(2)
+
+      // counting filtered
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.totalDocs).toBe(1)
+    })
   })
 })
 

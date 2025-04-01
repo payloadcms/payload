@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.19.0",
+  "version": "3.31.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -116,14 +116,14 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
+    "@date-fns/tz": "1.2.0",
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
     "@faceless-ui/modal": "3.0.0-beta.2",
-    "@faceless-ui/scroll-info": "2.0.0-beta.0",
-    "@faceless-ui/window-info": "3.0.0-beta.0",
-    "@monaco-editor/react": "4.6.0",
+    "@faceless-ui/scroll-info": "2.0.0",
+    "@faceless-ui/window-info": "3.0.1",
+    "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
-    "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
     "date-fns": "4.1.0",
     "dequal": "2.0.3",
@@ -140,25 +140,24 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.25.9",
-    "@babel/core": "7.26.0",
-    "@babel/preset-env": "7.26.0",
-    "@babel/preset-react": "7.25.9",
+    "@babel/cli": "7.26.4",
+    "@babel/core": "7.26.7",
+    "@babel/preset-env": "7.26.7",
+    "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.26.0",
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.0.12",
+    "@types/react-dom": "19.0.4",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
-    "esbuild": "0.24.0",
+    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
+    "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0",
+    "next": "^15.2.3",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"

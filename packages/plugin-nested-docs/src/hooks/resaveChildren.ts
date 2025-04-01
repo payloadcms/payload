@@ -81,10 +81,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
-            data: {
-              ...child,
-              [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
-            },
+            data: populateBreadcrumbs(req, pluginConfig, collection, child),
             depth: 0,
             draft: isDraft,
             locale: req.locale,

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import crypto from 'crypto'
 
 import type {
@@ -34,6 +35,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -77,10 +79,8 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -89,9 +89,8 @@ export const createOperation = async <
             operation: 'create',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     const {
       autosave = false,
@@ -111,7 +110,7 @@ export const createOperation = async <
         payload: { config },
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -182,10 +181,8 @@ export const createOperation = async <
     // beforeValidate - Collections
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(
-      async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
         data =
           (await hook({
             collection: collectionConfig,
@@ -195,27 +192,26 @@ export const createOperation = async <
             originalDoc: duplicatedFromDoc,
             req,
           })) || data
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'create',
-          originalDoc: duplicatedFromDoc,
-          req,
-        })) || data
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeChange?.length) {
+      for (const hook of collectionConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            operation: 'create',
+            originalDoc: duplicatedFromDoc,
+            req,
+          })) || data
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -249,6 +245,11 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     let doc
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
@@ -331,17 +332,17 @@ export const createOperation = async <
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -362,10 +363,8 @@ export const createOperation = async <
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(
-      async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
             collection: collectionConfig,
@@ -375,9 +374,8 @@ export const createOperation = async <
             previousDoc: {},
             req: args.req,
           })) || result
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

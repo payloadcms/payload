@@ -75,6 +75,7 @@ async function migrateGlobal({
   const found = migrateDocument({
     document,
     fields: global.fields,
+    payload,
   })
 
   if (found) {
@@ -159,6 +160,7 @@ async function migrateCollection({
       const found = migrateDocument({
         document,
         fields: collection.fields,
+        payload,
       })
 
       if (found) {
@@ -189,13 +191,16 @@ async function migrateCollection({
 function migrateDocument({
   document,
   fields,
+  payload,
 }: {
   document: Record<string, unknown>
   fields: Field[]
+  payload: Payload
 }): boolean {
   return !!migrateDocumentFieldsRecursively({
     data: document,
     fields,
     found: 0,
+    payload,
   })
 }

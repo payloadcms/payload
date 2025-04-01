@@ -7,12 +7,13 @@ const operatorMap: Record<string, string> = {
   like: 'like_regex',
   not_equals: '!=',
   not_in: 'in',
+  not_like: '!like_regex',
 }
 
 const sanitizeValue = (value: unknown, operator?: string) => {
   if (typeof value === 'string') {
-    // ignore casing with like
-    return `"${operator === 'like' ? '(?i)' : ''}${value}"`
+    // ignore casing with like or not_like
+    return `"${['like', 'not_like'].includes(operator) ? '(?i)' : ''}${value}"`
   }
 
   return value as string
@@ -35,6 +36,10 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     })
   } else if (operator === 'exists') {
     sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '$.${jsonPaths}')`
+  } else if (['not_like'].includes(operator)) {
+    const mappedOperator = operatorMap[operator]
+
+    sql = `NOT jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
   } else {
     sql = `jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
   }

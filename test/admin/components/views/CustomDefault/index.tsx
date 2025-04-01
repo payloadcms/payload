@@ -5,19 +5,16 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Button, SetStepNav } from '@payloadcms/ui'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
+
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export function CustomDefaultView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     permissions,
     req: {

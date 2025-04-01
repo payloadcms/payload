@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-import type { AdminViewConfig } from '../../admin/views/types.js'
+// @ts-strict-ignore
+
+import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { iterateCollections } from './iterateCollections.js'
+import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
 
 export function iterateConfig({
@@ -37,6 +39,20 @@ export function iterateConfig({
     imports,
   })
 
+  if (config?.blocks) {
+    const blocks = Object.values(config.blocks)
+    if (blocks?.length) {
+      genImportMapIterateFields({
+        addToImportMap,
+        baseDir,
+        config,
+        fields: blocks,
+        importMap,
+        imports,
+      })
+    }
+  }
+
   if (typeof config.admin?.avatar === 'object') {
     addToImportMap(config.admin?.avatar?.Component)
   }
@@ -60,7 +76,7 @@ export function iterateConfig({
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {
       for (const key in config.admin?.components?.views) {
-        const adminViewConfig: AdminViewConfig = config.admin?.components?.views[key]
+        const adminViewConfig = config.admin?.components?.views[key]
         addToImportMap(adminViewConfig?.Component)
       }
     }
@@ -79,8 +95,7 @@ export function iterateConfig({
   }
 
   if (config?.admin?.dependencies) {
-    for (const key in config.admin.dependencies) {
-      const dependency = config.admin.dependencies[key]
+    for (const dependency of Object.values(config.admin.dependencies)) {
       addToImportMap(dependency.path)
     }
   }

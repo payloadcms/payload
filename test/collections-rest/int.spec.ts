@@ -17,8 +17,8 @@ import {
   errorOnHookSlug,
   methods,
   pointSlug,
-  relationSlug,
   postsSlug,
+  relationSlug,
 } from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -1454,7 +1454,7 @@ describe('collections-rest', () => {
           for (let i = 0; i < 10; i++) {
             await createPost({
               number: i,
-              relationField: relatedDoc.id as string,
+              relationField: relatedDoc.id,
               title: 'paginate-test',
             })
           }
@@ -1732,6 +1732,73 @@ describe('collections-rest', () => {
         await expect(response.text()).resolves.toBe(`${method} response`)
       }
     })
+  })
+
+  it('should not mount auth endpoints for collection without auth', async () => {
+    const authEndpoints = [
+      {
+        method: 'post',
+        path: '/forgot-password',
+      },
+      {
+        method: 'post',
+        path: '/login',
+      },
+      {
+        method: 'post',
+        path: '/logout',
+      },
+      {
+        method: 'post',
+        path: '/refresh-token',
+      },
+      {
+        method: 'post',
+        path: '/first-register',
+      },
+      {
+        method: 'post',
+        path: '/reset-password',
+      },
+      {
+        method: 'post',
+        path: '/unlock',
+      },
+    ]
+
+    for (const endpoint of authEndpoints) {
+      const result = await restClient[endpoint.method.toUpperCase()](
+        `/${endpointsSlug}${endpoint.path}`,
+      )
+
+      expect(result.status).toBe(404)
+      const json = await result.json()
+
+      expect(json.message.startsWith('Route not found')).toBeTruthy()
+    }
+  })
+
+  it('should not mount upload endpoints for collection without auth', async () => {
+    const uploadEndpoints = [
+      {
+        method: 'get',
+        path: '/paste-url/some-id',
+      },
+      {
+        method: 'get',
+        path: '/file/some-filename.png',
+      },
+    ]
+
+    for (const endpoint of uploadEndpoints) {
+      const result = await restClient[endpoint.method.toUpperCase()](
+        `/${endpointsSlug}${endpoint.path}`,
+      )
+
+      expect(result.status).toBe(404)
+
+      expect((await result.json()).message.startsWith('Route not found')).toBeTruthy()
+    }
   })
 })
 

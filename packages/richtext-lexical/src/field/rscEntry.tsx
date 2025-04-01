@@ -39,7 +39,7 @@ export const RscEntryLexicalField: React.FC<
     throw new Error('Initialized lexical RSC field without a field name')
   }
 
-  const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
+  const { clientFeatures, featureClientImportMap, featureClientSchemaMap } = initLexicalFeatures({
     clientFieldSchemaMap: args.clientFieldSchemaMap,
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
@@ -50,12 +50,13 @@ export const RscEntryLexicalField: React.FC<
   })
 
   let initialLexicalFormState = {}
-  if (args.data?.[field.name]?.root?.children?.length) {
+  if (args.siblingData?.[field.name]?.root?.children?.length) {
     initialLexicalFormState = await buildInitialState({
       context: {
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
         lexicalFieldSchemaPath: schemaPath,
@@ -65,7 +66,7 @@ export const RscEntryLexicalField: React.FC<
         renderFieldFn: renderField,
         req: args.req,
       },
-      nodeData: args.data?.[field.name]?.root?.children as SerializedLexicalNode[],
+      nodeData: args.siblingData?.[field.name]?.root?.children as SerializedLexicalNode[],
     })
   }
 
@@ -87,6 +88,7 @@ export const RscEntryLexicalField: React.FC<
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,

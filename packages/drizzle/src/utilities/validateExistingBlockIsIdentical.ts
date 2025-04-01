@@ -1,22 +1,33 @@
 import type { Block, Field } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldShouldBeLocalized,
+  tabHasName,
+} from 'payload/shared'
 
 import type { RawTable } from '../types.js'
 
 type Args = {
   block: Block
   localized: boolean
+  /**
+   * @todo make required in v4.0. Usually you'd wanna pass this in
+   */
+  parentIsLocalized?: boolean
   rootTableName: string
   table: RawTable
   tableLocales?: RawTable
 }
 
-const getFlattenedFieldNames = (
-  fields: Field[],
-  prefix: string = '',
-): { localized?: boolean; name: string }[] => {
+const getFlattenedFieldNames = (args: {
+  fields: Field[]
+  parentIsLocalized: boolean
+  prefix?: string
+}): { localized?: boolean; name: string }[] => {
+  const { fields, parentIsLocalized, prefix = '' } = args
   return fields.reduce((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
@@ -29,7 +40,14 @@ const getFlattenedFieldNames = (
 
     if (fieldHasSubFields(field)) {
       fieldPrefix = 'name' in field ? `${prefix}${field.name}_` : prefix
-      return [...fieldsToUse, ...getFlattenedFieldNames(field.fields, fieldPrefix)]
+      return [
+        ...fieldsToUse,
+        ...getFlattenedFieldNames({
+          fields: field.fields,
+          parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
+          prefix: fieldPrefix,
+        }),
+      ]
     }
 
     if (field.type === 'tabs') {
@@ -41,7 +59,11 @@ const getFlattenedFieldNames = (
             ...tabFields,
             ...(tabHasName(tab)
               ? [{ ...tab, type: 'tab' }]
-              : getFlattenedFieldNames(tab.fields, fieldPrefix)),
+              : getFlattenedFieldNames({
+                  fields: tab.fields,
+                  parentIsLocalized: parentIsLocalized || tab.localized,
+                  prefix: fieldPrefix,
+                })),
           ]
         }, []),
       ]
@@ -52,7 +74,7 @@ const getFlattenedFieldNames = (
         ...fieldsToUse,
         {
           name: `${fieldPrefix}${field.name}`,
-          localized: field.localized,
+          localized: fieldShouldBeLocalized({ field, parentIsLocalized }),
         },
       ]
     }
@@ -64,11 +86,15 @@ const getFlattenedFieldNames = (
 export const validateExistingBlockIsIdentical = ({
   block,
   localized,
+  parentIsLocalized,
   rootTableName,
   table,
   tableLocales,
 }: Args): void => {
-  const fieldNames = getFlattenedFieldNames(block.fields)
+  const fieldNames = getFlattenedFieldNames({
+    fields: block.fields,
+    parentIsLocalized: parentIsLocalized || localized,
+  })
 
   const missingField =
     // ensure every field from the config is in the matching table

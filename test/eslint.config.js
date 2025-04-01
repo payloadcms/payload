@@ -8,7 +8,7 @@ import playwright from 'eslint-plugin-playwright'
 export const testEslintConfig = [
   ...rootEslintConfig,
   {
-    ignores: [...defaultESLintIgnores, '**/payload-types.ts'],
+    ignores: [...defaultESLintIgnores, '**/payload-types.ts', 'jest.setup.js'],
   },
   {
     languageOptions: {
@@ -16,9 +16,6 @@ export const testEslintConfig = [
         ...rootParserOptions,
         tsconfigRootDir: import.meta.dirname,
       },
-    },
-    plugins: {
-      payload: payloadPlugin,
     },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
@@ -65,6 +62,17 @@ export const testEslintConfig = [
       'payload/no-wait-function': 'warn',
       // Enable the no-non-retryable-assertions rule ONLY for hunting for flakes
       // 'payload/no-non-retryable-assertions': 'error',
+      'playwright/expect-expect': [
+        'error',
+        {
+          assertFunctionNames: [
+            'assertToastErrors',
+            'saveDocAndAssert',
+            'runFilterOptionsTest',
+            'assertNetworkRequests',
+          ],
+        },
+      ],
     },
   },
   {

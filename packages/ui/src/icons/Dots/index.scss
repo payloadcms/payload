@@ -1,0 +1,41 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .dots {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    background-color: var(--theme-elevation-150);
+    border-radius: $style-radius-m;
+    height: calc(var(--base) * 1.2);
+    width: calc(var(--base) * 1.2);
+
+    &:hover {
+      background-color: var(--theme-elevation-100);
+    }
+
+    &--no-background {
+      background-color: transparent;
+      width: auto;
+      height: auto;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    &--horizontal {
+      flex-direction: row;
+    }
+
+    > div {
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 100%;
+      background-color: currentColor;
+    }
+  }
+}

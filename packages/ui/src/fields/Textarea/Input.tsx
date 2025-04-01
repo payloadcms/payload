@@ -63,20 +63,16 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         />
         {BeforeInput}
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
-          <div className="textarea-inner">
-            <div className="textarea-clone" data-value={value || placeholder || ''} />
-            <textarea
-              className="textarea-element"
-              data-rtl={rtl}
-              disabled={readOnly}
-              id={`field-${path.replace(/\./g, '__')}`}
-              name={path}
-              onChange={onChange}
-              placeholder={getTranslation(placeholder, i18n)}
-              rows={rows}
-              value={value || ''}
-            />
-          </div>
+          <textarea
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange}
+            placeholder={getTranslation(placeholder, i18n)}
+            rows={rows}
+            value={value || ''}
+          />
         </label>
         {AfterInput}
         <RenderCustomComponent

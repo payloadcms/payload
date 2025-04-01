@@ -31,7 +31,7 @@ let page: Page
 let serverURL: string
 let url: AdminUrlUtil
 
-describe('Radio', () => {
+describe('Select', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -58,7 +58,7 @@ describe('Radio', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -74,5 +74,25 @@ describe('Radio', () => {
 
     await saveDocAndAssert(page)
     await expect(field.locator('.rs__value-container')).toContainText('One')
+  })
+
+  test('should show custom JSX option label in edit', async () => {
+    await page.goto(url.create)
+
+    const svgLocator = page.locator('#field-selectWithJsxLabelOption svg#payload-logo')
+
+    await expect(svgLocator).toBeVisible()
+  })
+
+  test('should show custom JSX option label in list', async () => {
+    await page.goto(url.list)
+
+    const columnsButton = page.locator('button:has-text("Columns")')
+
+    await columnsButton.click()
+
+    await page.locator('text=Select with JSX label option').click()
+
+    await expect(page.locator('.cell-selectWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
 })

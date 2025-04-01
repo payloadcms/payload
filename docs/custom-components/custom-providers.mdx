@@ -1,0 +1,48 @@
+---
+title: Swap in your own React Context providers
+label: Custom Providers
+order: 30
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+As you add more and more [Custom Components](./overview) to your [Admin Panel](../admin/overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s) to your app. Payload allows you to inject your own context providers where you can export your own custom hooks, etc.
+
+To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    components: {
+      providers: ['/path/to/MyProvider'], // highlight-line
+    },
+  },
+})
+```
+
+Then build your Custom Provider as follows:
+
+```tsx
+'use client'
+import React, { createContext, use } from 'react'
+
+const MyCustomContext = React.createContext(myCustomValue)
+
+export function MyProvider({ children }: { children: React.ReactNode }) {
+  return <MyCustomContext value={myCustomValue}>{children}</MyCustomContext>
+}
+
+export const useMyCustomContext = () => use(MyCustomContext)
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
+
+<Banner type="warning">
+  **Reminder:** React Context exists only within Client Components. This means
+  they must include the `use client` directive at the top of their files and
+  cannot contain server-only code. To use a Server Component here, simply _wrap_
+  your Client Component with it.
+</Banner>

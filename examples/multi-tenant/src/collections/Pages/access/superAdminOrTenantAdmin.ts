@@ -5,7 +5,7 @@ import { Access } from 'payload'
 /**
  * Tenant admins and super admins can will be allowed access
  */
-export const superAdminOrTeanantAdminAccess: Access = ({ req }) => {
+export const superAdminOrTenantAdminAccess: Access = ({ req }) => {
   if (!req.user) {
     return false
   }

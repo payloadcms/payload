@@ -16,6 +16,8 @@ export const withLocalizedRelSlug = 'with-localized-relationship'
 export const relationshipLocalizedSlug = 'relationship-localized'
 export const withRequiredLocalizedFields = 'localized-required'
 export const localizedSortSlug = 'localized-sort'
+
+export const localizedDraftsSlug = 'localized-drafts'
 export const usersSlug = 'users'
 export const blocksWithLocalizedSameName = 'blocks-same-name'
 export const cannotCreateDefaultLocale = 'cannot-create-default-locale'

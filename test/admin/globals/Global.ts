@@ -9,10 +9,10 @@ export const Global: GlobalConfig = {
       views: {
         edit: {
           api: {
-            actions: ['/components/GlobalAPIButton/index.js#GlobalAPIButton'],
+            actions: ['/components/actions/GlobalAPIButton/index.js#GlobalAPIButton'],
           },
           default: {
-            actions: ['/components/GlobalEditButton/index.js#GlobalEditButton'],
+            actions: ['/components/actions/GlobalEditButton/index.js#GlobalEditButton'],
           },
         },
       },

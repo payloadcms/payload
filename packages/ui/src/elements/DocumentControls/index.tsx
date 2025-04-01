@@ -1,7 +1,5 @@
 'use client'
 import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
   ClientUser,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
@@ -9,6 +7,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -17,8 +16,7 @@ import { useFormInitializing, useFormProcessing } from '../../forms/Form/context
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { formatDate } from '../../utilities/formatDate.js'
+import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
@@ -138,6 +136,8 @@ export const DocumentControls: React.FC<{
   const autosaveEnabled =
     (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
     (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
+
+  const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
   return (
     <Gutter className={baseClass}>
@@ -265,7 +265,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {localization && <CopyLocaleData />}
+                {showCopyToLocale && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (

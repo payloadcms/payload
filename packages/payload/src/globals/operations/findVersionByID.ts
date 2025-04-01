@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -9,6 +10,8 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   currentDepth?: number
@@ -36,7 +39,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -55,6 +58,11 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     }
 
     const hasWhereAccess = typeof accessResults === 'object'
+
+    const select = sanitizeSelect({
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+    })
 
     const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
       global: globalConfig.slug,
@@ -101,17 +109,17 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result.version,
-          global: globalConfig,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (globalConfig.hooks?.beforeRead?.length) {
+      for (const hook of globalConfig.hooks.beforeRead) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result.version,
+            global: globalConfig,
+            req,
+          })) || result.version
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -138,18 +146,18 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // afterRead - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result.version =
-        (await hook({
-          context: req.context,
-          doc: result.version,
-          global: globalConfig,
-          query: findGlobalVersionsArgs.where,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterRead?.length) {
+      for (const hook of globalConfig.hooks.afterRead) {
+        result.version =
+          (await hook({
+            context: req.context,
+            doc: result.version,
+            global: globalConfig,
+            query: findGlobalVersionsArgs.where,
+            req,
+          })) || result.version
+      }
+    }
 
     return result
   } catch (error: unknown) {

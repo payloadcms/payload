@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -20,7 +21,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -62,18 +65,18 @@ export const findOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -91,11 +94,16 @@ export const findOperation = async <
       populate,
       req: { fallbackLocale, locale, payload },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
       sort,
       where,
     } = args
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -175,6 +183,7 @@ export const findOperation = async <
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
@@ -198,7 +207,7 @@ export const findOperation = async <
         const now = new Date().getTime()
 
         const lockedDocuments = await payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: sanitizedLimit,
           overrideAccess: false,
@@ -256,9 +265,7 @@ export const findOperation = async <
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.beforeRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -267,7 +274,7 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || docRef
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
@@ -309,9 +316,7 @@ export const findOperation = async <
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -321,7 +326,7 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || doc
-          }, Promise.resolve())
+          }
 
           return docRef
         }),

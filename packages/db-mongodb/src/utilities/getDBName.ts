@@ -1,4 +1,4 @@
-import type { DBIdentifierName } from 'payload'
+import { APIError, type DBIdentifierName } from 'payload'
 
 type Args = {
   config: {
@@ -22,7 +22,7 @@ export const getDBName = ({
   target = 'dbName',
   versions = false,
 }: Args): string => {
-  let result: string
+  let result: null | string = null
   let custom = config[target]
 
   if (!custom && target === 'enumName') {
@@ -32,11 +32,15 @@ export const getDBName = ({
   if (custom) {
     result = typeof custom === 'function' ? custom({}) : custom
   } else {
-    result = name ?? slug
+    result = name ?? slug ?? null
   }
 
   if (versions) {
     result = `_${result}_versions`
+  }
+
+  if (!result) {
+    throw new APIError(`Assertion for DB name of ${name} ${slug} was failed.`)
   }
 
   return result

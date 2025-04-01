@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Payload preview example.",
   "license": "MIT",
+  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
@@ -15,6 +16,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
+    "@payloadcms/admin-bar": "latest",
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/next": "latest",
     "@payloadcms/richtext-slate": "latest",
@@ -22,9 +24,8 @@
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
     "graphql": "^16.9.0",
-    "next": "^15.0.0",
+    "next": "^15.2.3",
     "payload": "latest",
-    "payload-admin-bar": "^1.0.6",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

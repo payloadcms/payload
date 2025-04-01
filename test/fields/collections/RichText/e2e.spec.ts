@@ -51,7 +51,7 @@ describe('Rich Text', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -60,7 +60,6 @@ describe('Rich Text', () => {
   async function navigateToRichTextFields() {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
     await page.goto(url.list)
-    await page.waitForURL('**' + url.list + '**')
 
     const linkToDoc = page.locator('.row-1 .cell-title a').first()
     await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })

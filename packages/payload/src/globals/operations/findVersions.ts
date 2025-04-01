@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -9,7 +10,9 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   depth?: number
@@ -39,7 +42,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
     sort,
     where,
@@ -65,6 +68,11 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     })
 
     const fullWhere = combineQueries(where, accessResults)
+
+    const select = sanitizeSelect({
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Find
@@ -125,15 +133,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // afterRead - Global
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (globalConfig.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of globalConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 context: req.context,
@@ -143,11 +148,11 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////

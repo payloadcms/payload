@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
@@ -11,6 +12,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 
 export type Arguments = {
@@ -39,7 +41,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     populate,
     req,
     req: { fallbackLocale, locale, payload },
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -114,6 +116,11 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // Update
     // /////////////////////////////////////
 
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     let result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
@@ -164,17 +171,17 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -195,19 +202,19 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          operation: 'update',
-          previousDoc: prevDocWithLocales,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            operation: 'update',
+            previousDoc: prevDocWithLocales,
+            req,
+          })) || result
+      }
+    }
 
     return result
   } catch (error: unknown) {

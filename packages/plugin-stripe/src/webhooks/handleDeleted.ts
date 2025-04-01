@@ -40,6 +40,8 @@ export const handleDeleted: HandleDeleted = async (args) => {
     try {
       const payloadQuery = await payload.find({
         collection: collectionSlug,
+        limit: 1,
+        pagination: false,
         where: {
           stripeID: {
             equals: stripeID,

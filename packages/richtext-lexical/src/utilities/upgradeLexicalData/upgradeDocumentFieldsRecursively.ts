@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field } from 'payload'
+import type { Field, FlattenedBlock, Payload } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
@@ -13,12 +13,14 @@ type NestedRichTextFieldsArgs = {
 
   fields: Field[]
   found: number
+  payload: Payload
 }
 
 export const upgradeDocumentFieldsRecursively = ({
   data,
   fields,
   found,
+  payload,
 }: NestedRichTextFieldsArgs): number => {
   for (const field of fields) {
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
@@ -27,12 +29,14 @@ export const upgradeDocumentFieldsRecursively = ({
           data: data[field.name] as Record<string, unknown>,
           fields: field.fields,
           found,
+          payload,
         })
       } else {
         found += upgradeDocumentFieldsRecursively({
           data,
           fields: field.fields,
           found,
+          payload,
         })
       }
     } else if (field.type === 'tabs') {
@@ -41,28 +45,38 @@ export const upgradeDocumentFieldsRecursively = ({
           data: (tabHasName(tab) ? data[tab.name] : data) as Record<string, unknown>,
           fields: tab.fields,
           found,
+          payload,
         })
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        ;(data[field.name] as Record<string, unknown>[]).forEach((row, i) => {
-          const block = field.blocks.find(({ slug }) => slug === row?.blockType)
+        ;(data[field.name] as Record<string, unknown>[]).forEach((row) => {
+          const blockTypeToMatch: string = row?.blockType as string
+
+          const block =
+            payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+            ) as FlattenedBlock | undefined)
+
           if (block) {
             found += upgradeDocumentFieldsRecursively({
-              data: (data[field.name] as Record<string, unknown>[])[i],
+              data: row,
               fields: block.fields,
               found,
+              payload,
             })
           }
         })
       }
 
       if (field.type === 'array') {
-        ;(data[field.name] as Record<string, unknown>[]).forEach((_, i) => {
+        ;(data[field.name] as Record<string, unknown>[]).forEach((row) => {
           found += upgradeDocumentFieldsRecursively({
-            data: (data[field.name] as Record<string, unknown>[])[i],
+            data: row,
             fields: field.fields,
             found,
+            payload,
           })
         })
       }

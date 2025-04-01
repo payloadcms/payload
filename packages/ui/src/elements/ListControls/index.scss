@@ -19,18 +19,19 @@
       }
     }
 
+    &__custom-control {
+      padding: 0;
+      border-radius: 0;
+    }
+
+    &__modified {
+      color: var(--theme-elevation-500);
+    }
+
     &__buttons-wrap {
       display: flex;
       align-items: center;
-      gap: base(0.2);
-
-      .pill {
-        background-color: var(--theme-elevation-150);
-
-        &:hover {
-          background-color: var(--theme-elevation-100);
-        }
-      }
+      gap: 4px;
     }
 
     .column-selector,

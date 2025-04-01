@@ -1,10 +1,8 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
@@ -24,6 +22,8 @@ export type ListHeaderProps = {
   className?: string
   collectionConfig: ClientCollectionConfig
   Description?: React.ReactNode
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
   hasCreatePermission: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
@@ -37,6 +37,8 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,
   Description,
+  disableBulkDelete,
+  disableBulkEdit,
   hasCreatePermission,
   i18n,
   isBulkUploadEnabled,
@@ -56,7 +58,6 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
             })}
             buttonStyle="pill"
             el={'link'}
-            Link={Link}
             size="small"
             to={newDocumentURL}
           >
@@ -75,7 +76,12 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
         </>
       )}
       {!smallBreak && (
-        <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
+        <ListSelection
+          collectionConfig={collectionConfig}
+          disableBulkDelete={disableBulkDelete}
+          disableBulkEdit={disableBulkEdit}
+          label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+        />
       )}
       {Description}
     </header>

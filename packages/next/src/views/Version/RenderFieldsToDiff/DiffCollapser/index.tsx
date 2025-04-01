@@ -1,6 +1,7 @@
+'use client'
 import type { ClientField } from 'payload'
 
-import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
@@ -21,6 +22,7 @@ type Props =
       isIterable?: false
       label: React.ReactNode
       locales: string[] | undefined
+      parentIsLocalized: boolean
       version: unknown
     }
   | {
@@ -33,6 +35,7 @@ type Props =
       isIterable: true
       label: React.ReactNode
       locales: string[] | undefined
+      parentIsLocalized: boolean
       version: unknown
     }
 
@@ -45,10 +48,12 @@ export const DiffCollapser: React.FC<Props> = ({
   isIterable = false,
   label,
   locales,
+  parentIsLocalized,
   version,
 }) => {
   const { t } = useTranslation()
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
+  const { config } = useConfig()
 
   let changeCount = 0
 
@@ -69,15 +74,19 @@ export const DiffCollapser: React.FC<Props> = ({
 
     changeCount = countChangedFieldsInRows({
       comparisonRows,
+      config,
       field,
       locales,
+      parentIsLocalized,
       versionRows,
     })
   } else {
     changeCount = countChangedFields({
       comparison,
+      config,
       fields,
       locales,
+      parentIsLocalized,
       version,
     })
   }

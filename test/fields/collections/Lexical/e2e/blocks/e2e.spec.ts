@@ -24,6 +24,8 @@ import {
   saveDocAndAssert,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
+import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../../../helpers/rest.js'
@@ -105,7 +107,7 @@ async function createInlineBlock({
    */
   await page.keyboard.press(' ')
   await page.keyboard.press('/')
-  await page.keyboard.type(name.includes(' ') ? name.split(' ')[0] : name)
+  await page.keyboard.type(name.includes(' ') ? (name.split(' ')?.[0] ?? name) : name)
 
   // Create Rich Text Block
   const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
@@ -162,8 +164,8 @@ async function createInlineBlock({
 }
 
 async function assertLexicalDoc({
-  fn,
   depth = 0,
+  fn,
 }: {
   depth?: number
   fn: (args: {
@@ -222,7 +224,7 @@ describe('lexicalBlocks', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
+    client = new RESTClient({ defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
   })
 
@@ -298,17 +300,347 @@ describe('lexicalBlocks', () => {
 
     // Check if the API result is correct
     await assertLexicalDoc({
-      fn: async ({ lexicalWithBlocks }) => {
+      fn: ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
           .children[14] as SerializedBlockNode
-        const paragraphBlock: SerializedBlockNode = lexicalWithBlocks.root
-          .children[12] as SerializedBlockNode
+        const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
+          .children[12] as SerializedParagraphNode
 
         expect(rscBlock.fields.blockType).toBe('BlockRSC')
         expect(rscBlock.fields.key).toBe('value2')
-        expect((paragraphBlock.children[0] as SerializedTextNode).text).toBe('123')
-        expect((paragraphBlock.children[0] as SerializedTextNode).format).toBe(1)
+        expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
+        expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
+    })
+  })
+
+  describe('block filterOptions', () => {
+    async function setupFilterOptionsTests() {
+      const { richTextField } = await navigateToLexicalFields()
+
+      await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'invalid',
+        },
+        depth: 0,
+      })
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      await lastParagraph.click()
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('filter')
+
+      // CreateBlock
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await expect(blockSelectButton).toContainText('Filter Options Block')
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField
+        .locator('.lexical-block:not(.lexical-block .lexical-block)')
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+      await newBlock.scrollIntoViewIfNeeded()
+
+      await saveDocAndAssert(page)
+
+      const topLevelDocTextField = page.locator('#field-title').first()
+      const blockTextField = newBlock.locator('#field-text').first()
+      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+
+      const dependsOnDocData = newBlock.locator('#field-group__dependsOnDocData').first()
+      const dependsOnSiblingData = newBlock.locator('#field-group__dependsOnSiblingData').first()
+      const dependsOnBlockData = newBlock.locator('#field-group__dependsOnBlockData').first()
+
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
+      return {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnDocData,
+        dependsOnBlockData,
+        dependsOnSiblingData,
+        topLevelDocTextField,
+        newBlock,
+      }
+    }
+
+    test('ensure block fields with filter options have access to document-level data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      // Fill and wait for form state to come back
+      await assertNetworkRequests(page, '/admin/collections/lexical-fields', async () => {
+        await topLevelDocTextField.fill('invalid')
+      })
+
+      // Ensure block form state is updated and comes back (=> filter options are updated)
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('.')
+          await blockTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with filter options have access to sibling data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockGroupTextField.fill('invalid')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with filter options have access to block-level data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('invalid')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
+    })
+  })
+
+  describe('block validation data', () => {
+    async function setupValidationTests() {
+      const { richTextField } = await navigateToLexicalFields()
+
+      await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'invalid',
+        },
+        depth: 0,
+      })
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      await lastParagraph.click()
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('validation')
+
+      // CreateBlock
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await expect(blockSelectButton).toContainText('Validation Block')
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField
+        .locator('.lexical-block:not(.lexical-block .lexical-block)')
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+      await newBlock.scrollIntoViewIfNeeded()
+
+      await saveDocAndAssert(page)
+
+      const topLevelDocTextField = page.locator('#field-title').first()
+      const blockTextField = newBlock.locator('#field-text').first()
+      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+
+      const dependsOnDocData = newBlock.locator('#field-group__textDependsOnDocData').first()
+      const dependsOnSiblingData = newBlock
+        .locator('#field-group__textDependsOnSiblingData')
+        .first()
+      const dependsOnBlockData = newBlock.locator('#field-group__textDependsOnBlockData').first()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
+      return {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        dependsOnBlockData,
+        topLevelDocTextField,
+        newBlock,
+      }
+    }
+
+    test('ensure block fields with validations have access to document-level data', async () => {
+      const { topLevelDocTextField } = await setupValidationTests()
+
+      await topLevelDocTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      await assertToastErrors({
+        page,
+        errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
+      })
+
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await topLevelDocTextField.fill('Rich Text') // Default value
+        },
+        { allowedNumberOfRequests: 1 },
+      )
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with validations have access to sibling data', async () => {
+      const { blockGroupTextField } = await setupValidationTests()
+
+      await blockGroupTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+      await assertToastErrors({
+        page,
+        errors: [
+          'Lexical With Blocks',
+          'Lexical With Blocks → Group → Text Depends On Sibling Data',
+        ],
+      })
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockGroupTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with validations have access to block-level data', async () => {
+      const { blockTextField } = await setupValidationTests()
+
+      await blockTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+      await assertToastErrors({
+        page,
+        errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
+      })
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
+      await assertNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await saveDocAndAssert(page)
     })
   })
 
@@ -381,7 +713,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
 
@@ -441,7 +773,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
           const paragraphNodeInBlockNodeRichText = blockNode.fields.richTextField.root.children[1]
@@ -516,7 +848,7 @@ describe('lexicalBlocks', () => {
 
       // Make sure it's being returned from the API as well
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           expect(
             (
               (lexicalWithBlocks.root.children[0] as SerializedParagraphNode)
@@ -568,13 +900,17 @@ describe('lexicalBlocks', () => {
         .first()
       await expect(popoverHeading2Button).toBeVisible()
 
+      // scroll slash menu down
+      await popoverHeading2Button.hover()
+      await page.mouse.wheel(0, 250)
+
       await expect(async () => {
         // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
         const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
         expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
         expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
-        expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
-        expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.height).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.width).toBeGreaterThan(0)
 
         // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
         // by using page.mouse and the correct coordinates
@@ -583,8 +919,8 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox.x
-        const y = popoverHeading2ButtonBoundingBox.y
+        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
+        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -634,13 +970,16 @@ describe('lexicalBlocks', () => {
       await page.keyboard.type('text123')
       await expect(newContentTextArea).toHaveText('text123')
 
+      await wait(1000)
+
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[5] as SerializedBlockNode
-          const subBlocks = blockNode.fields.subBlocks
+
+          const subBlocks = blockNode.fields.subBlocksLexical
 
           expect(subBlocks).toHaveLength(2)
 
@@ -860,7 +1199,7 @@ describe('lexicalBlocks', () => {
       // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
       await expect(
         radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       // Click radio button option3 of radioButtonBlock2
       await radioButtonBlock2
@@ -871,7 +1210,7 @@ describe('lexicalBlocks', () => {
       // Ensure previously clicked option2 of radioButtonBlock1 is still selected
       await expect(
         radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       /**
        * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected
@@ -880,7 +1219,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const radio1: SerializedBlockNode = lexicalWithBlocks.root
             .children[8] as SerializedBlockNode
           const radio2: SerializedBlockNode = lexicalWithBlocks.root
@@ -1117,7 +1456,7 @@ describe('lexicalBlocks', () => {
       await expect(tab2Text1Field).toHaveValue('Some text2 changed')
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const tabBlockData: SerializedBlockNode = lexicalWithBlocks.root
             .children[13] as SerializedBlockNode
 
@@ -1135,7 +1474,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.scrollIntoViewIfNeeded()
       await expect(codeEditor).toBeVisible()
 
-      const height = (await codeEditor.boundingBox()).height
+      const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
         expect(height).toBe(56)
@@ -1143,7 +1482,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
-      const height2 = (await codeEditor.boundingBox()).height
+      const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
         expect(height2).toBe(74)
       }).toPass()
@@ -1168,14 +1507,32 @@ describe('lexicalBlocks', () => {
         ),
       ).toHaveText('Some Description')
     })
+
+    test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
+      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+
+      await assertNetworkRequests(
+        page,
+        '/collections/LexicalInBlock/',
+        async () => {
+          await page.locator('.cell-id a').first().click()
+          await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+          await expect(
+            page.locator('.inline-block:has-text("Inline Block In Lexical")'),
+          ).toHaveCount(20)
+        },
+        { allowedNumberOfRequests: 1 },
+      )
+    })
   })
 
   describe('inline blocks', () => {
     test('ensure inline blocks can be created and its values can be mutated from outside their form', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'My Inline Block',
+        richTextField,
       })
 
       // Click on react select in drawer, select 'value1'
@@ -1190,7 +1547,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
       // Check if the API result is correct
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
@@ -1228,13 +1585,13 @@ describe('lexicalBlocks', () => {
       // Save and check api result
       await saveDocAndAssert(page)
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
             .children[1] as SerializedInlineBlockNode
 
-          await expect(inlineBlock.fields.key).toBe('value2')
+          expect(inlineBlock.fields.key).toBe('value2')
         },
       })
     })
@@ -1242,8 +1599,8 @@ describe('lexicalBlocks', () => {
     test('ensure upload fields within inline blocks store and populate correctly', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'Avatar Group',
+        richTextField,
       })
 
       // Click button that says Add Avatar

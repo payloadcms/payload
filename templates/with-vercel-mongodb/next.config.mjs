@@ -5,4 +5,4 @@ const nextConfig = {
   // Your Next.js config here
 }
 
-export default withPayload(nextConfig)
+export default withPayload(nextConfig, { devBundleServerPackages: false })

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ErrorResult } from '../config/types.js'
 import type { APIError } from '../errors/APIError.js'
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
@@ -39,6 +40,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     const result = await getEntityPolicies({
       id,
       type: 'collection',
+      blockPolicies: {},
       entity: config,
       operations: collectionOperations,
       req,

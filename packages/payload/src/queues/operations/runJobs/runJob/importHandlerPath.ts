@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { pathToFileURL } from 'url'
 
 export async function importHandlerPath<T>(path: string): Promise<T> {

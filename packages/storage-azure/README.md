@@ -14,6 +14,7 @@ pnpm add @payloadcms/storage-azure
 
 - Configure the `collections` object to specify which collections should use the Azure Blob Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method to your website.
 
 ```ts
 import { azureStorage } from '@payloadcms/storage-azure'
@@ -49,3 +50,4 @@ export default buildConfig({
 | `baseURL`              | Base URL for the Azure Blob storage account                              |         |
 | `connectionString`     | Azure Blob storage connection string                                     |         |
 | `containerName`        | Azure Blob storage container name                                        |         |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.            |         |

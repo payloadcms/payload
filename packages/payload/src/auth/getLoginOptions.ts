@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Auth } from './types.js'
 
 export const getLoginOptions = (

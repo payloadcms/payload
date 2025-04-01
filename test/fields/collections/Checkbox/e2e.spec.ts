@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -51,7 +52,7 @@ describe('Checkboxes', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -59,25 +60,12 @@ describe('Checkboxes', () => {
   test('should not crash on filtering where checkbox is first field', async () => {
     await page.goto(url.list)
 
-    const filterButton = page.locator('.list-controls__toggle-where')
-    await filterButton.click()
-
-    const addButton = page.locator('.where-builder__add-first-filter')
-    await addButton.click()
-
-    const operator = page.locator('.condition__operator .rs__control')
-    await operator.click()
-
-    const equals = page.locator('.rs__option:has-text("equals")')
-    await equals.click()
-
-    const value = page.locator('.condition__value')
-    await value.click()
-
-    const trueOption = page.locator('.rs__option:has-text("True")')
-    await trueOption.click()
-
-    await wait(1000)
+    await addListFilter({
+      page,
+      fieldLabel: 'Checkbox',
+      operatorLabel: 'equals',
+      value: 'True',
+    })
 
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
   })

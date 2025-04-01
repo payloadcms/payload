@@ -1,0 +1,70 @@
+---
+title: Converting Plaintext
+label: Converting Plaintext
+order: 24
+desc: Converting between lexical richtext and plaintext
+keywords: lexical, richtext, plaintext, text
+---
+
+## Converting Richtext to Plaintext
+
+Here's how you can convert richtext data to plaintext using `@payloadcms/richtext-lexical/plaintext`.
+
+```ts
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
+
+// Your richtext data here
+const data: SerializedEditorState = {}
+
+const plaintext = convertLexicalToPlaintext({ data })
+```
+
+### Custom Converters
+
+The `convertLexicalToPlaintext` functions accepts a `converters` object that allows you to customize how specific nodes are converted to plaintext.
+
+```ts
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { MyTextBlock } from '@/payload-types'
+
+import {
+  convertLexicalToPlaintext,
+  type PlaintextConverters,
+} from '@payloadcms/richtext-lexical/plaintext'
+
+// Your richtext data here
+const data: SerializedEditorState = {}
+
+const converters: PlaintextConverters<
+  DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+> = {
+  blocks: {
+    textBlock: ({ node }) => {
+      return node.fields.text ?? ''
+    },
+  },
+  link: ({ node }) => {
+    return node.fields.url ?? ''
+  },
+}
+
+const plaintext = convertLexicalToPlaintext({
+  converters,
+  data,
+})
+```
+
+Unlike other converters, there are no default converters for plaintext.
+
+If a node does not have a converter defined, the following heuristics are used to convert it to plaintext:
+
+- If the node has a `text` field, it will be used as the plaintext.
+- If the node has a `children` field, the children will be recursively converted to plaintext.
+- If the node has neither, it will be ignored.
+- Paragraph, text and tab nodes insert newline / tab characters.

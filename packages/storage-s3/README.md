@@ -15,6 +15,7 @@ pnpm add @payloadcms/storage-s3
 - Configure the `collections` object to specify which collections should use the AWS S3 adapter. The slug _must_ match one of your existing collection slugs.
 - The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
 
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'

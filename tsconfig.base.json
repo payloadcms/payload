@@ -31,7 +31,8 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/versions/config.ts"],
+      "@payload-config": ["./test/query-presets/config.ts"],
+      "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
@@ -55,6 +56,9 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-import-export/rsc": [
+        "./packages/plugin-import-export/src/exports/rsc.ts"
+      ],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
@@ -66,7 +70,15 @@
         "./packages/plugin-multi-tenant/src/exports/client.ts"
       ],
       "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
-      "@payloadcms/next": ["./packages/next/src/exports/*"]
+      "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payloadcms/storage-s3/client": ["./packages/storage-s3/src/exports/client.ts"],
+      "@payloadcms/storage-vercel-blob/client": [
+        "./packages/storage-vercel-blob/src/exports/client.ts"
+      ],
+      "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
+      "@payloadcms/storage-uploadthing/client": [
+        "./packages/storage-uploadthing/src/exports/client.ts"
+      ]
     }
   },
   "include": ["${configDir}/src"],

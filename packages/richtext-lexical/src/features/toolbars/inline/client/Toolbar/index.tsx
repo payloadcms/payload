@@ -86,7 +86,7 @@ function ToolbarGroupComponent({
         return
       }
       const item = activeItems[0]
-      setDropdownIcon(() => item.ChildComponent)
+      setDropdownIcon(() => item?.ChildComponent)
     },
     [group],
   )

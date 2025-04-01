@@ -1,6 +1,7 @@
 import { type RelationshipField } from 'payload'
 import { APIError } from 'payload'
 
+import { defaults } from '../../defaults.js'
 import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 
@@ -12,10 +13,10 @@ type Args = {
   unique: boolean
 }
 export const tenantField = ({
-  name,
+  name = defaults.tenantFieldName,
   access = undefined,
   debug,
-  tenantsCollectionSlug,
+  tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
 }: Args): RelationshipField => ({
   name,

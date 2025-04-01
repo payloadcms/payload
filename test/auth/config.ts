@@ -9,7 +9,7 @@ import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
-  partialDisableLocaleStrategiesSlug,
+  partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -185,7 +185,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: partialDisableLocaleStrategiesSlug,
+      slug: partialDisableLocalStrategiesSlug,
       auth: {
         disableLocalStrategy: {
           // optionalPassword: true,

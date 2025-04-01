@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     postsLocalized: PostsLocalized;
@@ -29,12 +85,19 @@ export interface Config {
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
     'object-writes': ObjectWrite;
     'deep-nested': DeepNested;
+    relations: Relation1;
+    items: Item;
+    blocks: Block;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    items: {
+      relation: 'relations';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
@@ -54,6 +117,9 @@ export interface Config {
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
     'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
     'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
+    relations: RelationsSelect<false> | RelationsSelect<true>;
+    items: ItemsSelect<false> | ItemsSelect<true>;
+    blocks: BlocksSelect<false> | BlocksSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -203,6 +269,7 @@ export interface Movie {
   director?: (string | null) | Director;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -211,7 +278,9 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
   movies?: (string | Movie)[] | null;
+  directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -375,6 +444,51 @@ export interface DeepNested {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations".
+ */
+export interface Relation1 {
+  id: string;
+  item?: {
+    relationTo: 'items';
+    value: string | Item;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items".
+ */
+export interface Item {
+  id: string;
+  status?: ('completed' | 'failed' | 'pending') | null;
+  relation?: {
+    docs?: (string | Relation1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Block {
+  id: string;
+  blocks?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -451,6 +565,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'deep-nested';
         value: string | DeepNested;
+      } | null)
+    | ({
+        relationTo: 'relations';
+        value: string | Relation1;
+      } | null)
+    | ({
+        relationTo: 'items';
+        value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string | Block;
       } | null)
     | ({
         relationTo: 'users';
@@ -606,6 +732,7 @@ export interface MoviesSelect<T extends boolean = true> {
   director?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -613,7 +740,9 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
+  localized?: T;
   movies?: T;
+  directors?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -716,6 +845,44 @@ export interface DeepNestedSelect<T extends boolean = true> {
                     id?: T;
                     blockName?: T;
                   };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations_select".
+ */
+export interface RelationsSelect<T extends boolean = true> {
+  item?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items_select".
+ */
+export interface ItemsSelect<T extends boolean = true> {
+  status?: T;
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_select".
+ */
+export interface BlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              director?: T;
+              id?: T;
+              blockName?: T;
             };
       };
   updatedAt?: T;

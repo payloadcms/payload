@@ -15,6 +15,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import {
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormInitializing,
@@ -26,7 +27,7 @@ import {
 /**
  * Get and set the value of a form field.
  *
- * @see https://payloadcms.com/docs/admin/hooks#usefield
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { disableFormData = false, hasRows, path, validate } = options
@@ -45,6 +46,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
+  const documentForm = useDocumentForm()
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
@@ -55,6 +57,8 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
 
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
+
+  const pathSegments = path ? path.split('.') : []
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -101,6 +105,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -142,14 +147,17 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
         let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
+        const data = getData()
         const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
+                blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
                 collectionSlug,
-                data: getData(),
+                data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {

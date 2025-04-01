@@ -3,7 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { Action, Option, OptionGroup } from './types.js'
 
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {
@@ -70,6 +70,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
         ) {
           loadedIDs.push({ id, relationTo: relation })
           newSubOptions.push({
+            allowEdit: false,
             label: `${i18n.t('general:untitled')} - ID: ${id}`,
             relationTo: relation,
             value: id,

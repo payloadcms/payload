@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -9,21 +11,20 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
+import type { Metadata } from 'next'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
-  AdminViewConfig,
   DocumentSubViewTypes,
-  ServerPropsFromView,
-  ServerSideEditViewProps,
-  ViewTypes,
-  VisibleEntities,
-} from '../admin/views/types.js'
+  DocumentTabConfig,
+  DocumentViewServerProps,
+  RichTextAdapter,
+} from '../admin/types.js'
+import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -40,7 +41,15 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type {
+  Block,
+  FlattenedBlock,
+  JobsConfig,
+  Payload,
+  RequestContext,
+  TypedUser,
+} from '../index.js'
+import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -169,29 +178,12 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-export type OpenGraphConfig = {
-  description?: string
-  images?: OGImageConfig | OGImageConfig[]
-  siteName?: string
-  title?: string
-}
-
-export type IconConfig = {
-  color?: string
-  /**
-   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
-   */
-  fetchPriority?: 'auto' | 'high' | 'low'
-  media?: string
-  /** defaults to rel="icon" */
-  rel?: string
-  sizes?: string
-  type?: string
-  /**
-   * URL of the icon to use. You can use a relative path from the public folder (see https://nextjs.org/docs/app/building-your-application/optimizing/static-assets) or an absolute URL.
-   */
-  url: string
-}
+/**
+ * @todo find a way to remove the deep clone here.
+ * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
+ * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ */
+type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
 export type MetaConfig = {
   /**
@@ -202,38 +194,11 @@ export type MetaConfig = {
    */
   defaultOGImageType?: 'dynamic' | 'off' | 'static'
   /**
-   * Overrides the auto-generated <meta name="description"> of admin pages
-   * @example `"This is my custom CMS built with Payload."`
-   */
-  description?: string
-  /**
-   * Icons to be rendered by devices and browsers.
-   *
-   * For example browser tabs, phone home screens, and search engine results.
-   */
-  icons?: IconConfig[]
-  /**
-   * Overrides the auto-generated <meta name="keywords"> of admin pages
-   * @example `"CMS, Payload, Custom"`
-   */
-  keywords?: string
-  /**
-   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
-   *
-   * For example when sharing the Admin Panel on social media or through messaging services.
-   */
-  openGraph?: OpenGraphConfig
-  /**
-   * Overrides the auto-generated <title> of admin pages
-   * @example `"My Admin Panel"`
-   */
-  title?: string
-  /**
    * String to append to the auto-generated <title> of admin pages
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-}
+} & DeepClone<Metadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
@@ -374,7 +339,7 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
+export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
 export type EditViewConfig = {
   meta?: MetaConfig
@@ -398,22 +363,20 @@ export type EditViewConfig = {
     }
 )
 
-type ClientProps = {
-  readonly [key: string]: unknown
-}
+export type Params = { [key: string]: string | string[] | undefined }
 
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
-  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
-  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly searchParams?: Params
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
-} & ClientProps
+}
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',
@@ -424,6 +387,32 @@ export const serverProps: (keyof ServerProps)[] = [
   'searchParams',
   'permissions',
 ]
+
+export type Timezone = {
+  label: string
+  value: string
+}
+
+type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
+
+type TimezonesConfig = {
+  /**
+   * The default timezone to use for the admin panel.
+   */
+  defaultTimezone?: string
+  /**
+   * Provide your own list of supported timezones for the admin panel
+   *
+   * Values should be IANA timezone names, eg. `America/New_York`
+   *
+   * We use `@date-fns/tz` to handle timezones
+   */
+  supportedTimezones?: SupportedTimezonesFn | Timezone[]
+}
+
+type SanitizedTimezoneConfig = {
+  supportedTimezones: Timezone[]
+} & Omit<TimezonesConfig, 'supportedTimezones'>
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -469,6 +458,14 @@ export type BaseLocalizationConfig = {
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -512,9 +509,8 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
-  t,
-}: {
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
+  i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string
 
@@ -722,7 +718,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/components
+     * @see https://payloadcms.com/docs/admin/custom-components/overview
      */
     components?: {
       /**
@@ -797,9 +793,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
-     * Each entry in this map generates an entry in the importMap,
-     * as well as an entry in the componentMap if the type of the
-     * dependency is 'component'
+     * Each entry in this map generates an entry in the importMap.
      */
     dependencies?: AdminDependencies
     /**
@@ -816,9 +810,9 @@ export type Config = {
        * @default true
        */
       autoGenerate?: boolean
-      /** The base directory for component paths starting with /.
-       *
-       * By default, this is process.cwd()
+      /**
+       * The base directory for component paths starting with /.
+       * @default process.cwd()
        **/
       baseDir?: string
       /**
@@ -834,6 +828,11 @@ export type Config = {
           imports: Imports
         }) => void
       >
+      /**
+       * If Payload cannot find the import map file location automatically,
+       * you can manually provide it here.
+       */
+      importMapFile?: string
     }
     livePreview?: {
       collections?: string[]
@@ -842,22 +841,46 @@ export type Config = {
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
-      /** The route for the account page. */
-      account?: string
-      /** The route for the create first user page. */
-      createFirstUser?: string
-      /** The route for the forgot password page. */
-      forgot?: string
-      /** The route the user will be redirected to after being inactive for too long. */
-      inactivity?: string
-      /** The route for the login page. */
-      login?: string
-      /** The route for the logout page. */
-      logout?: string
-      /** The route for the reset password page. */
-      reset?: string
-      /** The route for the unauthorized page. */
-      unauthorized?: string
+      /** The route for the account page.
+       *
+       * @default '/account'
+       */
+      account?: `/${string}`
+      /** The route for the create first user page.
+       *
+       * @default '/create-first-user'
+       */
+      createFirstUser?: `/${string}`
+      /** The route for the forgot password page.
+       *
+       * @default '/forgot'
+       */
+      forgot?: `/${string}`
+      /** The route the user will be redirected to after being inactive for too long.
+       *
+       * @default '/logout-inactivity'
+       */
+      inactivity?: `/${string}`
+      /** The route for the login page.
+       *
+       * @default '/login'
+       */
+      login?: `/${string}`
+      /** The route for the logout page.
+       *
+       * @default '/logout'
+       */
+      logout?: `/${string}`
+      /** The route for the reset password page.
+       *
+       * @default '/reset'
+       */
+      reset?: `/${string}`
+      /** The route for the unauthorized page.
+       *
+       * @default '/unauthorized'
+       */
+      unauthorized?: `/${string}`
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
@@ -871,11 +894,26 @@ export type Config = {
      * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
+    /**
+     * Configure timezone related settings for the admin panel.
+     */
+    timezones?: TimezonesConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+  /**
+   * Configure authentication-related Payload-wide settings.
+   */
+  auth?: {
+    /**
+     * Define which JWT identification methods you'd like to support for Payload's local auth strategy, as well as the order that they're retrieved in.
+     * Defaults to ['JWT', 'Bearer', 'cookie]
+     */
+    jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
+  }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  blocks?: Block[]
   /**
    * Manage the datamodel of your application
    *
@@ -892,6 +930,8 @@ export type Config = {
      * to `true` only if you have an existing Payload database from pre-3.0
      * that you would like to maintain without migrating. This is only
      * relevant for MongoDB databases.
+     *
+     * @todo Remove in v4
      */
     allowLocalizedWithinLocalized: true
   }
@@ -998,7 +1038,6 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -1055,6 +1094,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -1063,6 +1103,25 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Allow you to save and share filters, columns, and sort orders for your collections.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  queryPresets?: {
+    access: {
+      create?: Access<QueryPreset>
+      delete?: Access<QueryPreset>
+      read?: Access<QueryPreset>
+      update?: Access<QueryPreset>
+    }
+    constraints: {
+      create?: QueryPresetConstraints
+      delete?: QueryPresetConstraints
+      read?: QueryPresetConstraints
+      update?: QueryPresetConstraints
+    }
+    labels?: CollectionConfig['labels']
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.
@@ -1122,7 +1181,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
@@ -1130,7 +1198,15 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export type SanitizedConfig = {
+  admin: {
+    timezones: SanitizedTimezoneConfig
+  } & DeepRequired<Config['admin']>
+  blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1155,7 +1231,15 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  | 'admin'
+  | 'blocks'
+  | 'collections'
+  | 'editor'
+  | 'endpoint'
+  | 'globals'
+  | 'i18n'
+  | 'localization'
+  | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
@@ -1203,5 +1287,3 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
-
-export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }

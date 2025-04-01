@@ -6,16 +6,71 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'partial-disable-locale-strategies': PartialDisableLocaleStrategyAuthOperations;
+    'partial-disable-local-strategies': PartialDisableLocalStrategyAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
   };
+  blocks: {};
   collections: {
     users: User;
-    'partial-disable-locale-strategies': PartialDisableLocaleStrategy;
+    'partial-disable-local-strategies': PartialDisableLocalStrategy;
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
@@ -26,7 +81,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    'partial-disable-locale-strategies': PartialDisableLocaleStrategiesSelect<false> | PartialDisableLocaleStrategiesSelect<true>;
+    'partial-disable-local-strategies': PartialDisableLocalStrategiesSelect<false> | PartialDisableLocalStrategiesSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
@@ -44,8 +99,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (PartialDisableLocaleStrategy & {
-        collection: 'partial-disable-locale-strategies';
+    | (PartialDisableLocalStrategy & {
+        collection: 'partial-disable-local-strategies';
       })
     | (ApiKey & {
         collection: 'api-keys';
@@ -76,7 +131,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PartialDisableLocaleStrategyAuthOperations {
+export interface PartialDisableLocalStrategyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -172,9 +227,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partial-disable-locale-strategies".
+ * via the `definition` "partial-disable-local-strategies".
  */
-export interface PartialDisableLocaleStrategy {
+export interface PartialDisableLocalStrategy {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -241,8 +296,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'partial-disable-locale-strategies';
-        value: string | PartialDisableLocaleStrategy;
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
       } | null)
     | ({
         relationTo: 'api-keys';
@@ -263,8 +318,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'partial-disable-locale-strategies';
-        value: string | PartialDisableLocaleStrategy;
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
       }
     | {
         relationTo: 'api-keys';
@@ -289,8 +344,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'partial-disable-locale-strategies';
-        value: string | PartialDisableLocaleStrategy;
+        relationTo: 'partial-disable-local-strategies';
+        value: string | PartialDisableLocalStrategy;
       }
     | {
         relationTo: 'api-keys';
@@ -372,9 +427,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partial-disable-locale-strategies_select".
+ * via the `definition` "partial-disable-local-strategies_select".
  */
-export interface PartialDisableLocaleStrategiesSelect<T extends boolean = true> {
+export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;

@@ -28,11 +28,13 @@ import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
+import { RouteTransitionProvider } from '../RouteTransition/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
+import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
   readonly children: React.ReactNode
@@ -73,57 +75,61 @@ export const RootProvider: React.FC<Props> = ({
   return (
     <Fragment>
       <ServerFunctionsProvider serverFunction={serverFunction}>
-        <RouteCacheComponent>
-          <ConfigProvider config={config}>
-            <ClientFunctionProvider>
-              <TranslationProvider
-                dateFNSKey={dateFNSKey}
-                fallbackLang={fallbackLang}
-                language={languageCode}
-                languageOptions={languageOptions}
-                switchLanguageServerAction={switchLanguageServerAction}
-                translations={translations}
-              >
-                <WindowInfoProvider
-                  breakpoints={{
-                    l: '(max-width: 1440px)',
-                    m: '(max-width: 1024px)',
-                    s: '(max-width: 768px)',
-                    xs: '(max-width: 400px)',
-                  }}
+        <RouteTransitionProvider>
+          <RouteCacheComponent>
+            <ConfigProvider config={config}>
+              <ClientFunctionProvider>
+                <TranslationProvider
+                  dateFNSKey={dateFNSKey}
+                  fallbackLang={fallbackLang}
+                  language={languageCode}
+                  languageOptions={languageOptions}
+                  switchLanguageServerAction={switchLanguageServerAction}
+                  translations={translations}
                 >
-                  <ScrollInfoProvider>
-                    <SearchParamsProvider>
-                      <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                        <AuthProvider permissions={permissions} user={user}>
-                          <PreferencesProvider>
-                            <ThemeProvider theme={theme}>
-                              <ParamsProvider>
-                                <LocaleProvider locale={locale}>
-                                  <StepNavProvider>
-                                    <LoadingOverlayProvider>
-                                      <DocumentEventsProvider>
-                                        <NavProvider initialIsOpen={isNavOpen}>
-                                          {children}
-                                        </NavProvider>
-                                      </DocumentEventsProvider>
-                                    </LoadingOverlayProvider>
-                                  </StepNavProvider>
-                                </LocaleProvider>
-                              </ParamsProvider>
-                            </ThemeProvider>
-                          </PreferencesProvider>
-                          <ModalContainer />
-                          <StayLoggedInModal />
-                        </AuthProvider>
-                      </ModalProvider>
-                    </SearchParamsProvider>
-                  </ScrollInfoProvider>
-                </WindowInfoProvider>
-              </TranslationProvider>
-            </ClientFunctionProvider>
-          </ConfigProvider>
-        </RouteCacheComponent>
+                  <WindowInfoProvider
+                    breakpoints={{
+                      l: '(max-width: 1440px)',
+                      m: '(max-width: 1024px)',
+                      s: '(max-width: 768px)',
+                      xs: '(max-width: 400px)',
+                    }}
+                  >
+                    <ScrollInfoProvider>
+                      <SearchParamsProvider>
+                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <AuthProvider permissions={permissions} user={user}>
+                            <PreferencesProvider>
+                              <ThemeProvider theme={theme}>
+                                <ParamsProvider>
+                                  <LocaleProvider locale={locale}>
+                                    <StepNavProvider>
+                                      <LoadingOverlayProvider>
+                                        <DocumentEventsProvider>
+                                          <NavProvider initialIsOpen={isNavOpen}>
+                                            <UploadHandlersProvider>
+                                              {children}
+                                            </UploadHandlersProvider>
+                                          </NavProvider>
+                                        </DocumentEventsProvider>
+                                      </LoadingOverlayProvider>
+                                    </StepNavProvider>
+                                  </LocaleProvider>
+                                </ParamsProvider>
+                              </ThemeProvider>
+                            </PreferencesProvider>
+                            <ModalContainer />
+                            <StayLoggedInModal />
+                          </AuthProvider>
+                        </ModalProvider>
+                      </SearchParamsProvider>
+                    </ScrollInfoProvider>
+                  </WindowInfoProvider>
+                </TranslationProvider>
+              </ClientFunctionProvider>
+            </ConfigProvider>
+          </RouteCacheComponent>
+        </RouteTransitionProvider>
       </ServerFunctionsProvider>
       <ToastContainer />
     </Fragment>

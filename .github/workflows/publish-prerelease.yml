@@ -1,0 +1,48 @@
+name: publish-prerelease
+
+on:
+  schedule:
+    # Run nightly at 10pm EST
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 22.6.0
+  PNPM_VERSION: 9.7.1
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+jobs:
+  release:
+    name: publish-prerelease-${{ github.ref_name }}-${{ github.sha }}
+    permissions:
+      id-token: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Load npm token
+        run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Determine release type
+        id: determine_release_type
+        # Use 'canary' for main branch, 'internal' for others
+        run: |
+          if [[ ${{ github.ref_name }} == "main" ]]; then
+            echo "release_type=canary" >> $GITHUB_OUTPUT
+          else
+            echo "release_type=internal" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release
+        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

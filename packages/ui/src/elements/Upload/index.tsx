@@ -268,6 +268,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
+  const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
+
+  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
+    return null
+  }
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
@@ -279,11 +285,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
-          imageCacheTag={uploadConfig?.cacheTags && savedDocumentData.updatedAt}
+          hideRemoveFile={uploadConfig.hideRemoveFile}
+          imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
         />
       )}
-      {(!savedDocumentData?.filename || removedFile) && (
+      {((!uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) || removedFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone onChange={handleFileSelection}>
@@ -415,7 +422,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
             <EditUpload
               fileName={value?.name || savedDocumentData?.filename}
               fileSrc={savedDocumentData?.url || fileSrc}
-              imageCacheTag={savedDocumentData?.updatedAt}
+              imageCacheTag={imageCacheTag}
               initialCrop={uploadEdits?.crop ?? undefined}
               initialFocalPoint={{
                 x: uploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
@@ -437,7 +444,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
         >
           <PreviewSizes
             doc={savedDocumentData}
-            imageCacheTag={savedDocumentData.updatedAt}
+            imageCacheTag={imageCacheTag}
             uploadConfig={uploadConfig}
           />
         </Drawer>

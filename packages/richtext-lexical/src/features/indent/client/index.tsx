@@ -1,35 +1,55 @@
 'use client'
 
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
-import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
+import type { BaseSelection, ElementNode, LexicalNode } from 'lexical'
+
+import { $findMatchingParent } from '@lexical/utils'
+import {
+  $isElementNode,
+  $isRangeSelection,
+  INDENT_CONTENT_COMMAND,
+  OUTDENT_CONTENT_COMMAND,
+} from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
 
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
+import { type IndentFeatureProps } from '../server/index.js'
+import { IndentPlugin } from './IndentPlugin.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
-const toolbarGroups: ToolbarGroup[] = [
+const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] => [
   toolbarIndentGroupWithItems([
     {
       ChildComponent: IndentDecreaseIcon,
       isActive: () => false,
       isEnabled: ({ selection }) => {
-        if (!selection || !selection?.getNodes()?.length) {
+        const nodes = selection?.getNodes()
+        if (!nodes?.length) {
           return false
         }
-        for (const node of selection.getNodes()) {
-          const parent = node.getParentOrThrow()
-          // If at least one node is indented, this should be active
+        let atLeastOneNodeCanOutdent = false
+        const isIndentable = (node: LexicalNode): node is ElementNode =>
+          $isElementNode(node) && node.canIndent()
+        for (const node of nodes) {
+          if (isIndentable(node)) {
+            if (node.getIndent() <= 0) {
+              return false
+            } else {
+              atLeastOneNodeCanOutdent = true
+            }
+          }
+        }
+
+        if (!atLeastOneNodeCanOutdent) {
           if (
-            ('__indent' in node && (node.__indent as number) > 0) ||
-            ('__indent' in parent && parent.__indent > 0)
+            $pointsAncestorMatch(selection, (node) => isIndentable(node) && node.getIndent() > 0)
           ) {
             return true
           }
         }
-        return false
+        return atLeastOneNodeCanOutdent
       },
       key: 'indentDecrease',
       label: ({ i18n }) => {
@@ -43,6 +63,18 @@ const toolbarGroups: ToolbarGroup[] = [
     {
       ChildComponent: IndentIncreaseIcon,
       isActive: () => false,
+      isEnabled: ({ selection }) => {
+        const nodes = selection?.getNodes()
+        if (!nodes?.length) {
+          return false
+        }
+        if (nodes.some((node) => disabledNodes?.includes(node.getType()))) {
+          return false
+        }
+        return !$pointsAncestorMatch(selection, (node) =>
+          (disabledNodes ?? []).includes(node.getType()),
+        )
+      },
       key: 'indentIncrease',
       label: ({ i18n }) => {
         return i18n.t('lexical:indent:increaseLabel')
@@ -55,17 +87,32 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-export const IndentFeatureClient = createClientFeature({
-  plugins: [
-    {
-      Component: TabIndentationPlugin,
-      position: 'normal',
+export const IndentFeatureClient = createClientFeature<IndentFeatureProps>(({ props }) => {
+  const disabledNodes = props.disabledNodes ?? []
+  return {
+    plugins: [
+      {
+        Component: IndentPlugin,
+        position: 'normal',
+      },
+    ],
+    sanitizedClientFeatureProps: props,
+    toolbarFixed: {
+      groups: toolbarGroups({ disabledNodes }),
     },
-  ],
-  toolbarFixed: {
-    groups: toolbarGroups,
-  },
-  toolbarInline: {
-    groups: toolbarGroups,
-  },
+    toolbarInline: {
+      groups: toolbarGroups({ disabledNodes }),
+    },
+  }
 })
+
+function $pointsAncestorMatch(
+  selection: BaseSelection,
+  fn: (node: LexicalNode) => boolean,
+): boolean {
+  return (
+    $isRangeSelection(selection) &&
+    (!!$findMatchingParent(selection.anchor.getNode(), fn) ||
+      !!$findMatchingParent(selection.focus.getNode(), fn))
+  )
+}

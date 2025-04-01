@@ -1,8 +1,8 @@
+// @ts-strict-ignore
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
-import { mkdirSync } from 'node:fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
@@ -120,7 +120,7 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    mkdirSync(staticPath, { recursive: true })
+    await fs.mkdir(staticPath, { recursive: true })
   }
 
   let newData = data
@@ -140,7 +140,7 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
@@ -290,7 +290,7 @@ export const generateFileData = async <T>({
       }
 
       if (file.tempFilePath) {
-        await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {
         req.file = fileForResize
       }
@@ -303,7 +303,7 @@ export const generateFileData = async <T>({
       // If using temp files and the image is being resized, write the file to the temp path
       if (fileBuffer?.data || file.data.length > 0) {
         if (file.tempFilePath) {
-          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+          await fs.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
           req.file = {

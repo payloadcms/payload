@@ -2,38 +2,20 @@
 
 @layer payload-default {
   .publish-many {
-    @include blur-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
-    &__wrapper {
-      z-index: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: base(0.8);
-      padding: base(2);
-    }
-
-    &__content {
-      display: flex;
-      flex-direction: column;
-      gap: base(0.4);
-
-      > * {
-        margin: 0;
-      }
-    }
-
-    &__controls {
-      display: flex;
-      gap: base(0.4);
-
-      .btn {
-        margin: 0;
-      }
+    &__toggle {
+      font-size: inherit;
+      line-height: inherit;
+      display: inline-flex;
+      background: transparent;
+      color: var(--theme-elevation-800);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 0;
+      padding: 0;
+      align-items: center;
+      cursor: pointer;
+      text-decoration: underline;
     }
   }
 }

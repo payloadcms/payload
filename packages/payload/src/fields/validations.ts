@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
@@ -189,7 +190,19 @@ export const email: EmailFieldValidation = (
     }
   }
 
-  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
+  /**
+   * Disallows emails with double quotes (e.g., "user"@example.com, user@"example.com", "user@example.com")
+   * Rejects spaces anywhere in the email (e.g., user @example.com, user@ example.com, user name@example.com)
+   * Prevents consecutive dots in the local or domain part (e.g., user..name@example.com, user@example..com)
+   * Disallows domains that start or end with a hyphen (e.g., user@-example.com, user@example-.com)
+   * Allows standard email formats (e.g., user@example.com, user.name+alias@example.co.uk, user-name@example.org)
+   * Allows domains with consecutive hyphens as long as they are not leading/trailing (e.g., user@ex--ample.com)
+   * Supports multiple subdomains (e.g., user@sub.domain.example.com)
+   */
+  const emailRegex =
+    /^(?!.*\.\.)[\w.%+-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+
+  if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
 
@@ -356,10 +369,10 @@ export const json: JSONFieldValidation = async (
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
-        return t(ajv.errorsText())
+        return ajv.errorsText()
       }
     } catch (error) {
-      return t(error.message)
+      return error.message
     }
   }
   return true
@@ -377,9 +390,25 @@ export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required 
 
 export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
 
-export const date: DateFieldValidation = (value, { req: { t }, required }) => {
-  if (value && !isNaN(Date.parse(value.toString()))) {
+export const date: DateFieldValidation = (
+  value,
+  { name, req: { t }, required, siblingData, timezone },
+) => {
+  const validDate = value && !isNaN(Date.parse(value.toString()))
+
+  // We need to also check for the timezone data based on this field's config
+  // We cannot do this inside the timezone field validation as it's visually hidden
+  const hasRequiredTimezone = timezone && required
+  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  // Always resolve to true if the field is not required, as timezone may be optional too then
+  const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
+
+  if (validDate && validTimezone) {
     return true
+  }
+
+  if (validDate && !validTimezone) {
+    return t('validation:timezoneRequired')
   }
 
   if (value) {
@@ -510,7 +539,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -527,6 +556,7 @@ const validateFilterOptions: Validate<
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
+                blockData,
                 data,
                 relationTo: collection,
                 req,
@@ -568,7 +598,7 @@ const validateFilterOptions: Validate<
             falseCollections.push(collection)
           }
 
-          const result = await payload.find({
+          const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
             limit: 0,

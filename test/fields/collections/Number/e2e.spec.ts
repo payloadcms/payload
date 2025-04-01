@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -15,6 +16,7 @@ import {
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -60,7 +62,7 @@ describe('Number', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -74,25 +76,14 @@ describe('Number', () => {
   test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
     await page.goto(url.list)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
-    const initialField = page.locator('.condition__field')
-    const operatorField = page.locator('.condition__operator')
-    const valueField = page.locator('.condition__value >> input')
-    await initialField.click()
-    const initialFieldOptions = initialField.locator('.rs__option')
-    await initialFieldOptions.locator('text=number').first().click()
-    await expect(initialField.locator('.rs__single-value')).toContainText('Number')
-    await operatorField.click()
-    const operatorOptions = operatorField.locator('.rs__option')
-    await operatorOptions.last().click()
-    await expect(operatorField.locator('.rs__single-value')).toContainText(
-      'is greater than or equal to',
-    )
 
-    // enter value of 3
-    await valueField.fill('3')
-    await expect(valueField).toHaveValue('3')
+    await addListFilter({
+      page,
+      fieldLabel: 'Number',
+      operatorLabel: 'is greater than or equal to',
+      value: '3',
+    })
+
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
@@ -120,7 +111,6 @@ describe('Number', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    expect(true).toBe(true) // the above fn contains the assertion
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -130,9 +120,10 @@ describe('Number', () => {
     await page.keyboard.type(String(input))
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['With Min Rows'],
+    })
   })
 
   test('should keep data removed on save if deleted', async () => {

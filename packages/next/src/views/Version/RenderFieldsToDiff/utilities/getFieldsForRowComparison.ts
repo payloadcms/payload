@@ -2,6 +2,8 @@ import type {
   ArrayFieldClient,
   BaseVersionField,
   BlocksFieldClient,
+  ClientBlock,
+  ClientConfig,
   ClientField,
   VersionField,
 } from 'payload'
@@ -17,12 +19,14 @@ import { getUniqueListBy } from 'payload/shared'
 export function getFieldsForRowComparison({
   baseVersionField,
   comparisonRow,
+  config,
   field,
   row,
   versionRow,
 }: {
   baseVersionField: BaseVersionField
   comparisonRow: any
+  config: ClientConfig
   field: ArrayFieldClient | BlocksFieldClient
   row: number
   versionRow: any
@@ -37,24 +41,37 @@ export function getFieldsForRowComparison({
       : baseVersionField.fields
   } else if (field.type === 'blocks') {
     if (versionRow?.blockType === comparisonRow?.blockType) {
-      const matchedBlock = ('blocks' in field &&
-        field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-        fields: [],
-      }
+      const matchedBlock: ClientBlock =
+        config?.blocksMap?.[versionRow?.blockType] ??
+        (((('blocks' in field || 'blockReferences' in field) &&
+          (field.blockReferences ?? field.blocks)?.find(
+            (block) => typeof block !== 'string' && block.slug === versionRow?.blockType,
+          )) || {
+          fields: [],
+        }) as ClientBlock)
 
       fields = matchedBlock.fields
       versionFields = baseVersionField.rows?.length
         ? baseVersionField.rows[row]
         : baseVersionField.fields
     } else {
-      const matchedVersionBlock = ('blocks' in field &&
-        field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-        fields: [],
-      }
-      const matchedComparisonBlock = ('blocks' in field &&
-        field.blocks?.find((block) => block.slug === comparisonRow?.blockType)) || {
-        fields: [],
-      }
+      const matchedVersionBlock =
+        config?.blocksMap?.[versionRow?.blockType] ??
+        (((('blocks' in field || 'blockReferences' in field) &&
+          (field.blockReferences ?? field.blocks)?.find(
+            (block) => typeof block !== 'string' && block.slug === versionRow?.blockType,
+          )) || {
+          fields: [],
+        }) as ClientBlock)
+
+      const matchedComparisonBlock =
+        config?.blocksMap?.[comparisonRow?.blockType] ??
+        (((('blocks' in field || 'blockReferences' in field) &&
+          (field.blockReferences ?? field.blocks)?.find(
+            (block) => typeof block !== 'string' && block.slug === comparisonRow?.blockType,
+          )) || {
+          fields: [],
+        }) as ClientBlock)
 
       fields = getUniqueListBy<ClientField>(
         [...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],

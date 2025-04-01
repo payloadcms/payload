@@ -2,21 +2,13 @@
 import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
@@ -28,7 +20,7 @@ const Context = createContext({} as DocumentInfoContext)
 
 export type * from './types.js'
 
-export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
+export const useDocumentInfo = (): DocumentInfoContext => use(Context)
 
 const DocumentInfo: React.FC<
   {
@@ -257,10 +249,19 @@ const DocumentInfo: React.FC<
   )
 
   const incrementVersionCount = useCallback(() => {
+    const newCount = versionCount + 1
     if (collectionConfig && collectionConfig.versions) {
-      setVersionCount(Math.min(versionCount + 1, collectionConfig.versions.maxPerDoc))
+      if (collectionConfig.versions.maxPerDoc > 0) {
+        setVersionCount(Math.min(newCount, collectionConfig.versions.maxPerDoc))
+      } else {
+        setVersionCount(newCount)
+      }
     } else if (globalConfig && globalConfig.versions) {
-      setVersionCount(Math.min(versionCount + 1, globalConfig.versions.max))
+      if (globalConfig.versions.max > 0) {
+        setVersionCount(Math.min(newCount, globalConfig.versions.max))
+      } else {
+        setVersionCount(newCount)
+      }
     }
   }, [collectionConfig, globalConfig, versionCount])
 
@@ -351,7 +352,7 @@ const DocumentInfo: React.FC<
     versionCount,
   }
 
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return <Context value={value}>{children}</Context>
 }
 
 export const DocumentInfoProvider: React.FC<

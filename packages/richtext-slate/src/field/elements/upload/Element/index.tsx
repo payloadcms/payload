@@ -1,5 +1,6 @@
 'use client'
 
+import type { ListDrawerProps } from '@payloadcms/ui'
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -23,8 +24,8 @@ import type { UploadElementType } from '../types.js'
 import { useElement } from '../../../providers/ElementProvider.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import { uploadFieldsSchemaPath, uploadName } from '../shared.js'
-import './index.scss'
 import { UploadDrawer } from './UploadDrawer/index.js'
+import './index.scss'
 
 const baseClass = 'rich-text-upload'
 
@@ -110,13 +111,13 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
     [editor, element, setParams, cacheBust, closeDrawer],
   )
 
-  const swapUpload = React.useCallback(
-    ({ collectionSlug, docID }) => {
+  const swapUpload = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       const newNode = {
         type: uploadName,
         children: [{ text: ' ' }],
         relationTo: collectionSlug,
-        value: { id: docID },
+        value: { id: doc.id },
       }
 
       const elementPath = ReactEditor.findPath(editor, element)

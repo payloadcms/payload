@@ -307,7 +307,7 @@ const RichTextFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'richTextBlock',
+          slug: 'richTextBlockSlate',
           fields: [
             {
               editor: slateEditor({}),

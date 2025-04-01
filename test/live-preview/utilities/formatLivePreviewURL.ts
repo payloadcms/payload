@@ -5,7 +5,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
   collectionConfig,
   req,
 }) => {
-  let baseURL = `${req.protocol}//${req.host}/live-preview`
+  let baseURL = `/live-preview`
 
   // You can run async requests here, if needed
   // For example, multi-tenant apps may need to lookup additional data

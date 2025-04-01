@@ -1,17 +1,16 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useCallback, useState } from 'react'
+import { useModal } from '@faceless-ui/modal'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import './index.scss'
 
 const baseClass = 'status'
@@ -36,12 +35,9 @@ export const Status: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const [processing, setProcessing] = useState(false)
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
-
-  const editDepth = useEditDepth()
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
@@ -62,8 +58,6 @@ export const Status: React.FC = () => {
       let method
       let body
 
-      setProcessing(true)
-
       if (action === 'unpublish') {
         body = {
           _status: 'draft',
@@ -74,6 +68,7 @@ export const Status: React.FC = () => {
         url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'patch'
       }
+
       if (globalSlug) {
         url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'post'
@@ -124,15 +119,6 @@ export const Status: React.FC = () => {
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
-
-      setProcessing(false)
-      if (action === 'revert') {
-        toggleModal(revertModalSlug)
-      }
-
-      if (action === 'unpublish') {
-        toggleModal(unPublishModalSlug)
-      }
     },
     [
       api,
@@ -145,10 +131,8 @@ export const Status: React.FC = () => {
       resetForm,
       serverURL,
       setUnpublishedVersionCount,
+      setMostRecentVersionIsAutosaved,
       t,
-      toggleModal,
-      revertModalSlug,
-      unPublishModalSlug,
       setHasPublishedDoc,
     ],
   )
@@ -174,34 +158,13 @@ export const Status: React.FC = () => {
               >
                 {t('version:unpublish')}
               </Button>
-              <Modal
-                className={`${baseClass}__modal`}
-                slug={unPublishModalSlug}
-                style={{ zIndex: drawerZBase + editDepth }}
-              >
-                <div className={`${baseClass}__wrapper`}>
-                  <div className={`${baseClass}__content`}>
-                    <h1>{t('version:confirmUnpublish')}</h1>
-                    <p>{t('version:aboutToUnpublish')}</p>
-                  </div>
-                  <div className={`${baseClass}__controls`}>
-                    <Button
-                      buttonStyle="secondary"
-                      onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
-                      size="large"
-                      type="button"
-                    >
-                      {t('general:cancel')}
-                    </Button>
-                    <Button
-                      onClick={processing ? undefined : () => performAction('unpublish')}
-                      size="large"
-                    >
-                      {t(processing ? 'version:unpublishing' : 'general:confirm')}
-                    </Button>
-                  </div>
-                </div>
-              </Modal>
+              <ConfirmationModal
+                body={t('version:aboutToUnpublish')}
+                confirmingLabel={t('version:unpublishing')}
+                heading={t('version:confirmUnpublish')}
+                modalSlug={unPublishModalSlug}
+                onConfirm={() => performAction('unpublish')}
+              />
             </React.Fragment>
           )}
           {canUpdate && statusToRender === 'changed' && (
@@ -215,31 +178,13 @@ export const Status: React.FC = () => {
               >
                 {t('version:revertToPublished')}
               </Button>
-              <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
-                <div className={`${baseClass}__wrapper`}>
-                  <div className={`${baseClass}__content`}>
-                    <h1>{t('version:confirmRevertToSaved')}</h1>
-                    <p>{t('version:aboutToRevertToPublished')}</p>
-                  </div>
-                  <div className={`${baseClass}__controls`}>
-                    <Button
-                      buttonStyle="secondary"
-                      onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
-                      size="large"
-                      type="button"
-                    >
-                      {t('general:cancel')}
-                    </Button>
-                    <Button
-                      id="action-revert-to-published-confirm"
-                      onClick={processing ? undefined : () => performAction('revert')}
-                      size="large"
-                    >
-                      {t(processing ? 'version:reverting' : 'general:confirm')}
-                    </Button>
-                  </div>
-                </div>
-              </Modal>
+              <ConfirmationModal
+                body={t('version:aboutToRevertToPublished')}
+                confirmingLabel={t('version:reverting')}
+                heading={t('version:confirmRevertToSaved')}
+                modalSlug={revertModalSlug}
+                onConfirm={() => performAction('revert')}
+              />
             </React.Fragment>
           )}
         </div>

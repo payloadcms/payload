@@ -1,42 +1,93 @@
-import type { ArrayField, BlocksField, Field, TabAsField } from '../fields/config/types.js'
+// @ts-strict-ignore
+import type { Config, SanitizedConfig } from '../config/types.js'
+import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
-import { fieldHasSubFields } from '../fields/config/types.js'
+import { fieldHasSubFields, fieldShouldBeLocalized } from '../fields/config/types.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
+  callbackStack,
+  config,
   data,
   field,
   fillEmpty,
+  leavesFirst,
+  parentIsLocalized,
   parentRef,
 }: {
   callback: TraverseFieldsCallback
+  callbackStack: (() => ReturnType<TraverseFieldsCallback>)[]
+  config?: Config | SanitizedConfig
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
+  leavesFirst: boolean
+  parentIsLocalized: boolean
   parentRef?: unknown
 }) => {
   if (fillEmpty) {
     if (field.type === 'array') {
-      traverseFields({ callback, fields: field.fields, parentRef })
+      traverseFields({
+        callback,
+        callbackStack,
+        config,
+        fields: field.fields,
+        isTopLevel: false,
+        leavesFirst,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentRef,
+      })
     }
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        traverseFields({ callback, fields: block.fields, parentRef })
-      })
+      for (const _block of field.blockReferences ?? field.blocks) {
+        // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+        const block =
+          typeof _block === 'string' ? config?.blocks?.find((b) => b.slug === _block) : _block
+        if (block) {
+          traverseFields({
+            callback,
+            callbackStack,
+            config,
+            fields: block.fields,
+            isTopLevel: false,
+            leavesFirst,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            parentRef,
+          })
+        }
+      }
     }
     return
   }
   for (const ref of data) {
     let fields: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
-      const block = field.blocks.find((block) => block.slug === ref.blockType)
+      // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+      const block = field.blockReferences
+        ? ((config?.blocks?.find((b) => b.slug === ref.blockType) ??
+            field.blockReferences.find(
+              (b) => typeof b !== 'string' && b.slug === ref.blockType,
+            )) as Block)
+        : field.blocks.find((b) => b.slug === ref.blockType)
+
       fields = block?.fields
     } else if (field.type === 'array') {
       fields = field.fields
     }
 
     if (fields) {
-      traverseFields({ callback, fields, fillEmpty, parentRef, ref })
+      traverseFields({
+        callback,
+        callbackStack,
+        config,
+        fields,
+        fillEmpty,
+        isTopLevel: false,
+        leavesFirst,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentRef,
+        ref,
+      })
     }
   }
 }
@@ -50,6 +101,7 @@ export type TraverseFieldsCallback = (args: {
    * Function that when called will skip the current field and continue to the next
    */
   next?: () => void
+  parentIsLocalized: boolean
   /**
    * The parent reference object
    */
@@ -62,8 +114,19 @@ export type TraverseFieldsCallback = (args: {
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
+  callbackStack?: (() => ReturnType<TraverseFieldsCallback>)[]
+  config?: Config | SanitizedConfig
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
+  isTopLevel?: boolean
+  /**
+   * @default false
+   *
+   * if this is `true`, the callback functions of the leaf fields will be called before the parent fields.
+   * The return value of the callback function will be ignored.
+   */
+  leavesFirst?: boolean
+  parentIsLocalized?: boolean
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -79,12 +142,21 @@ type TraverseFieldsArgs = {
  */
 export const traverseFields = ({
   callback,
+  callbackStack: _callbackStack = [],
+  config,
   fields,
   fillEmpty = true,
+  isTopLevel = true,
+  leavesFirst = false,
+  parentIsLocalized,
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
   fields.some((field) => {
+    let callbackStack: (() => ReturnType<TraverseFieldsCallback>)[] = []
+    if (!isTopLevel) {
+      callbackStack = _callbackStack
+    }
     let skip = false
     const next = () => {
       skip = true
@@ -94,8 +166,10 @@ export const traverseFields = ({
       return
     }
 
-    if (callback && callback({ field, next, parentRef, ref })) {
+    if (!leavesFirst && callback && callback({ field, next, parentIsLocalized, parentRef, ref })) {
       return true
+    } else if (leavesFirst) {
+      callbackStack.push(() => callback({ field, next, parentIsLocalized, parentRef, ref }))
     }
 
     if (skip) {
@@ -129,14 +203,26 @@ export const traverseFields = ({
 
           if (
             callback &&
+            !leavesFirst &&
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized,
               parentRef: currentParentRef,
               ref: tabRef,
             })
           ) {
             return true
+          } else if (leavesFirst) {
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentIsLocalized,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
 
           tabRef = tabRef[tab.name]
@@ -146,8 +232,13 @@ export const traverseFields = ({
               if (tabRef[key] && typeof tabRef[key] === 'object') {
                 traverseFields({
                   callback,
+                  callbackStack,
+                  config,
                   fields: tab.fields,
                   fillEmpty,
+                  isTopLevel: false,
+                  leavesFirst,
+                  parentIsLocalized: true,
                   parentRef: currentParentRef,
                   ref: tabRef[key],
                 })
@@ -157,22 +248,39 @@ export const traverseFields = ({
         } else {
           if (
             callback &&
+            !leavesFirst &&
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized,
               parentRef: currentParentRef,
               ref: tabRef,
             })
           ) {
             return true
+          } else if (leavesFirst) {
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentIsLocalized,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
         }
 
         if (!tab.localized) {
           traverseFields({
             callback,
+            callbackStack,
+            config,
             fields: tab.fields,
             fillEmpty,
+            isTopLevel: false,
+            leavesFirst,
+            parentIsLocalized: false,
             parentRef: currentParentRef,
             ref: tabRef,
           })
@@ -192,7 +300,7 @@ export const traverseFields = ({
         if (!ref[field.name]) {
           if (fillEmpty) {
             if (field.type === 'group') {
-              if (field.localized) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 ref[field.name] = {
                   en: {},
                 }
@@ -200,7 +308,7 @@ export const traverseFields = ({
                 ref[field.name] = {}
               }
             } else if (field.type === 'array' || field.type === 'blocks') {
-              if (field.localized) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 ref[field.name] = {
                   en: [],
                 }
@@ -217,7 +325,7 @@ export const traverseFields = ({
 
       if (
         field.type === 'group' &&
-        field.localized &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
         currentRef &&
         typeof currentRef === 'object'
       ) {
@@ -225,8 +333,13 @@ export const traverseFields = ({
           if (currentRef[key]) {
             traverseFields({
               callback,
+              callbackStack,
+              config,
               fields: field.fields,
               fillEmpty,
+              isTopLevel: false,
+              leavesFirst,
+              parentIsLocalized: true,
               parentRef: currentParentRef,
               ref: currentRef[key],
             })
@@ -240,7 +353,7 @@ export const traverseFields = ({
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        if (field.localized) {
+        if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
           if (Array.isArray(currentRef)) {
             return
           }
@@ -253,30 +366,49 @@ export const traverseFields = ({
 
             traverseArrayOrBlocksField({
               callback,
+              callbackStack,
+              config,
               data: localeData,
               field,
               fillEmpty,
+              leavesFirst,
+              parentIsLocalized: true,
               parentRef: currentParentRef,
             })
           }
         } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
             callback,
+            callbackStack,
+            config,
             data: currentRef as Record<string, unknown>[],
             field,
             fillEmpty,
+            leavesFirst,
+            parentIsLocalized,
             parentRef: currentParentRef,
           })
         }
       } else if (currentRef && typeof currentRef === 'object' && 'fields' in field) {
         traverseFields({
           callback,
+          callbackStack,
+          config,
           fields: field.fields,
           fillEmpty,
+          isTopLevel: false,
+          leavesFirst,
+          parentIsLocalized,
           parentRef: currentParentRef,
           ref: currentRef,
         })
       }
+    }
+
+    if (isTopLevel) {
+      callbackStack.reverse().forEach((cb) => {
+        cb()
+      })
     }
   })
 }

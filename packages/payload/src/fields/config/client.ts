@@ -1,7 +1,12 @@
+// @ts-strict-ignore
+/* eslint-disable perfectionist/sort-switch-case */
+// Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
 import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  ArrayFieldClient,
+  Block,
   BlockJSX,
   BlocksFieldClient,
   ClientBlock,
@@ -17,11 +22,10 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
+import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
-import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -70,6 +74,96 @@ const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] 
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField
+
+export const createClientBlocks = ({
+  blocks,
+  defaultIDType,
+  i18n,
+  importMap,
+}: {
+  blocks: (Block | string)[]
+  defaultIDType: Payload['config']['db']['defaultIDType']
+  i18n: I18nClient
+  importMap: ImportMap
+}): (ClientBlock | string)[] | ClientBlock[] => {
+  const clientBlocks: (ClientBlock | string)[] = []
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i]
+
+    if (typeof block === 'string') {
+      // Do not process blocks that are just strings - they are processed once in the client config
+      clientBlocks.push(block)
+      continue
+    }
+
+    const clientBlock: ClientBlock = {
+      slug: block.slug,
+      fields: [],
+    }
+    if (block.imageAltText) {
+      clientBlock.imageAltText = block.imageAltText
+    }
+    if (block.imageURL) {
+      clientBlock.imageURL = block.imageURL
+    }
+
+    if (block.admin?.custom || block.admin?.group) {
+      clientBlock.admin = {}
+      if (block.admin.custom) {
+        clientBlock.admin.custom = block.admin.custom
+      }
+      if (block.admin.group) {
+        clientBlock.admin.group = block.admin.group
+      }
+    }
+
+    if (block?.admin?.jsx) {
+      const jsxResolved = getFromImportMap<BlockJSX>({
+        importMap,
+        PayloadComponent: block.admin.jsx,
+        schemaPath: '',
+      })
+      clientBlock.jsx = jsxResolved
+    }
+
+    if (block?.admin?.disableBlockName) {
+      // Check for existing admin object, this way we don't have to spread it in
+      if (clientBlock.admin) {
+        clientBlock.admin.disableBlockName = block.admin.disableBlockName
+      } else {
+        clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
+      }
+    }
+
+    if (block.labels) {
+      clientBlock.labels = {} as unknown as LabelsClient
+
+      if (block.labels.singular) {
+        if (typeof block.labels.singular === 'function') {
+          clientBlock.labels.singular = block.labels.singular({ i18n, t: i18n.t })
+        } else {
+          clientBlock.labels.singular = block.labels.singular
+        }
+        if (typeof block.labels.plural === 'function') {
+          clientBlock.labels.plural = block.labels.plural({ i18n, t: i18n.t })
+        } else {
+          clientBlock.labels.plural = block.labels.plural
+        }
+      }
+    }
+
+    clientBlock.fields = createClientFields({
+      defaultIDType,
+      fields: block.fields,
+      i18n,
+      importMap,
+    })
+
+    clientBlocks.push(clientBlock)
+  }
+
+  return clientBlocks
+}
 
 export const createClientField = ({
   defaultIDType,
@@ -130,7 +224,7 @@ export const createClientField = ({
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
           //@ts-expect-error - would need to type narrow
-          clientField.label = incomingField.label({ t: i18n.t })
+          clientField.label = incomingField.label({ i18n, t: i18n.t })
         } else {
           //@ts-expect-error - would need to type narrow
           clientField.label = incomingField.label
@@ -144,7 +238,27 @@ export const createClientField = ({
   }
 
   switch (incomingField.type) {
-    case 'array':
+    case 'array': {
+      if (incomingField.labels) {
+        const field = clientField as unknown as ArrayFieldClient
+
+        field.labels = {} as unknown as LabelsClient
+
+        if (incomingField.labels.singular) {
+          if (typeof incomingField.labels.singular === 'function') {
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
+          } else {
+            field.labels.singular = incomingField.labels.singular
+          }
+          if (typeof incomingField.labels.plural === 'function') {
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
+          } else {
+            field.labels.plural = incomingField.labels.plural
+          }
+        }
+      }
+    }
+    // falls through
     case 'collapsible':
     case 'group':
     case 'row': {
@@ -168,63 +282,39 @@ export const createClientField = ({
     case 'blocks': {
       const field = clientField as unknown as BlocksFieldClient
 
-      if (incomingField.blocks?.length) {
-        for (let i = 0; i < incomingField.blocks.length; i++) {
-          const block = incomingField.blocks[i]
+      if (incomingField.labels) {
+        field.labels = {} as unknown as LabelsClient
 
-          // prevent $undefined from being passed through the rsc requests
-          const clientBlock = removeUndefined<ClientBlock>({
-            slug: block.slug,
-            fields: field.blocks?.[i]?.fields || [],
-            imageAltText: block.imageAltText,
-            imageURL: block.imageURL,
-          }) satisfies ClientBlock
-
-          if (block.admin?.custom) {
-            clientBlock.admin = {
-              custom: block.admin.custom,
-            }
+        if (incomingField.labels.singular) {
+          if (typeof incomingField.labels.singular === 'function') {
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
+          } else {
+            field.labels.singular = incomingField.labels.singular
           }
-
-          if (block?.admin?.jsx) {
-            const jsxResolved = getFromImportMap<BlockJSX>({
-              importMap,
-              PayloadComponent: block.admin.jsx,
-              schemaPath: '',
-            })
-            clientBlock.jsx = jsxResolved
+          if (typeof incomingField.labels.plural === 'function') {
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
+          } else {
+            field.labels.plural = incomingField.labels.plural
           }
-
-          if (block.labels) {
-            clientBlock.labels = {} as unknown as LabelsClient
-
-            if (block.labels.singular) {
-              if (typeof block.labels.singular === 'function') {
-                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
-              } else {
-                clientBlock.labels.singular = block.labels.singular
-              }
-              if (typeof block.labels.plural === 'function') {
-                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
-              } else {
-                clientBlock.labels.plural = block.labels.plural
-              }
-            }
-          }
-
-          clientBlock.fields = createClientFields({
-            defaultIDType,
-            fields: block.fields,
-            i18n,
-            importMap,
-          })
-
-          if (!field.blocks) {
-            field.blocks = []
-          }
-
-          field.blocks[i] = clientBlock
         }
+      }
+
+      if (incomingField.blockReferences?.length) {
+        field.blockReferences = createClientBlocks({
+          blocks: incomingField.blockReferences,
+          defaultIDType,
+          i18n,
+          importMap,
+        })
+      }
+
+      if (incomingField.blocks?.length) {
+        field.blocks = createClientBlocks({
+          blocks: incomingField.blocks,
+          defaultIDType,
+          i18n,
+          importMap,
+        }) as ClientBlock[]
       }
 
       break
@@ -234,7 +324,7 @@ export const createClientField = ({
       const field = clientField as JoinFieldClient
 
       field.targetField = {
-        relationTo: field.targetField.relationTo,
+        relationTo: field.targetField?.relationTo,
       }
 
       break
@@ -255,7 +345,7 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ t: i18n.t }),
+              label: option.label({ i18n, t: i18n.t }),
               value: option.value,
             }
           }
@@ -319,7 +409,7 @@ export const createClientField = ({
                   case 'description':
                     if ('description' in tab.admin) {
                       if (typeof tab.admin?.description === 'function') {
-                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                        clientTab.admin.description = tab.admin.description({ i18n, t: i18n.t })
                       } else {
                         clientTab.admin.description = tab.admin.description
                       }

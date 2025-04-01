@@ -1,18 +1,29 @@
 import type {
-  ListComponentClientProps,
-  ListComponentServerProps,
+  AfterListClientProps,
+  AfterListTableClientProps,
+  AfterListTableServerPropsOnly,
+  BeforeListClientProps,
+  BeforeListServerPropsOnly,
+  BeforeListTableClientProps,
+  BeforeListTableServerPropsOnly,
+  ListViewServerPropsOnly,
   ListViewSlots,
-} from '@payloadcms/ui'
-import type { Payload, SanitizedCollectionConfig, StaticDescription } from 'payload'
+  ListViewSlotSharedClientProps,
+  Payload,
+  SanitizedCollectionConfig,
+  StaticDescription,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerPropsOnly,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
 type Args = {
-  clientProps: ListComponentClientProps
+  clientProps: ListViewSlotSharedClientProps
   collectionConfig: SanitizedCollectionConfig
   description?: StaticDescription
   payload: Payload
-  serverProps: ListComponentServerProps
+  serverProps: ListViewServerPropsOnly
 }
 
 export const renderListViewSlots = ({
@@ -26,49 +37,62 @@ export const renderListViewSlots = ({
 
   if (collectionConfig.admin.components?.afterList) {
     result.AfterList = RenderServerComponent({
-      clientProps,
+      clientProps: clientProps satisfies AfterListClientProps,
       Component: collectionConfig.admin.components.afterList,
       importMap: payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies AfterListTableServerPropsOnly,
     })
+  }
+
+  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+
+  if (Array.isArray(listMenuItems)) {
+    result.listMenuItems = [
+      RenderServerComponent({
+        clientProps,
+        Component: listMenuItems,
+        importMap: payload.importMap,
+        serverProps,
+      }),
+    ]
   }
 
   if (collectionConfig.admin.components?.afterListTable) {
     result.AfterListTable = RenderServerComponent({
-      clientProps,
+      clientProps: clientProps satisfies AfterListTableClientProps,
       Component: collectionConfig.admin.components.afterListTable,
       importMap: payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies AfterListTableServerPropsOnly,
     })
   }
 
   if (collectionConfig.admin.components?.beforeList) {
     result.BeforeList = RenderServerComponent({
-      clientProps,
+      clientProps: clientProps satisfies BeforeListClientProps,
       Component: collectionConfig.admin.components.beforeList,
       importMap: payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies BeforeListServerPropsOnly,
     })
   }
 
   if (collectionConfig.admin.components?.beforeListTable) {
     result.BeforeListTable = RenderServerComponent({
-      clientProps,
+      clientProps: clientProps satisfies BeforeListTableClientProps,
       Component: collectionConfig.admin.components.beforeListTable,
       importMap: payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
     })
   }
 
   if (collectionConfig.admin.components?.Description) {
     result.Description = RenderServerComponent({
       clientProps: {
+        collectionSlug: collectionConfig.slug,
         description,
-        ...clientProps,
-      },
+      } satisfies ViewDescriptionClientProps,
       Component: collectionConfig.admin.components.Description,
       importMap: payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
 

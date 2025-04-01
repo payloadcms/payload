@@ -1,5 +1,7 @@
 'use client'
 
+import type { ListDrawerProps } from '@payloadcms/ui'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -103,8 +105,8 @@ const RelationshipElementComponent: React.FC = () => {
     [editor, element, relatedCollection, cacheBust, setParams, closeDrawer],
   )
 
-  const swapRelationship = React.useCallback(
-    ({ collectionSlug, docID }) => {
+  const swapRelationship = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       const elementPath = ReactEditor.findPath(editor, element)
 
       Transforms.setNodes(
@@ -113,7 +115,7 @@ const RelationshipElementComponent: React.FC = () => {
           type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: collectionSlug,
-          value: { id: docID },
+          value: { id: doc.id },
         },
         { at: elementPath },
       )

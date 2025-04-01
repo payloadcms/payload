@@ -32,7 +32,12 @@ export const RenderVersionFieldsToDiff = ({
             const LocaleComponents: React.ReactNode[] = []
             for (const [locale, baseField] of Object.entries(field.fieldByLocale)) {
               LocaleComponents.push(
-                <div className={`${baseClass}__locale`} key={[locale, fieldIndex].join('-')}>
+                <div
+                  className={`${baseClass}__locale`}
+                  data-field-path={baseField.path}
+                  data-locale={locale}
+                  key={[locale, fieldIndex].join('-')}
+                >
                   <div className={`${baseClass}__locale-value`}>{baseField.CustomComponent}</div>
                 </div>,
               )

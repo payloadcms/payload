@@ -32,7 +32,7 @@ export const LexicalLocalizedFields: CollectionConfig = {
           BlocksFeature({
             blocks: [
               {
-                slug: 'block',
+                slug: 'blockLexicalLocalized',
                 fields: [
                   {
                     name: 'textLocalized',
@@ -80,7 +80,7 @@ export const LexicalLocalizedFields: CollectionConfig = {
           BlocksFeature({
             blocks: [
               {
-                slug: 'block',
+                slug: 'blockLexicalLocalized2',
                 fields: [
                   {
                     name: 'textLocalized',

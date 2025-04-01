@@ -18,6 +18,71 @@ export default buildConfigWithDefaults({
           type: 'text',
           name: 'text',
         },
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          name: 'selectField',
+          type: 'select',
+          required: true,
+          interfaceName: 'MySelectOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+        {
+          name: 'radioField',
+          type: 'radio',
+          required: true,
+          interfaceName: 'MyRadioOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'pages-categories',
+          name: 'category',
+        },
+      ],
+    },
+    {
+      slug: 'pages-categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'join',
+          name: 'relatedPages',
+          collection: 'pages',
+          on: 'category',
+        },
       ],
     },
   ],

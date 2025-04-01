@@ -7,7 +7,7 @@ export const richTextBlocks = [
     text: 'Regular text',
   },
   {
-    blockType: 'richTextBlock',
+    blockType: 'richTextBlockSlate',
     text: [
       {
         children: [

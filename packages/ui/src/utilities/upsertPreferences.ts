@@ -1,46 +1,48 @@
-import type { DefaultDocumentIDType, PayloadRequest } from 'payload'
+import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
 
 import { dequal } from 'dequal/lite'
+import { cache } from 'react'
 
 import { removeUndefined } from './removeUndefined.js'
 
-const getPreferences = async <T>({
-  key,
-  req,
-}: {
-  key: string
-  req: PayloadRequest
-}): Promise<{ id: DefaultDocumentIDType; value: T }> => {
-  const result = (await req.payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      pagination: false,
-      where: {
-        and: [
-          {
-            key: {
-              equals: key,
+export const getPreferences = cache(
+  async <T>(
+    key: string,
+    payload: Payload,
+    userID: DefaultDocumentIDType,
+    userSlug: string,
+  ): Promise<{ id: DefaultDocumentIDType; value: T }> => {
+    const result = (await payload
+      .find({
+        collection: 'payload-preferences',
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        where: {
+          and: [
+            {
+              key: {
+                equals: key,
+              },
             },
-          },
-          {
-            'user.relationTo': {
-              equals: req.user.collection,
+            {
+              'user.relationTo': {
+                equals: userSlug,
+              },
             },
-          },
-          {
-            'user.value': {
-              equals: req.user.id,
+            {
+              'user.value': {
+                equals: userID,
+              },
             },
-          },
-        ],
-      },
-    })
-    .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
+          ],
+        },
+      })
+      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
 
-  return result
-}
+    return result
+  },
+)
 
 /**
  * Will update the given preferences by key, creating a new record if it doesn't already exist, or merging existing preferences with the new value.
@@ -51,18 +53,26 @@ const getPreferences = async <T>({
  * @param value - The new value to merge with the existing preferences
  */
 export const upsertPreferences = async <T extends Record<string, unknown> | string>({
+  customMerge,
   key,
   req,
   value: incomingValue,
 }: {
   key: string
   req: PayloadRequest
-  value: T
-}): Promise<T> => {
-  const existingPrefs = await getPreferences<T>({
-    key,
-    req,
-  })
+} & (
+  | {
+      customMerge: (existingValue: T) => T
+      value?: never
+    }
+  | {
+      customMerge?: never
+      value: T
+    }
+)): Promise<T> => {
+  const existingPrefs: { id?: DefaultDocumentIDType; value?: T } = req.user
+    ? await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
+    : {}
 
   let newPrefs = existingPrefs?.value
 
@@ -78,17 +88,24 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
         value: incomingValue,
       },
       depth: 0,
-      req,
+      disableTransaction: true,
+      user: req.user,
     })
   } else {
-    // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
-    const mergedPrefs =
-      typeof incomingValue === 'object'
-        ? {
-            ...(typeof existingPrefs.value === 'object' ? existingPrefs?.value : {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
-            ...removeUndefined(incomingValue || {}),
-          }
-        : incomingValue
+    let mergedPrefs: T
+
+    if (typeof customMerge === 'function') {
+      mergedPrefs = customMerge(existingPrefs.value)
+    } else {
+      // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
+      mergedPrefs =
+        typeof incomingValue === 'object'
+          ? ({
+              ...(typeof existingPrefs.value === 'object' ? existingPrefs?.value : {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
+              ...removeUndefined(incomingValue || {}),
+            } as T)
+          : incomingValue
+    }
 
     if (!dequal(mergedPrefs, existingPrefs.value)) {
       newPrefs = await req.payload
@@ -104,7 +121,8 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
             value: mergedPrefs,
           },
           depth: 0,
-          req,
+          disableTransaction: true,
+          user: req.user,
         })
         ?.then((res) => res.value)
     }

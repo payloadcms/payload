@@ -7,11 +7,12 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
@@ -22,10 +23,13 @@ import {
 } from 'payload'
 import { fileURLToPath } from 'url'
 
+import type { Global2 } from './payload-types.js'
+
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,8 +45,16 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
+
+    await seed(payload)
+
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -291,6 +303,143 @@ describe('database', () => {
       keys = Object.keys(foundUser)
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
+    })
+  })
+
+  describe('allow ID on create', () => {
+    beforeAll(() => {
+      payload.db.allowIDOnCreate = true
+      payload.config.db.allowIDOnCreate = true
+    })
+
+    afterAll(() => {
+      payload.db.allowIDOnCreate = false
+      payload.config.db.allowIDOnCreate = false
+    })
+
+    it('local API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 9999
+      }
+
+      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+
+      expect(post.id).toBe(id)
+    })
+
+    it('rEST API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 99999
+      }
+
+      const response = await restClient.POST(`/posts`, {
+        body: JSON.stringify({
+          id,
+          title: 'created',
+        }),
+      })
+
+      const post = await response.json()
+
+      expect(post.doc.id).toBe(id)
+    })
+
+    it('graphQL - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 999999
+      }
+
+      const query = `mutation {
+                createPost(data: {title: "created", id: ${typeof id === 'string' ? `"${id}"` : id}}) {
+                id
+                title
+              }
+            }`
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const doc = res.data.createPost
+
+      expect(doc).toMatchObject({ title: 'created', id })
+      expect(doc.id).toBe(id)
+    })
+  })
+
+  describe('Compound Indexes', () => {
+    beforeEach(async () => {
+      await payload.delete({ collection: 'compound-indexes', where: {} })
+    })
+
+    it('top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '2' },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '3' },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '-1', two: '2' },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { three: randomUUID(), one: '1', two: '2' },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('combine group and top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: {
+          one: randomUUID(),
+          three: '3',
+          group: { four: '4' },
+        },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '3', group: { four: '5' } },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '4', group: { four: '4' } },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { one: randomUUID(), three: '3', group: { four: '4' } },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 
@@ -792,6 +941,7 @@ describe('database', () => {
             data: {
               title,
             },
+            depth: 0,
             disableTransaction: true,
           })
         })
@@ -874,6 +1024,525 @@ describe('database', () => {
 
       expect(result.point).toEqual([5, 10])
     })
+
+    it('ensure updateMany updates all docs and respects where query', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'notupdated',
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: `v1 ${i}`,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            not_equals: 'notupdated',
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            not_equals: 'updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(1)
+      expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
+    })
+
+    it('ensure updateMany respects limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 11 posts
+      for (let i = 0; i < 11; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'not updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(6)
+      expect(notUpdatedDocs?.[0]?.title).toBe('not updated')
+      expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
+    })
+
+    it('ensure updateMany respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.[i]?.number).toBe(i)
+        expect(result?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.docs?.[i]?.number).toBe(i)
+        expect(result?.docs?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.[-i + 10]?.number).toBe(i)
+        expect(result?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.docs?.[-i + 10]?.number).toBe(i)
+        expect(result?.docs?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany correctly handles 0 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: 0 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
+
+    it('ensure updateMany correctly handles -1 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: -1,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: -1 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
   })
 
   describe('Error Handler', () => {
@@ -892,7 +1561,7 @@ describe('database', () => {
         errorMessage = e.message
       }
 
-      await expect(errorMessage).toBe('The following field is invalid: Title')
+      expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
     it('should return validation errors in response', async () => {
@@ -912,7 +1581,7 @@ describe('database', () => {
           },
         })
       } catch (e: any) {
-        await expect(e.message).toMatch(
+        expect(e.message).toMatch(
           payload.db.name === 'mongoose'
             ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
             : payload.db.name === 'sqlite'
@@ -1356,5 +2025,157 @@ describe('database', () => {
     await payload.delete({ id, collection: postsSlug })
     const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     expect(id_2).not.toBe(id)
+  })
+
+  it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.db.createGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2')
+    expect(result.globalType).toBe('global-2')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.db.updateGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2 but updated')
+    expect(result.globalType).toBe('global-2')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3')
+    expect(result.globalType).toBe('global-3')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3 but updated')
+    expect(result.globalType).toBe('global-3')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('should group where conditions with AND', async () => {
+    // create 2 docs
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 2',
+      },
+    })
+
+    const query1 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` last
+          not_in: [],
+          in: [doc2.id],
+        },
+      },
+    })
+
+    const query2 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` first
+          in: [doc2.id],
+          not_in: [],
+        },
+      },
+    })
+
+    const query3 = await payload.find({
+      collection: postsSlug,
+      where: {
+        and: [
+          {
+            id: {
+              in: [doc2.id],
+              not_in: [],
+            },
+          },
+        ],
+      },
+    })
+
+    expect(query1.totalDocs).toEqual(1)
+    expect(query2.totalDocs).toEqual(1)
+    expect(query3.totalDocs).toEqual(1)
+  })
+
+  it('mongodb additional keys stripping', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+
+    const arrItemID = randomUUID()
+    const res = await payload.db.collections[postsSlug]?.collection.insertOne({
+      SECRET_FIELD: 'secret data',
+      arrayWithIDs: [
+        {
+          id: arrItemID,
+          additionalKeyInArray: 'true',
+          text: 'existing key',
+        },
+      ],
+    })
+
+    let payloadRes: any = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBeUndefined()
+    expect(payloadRes.arrayWithIDs).toBeDefined()
+    expect(payloadRes.arrayWithIDs[0].id).toBe(arrItemID)
+    expect(payloadRes.arrayWithIDs[0].text).toBe('existing key')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBeUndefined()
+
+    // But allows when allowAdditionaKeys is true
+    payload.db.allowAdditionalKeys = true
+
+    payloadRes = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBe('secret data')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
+
+    payload.db.allowAdditionalKeys = false
   })
 })

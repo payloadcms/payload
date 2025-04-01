@@ -1,8 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertToastErrors } from 'helpers/assertToastErrors.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -19,15 +21,9 @@ import type {
   VersionedRelationshipField,
 } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  openCreateDocDrawer,
-  openDocDrawer,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -42,7 +38,7 @@ import {
   relationWithTitleSlug,
   slug,
   versionedRelationshipFieldSlug,
-} from './collectionSlugs.js'
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -180,7 +176,7 @@ describe('Relationship Field', () => {
     await expect(options).toHaveCount(2) // two docs
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-    await trackNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
+    await assertNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
       await saveDocAndAssert(page)
       await wait(200)
     })
@@ -293,9 +289,10 @@ describe('Relationship Field', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      `is invalid: ${fieldLabel}`,
-    )
+    await assertToastErrors({
+      page,
+      errors: [fieldLabel],
+    })
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -305,97 +302,169 @@ describe('Relationship Field', () => {
     await saveDocAndAssert(page)
   }
 
-  // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test('should allow dynamic filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFiltered', 'Relationship Filtered')
-  })
-
-  // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test('should allow dynamic async filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
-  })
-
-  test('should allow usage of relationTo in filterOptions', async () => {
-    const { id: include } = (await payload.create({
-      collection: relationOneSlug,
-      data: {
-        name: 'include',
-      },
-    })) as any
-    const { id: exclude } = (await payload.create({
-      collection: relationOneSlug,
-      data: {
-        name: 'exclude',
-      },
-    })) as any
-
-    await page.goto(url.create)
-
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText(include)
-    await expect(options).not.toContainText(exclude)
-  })
-
-  test('should allow usage of siblingData in filterOptions', async () => {
-    await payload.create({
-      collection: relationWithTitleSlug,
-      data: {
-        name: 'exclude',
-      },
+  describe('filterOptions', () => {
+    // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
+    test('should allow dynamic filterOptions', async () => {
+      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered By ID')
     })
 
-    await page.goto(url.create)
-
-    // enter a filter for relationshipManyFiltered to use
-    await page.locator('#field-filter').fill('include')
-
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).not.toContainText('exclude')
-  })
-
-  // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
-  test.skip('should not query for a relationship when filterOptions returns false', async () => {
-    await payload.create({
-      collection: relationFalseFilterOptionSlug,
-      data: {
-        name: 'whatever',
-      },
+    // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
+    test('should allow dynamic async filterOptions', async () => {
+      await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
     })
 
-    await page.goto(url.create)
+    test('should apply filter options within list view filter controls', async () => {
+      const { id: idToInclude } = await payload.create({
+        collection: slug,
+        data: {
+          filter: 'Include me',
+        },
+      })
 
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+      // first ensure that filter options are applied in the edit view
+      await page.goto(url.edit(idToInclude))
+      const field = page.locator('#field-relationshipFilteredByField')
+      await field.click({ delay: 100 })
+      const options = field.locator('.rs__option')
+      await expect(options).toHaveCount(1)
+      await expect(options).toContainText(idToInclude)
 
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText('Relation With Titles')
-    await expect(options).not.toContainText('whatever')
-  })
+      // now ensure that the same filter options are applied in the list view
+      await page.goto(url.list)
 
-  // TODO: Flaky test in CI - fix.
-  test('should show a relationship when filterOptions returns true', async () => {
-    await payload.create({
-      collection: relationTrueFilterOptionSlug,
-      data: {
-        name: 'truth',
-      },
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Relationship Filtered By Field',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const valueInput = page.locator('.condition__value input')
+      await valueInput.click()
+      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+
+      await expect(valueOptions).toHaveCount(2)
+      await expect(valueOptions.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
-    await page.goto(url.create)
-    // wait for relationship options to load
-    const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-    await relationFilterOptionsReq
+    test('should apply filter options of nested fields to list view filter controls', async () => {
+      const { id: idToInclude } = await payload.create({
+        collection: slug,
+        data: {
+          filter: 'Include me',
+        },
+      })
 
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText('truth')
+      // first ensure that filter options are applied in the edit view
+      await page.goto(url.edit(idToInclude))
+      const field = page.locator('#field-nestedRelationshipFilteredByField')
+      await field.click({ delay: 100 })
+      const options = field.locator('.rs__option')
+      await expect(options).toHaveCount(1)
+      await expect(options).toContainText(idToInclude)
+
+      // now ensure that the same filter options are applied in the list view
+      await page.goto(url.list)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Collapsible > Nested Relationship Filtered By Field',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const valueInput = page.locator('.condition__value input')
+      await valueInput.click()
+      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+
+      await expect(valueOptions).toHaveCount(2)
+      await expect(valueOptions.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
+    })
+
+    test('should allow usage of relationTo in filterOptions', async () => {
+      const { id: include } = (await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: 'include',
+        },
+      })) as any
+      const { id: exclude } = (await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: 'exclude',
+        },
+      })) as any
+
+      await page.goto(url.create)
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText(include)
+      await expect(options).not.toContainText(exclude)
+    })
+
+    test('should allow usage of siblingData in filterOptions', async () => {
+      await payload.create({
+        collection: relationWithTitleSlug,
+        data: {
+          name: 'exclude',
+        },
+      })
+
+      await page.goto(url.create)
+
+      // enter a filter for relationshipManyFiltered to use
+      await page.locator('#field-filter').fill('include')
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).not.toContainText('exclude')
+    })
+
+    // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
+    test.skip('should not query for a relationship when filterOptions returns false', async () => {
+      await payload.create({
+        collection: relationFalseFilterOptionSlug,
+        data: {
+          name: 'whatever',
+        },
+      })
+
+      await page.goto(url.create)
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText('Relation With Titles')
+      await expect(options).not.toContainText('whatever')
+    })
+
+    // TODO: Flaky test in CI - fix.
+    test('should show a relationship when filterOptions returns true', async () => {
+      await payload.create({
+        collection: relationTrueFilterOptionSlug,
+        data: {
+          name: 'truth',
+        },
+      })
+
+      await page.goto(url.create)
+      // wait for relationship options to load
+      const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+      await relationFilterOptionsReq
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText('truth')
+    })
   })
 
   test('should allow docs with same ID but different collections to be selectable', async () => {
@@ -422,12 +491,12 @@ describe('Relationship Field', () => {
   test.skip('should open document drawer from read-only relationships', async () => {
     const editURL = url.edit(docWithExistingRelations.id)
     await page.goto(editURL)
-    await page.waitForURL(editURL)
 
-    await openDocDrawer(
+    await openDocDrawer({
       page,
-      '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
-    )
+      selector:
+        '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
+    })
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
@@ -435,7 +504,7 @@ describe('Relationship Field', () => {
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
-    await openCreateDocDrawer(page, '#field-relationshipHasMany')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationshipHasMany' })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
     const drawerField = documentDrawer.locator('#field-name')
@@ -461,10 +530,10 @@ describe('Relationship Field', () => {
     const saveButton = page.locator('#action-save')
     await expect(saveButton).toBeDisabled()
 
-    await openDocDrawer(
+    await openDocDrawer({
       page,
-      '#field-relationship button.relationship--single-value__drawer-toggler ',
-    )
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+    })
 
     const field = page.locator('#field-name')
     await field.fill('Updated')
@@ -488,25 +557,13 @@ describe('Relationship Field', () => {
     await page.goto(versionedRelationshipFieldURL.list)
 
     await page.locator('.list-controls__toggle-columns').click()
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
 
-    const conditionField = page.locator('.condition__field')
-    await conditionField.click()
-
-    const dropdownFieldOptions = conditionField.locator('.rs__option')
-    await dropdownFieldOptions.locator('text=Relationship Field').nth(0).click()
-
-    const operatorField = page.locator('.condition__operator')
-    await operatorField.click()
-
-    const dropdownOperatorOptions = operatorField.locator('.rs__option')
-    await dropdownOperatorOptions.locator('text=exists').click()
-
-    const valueField = page.locator('.condition__value')
-    await valueField.click()
-    const dropdownValueOptions = valueField.locator('.rs__option')
-    await dropdownValueOptions.locator('text=True').click()
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship Field',
+      operatorLabel: 'exists',
+      value: 'True',
+    })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })

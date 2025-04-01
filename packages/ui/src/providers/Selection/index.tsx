@@ -3,7 +3,7 @@ import type { ClientUser, Where } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useLocale } from '../Locale/index.js'
@@ -93,17 +93,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
-      let newMap = new Map()
+      const newMap = new Map(selected.set(id, isSelected))
 
-      if (isSelected) {
-        newMap = new Map(selected.set(id, isSelected))
-      } else {
-        newMap = new Map(selected.set(id, false))
+      // If previously selected all and now deselecting, adjust status
+      if (selectAll === SelectAllStatus.AllAvailable && !isSelected) {
+        setSelectAll(SelectAllStatus.Some)
       }
 
       setSelected(newMap)
     },
-    [selected, docs, user?.id],
+    [selected, docs, selectAll, user?.id],
   )
 
   const getQueryParams = useCallback(
@@ -201,7 +200,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
-  return <Context.Provider value={contextRef.current}>{children}</Context.Provider>
+  return <Context value={contextRef.current}>{children}</Context>
 }
 
-export const useSelection = (): SelectionContext => useContext(Context)
+export const useSelection = (): SelectionContext => use(Context)

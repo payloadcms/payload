@@ -92,7 +92,7 @@ export const getBlockMarkdownTransformers = ({
 
           const childrenString = linesInBetween.join('\n').trim()
 
-          const propsString: null | string = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+          const propsString = openMatch[2]?.trim()
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 

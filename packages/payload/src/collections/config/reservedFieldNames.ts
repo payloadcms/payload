@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Field } from '../../fields/config/types.js'
 import type { CollectionConfig } from '../../index.js'
 
