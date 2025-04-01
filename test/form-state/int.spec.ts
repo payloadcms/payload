@@ -25,7 +25,7 @@ describe('Form State', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, false))
 
     const data = await restClient
       .POST('/users/login', {
@@ -138,5 +138,163 @@ describe('Form State', () => {
     })
   })
 
-  it.todo('should skip validation if specified')
+  it('should not unnecessarily re-render custom components when adding a row and then editing a field', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const { state: stateWithRow } = await buildFormState({
+      collectionSlug: postsSlug,
+      formState: {
+        array: {
+          rows: [
+            {
+              id: '123',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // Ensure that row 1 returns with rendered components
+    expect(stateWithRow['array']?.lastRenderedPath).toStrictEqual('array')
+    expect(stateWithRow['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
+    expect(stateWithRow['array.0.richText']?.customComponents?.Field).toBeDefined()
+
+    const { state: stateWithTitle } = await buildFormState({
+      collectionSlug: postsSlug,
+      formState: {
+        title: {
+          value: 'Test Post',
+          initialValue: 'Test Post',
+        },
+        array: {
+          rows: [
+            {
+              id: '123',
+            },
+            {
+              id: '456',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+        'array.0.richText': {
+          lastRenderedPath: 'array.0.richText',
+        },
+        'array.1.id': {
+          value: '456',
+          initialValue: '456',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // Ensure that row 1 DOES NOT return with rendered components
+    expect(stateWithTitle['array']?.lastRenderedPath).toStrictEqual('array')
+    expect(stateWithTitle['array.0.richText']).not.toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle['array.0.richText']).not.toHaveProperty('customComponents')
+  })
+
+  it('should not unnecessarily re-render custom components when adding rows back-to-back', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const { state: stateWith1Row } = await buildFormState({
+      collectionSlug: postsSlug,
+      formState: {
+        array: {
+          rows: [
+            {
+              id: '123',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // Ensure that row 1 returns rendered components
+    expect(stateWith1Row['array']?.lastRenderedPath).toStrictEqual('array')
+    expect(stateWith1Row['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
+    expect(stateWith1Row['array.0.richText']?.customComponents?.Field).toBeDefined()
+
+    const { state: stateWith2Rows } = await buildFormState({
+      collectionSlug: postsSlug,
+      formState: {
+        array: {
+          lastRenderedPath: 'array',
+          rows: [
+            {
+              id: '123',
+            },
+            {
+              id: '456',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+        'array.0.richText': {
+          lastRenderedPath: 'array.0.richText',
+        },
+        'array.1.id': {
+          value: '456',
+          initialValue: '456',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // Ensure that row 1 DOES NOT return rendered components
+    // But row 2 DOES return rendered components
+    expect(stateWith2Rows['array']?.lastRenderedPath).toStrictEqual('array')
+    expect(stateWith2Rows['array.0.richText']).not.toHaveProperty('lastRenderedPath')
+    expect(stateWith2Rows['array.0.richText']).not.toHaveProperty('customComponents')
+    expect(stateWith2Rows['array.1.richText']?.lastRenderedPath).toStrictEqual('array.1.richText')
+    expect(stateWith2Rows['array.1.richText']?.customComponents?.Field).toBeDefined()
+  })
 })
