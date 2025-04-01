@@ -2,7 +2,7 @@ import type { SerializedEditorState } from 'lexical'
 import type { RichTextFieldDiffServerComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffLabel } from '@payloadcms/ui/shared'
+import { FieldDiffLabel } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 import './htmlDiff/index.scss'

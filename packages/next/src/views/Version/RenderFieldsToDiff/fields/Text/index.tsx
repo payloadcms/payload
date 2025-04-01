@@ -2,8 +2,7 @@
 import type { TextFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui'
-import { FieldDiffLabel } from '@payloadcms/ui/shared'
+import { FieldDiffLabel, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'

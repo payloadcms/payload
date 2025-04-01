@@ -1,3 +1,4 @@
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'
 export { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'

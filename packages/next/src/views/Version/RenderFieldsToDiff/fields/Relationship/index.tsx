@@ -7,8 +7,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useTranslation } from '@payloadcms/ui'
-import { FieldDiffLabel } from '@payloadcms/ui/shared'
+import { FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
