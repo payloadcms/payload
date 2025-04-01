@@ -24,6 +24,7 @@ export const ListItemDiffHTMLConverterAsync: HTMLConvertersAsync<SerializedListI
           className={`checkboxItem ${node.checked ? 'checkboxItem--checked' : 'checkboxItem--unchecked'}${
             hasSubLists ? ' checkboxItem--nested' : ''
           }`}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
           role="checkbox"
           tabIndex={-1}
           value={node.value}
