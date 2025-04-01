@@ -21,7 +21,8 @@
       text-overflow: ellipsis;
     }
 
-    &__drawer-toggler {
+    &__drawer-toggler,
+    &__open-in-new-tab {
       border: none;
       background-color: transparent;
       padding: 0;
