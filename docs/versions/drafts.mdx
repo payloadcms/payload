@@ -49,17 +49,21 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
   specify if you are interacting with drafts or with live documents.
 </Banner>
 
-#### Updating or creating drafts
+#### Updating drafts
 
-If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a **draft**, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `create` or `update` operation, your action will be treated as if you are creating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
+If you enable drafts on a collection or global, the `update` operation for REST, GraphQL, and Local APIs exposes a new option called `draft` which allows you to specify if you are updating a **draft**, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `update` operation, your action will be treated as if you are updating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
 
 **Required fields**
 
-If `draft` is enabled while creating or updating a document, all fields are considered as not required, so that you can save drafts that are incomplete.
+If `draft` is enabled while updating a document, all fields are considered as not required, so that you can save drafts that are incomplete.
+
+#### Creating drafts
+
+By default, draft-enabled collections will create draft documents when you create a new document. In order to create a published document, you need to pass `_status: 'published'` to the document data.
 
 #### Reading drafts vs. published documents
 
-In addition to the `draft` argument within `create` and `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
+In addition to the `draft` argument within `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
 
 If `draft` is set to `true` while reading a document, **Payload will automatically replace returned document(s) with their newest drafts** if any newer drafts are available.
 
