@@ -119,7 +119,7 @@ export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) =>
     return false
   }
   // Check whether folder for the file exists.
-  const parentPath = path.dirname(filePath)
+  const parentPath = path.resolve(path.dirname(filePath))
   // Create folder if it doesn't exist.
   if (!fs.existsSync(parentPath)) {
     fs.mkdirSync(parentPath, { recursive: true })
