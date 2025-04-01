@@ -507,12 +507,43 @@ describe('Uploads', () => {
   test('should render adminUploadControls', async () => {
     await page.goto(adminUploadControlURL.create)
 
-    const serverRenderedUploadButon = page.locator('#load-from-file-upload-button')
-    const clientRenderedUploadButon = page.locator('#load-from-url-upload-button')
-    await expect(serverRenderedUploadButon).toBeVisible()
-    await expect(clientRenderedUploadButon).toBeVisible()
+    const loadFromFileButton = page.locator('#load-from-file-upload-button')
+    const loadFromUrlButton = page.locator('#load-from-url-upload-button')
+    await expect(loadFromFileButton).toBeVisible()
+    await expect(loadFromUrlButton).toBeVisible()
   })
-  // TODO: loading from file and URL using the adminUploadControls
+
+  test('should load a file using a file reference from custom controls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const loadFromFileButton = page.locator('#load-from-file-upload-button')
+    await loadFromFileButton.click()
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    const mediaID = page.url().split('/').pop()
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID as string,
+      slug: adminUploadControlSlug,
+      auth: true,
+    })
+    await expect(mediaDoc.filename).toContainText('universal-truth.jpg')
+  })
+
+  test('should load a file using a URL reference from custom controls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const loadFromUrlButton = page.locator('#load-from-url-upload-button')
+    await loadFromUrlButton.click()
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    const mediaID = page.url().split('/').pop()
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID as string,
+      slug: adminUploadControlSlug,
+      auth: true,
+    })
+    await expect(mediaDoc.filename).toContainText('universal-truth.jpg')
+  })
 
   test('should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
