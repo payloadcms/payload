@@ -297,6 +297,46 @@ test.describe('Form State', () => {
 
     await cdpSession.detach()
   })
+
+  test('should send `lastRenderedPath` for all previously rendered rows through form state requests', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      expect: (body) => !body[0]?.args.formState?.['array.0.richText']?.lastRenderedPath,
+    })
+
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      expect: (body) =>
+        body?.[0]?.args?.formState?.['array.0.richText']?.lastRenderedPath === 'array.0.richText',
+    })
+
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      expect: (body) =>
+        !body?.[0]?.args?.formState?.['array.0.richText']?.lastRenderedPath &&
+        !body?.[0]?.args?.formState?.['array.1.richText']?.lastRenderedPath &&
+        body?.[0]?.args?.formState?.['array.2.richText']?.lastRenderedPath === 'array.2.richText',
+    })
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
