@@ -121,8 +121,6 @@ export const mergeServerFormState = ({
 
               // If an row was deleted from local state while the request was pending, remove it from incoming state
               // Do this in reverse order to avoid index issues when removing items
-              // While in the loop, merge locally stored properties into incoming state
-              // This is important, as the incoming state may not contain all properties of the row, such as custom components that were not part of this request
               for (let i = incomingState[path].rows.length - 1; i >= 0; i--) {
                 const incomingRow = incomingState[path].rows[i]
 
@@ -132,12 +130,6 @@ export const mergeServerFormState = ({
 
                 if (indexInCurrentState === -1) {
                   incomingState[path].rows.splice(i, 1)
-                } else {
-                  incomingState[path].rows[i] = {
-                    ...newFieldState.rows[indexInCurrentState],
-                    ...incomingState[path].rows[i],
-                    isLoading: false, // the server does not send this back so we need to explicitly set it to false
-                  }
                 }
               }
             }
