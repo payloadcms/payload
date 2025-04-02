@@ -4,9 +4,12 @@ import type { FieldType, Options } from '@payloadcms/ui'
 import type { TextFieldClientProps } from 'payload'
 
 import {
+  CheckboxInput,
   FieldLabel,
   TextInput,
+  useAllFormFields,
   useConfig,
+  useDebouncedCallback,
   useDocumentInfo,
   useField,
   useForm,
@@ -14,7 +17,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateTitle } from '../../types.js'
@@ -57,6 +60,15 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const maxLength = maxLengthFromProps || maxLengthDefault
 
   const { errorMessage, setValue, showError, value } = field
+
+  // State to track if auto-generate is enabled
+  const [autoGenerateEnabled, setAutoGenerateEnabled] = useState<boolean>(false)
+
+  // Track previous field values to detect changes
+  const previousFields = useRef<Record<string, any>>({})
+
+  // Get all form fields - this re-renders when ANY field changes
+  const [fields] = useAllFormFields()
 
   const regenerateTitle = useCallback(async () => {
     if (!hasGenerateTitleFn) {
@@ -110,6 +122,36 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue,
   ])
 
+  const debouncedRegenerateTitle = useDebouncedCallback(regenerateTitle, 1000)
+
+  // Listen for changes in form fields
+  useEffect(() => {
+    if (!autoGenerateEnabled || !fields) {
+      return
+    }
+
+    // Skip regeneration if we only have changes to this field
+    // This prevents infinite loops
+    const changedFields = Object.entries(fields).filter(([fieldPath, fieldData]) => {
+      // Skip our own field
+      if (fieldPath === path) {
+        return false
+      }
+
+      // Check if the field wasn't in previous state or has changed
+      const prevField = previousFields.current[fieldPath]
+      return !prevField || prevField.value !== fieldData?.value
+    })
+
+    // Only regenerate if fields other than ours have changed
+    if (changedFields.length > 0) {
+      debouncedRegenerateTitle()
+    }
+
+    // Update previous fields state
+    previousFields.current = { ...fields }
+  }, [fields, autoGenerateEnabled, path, debouncedRegenerateTitle])
+
   return (
     <div
       style={{
@@ -127,24 +169,19 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
-              <button
-                disabled={readOnly}
-                onClick={() => {
-                  void regenerateTitle()
+              <CheckboxInput
+                checked={autoGenerateEnabled}
+                className="inline-checkbox"
+                label={t('plugin-seo:autoGenerate')}
+                onToggle={(event) => {
+                  const checked = event.target.checked
+                  setAutoGenerateEnabled(checked)
+                  if (checked) {
+                    // Generate title immediately when enabled - don't debounce the initial generation
+                    void regenerateTitle()
+                  }
                 }}
-                style={{
-                  background: 'none',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'currentcolor',
-                  cursor: 'pointer',
-                  padding: 0,
-                  textDecoration: 'underline',
-                }}
-                type="button"
-              >
-                {t('plugin-seo:autoGenerate')}
-              </button>
+              />
             </React.Fragment>
           )}
         </div>
@@ -176,7 +213,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
           Error={errorMessage}
           onChange={setValue}
           path={path}
-          readOnly={readOnly}
+          readOnly={readOnly || autoGenerateEnabled}
           required={required}
           showError={showError}
           style={{

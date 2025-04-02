@@ -1,7 +1,6 @@
 @layer payload-default {
   .plugin-seo__field {
-    .field-label {
-      display: inline !important;
-    }
+    display: inline-flex;
+    margin-bottom: -4px;
   }
 }

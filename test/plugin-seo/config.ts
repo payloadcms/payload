@@ -100,7 +100,7 @@ export default buildConfigWithDefaults({
       generateDescription,
       generateTitle,
       generateURL,
-      tabbedUI: true,
+      tabbedUI: false,
       uploadsCollection: 'media',
     }),
   ],
