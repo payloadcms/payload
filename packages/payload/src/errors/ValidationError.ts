@@ -29,6 +29,9 @@ export class ValidationError extends APIError<{
       errors: ValidationFieldError[]
       global?: string
       id?: number | string
+      /**
+       *  req needs to be passed through (if you have one) in order to resolve label functions that may be part of the errors array
+       */
       req?: Partial<PayloadRequest>
     },
     t?: TFunction,
@@ -40,6 +43,7 @@ export class ValidationError extends APIError<{
         : en.translations.error.followingFieldsInvalid_other
 
     const req = results.req
+    // delete to avoid logging the whole req
     delete results['req']
 
     super(
