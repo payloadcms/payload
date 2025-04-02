@@ -1,8 +1,7 @@
 'use client'
-import type { FieldState } from 'payload'
+import type { FieldState, FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
@@ -106,16 +105,28 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
+            // Need to intelligently merge the rows array to ensure no rows are lost or added while requests are pending
             if (propFromServer === 'rows') {
-              // use a for loop to ensure that empty indices are not skipped
-              for (const [index, existingRow] of Object.entries(newFieldState.rows)) {
-                // check if a row has been added to local state while the request was still pending
-                const indexOfLocalRow = incomingState[path].rows.findIndex(
-                  (row) => row.id === existingRow.id,
+              // When adding rows to local state while a request is pending, add them to incoming state
+              newFieldState.rows.forEach((row, index) => {
+                const indexInIncomingState = incomingState[path].rows.findIndex(
+                  (incomingRow) => incomingRow.id === row.id,
                 )
 
-                if (indexOfLocalRow !== -1) {
-                  incomingState[path].rows.splice(indexOfLocalRow, 1, existingRow)
+                if (indexInIncomingState === -1) {
+                  incomingState[path].rows.splice(index, 0, row)
+                }
+              })
+
+              // When deleting rows from local state while a request is pending, remove them from incoming state
+              for (let i = 0; i < incomingState[path].rows.length; i++) {
+                const incomingRow = incomingState[path].rows[i]
+                const indexInExistingState = newFieldState.rows.findIndex(
+                  (existingRow) => existingRow.id === incomingRow.id,
+                )
+
+                if (indexInExistingState === -1) {
+                  incomingState[path].rows.splice(i, 1)
                 }
               }
             }
