@@ -106,6 +106,20 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
+            if (propFromServer === 'rows') {
+              // use a for loop to ensure that empty indices are not skipped
+              for (const [index, existingRow] of Object.entries(newFieldState.rows)) {
+                // check if a row has been added to local state while the request was still pending
+                const indexOfLocalRow = incomingState[path].rows.findIndex(
+                  (row) => row.id === existingRow.id,
+                )
+
+                if (indexOfLocalRow !== -1) {
+                  incomingState[path].rows.splice(indexOfLocalRow, 1, existingRow)
+                }
+              }
+            }
+
             newFieldState[propFromServer as any] = incomingState[path][propFromServer]
           }
         }
