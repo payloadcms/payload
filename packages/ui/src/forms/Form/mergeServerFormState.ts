@@ -106,15 +106,22 @@ export const mergeServerFormState = ({
 
               // If an row was deleted from local state while the request was pending, remove it from incoming state
               // Do this in reverse order to avoid index issues when removing items
+              // While in the loop, merge locally stored properties into incoming state
+              // This is important, as the incoming state may not contain all properties of the row, such as custom components that were not part of this request
               for (let i = incomingState[path].rows.length - 1; i >= 0; i--) {
                 const incomingRow = incomingState[path].rows[i]
 
-                const indexInExistingState = newFieldState.rows.findIndex(
+                const indexInCurrentState = newFieldState.rows.findIndex(
                   (existingRow) => existingRow.id === incomingRow.id,
                 )
 
-                if (indexInExistingState === -1) {
+                if (indexInCurrentState === -1) {
                   incomingState[path].rows.splice(i, 1)
+                } else {
+                  incomingState[path].rows[i] = {
+                    ...newFieldState.rows[indexInCurrentState],
+                    ...incomingState[path].rows[i],
+                  }
                 }
               }
             }
@@ -136,7 +143,7 @@ export const mergeServerFormState = ({
       newState[path] = fieldChanged ? { ...newFieldState } : newFieldState
     }
 
-    // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
+    // Now loop over values that are part of incoming state but not part of current state, and add them to the new state.
     // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
     // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
     for (const [path, field] of Object.entries(incomingState)) {

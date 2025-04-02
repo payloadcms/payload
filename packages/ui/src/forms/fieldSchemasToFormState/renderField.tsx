@@ -118,12 +118,14 @@ export const renderField: RenderFieldMethod = ({
 
         row.lastRenderedPath = rowPath
 
+        row.isLoading = false
+
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
-          if (!fieldState.rows[rowIndex]?.customComponents) {
-            fieldState.rows[rowIndex].customComponents = {}
+          if (!row.customComponents) {
+            row.customComponents = {}
           }
 
-          fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
+          row.customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
                 clientProps,
                 Component: fieldConfig.admin.components.RowLabel,
