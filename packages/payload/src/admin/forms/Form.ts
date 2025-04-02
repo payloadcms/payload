@@ -13,6 +13,9 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
+  customComponents?: {
+    RowLabel?: React.ReactNode
+  }
   id: string
   isLoading?: boolean
   lastRenderedPath?: string
@@ -35,7 +38,6 @@ export type FieldState = {
     Error?: React.ReactNode
     Field?: React.ReactNode
     Label?: React.ReactNode
-    RowLabels?: React.ReactNode[]
   }
   disableFormData?: boolean
   errorMessage?: string

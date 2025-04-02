@@ -119,15 +119,11 @@ export const renderField: RenderFieldMethod = ({
         row.lastRenderedPath = rowPath
 
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
-          if (!fieldState.customComponents) {
-            fieldState.customComponents = {}
+          if (!fieldState.rows[rowIndex]?.customComponents) {
+            fieldState.rows[rowIndex].customComponents = {}
           }
 
-          if (!fieldState.customComponents.RowLabels) {
-            fieldState.customComponents.RowLabels = []
-          }
-
-          fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
+          fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
                 clientProps,
                 Component: fieldConfig.admin.components.RowLabel,
@@ -172,15 +168,11 @@ export const renderField: RenderFieldMethod = ({
           ) as FlattenedBlock | undefined)
 
         if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
-          if (!fieldState.customComponents) {
-            fieldState.customComponents = {}
+          if (!fieldState.rows[rowIndex]?.customComponents) {
+            fieldState.rows[rowIndex].customComponents = {}
           }
 
-          if (!fieldState.customComponents.RowLabels) {
-            fieldState.customComponents.RowLabels = []
-          }
-
-          fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
+          fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
             ? RenderServerComponent({
                 clientProps,
                 Component: blockConfig.admin.components.Label,
