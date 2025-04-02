@@ -103,7 +103,7 @@ export const renderField: RenderFieldMethod = ({
   }
 
   switch (fieldConfig.type) {
-    case 'array':
+    case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
         const rowPath = `${path}.${rowIndex}`
@@ -113,9 +113,14 @@ export const renderField: RenderFieldMethod = ({
         if (!rowRequiresRender) {
           return
         }
+
         row.lastRenderedPath = rowPath
 
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState.customComponents) {
+            fieldState.customComponents = {}
+          }
+
           if (!fieldState.customComponents.RowLabels) {
             fieldState.customComponents.RowLabels = []
           }
@@ -137,8 +142,11 @@ export const renderField: RenderFieldMethod = ({
             : 'Mock'
         }
       })
+
       break
-    case 'blocks':
+    }
+
+    case 'blocks': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
         const rowPath = `${path}.${rowIndex}`
@@ -148,6 +156,7 @@ export const renderField: RenderFieldMethod = ({
         if (!rowRequiresRender) {
           return
         }
+
         row.lastRenderedPath = rowPath
 
         const blockTypeToMatch: string = row.blockType
@@ -184,7 +193,9 @@ export const renderField: RenderFieldMethod = ({
             : 'Mock'
         }
       })
+
       break
+    }
   }
 
   if (!requiresRender) {
