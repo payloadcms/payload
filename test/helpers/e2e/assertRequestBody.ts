@@ -23,10 +23,11 @@ export const assertRequestBody = async <T>(
   options: {
     action: Promise<void> | void
     expect?: (requestBody: T) => boolean | Promise<boolean>
+    url: string
   },
 ): Promise<T | undefined> => {
   const [request] = await Promise.all([
-    page.waitForRequest((request) => Boolean(request.method())), // Adjust condition as needed
+    page.waitForRequest((request) => Boolean(request.url().startsWith(options.url))),
     await options.action,
   ])
 

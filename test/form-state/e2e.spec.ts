@@ -7,6 +7,7 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -145,6 +146,54 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should send `lastRenderedPath` only when necessary', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    // The `array` itself should NOT have a `lastRenderedPath` because it has not been rendered yet
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body[0]?.args.formState?.['array'] && !body[0].args.formState['array'].lastRenderedPath,
+        ),
+    })
+
+    await wait(1000)
+
+    // The `array` itself should still NOT have a `lastRenderedPath`
+    // The rich text field in the first row SHOULD have a `lastRenderedPath` bc it has been rendered in the first request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body[0]?.args.formState?.['array'] &&
+            !body[0].args.formState['array'].lastRenderedPath &&
+            body[0].args.formState['array.0.richText']?.lastRenderedPath,
+        ),
+    })
+
+    await wait(1000)
+
+    // The `array` itself should still NOT have a `lastRenderedPath`
+    // The rich text field in the first row SHOULD have a `lastRenderedPath` bc it has been rendered in the first request
+    // The rich text field in the second row SHOULD have a `lastRenderedPath` bc it has been rendered in the second request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body[0]?.args.formState?.['array'] &&
+            !body[0].args.formState['array'].lastRenderedPath &&
+            body[0].args.formState['array.0.richText']?.lastRenderedPath &&
+            body[0].args.formState['array.1.richText']?.lastRenderedPath,
+        ),
+    })
   })
 
   test('should queue onChange functions', async () => {
@@ -286,46 +335,6 @@ test.describe('Form State', () => {
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: page.locator('#field-title').fill('Title 2'),
       expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
-    })
-
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
-    })
-
-    await cdpSession.detach()
-  })
-
-  test('should send `lastRenderedPath` for all previously rendered rows through form state requests', async () => {
-    await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
-
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
-    })
-
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
-      expect: (body) => !body[0]?.args.formState?.['array.0.richText']?.lastRenderedPath,
-    })
-
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
-      expect: (body) =>
-        body?.[0]?.args?.formState?.['array.0.richText']?.lastRenderedPath === 'array.0.richText',
-    })
-
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
-      expect: (body) =>
-        !body?.[0]?.args?.formState?.['array.0.richText']?.lastRenderedPath &&
-        !body?.[0]?.args?.formState?.['array.1.richText']?.lastRenderedPath &&
-        body?.[0]?.args?.formState?.['array.2.richText']?.lastRenderedPath === 'array.2.richText',
     })
 
     await cdpSession.send('Network.emulateNetworkConditions', {

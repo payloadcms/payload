@@ -158,6 +158,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const fieldState: FieldState = {}
 
+  if (lastRenderedPath) {
+    fieldState.lastRenderedPath = lastRenderedPath
+  }
+
   if (passesCondition === false) {
     fieldState.passesCondition = false
   }
