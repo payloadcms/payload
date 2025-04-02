@@ -1,8 +1,7 @@
 'use client'
-import type { FieldState } from 'payload'
+import type { FieldState, FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
@@ -92,31 +91,31 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
-            if (
-              propFromServer === 'customComponents' &&
-              'RowLabels' in incomingState[path].customComponents
-            ) {
-              // mutate the incomingState's RowLabels to ensure that none are lost when an array index is missing
-              // use a for loop for this to ensure empty slots are iterated over
-              for (let i = 0; i < incomingState[path].customComponents.RowLabels.length; i++) {
-                if (!incomingState[path].customComponents.RowLabels[i]) {
-                  incomingState[path].customComponents.RowLabels[i] =
-                    newFieldState.customComponents.RowLabels[i]
-                }
-              }
-
-              // trim extra items since the for loop above only covered the length of the incoming state
-              if (
-                newFieldState.customComponents.RowLabels?.length > 0 &&
-                newFieldState.customComponents.RowLabels.length >
-                  incomingState[path].customComponents.RowLabels.length
-              ) {
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                newFieldState.customComponents.RowLabels.splice(
-                  incomingState[path].customComponents.RowLabels.length,
-                  newFieldState.customComponents.RowLabels.length -
-                    incomingState[path].customComponents.RowLabels.length,
+            // Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
+            if (propFromServer === 'rows') {
+              // If a row was added to local state while the request was pending, add it to incoming state
+              newFieldState.rows.forEach((row, index) => {
+                const indexInIncomingState = incomingState[path].rows.findIndex(
+                  (incomingRow) => incomingRow.id === row.id,
                 )
+
+                if (indexInIncomingState === -1) {
+                  incomingState[path].rows.splice(index, 0, row)
+                }
+              })
+
+              // If an row was deleted from local state while the request was pending, remove it from incoming state
+              // Do this in reverse order to avoid index issues when removing items
+              for (let i = incomingState[path].rows.length - 1; i >= 0; i--) {
+                const incomingRow = incomingState[path].rows[i]
+
+                const indexInExistingState = newFieldState.rows.findIndex(
+                  (existingRow) => existingRow.id === incomingRow.id,
+                )
+
+                if (indexInExistingState === -1) {
+                  incomingState[path].rows.splice(i, 1)
+                }
               }
             }
 
