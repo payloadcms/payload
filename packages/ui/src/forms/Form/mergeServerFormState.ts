@@ -108,6 +108,7 @@ export const mergeServerFormState = ({
             // Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
             if (propFromServer === 'rows') {
               // If a row was added to local state while the request was pending, add it to incoming state
+              // This will ensure that the incoming state is fully formed before sanitizing it below
               newFieldState.rows.forEach((row, index) => {
                 const indexInIncomingState = incomingState[path].rows.findIndex(
                   (incomingRow) => incomingRow.id === row.id,
@@ -120,15 +121,23 @@ export const mergeServerFormState = ({
 
               // If an row was deleted from local state while the request was pending, remove it from incoming state
               // Do this in reverse order to avoid index issues when removing items
+              // While in the loop, merge locally stored properties into incoming state
+              // This is important, as the incoming state may not contain all properties of the row, such as custom components that were not part of this request
               for (let i = incomingState[path].rows.length - 1; i >= 0; i--) {
                 const incomingRow = incomingState[path].rows[i]
 
-                const indexInExistingState = newFieldState.rows.findIndex(
+                const indexInCurrentState = newFieldState.rows.findIndex(
                   (existingRow) => existingRow.id === incomingRow.id,
                 )
 
-                if (indexInExistingState === -1) {
+                if (indexInCurrentState === -1) {
                   incomingState[path].rows.splice(i, 1)
+                } else {
+                  incomingState[path].rows[i] = {
+                    ...newFieldState.rows[indexInCurrentState],
+                    ...incomingState[path].rows[i],
+                    isLoading: false, // the server does not send this back so we need to explicitly set it to false
+                  }
                 }
               }
             }
