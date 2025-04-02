@@ -4,6 +4,7 @@ import type { BaseJob, UpdateJobs, Where } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { buildSortParam } from './queries/buildSortParam.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
@@ -11,7 +12,7 @@ import { transform } from './utilities/transform.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
   this: MongooseAdapter,
-  { id, data, limit, req, returning, where: whereArg },
+  { id, data, limit, req, returning, sort: sortArg, where: whereArg },
 ) {
   if (!(data?.log as object[])?.length) {
     delete data.log
@@ -21,6 +22,14 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const { collectionConfig, Model } = getCollection({
     adapter: this,
     collectionSlug: 'payload-jobs',
+  })
+
+  const sort: Record<string, unknown> | undefined = buildSortParam({
+    adapter: this,
+    config: this.payload.config,
+    fields: collectionConfig.flattenedFields,
+    sort: sortArg || collectionConfig.defaultSort,
+    timestamps: true,
   })
 
   const options: MongooseUpdateQueryOptions = {
@@ -54,7 +63,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const documentsToUpdate = await Model.find(
           query,
           {},
-          { ...options, limit, projection: { _id: 1 } },
+          { ...options, limit, projection: { _id: 1 }, sort },
         )
         if (documentsToUpdate.length === 0) {
           return null
@@ -69,7 +78,14 @@ export const updateJobs: UpdateJobs = async function updateMany(
         return null
       }
 
-      result = await Model.find(query, {}, options)
+      result = await Model.find(
+        query,
+        {},
+        {
+          ...options,
+          sort,
+        },
+      )
     }
   } catch (error) {
     handleError({ collection: collectionConfig.slug, error, req })

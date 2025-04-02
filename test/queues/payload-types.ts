@@ -123,6 +123,7 @@ export interface Config {
       workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
       workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
+      inlineTaskTestDelayed: WorkflowInlineTaskTestDelayed;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
       subTask: WorkflowSubTask;
@@ -313,6 +314,7 @@ export interface PayloadJob {
         | 'workflowRetries2TasksRetriesUndefined'
         | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
+        | 'inlineTaskTestDelayed'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
         | 'subTask'
@@ -718,6 +720,15 @@ export interface WorkflowWorkflowRetries2TasksRetries0 {
  * via the `definition` "WorkflowInlineTaskTest".
  */
 export interface WorkflowInlineTaskTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowInlineTaskTestDelayed".
+ */
+export interface WorkflowInlineTaskTestDelayed {
   input: {
     message: string;
   };
