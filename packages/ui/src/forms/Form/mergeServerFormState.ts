@@ -85,20 +85,6 @@ export const mergeServerFormState = ({
           changed = true
           fieldChanged = true
 
-          if (newFieldState?.serverPropsToIgnore?.includes(propFromServer)) {
-            // Remove the ignored prop for the next request
-            newFieldState.serverPropsToIgnore = newFieldState.serverPropsToIgnore.filter(
-              (prop) => prop !== propFromServer,
-            )
-
-            // if no keys left, remove the entire object
-            if (!newFieldState.serverPropsToIgnore.length) {
-              delete newFieldState.serverPropsToIgnore
-            }
-
-            return
-          }
-
           if (!(propFromServer in incomingState[path])) {
             // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
             // Thus, we simply re-use the initial render state
