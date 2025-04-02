@@ -152,7 +152,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
-  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
@@ -849,7 +848,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (requiresRender && renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
+  if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)
@@ -878,6 +877,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState,
       formState: state,
       indexPath,
+      lastRenderedPath,
       mockRSCs,
       operation,
       parentPath,
