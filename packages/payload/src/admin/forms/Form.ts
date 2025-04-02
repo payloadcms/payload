@@ -15,6 +15,7 @@ export type Row = {
   collapsed?: boolean
   id: string
   isLoading?: boolean
+  lastRenderedPath?: string
 }
 
 export type FilterOptionsResult = {

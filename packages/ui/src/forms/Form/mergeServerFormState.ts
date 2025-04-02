@@ -92,6 +92,34 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
+            if (
+              propFromServer === 'customComponents' &&
+              'RowLabels' in incomingState[path].customComponents
+            ) {
+              // mutate the incomingState's RowLabels to ensure that none are lost when an array index is missing
+              // use a for loop for this to ensure empty slots are iterated over
+              for (let i = 0; i < incomingState[path].customComponents.RowLabels.length; i++) {
+                if (!incomingState[path].customComponents.RowLabels[i]) {
+                  incomingState[path].customComponents.RowLabels[i] =
+                    newFieldState.customComponents.RowLabels[i]
+                }
+              }
+
+              // trim extra items since the for loop above only covered the length of the incoming state
+              if (
+                newFieldState.customComponents.RowLabels?.length > 0 &&
+                newFieldState.customComponents.RowLabels.length >
+                  incomingState[path].customComponents.RowLabels.length
+              ) {
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                newFieldState.customComponents.RowLabels.splice(
+                  incomingState[path].customComponents.RowLabels.length,
+                  newFieldState.customComponents.RowLabels.length -
+                    incomingState[path].customComponents.RowLabels.length,
+                )
+              }
+            }
+
             newFieldState[propFromServer as any] = incomingState[path][propFromServer]
           }
         }

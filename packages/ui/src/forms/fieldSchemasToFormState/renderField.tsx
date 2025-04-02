@@ -34,6 +34,7 @@ export const renderField: RenderFieldMethod = ({
   fieldState,
   formState,
   indexPath,
+  lastRenderedPath,
   mockRSCs,
   operation,
   parentPath,
@@ -41,10 +42,17 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  renderAllFields,
   req,
   schemaPath,
   siblingData,
 }) => {
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
+
+  if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
+    return
+  }
+
   const clientField = clientFieldSchemaMap
     ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
     : createClientField({
@@ -53,15 +61,6 @@ export const renderField: RenderFieldMethod = ({
         i18n: req.i18n,
         importMap: req.payload.importMap,
       })
-
-  /**
-   * Set the lastRenderedPath equal to the new path of the field
-   */
-  fieldState.lastRenderedPath = path
-
-  if (fieldIsHiddenOrDisabled(clientField)) {
-    return
-  }
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
@@ -103,26 +102,27 @@ export const renderField: RenderFieldMethod = ({
     user: req.user,
   }
 
-  /**
-   * Only create the `customComponents` object if needed.
-   * This will prevent unnecessary data from being transferred to the client.
-   */
-  if (fieldConfig.admin) {
-    if (
-      (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
-        fieldConfig.type === 'richText' ||
-        ('description' in fieldConfig.admin &&
-          typeof fieldConfig.admin.description === 'function')) &&
-      !fieldState?.customComponents
-    ) {
-      fieldState.customComponents = {}
-    }
-  }
-
   switch (fieldConfig.type) {
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+
+        const rowPath = `${path}.${rowIndex}`
+
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+
+        row.lastRenderedPath = rowPath
+
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState.customComponents) {
+            fieldState.customComponents = {}
+          }
+
           if (!fieldState.customComponents.RowLabels) {
             fieldState.customComponents.RowLabels = []
           }
@@ -150,7 +150,21 @@ export const renderField: RenderFieldMethod = ({
 
     case 'blocks': {
       fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+
+        const rowPath = `${path}.${rowIndex}`
+
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+
+        row.lastRenderedPath = rowPath
+
         const blockTypeToMatch: string = row.blockType
+
         const blockConfig =
           req.payload.blocks[blockTypeToMatch] ??
           ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
@@ -187,7 +201,38 @@ export const renderField: RenderFieldMethod = ({
 
       break
     }
+  }
 
+  if (!requiresRender) {
+    return
+  }
+
+  /**
+   * Set the lastRenderedPath equal to the new path of the field
+   */
+  fieldState.lastRenderedPath = path
+
+  if (fieldIsHiddenOrDisabled(clientField)) {
+    return
+  }
+
+  /**
+   * Only create the `customComponents` object if needed.
+   * This will prevent unnecessary data from being transferred to the client.
+   */
+  if (fieldConfig.admin) {
+    if (
+      (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
+        fieldConfig.type === 'richText' ||
+        ('description' in fieldConfig.admin &&
+          typeof fieldConfig.admin.description === 'function')) &&
+      !fieldState?.customComponents
+    ) {
+      fieldState.customComponents = {}
+    }
+  }
+
+  switch (fieldConfig.type) {
     case 'richText': {
       if (!fieldConfig?.editor) {
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
