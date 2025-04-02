@@ -123,23 +123,31 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetStepNav
-        collectionConfig={collectionConfig}
-        collectionSlug={collectionSlug}
-        doc={doc}
-        fields={(collectionConfig || globalConfig)?.fields}
-        globalConfig={globalConfig}
-        globalSlug={globalSlug}
-        id={id}
-      />
-      <Gutter className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__header-wrap`}>
-          <p className={`${baseClass}__created-at`}>
-            {i18n.t('version:versionCreatedOn', {
-              version: i18n.t(doc?.autosave ? 'version:autosavedVersion' : 'version:version'),
-            })}
-          </p>
-          <header className={`${baseClass}__header`}>
+      <Gutter className={`${baseClass}-controls-top`}>
+        <div className={`${baseClass}-controls-top__wrapper`}>
+          <h2>{i18n.t('version:compareVersions')}</h2>
+          <div className={`${baseClass}-controls-top__wrapper-actions`}>
+            <span className={`${baseClass}__modifiedCheckBox`}>
+              <CheckboxInput
+                checked={modifiedOnly}
+                id={'modifiedOnly'}
+                label={i18n.t('version:modifiedOnly')}
+                onToggle={onToggleModifiedOnly}
+              />
+            </span>
+            {localization && (
+              <SelectLocales
+                onChange={setSelectedLocales}
+                options={availableLocales}
+                value={selectedLocales}
+              />
+            )}
+          </div>
+        </div>
+      </Gutter>
+      <Gutter className={`${baseClass}-controls-bottom`}>
+        <div className={`${baseClass}-controls-bottom__wrapper`}>
+          <div className={`${baseClass}-controls-bottom__selected-version`}>
             <h2>{versionCreatedAt}</h2>
             {canUpdate && (
               <Restore
@@ -153,35 +161,32 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 versionID={versionID}
               />
             )}
-            <span className={`${baseClass}__modifiedCheckBox`}>
-              <CheckboxInput
-                checked={modifiedOnly}
-                id={'modifiedOnly'}
-                label={i18n.t('version:modifiedOnly')}
-                onToggle={onToggleModifiedOnly}
-              />
-            </span>
-          </header>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <SelectComparison
-            baseURL={compareBaseURL}
-            draftsEnabled={draftsEnabled}
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-            onChange={setCompareValue}
-            parentID={id}
-            value={compareValue}
-            versionID={versionID}
-          />
-          {localization && (
-            <SelectLocales
-              onChange={setSelectedLocales}
-              options={availableLocales}
-              value={selectedLocales}
+          </div>
+
+          <div className={`${baseClass}-controls-bottom__compare-version`}>
+            <SelectComparison
+              baseURL={compareBaseURL}
+              draftsEnabled={draftsEnabled}
+              latestDraftVersion={latestDraftVersion}
+              latestPublishedVersion={latestPublishedVersion}
+              onChange={setCompareValue}
+              parentID={id}
+              value={compareValue}
+              versionID={versionID}
             />
-          )}
+          </div>
         </div>
+      </Gutter>
+      <SetStepNav
+        collectionConfig={collectionConfig}
+        collectionSlug={collectionSlug}
+        doc={doc}
+        fields={(collectionConfig || globalConfig)?.fields}
+        globalConfig={globalConfig}
+        globalSlug={globalSlug}
+        id={id}
+      />
+      <Gutter className={`${baseClass}__wrap`}>
         <SelectedLocalesContext
           value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
         >

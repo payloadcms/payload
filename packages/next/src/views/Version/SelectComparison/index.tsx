@@ -186,7 +186,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <div className={`${baseClass}__label`}>{t('version:compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
           isClearable={false}

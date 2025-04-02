@@ -24,7 +24,11 @@
       }
     }
 
-    &__button {
+    .btn {
+      margin-block: 0;
+    }
+
+    &__restore-as-draft-button {
       border-top-right-radius: 0px;
       border-bottom-right-radius: 0px;
       margin-right: 2px;
