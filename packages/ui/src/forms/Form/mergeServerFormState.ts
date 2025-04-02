@@ -107,7 +107,7 @@ export const mergeServerFormState = ({
           } else {
             // Need to intelligently merge the rows array to ensure no rows are lost or added while requests are pending
             if (propFromServer === 'rows') {
-              // When adding rows to local state while a request is pending, add them to incoming state
+              // If a row was added to local state while the request was pending, add it to incoming state
               newFieldState.rows.forEach((row, index) => {
                 const indexInIncomingState = incomingState[path].rows.findIndex(
                   (incomingRow) => incomingRow.id === row.id,
@@ -118,9 +118,8 @@ export const mergeServerFormState = ({
                 }
               })
 
-              // When deleting rows from local state while a request is pending, remove them from incoming state
-              for (let i = 0; i < incomingState[path].rows.length; i++) {
-                const incomingRow = incomingState[path].rows[i]
+              // If an row was deleted from local state while the request was pending, remove it from incoming state
+              incomingState[path].rows.forEach((incomingRow, i) => {
                 const indexInExistingState = newFieldState.rows.findIndex(
                   (existingRow) => existingRow.id === incomingRow.id,
                 )
@@ -128,7 +127,7 @@ export const mergeServerFormState = ({
                 if (indexInExistingState === -1) {
                   incomingState[path].rows.splice(i, 1)
                 }
-              }
+              })
             }
 
             newFieldState[propFromServer as any] = incomingState[path][propFromServer]
