@@ -47,6 +47,12 @@ export const renderField: RenderFieldMethod = ({
   schemaPath,
   siblingData,
 }) => {
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
+
+  if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
+    return
+  }
+
   const clientField = clientFieldSchemaMap
     ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
     : createClientField({
@@ -96,76 +102,54 @@ export const renderField: RenderFieldMethod = ({
     user: req.user,
   }
 
-  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
-
-  if (field.type === 'array') {
-    fieldState?.rows?.forEach((row, rowIndex) => {
-      const rowLastRenderedPath = row.lastRenderedPath
-      const rowPath = `${path}.${rowIndex}`
-      const requiresRender =
-        renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
-
-      if (!requiresRender) {
-        return
-      }
-
-      if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
-        if (!fieldState.customComponents.RowLabels) {
-          fieldState.customComponents.RowLabels = []
-        }
-
-        fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
-          ? RenderServerComponent({
-              clientProps,
-              Component: fieldConfig.admin.components.RowLabel,
-              importMap: req.payload.importMap,
-              key: `${rowIndex}`,
-              serverProps: {
-                ...serverProps,
-                rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
-                  rowIndex + 1,
-                ).padStart(2, '0')}`,
-                rowNumber: rowIndex + 1,
-              },
-            })
-          : 'Mock'
-      }
-      row.lastRenderedPath = rowPath
-    })
-  }
-
-  if (!requiresRender) {
-    return
-  }
-
-  /**
-   * Set the lastRenderedPath equal to the new path of the field
-   */
-  fieldState.lastRenderedPath = path
-
-  if (fieldIsHiddenOrDisabled(clientField)) {
-    return
-  }
-
-  /**
-   * Only create the `customComponents` object if needed.
-   * This will prevent unnecessary data from being transferred to the client.
-   */
-  if (fieldConfig.admin) {
-    if (
-      (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
-        fieldConfig.type === 'richText' ||
-        ('description' in fieldConfig.admin &&
-          typeof fieldConfig.admin.description === 'function')) &&
-      !fieldState?.customComponents
-    ) {
-      fieldState.customComponents = {}
-    }
-  }
-
   switch (fieldConfig.type) {
-    case 'blocks': {
+    case 'array':
       fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+        const rowPath = `${path}.${rowIndex}`
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+        row.lastRenderedPath = rowPath
+
+        if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState.customComponents.RowLabels) {
+            fieldState.customComponents.RowLabels = []
+          }
+
+          fieldState.customComponents.RowLabels[rowIndex] = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component: fieldConfig.admin.components.RowLabel,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: {
+                  ...serverProps,
+                  rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                    rowIndex + 1,
+                  ).padStart(2, '0')}`,
+                  rowNumber: rowIndex + 1,
+                },
+              })
+            : 'Mock'
+        }
+      })
+      break
+    case 'blocks':
+      fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+        const rowPath = `${path}.${rowIndex}`
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+        row.lastRenderedPath = rowPath
+
         const blockTypeToMatch: string = row.blockType
         const blockConfig =
           req.payload.blocks[blockTypeToMatch] ??
@@ -200,10 +184,39 @@ export const renderField: RenderFieldMethod = ({
             : 'Mock'
         }
       })
-
       break
-    }
+  }
 
+  if (!requiresRender) {
+    return
+  }
+
+  /**
+   * Set the lastRenderedPath equal to the new path of the field
+   */
+  fieldState.lastRenderedPath = path
+
+  if (fieldIsHiddenOrDisabled(clientField)) {
+    return
+  }
+
+  /**
+   * Only create the `customComponents` object if needed.
+   * This will prevent unnecessary data from being transferred to the client.
+   */
+  if (fieldConfig.admin) {
+    if (
+      (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
+        fieldConfig.type === 'richText' ||
+        ('description' in fieldConfig.admin &&
+          typeof fieldConfig.admin.description === 'function')) &&
+      !fieldState?.customComponents
+    ) {
+      fieldState.customComponents = {}
+    }
+  }
+
+  switch (fieldConfig.type) {
     case 'richText': {
       if (!fieldConfig?.editor) {
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor

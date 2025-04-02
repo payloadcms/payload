@@ -10,6 +10,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  Row,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
   SelectMode,
@@ -325,11 +326,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const previousRows = previousFormState?.[path]?.rows || []
 
             // First, check if `previousFormState` has a matching row
-            const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+            const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
 
-            const newRow = {
+            const newRow: Row = {
               id: row.id,
             }
+
             if (previousRow?.lastRenderedPath) {
               newRow.lastRenderedPath = previousRow.lastRenderedPath
             }
@@ -506,10 +508,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              acc.rowMetadata.push({
+              const previousRows = previousFormState?.[path]?.rows || []
+
+              // First, check if `previousFormState` has a matching row
+              const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
+
+              const newRow: Row = {
                 id: row.id,
                 blockType: row.blockType,
-              })
+              }
+
+              if (previousRow?.lastRenderedPath) {
+                newRow.lastRenderedPath = previousRow.lastRenderedPath
+              }
+
+              acc.rowMetadata.push(newRow)
 
               const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
 
@@ -893,6 +906,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: fieldPermissions,
       preferences,
       previousFieldState: previousFormState?.[path],
+      renderAllFields,
       req,
       schemaPath,
       siblingData: data,
