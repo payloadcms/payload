@@ -76,6 +76,10 @@ export const uploadthingStorage: UploadthingPlugin =
             ? uploadthingStorageOptions.clientUploads.access
             : undefined,
         acl: uploadthingStorageOptions.options.acl || 'public-read',
+        routerInputConfig:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.routerInputConfig
+            : undefined,
         token: uploadthingStorageOptions.options.token,
       }),
       serverHandlerPath: '/storage-uploadthing-client-upload-route',
