@@ -1,17 +1,17 @@
 import type {
   Adapter,
-  ClientUploadsConfig,
+  ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
+import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
-import { createRouteHandler } from 'uploadthing/next'
-import { createUploadthing, UTApi } from 'uploadthing/server'
+import { UTApi } from 'uploadthing/server'
 
 import { generateURL } from './generateURL.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
@@ -19,11 +19,18 @@ import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
+export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthing>>[0]
+
 export type UploadthingStorageOptions = {
   /**
    * Do uploads directly on the client, to bypass limits on Vercel.
    */
-  clientUploads?: ClientUploadsConfig
+  clientUploads?:
+    | {
+        access?: ClientUploadsAccess
+        routerInputConfig?: FileRouterInputConfig
+      }
+    | boolean
 
   /**
    * Collection options to apply the adapter to.
