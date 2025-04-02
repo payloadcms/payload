@@ -106,7 +106,9 @@ export const renderField: RenderFieldMethod = ({
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
+
         const rowPath = `${path}.${rowIndex}`
+
         const rowRequiresRender =
           renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
 
@@ -149,7 +151,9 @@ export const renderField: RenderFieldMethod = ({
     case 'blocks': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         const rowLastRenderedPath = row.lastRenderedPath
+
         const rowPath = `${path}.${rowIndex}`
+
         const rowRequiresRender =
           renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
 
@@ -160,6 +164,7 @@ export const renderField: RenderFieldMethod = ({
         row.lastRenderedPath = rowPath
 
         const blockTypeToMatch: string = row.blockType
+
         const blockConfig =
           req.payload.blocks[blockTypeToMatch] ??
           ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(

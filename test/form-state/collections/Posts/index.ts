@@ -69,6 +69,11 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'array',
       type: 'array',
+      admin: {
+        components: {
+          RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel',
+        },
+      },
       fields: [
         {
           name: 'richText',
