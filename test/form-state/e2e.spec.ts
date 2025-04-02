@@ -1,9 +1,11 @@
 import type { BrowserContext, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
+import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -180,7 +182,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('sequentially queued tasks not cause nested custom components to disappear', async () => {
+  test('should not cause nested custom fields to disappear when queuing form state (1)', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -191,14 +193,25 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
+    // Add a row and immediately type into another field
+    // Test that the rich text field within the row does not disappear
     await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
-        await page.locator('#field-array .array-field__add-row').click()
+        // Ensure `requiresRender` is `true` is set for the first request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
 
-        await page.locator('#field-title').fill('Title 2')
+        // Ensure `requiresRender` is `false` for the second request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-title').fill('Title 2'),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
+        })
 
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
         // eslint-disable-next-line playwright/no-wait-for-selector
         await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
           timeout: TEST_TIMEOUT,
@@ -213,6 +226,77 @@ test.describe('Form State', () => {
         timeout: 10000,
       },
     )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('should not cause nested custom fields to disappear when queuing form state (2)', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    // Add two rows quickly
+    // Test that the rich text fields within the rows do not disappear
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        // Ensure `requiresRender` is `true` is set for the first request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
+
+        // Ensure `requiresRender` is `true` is set for the second request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-1 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        await expect(
+          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+
+        await expect(
+          page.locator('#field-array #array-row-1 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    // Ensure `requiresRender` is `false` for the third request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: page.locator('#field-title').fill('Title 2'),
+      expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
+    })
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,

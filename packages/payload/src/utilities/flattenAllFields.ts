@@ -18,6 +18,11 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
 
 const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
 
+/**
+ * Flattens all fields in a collection, preserving the nested field structure.
+ * @param cache
+ * @param fields
+ */
 export const flattenAllFields = ({
   cache,
   fields,

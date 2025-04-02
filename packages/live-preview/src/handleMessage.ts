@@ -1,9 +1,15 @@
+import type { FieldSchemaJSON } from 'payload'
+
 import type { LivePreviewMessageEvent } from './types.js'
 
 import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
 
-const _payloadLivePreview = {
+const _payloadLivePreview: {
+  fieldSchema: FieldSchemaJSON | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  previousData: any
+} = {
   /**
    * For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
    * We need to cache this value so that it can be used across subsequent messages
@@ -18,7 +24,7 @@ const _payloadLivePreview = {
   previousData: undefined,
 }
 
-export const handleMessage = async <T>(args: {
+export const handleMessage = async <T extends Record<string, any>>(args: {
   apiRoute?: string
   depth?: number
   event: LivePreviewMessageEvent<T>
