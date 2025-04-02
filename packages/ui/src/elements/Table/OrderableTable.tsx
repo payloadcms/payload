@@ -11,6 +11,8 @@ import { toast } from 'sonner'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { OrderableRow } from './OrderableRow.js'
+import { OrderableRowDragPreview } from './OrderableRowDragPreview.js'
 
 const baseClass = 'table'
 
@@ -37,7 +39,7 @@ export const OrderableTable: React.FC<Props> = ({
   // id -> index for each column
   const [cellMap, setCellMap] = useState<Record<string, number>>({})
 
-  const [activeRow, setActiveRow] = useState<number | string | undefined>()
+  const [dragActiveRowId, setDragActiveRowId] = useState<number | string | undefined>()
 
   // Update local data when server data changes
   useEffect(() => {
@@ -59,12 +61,12 @@ export const OrderableTable: React.FC<Props> = ({
   const handleDragEnd = async ({ moveFromIndex, moveToIndex }) => {
     if (query.sort !== orderableFieldName && query.sort !== `-${orderableFieldName}`) {
       toast.warning('To reorder the rows you must first sort them by the "Order" column')
-      setActiveRow(undefined)
+      setDragActiveRowId(undefined)
       return
     }
 
     if (moveFromIndex === moveToIndex) {
-      setActiveRow(undefined)
+      setDragActiveRowId(undefined)
       return
     }
 
@@ -135,12 +137,12 @@ export const OrderableTable: React.FC<Props> = ({
       setLocalData(previousData)
       toast.error(error)
     } finally {
-      setActiveRow(undefined)
+      setDragActiveRowId(undefined)
     }
   }
 
   const handleDragStart = ({ id }) => {
-    setActiveRow(id)
+    setDragActiveRowId(id)
   }
 
   const rowIds = localData.map((row) => row.id ?? row._id)
@@ -166,39 +168,20 @@ export const OrderableTable: React.FC<Props> = ({
             {localData.map((row, rowIndex) => (
               <DraggableSortableItem id={rowIds[rowIndex]} key={rowIds[rowIndex]}>
                 {({ attributes, isDragging, listeners, setNodeRef, transform, transition }) => (
-                  <tr
+                  <OrderableRow
+                    cellMap={cellMap}
                     className={`row-${rowIndex + 1}`}
+                    columns={activeColumns}
+                    dragAttributes={attributes}
+                    dragListeners={listeners}
                     ref={setNodeRef}
+                    rowId={row.id ?? row._id}
                     style={{
                       opacity: isDragging ? 0 : 1,
                       transform,
                       transition,
                     }}
-                  >
-                    {activeColumns.map((col, colIndex) => {
-                      const { accessor } = col
-
-                      // Use the cellMap to find which index in the renderedCells to use
-                      const cell = col.renderedCells[cellMap[row.id ?? row._id]]
-
-                      // For drag handles, wrap in div with drag attributes
-                      if (accessor === '_dragHandle') {
-                        return (
-                          <td className={`cell-${accessor}`} key={colIndex}>
-                            <div {...attributes} {...listeners}>
-                              {cell}
-                            </div>
-                          </td>
-                        )
-                      }
-
-                      return (
-                        <td className={`cell-${accessor}`} key={colIndex}>
-                          {cell}
-                        </td>
-                      )
-                    })}
-                  </tr>
+                  />
                 )}
               </DraggableSortableItem>
             ))}
@@ -206,43 +189,12 @@ export const OrderableTable: React.FC<Props> = ({
         </table>
 
         <DragOverlay>
-          {typeof activeRow !== 'undefined' ? (
-            <div
-              className={baseClass}
-              style={{
-                cursor: 'grabbing',
-                zIndex: 10,
-              }}
-            >
-              <table cellPadding={0} cellSpacing={0}>
-                <tbody>
-                  <tr>
-                    {activeColumns.map((col, colIndex) => {
-                      const { accessor } = col
-
-                      // Use the cellMap to find which index in the renderedCells to use
-                      const cell = col.renderedCells[cellMap[activeRow]]
-
-                      // For drag handles, wrap in div with drag attributes
-                      if (accessor === '_dragHandle') {
-                        return (
-                          <td className={`cell-${accessor}`} key={colIndex}>
-                            <div>{cell}</div>
-                          </td>
-                        )
-                      }
-
-                      return (
-                        <td className={`cell-${accessor}`} key={colIndex}>
-                          {cell}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          ) : null}
+          <OrderableRowDragPreview
+            className={[baseClass, `${baseClass}--drag-preview`].join(' ')}
+            rowId={dragActiveRowId}
+          >
+            <OrderableRow cellMap={cellMap} columns={activeColumns} rowId={dragActiveRowId} />
+          </OrderableRowDragPreview>
         </DragOverlay>
       </DraggableSortable>
     </div>
