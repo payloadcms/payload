@@ -322,16 +322,23 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rows = []
             }
 
-            acc.rows.push({
-              id: row.id,
-            })
-
             const previousRows = previousFormState?.[path]?.rows || []
+
+            // First, check if `previousFormState` has a matching row
+            const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+
+            const newRow = {
+              id: row.id,
+            }
+            if (previousRow?.lastRenderedPath) {
+              newRow.lastRenderedPath = previousRow.lastRenderedPath
+            }
+
+            acc.rows.push(newRow)
+
             const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
 
             const collapsed = (() => {
-              // First, check if `previousFormState` has a matching row
-              const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
               if (previousRow) {
                 return previousRow.collapsed ?? false
               }
