@@ -118,8 +118,6 @@ export const renderField: RenderFieldMethod = ({
 
         row.lastRenderedPath = rowPath
 
-        row.isLoading = false
-
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
           if (!row.customComponents) {
             row.customComponents = {}
@@ -160,8 +158,6 @@ export const renderField: RenderFieldMethod = ({
         }
 
         row.lastRenderedPath = rowPath
-
-        row.isLoading = false
 
         const blockTypeToMatch: string = row.blockType
 

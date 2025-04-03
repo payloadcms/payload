@@ -33,9 +33,7 @@ export const mergeServerFormState = ({
       'valid',
       'errorMessage',
       'errorPaths',
-      'rows',
       'customComponents',
-      'lastRenderedPath',
     ]
 
     if (acceptValues) {
@@ -77,12 +75,46 @@ export const mergeServerFormState = ({
       }
 
       /**
+       * Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
+       * For example, the server response could come back with a row which has been deleted on the client
+       * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
+       */
+      if (Array.isArray(incomingState[path].rows)) {
+        incomingState[path].rows.forEach((row) => {
+          const matchedExistingRowIndex = newFieldState.rows.findIndex(
+            (existingRow) => existingRow.id === row.id,
+          )
+
+          if (matchedExistingRowIndex > -1) {
+            newFieldState.rows[matchedExistingRowIndex] = {
+              ...newFieldState.rows[matchedExistingRowIndex],
+              ...row,
+            }
+          }
+        })
+      }
+
+      /**
        * Handle adding all the remaining props that should be updated in the local form state from the server form state
        */
       serverPropsToAccept.forEach((propFromServer) => {
         if (!dequal(incomingState[path]?.[propFromServer], newFieldState[propFromServer])) {
           changed = true
           fieldChanged = true
+
+          if (newFieldState?.serverPropsToIgnore?.includes(propFromServer)) {
+            // Remove the ignored prop for the next request
+            newFieldState.serverPropsToIgnore = newFieldState.serverPropsToIgnore.filter(
+              (prop) => prop !== propFromServer,
+            )
+
+            // if no keys left, remove the entire object
+            if (!newFieldState.serverPropsToIgnore.length) {
+              delete newFieldState.serverPropsToIgnore
+            }
+
+            return
+          }
 
           if (!(propFromServer in incomingState[path])) {
             // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
@@ -91,41 +123,6 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
-            // Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
-            if (propFromServer === 'rows') {
-              // If a row was added to local state while the request was pending, add it to incoming state
-              newFieldState.rows.forEach((row, index) => {
-                const indexInIncomingState = incomingState[path].rows.findIndex(
-                  (incomingRow) => incomingRow.id === row.id,
-                )
-
-                if (indexInIncomingState === -1) {
-                  incomingState[path].rows.splice(index, 0, row)
-                }
-              })
-
-              // If a row was deleted from local state while the request was pending, remove it from incoming state
-              // Do this in reverse order to avoid index issues when removing items
-              // While in the loop, merge locally stored properties into incoming state
-              // This is important, as the incoming state may not contain all properties of the row, such as custom components that were not part of this request
-              for (let i = incomingState[path].rows.length - 1; i >= 0; i--) {
-                const incomingRow = incomingState[path].rows[i]
-
-                const indexInCurrentState = newFieldState.rows.findIndex(
-                  (existingRow) => existingRow.id === incomingRow.id,
-                )
-
-                if (indexInCurrentState === -1) {
-                  incomingState[path].rows.splice(i, 1)
-                } else {
-                  incomingState[path].rows[i] = {
-                    ...newFieldState.rows[indexInCurrentState],
-                    ...incomingState[path].rows[i],
-                  }
-                }
-              }
-            }
-
             newFieldState[propFromServer as any] = incomingState[path][propFromServer]
           }
         }
@@ -143,7 +140,7 @@ export const mergeServerFormState = ({
       newState[path] = fieldChanged ? { ...newFieldState } : newFieldState
     }
 
-    // Now loop over values that are part of incoming state but not part of current state, and add them to the new state.
+    // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
     // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
     // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
     for (const [path, field] of Object.entries(incomingState)) {

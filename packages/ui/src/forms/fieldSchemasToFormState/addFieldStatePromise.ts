@@ -330,6 +330,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             const newRow: Row = {
               id: row.id,
+              isLoading: false,
             }
 
             if (previousRow?.lastRenderedPath) {
@@ -516,6 +517,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               const newRow: Row = {
                 id: row.id,
                 blockType: row.blockType,
+                isLoading: false,
               }
 
               if (previousRow?.lastRenderedPath) {
