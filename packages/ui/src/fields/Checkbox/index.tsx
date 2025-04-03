@@ -39,7 +39,6 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path,
     readOnly,
     validate,
   } = props
@@ -60,12 +59,12 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
     disableFormData,
-    path,
     validate: memoizedValidate,
   })
 

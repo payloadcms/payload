@@ -23,14 +23,19 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
+import { useFieldPath } from '../RenderFields/context.js'
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
-export const useField = <TValue,>(options: Options): FieldType<TValue> => {
-  const { disableFormData = false, hasRows, path, validate } = options
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const { disableFormData = false, hasRows, path: pathFromOptions, validate } = options || {}
+
+  const pathFromContext = useFieldPath()
+
+  const path = pathFromOptions || pathFromContext
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

@@ -31,7 +31,6 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       required,
     },
     onMount,
-    path,
     readOnly,
     validate,
   } = props
@@ -48,11 +47,11 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
     validate: memoizedValidate,
   })
 

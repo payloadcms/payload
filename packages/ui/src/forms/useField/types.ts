@@ -3,7 +3,7 @@ import type { FieldState, FilterOptionsResult, Row, Validate } from 'payload'
 export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
-  path: string
+  path?: string
   validate?: Validate
 }
 
@@ -17,6 +17,7 @@ export type FieldType<T> = {
   formProcessing: boolean
   formSubmitted: boolean
   initialValue?: T
+  path: string
   readOnly?: boolean
   rows?: Row[]
   setValue: (val: unknown, disableModifyingForm?: boolean) => void

@@ -30,7 +30,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
     field: { label, localized, relationTo, required },
     hasGenerateImageFn,
-    path,
     readOnly,
   } = props || {}
 
@@ -42,18 +41,20 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     getEntityConfig,
   } = useConfig()
 
-  const field: FieldType<string> = useField({ ...props, path } as Options)
   const {
     customComponents: { Error, Label },
-  } = field
+    filterOptions,
+    path,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
-
-  const { setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
     if (!hasGenerateImageFn) {
@@ -174,7 +175,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
           api={api}
           collection={collection}
           Error={Error}
-          filterOptions={field.filterOptions}
+          filterOptions={filterOptions}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
               if (typeof incomingImage === 'object') {

@@ -12,11 +12,9 @@ import { withCondition } from '../../forms/withCondition/index.js'
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
 const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
-  const { disableModifyingForm = true, path, value: valueFromProps } = props
+  const { disableModifyingForm = true, value: valueFromProps } = props
 
-  const { setValue, value } = useField({
-    path,
-  })
+  const { path, setValue, value } = useField()
 
   useEffect(() => {
     if (valueFromProps !== undefined) {
