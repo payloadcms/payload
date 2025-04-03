@@ -45,17 +45,17 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Posts {
-  docs: [Post]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
-  nextPage: Int
+  docs: [Post!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int!
   offset: Int
-  page: Int
-  pagingCounter: Int
-  prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int!
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input Post_where {
@@ -326,17 +326,17 @@ type Media_Sizes_Large {
 }
 
 type allMedia {
-  docs: [Media]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
-  nextPage: Int
+  docs: [Media!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int!
   offset: Int
-  page: Int
-  pagingCounter: Int
-  prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int!
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input Media_where {
@@ -1622,17 +1622,17 @@ A field whose value conforms to the standard internet email address format as sp
 scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
-  docs: [User]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
-  nextPage: Int
+  docs: [User!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int!
   offset: Int
-  page: Int
-  pagingCounter: Int
-  prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int!
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input User_where {
@@ -1860,17 +1860,17 @@ enum PayloadLockedDocument_User_RelationTo {
 union PayloadLockedDocument_User = User
 
 type PayloadLockedDocuments {
-  docs: [PayloadLockedDocument]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
-  nextPage: Int
+  docs: [PayloadLockedDocument!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int!
   offset: Int
-  page: Int
-  pagingCounter: Int
-  prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int!
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input PayloadLockedDocument_where {
@@ -2146,17 +2146,17 @@ enum PayloadPreference_User_RelationTo {
 union PayloadPreference_User = User
 
 type PayloadPreferences {
-  docs: [PayloadPreference]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
-  nextPage: Int
+  docs: [PayloadPreference!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int!
   offset: Int
-  page: Int
-  pagingCounter: Int
-  prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int!
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input PayloadPreference_where {
