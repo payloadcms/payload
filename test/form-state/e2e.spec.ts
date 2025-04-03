@@ -7,7 +7,6 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -153,43 +152,53 @@ test.describe('Form State', () => {
     const field = page.locator('#field-title')
     await field.fill('Test')
 
-    // The `array` itself should NOT have a `lastRenderedPath` because it has not been rendered yet
+    // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
-          body[0]?.args.formState?.['array'] && !body[0].args.formState['array'].lastRenderedPath,
+          body?.[0]?.args?.formState?.['array'] && body[0].args.formState['array'].lastRenderedPath,
         ),
     })
 
-    await wait(1000)
+    await page.waitForResponse(
+      (response) =>
+        response.url() === postsUrl.create &&
+        response.status() === 200 &&
+        response.headers()['content-type'] === 'text/x-component',
+    )
 
-    // The `array` itself should still NOT have a `lastRenderedPath`
-    // The rich text field in the first row SHOULD have a `lastRenderedPath` bc it has been rendered in the first request
+    // The `array` itself SHOULD still have a `lastRenderedPath`
+    // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
-          body[0]?.args.formState?.['array'] &&
-            !body[0].args.formState['array'].lastRenderedPath &&
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath &&
             body[0].args.formState['array.0.richText']?.lastRenderedPath,
         ),
     })
 
-    await wait(1000)
+    await page.waitForResponse(
+      (response) =>
+        response.url() === postsUrl.create &&
+        response.status() === 200 &&
+        response.headers()['content-type'] === 'text/x-component',
+    )
 
-    // The `array` itself should still NOT have a `lastRenderedPath`
-    // The rich text field in the first row SHOULD have a `lastRenderedPath` bc it has been rendered in the first request
-    // The rich text field in the second row SHOULD have a `lastRenderedPath` bc it has been rendered in the second request
+    // The `array` itself SHOULD still have a `lastRenderedPath`
+    // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
+    // The rich text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
-          body[0]?.args.formState?.['array'] &&
-            !body[0].args.formState['array'].lastRenderedPath &&
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath &&
             body[0].args.formState['array.0.richText']?.lastRenderedPath &&
             body[0].args.formState['array.1.richText']?.lastRenderedPath,
         ),
@@ -293,17 +302,8 @@ test.describe('Form State', () => {
       page,
       postsUrl.create,
       async () => {
-        // Ensure `requiresRender` is `true` is set for the first request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-          action: page.locator('#field-array .array-field__add-row').click(),
-          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
-        })
-
-        // Ensure `requiresRender` is `true` is set for the second request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-          action: page.locator('#field-array .array-field__add-row').click(),
-          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
-        })
+        await page.locator('#field-array .array-field__add-row').click()
+        await page.locator('#field-array .array-field__add-row').click()
 
         // use `waitForSelector` to ensure the element doesn't appear and then disappear
         // eslint-disable-next-line playwright/no-wait-for-selector
@@ -330,12 +330,6 @@ test.describe('Form State', () => {
         timeout: 10000,
       },
     )
-
-    // Ensure `requiresRender` is `false` for the third request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: page.locator('#field-title').fill('Title 2'),
-      expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
-    })
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,

@@ -93,7 +93,6 @@ describe('Form State', () => {
       validateUsingEvent: {},
       blocks: {
         initialValue: 0,
-        requiresRender: false,
         rows: [],
         value: 0,
       },
@@ -138,7 +137,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should not re-render custom components when `lastRenderedPath` exists', async () => {
+  it('should not render custom components when `lastRenderedPath` exists', async () => {
     const req = await createLocalReq({ user }, payload)
 
     const { state: stateWithRow } = await buildFormState({
@@ -210,7 +209,12 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
-    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.richText']).toHaveProperty('lastRenderedPath')
     expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('customComponents')
+
+    // Ensure that row 2 _DOES_ return with rendered components
+    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.1.richText']?.customComponents?.Field).toBeDefined()
   })
 })
