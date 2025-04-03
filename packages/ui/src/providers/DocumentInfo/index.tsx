@@ -73,7 +73,7 @@ const DocumentInfo: React.FC<
 
   const { i18n } = useTranslation()
 
-  const { uploadEdits } = useUploadEdits()
+  const { getUploadEdits } = useUploadEdits()
 
   const [documentTitle, setDocumentTitle] = useState(() =>
     formatDocTitle({
@@ -300,19 +300,21 @@ const DocumentInfo: React.FC<
     }
   }, [])
 
+  console.log('Get upload edits: ', getUploadEdits())
+
   const action: string = React.useMemo(() => {
     const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
     const params = {
       depth: 0,
       'fallback-locale': 'null',
       locale,
-      uploadEdits: uploadEdits || undefined,
+      uploadEdits: getUploadEdits() || undefined, // Single upload = no index
     }
 
     return `${docURL}${qs.stringify(params, {
       addQueryPrefix: true,
     })}`
-  }, [baseURL, locale, pluralType, id, slug, uploadEdits])
+  }, [baseURL, locale, pluralType, id, slug, getUploadEdits])
 
   const value: DocumentInfoContext = {
     ...props,

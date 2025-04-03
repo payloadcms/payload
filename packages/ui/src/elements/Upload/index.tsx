@@ -14,12 +14,13 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFormsManager } from '../BulkUpload/FormsManager/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import { FileDetails } from '../FileDetails/index.js'
 import './index.scss'
+import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
@@ -102,13 +103,22 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  const { activeIndex } = useFormsManager?.() || {}
+  const { getUploadEdits, resetUploadEdits, updateUploadEdits } = useUploadEdits()
   const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
+
+  const isBulkUpload = typeof activeIndex === 'number'
+
+  const currentUploadEdits = getUploadEdits(isBulkUpload ? activeIndex : undefined)
+
+  console.log('Upload edits: ', getUploadEdits(activeIndex))
+
+  console.log('Saved document data: ', savedDocumentData)
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
@@ -172,16 +182,16 @@ export const Upload: React.FC<UploadProps> = (props) => {
     handleFileChange(null)
     setFileSrc('')
     setFileUrl('')
-    resetUploadEdits()
+    resetUploadEdits(isBulkUpload ? activeIndex : undefined)
     setShowUrlInput(false)
-  }, [handleFileChange, resetUploadEdits])
+  }, [activeIndex, isBulkUpload, handleFileChange, resetUploadEdits])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
       setModified(true)
-      updateUploadEdits(args)
+      updateUploadEdits(args, isBulkUpload ? activeIndex : undefined)
     },
-    [setModified, updateUploadEdits],
+    [activeIndex, isBulkUpload, setModified, updateUploadEdits],
   )
 
   const handleUrlSubmit = async () => {
@@ -273,6 +283,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
   if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
     return null
   }
+
+  console.log('Current upload edits: ', currentUploadEdits)
+
+  console.log('Saved document data: ', savedDocumentData)
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -423,10 +437,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
               fileName={value?.name || savedDocumentData?.filename}
               fileSrc={savedDocumentData?.url || fileSrc}
               imageCacheTag={imageCacheTag}
-              initialCrop={uploadEdits?.crop ?? undefined}
+              initialCrop={currentUploadEdits?.crop ?? undefined}
               initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
+                x: currentUploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
+                y: currentUploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
               }}
               onSave={onEditsSave}
               showCrop={showCrop}
