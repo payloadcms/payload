@@ -1,10 +1,15 @@
 import type { BrowserContext, Page } from '@playwright/test'
+import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
+import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { Config, Post } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -14,13 +19,15 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const title = 'Title'
 let context: BrowserContext
+let payload: PayloadTestSDK<Config>
+let serverURL: string
 
 test.describe('Form State', () => {
   let page: Page
@@ -28,8 +35,7 @@ test.describe('Form State', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     context = await browser.newContext()
@@ -37,15 +43,31 @@ test.describe('Form State', () => {
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
+  test.beforeEach(async () => {
+    // await throttleTest({ page, context, delay: 'Fast 3G' })
+  })
 
-  test('collection — should re-enable fields after save', async () => {
+  test('should disable fields during initialization', async () => {
+    await page.goto(postsUrl.create, { waitUntil: 'commit' })
+    await expect(page.locator('#field-title')).toBeDisabled()
+  })
+
+  test('should disable fields while processing', async () => {
+    const doc = await createPost()
+    await page.goto(postsUrl.edit(doc.id))
+    await page.locator('#field-title').fill(title)
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('#field-title')).toBeDisabled()
+  })
+
+  test('should re-enable fields after save', async () => {
     await page.goto(postsUrl.create)
     await page.locator('#field-title').fill(title)
     await saveDocAndAssert(page)
     await expect(page.locator('#field-title')).toBeEnabled()
   })
 
-  test('should thread proper event argument to validation functions', async () => {
+  test('should only validate on submit via the `event` argument', async () => {
     await page.goto(postsUrl.create)
     await page.locator('#field-title').fill(title)
     await page.locator('#field-validateUsingEvent').fill('Not allowed')
@@ -69,6 +91,42 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should not throw fields into an infinite rendering loop', async () => {
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+
+    let numberOfRenders = 0
+
+    page.on('console', (msg) => {
+      if (msg.type() === 'count' && msg.text().includes('Renders')) {
+        numberOfRenders++
+      }
+    })
+
+    const allowedNumberOfRenders = 25
+    const pollInterval = 200
+    const maxTime = 5000
+
+    let elapsedTime = 0
+
+    const intervalId = setInterval(() => {
+      if (numberOfRenders > allowedNumberOfRenders) {
+        clearInterval(intervalId)
+        throw new Error(`Render count exceeded the threshold of ${allowedNumberOfRenders}`)
+      }
+
+      elapsedTime += pollInterval
+
+      if (elapsedTime >= maxTime) {
+        clearInterval(intervalId)
+      }
+    }, pollInterval)
+
+    await page.waitForTimeout(maxTime)
+
+    expect(numberOfRenders).toBeLessThanOrEqual(allowedNumberOfRenders)
   })
 
   test('should debounce onChange events', async () => {
@@ -106,10 +164,10 @@ test.describe('Form State', () => {
       async () => {
         await field.fill('')
         // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 300 })
+        await field.pressSequentially('Some text to type', { delay: 275 })
       },
       {
-        allowedNumberOfRequests: 1,
+        allowedNumberOfRequests: 2,
         timeout: 10000, // watch network for 10 seconds to allow requests to build up
       },
     )
@@ -123,4 +181,140 @@ test.describe('Form State', () => {
 
     await cdpSession.detach()
   })
+
+  test('should not cause nested custom fields to disappear when queuing form state (1)', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    // Add a row and immediately type into another field
+    // Test that the rich text field within the row does not disappear
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        // Ensure `requiresRender` is `true` is set for the first request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
+
+        // Ensure `requiresRender` is `false` for the second request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-title').fill('Title 2'),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        await expect(
+          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('should not cause nested custom fields to disappear when queuing form state (2)', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    // Add two rows quickly
+    // Test that the rich text fields within the rows do not disappear
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        // Ensure `requiresRender` is `true` is set for the first request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
+
+        // Ensure `requiresRender` is `true` is set for the second request
+        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+          action: page.locator('#field-array .array-field__add-row').click(),
+          expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-1 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        await expect(
+          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+
+        await expect(
+          page.locator('#field-array #array-row-1 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    // Ensure `requiresRender` is `false` for the third request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: page.locator('#field-title').fill('Title 2'),
+      expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
+    })
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
 })
+
+async function createPost(overrides?: Partial<Post>): Promise<Post> {
+  return payload.create({
+    collection: 'posts',
+    data: {
+      title: 'Post Title',
+      ...overrides,
+    },
+  }) as unknown as Promise<Post>
+}

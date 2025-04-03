@@ -72,6 +72,7 @@ export interface Config {
     'deep-posts': DeepPost;
     pages: Page;
     points: Point;
+    'force-select': ForceSelect;
     upload: Upload;
     rels: Rel;
     'custom-ids': CustomId;
@@ -88,6 +89,7 @@ export interface Config {
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     points: PointsSelect<false> | PointsSelect<true>;
+    'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
@@ -101,9 +103,11 @@ export interface Config {
   };
   globals: {
     'global-post': GlobalPost;
+    'force-select-global': ForceSelectGlobal;
   };
   globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
+    'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
   user: User & {
@@ -447,6 +451,23 @@ export interface Point {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select".
+ */
+export interface ForceSelect {
+  id: string;
+  text?: string | null;
+  forceSelected?: string | null;
+  array?:
+    | {
+        forceSelected?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -502,6 +523,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'points';
         value: string | Point;
+      } | null)
+    | ({
+        relationTo: 'force-select';
+        value: string | ForceSelect;
       } | null)
     | ({
         relationTo: 'upload';
@@ -837,6 +862,22 @@ export interface PointsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select_select".
+ */
+export interface ForceSelectSelect<T extends boolean = true> {
+  text?: T;
+  forceSelected?: T;
+  array?:
+    | T
+    | {
+        forceSelected?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "upload_select".
  */
 export interface UploadSelect<T extends boolean = true> {
@@ -930,11 +971,45 @@ export interface GlobalPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-global".
+ */
+export interface ForceSelectGlobal {
+  id: string;
+  text?: string | null;
+  forceSelected?: string | null;
+  array?:
+    | {
+        forceSelected?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-post_select".
  */
 export interface GlobalPostSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-global_select".
+ */
+export interface ForceSelectGlobalSelect<T extends boolean = true> {
+  text?: T;
+  forceSelected?: T;
+  array?:
+    | T
+    | {
+        forceSelected?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -5,11 +5,13 @@ import {
   type Payload,
   type PayloadRequest,
   type RunningJob,
+  type Sort,
   type TypedJobs,
   type Where,
 } from '../index.js'
-import { jobsCollectionSlug } from './config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from './config/index.js'
 import { runJobs } from './operations/runJobs/index.js'
+import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
   queue: async <
@@ -72,20 +74,45 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       data.taskSlug = args.task as string
     }
 
-    return (await payload.create({
-      collection: jobsCollectionSlug,
-      data,
-      req: args.req,
-    })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
+    type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? RunningJob<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+
+    if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
+      return (await payload.create({
+        collection: jobsCollectionSlug,
+        data,
+        depth: payload.config.jobs.depth ?? 0,
+        req: args.req,
+      })) as ReturnType
+    } else {
+      return jobAfterRead({
+        config: payload.config,
+        doc: await payload.db.create({
+          collection: jobsCollectionSlug,
+          data,
+          req: args.req,
+        }),
+      }) as unknown as ReturnType
+    }
   },
 
   run: async (args?: {
     limit?: number
     overrideAccess?: boolean
+    /**
+     * Adjust the job processing order using a Payload sort string.
+     *
+     * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+     */
+    processingOrder?: Sort
     queue?: string
     req?: PayloadRequest
+    /**
+     * By default, jobs are run in parallel.
+     * If you want to run them in sequence, set this to true.
+     */
+    sequential?: boolean
     where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
@@ -93,8 +120,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     return await runJobs({
       limit: args?.limit,
       overrideAccess: args?.overrideAccess !== false,
+      processingOrder: args?.processingOrder,
       queue: args?.queue,
       req: newReq,
+      sequential: args?.sequential,
       where: args?.where,
     })
   },
@@ -143,37 +172,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       })
     }
 
-    await payload.db.updateMany({
-      collection: jobsCollectionSlug,
-      data: {
-        completedAt: null,
-        error: {
-          cancelled: true,
-        },
-        hasError: true,
-        processing: false,
-        waitUntil: null,
-      } as Partial<
-        {
-          completedAt: null
-          waitUntil: null
-        } & BaseJob
-      >,
-      req: newReq,
-      where: { and },
-    })
-  },
-
-  cancelByID: async (args: {
-    id: number | string
-    overrideAccess?: boolean
-    req?: PayloadRequest
-  }): Promise<void> => {
-    const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
-
-    await payload.db.updateOne({
-      id: args.id,
-      collection: jobsCollectionSlug,
+    await updateJobs({
       data: {
         completedAt: null,
         error: {
@@ -186,7 +185,39 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         completedAt: null
         waitUntil: null
       } & BaseJob,
+      depth: 0, // No depth, since we're not returning
+      disableTransaction: true,
       req: newReq,
+      returning: false,
+      where: { and },
+    })
+  },
+
+  cancelByID: async (args: {
+    id: number | string
+    overrideAccess?: boolean
+    req?: PayloadRequest
+  }): Promise<void> => {
+    const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+
+    await updateJob({
+      id: args.id,
+      data: {
+        completedAt: null,
+        error: {
+          cancelled: true,
+        },
+        hasError: true,
+        processing: false,
+        waitUntil: null,
+      } as {
+        completedAt: null
+        waitUntil: null
+      } & BaseJob,
+      depth: 0, // No depth, since we're not returning
+      disableTransaction: true,
+      req: newReq,
+      returning: false,
     })
   },
 })

@@ -48,6 +48,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     filterOptions,
     setValue,
     showError,
@@ -79,7 +80,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       maxRows={maxRows}
       onChange={setValue}
       path={path}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       relationTo={relationTo}
       required={required}
       serverURL={config.serverURL}

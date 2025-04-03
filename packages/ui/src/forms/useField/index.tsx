@@ -105,6 +105,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,

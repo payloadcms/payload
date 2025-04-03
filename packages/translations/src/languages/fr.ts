@@ -124,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
     unPublishingDocument:
       'Un problème est survenu lors de l’annulation de la publication de ce document.',
     unspecific: 'Une erreur est survenue.',
+    unverifiedEmail: 'Veuillez vérifier votre e-mail avant de vous connecter.',
     userEmailAlreadyRegistered: "Un utilisateur avec l'email donné est déjà enregistré.",
     userLocked:
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',
@@ -321,6 +322,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',
+    selectLabel: 'Sélectionnez {{label}}',
     selectValue: 'Sélectionnez une valeur',
     showAllLabel: 'Afficher tous les {{label}}',
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
@@ -350,7 +352,9 @@ export const frTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Événements à venir',
     updatedAt: 'Modifié le',
     updatedCountSuccessfully: '{{count}} {{label}} mis à jour avec succès.',
+    updatedLabelSuccessfully: '{{label}} mis à jour avec succès.',
     updatedSuccessfully: 'Mis à jour avec succès.',
+    updateForEveryone: 'Mise à jour pour tout le monde',
     updating: 'Mise à jour',
     uploading: 'Téléchargement',
     uploadingBulk: 'Téléchargement de {{current}} sur {{total}}',
@@ -407,6 +411,7 @@ export const frTranslations: DefaultTranslationsObject = {
     height: 'Hauteur',
     lessInfo: 'Moins d’infos',
     moreInfo: 'Plus d’infos',
+    noFile: 'Aucun fichier',
     pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',

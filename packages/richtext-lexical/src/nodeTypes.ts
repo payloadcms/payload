@@ -93,6 +93,7 @@ export type DefaultNodeTypes =
   | SerializedParagraphNode
   | SerializedQuoteNode
   | SerializedRelationshipNode
+  | SerializedTabNode
   | SerializedTextNode
   | SerializedUploadNode
 

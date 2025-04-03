@@ -21,13 +21,13 @@ export type ThumbnailProps = {
 }
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
+  const { className = '', doc: { filename, mimeType } = {}, fileSrc, imageCacheTag, size } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
   React.useEffect(() => {
-    if (!fileSrc) {
+    if (!fileSrc || (typeof mimeType === 'string' && !mimeType.startsWith('image'))) {
       setFileExists(false)
       return
     }
@@ -41,9 +41,9 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc])
+  }, [fileSrc, mimeType])
 
-  let src: string = ''
+  let src: null | string = null
 
   /**
    * If an imageCacheTag is provided, append it to the fileSrc

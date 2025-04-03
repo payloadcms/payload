@@ -1,6 +1,6 @@
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -51,9 +51,11 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const getPreference = useCallback(
     async <T = any,>(key: string): Promise<T> => {
       const prefs = preferencesRef.current
+
       if (typeof prefs[key] !== 'undefined') {
         return prefs[key]
       }
+
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
           const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
@@ -61,16 +63,22 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
               'Accept-Language': i18n.language,
             },
           })
+
           let value = null
+
           if (request.status === 200) {
             const preference = await request.json()
             value = preference.value
           }
+
           preferencesRef.current[key] = value
+
           resolve(value)
         })()
       })
+
       prefs[key] = promise
+
       return promise
     },
     [i18n.language, api, preferencesRef, serverURL],
@@ -149,7 +157,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   contextRef.current.getPreference = getPreference
   contextRef.current.setPreference = setPreference
 
-  return <Context.Provider value={contextRef.current}>{children}</Context.Provider>
+  return <Context value={contextRef.current}>{children}</Context>
 }
 
-export const usePreferences = (): PreferencesContext => useContext(Context)
+export const usePreferences = (): PreferencesContext => use(Context)

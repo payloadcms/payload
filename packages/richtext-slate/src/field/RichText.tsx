@@ -95,7 +95,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   const {
     customComponents: { Description, Error, Label } = {},
-    formInitializing,
+    disabled: disabledFromField,
     initialValue,
     setValue,
     showError,
@@ -105,7 +105,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formInitializing
+  const disabled = readOnlyFromProps || disabledFromField
 
   const editor = useMemo(() => {
     let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))

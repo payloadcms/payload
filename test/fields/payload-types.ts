@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -1086,6 +1087,7 @@ export interface CodeField {
   json?: string | null;
   html?: string | null;
   css?: string | null;
+  codeWithPadding?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1304,6 +1306,7 @@ export interface EmailField {
 export interface RadioField {
   id: string;
   radio?: ('one' | 'two' | 'three') | null;
+  radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1799,6 +1802,7 @@ export interface SelectField {
   settings?: {
     category?: ('a' | 'b')[] | null;
   };
+  selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1830,6 +1834,23 @@ export interface TabsField {
    * This should not collapse despite there being many tabs pushing the main fields open.
    */
   sidebarField?: string | null;
+  /**
+   * When active, the conditional tab should be visible. When inactive, it should be hidden.
+   */
+  conditionalTabVisible?: boolean | null;
+  conditionalTab?: {
+    conditionalTabField?: string | null;
+    /**
+     * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
+     */
+    nestedConditionalTabVisible?: boolean | null;
+    conditionalTabGroup?: {
+      conditionalTabGroupTitle?: string | null;
+      conditionalTab?: {};
+    };
+    nestedUnconditionalTabInput?: string | null;
+    nestedConditionalTabInput?: string | null;
+  };
   array: {
     text: string;
     id?: string | null;
@@ -2853,6 +2874,7 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   json?: T;
   html?: T;
   css?: T;
+  codeWithPadding?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3060,6 +3082,7 @@ export interface EmailFieldsSelect<T extends boolean = true> {
  */
 export interface RadioFieldsSelect<T extends boolean = true> {
   radio?: T;
+  radioWithJsxLabelOption?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3422,6 +3445,7 @@ export interface SelectFieldsSelect<T extends boolean = true> {
     | {
         category?: T;
       };
+  selectWithJsxLabelOption?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3450,6 +3474,21 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
+  conditionalTabVisible?: T;
+  conditionalTab?:
+    | T
+    | {
+        conditionalTabField?: T;
+        nestedConditionalTabVisible?: T;
+        conditionalTabGroup?:
+          | T
+          | {
+              conditionalTabGroupTitle?: T;
+              conditionalTab?: T | {};
+            };
+        nestedUnconditionalTabInput?: T;
+        nestedConditionalTabInput?: T;
+      };
   array?:
     | T
     | {

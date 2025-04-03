@@ -49,6 +49,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
+import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -508,9 +509,8 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
-  t,
-}: {
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
+  i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string
 
@@ -793,9 +793,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
-     * Each entry in this map generates an entry in the importMap,
-     * as well as an entry in the componentMap if the type of the
-     * dependency is 'component'
+     * Each entry in this map generates an entry in the importMap.
      */
     dependencies?: AdminDependencies
     /**
@@ -945,12 +943,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
-
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1040,7 +1038,6 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -1097,6 +1094,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -1105,6 +1103,25 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Allow you to save and share filters, columns, and sort orders for your collections.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  queryPresets?: {
+    access: {
+      create?: Access<QueryPreset>
+      delete?: Access<QueryPreset>
+      read?: Access<QueryPreset>
+      update?: Access<QueryPreset>
+    }
+    constraints: {
+      create?: QueryPresetConstraints
+      delete?: QueryPresetConstraints
+      read?: QueryPresetConstraints
+      update?: QueryPresetConstraints
+    }
+    labels?: CollectionConfig['labels']
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.

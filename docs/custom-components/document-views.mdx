@@ -45,15 +45,15 @@ export const MyCollectionOrGlobalConfig: CollectionConfig = {
 
 The following options are available:
 
-| Property          | Description                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set. [More details](#document-root). |
-| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                                                    |
+| Property      | Description                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set. [More details](#document-root).      |
+| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                       |
 | `versions`    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
 | `version`     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
 | `api`         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
 | `livePreview` | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
-| `[key]`       | Any other key can be used to add a completely new Document View.                                                                |
+| `[key]`       | Any other key can be used to add a completely new Document View.                                                                                                |
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
@@ -112,8 +112,8 @@ export const MyCollection: CollectionConfig = {
             path: '/my-custom-tab',
             // highlight-start
             tab: {
-              Component: '/path/to/MyCustomTabComponent'
-            }
+              Component: '/path/to/MyCustomTabComponent',
+            },
             // highlight-end
           },
           anotherCustomTab: {
@@ -123,7 +123,7 @@ export const MyCollection: CollectionConfig = {
             tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
-            }
+            },
             // highlight-end
           },
         },
@@ -134,16 +134,15 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
- **Note:**
- This applies to _both_ Collections _and_ Globals.
+  **Note:** This applies to _both_ Collections _and_ Globals.
 </Banner>
 
 The following options are available for tabs:
 
-| Property    | Description                                                                                           |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
-| `label`     | The label to display in the tab.                                                                      |
-| `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.    |
+| Property    | Description                                                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `label`     | The label to display in the tab.                                                                              |
+| `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.            |
 | `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
 
 ### Tab Components
@@ -161,9 +160,7 @@ import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabServerProps) {
   return (
-    <Link href="/my-custom-tab">
-      This is a custom Document Tab (Server)
-    </Link>
+    <Link href="/my-custom-tab">This is a custom Document Tab (Server)</Link>
   )
 }
 ```
@@ -178,9 +175,7 @@ import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabClientProps) {
   return (
-    <Link href="/my-custom-tab">
-      This is a custom Document Tab (Client)
-    </Link>
+    <Link href="/my-custom-tab">This is a custom Document Tab (Client)</Link>
   )
 }
 ```
