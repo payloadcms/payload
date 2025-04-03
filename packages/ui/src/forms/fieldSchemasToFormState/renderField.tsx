@@ -161,6 +161,8 @@ export const renderField: RenderFieldMethod = ({
 
         row.lastRenderedPath = rowPath
 
+        row.isLoading = false
+
         const blockTypeToMatch: string = row.blockType
 
         const blockConfig =
