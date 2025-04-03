@@ -134,12 +134,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { remainingFields, rows } = separateRows(path, state)
       const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
+      const duplicateRowMetadata = deepCopyObjectSimpleWithoutReactComponents(
+        rowsMetadata[rowIndex],
+      )
+
       if (duplicateRowMetadata.id) {
         duplicateRowMetadata.id = new ObjectId().toHexString()
       }
 
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
+
       if (duplicateRowState.id) {
         duplicateRowState.id.value = new ObjectId().toHexString()
         duplicateRowState.id.initialValue = new ObjectId().toHexString()

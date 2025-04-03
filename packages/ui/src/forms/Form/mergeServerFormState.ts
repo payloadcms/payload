@@ -104,7 +104,7 @@ export const mergeServerFormState = ({
                 }
               })
 
-              // If an row was deleted from local state while the request was pending, remove it from incoming state
+              // If a row was deleted from local state while the request was pending, remove it from incoming state
               // Do this in reverse order to avoid index issues when removing items
               // While in the loop, merge locally stored properties into incoming state
               // This is important, as the incoming state may not contain all properties of the row, such as custom components that were not part of this request
