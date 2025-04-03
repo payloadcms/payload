@@ -55,7 +55,7 @@
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.19.2"
+    "tsx": "4.19.3"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
