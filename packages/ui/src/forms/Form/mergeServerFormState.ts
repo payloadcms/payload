@@ -34,7 +34,6 @@ export const mergeServerFormState = ({
       'errorMessage',
       'errorPaths',
       'customComponents',
-      'requiresRender',
     ]
 
     if (acceptValues) {
@@ -76,7 +75,7 @@ export const mergeServerFormState = ({
       }
 
       /**
-       * Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
+       * Need to intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
        * For example, the server response could come back with a row which has been deleted on the client
        * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
        */

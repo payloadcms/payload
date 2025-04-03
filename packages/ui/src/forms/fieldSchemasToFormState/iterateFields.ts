@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -46,6 +47,7 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -94,6 +96,7 @@ export const iterateFields = async ({
   forceFullValue = false,
   fullData,
   includeSchema = false,
+  mockRSCs,
   omitParents = false,
   operation,
   parentIndexPath,
@@ -180,6 +183,7 @@ export const iterateFields = async ({
         fullData,
         includeSchema,
         indexPath,
+        mockRSCs,
         omitParents,
         operation,
         parentIndexPath,
