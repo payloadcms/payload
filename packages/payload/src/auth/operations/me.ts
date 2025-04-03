@@ -8,6 +8,12 @@ import type { ClientUser, User } from '../types.js'
 export type MeOperationResult = {
   collection?: string
   exp?: number
+  /** @deprecated
+   * use:
+   * ```ts
+   * user._strategy
+   * ```
+   */
   strategy?: string
   token?: string
   user?: ClientUser
@@ -41,6 +47,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
     if (user) {
       user.collection = collection.config.slug
+      user._strategy = req.user._strategy
     }
 
     if (req.user.collection !== collection.config.slug) {
@@ -65,6 +72,12 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     }
 
     result.collection = req.user.collection
+    /** @deprecated
+     * use:
+     * ```ts
+     * user._strategy
+     * ```
+     */
     result.strategy = req.user._strategy
 
     if (!result.user) {

@@ -8,9 +8,9 @@ keywords: slatejs, slate, rich text, editor, headless cms
 
 <Banner type="warning">
 
-  The [default Payload editor](/docs/rich-text/overview) is currently based on Lexical. This documentation 
-  is about our old Slate-based editor. You can continue using it because it is still supported, or you can 
-  see the optional [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
+The [default Payload editor](/docs/rich-text/overview) is currently based on Lexical. This documentation
+is about our old Slate-based editor. You can continue using it because it is still supported, or you can
+see the optional [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
 
 </Banner>
 
@@ -129,10 +129,11 @@ Similar to the `relationship` element, the `upload` element is a user-friendly w
 <Banner type="success">
   **Tip:**
 
-  Collections are automatically allowed to be selected within the Rich Text relationship and upload
-  elements by default. If you want to disable a collection from being able to be referenced in Rich
-  Text fields, set the collection admin options of **enableRichTextLink** and
-  **enableRichTextRelationship** to false.
+Collections are automatically allowed to be selected within the Rich Text relationship and upload
+elements by default. If you want to disable a collection from being able to be referenced in Rich
+Text fields, set the collection admin options of **enableRichTextLink** and
+**enableRichTextRelationship** to false.
+
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
@@ -155,8 +156,8 @@ Once you're up to speed with the general concepts involved, you can pass in your
 
 | Property        | Description                                                |
 | --------------- | ---------------------------------------------------------- |
-| **`name`** *   | The default name to be used as a `type` for this element.  |
-| **`Button`** * | A React component to be rendered in the Rich Text toolbar. |
+| **`name`** \*   | The default name to be used as a `type` for this element.  |
+| **`Button`** \* | A React component to be rendered in the Rich Text toolbar. |
 | **`plugins`**   | An array of plugins to provide to the Rich Text editor.    |
 | **`type`**      | A type that overrides the default type used by `name`      |
 
@@ -312,8 +313,9 @@ const serialize = (children) =>
 <Banner>
   **Note:**
 
-  The above example is for how to render to JSX, although for plain HTML the pattern is similar.
-  Just remove the JSX and return HTML strings instead!
+The above example is for how to render to JSX, although for plain HTML the pattern is similar.
+Just remove the JSX and return HTML strings instead!
+
 </Banner>
 
 ### Built-in SlateJS Plugins
@@ -360,5 +362,8 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
 ```ts
-import type { RichTextCustomElement, RichTextCustomLeaf } from '@payloadcms/richtext-slate'
+import type {
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+} from '@payloadcms/richtext-slate'
 ```

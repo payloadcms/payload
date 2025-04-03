@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -22,8 +22,13 @@ export const toggleColumn = async (
     targetState?: 'off' | 'on'
     togglerSelector?: string
   },
-): Promise<any> => {
-  const columnContainer = await openListColumns(page, { togglerSelector, columnContainerSelector })
+): Promise<{
+  columnContainer: Locator
+}> => {
+  const { columnContainer } = await openListColumns(page, {
+    togglerSelector,
+    columnContainerSelector,
+  })
 
   const column = columnContainer.locator(`.column-selector .column-selector__column`, {
     hasText: exactText(columnLabel),
@@ -57,7 +62,7 @@ export const toggleColumn = async (
     await waitForColumnInURL({ page, columnName, state: targetState })
   }
 
-  return column
+  return { columnContainer }
 }
 
 export const waitForColumnInURL = async ({

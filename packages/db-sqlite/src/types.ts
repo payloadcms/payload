@@ -32,6 +32,14 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
    * This ensures that the same ID cannot be reused from previously deleted rows.
    */

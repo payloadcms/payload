@@ -114,7 +114,6 @@ describe('Array', () => {
     await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
-   
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)

@@ -14,13 +14,14 @@ import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, limit, overrideLock, populate, select, where } = req.query as {
+  const { depth, draft, limit, overrideLock, populate, select, sort, where } = req.query as {
     depth?: string
     draft?: string
     limit?: string
     overrideLock?: string
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
+    sort?: string
     where?: Where
   }
 
@@ -34,6 +35,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
+    sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })
 

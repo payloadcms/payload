@@ -140,12 +140,12 @@ export const createClientBlocks = ({
 
       if (block.labels.singular) {
         if (typeof block.labels.singular === 'function') {
-          clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+          clientBlock.labels.singular = block.labels.singular({ i18n, t: i18n.t })
         } else {
           clientBlock.labels.singular = block.labels.singular
         }
         if (typeof block.labels.plural === 'function') {
-          clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+          clientBlock.labels.plural = block.labels.plural({ i18n, t: i18n.t })
         } else {
           clientBlock.labels.plural = block.labels.plural
         }
@@ -224,7 +224,7 @@ export const createClientField = ({
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
           //@ts-expect-error - would need to type narrow
-          clientField.label = incomingField.label({ t: i18n.t })
+          clientField.label = incomingField.label({ i18n, t: i18n.t })
         } else {
           //@ts-expect-error - would need to type narrow
           clientField.label = incomingField.label
@@ -246,12 +246,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -287,12 +287,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -345,7 +345,7 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ t: i18n.t }),
+              label: option.label({ i18n, t: i18n.t }),
               value: option.value,
             }
           }
@@ -409,7 +409,7 @@ export const createClientField = ({
                   case 'description':
                     if ('description' in tab.admin) {
                       if (typeof tab.admin?.description === 'function') {
-                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                        clientTab.admin.description = tab.admin.description({ i18n, t: i18n.t })
                       } else {
                         clientTab.admin.description = tab.admin.description
                       }

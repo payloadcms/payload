@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
@@ -140,7 +140,7 @@ export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const parentDepth = useDrawerDepth()
   const depth = parentDepth + 1
 
-  return <DrawerDepthContext.Provider value={depth}>{children}</DrawerDepthContext.Provider>
+  return <DrawerDepthContext value={depth}>{children}</DrawerDepthContext>
 }
 
-export const useDrawerDepth = (): number => useContext(DrawerDepthContext)
+export const useDrawerDepth = (): number => use(DrawerDepthContext)

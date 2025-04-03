@@ -358,7 +358,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          if (req.status === 413) {
+          if (req.status === 413 || req.status === 400) {
             // file too large
             currentForms[i] = {
               ...currentForms[i],
@@ -514,7 +514,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   ])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         activeIndex: state.activeIndex,
         addFiles,
@@ -545,10 +545,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         />
       )}
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export function useFormsManager() {
-  return React.useContext(Context)
+  return React.use(Context)
 }

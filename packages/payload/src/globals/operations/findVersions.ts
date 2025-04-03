@@ -10,7 +10,9 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   depth?: number
@@ -40,7 +42,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
     sort,
     where,
@@ -66,6 +68,11 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     })
 
     const fullWhere = combineQueries(where, accessResults)
+
+    const select = sanitizeSelect({
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Find

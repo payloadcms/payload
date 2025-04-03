@@ -58,7 +58,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -111,6 +111,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    disabled,
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -152,18 +153,20 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
-      setModified(true)
+      removeFieldRow({ path, rowIndex })
     },
-    [dispatchFields, path, setModified],
+    [removeFieldRow, path],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
     },
-    [dispatchFields, path, setModified],
+    [path, moveFieldRow],
   )
 
   const toggleCollapseAll = useCallback(
@@ -197,7 +200,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rowsData.length === 0
+  const showRequired = (readOnly || disabled) && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
 
   return (
@@ -285,7 +288,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -303,7 +310,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     parentPath={path}
                     path={rowPath}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rowsData?.length}

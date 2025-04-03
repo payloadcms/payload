@@ -9,7 +9,7 @@ import type {
   UnsanitizedClientConfig,
 } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useState } from 'react'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -99,10 +99,8 @@ export const ConfigProvider: React.FC<{
   )
 
   return (
-    <RootConfigContext.Provider value={{ config, getEntityConfig, setConfig }}>
-      {children}
-    </RootConfigContext.Provider>
+    <RootConfigContext value={{ config, getEntityConfig, setConfig }}>{children}</RootConfigContext>
   )
 }
 
-export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)
+export const useConfig = (): ClientConfigContext => use(RootConfigContext)

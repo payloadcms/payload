@@ -20,12 +20,12 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListHeader } from './ListHeader/index.js'
@@ -45,10 +45,13 @@ export function DefaultListView(props: ListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
     newDocumentURL,
+    queryPreset,
+    queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -189,7 +192,12 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
+                disableQueryPresets={
+                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
+                }
                 listMenuItems={listMenuItems}
+                queryPreset={queryPreset}
+                queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

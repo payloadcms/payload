@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
 import { selectFieldsSlug } from '../../slugs.js'
+import { CustomJSXLabel } from './CustomJSXLabel.js'
 
 const SelectFields: CollectionConfig = {
   slug: selectFieldsSlug,
+  versions: true,
   fields: [
     {
       name: 'select',
@@ -218,6 +220,26 @@ const SelectFields: CollectionConfig = {
             { value: 'a', label: 'A' },
             { value: 'b', label: 'B' },
           ],
+        },
+      ],
+    },
+    {
+      name: 'selectWithJsxLabelOption',
+      label: 'Select with JSX label option',
+      type: 'select',
+      defaultValue: 'three',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: CustomJSXLabel,
+          value: 'three',
         },
       ],
     },

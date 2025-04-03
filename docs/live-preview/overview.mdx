@@ -22,16 +22,19 @@ const config = buildConfig({
     // highlight-start
     livePreview: {
       url: 'http://localhost:3000',
-      collections: ['pages']
+      collections: ['pages'],
     },
     // highlight-end
-  }
+  },
 })
 ```
 
 <Banner type="warning">
-  **Reminder:**
-  Alternatively, you can define the `admin.livePreview` property on individual [Collection Admin Configs](../configuration/collections#admin-options) and [Global Admin Configs](../configuration/globals#admin-options). Settings defined here will be merged into the top-level as overrides.
+  **Reminder:** Alternatively, you can define the `admin.livePreview` property
+  on individual [Collection Admin
+  Configs](../configuration/collections#admin-options) and [Global Admin
+  Configs](../configuration/globals#admin-options). Settings defined here will
+  be merged into the top-level as overrides.
 </Banner>
 
 ## Options
@@ -42,12 +45,12 @@ The following options are available:
 
 | Path              | Description                                                                                                                                           |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`url`** *      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
+| **`url`** \*      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
 | **`breakpoints`** | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints). |
 | **`collections`** | Array of collection slugs to enable Live Preview on.                                                                                                  |
 | **`globals`**     | Array of global slugs to enable Live Preview on.                                                                                                      |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ### URL
 
@@ -66,7 +69,7 @@ const config = buildConfig({
       url: 'http://localhost:3000', // highlight-line
       collections: ['pages'],
     },
-  }
+  },
 })
 ```
 
@@ -101,13 +104,13 @@ const config = buildConfig({
 
 The following arguments are provided to the `url` function:
 
-| Path               | Description                                                                                                       |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **`data`**         | The data of the Document being edited. This includes changes that have not yet been saved.                        |
-| **`locale`**       | The locale currently being edited (if applicable). [More details](../configuration/localization).                 |
-| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../configuration/collections#admin-options).                 |
-| **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../configuration/globals#admin-options).                          |
-| **`req`**          | The Payload Request object.  |
+| Path                   | Description                                                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **`data`**             | The data of the Document being edited. This includes changes that have not yet been saved.                            |
+| **`locale`**           | The locale currently being edited (if applicable). [More details](../configuration/localization).                     |
+| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../configuration/collections#admin-options). |
+| **`globalConfig`**     | The Global Admin Config of the Document being edited. [More details](../configuration/globals#admin-options).         |
+| **`req`**              | The Payload Request object.                                                                                           |
 
 You can return either an absolute URL or relative URL from this function. If you don't know the URL of your frontend at build-time, you can return a relative URL, and in that case, Payload will automatically construct an absolute URL by injecting the protocol, domain, and port from your browser window. Returning a relative URL is helpful for platforms like Vercel where you may have preview deployment URLs that are unknown at build time.
 
@@ -143,7 +146,7 @@ const config = buildConfig({
       ],
       // highlight-end
     },
-  }
+  },
 })
 ```
 
@@ -151,12 +154,12 @@ The following options are available for each breakpoint:
 
 | Path            | Description                                                                 |
 | --------------- | --------------------------------------------------------------------------- |
-| **`label`** *  | The label to display in the drop-down. This is what the user will see.      |
-| **`name`** *   | The name of the breakpoint.                                                 |
-| **`width`** *  | The width of the breakpoint. This is used to set the width of the iframe.   |
-| **`height`** * | The height of the breakpoint. This is used to set the height of the iframe. |
+| **`label`** \*  | The label to display in the drop-down. This is what the user will see.      |
+| **`name`** \*   | The name of the breakpoint.                                                 |
+| **`width`** \*  | The width of the breakpoint. This is used to set the width of the iframe.   |
+| **`height`** \* | The height of the breakpoint. This is used to set the height of the iframe. |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 The "Responsive" option is always available in the drop-down and requires no additional configuration. This is the default breakpoint that will be used on initial load. This option styles the iframe with a width and height of `100%` so that it fills the screen at its maximum size and automatically resizes as the window changes size.
 
