@@ -1,4 +1,4 @@
-import type { MigrateDownArgs, MigrateUpArgs} from '@payloadcms/db-sqlite';
+import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-sqlite'
 
 import { sql } from '@payloadcms/db-sqlite'
 
