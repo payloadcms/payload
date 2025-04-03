@@ -316,6 +316,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             acc.rows.push({
               id: row.id,
+              isLoading: false,
             })
 
             const previousRows = previousFormState?.[path]?.rows || []
@@ -495,6 +496,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
+                isLoading: false,
               })
 
               const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
