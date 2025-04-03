@@ -1,8 +1,7 @@
 'use client'
-import type { FieldState } from 'payload'
+import type { FieldState, FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
@@ -34,7 +33,6 @@ export const mergeServerFormState = ({
       'valid',
       'errorMessage',
       'errorPaths',
-      'rows',
       'customComponents',
       'requiresRender',
     ]
@@ -75,6 +73,26 @@ export const mergeServerFormState = ({
           fieldChanged = true
           newFieldState.filterOptions = incomingState[path].filterOptions
         }
+      }
+
+      /**
+       * Need to intelligently merge the rows array to ensure no rows are lost or added while the request was pending
+       * For example, the server response could come back with a row which has been deleted on the client
+       * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
+       */
+      if (Array.isArray(incomingState[path].rows)) {
+        incomingState[path].rows.forEach((row) => {
+          const matchedExistingRowIndex = newFieldState.rows.findIndex(
+            (existingRow) => existingRow.id === row.id,
+          )
+
+          if (matchedExistingRowIndex > -1) {
+            newFieldState.rows[matchedExistingRowIndex] = {
+              ...newFieldState.rows[matchedExistingRowIndex],
+              ...row,
+            }
+          }
+        })
       }
 
       /**
