@@ -58,9 +58,11 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       },
     })
 
-    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce<
+      Record<string, JsonObject[]>
+    >((acc, child) => {
       acc[child.id] = acc[child.id] || []
-      acc[child.id].push(child)
+      acc[child.id]!.push(child)
       return acc
     }, {})
 

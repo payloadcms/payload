@@ -19,7 +19,7 @@ type Args = {
   aliasTable?: Table
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
-  locale: string
+  locale?: string
   parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
