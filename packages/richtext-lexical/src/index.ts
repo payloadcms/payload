@@ -901,6 +901,7 @@ export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
 } from './features/converters/lexicalToHtml_deprecated/index.js'
+export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
 export { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
 
