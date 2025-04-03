@@ -106,24 +106,26 @@ export const addOrderableFieldsAndHook = (
     collection.hooks.beforeChange = []
   }
 
-  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, operation, req }) => {
-    // Only set _order on create, not on update (unless explicitly provided)
-    if (operation === 'create') {
-      for (const orderableFieldName of orderableFieldNames) {
-        if (!data[orderableFieldName]) {
-          const lastDoc = await req.payload.find({
-            collection: collection.slug,
-            depth: 0,
-            limit: 1,
-            pagination: false,
-            req,
-            select: { [orderableFieldName]: true },
-            sort: `-${orderableFieldName}`,
-          })
+  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
+    for (const orderableFieldName of orderableFieldNames) {
+      if (!data[orderableFieldName] || (originalDoc && !originalDoc[orderableFieldName])) {
+        const lastDoc = await req.payload.find({
+          collection: collection.slug,
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          req,
+          select: { [orderableFieldName]: true },
+          sort: `-${orderableFieldName}`,
+          where: {
+            [orderableFieldName]: {
+              exists: true,
+            },
+          },
+        })
 
-          const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
-          data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
-        }
+        const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+        data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
       }
     }
 
