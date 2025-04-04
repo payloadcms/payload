@@ -11,6 +11,21 @@ const dirname = path.dirname(filename)
 export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 'config.ts') => {
   const rootDir = getNextRootDir().rootDir
 
+  process.env.PAYLOAD_CONFIG_PATH =
+    process.env.PAYLOAD_TEST_PROD === 'true'
+      ? `./${testSuiteName}/${testSuiteConfig}`
+      : `./test/${testSuiteName}/${testSuiteConfig}`
+
+  console.log('Debug paths:', {
+    rootDir,
+    dirname,
+    testSuiteName,
+    testSuiteConfig,
+    configPath: process.env.PAYLOAD_CONFIG_PATH,
+    cwd: process.cwd(),
+    NODE_PATH: process.env.NODE_PATH,
+  })
+
   return {
     /**
      * Clear next webpack cache and set 'PAYLOAD_CONFIG_PATH' environment variable
@@ -21,11 +36,6 @@ export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 
       if (existsSync(nextCache)) {
         await rm(nextCache, { recursive: true })
       }
-
-      process.env.PAYLOAD_CONFIG_PATH =
-        process.env.PAYLOAD_TEST_PROD === 'true'
-          ? path.resolve(rootDir, testSuiteName, testSuiteConfig)
-          : path.resolve(dirname, testSuiteName, testSuiteConfig)
     },
   }
 }
