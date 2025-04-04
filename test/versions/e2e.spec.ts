@@ -201,6 +201,46 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
+    test('should show currently published version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Current Published Version')
+    })
+
+    test('should show unpublished version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      // Unpublish the document
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: publishedDoc.id,
+        data: {
+          _status: 'draft',
+        },
+        draft: false,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Previously Published')
+    })
+
     test('should show global versions view level action in globals versions view', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(`${global.global(draftGlobalSlug)}/versions`)
