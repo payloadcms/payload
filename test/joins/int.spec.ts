@@ -1389,10 +1389,27 @@ describe('Joins Field', () => {
       expect(parent.children?.docs).toHaveLength(1)
       expect(parent.children.docs[0]?.value.title).toBe('doc-1')
 
-      // WHERE by _relationTo (join for specific collectionSlug)
+      // WHERE by relationTo (join for specific collectionSlug)
       parent = await payload.findByID({
         collection: 'multiple-collections-parents',
         id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      // WHERE by relationTo with overrideAccess:false
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        overrideAccess: false,
         depth: 1,
         joins: {
           children: {
