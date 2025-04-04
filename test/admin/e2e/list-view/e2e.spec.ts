@@ -413,7 +413,6 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
