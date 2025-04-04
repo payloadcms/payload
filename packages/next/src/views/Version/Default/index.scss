@@ -99,6 +99,35 @@
       &__restore {
         margin: calc(var(--base) * 0.5) 0 0 0;
       }
+
+      &-controls-top {
+        &__wrapper {
+          flex-direction: column;
+          align-items: flex-start;
+
+          .view-version__modifiedCheckBox {
+            margin-left: 0;
+          }
+        }
+      }
+
+      &-controls-bottom {
+        &__selected-version {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0;
+        }
+
+        &__compare-version {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+
+          .compare-version {
+            width: 100%;
+          }
+        }
+      }
     }
 
     @include small-break {

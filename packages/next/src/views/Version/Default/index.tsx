@@ -6,12 +6,13 @@ import {
   Gutter,
   useConfig,
   useDocumentInfo,
+  useEffectEvent,
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
@@ -66,7 +67,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     setModifiedOnly(!modifiedOnly)
   }
 
-  useEffect(() => {
+  const isInitialRender = useRef(true)
+
+  const updateSearchParams = useEffectEvent(() => {
     // If the selected comparison doc or locales change, update URL params so that version page
     // This is so that RSC can update the version comparison state
     const current = new URLSearchParams(Array.from(searchParams.entries()))
@@ -92,17 +95,21 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     const search = current.toString()
     const query = search ? `?${search}` : ''
 
-    // TODO: this transition occurs multiple times during the initial rendering phases, need to evaluate
-    startRouteTransition(() => router.push(`${pathname}${query}`))
-  }, [
-    compareValue,
-    pathname,
-    router,
-    searchParams,
-    selectedLocales,
-    modifiedOnly,
-    startRouteTransition,
-  ])
+    if (isInitialRender.current) {
+      // Do not use router.push here
+      router.replace(`${pathname}${query}`)
+    } else {
+      // Do not use router.push here
+      // TODO: this transition occurs multiple times during the initial rendering phases, need to evaluate
+      startRouteTransition(() => router.replace(`${pathname}${query}`))
+    }
+
+    isInitialRender.current = false
+  })
+
+  useEffect(() => {
+    updateSearchParams()
+  }, [compareValue?.value, selectedLocales, modifiedOnly])
 
   const {
     admin: { dateFormat },

@@ -148,7 +148,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
             }
           })
 
-          setOptions((existingOptions) => [...existingOptions, ...additionalOptions])
+          setOptions((existingOptions) =>
+            [...existingOptions, ...additionalOptions].filter(
+              (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
+            ),
+          )
 
           if (!data.hasNextPage) {
             loadedAllOptionsRef.current = true
@@ -159,7 +163,18 @@ export const SelectComparison: React.FC<Props> = (props) => {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [dateFormat, baseURL, parentID, versionID, t, i18n, latestDraftVersion, latestPublishedVersion],
+    [
+      versionID,
+      parentID,
+      localization,
+      draftsEnabled,
+      baseURL,
+      i18n,
+      t,
+      latestDraftVersion,
+      latestPublishedVersion,
+      dateFormat,
+    ],
   )
 
   useEffect(() => {
@@ -170,15 +185,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
     void getResults({ lastLoadedPage: 1 })
   }, [getResults, i18n.dateFNS])
 
-  const filteredOptions = options.filter(
-    (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
-  )
-
   useEffect(() => {
-    if (filteredOptions.length > 0 && !value) {
-      onChange(filteredOptions[0])
+    if (options.length > 0 && !value) {
+      onChange(options[0])
     }
-  }, [filteredOptions, value, onChange])
+  }, [options, value, onChange])
 
   return (
     <div
@@ -194,7 +205,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
           onMenuScrollToBottom={() => {
             void getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          options={filteredOptions}
+          options={options}
           placeholder={t('version:selectVersionToCompare')}
           value={value}
         />
