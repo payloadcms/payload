@@ -37,6 +37,11 @@
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
     },
+    "./server-functions": {
+      "import": "./src/exports/server-functions.ts",
+      "types": "./src/exports/server-functions.ts",
+      "default": "./src/exports/server-functions.ts"
+    },
     "./templates": {
       "import": "./src/exports/templates.ts",
       "types": "./src/exports/templates.ts",

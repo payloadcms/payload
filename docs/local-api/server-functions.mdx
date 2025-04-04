@@ -1,0 +1,122 @@
+---
+title: Using Local API Operations with Server Functions
+label: Server Functions
+order: 30
+desc: Learn to use Local API operations with Server Functions in Payload to manage server-side logic, data interactions, and custom workflows directly within your CMS.
+keywords: server functions, local API, Payload, CMS, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
+---
+
+## **Reusable Payload Server Functions**
+
+Managing authentication with the Local API can be tricky as you have to handle cookies and tokens yourself, and there aren't built-in logout or refresh functions since these only modify cookies. To make this easier, we provide `login`, `logout`, and `refresh` as ready-to-use server functions. They take care of the underlying complexity so you don't have to.
+
+### `login`
+
+Logs in a user by verifying credentials and setting the authentication cookie. This function allows login via username or email, depending on the collection auth configuration.
+
+#### Importing the `login` function
+
+```ts
+import { login } from '@payloadcms/next/server-functions'
+```
+
+#### Example: Login Form (React Client Component)
+
+```tsx
+'use client'
+import { useState } from 'react'
+import { login } from '@payloadcms/next/server-functions'
+
+export default function LoginForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      const response = await login({
+        collection: 'users',
+        email, // or username
+        password,
+      })
+      console.log('Logged in:', response)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        required
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        required
+      />
+      <button type="submit">Login</button>
+      {error && <p>{error}</p>}
+    </form>
+  )
+}
+```
+
+### `logout`
+
+Logs out the current user by clearing the authentication cookie.
+
+#### Importing the `logout` function
+
+```ts
+import { logout } from '@payloadcms/next/server-functions'
+```
+
+#### Example: Logout Button (React Client Component)
+
+```tsx
+'use client'
+import { logout } from '@payloadcms/next/server-functions'
+
+export default LogoutButton = () => {
+  const handleLogout = async () => {
+    await logout()
+    console.log('User logged out')
+  }
+
+  return <button onClick={handleLogout}>Logout</button>
+}
+```
+
+### `refresh`
+
+Refreshes the authentication token for the logged-in user.
+
+#### Importing the `refresh` function
+
+```ts
+import { refresh } from '@payloadcms/next/server-functions'
+```
+
+#### Example: Refresh Token Button (React Client Component)
+
+```tsx
+'use client'
+import { refresh } from '@payloadcms/next/server-functions'
+
+export default RefreshTokenButton = () => {
+  const handleRefresh = async () => {
+    const response = await refresh({ collection: 'users' })
+    console.log('Token refreshed:', response)
+  }
+
+  return <button onClick={handleRefresh}>Refresh Token</button>
+}
+```
