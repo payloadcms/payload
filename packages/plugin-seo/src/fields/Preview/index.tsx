@@ -44,6 +44,6 @@ export const PreviewField: FieldFunction = ({
       },
     },
     label: 'Preview',
-    ...((overrides as unknown as UIField) ?? {}),
+    ...(overrides ?? {}),
   }
 }

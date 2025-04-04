@@ -43,9 +43,9 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   } = useConfig()
 
   const field: FieldType<string> = useField({ ...props, path } as Options)
-  const {
-    customComponents: { Error, Label },
-  } = field
+  const { customComponents } = field
+
+  const { Error, Label } = customComponents ?? {}
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -72,7 +72,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<
