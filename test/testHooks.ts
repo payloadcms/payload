@@ -22,7 +22,10 @@ export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 
         await rm(nextCache, { recursive: true })
       }
 
-      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, testSuiteConfig)
+      process.env.PAYLOAD_CONFIG_PATH =
+        process.env.PAYLOAD_TEST_PROD === 'true'
+          ? path.resolve(rootDir, testSuiteName, testSuiteConfig)
+          : path.resolve(dirname, testSuiteName, testSuiteConfig)
     },
   }
 }
