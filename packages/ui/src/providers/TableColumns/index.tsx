@@ -71,20 +71,9 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const setActiveColumns = useCallback(
     async (columns: string[]) => {
-      const newColumnState = currentQuery.columns
-
-      columns.forEach((colName) => {
-        const colIndex = newColumnState.findIndex((c) => colName === c)
-
-        // ensure the name does not begin with a `-` which denotes an inactive column
-        if (colIndex !== undefined && newColumnState[colIndex][0] === '-') {
-          newColumnState[colIndex] = colName.slice(1)
-        }
-      })
-
-      await refineListData({ columns: newColumnState })
+      await refineListData({ columns })
     },
-    [currentQuery, refineListData],
+    [refineListData],
   )
 
   const resetColumnsState = React.useCallback(async () => {
