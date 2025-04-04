@@ -6,7 +6,6 @@ import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
@@ -312,8 +311,6 @@ describe('Block fields', () => {
       await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
         'Second block',
       )
-
-      await wait(1000)
 
       await reorderBlocks({
         page,
