@@ -359,10 +359,12 @@ const config = buildConfig({
           name: 'editor',
           type: 'richText',
           editor: lexicalEditor({
-            BlocksFeature({
-              // Same reference can be reused anywhere, even in the lexical editor, without incurred performance hit
-              blocks: ['TextBlock'],
-            })
+            features: [
+              BlocksFeature({
+                // Same reference can be reused anywhere, even in the lexical editor, without incurred performance hit
+                blocks: ['TextBlock'],
+              }),
+            ],
           })
         },
       ],
