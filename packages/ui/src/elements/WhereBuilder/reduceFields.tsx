@@ -99,7 +99,7 @@ export const reduceFields = ({
       return reduced
     }
 
-    if (field.type === 'group' && 'fields' in field) {
+    if ((field.type === 'group' || field.type === 'array') && 'fields' in field) {
       const translatedLabel = getTranslation(field.label || '', i18n)
 
       const labelWithPrefix = labelPrefix
