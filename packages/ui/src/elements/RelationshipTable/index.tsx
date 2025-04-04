@@ -39,6 +39,7 @@ type RelationshipTableComponentProps = {
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly BeforeInput?: React.ReactNode
+  readonly closeOnSave?: boolean
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
@@ -58,6 +59,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     AfterInput,
     allowCreate = true,
     BeforeInput,
+    closeOnSave = true,
     disableTable = false,
     field,
     filterOptions,
@@ -206,11 +208,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      closeDrawer()
+      if (closeOnSave) {
+        closeDrawer()
+      }
 
       void onDrawerSave(args)
     },
-    [closeDrawer, onDrawerSave],
+    [closeDrawer, onDrawerSave, closeOnSave],
   )
 
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(

@@ -98,6 +98,7 @@ export interface Config {
   collectionsJoins: {
     users: {
       posts: 'posts';
+      postsWithCloseOnSaveFalse: 'posts';
     };
     categories: {
       relatedPosts: 'posts';
@@ -217,6 +218,11 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   posts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  postsWithCloseOnSaveFalse?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -878,6 +884,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   posts?: T;
+  postsWithCloseOnSaveFalse?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
