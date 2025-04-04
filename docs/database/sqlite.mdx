@@ -40,6 +40,7 @@ export default buildConfig({
 | `push`                     | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                              |
 | `logger`                   | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
+| `casing`                   | The [casing](https://orm.drizzle.team/docs/sql-schema-declaration#camel-and-snake-casing) to be passed to drizzle. Default is 'snake_case'.                                      |
 | `idType`                   | A string of 'number', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`       | A SQLiteTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                   |
 | `localesSuffix`            | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                |
