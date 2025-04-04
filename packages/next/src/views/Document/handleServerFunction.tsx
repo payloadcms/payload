@@ -28,7 +28,7 @@ export const renderDocumentHandler = async (args: {
   initialState?: FormState
   locale?: Locale
   overrideEntityVisibility?: boolean
-  redirectAfterCreate: boolean
+  redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest

@@ -23,15 +23,15 @@ export const metadata = {
 export const RootLayout = async ({
   children,
   config: configPromise,
+  htmlProps = {},
   importMap,
   serverFunction,
-  htmlProps = {},
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
-  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
 }) => {
   checkDependencies()
 

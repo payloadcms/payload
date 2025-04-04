@@ -2134,6 +2134,16 @@ describe('database', () => {
     expect(query3.totalDocs).toEqual(1)
   })
 
+  it('db.deleteOne should not fail if query does not resolve to any document', async () => {
+    await expect(
+      payload.db.deleteOne({
+        collection: 'posts',
+        returning: false,
+        where: { title: { equals: 'some random title' } },
+      }),
+    ).resolves.toBeNull()
+  })
+
   it('mongodb additional keys stripping', async () => {
     // eslint-disable-next-line jest/no-conditional-in-test
     if (payload.db.name !== 'mongoose') {

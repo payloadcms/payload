@@ -981,6 +981,8 @@ describe('Versions', () => {
       // Fill with invalid data again, then reload and accept the warning, should contain previous data
       await titleField.fill('')
 
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
       await page.reload()
 
       await expect(titleField).toBeEnabled()
@@ -1197,11 +1199,11 @@ describe('Versions', () => {
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
-      await expect(textInArrayES).toContainText('No Array Localizeds found')
+      await expect(textInArrayES).toBeHidden()
 
       await page.locator('#modifiedOnly').click()
 
-      await expect(textInArrayES).toBeHidden()
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
     })
 
     test('correctly renders diff for block fields', async () => {
@@ -1211,6 +1213,62 @@ describe('Versions', () => {
 
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInBlock')
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
+    })
+
+    test('correctly renders diff for collapsibles within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for rows within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInRowInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for named tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInNamedTab1InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInNamedTab1InBlock2',
+      )
+    })
+
+    test('correctly renders diff for unnamed tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInUnnamedTab2InBlock2',
+      )
     })
 
     test('correctly renders diff for checkbox fields', async () => {
@@ -1326,12 +1384,17 @@ describe('Versions', () => {
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(1)).toHaveText(
-        '"text": "richtext",',
-      )
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(3)).toHaveText(
-        '"text": "richtext2",',
-      )
+      const oldDiff = richtext.locator('.lexical-diff__diff-old')
+      const newDiff = richtext.locator('.lexical-diff__diff-new')
+
+      const oldHTML =
+        `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
+      `.trim()
+      const newHTML =
+        `Fugiat <span data-match-type="create">esse new in</span> dolor aleiqua <span data-match-type="create">gillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="create">labore officia</span> cupidatat amet commodo commodo proident occaecat.`.trim()
+
+      expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
+      expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

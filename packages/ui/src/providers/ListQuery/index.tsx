@@ -3,20 +3,21 @@ import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { ListQueryProps } from './types.js'
+import type { IListQueryContext, ListQueryProps } from './types.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { ListQueryContext } from './context.js'
+import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 
 export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  collectionSlug,
   columns,
   data,
   defaultLimit,
@@ -24,16 +25,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
+  orderableFieldName,
 }) => {
   'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
+  const [modified, setModified] = useState(false)
 
   const searchParams = useMemo<ListQuery>(
     () => parseSearchParams(rawSearchParams),
     [rawSearchParams],
   )
+
+  const contextRef = useRef({} as IListQueryContext)
+
+  contextRef.current.modified = modified
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -47,22 +54,35 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
-    async (query: ListQuery) => {
-      let page = 'page' in query ? query.page : currentQuery?.page
+    async (incomingQuery: ListQuery, modified?: boolean) => {
+      if (modified !== undefined) {
+        setModified(modified)
+      } else {
+        setModified(true)
+      }
 
-      if ('where' in query || 'search' in query) {
+      let page = 'page' in incomingQuery ? incomingQuery.page : currentQuery?.page
+
+      if ('where' in incomingQuery || 'search' in incomingQuery) {
         page = '1'
       }
 
       const newQuery: ListQuery = {
         ...currentQuery,
-        ...query,
-        columns: 'columns' in query ? query.columns : currentQuery.columns,
-        limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
+        ...incomingQuery,
+        columns: 'columns' in incomingQuery ? incomingQuery.columns : currentQuery.columns,
+        limit:
+          'limit' in incomingQuery
+            ? incomingQuery.limit
+            : (currentQuery?.limit ?? String(defaultLimit)),
         page,
-        search: 'search' in query ? query.search : currentQuery?.search,
-        sort: 'sort' in query ? query.sort : ((currentQuery?.sort as string) ?? defaultSort),
-        where: 'where' in query ? query.where : currentQuery?.where,
+        preset: 'preset' in incomingQuery ? incomingQuery.preset : currentQuery?.preset,
+        search: 'search' in incomingQuery ? incomingQuery.search : currentQuery?.search,
+        sort:
+          'sort' in incomingQuery
+            ? incomingQuery.sort
+            : ((currentQuery?.sort as string) ?? defaultSort),
+        where: 'where' in incomingQuery ? incomingQuery.where : currentQuery?.where,
       }
 
       if (modifySearchParams) {
@@ -85,18 +105,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery?.columns,
-      currentQuery?.limit,
-      currentQuery?.page,
-      currentQuery?.search,
-      currentQuery?.sort,
-      currentQuery?.where,
-      startRouteTransition,
+      currentQuery,
       defaultLimit,
       defaultSort,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
+      startRouteTransition,
       router,
     ],
   )
@@ -182,17 +197,21 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   return (
     <ListQueryContext
       value={{
+        collectionSlug,
         data,
         handlePageChange,
         handlePerPageChange,
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        orderableFieldName,
         query: currentQuery,
         refineListData,
+        setModified,
+        ...contextRef.current,
       }}
     >
-      {children}
+      <ListQueryModifiedContext value={modified}>{children}</ListQueryModifiedContext>
     </ListQueryContext>
   )
 }

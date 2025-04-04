@@ -1135,6 +1135,33 @@ describe('lexicalMain', () => {
     await expect(urlInput).toBeVisible()
   })
 
+  test('ensure link drawer displays nested block fields if document does not have `create` permission', async () => {
+    await navigateToLexicalFields(true, 'lexical-access-control')
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const link = richTextField.locator('.LexicalEditorTheme__link').first()
+    await link.scrollIntoViewIfNeeded()
+    await expect(link).toBeVisible()
+    await link.click({
+      // eslint-disable-next-line playwright/no-force-option
+      force: true,
+      button: 'left',
+    })
+
+    await expect(page.locator('.link-edit')).toBeVisible()
+    await page.locator('.link-edit').click()
+
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first()
+    await expect(linkDrawer).toBeVisible()
+
+    const blockTextInput = linkDrawer.locator('#field-blocks__0__text').first()
+
+    await expect(blockTextInput).toBeVisible()
+    await expect(blockTextInput).toBeEditable()
+  })
+
   test('lexical cursor / selection should be preserved when swapping upload field and clicking within with its list drawer', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -1494,6 +1521,7 @@ describe('lexicalMain', () => {
       expect(htmlContent).not.toContain('Cargando...')
       expect(htmlContent).toContain('Start typing, or press')
     })
+    // eslint-disable-next-line playwright/expect-expect, playwright/no-skipped-test
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, 'lexical-localized-fields')
     })

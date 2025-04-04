@@ -37,10 +37,7 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
-import type { ChainedMethods } from './find/chainMethods.js'
 import type { Operators } from './queries/operatorMap.js'
-
-export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -377,3 +374,8 @@ export type RelationMap = Map<
     type: 'many' | 'one'
   }
 >
+
+/**
+ * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ */
+export type { ChainedMethods } from './find/chainMethods.js'

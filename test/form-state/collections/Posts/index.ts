@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
@@ -61,6 +63,22 @@ export const PostsCollection: CollectionConfig = {
               type: 'number',
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel',
+        },
+      },
+      fields: [
+        {
+          name: 'richText',
+          type: 'richText',
+          editor: lexicalEditor(),
         },
       ],
     },

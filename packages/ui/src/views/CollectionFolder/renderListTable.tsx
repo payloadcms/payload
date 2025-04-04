@@ -17,16 +17,16 @@ import type {
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 import React from 'react'
 
-import type { BuildColumnStateArgs } from '../../elements/TableColumns/buildColumnState/temp_index.js'
+import type { BuildColumnStateArgs } from '../../providers/TableColumns/buildColumnState/index.js'
 
 import { FolderListTable } from '../../elements/FolderView/FolderListTable/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
-import { buildColumnState } from '../../elements/TableColumns/buildColumnState/temp_index.js'
-import { filterFields } from '../../elements/TableColumns/filterFields.js'
-import { getInitialColumns } from '../../elements/TableColumns/getInitialColumns.js'
 import { DocumentIcon } from '../../icons/Document/index.js'
 import { FolderIcon } from '../../icons/Folder/index.js'
+import { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
+import { buildColumnState } from '../../providers/TableColumns/buildColumnState/index.js'
+import { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
 export const renderFilters = (
   fields: Field[],
   importMap: ImportMap,

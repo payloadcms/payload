@@ -12,6 +12,9 @@ export type DocumentDrawerProps = {
   readonly drawerSlug?: string
   readonly id?: null | number | string
   readonly initialData?: Data
+  /**
+   * @deprecated
+   */
   readonly initialState?: FormState
   readonly overrideEntityVisibility?: boolean
   readonly redirectAfterCreate?: boolean

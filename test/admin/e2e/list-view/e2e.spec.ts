@@ -392,7 +392,7 @@ describe('List View', () => {
     test('should reset filter value when a different field is selected', async () => {
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'ID',
         operatorLabel: 'equals',
@@ -413,10 +413,11 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
+     
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
@@ -431,16 +432,13 @@ describe('List View', () => {
       await whereBuilder.locator('.condition__value .clear-indicator').click()
 
       await page.waitForURL(new RegExp(encodedQueryString))
-    })
-
-    test.skip('should remove condition from URL when a different field is selected', async () => {
-      // TODO: fix this bug and write this test
+      expect(true).toBe(true)
     })
 
     test('should refresh relationship values when a different field is selected', async () => {
       await page.goto(postsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
@@ -600,7 +598,7 @@ describe('List View', () => {
     test('should reset filter values for every additional filter', async () => {
       await page.goto(postsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
@@ -622,7 +620,7 @@ describe('List View', () => {
     test('should not re-render page upon typing in a value in the filter value field', async () => {
       await page.goto(postsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
@@ -645,7 +643,7 @@ describe('List View', () => {
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
@@ -739,7 +737,7 @@ describe('List View', () => {
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
@@ -1287,6 +1285,31 @@ describe('List View', () => {
       await expect(columnAfterSort).toHaveClass(/column-selector__column--active/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+
+      await toggleColumn(page, {
+        columnLabel: 'Wavelengths',
+        targetState: 'on',
+        columnName: 'wavelengths',
+      })
+
+      await toggleColumn(page, {
+        columnLabel: 'Select Field',
+        targetState: 'on',
+        columnName: 'selectField',
+      })
+
+      // check that the cells have the classes added per value selected
+      await expect(
+        page.locator('.cell-_status').first().locator("[class*='selected--']"),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('.cell-wavelengths').first().locator("[class*='selected--']"),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('.cell-selectField').first().locator("[class*='selected--']"),
+      ).toBeVisible()
 
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()

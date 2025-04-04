@@ -42,6 +42,12 @@
         .cell-_select {
           min-width: unset;
         }
+
+        #heading-_dragHandle,
+        .cell-_dragHandle {
+          width: 20px;
+          min-width: 0;
+        }
       }
     }
 

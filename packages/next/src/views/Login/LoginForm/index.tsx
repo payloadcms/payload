@@ -20,6 +20,7 @@ import { formatAdminURL, getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
+import { getSafeRedirect } from '../../../utilities/getSafeRedirect.js'
 import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
@@ -91,13 +92,7 @@ export const LoginForm: React.FC<{
       initialState={initialState}
       method="POST"
       onSuccess={handleLogin}
-      redirect={
-        typeof searchParams?.redirect === 'string'
-          ? searchParams.redirect.startsWith('/')
-            ? searchParams.redirect
-            : encodeURIComponent(searchParams.redirect)
-          : adminRoute
-      }
+      redirect={getSafeRedirect(searchParams?.redirect, adminRoute)}
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>

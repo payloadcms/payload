@@ -3,6 +3,7 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  Column,
   ColumnPreference,
   Field,
   ImportMap,
@@ -14,16 +15,17 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import React from 'react'
 
-import type { BuildColumnStateArgs } from '../elements/TableColumns/buildColumnState/temp_index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { Column } from '../exports/client/index.js'
+import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { buildColumnState } from '../elements/TableColumns/buildColumnState/temp_index.js'
-import { filterFields } from '../elements/TableColumns/filterFields.js'
-import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
-
+import { SortHeader } from '../elements/SortHeader/index.js'
+import { SortRow } from '../elements/SortRow/index.js'
+import { OrderableTable } from '../elements/Table/OrderableTable.js'
+import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
+import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
@@ -63,6 +65,7 @@ export const renderTable = ({
   docs,
   enableRowSelections,
   i18n,
+  orderableFieldName,
   payload,
   renderRowTypes,
   tableAppearance,
@@ -79,6 +82,7 @@ export const renderTable = ({
   drawerSlug?: string
   enableRowSelections: boolean
   i18n: I18nClient
+  orderableFieldName: string
   payload: Payload
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
@@ -217,9 +221,38 @@ export const renderTable = ({
     } as Column)
   }
 
+  if (!orderableFieldName) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    }
+  }
+
+  columnsToUse.unshift({
+    accessor: '_dragHandle',
+    active: true,
+    field: {
+      admin: {
+        disabled: true,
+      },
+      hidden: true,
+    },
+    Heading: <SortHeader />,
+    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+  } as Column)
+
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
-    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    Table: (
+      <OrderableTable
+        appearance={tableAppearance}
+        collection={clientCollectionConfig}
+        columns={columnsToUse}
+        data={docs}
+        key="table"
+      />
+    ),
   }
 }

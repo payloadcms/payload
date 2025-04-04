@@ -52,6 +52,9 @@ export const renderDocument = async ({
 }: {
   drawerSlug?: string
   overrideEntityVisibility?: boolean
+  readonly redirectAfterCreate?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
@@ -309,7 +312,7 @@ export const renderDocument = async ({
       id = doc.id
       isEditing = getIsEditing({ id: doc.id, collectionSlug, globalSlug })
 
-      if (!drawerSlug) {
+      if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,

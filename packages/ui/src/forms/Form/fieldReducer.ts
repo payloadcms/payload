@@ -53,14 +53,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [`${path}.${rowIndex}.id`]: {
           initialValue: newRow.id,
           passesCondition: true,
-          requiresRender: true,
           valid: true,
           value: newRow.id,
         },
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -136,12 +134,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { remainingFields, rows } = separateRows(path, state)
       const rowsMetadata = [...(state[path].rows || [])]
 
-      const duplicateRowMetadata = deepCopyObjectSimple(rowsMetadata[rowIndex])
+      const duplicateRowMetadata = deepCopyObjectSimpleWithoutReactComponents(
+        rowsMetadata[rowIndex],
+      )
+
       if (duplicateRowMetadata.id) {
         duplicateRowMetadata.id = new ObjectId().toHexString()
       }
 
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
+
       if (duplicateRowState.id) {
         duplicateRowState.id.value = new ObjectId().toHexString()
         duplicateRowState.id.initialValue = new ObjectId().toHexString()
@@ -169,7 +171,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -198,32 +199,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, topLevelRows),
         [path]: {
           ...state[path],
-          requiresRender: true,
           rows: rowsWithinField,
         },
-      }
-
-      // Do the same for custom components, i.e. `array.customComponents.RowLabels[0]` -> `array.customComponents.RowLabels[1]`
-      // Do this _after_ initializing `newState` to avoid adding the `customComponents` key to the state if it doesn't exist
-      if (newState[path]?.customComponents?.RowLabels) {
-        const customComponents = {
-          ...newState[path].customComponents,
-          RowLabels: [...newState[path].customComponents.RowLabels],
-        }
-
-        // Ensure the array grows if necessary
-        if (moveToIndex >= customComponents.RowLabels.length) {
-          customComponents.RowLabels.length = moveToIndex + 1
-        }
-
-        const copyOfMovingLabel = customComponents.RowLabels[moveFromIndex]
-
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        customComponents.RowLabels.splice(moveFromIndex, 1)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        customComponents.RowLabels.splice(moveToIndex, 0, copyOfMovingLabel)
-
-        newState[path].customComponents = customComponents
       }
 
       return newState
@@ -250,7 +227,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: rows.length > 0,
-          requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -327,7 +303,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      //TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
       if (action.sanitize) {
         for (const field of Object.values(action.state)) {
           if (field.valid !== false) {
