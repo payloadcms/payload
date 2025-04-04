@@ -59,6 +59,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await db.query[tableName].findFirst(findManyArgs)
   }
 
+  if (!docToDelete) {
+    return null
+  }
+
   const result =
     returning === false
       ? null
