@@ -196,7 +196,8 @@ export const traverseFields = ({
           }
         }
 
-        currentArgs.with[`${path}${field.name}`] = withArray
+        const relationName = field.dbName ? `_${arrayTableName}` : `${path}${field.name}`
+        currentArgs.with[relationName] = withArray
 
         traverseFields({
           _locales: withArray.with._locales,
