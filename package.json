@@ -99,11 +99,11 @@
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
     "test:e2e:prod": "pnpm prepare-run-test-against-prod && pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:ci": "pnpm prepare-run-test-against-prod:ci && pnpm runts ./test/runE2E.ts --prod",
-    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
-    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --experimental-vm-modules\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --experimental-vm-modules\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --experimental-vm-modules\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
-    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
+    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation --experimental-vm-modules\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter translations run translateNewKeys"
   },
   "lint-staged": {
