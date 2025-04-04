@@ -16,14 +16,15 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { BulkUploadProvider } from '../index.js'
 import './index.scss'
+import { BulkUploadProvider } from '../index.js'
 
 const baseClass = 'collection-edit'
 
@@ -161,11 +162,13 @@ export function EditForm({ submitted }: EditFormProps) {
             BeforeFields={
               <React.Fragment>
                 {CustomUpload || (
-                  <Upload
-                    collectionSlug={collectionConfig.slug}
-                    initialState={initialState}
-                    uploadConfig={collectionConfig.upload}
-                  />
+                  <UploadControlsProvider>
+                    <Upload
+                      collectionSlug={collectionConfig.slug}
+                      initialState={initialState}
+                      uploadConfig={collectionConfig.upload}
+                    />
+                  </UploadControlsProvider>
                 )}
               </React.Fragment>
             }
