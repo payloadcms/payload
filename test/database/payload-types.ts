@@ -80,6 +80,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
     'compound-indexes': CompoundIndex;
+    'array-default-id': ArrayDefaultId;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +101,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
+    'array-default-id': ArrayDefaultIdSelect<false> | ArrayDefaultIdSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -421,6 +423,21 @@ export interface CompoundIndex {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-default-id".
+ */
+export interface ArrayDefaultId {
+  id: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -494,6 +511,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'compound-indexes';
         value: string | CompoundIndex;
+      } | null)
+    | ({
+        relationTo: 'array-default-id';
+        value: string | ArrayDefaultId;
       } | null)
     | ({
         relationTo: 'users';
@@ -791,6 +812,20 @@ export interface CompoundIndexesSelect<T extends boolean = true> {
     | T
     | {
         four?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-default-id_select".
+ */
+export interface ArrayDefaultIdSelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

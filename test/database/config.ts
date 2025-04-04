@@ -604,6 +604,63 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'array-default-id',
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'General',
+              fields: [
+                {
+                  name: 'name',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+            {
+              label: 'Content',
+              fields: [
+                // ...
+                {
+                  name: 'myItems',
+                  labels: {
+                    singular: 'item',
+                    plural: 'items',
+                  },
+                  type: 'array',
+                  required: false,
+                  defaultValue: Array(4).fill({ name: '', description: '' }),
+                  fields: [
+                    {
+                      name: 'name',
+                      type: 'text',
+                      required: true,
+                    },
+                    {
+                      name: 'description',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+            // ...
+          ],
+        },
+        // {
+        //   name: 'array',
+        //   type: 'array',
+        //   fields: [{ type: 'text', name: 'text' }],
+        //   defaultValue: Array(100).fill({ text: 'text-1' }),
+        //   // defaultValue: Array.from({ length: 4 }, () => ({ text: 'text-1' })),
+        // },
+      ],
+    },
   ],
   globals: [
     {

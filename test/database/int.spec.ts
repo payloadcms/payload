@@ -1627,6 +1627,18 @@ describe('database', () => {
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
+
+    it('defaultValue should work with arrays', async () => {
+      const res_1 = await payload.create({ draft: true, collection: 'array-default-id', data: {} })
+      expect(res_1.array).toHaveLength(4)
+      expect(res_1.array[0]?.text).toBe('text-1')
+      expect(res_1.array[1]?.text).toBe('text-1')
+
+      // const res_2 = await payload.create({ draft: true, collection: 'array-default-id', data: {} })
+      // expect(res_2.array).toHaveLength(2)
+      // expect(res_2.array[0]?.text).toBe('text-1')
+      // expect(res_2.array[1]?.text).toBe('text-2')
+    })
   })
 
   describe('Schema generation', () => {
