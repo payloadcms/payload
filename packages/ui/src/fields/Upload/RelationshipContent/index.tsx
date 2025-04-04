@@ -99,7 +99,7 @@ export function RelationshipContent(props: Props) {
             alt={alt}
             className={`${baseClass}__thumbnail`}
             filename={filename}
-            fileSrc={isImage(mimeType) && thumbnailSrc}
+            fileSrc={thumbnailSrc}
             size="small"
           />
         )}
