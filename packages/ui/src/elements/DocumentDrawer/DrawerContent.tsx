@@ -92,6 +92,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete,
       redirectAfterDuplicate,
       renderDocument,
+      redirectAfterCreate,
       closeModal,
       overrideEntityVisibility,
       t,

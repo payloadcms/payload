@@ -38,6 +38,14 @@
       flex-grow: 1;
       overflow: hidden;
       padding: base(0.8) 0;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__meta-icons {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.2);
+      flex-shrink: 0;
     }
 
     &__meta {

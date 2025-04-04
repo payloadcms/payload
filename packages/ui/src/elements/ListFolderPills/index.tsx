@@ -1,0 +1,64 @@
+'use client'
+
+import type { ClientCollectionConfig } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
+
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
+import './index.scss'
+
+const baseClass = 'list-folder-pills'
+
+type ListFolderPillsProps = {
+  collectionConfig: ClientCollectionConfig
+  viewType: 'folders' | 'list'
+}
+
+export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsProps) {
+  const { i18n } = useTranslation()
+  const { config } = useConfig()
+  return (
+    <div className={baseClass}>
+      <Button
+        buttonStyle="pill"
+        className={[
+          `${baseClass}__button`,
+          viewType === 'folders' && `${baseClass}__button--active`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        disabled={viewType === 'folders'}
+        el={viewType === 'list' ? 'link' : 'div'}
+        size="small"
+        to={formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${collectionConfig.slug}/folders`,
+          serverURL: config.serverURL,
+        })}
+      >
+        {/* @todo: translate */}
+        By Folder
+      </Button>
+      <Button
+        buttonStyle="pill"
+        className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
+          .filter(Boolean)
+          .join(' ')}
+        disabled={viewType === 'list'}
+        el={viewType === 'folders' ? 'link' : 'div'}
+        size="small"
+        to={formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${collectionConfig.slug}`,
+          serverURL: config.serverURL,
+        })}
+      >
+        {/* @todo: translate */}
+        All {getTranslation(collectionConfig?.labels?.plural, i18n)}
+      </Button>
+    </div>
+  )
+}
