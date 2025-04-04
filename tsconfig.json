@@ -28,6 +28,9 @@
       "path": "./packages/live-preview"
     },
     {
+      "path": "./packages/ecommerce"
+    },
+    {
       "path": "./packages/live-preview-react"
     },
     {

@@ -1,0 +1,200 @@
+{
+  "name": "@payloadcms/ecommerce",
+  "version": "3.29.0",
+  "description": "Ecommerce for Payload",
+  "keywords": [
+    "payload",
+    "cms",
+    "plugin",
+    "typescript",
+    "react",
+    "ecommerce"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/ecommerce"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./variants": {
+      "import": "./src/exports/variants.ts",
+      "types": "./src/exports/variants.ts",
+      "default": "./src/exports/variants.ts"
+    },
+    "./fields": {
+      "import": "./src/exports/fields.ts",
+      "types": "./src/exports/fields.ts",
+      "default": "./src/exports/fields.ts"
+    },
+    "./products": {
+      "import": "./src/exports/products.ts",
+      "types": "./src/exports/products.ts",
+      "default": "./src/exports/products.ts"
+    },
+    "./transactions": {
+      "import": "./src/exports/transactions.ts",
+      "types": "./src/exports/transactions.ts",
+      "default": "./src/exports/transactions.ts"
+    },
+    "./payments/stripe": {
+      "import": "./src/exports/payments/stripe.ts",
+      "types": "./src/exports/payments/stripe.ts",
+      "default": "./src/exports/payments/stripe.ts"
+    },
+    "./ui": {
+      "import": "./src/exports/ui.ts",
+      "types": "./src/exports/ui.ts",
+      "default": "./src/exports/ui.ts"
+    },
+    "./currencies": {
+      "import": "./src/exports/currencies.ts",
+      "types": "./src/exports/currencies.ts",
+      "default": "./src/exports/currencies.ts"
+    },
+    "./orders": {
+      "import": "./src/exports/orders.ts",
+      "types": "./src/exports/orders.ts",
+      "default": "./src/exports/orders.ts"
+    },
+    "./plugin": {
+      "import": "./src/exports/plugin.ts",
+      "types": "./src/exports/plugin.ts",
+      "default": "./src/exports/plugin.ts"
+    },
+    "./translations": {
+      "import": "./src/exports/translations.ts",
+      "types": "./src/exports/translations.ts",
+      "default": "./src/exports/translations.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    }
+  },
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "payload": "workspace:*",
+    "stripe": "^10.2.0"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      },
+      "./variants": {
+        "import": "./dist/exports/variants.js",
+        "types": "./dist/exports/variants.d.ts",
+        "default": "./dist/exports/variants.js"
+      },
+      "./fields": {
+        "import": "./dist/exports/fields.js",
+        "types": "./dist/exports/fields.d.ts",
+        "default": "./dist/exports/fields.js"
+      },
+      "./products": {
+        "import": "./dist/exports/products.js",
+        "types": "./dist/exports/products.d.ts",
+        "default": "./dist/exports/products.js"
+      },
+      "./transactions": {
+        "import": "./dist/exports/transactions.js",
+        "types": "./dist/exports/transactions.d.ts",
+        "default": "./dist/exports/transactions.js"
+      },
+      "./currencies": {
+        "import": "./dist/exports/currencies.js",
+        "types": "./dist/exports/currencies.d.ts",
+        "default": "./dist/exports/currencies.js"
+      },
+      "./payments/stripe": {
+        "import": "./dist/exports/payments/stripe.js",
+        "types": "./dist/exports/payments/stripe.d.ts",
+        "default": "./dist/exports/payments/stripe.js"
+      },
+      "./ui": {
+        "import": "./dist/exports/ui.js",
+        "types": "./dist/exports/ui.d.ts",
+        "default": "./dist/exports/ui.js"
+      },
+      "./orders": {
+        "import": "./dist/exports/orders.js",
+        "types": "./dist/exports/orders.d.ts",
+        "default": "./dist/exports/orders.js"
+      },
+      "./plugin": {
+        "import": "./dist/exports/plugin.js",
+        "types": "./dist/exports/plugin.d.ts",
+        "default": "./dist/exports/plugin.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./translations": {
+        "import": "./dist/exports/translations.js",
+        "types": "./dist/exports/translations.d.ts",
+        "default": "./dist/exports/translations.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "homepage:": "https://payloadcms.com"
+}
