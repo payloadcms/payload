@@ -48,6 +48,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
@@ -107,6 +108,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 

@@ -22,7 +22,7 @@ import type {
 type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 
 type EmailFieldBaseClientProps = {
-  readonly path: string
+  readonly path?: string
   readonly validate?: EmailFieldValidation
 }
 

@@ -64,7 +64,7 @@ export type FieldPaths = {
    *
    * @default field.name
    */
-  path: string
+  path?: string
 }
 
 export type ServerComponentProps = {

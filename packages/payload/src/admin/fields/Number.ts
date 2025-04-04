@@ -23,7 +23,7 @@ type NumberFieldClientWithoutType = MarkOptional<NumberFieldClient, 'type'>
 
 type NumberFieldBaseClientProps = {
   readonly onChange?: (e: number) => void
-  readonly path: string
+  readonly path?: string
   readonly validate?: NumberFieldValidation
 }
 

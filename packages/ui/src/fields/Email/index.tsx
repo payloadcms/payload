@@ -33,6 +33,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -56,6 +57,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 

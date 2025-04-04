@@ -28,6 +28,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       localized,
       required,
     },
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -54,6 +55,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     showError,
     value,
   } = useField<string>({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 

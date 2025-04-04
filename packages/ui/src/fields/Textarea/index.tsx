@@ -29,6 +29,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       minLength,
       required,
     },
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -65,6 +66,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     showError,
     value,
   } = useField<string>({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 

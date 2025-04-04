@@ -98,7 +98,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
                 indexPath={indexPath}
                 parentPath={parentPath}
                 parentSchemaPath={parentSchemaPath}
-                path={path}
                 permissions={fieldPermissions}
                 readOnly={isReadOnly}
                 schemaPath={schemaPath}

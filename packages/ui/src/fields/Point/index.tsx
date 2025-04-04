@@ -26,6 +26,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       localized,
       required,
     },
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -49,6 +50,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 
