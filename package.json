@@ -37,6 +37,7 @@
     "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",
     "build:plugin-multi-tenant": "turbo build --filter \"@payloadcms/plugin-multi-tenant\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
+    "build:plugin-realtime": "turbo build --filter \"@payloadcms/plugin-realtime\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",
     "build:plugin-search": "turbo build --filter \"@payloadcms/plugin-search\"",
     "build:plugin-sentry": "turbo build --filter \"@payloadcms/plugin-sentry\"",
