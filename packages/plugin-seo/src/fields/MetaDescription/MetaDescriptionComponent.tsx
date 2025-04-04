@@ -38,7 +38,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       required,
     },
     hasGenerateDescriptionFn,
-    path,
     readOnly,
   } = props
 
@@ -61,12 +60,11 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const {
     customComponents: { AfterInput, BeforeInput, Label },
     errorMessage,
+    path,
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    path,
-  } as Options)
+  }: FieldType<string> = useField()
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {

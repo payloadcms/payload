@@ -59,14 +59,12 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
       required,
     },
     leaves,
-    path: pathFromProps,
     plugins,
     readOnly: readOnlyFromTopLevelProps,
     schemaPath: schemaPathFromProps,
     validate = richTextValidate,
   } = props
 
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -97,11 +95,11 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     customComponents: { Description, Error, Label } = {},
     disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
     validate: memoizedValidate,
   })
 

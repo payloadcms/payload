@@ -56,7 +56,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       relationTo,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -104,11 +104,12 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     disabled,
     filterOptions,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField<Value | Value[]>({
-    path,
+    path: pathFromProps,
     validate: memoizedValidate,
   })
   const [options, dispatchOptions] = useReducer(optionsReducer, [])

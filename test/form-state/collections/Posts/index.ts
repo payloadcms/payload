@@ -80,6 +80,15 @@ export const PostsCollection: CollectionConfig = {
           type: 'richText',
           editor: lexicalEditor(),
         },
+        {
+          name: 'text',
+          type: 'text',
+          admin: {
+            components: {
+              Field: './collections/Posts/TextField.js#CustomTextField',
+            },
+          },
+        },
       ],
     },
   ],

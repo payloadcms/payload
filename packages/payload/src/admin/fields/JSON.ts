@@ -22,7 +22,7 @@ import type {
 type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
 
 type JSONFieldBaseClientProps = {
-  readonly path: string
+  readonly path?: string
   readonly validate?: JSONFieldValidation
 }
 

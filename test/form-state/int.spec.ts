@@ -168,8 +168,8 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES_ return with rendered components
-    expect(stateWithRow?.['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
-    expect(stateWithRow?.['array.0.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWithRow?.['array.0.text']?.lastRenderedPath).toStrictEqual('array.0.text')
+    expect(stateWithRow?.['array.0.text']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
       mockRSCs: true,
@@ -189,8 +189,8 @@ describe('Form State', () => {
           value: '123',
           initialValue: '123',
         },
-        'array.0.richText': {
-          lastRenderedPath: 'array.0.richText',
+        'array.0.text': {
+          lastRenderedPath: 'array.0.text',
         },
         'array.1.id': {
           value: '456',
@@ -209,12 +209,12 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
-    expect(stateWithTitle?.['array.0.richText']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.0.text']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.text']).not.toHaveProperty('customComponents')
 
     // Ensure that row 2 _DOES_ return with rendered components
-    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('customComponents')
-    expect(stateWithTitle?.['array.1.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWithTitle?.['array.1.text']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.1.text']).toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.1.text']?.customComponents?.Field).toBeDefined()
   })
 })

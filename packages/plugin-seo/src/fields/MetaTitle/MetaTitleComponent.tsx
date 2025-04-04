@@ -33,7 +33,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
     hasGenerateTitleFn,
-    path,
     readOnly,
   } = props || {}
 
@@ -46,8 +45,14 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     },
   } = useConfig()
 
-  const field: FieldType<string> = useField({ path } as Options)
-  const { customComponents: { AfterInput, BeforeInput, Label } = {} } = field
+  const {
+    customComponents: { AfterInput, BeforeInput, Label } = {},
+    errorMessage,
+    path,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField()
 
   const locale = useLocale()
   const { getData } = useForm()
@@ -55,8 +60,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
 
   const minLength = minLengthFromProps || minLengthDefault
   const maxLength = maxLengthFromProps || maxLengthDefault
-
-  const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
     if (!hasGenerateTitleFn) {
