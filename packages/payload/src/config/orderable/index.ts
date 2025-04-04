@@ -109,6 +109,7 @@ export const addOrderableFieldsAndHook = (
   const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
     for (const orderableFieldName of orderableFieldNames) {
       if (!data[orderableFieldName] && !originalDoc?.[orderableFieldName]) {
+        console.log('do not enter')
         const lastDoc = await req.payload.find({
           collection: collection.slug,
           depth: 0,
@@ -165,7 +166,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
     }
     if (
       typeof target !== 'object' ||
-      typeof target.id !== 'string' ||
+      typeof target.id === 'undefined' ||
       typeof target.key !== 'string'
     ) {
       return new Response(JSON.stringify({ error: 'target must be an object with id and key' }), {
