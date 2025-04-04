@@ -85,13 +85,34 @@ export async function VersionsView(props: DocumentViewServerProps) {
           payload,
           status: 'draft',
         })
-        latestPublishedVersion = await getLatestVersion({
-          slug: collectionSlug,
-          type: 'collection',
-          parentID: id,
-          payload,
-          status: 'published',
+        const publishedDoc = await payload.count({
+          collection: collectionSlug,
+          depth: 0,
+          overrideAccess: true,
+          req,
+          where: {
+            id: {
+              equals: id,
+            },
+            _status: {
+              equals: 'published',
+            },
+          },
         })
+
+        // If we pass a latestPublishedVersion to buildVersionColumns,
+        // this will be used to display it as the "current published version".
+        // However, the latest published version might have been unpublished in the meantime.
+        // Hence, we should only pass the latest published version if there is a published document.
+        latestPublishedVersion =
+          publishedDoc.totalDocs > 0 &&
+          (await getLatestVersion({
+            slug: collectionSlug,
+            type: 'collection',
+            parentID: id,
+            payload,
+            status: 'published',
+          }))
       }
     } catch (err) {
       logError({ err, payload })
