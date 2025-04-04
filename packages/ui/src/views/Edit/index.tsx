@@ -325,6 +325,7 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
+      redirectAfterCreate,
     ],
   )
 

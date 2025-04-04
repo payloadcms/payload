@@ -14,12 +14,13 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFormsManager } from '../BulkUpload/FormsManager/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
+import './index.scss'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
-import './index.scss'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
@@ -103,12 +104,17 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  const { activeIndex, forms, getUploadEditsRef, isInBulkUploadContext } = useFormsManager()
   const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
+
+  const currentUploadEdits = isInBulkUploadContext
+    ? getUploadEditsRef.current?.() || forms[activeIndex]?.uploadEdits
+    : uploadEdits
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
@@ -423,10 +429,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
               fileName={value?.name || savedDocumentData?.filename}
               fileSrc={savedDocumentData?.url || fileSrc}
               imageCacheTag={imageCacheTag}
-              initialCrop={uploadEdits?.crop ?? undefined}
+              initialCrop={currentUploadEdits?.crop ?? undefined}
               initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
+                x: currentUploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
+                y: currentUploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
               }}
               onSave={onEditsSave}
               showCrop={showCrop}
