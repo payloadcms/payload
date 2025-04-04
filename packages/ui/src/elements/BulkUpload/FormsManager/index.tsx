@@ -1,6 +1,12 @@
 'use client'
 
-import type { Data, DocumentSlots, FormState, SanitizedDocumentPermissions } from 'payload'
+import type {
+  Data,
+  DocumentSlots,
+  FormState,
+  SanitizedDocumentPermissions,
+  UploadEdits,
+} from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
@@ -36,9 +42,11 @@ type FormsManagerContext = {
   readonly documentSlots: DocumentSlots
   readonly forms: State['forms']
   getFormDataRef: React.RefObject<() => Data>
+  getUploadEditsRef: React.RefObject<() => UploadEdits>
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
+  readonly isInBulkUploadContext: boolean
   readonly isInitializing: boolean
   readonly removeFile: (index: number) => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
@@ -63,9 +71,11 @@ const Context = React.createContext<FormsManagerContext>({
   documentSlots: {},
   forms: [],
   getFormDataRef: { current: () => ({}) },
+  getUploadEditsRef: { current: () => ({}) },
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
+  isInBulkUploadContext: false,
   isInitializing: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
@@ -152,6 +162,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
+  const getUploadEditsRef = React.useRef<() => UploadEdits>(() => ({}))
 
   const actionURL = `${api}/${collectionSlug}`
 
@@ -233,6 +244,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {
       const currentFormsData = getFormDataRef.current()
+      const currentUploadEdits = getUploadEditsRef.current()
       dispatch({
         type: 'REPLACE',
         state: {
@@ -242,6 +254,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               return {
                 errorCount: form.errorCount,
                 formState: currentFormsData,
+                uploadEdits: currentUploadEdits,
               }
             }
             return form
@@ -291,10 +304,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const saveAllDocs: FormsManagerContext['saveAllDocs'] = React.useCallback(
     async ({ overrides } = {}) => {
       const currentFormsData = getFormDataRef.current()
+      const currentUploadEdits = getUploadEditsRef.current()
       const currentForms = [...forms]
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
         formState: currentFormsData,
+        uploadEdits: currentUploadEdits,
       }
       const newDocs = []
 
@@ -306,7 +321,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
-          const req = await fetch(actionURL, {
+          const params = {
+            uploadEdits: form?.uploadEdits || undefined,
+          }
+
+          const actionURLWithParams = `${actionURL}${qs.stringify(params, {
+            addQueryPrefix: true,
+          })}`
+
+          const req = await fetch(actionURLWithParams, {
             body: await createFormData(
               form.formState,
               overrides,
@@ -443,6 +466,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               errorCount: forms[i].errorCount,
               formState: forms[i].formState,
               index: i,
+              uploadEdits: forms[i].uploadEdits,
             })
           }
         })
@@ -524,9 +548,11 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         documentSlots,
         forms,
         getFormDataRef,
+        getUploadEditsRef,
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,
+        isInBulkUploadContext: true,
         isInitializing,
         removeFile,
         saveAllDocs,

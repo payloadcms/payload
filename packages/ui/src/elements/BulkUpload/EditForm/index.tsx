@@ -183,11 +183,13 @@ export function EditForm({ submitted }: EditFormProps) {
 
 function GetFieldProxy() {
   const { getFields } = useForm()
-  const { getFormDataRef } = useFormsManager()
+  const { getFormDataRef, getUploadEditsRef } = useFormsManager()
+  const { getUploadEdits } = useUploadEdits()
 
-  React.useEffect(() => {
+  useEffect(() => {
     getFormDataRef.current = getFields
-  }, [getFields, getFormDataRef])
+    getUploadEditsRef.current = getUploadEdits
+  }, [getFields, getFormDataRef, getUploadEdits, getUploadEditsRef])
 
   return null
 }

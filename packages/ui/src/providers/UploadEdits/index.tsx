@@ -3,75 +3,44 @@ import type { UploadEdits } from 'payload'
 
 import React from 'react'
 
-export type UploadEditsState = {
-  byIndex: Record<number, UploadEdits>
-  global?: UploadEdits
+export type UploadEditsProviderProps = {
+  children: React.ReactNode
+  initialUploadEdits?: UploadEdits
 }
-
 export type UploadEditsContext = {
-  getUploadEdits: (index?: number) => UploadEdits
-  resetUploadEdits: (index?: number) => void
-  updateUploadEdits: (edits: UploadEdits, index?: number) => void
+  getUploadEdits: () => UploadEdits
+  resetUploadEdits: () => void
+  updateUploadEdits: (edits: UploadEdits) => void
+  uploadEdits: UploadEdits
 }
 
 const Context = React.createContext<UploadEditsContext>({
-  getUploadEdits: () => ({}),
-  resetUploadEdits: () => {},
-  updateUploadEdits: () => {},
+  getUploadEdits: () => undefined,
+  resetUploadEdits: undefined,
+  updateUploadEdits: undefined,
+  uploadEdits: undefined,
 })
 
-export const UploadEditsProvider = ({ children }) => {
-  const [edits, setEdits] = React.useState<UploadEditsState>({
-    byIndex: {},
-    global: {},
-  })
+export const UploadEditsProvider = ({ children, initialUploadEdits }: UploadEditsProviderProps) => {
+  const [uploadEdits, setUploadEdits] = React.useState<UploadEdits>(initialUploadEdits || {})
 
-  const resetUploadEdits = (index?: number) => {
-    setEdits((prev) => {
-      if (typeof index === 'number') {
-        const { [index]: _, ...rest } = prev.byIndex
-        return {
-          ...prev,
-          byIndex: rest,
-        }
-      }
-      return {
-        ...prev,
-        global: {},
-      }
-    })
+  const resetUploadEdits = () => {
+    setUploadEdits({})
   }
 
-  const getUploadEdits = (index?: number): UploadEdits => {
-    return typeof index === 'number' ? edits.byIndex[index] || {} : edits.global || {}
+  const updateUploadEdits = (edits: UploadEdits) => {
+    setUploadEdits((prevEdits) => ({
+      ...(prevEdits || {}),
+      ...(edits || {}),
+    }))
   }
 
-  const updateUploadEdits = (newEdits: UploadEdits, index?: number) => {
-    setEdits((prev) => {
-      if (typeof index === 'number') {
-        return {
-          ...prev,
-          byIndex: {
-            ...prev.byIndex,
-            [index]: {
-              ...(prev.byIndex[index] || {}),
-              ...newEdits,
-            },
-          },
-        }
-      }
-      return {
-        ...prev,
-        global: {
-          ...(prev.global || {}),
-          ...newEdits,
-        },
-      }
-    })
-  }
+  const getUploadEdits = () => uploadEdits
 
   return (
-    <Context value={{ getUploadEdits, resetUploadEdits, updateUploadEdits }}>{children}</Context>
+    <Context value={{ getUploadEdits, resetUploadEdits, updateUploadEdits, uploadEdits }}>
+      {children}
+    </Context>
   )
 }
 
