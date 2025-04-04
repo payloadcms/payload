@@ -1,19 +1,26 @@
 import type {
   AdminViewServerProps,
+  CollectionSlug,
+  ColumnPreference,
+  FolderListViewServerPropsOnly,
   ListPreferences,
   ListQuery,
   ListViewClientProps,
-  ListViewServerPropsOnly,
   Where,
 } from 'payload'
 
 import { DefaultCollectionFolderView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { renderFilters, renderFolderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { parseDocumentID } from 'payload'
-import { combineWhereConstraints, formatFilesize, isNumber } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatFilesize,
+  isNumber,
+  transformColumnsToPreferences,
+} from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderFolderViewSlots } from './renderFolderViewSlots.js'
@@ -21,19 +28,27 @@ import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateFolderMetadata as generateListMetadata } from './meta.js'
 
-type RenderListViewArgs = {
+type RenderFolderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  documents: {
+    relationTo: CollectionSlug
+    value: any
+  }[]
   drawerSlug?: string
   enableRowSelections: boolean
   folderID?: number | string
   overrideEntityVisibility?: boolean
   query: ListQuery
+  subfolders: {
+    relationTo: CollectionSlug
+    value: any
+  }[]
 } & AdminViewServerProps
 
 export const renderFolderView = async (
-  args: RenderListViewArgs,
+  args: RenderFolderListViewArgs,
 ): Promise<{
   List: React.ReactNode
 }> => {
@@ -42,6 +57,7 @@ export const renderFolderView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
+    documents,
     drawerSlug,
     enableRowSelections,
     folderID,
@@ -50,6 +66,7 @@ export const renderFolderView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    subfolders,
     viewType,
   } = args
 
@@ -76,10 +93,15 @@ export const renderFolderView = async (
 
   const query = queryFromArgs || queryFromReq
 
+  const columns: ColumnPreference[] = transformColumnsToPreferences(
+    query?.columns as ColumnPreference[] | string,
+  )
+
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
     value: {
+      columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
@@ -111,11 +133,6 @@ export const renderFolderView = async (
         search: typeof query?.search === 'string' ? query.search : undefined,
         where: (query?.where as Where) || undefined,
       }),
-      {
-        _parentFolder: {
-          exists: true,
-        },
-      },
     ]
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
@@ -135,6 +152,12 @@ export const renderFolderView = async (
       whereConstraints.push({
         _parentFolder: {
           equals: parseDocumentID({ id: folderID, collectionSlug, payload }),
+        },
+      })
+    } else {
+      whereConstraints.push({
+        _parentFolder: {
+          exists: false,
         },
       })
     }
@@ -166,16 +189,17 @@ export const renderFolderView = async (
       }))
     }
 
-    const { columnState, Table } = renderTable({
+    const { columnState, Table } = renderFolderTable({
       clientCollectionConfig,
       collectionConfig,
       columnPreferences: listPreferences?.columns,
       customCellProps,
-      docs: data.docs,
+      docs: documents,
       drawerSlug,
       enableRowSelections,
       i18n: req.i18n,
       payload,
+      subfolders,
       useAsTitle: collectionConfig.admin.useAsTitle,
     })
 
@@ -198,9 +222,9 @@ export const renderFolderView = async (
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
-    const serverProps: ListViewServerPropsOnly = {
+    const serverProps: FolderListViewServerPropsOnly = {
       collectionConfig,
-      data,
+      documents,
       i18n,
       limit,
       listPreferences,
@@ -210,6 +234,7 @@ export const renderFolderView = async (
       payload,
       permissions,
       searchParams,
+      subfolders,
       user,
     }
 
@@ -225,18 +250,11 @@ export const renderFolderView = async (
       serverProps,
     })
 
-    const isInDrawer = Boolean(drawerSlug)
-
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
-          <ListQueryProvider
-            data={data}
-            defaultLimit={limit}
-            defaultSort={sort}
-            modifySearchParams={!isInDrawer}
-          >
+          <ListQueryProvider data={null}>
             {RenderServerComponent({
               clientProps: {
                 ...folderViewSlots,
@@ -266,12 +284,9 @@ export const renderFolderView = async (
   throw new Error('not-found')
 }
 
-export const CollectionFolderView: React.FC<RenderListViewArgs> = async (args) => {
+export const CollectionFolderView: React.FC<RenderFolderListViewArgs> = async (args) => {
   try {
-    const { List: RenderedFolderView } = await renderFolderView({
-      ...args,
-      enableRowSelections: true,
-    })
+    const { List: RenderedFolderView } = await renderFolderView(args)
     return RenderedFolderView
   } catch (error) {
     if (error.message === 'not-found') {

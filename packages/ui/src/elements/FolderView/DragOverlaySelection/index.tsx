@@ -18,7 +18,7 @@ type DragCardsProps = {
 }
 export function DragOverlaySelection({
   allItems,
-  collectionUseAsTitles,
+  collectionUseAsTitles = new Map(),
   lastSelected,
   selectedCount,
 }: DragCardsProps) {

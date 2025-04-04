@@ -1,11 +1,18 @@
 @import '../../../scss/styles.scss';
 
 @layer payload-default {
+  .droppable-button {
+    @include btn-reset;
+    font-size: calc(var(--base) * 0.65);
+    &:hover {
+      cursor: pointer;
+    }
+  }
   .folderBreadcrumbs {
     display: flex;
 
     &__crumb,
-    &__crumb-item {
+    &__crumb-item.droppable-button {
       display: flex;
       align-items: center;
       font-size: calc(var(--base) * 1.25);
@@ -29,7 +36,7 @@
       }
     }
 
-    &__crumb-item--over {
+    &__crumb-item.droppable-button--hover {
       opacity: 0.5;
     }
 

@@ -1,13 +1,6 @@
 @import '../../../scss/styles.scss';
 
 @layer payload-default {
-  .list-header {
-    &__folder-view-buttons {
-      display: flex;
-      gap: calc(var(--base) * 0.5);
-      margin-left: calc(var(--base) * 0.5);
-    }
-  }
   .list-drawer {
     .list-header__title {
       @extend %h2;

@@ -38,6 +38,7 @@ export type BuildColumnStateArgs = {
   columnPreferences: ListPreferences['columns']
   columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
+  enableLinkedCell?: boolean
   enableRowSelections: boolean
   enableRowTypes?: boolean
   i18n: I18nClient
@@ -71,6 +72,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     customCellProps,
     dataType,
     docs,
+    enableLinkedCell = true,
     enableRowSelections,
     i18n,
     payload,
@@ -210,7 +212,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               doc: dataType === 'monomorphic' ? doc : doc.value,
               enableRowSelections,
               i18n,
-              isLinkedColumn: colIndex === activeColumnsIndices[0],
+              isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
               rowIndex,
               serverField,

@@ -262,7 +262,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
         { addQueryPrefix: true },
       ),
     )
-    clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
+    clearRouteCache()
     closeModal(drawerSlug)
   }
 

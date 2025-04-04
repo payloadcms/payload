@@ -1,130 +1,91 @@
-import type { CollectionSlug, FindArgs, Payload, User, Where } from '../../index.js'
+import type { CollectionSlug, Payload, User, Where } from '../../index.js'
 
+import { parseDocumentID } from '../../index.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
-import { foldersSlug, parentFolderFieldName } from '../constants.js'
 
-type GetFolderDocumentsReturnType = {
+export async function getFolderDocuments({
+  collectionSlugs,
+  folderID,
+  folderSlug,
+  locale,
+  payload,
+  sort,
+  user,
+  where,
+}: {
+  collectionSlugs: CollectionSlug[]
+  folderID: number | string
+  folderSlug: CollectionSlug
+  locale?: string
+  payload: Payload
+  sort?: string
+  user?: User
+  where?: Where
+}): Promise<{
   docs: {
     relationTo: CollectionSlug
     value: any
   }[]
   hasMoreDocuments: boolean
-}
-type GetFolderDocumentsArgs = {
-  depth?: number
-  folderID: number | string
-  payload: Payload
-  search?: null | string
-  user?: User
-} & Omit<FindArgs, 'collection'>
-export const getFolderDocuments = async (
-  args: GetFolderDocumentsArgs,
-): Promise<GetFolderDocumentsReturnType> => {
-  return fetchWithJoin(args)
-}
-
-async function fetchWithJoin({
-  folderID,
-  limit = 10,
-  page = 1,
-  payload,
-  search,
-  sort,
-  user,
-  where,
-}: GetFolderDocumentsArgs): Promise<GetFolderDocumentsReturnType> {
-  const constraints: (undefined | Where)[] = [
-    where,
-    {
-      relationTo: {
-        not_equals: foldersSlug,
-      },
-    },
-    {
-      [parentFolderFieldName]: {
-        equals: folderID,
-      },
-    },
-  ]
-
-  if (search) {
-    constraints.push({
-      _folderSearch: {
-        like: search,
-      },
-    })
-  }
-
-  const currentFolderQuery = await payload.find({
-    collection: foldersSlug,
-    joins: {
-      documentsAndFolders: {
-        limit,
-        page,
-        sort: typeof sort === 'string' ? sort : '_folderSearch',
-        where: combineWhereConstraints(constraints),
-      },
-    },
-    limit: 1,
-    user,
-    where: {
-      id: {
-        equals: folderID,
-      },
-    },
-  })
-
-  return currentFolderQuery?.docs[0]?.documentsAndFolders
-}
-
-async function manuallyBuildRelations({
-  depth = 0,
-  folderID,
-  limit = 0,
-  page,
-  payload,
-  sort,
-  where,
-}: GetFolderDocumentsArgs) {
-  const relationTo = Object.keys(payload.config.folders.collections)
-
-  const results: {
-    relationTo: CollectionSlug
-    value: any
-  }[] = []
-  for (const collection of relationTo) {
-    const constraints: Where[] = [
-      folderID
-        ? {
-            [parentFolderFieldName]: {
-              equals: folderID,
-            },
-          }
-        : {
-            [`${parentFolderFieldName}.isRoot`]: {
-              equals: true,
-            },
-          },
-    ]
-    if (where) {
-      constraints.push(where)
-    }
-    const { docs } = await payload.find({
-      collection,
-      depth,
-      limit,
-      page,
-      sort,
-      where: combineWhereConstraints(constraints),
-    })
-
-    docs.forEach((doc) => {
-      results.push({
-        relationTo: collection,
-        value: doc,
+}> {
+  const parentFolderID = folderID
+    ? parseDocumentID({
+        id: folderID,
+        collectionSlug: folderSlug,
+        payload,
       })
-    })
+    : undefined
+  if (collectionSlugs.length) {
+    if (collectionSlugs.length === 1) {
+      // monomorphic query
+      const collectionSlug = collectionSlugs[0]
+      const result = await payload.find({
+        collection: collectionSlug,
+        limit: 0,
+        locale,
+        overrideAccess: false,
+        sort,
+        user,
+        where: combineWhereConstraints([
+          where,
+          { _parentFolder: parentFolderID ? { equals: parentFolderID } : { exists: false } },
+        ]),
+      })
+      return {
+        docs: result.docs.map((doc) => ({
+          relationTo: collectionSlug,
+          value: doc,
+        })),
+        hasMoreDocuments: Boolean(result.hasNextPage),
+      }
+    } else if (parentFolderID) {
+      // polymorphic queries must have parent folders
+      const currentFolderQuery = await payload.find({
+        collection: folderSlug,
+        joins: {
+          documentsAndFolders: {
+            limit: 100_000,
+            sort: typeof sort === 'string' ? sort : '_folderSearch',
+            where,
+          },
+        },
+        limit: 1,
+        locale,
+        overrideAccess: false,
+        user,
+        where: {
+          id: {
+            equals: folderID,
+          },
+        },
+      })
+
+      return currentFolderQuery?.docs[0]?.documentsAndFolders ?? []
+    }
   }
 
-  return results
+  return {
+    docs: [],
+    hasMoreDocuments: false,
+  }
 }

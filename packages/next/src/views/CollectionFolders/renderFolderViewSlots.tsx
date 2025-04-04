@@ -1,13 +1,13 @@
 import type {
-  AfterListClientProps,
-  AfterListTableClientProps,
-  AfterListTableServerPropsOnly,
-  BeforeListClientProps,
-  BeforeListServerPropsOnly,
-  BeforeListTableClientProps,
-  BeforeListTableServerPropsOnly,
-  ListViewServerPropsOnly,
-  ListViewSlots,
+  AfterFolderListClientProps,
+  AfterFolderListTableClientProps,
+  AfterFolderListTableServerPropsOnly,
+  BeforeFolderListClientProps,
+  BeforeFolderListServerPropsOnly,
+  BeforeFolderListTableClientProps,
+  BeforeFolderListTableServerPropsOnly,
+  FolderListViewServerPropsOnly,
+  FolderListViewSlots,
   ListViewSlotSharedClientProps,
   Payload,
   SanitizedCollectionConfig,
@@ -23,7 +23,7 @@ type Args = {
   collectionConfig: SanitizedCollectionConfig
   description?: StaticDescription
   payload: Payload
-  serverProps: ListViewServerPropsOnly
+  serverProps: FolderListViewServerPropsOnly
 }
 
 export const renderFolderViewSlots = ({
@@ -32,15 +32,15 @@ export const renderFolderViewSlots = ({
   description,
   payload,
   serverProps,
-}: Args): ListViewSlots => {
-  const result: ListViewSlots = {} as ListViewSlots
+}: Args): FolderListViewSlots => {
+  const result: FolderListViewSlots = {} as FolderListViewSlots
 
   if (collectionConfig.admin.components?.afterList) {
-    result.AfterList = RenderServerComponent({
-      clientProps: clientProps satisfies AfterListClientProps,
+    result.AfterFolderList = RenderServerComponent({
+      clientProps: clientProps satisfies AfterFolderListClientProps,
       Component: collectionConfig.admin.components.afterList,
       importMap: payload.importMap,
-      serverProps: serverProps satisfies AfterListTableServerPropsOnly,
+      serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
 
@@ -57,29 +57,29 @@ export const renderFolderViewSlots = ({
   }
 
   if (collectionConfig.admin.components?.afterListTable) {
-    result.AfterListTable = RenderServerComponent({
-      clientProps: clientProps satisfies AfterListTableClientProps,
+    result.AfterFolderListTable = RenderServerComponent({
+      clientProps: clientProps satisfies AfterFolderListTableClientProps,
       Component: collectionConfig.admin.components.afterListTable,
       importMap: payload.importMap,
-      serverProps: serverProps satisfies AfterListTableServerPropsOnly,
+      serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
 
   if (collectionConfig.admin.components?.beforeList) {
-    result.BeforeList = RenderServerComponent({
-      clientProps: clientProps satisfies BeforeListClientProps,
+    result.BeforeFolderList = RenderServerComponent({
+      clientProps: clientProps satisfies BeforeFolderListClientProps,
       Component: collectionConfig.admin.components.beforeList,
       importMap: payload.importMap,
-      serverProps: serverProps satisfies BeforeListServerPropsOnly,
+      serverProps: serverProps satisfies BeforeFolderListServerPropsOnly,
     })
   }
 
   if (collectionConfig.admin.components?.beforeListTable) {
-    result.BeforeListTable = RenderServerComponent({
-      clientProps: clientProps satisfies BeforeListTableClientProps,
+    result.BeforeFolderListTable = RenderServerComponent({
+      clientProps: clientProps satisfies BeforeFolderListTableClientProps,
       Component: collectionConfig.admin.components.beforeListTable,
       importMap: payload.importMap,
-      serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
+      serverProps: serverProps satisfies BeforeFolderListTableServerPropsOnly,
     })
   }
 

@@ -1,5 +1,5 @@
-import type { User } from '../../index.js'
-import type { Payload } from '../../types/index.js'
+import type { CollectionSlug, User } from '../../index.js'
+import type { Payload, Where } from '../../types/index.js'
 import type { GetFolderDataResult } from '../types.js'
 
 import { buildFolderBreadcrumbs } from './buildFolderBreadcrumbs.js'
@@ -7,20 +7,24 @@ import { getFolderDocuments } from './getFolderDocuments.js'
 import { getFolderSubfolders } from './getFolderSubfolders.js'
 
 type Args = {
-  docLimit?: number
+  collectionSlugs: CollectionSlug[]
+  docSort?: string
+  docWhere?: Where
   folderID: null | number | string
-  page?: number
+  folderSlug?: CollectionSlug
+  locale?: string
   payload: Payload
-  search?: null | string
   user?: User
 }
 
 export const getFolderData = async ({
-  docLimit,
+  collectionSlugs,
+  docSort,
+  docWhere,
   folderID: folderIDArg,
-  page,
+  folderSlug = '_folders',
+  locale,
   payload,
-  search,
   user,
 }: Args): Promise<GetFolderDataResult> => {
   const folderID =
@@ -31,6 +35,7 @@ export const getFolderData = async ({
   const breadcrumbs = buildFolderBreadcrumbs({
     folderID,
     payload,
+    user,
   })
 
   const subfolders = getFolderSubfolders({
@@ -39,19 +44,16 @@ export const getFolderData = async ({
     user,
   })
 
-  // [?] @todo
-  // should this query fetch using the join on the folderID
-  // or should it continue to fetch each collection individually?
-  const documents = folderID
-    ? getFolderDocuments({
-        folderID,
-        limit: docLimit,
-        page,
-        payload,
-        search,
-        user,
-      })
-    : null
+  const documents = getFolderDocuments({
+    collectionSlugs,
+    folderID,
+    folderSlug,
+    locale,
+    payload,
+    sort: docSort,
+    user,
+    where: docWhere,
+  })
 
   const [resolvedBreadcrumbs, resolvedSubfolders, resolvedDocuments] = await Promise.all([
     breadcrumbs,
@@ -59,14 +61,10 @@ export const getFolderData = async ({
     documents,
   ])
 
-  const items: {
-    relationTo: string
-    value: any
-  }[] = [...resolvedSubfolders, ...(resolvedDocuments?.docs || [])]
-
   return {
     breadcrumbs: resolvedBreadcrumbs,
+    documents: resolvedDocuments?.docs || [],
     hasMoreDocuments: Boolean(resolvedDocuments?.hasMoreDocuments),
-    items,
+    subfolders: resolvedSubfolders || [],
   }
 }

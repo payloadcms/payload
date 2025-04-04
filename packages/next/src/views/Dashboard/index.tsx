@@ -107,8 +107,8 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
           locale,
         } satisfies DashboardViewClientProps,
         Component: config.admin?.components?.views?.dashboard?.Component,
-        Fallback: FolderDashboard,
-        // Fallback: DefaultDashboard,
+        // Fallback: FolderDashboard,
+        Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
           globalData,

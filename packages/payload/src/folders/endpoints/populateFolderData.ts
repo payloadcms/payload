@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
+import * as qs from 'qs-esm'
 
-import type { Endpoint } from '../../index.js'
+import type { Endpoint, Where } from '../../index.js'
 
 import { isNumber } from '../../utilities/isNumber.js'
 import { foldersSlug } from '../constants.js'
@@ -33,18 +34,18 @@ export const populateFolderDataEndpoint: Endpoint = {
     }
 
     const data = await getFolderData({
-      docLimit: isNumber(req.searchParams.get('limit'))
-        ? parseInt(String(req.searchParams.get('limit')), 10)
-        : 10,
       folderID: req.searchParams.get('folderID'),
-      page: isNumber(req.searchParams.get('page'))
-        ? parseInt(String(req.searchParams.get('page')), 10)
-        : 1,
+      // search:
+      //   typeof req.searchParams.get('search') === 'string'
+      //     ? req.searchParams.get('search')
+      //     : undefined,
+      collectionSlugs: req.searchParams.getAll('collectionSlugs'),
+      docSort: req.searchParams.get('docSort'),
+      docWhere: req.searchParams.get('where')
+        ? (qs.parse(req.searchParams.get('where')) as Where)
+        : undefined,
+      locale: req.locale,
       payload: req.payload,
-      search:
-        typeof req.searchParams.get('search') === 'string'
-          ? req.searchParams.get('search')
-          : undefined,
       user: req.user,
     })
 

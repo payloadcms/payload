@@ -23,7 +23,6 @@ import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Pagination } from '../../Pagination/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { SearchFilter } from '../../SearchFilter/index.js'
-import { FolderBreadcrumbs } from '../Breadcrumbs/index.js'
 import { DisplayItems } from '../DisplayItems/index.js'
 import { DragOverlaySelection } from '../DragOverlaySelection/index.js'
 import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
@@ -196,8 +195,6 @@ export const FoldersAndDocuments = ({ initialDisplayType }: Props) => {
 
         <div className={baseClass}>
           <div className={`${baseClass}__header`}>
-            <FolderBreadcrumbs breadcrumbs={breadcrumbs} />
-
             <div className={`${baseClass}__header-actions`}>
               {!folderID ? (
                 <Button

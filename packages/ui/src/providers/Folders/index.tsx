@@ -1,11 +1,13 @@
 'use client'
-import type { PaginatedDocs } from 'payload'
 
-import { useSearchParams } from 'next/navigation.js'
+import type { CollectionSlug } from 'payload'
+
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   extractID,
   type FolderBreadcrumb,
   type FolderInterface,
+  formatAdminURL,
   type GetFolderDataResult,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -15,9 +17,11 @@ import { toast } from 'sonner'
 import type { PolymorphicRelationshipValue } from '../../elements/FolderView/types.js'
 
 import { useDrawerDepth } from '../../elements/Drawer/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
+import { useListQuery } from '../ListQuery/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { getMetaSelection, getShiftSelection } from './selection.js'
 export type FileCardData = {
@@ -34,12 +38,15 @@ export type FolderContextValue = {
   collectionUseAsTitles: Map<string, string>
   currentFolder?: FolderInterface | null
   deleteCurrentFolder: () => Promise<Response>
-  documents?: GetFolderDataResult['items']
+  documents?: GetFolderDataResult['documents']
   focusedRowIndex: number
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
   hasMoreDocuments: boolean
+  isDragging: boolean
+  lastSelectedIndex: null | number
+  loadingStatus?: 'error' | 'idle' | 'loading'
   moveToFolder: (args: {
     itemsToMove: PolymorphicRelationshipValue[]
     toFolderID?: number | string
@@ -50,9 +57,11 @@ export type FolderContextValue = {
   removeItems: (args: PolymorphicRelationshipValue[]) => Promise<void>
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
+  setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
-  setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['items']>>
-  subfolders?: GetFolderDataResult<FolderInterface>['items']
+  setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
+  setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['subfolders']>>
+  subfolders?: GetFolderDataResult<FolderInterface>['subfolders']
 }
 
 const Context = React.createContext<FolderContextValue>({
@@ -67,6 +76,9 @@ const Context = React.createContext<FolderContextValue>({
   folderID: undefined,
   getSelectedItems: () => [],
   hasMoreDocuments: true,
+  isDragging: false,
+  lastSelectedIndex: null,
+  loadingStatus: 'idle',
   moveToFolder: () => Promise.resolve(undefined),
   onItemClick: () => ({ doubleClicked: false }),
   onItemKeyPress: () => ({ keyCode: '' }),
@@ -74,42 +86,56 @@ const Context = React.createContext<FolderContextValue>({
   removeItems: () => Promise.resolve(undefined),
   selectedIndexes: new Set(),
   setBreadcrumbs: () => {},
+  setFocusedRowIndex: () => -1,
   setFolderID: () => Promise.resolve(undefined),
+  setIsDragging: () => false,
   setSubfolders: () => {},
   subfolders: [],
 })
 
 export type FolderProviderData = {
-  documents?: PaginatedDocs[]
+  documents?: GetFolderDataResult['documents']
   folderID?: number | string
-  subfolders?: FolderInterface[]
+  subfolders?: GetFolderDataResult['subfolders']
 } & GetFolderDataResult
 const folderCollectionSlug = '_folders'
 type Props = {
   readonly allowMultiSelection?: boolean
   readonly children: React.ReactNode
+  readonly collectionSlugs?: CollectionSlug[]
   readonly initialData?: FolderProviderData
 }
-export function FolderProvider({ allowMultiSelection = true, children, initialData }: Props) {
+export function FolderProvider({
+  allowMultiSelection = true,
+  children,
+  collectionSlugs = [],
+  initialData,
+}: Props) {
   const { config } = useConfig()
   const { routes, serverURL } = config
   const searchParams = useSearchParams()
   const drawerDepth = useDrawerDepth()
-  const { refineListData } = useListQuery()
   const { t } = useTranslation()
+  const router = useRouter()
+  const { refineListData } = useListQuery()
+  const { startRouteTransition } = useRouteTransition()
+  const { clearRouteCache } = useRouteCache()
 
+  const [isDragging, setIsDragging] = React.useState(false)
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
     initialData?.folderID,
   )
   const [folderBreadcrumbs, setFolderBreadcrumbs] = React.useState<
     FolderContextValue['breadcrumbs']
   >(initialData?.breadcrumbs || [])
-  const [subfolders, setSubfolders] = React.useState<GetFolderDataResult<FolderInterface>['items']>(
-    (initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) ||
-      []) as GetFolderDataResult<FolderInterface>['items'],
+  const [subfolders, setSubfolders] = React.useState<
+    GetFolderDataResult<FolderInterface>['subfolders']
+  >((initialData?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'])
+  const [documents, setDocuments] = React.useState<GetFolderDataResult['documents']>(
+    initialData?.documents || [],
   )
-  const [documents, setDocuments] = React.useState<GetFolderDataResult['items']>(
-    initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],
+  const [loadingStatus, setLoadingStatus] = React.useState<'error' | 'idle' | 'loading'>(() =>
+    initialData ? 'idle' : 'loading',
   )
   const [selectedIndexes, setSelectedIndexes] = React.useState<Set<number>>(() => new Set())
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
@@ -134,47 +160,41 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
 
   const populateFolderData = React.useCallback(
     async ({ folderID: folderToPopulate }: { folderID: number | string }) => {
-      // when in a drawer, you cannot rely on the server rendered data
-      const queryParams = qs.stringify(
-        {
-          ...parseSearchParams(searchParams),
-          folderID: folderToPopulate,
-        },
-        { addQueryPrefix: true },
-      )
-      const folderDataReq = await fetch(
-        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${queryParams}`,
-        {
-          credentials: 'include',
-          headers: {
-            'content-type': 'application/json',
+      setLoadingStatus('loading')
+      try {
+        const folderDataReq = await fetch(
+          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${qs.stringify(
+            {
+              ...parseSearchParams(searchParams),
+              folderID: folderToPopulate,
+            },
+            { addQueryPrefix: true },
+          )}`,
+          {
+            credentials: 'include',
+            headers: {
+              'content-type': 'application/json',
+            },
           },
-        },
-      )
+        )
 
-      if (folderDataReq.status === 200) {
-        const folderDataRes: GetFolderDataResult = await folderDataReq.json()
-        if (folderDataRes.breadcrumbs) {
-          setFolderBreadcrumbs(folderDataRes.breadcrumbs)
-        }
-
-        if (folderDataRes.items) {
+        if (folderDataReq.status === 200) {
+          const folderDataRes: GetFolderDataResult = await folderDataReq.json()
+          setFolderBreadcrumbs(folderDataRes?.breadcrumbs || [])
           setSubfolders(
-            folderDataRes.items.filter(
-              (item) => item.relationTo === folderCollectionSlug,
-            ) as GetFolderDataResult<FolderInterface>['items'],
+            (folderDataRes?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'],
           )
-          setDocuments(
-            folderDataRes.items.filter((item) => item.relationTo !== folderCollectionSlug),
-          )
+          setDocuments(folderDataRes?.documents || [])
+          setHasMoreDocuments(Boolean(folderDataRes?.hasMoreDocuments))
+        } else {
+          setFolderBreadcrumbs([])
+          setSubfolders([])
+          setDocuments([])
+          setHasMoreDocuments(false)
         }
-
-        setHasMoreDocuments(folderDataRes.hasMoreDocuments)
-      } else {
-        setFolderBreadcrumbs([])
-        setSubfolders([])
-        setDocuments([])
-        setHasMoreDocuments(false)
+        setLoadingStatus('idle')
+      } catch (e) {
+        setLoadingStatus('error')
       }
     },
     [routes.api, serverURL, searchParams],
@@ -184,16 +204,39 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
     async ({ folderID: toFolderID }) => {
       clearSelections()
       setActiveFolderID(toFolderID)
-      // not in a drawer (confusing default of 1)
       if (drawerDepth === 1) {
-        await refineListData({
-          folder: toFolderID !== folderBreadcrumbs?.[0]?.id ? toFolderID : undefined,
-        })
+        // not in a drawer (default is 1)
+        if (collectionSlugs.length === 1) {
+          // looking at a single collection (collection folders)
+          startRouteTransition(() =>
+            router.push(
+              formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: `/collections/${collectionSlugs[0]}/folders${toFolderID ? `/${toFolderID}` : ''}`,
+              }),
+            ),
+          )
+        } else {
+          // looking at many collections (dashboard folders)
+          await refineListData({
+            folder: toFolderID !== folderBreadcrumbs?.[0]?.id ? toFolderID : undefined,
+          })
+        }
       } else {
         await populateFolderData({ folderID: toFolderID })
       }
     },
-    [clearSelections, drawerDepth, populateFolderData, refineListData, folderBreadcrumbs],
+    [
+      clearSelections,
+      config.routes.admin,
+      drawerDepth,
+      populateFolderData,
+      router,
+      collectionSlugs,
+      refineListData,
+      folderBreadcrumbs,
+      startRouteTransition,
+    ],
   )
 
   const getSelectedItems = React.useCallback(() => {
@@ -375,32 +418,34 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
       )
 
       let folderIDsToFilterOut: (number | string)[] = []
-      const docsToFilterOut: GetFolderDataResult['items'] = []
+      const docsToFilterOut: GetFolderDataResult['documents'] = []
 
       for (const [relationSlug, ids] of Object.entries(groupedByRelationTo)) {
-        const query = qs.stringify(
-          {
-            where: {
-              id: {
-                in: ids,
+        const res = await fetch(
+          `${serverURL}${routes.api}/${relationSlug}${qs.stringify(
+            {
+              where: {
+                id: {
+                  in: ids,
+                },
               },
             },
-          },
+            {
+              addQueryPrefix: true,
+            },
+          )}`,
           {
-            addQueryPrefix: true,
+            body:
+              relationSlug === folderCollectionSlug
+                ? undefined
+                : JSON.stringify({ _parentFolder: null }),
+            credentials: 'include',
+            headers: {
+              'content-type': 'application/json',
+            },
+            method: relationSlug === folderCollectionSlug ? 'DELETE' : 'PATCH',
           },
         )
-        const res = await fetch(`${serverURL}${routes.api}/${relationSlug}${query}`, {
-          body:
-            relationSlug === folderCollectionSlug
-              ? undefined
-              : JSON.stringify({ _parentFolder: null }),
-          credentials: 'include',
-          headers: {
-            'content-type': 'application/json',
-          },
-          method: relationSlug === folderCollectionSlug ? 'DELETE' : 'PATCH',
-        })
 
         if (res.status === 200) {
           if (relationSlug === folderCollectionSlug) {
@@ -435,12 +480,12 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
       }
 
       if (docsToFilterOut.length || folderIDsToFilterOut.length) {
-        await populateFolderData({ folderID: activeFolderID })
+        clearRouteCache()
       }
 
       toast.success(t('general:deletedSuccessfully'))
     },
-    [routes.api, serverURL, t, activeFolderID, populateFolderData],
+    [routes.api, serverURL, t, clearRouteCache],
   )
 
   const deleteCurrentFolder = React.useCallback(async () => {
@@ -481,7 +526,7 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
       )
 
       let folderIDsToFilterOut: (number | string)[] = []
-      const docsToFilterOut: GetFolderDataResult['items'] = []
+      const docsToFilterOut: GetFolderDataResult['documents'] = []
 
       const toastID = toast.loading(
         t('general:movingCount', {
@@ -534,44 +579,35 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
       toast.success(t('general:success'), { id: toastID })
 
       if (docsToFilterOut.length) {
+        // optimistically update documents rendered
         setDocuments((prevDocs) =>
           prevDocs.filter(({ relationTo, value }) => {
             return !docsToFilterOut.some(
-              (doc) => doc.relationTo === relationTo && doc.value === value,
+              (doc) => doc.relationTo === relationTo && extractID(doc.value) === extractID(value),
             )
           }),
         )
       }
       if (folderIDsToFilterOut.length) {
+        // optimistically update subfolders rendered
         setSubfolders((prevFolders) =>
-          prevFolders.filter(({ value }) => {
-            const valueID = typeof value === 'object' ? value.id : value
-            return !folderIDsToFilterOut.includes(valueID)
-          }),
+          prevFolders.filter(({ value }) => !folderIDsToFilterOut.includes(extractID(value))),
         )
       }
 
-      const isMovingCurrentFolder = itemsToMove.some(
-        (item) => item.relationTo === folderCollectionSlug && extractID(item.value) === toFolderID,
-      )
       clearSelections()
-
-      await populateFolderData({
-        folderID: isMovingCurrentFolder ? toFolderID : activeFolderID,
-      })
+      clearRouteCache()
     },
-    [t, clearSelections, populateFolderData, activeFolderID, serverURL, routes.api],
+    [t, clearSelections, clearRouteCache, serverURL, routes.api],
   )
 
   React.useEffect(() => {
+    // @todo is this necessary? is there a better way? likely.
     if (initialData) {
       setSubfolders(
-        (initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) ||
-          []) as GetFolderDataResult<FolderInterface>['items'],
+        (initialData?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'],
       )
-      setDocuments(
-        initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],
-      )
+      setDocuments(initialData?.documents || [])
       setFolderBreadcrumbs(initialData?.breadcrumbs || [])
       clearSelections()
     }
@@ -579,9 +615,9 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
 
   React.useEffect(() => {
     if (!initialData) {
-      void populateFolderData({ folderID: activeFolderID })
+      void populateFolderData({ folderID: null })
     }
-  }, [initialData, activeFolderID, populateFolderData])
+  }, [initialData, populateFolderData])
 
   return (
     <Context
@@ -597,6 +633,9 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
         folderID: activeFolderID,
         getSelectedItems,
         hasMoreDocuments,
+        isDragging,
+        lastSelectedIndex,
+        loadingStatus,
         moveToFolder,
         onItemClick,
         onItemKeyPress,
@@ -604,7 +643,9 @@ export function FolderProvider({ allowMultiSelection = true, children, initialDa
         removeItems,
         selectedIndexes,
         setBreadcrumbs: setFolderBreadcrumbs,
+        setFocusedRowIndex,
         setFolderID: setNewActiveFolderID,
+        setIsDragging,
         setSubfolders,
         subfolders,
       }}

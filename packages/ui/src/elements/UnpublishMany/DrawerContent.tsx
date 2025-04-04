@@ -135,8 +135,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
               ),
             )
 
-            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
-
+            clearRouteCache()
             return null
           }
 

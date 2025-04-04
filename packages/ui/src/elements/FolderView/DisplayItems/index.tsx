@@ -24,12 +24,12 @@ type Props = {
   readonly disabledItems?: PolymorphicRelationshipValue[]
   readonly isMovingItems?: boolean
   readonly RenderDocumentActionGroup?: (args: {
-    document: GetFolderDataResult['items'][number]
+    document: GetFolderDataResult['documents'][number]
     index: number
   }) => React.ReactNode
   readonly RenderSubfolderActionGroup?: (args: {
     index: number
-    subfolder: GetFolderDataResult['items'][number]
+    subfolder: GetFolderDataResult['subfolders'][number]
   }) => React.ReactNode
   readonly selectedItems: PolymorphicRelationshipValue[]
   readonly viewType: 'grid' | 'list'
@@ -100,7 +100,7 @@ export function DisplayItems(props: Props) {
       event: React.KeyboardEvent
       item: { id: number | string; index: number; relationTo: string }
     }): Promise<void> => {
-      const { keyCode } = await onItemKeyPress({ event, index: item.index })
+      const { keyCode } = onItemKeyPress({ event, index: item.index })
 
       if (selectedIndexes.size === 1 && keyCode === 'Enter') {
         await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
@@ -117,7 +117,7 @@ export function DisplayItems(props: Props) {
       event: React.MouseEvent
       item: { id: number | string; index: number; relationTo: string }
     }): Promise<void> => {
-      const { doubleClicked } = await onItemClick({ event, index: item.index })
+      const { doubleClicked } = onItemClick({ event, index: item.index })
 
       if (doubleClicked) {
         await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })

@@ -8,14 +8,15 @@ import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
+import { ListFolderPills } from '../../../elements/ListFolderPills/index.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import { DefaultDrawerTitleActions } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { CollectionListHeader } from '../../../elements/ListHeader/index.js'
 import { DefaultTitleActions } from '../../../elements/ListHeader/TitleActions/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { ListSelection } from '../ListSelection/index.js'
 import './index.scss'
+import { ListSelection } from '../ListSelection/index.js'
 
 const drawerBaseClass = 'list-drawer'
 const baseClass = 'list-header'
@@ -93,43 +94,17 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
       Actions={[
         !smallBreak && (
           <ListSelection
-            collectionConfig={collectionConfig}
             disableBulkDelete={disableBulkDelete}
             disableBulkEdit={disableBulkEdit}
             key="list-selection"
           />
         ),
         Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
-          <div className={`${baseClass}__folder-view-buttons`} key="list-header-buttons">
-            <Button
-              buttonStyle={viewType === 'list' ? 'pill' : 'none'}
-              disabled={viewType === 'folders'}
-              el={viewType === 'list' ? 'link' : 'div'}
-              size="small"
-              to={formatAdminURL({
-                adminRoute: config.routes.admin,
-                path: `/collections/${collectionConfig.slug}/folders`,
-                serverURL: config.serverURL,
-              })}
-            >
-              {/* @todo: translate */}
-              By Folder
-            </Button>
-            <Button
-              buttonStyle={viewType === 'folders' ? 'pill' : 'none'}
-              disabled={viewType === 'list'}
-              el={viewType === 'folders' ? 'link' : 'div'}
-              size="small"
-              to={formatAdminURL({
-                adminRoute: config.routes.admin,
-                path: `/collections/${collectionConfig.slug}`,
-                serverURL: config.serverURL,
-              })}
-            >
-              {/* @todo: translate */}
-              All {getTranslation(collectionConfig?.labels?.plural, i18n)}
-            </Button>
-          </div>
+          <ListFolderPills
+            collectionConfig={collectionConfig}
+            key="list-header-buttons"
+            viewType={viewType}
+          />
         ),
       ].filter(Boolean)}
       AfterListHeaderContent={Description}

@@ -6,6 +6,7 @@ import './index.scss'
 const baseClass = 'draggable-with-click'
 
 type Props = {
+  readonly as?: React.ElementType
   readonly children?: React.ReactNode
   readonly className?: string
   readonly id: string
@@ -17,6 +18,7 @@ type Props = {
 
 export const DraggableWithClick = ({
   id,
+  as = 'div',
   children,
   className,
   onClick,
@@ -35,7 +37,6 @@ export const DraggableWithClick = ({
     const handlePointerMove = (moveEvent) => {
       const deltaX = Math.abs(moveEvent.clientX - initialPos.current.x)
       const deltaY = Math.abs(moveEvent.clientY - initialPos.current.y)
-
       if (deltaX > thresholdPixels || deltaY > thresholdPixels) {
         isDragging.current = true
         if (listeners?.onPointerDown) {
@@ -67,14 +68,16 @@ export const DraggableWithClick = ({
     window.addEventListener('pointerup', handlePointerUp)
   }
 
+  const Component = as || 'div'
+
   return (
-    <div
+    <Component
       role="button"
       tabIndex={0}
       {...attributes}
       className={`${baseClass} ${className || ''}`.trim()}
       onKeyDown={onKeyDown}
-      onPointerDown={handlePointerDown}
+      onPointerDown={onClick ? handlePointerDown : undefined}
       ref={(node) => {
         setNodeRef(node)
         if (ref) {
@@ -83,6 +86,6 @@ export const DraggableWithClick = ({
       }}
     >
       {children}
-    </div>
+    </Component>
   )
 }

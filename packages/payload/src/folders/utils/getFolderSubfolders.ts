@@ -24,7 +24,7 @@ export const getFolderSubfolders = async ({
       collection: foldersSlug,
       joins: {
         documentsAndFolders: {
-          limit: 1000,
+          limit: 100_000,
           sort: 'name',
           where: {
             relationTo: {
@@ -34,6 +34,7 @@ export const getFolderSubfolders = async ({
         },
       },
       limit: 1,
+      // overrideAccess: false, // @todo: bug in core, throws "QueryError: The following paths cannot be queried: relationTo"
       user,
       where: {
         id: {
@@ -47,8 +48,10 @@ export const getFolderSubfolders = async ({
 
   const orphanedFolders = (await payload.find({
     collection: foldersSlug,
-    limit: 1000,
+    limit: 0,
+    overrideAccess: false,
     sort: 'name',
+    user,
     where: {
       _parentFolder: {
         exists: false,

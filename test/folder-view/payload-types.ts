@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -166,24 +167,23 @@ export interface FolderInterface {
   name: string;
   _parentFolder?: (string | null) | FolderInterface;
   documentsAndFolders?: {
-    docs?:
-      | (
-          | {
-              relationTo?: '_folders';
-              value: string | FolderInterface;
-            }
-          | {
-              relationTo?: 'posts';
-              value: string | Post;
-            }
-          | {
-              relationTo?: 'media';
-              value: string | Media;
-            }
-        )[]
-      | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (
+      | {
+          relationTo?: '_folders';
+          value: string | FolderInterface;
+        }
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'media';
+          value: string | Media;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;

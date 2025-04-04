@@ -6,6 +6,7 @@ import React from 'react'
 
 import type { PolymorphicRelationshipValue } from '../../types.js'
 
+import { FolderIcon } from '../../../../icons/Folder/index.js'
 import { useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
@@ -79,7 +80,15 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
       />
 
       <DrawerContentContainer className={baseClass}>
-        <FolderBreadcrumbs breadcrumbs={folderContext.breadcrumbs} />
+        <FolderBreadcrumbs
+          breadcrumbs={[
+            {
+              id: null,
+              name: <FolderIcon />,
+            },
+            ...folderContext.breadcrumbs,
+          ]}
+        />
 
         <div>
           <DisplayItems

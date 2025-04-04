@@ -615,6 +615,26 @@ export type {
 } from './views/document.js'
 
 export type {
+  AfterFolderListClientProps,
+  AfterFolderListServerProps,
+  AfterFolderListServerPropsOnly,
+  AfterFolderListTableClientProps,
+  AfterFolderListTableServerProps,
+  AfterFolderListTableServerPropsOnly,
+  BeforeFolderListClientProps,
+  BeforeFolderListServerProps,
+  BeforeFolderListServerPropsOnly,
+  BeforeFolderListTableClientProps,
+  BeforeFolderListTableServerProps,
+  BeforeFolderListTableServerPropsOnly,
+  FolderListViewClientProps,
+  FolderListViewServerProps,
+  FolderListViewServerPropsOnly,
+  FolderListViewSlots,
+  FolderListViewSlotSharedClientProps,
+} from './views/folderList.js'
+
+export type {
   AdminViewClientProps,
   /**
    * @deprecated

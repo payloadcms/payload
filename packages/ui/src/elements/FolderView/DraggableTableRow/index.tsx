@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { DraggableWithClick } from '../DraggableWithClick/index.js'
-import { HiddenCell, TableCell, TableRow } from '../SimpleTable/index.js'
+import { HiddenCell, TableCell } from '../SimpleTable/index.js'
 import './index.scss'
 
 const baseClass = 'draggable-table-row'
@@ -23,9 +23,9 @@ type Props = {
 export function DraggableTableRow({
   id,
   columns,
-  disabled,
+  disabled = false,
   dragData,
-  isDroppable,
+  isDroppable: _isDroppable,
   isFocused,
   isSelected,
   isSelecting,
@@ -33,11 +33,11 @@ export function DraggableTableRow({
   onClick,
   onKeyDown,
 }: Props) {
-  const enableDroppable = isDroppable && !isSelected
+  const isDroppable = !disabled && _isDroppable && !isSelected
   const { isOver, setNodeRef } = useDroppable({
     id,
     data: dragData,
-    disabled: !enableDroppable,
+    disabled: !isDroppable,
   })
   const ref = React.useRef(null)
 
@@ -56,7 +56,8 @@ export function DraggableTableRow({
   }, [isFocused])
 
   return (
-    <TableRow
+    <DraggableWithClick
+      as="tr"
       className={[
         baseClass,
         isSelected && `${baseClass}--selected`,
@@ -67,28 +68,32 @@ export function DraggableTableRow({
       ]
         .filter(Boolean)
         .join(' ')}
+      id={itemKey}
+      key={itemKey}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      ref={ref}
     >
       {columns.map((col, i) => (
-        <TableCell className={`${baseClass}__cell-content`} key={i}>
+        <TableCell
+          className={[
+            `${baseClass}__cell-content`,
+            i === 0 && `${baseClass}__first-td`,
+            i === columns.length - 1 && `${baseClass}__last-td`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          key={i}
+        >
           {col}
         </TableCell>
       ))}
 
-      <HiddenCell>
-        {enableDroppable ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
-        {onClick || onKeyDown ? (
-          <DraggableWithClick
-            className={`${baseClass}__drag-handle`}
-            id={itemKey}
-            key={itemKey}
-            onClick={onClick}
-            onKeyDown={onKeyDown}
-            ref={ref}
-          />
-        ) : null}
-        <div className={`${baseClass}__row-foreground`} />
-        <div className={`${baseClass}__row-background`} />
-      </HiddenCell>
-    </TableRow>
+      {isDroppable ? (
+        <HiddenCell>
+          <div className={`${baseClass}__drop-area`} ref={setNodeRef} />
+        </HiddenCell>
+      ) : null}
+    </DraggableWithClick>
   )
 }

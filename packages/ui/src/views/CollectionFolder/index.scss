@@ -4,12 +4,36 @@
   .collection-folder-list {
     width: 100%;
 
+    &__step-nav-icon-label,
+    &__step-nav-icon-label .btn__label {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.25);
+
+      .icon {
+        height: 18px;
+      }
+    }
+
+    &__step-nav-droppable.droppable-button {
+      &--hover {
+        opacity: 0.3;
+      }
+    }
+
     &__wrap {
       padding-bottom: var(--spacing-view-bottom);
 
       & > *:not(:last-child) {
         margin-bottom: var(--base);
       }
+    }
+
+    .cell-with-icon {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.5);
     }
 
     .list-header {
@@ -36,11 +60,6 @@
           overflow: hidden;
           display: -webkit-box;
           max-width: 100vw;
-        }
-
-        #heading-_select,
-        .cell-_select {
-          min-width: unset;
         }
       }
     }
@@ -75,35 +94,6 @@
         margin-left: base(1);
         margin-right: auto;
       }
-    }
-
-    &__list-selection {
-      position: fixed;
-      bottom: 0;
-      z-index: 10;
-      padding: base(0.8) 0;
-      width: 100%;
-      background-color: var(--theme-bg);
-
-      .btn {
-        margin: 0 0 0 base(0.4);
-      }
-
-      .btn {
-        background-color: var(--theme-elevation-100);
-        cursor: pointer;
-        padding: 0 base(0.4);
-        border-radius: $style-radius-s;
-
-        &:hover {
-          background-color: var(--theme-elevation-200);
-        }
-      }
-    }
-
-    &__list-selection-actions {
-      display: flex;
-      gap: base(0.25);
     }
 
     &__shimmer {

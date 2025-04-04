@@ -1,18 +1,28 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
+import type {
+  AdminViewClientProps,
+  AdminViewServerPropsOnly,
+  ColumnPreference,
+  ImportMap,
+  ListPreferences,
+  SanitizedConfig,
+  Where,
+} from 'payload'
 
 import { FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { upsertPreferences } from '@payloadcms/ui/rsc'
+import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import { getFolderData } from 'payload'
 import {
-  type AdminViewClientProps,
-  type AdminViewServerPropsOnly,
-  getFolderData,
-  type ImportMap,
-  type SanitizedConfig,
-} from 'payload'
-import { formatAdminURL, isNumber } from 'payload/shared'
+  combineWhereConstraints,
+  formatAdminURL,
+  isNumber,
+  transformColumnsToPreferences,
+} from 'payload/shared'
 import React from 'react'
 
 import { initPage } from '../../utilities/initPage/index.js'
@@ -138,32 +148,71 @@ export const RootPage = async ({
     importMap,
   })
 
-  const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
-    Component: DefaultView.payloadComponent,
-    Fallback: DefaultView.Component,
+  const sharedServerProps = {
+    ...serverProps,
+    clientConfig,
+    docID: initPageResult?.docID,
+    folderID,
+    i18n: initPageResult?.req.i18n,
     importMap,
-    serverProps: {
-      ...serverProps,
-      clientConfig,
-      docID: initPageResult?.docID,
-      folderID,
-      i18n: initPageResult?.req.i18n,
-      importMap,
-      initPageResult,
-      params,
-      payload: initPageResult?.req.payload,
-      searchParams,
-    } satisfies AdminViewServerPropsOnly,
-  })
+    initPageResult,
+    params,
+    payload: initPageResult?.req.payload,
+    searchParams,
+  }
 
   if (viewType === 'collection-folders') {
-    const { breadcrumbs, hasMoreDocuments, items } = await getFolderData({
-      docLimit: searchParams?.limit ? parseInt(String(searchParams.limit), 10) : undefined,
+    const collectionConfig = initPageResult?.collectionConfig
+    const collectionSlug = collectionConfig?.slug
+    const page = isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1
+    const query = initPageResult?.req.query
+    const locale = initPageResult?.req.locale
+    const columns: ColumnPreference[] = transformColumnsToPreferences(
+      query?.columns as ColumnPreference[] | string,
+    )
+    const listPreferences = await upsertPreferences<ListPreferences>({
+      key: `${collectionSlug}-list`,
+      req: initPageResult.req,
+      value: {
+        columns,
+        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+        sort: query?.sort as string,
+      },
+    })
+    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    const sort =
+      listPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    const whereConstraints = [
+      mergeListSearchAndWhere({
+        collectionConfig,
+        search: typeof query?.search === 'string' ? query.search : undefined,
+        where: (query?.where as Where) || undefined,
+      }),
+    ]
+
+    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
+      const baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit,
+        page,
+        req: initPageResult.req,
+        sort,
+      })
+
+      if (baseListFilter) {
+        whereConstraints.push(baseListFilter)
+      }
+    }
+
+    const { breadcrumbs, documents, hasMoreDocuments, subfolders } = await getFolderData({
+      collectionSlugs: [collectionSlug],
+      docSort: initPageResult?.req.query?.sort as string,
+      docWhere: combineWhereConstraints(whereConstraints),
       folderID,
-      page: isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1,
-      payload: initPageResult?.req.payload,
-      search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
+      locale,
+      payload: initPageResult.req.payload,
+      user: initPageResult.req.user,
     })
 
     const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.root
@@ -174,16 +223,45 @@ export const RootPage = async ({
       (resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
       (folderID && !resolvedFolderID)
     ) {
-      return redirect(config.routes.admin)
+      return redirect(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/folders`,
+          serverURL: config.serverURL,
+        }),
+      )
     }
+
+    const RenderedView = RenderServerComponent({
+      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+      Component: DefaultView.payloadComponent,
+      Fallback: DefaultView.Component,
+      importMap,
+      serverProps: {
+        ...sharedServerProps,
+        documents,
+        subfolders,
+      } satisfies {
+        documents: {
+          relationTo: string
+          value: any
+        }[]
+        subfolders: {
+          relationTo: string
+          value: any
+        }[]
+      } & AdminViewServerPropsOnly,
+    })
 
     return (
       <FolderProvider
+        collectionSlugs={[collectionSlug]}
         initialData={{
           breadcrumbs,
+          documents,
           folderID,
           hasMoreDocuments,
-          items,
+          subfolders,
         }}
       >
         <RootViewComponent
@@ -200,6 +278,13 @@ export const RootPage = async ({
       </FolderProvider>
     )
   } else {
+    const RenderedView = RenderServerComponent({
+      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+      Component: DefaultView.payloadComponent,
+      Fallback: DefaultView.Component,
+      importMap,
+      serverProps: sharedServerProps satisfies AdminViewServerPropsOnly,
+    })
     return (
       <RootViewComponent
         documentSubViewType={documentSubViewType}

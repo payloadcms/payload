@@ -1,47 +1,45 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { DragEndEvent } from '@dnd-kit/core'
+import type { FolderListViewClientProps } from 'payload'
 
+import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
-import { FoldersAndDocuments } from '../../elements/FolderView/FoldersAndDocuments/index.js'
+import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
+import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useModal } from '../../elements/Modal/index.js'
-import { Pagination } from '../../elements/Pagination/index.js'
-import { PerPage } from '../../elements/PerPage/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
+import { FolderIcon } from '../../icons/Folder/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
-import { SelectionProvider } from '../../providers/Selection/index.js'
+import { useFolder } from '../../providers/Folders/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListHeader } from './ListHeader/index.js'
-import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-folder-list'
 
-export function DefaultCollectionFolderView(props: ListViewClientProps) {
+export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
   const {
-    AfterList,
-    AfterListTable,
+    AfterFolderList,
+    AfterFolderListTable,
     beforeActions,
-    BeforeList,
-    BeforeListTable,
+    BeforeFolderList,
+    BeforeFolderListTable,
     collectionSlug,
     columnState,
     Description,
@@ -50,9 +48,7 @@ export function DefaultCollectionFolderView(props: ListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    listPreferences,
     newDocumentURL,
-    preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -78,19 +74,20 @@ export function DefaultCollectionFolderView(props: ListViewClientProps) {
     }
   }, [InitialTable])
 
-  const { user } = useAuth()
-
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
   const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
-
+    breadcrumbs,
+    collectionUseAsTitles,
+    documents,
+    getSelectedItems,
+    lastSelectedIndex,
+    moveToFolder,
+    selectedIndexes,
+    setIsDragging,
+    subfolders,
+  } = useFolder()
   const { openModal } = useModal()
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
@@ -115,19 +112,6 @@ export function DefaultCollectionFolderView(props: ListViewClientProps) {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  const docs = React.useMemo(() => {
-    if (isUploadCollection) {
-      return data.docs.map((doc) => {
-        return {
-          ...doc,
-          filesize: formatFilesize(doc.filesize),
-        }
-      })
-    } else {
-      return data.docs
-    }
-  }, [data.docs, isUploadCollection])
-
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
     setCurrentActivePath(collectionSlug)
@@ -146,144 +130,170 @@ export function DefaultCollectionFolderView(props: ListViewClientProps) {
   useEffect(() => {
     if (!drawerDepth) {
       setStepNav([
-        {
-          label: labels?.plural,
-        },
+        !breadcrumbs.length
+          ? {
+              label: (
+                <div className={`${baseClass}__step-nav-icon-label`} key="root">
+                  <FolderIcon />
+                  {getTranslation(labels?.plural, i18n)}
+                </div>
+              ),
+            }
+          : {
+              label: (
+                <DroppableBreadcrumb
+                  className={[
+                    `${baseClass}__step-nav-droppable`,
+                    `${baseClass}__step-nav-icon-label`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  id={null}
+                  key="root"
+                >
+                  <FolderIcon />
+                  {getTranslation(labels?.plural, i18n)}
+                </DroppableBreadcrumb>
+              ),
+            },
+        ...breadcrumbs.map((crumb, crumbIndex) => {
+          return {
+            label:
+              crumbIndex === breadcrumbs.length - 1 ? (
+                crumb.name
+              ) : (
+                <DroppableBreadcrumb
+                  className={`${baseClass}__step-nav-droppable`}
+                  id={crumb.id}
+                  key={crumb.id}
+                >
+                  {crumb.name}
+                </DroppableBreadcrumb>
+              ),
+          }
+        }),
       ])
     }
-  }, [setStepNav, labels, drawerDepth])
+  }, [setStepNav, labels, drawerDepth, i18n, breadcrumbs])
+
+  const totalDocsAndSubfolders = documents.length + subfolders.length
+
+  const onDragEnd = React.useCallback(
+    async (event: DragEndEvent) => {
+      if (!event.over) {
+        return
+      }
+
+      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
+        await moveToFolder({
+          itemsToMove: getSelectedItems(),
+          toFolderID: event.over.data.current.id || null,
+        })
+      }
+    },
+    [moveToFolder, getSelectedItems],
+  )
 
   return (
     <Fragment>
+      <DndEventListener onDragEnd={onDragEnd} setIsDragging={setIsDragging} />
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
-            {BeforeList}
-            <Gutter className={`${baseClass}__wrap`}>
-              <ListHeader
-                collectionConfig={collectionConfig}
-                Description={
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderCustomComponent
-                      CustomComponent={Description}
-                      Fallback={
-                        <ViewDescription
-                          collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
-                        />
-                      }
-                    />
-                  </div>
-                }
-                disableBulkDelete={disableBulkDelete}
-                disableBulkEdit={disableBulkEdit}
-                hasCreatePermission={hasCreatePermission}
-                i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
-                newDocumentURL={newDocumentURL}
-                openBulkUpload={openBulkUpload}
-                smallBreak={smallBreak}
-                t={t}
-                viewType="folders"
-              />
-              <ListControls
-                beforeActions={
-                  enableRowSelections && typeof onBulkSelect === 'function'
-                    ? beforeActions
-                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
-                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                    : beforeActions
-                }
-                collectionConfig={collectionConfig}
-                collectionSlug={collectionSlug}
-                listMenuItems={listMenuItems}
-                renderedFilters={renderedFilters}
-                resolvedFilterOptions={resolvedFilterOptions}
-              />
-              {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
-              {docs.length === 0 && (
-                <div className={`${baseClass}__no-results`}>
-                  <p>
-                    {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
-                  </p>
-                  {hasCreatePermission && newDocumentURL && (
-                    <Fragment>
-                      {isInDrawer ? (
-                        <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      ) : (
-                        <Button el="link" to={newDocumentURL}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      )}
-                    </Fragment>
-                  )}
-                </div>
-              )}
-              {AfterListTable}
-              {docs.length > 0 && (
-                <div className={`${baseClass}__page-controls`}>
-                  <Pagination
-                    hasNextPage={data.hasNextPage}
-                    hasPrevPage={data.hasPrevPage}
-                    limit={data.limit}
-                    nextPage={data.nextPage}
-                    numberOfNeighbors={1}
-                    onChange={(page) => void handlePageChange(page)}
-                    page={data.page}
-                    prevPage={data.prevPage}
-                    totalPages={data.totalPages}
-                  />
-                  {data.totalDocs > 0 && (
-                    <Fragment>
-                      <div className={`${baseClass}__page-info`}>
-                        {data.page * data.limit - (data.limit - 1)}-
-                        {data.totalPages > 1 && data.totalPages !== data.page
-                          ? data.limit * data.page
-                          : data.totalDocs}{' '}
-                        {i18n.t('general:of')} {data.totalDocs}
-                      </div>
-                      <PerPage
-                        handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
-                        limits={collectionConfig?.admin?.pagination?.limits}
-                        resetPage={data.totalDocs <= data.pagingCounter}
+          {BeforeFolderList}
+          <Gutter className={`${baseClass}__wrap`}>
+            <ListHeader
+              collectionConfig={collectionConfig}
+              Description={
+                <div className={`${baseClass}__sub-header`}>
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={
+                      <ViewDescription
+                        collectionSlug={collectionSlug}
+                        description={collectionConfig?.admin?.description}
                       />
-                      {smallBreak && (
-                        <div className={`${baseClass}__list-selection`}>
-                          <ListSelection
-                            collectionConfig={collectionConfig}
-                            disableBulkDelete={disableBulkDelete}
-                            disableBulkEdit={disableBulkEdit}
-                          />
-                          <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
-                          </div>
-                        </div>
-                      )}
-                    </Fragment>
-                  )}
+                    }
+                  />
                 </div>
-              )}
-            </Gutter>
-            {AfterList}
-          </SelectionProvider>
+              }
+              disableBulkDelete={disableBulkDelete}
+              disableBulkEdit={disableBulkEdit}
+              hasCreatePermission={hasCreatePermission}
+              i18n={i18n}
+              isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+              newDocumentURL={newDocumentURL}
+              openBulkUpload={openBulkUpload}
+              smallBreak={smallBreak}
+              t={t}
+              viewType="folders"
+            />
+            <ListControls
+              beforeActions={
+                enableRowSelections && typeof onBulkSelect === 'function'
+                  ? beforeActions
+                    ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+                    : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                  : beforeActions
+              }
+              collectionConfig={collectionConfig}
+              collectionSlug={collectionSlug}
+              listMenuItems={listMenuItems}
+              renderedFilters={renderedFilters}
+              resolvedFilterOptions={resolvedFilterOptions}
+            />
+            {BeforeFolderListTable}
+            {totalDocsAndSubfolders > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
+            {totalDocsAndSubfolders === 0 && (
+              <div className={`${baseClass}__no-results`}>
+                <p>
+                  {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
+                </p>
+                {hasCreatePermission && newDocumentURL && (
+                  <Fragment>
+                    {isInDrawer ? (
+                      <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
+                        {i18n.t('general:createNewLabel', {
+                          label: getTranslation(labels?.singular, i18n),
+                        })}
+                      </Button>
+                    ) : (
+                      <Button el="link" to={newDocumentURL}>
+                        {i18n.t('general:createNewLabel', {
+                          label: getTranslation(labels?.singular, i18n),
+                        })}
+                      </Button>
+                    )}
+                  </Fragment>
+                )}
+              </div>
+            )}
+            {AfterFolderListTable}
+          </Gutter>
+          {AfterFolderList}
         </div>
       </TableColumnsProvider>
-      <FoldersAndDocuments initialDisplayType="grid" />
+      <DragOverlaySelection
+        allItems={[...subfolders, ...documents]}
+        collectionUseAsTitles={collectionUseAsTitles}
+        lastSelected={lastSelectedIndex}
+        selectedCount={selectedIndexes.size}
+      />
     </Fragment>
   )
+}
+function DndEventListener({ onDragEnd, setIsDragging }) {
+  useDndMonitor({
+    onDragCancel() {
+      setIsDragging(false)
+    },
+    onDragEnd(event) {
+      setIsDragging(false)
+      onDragEnd(event)
+    },
+    onDragStart() {
+      setIsDragging(true)
+    },
+  })
+
+  return null
 }

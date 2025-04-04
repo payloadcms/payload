@@ -57,12 +57,12 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
 
   const docLimit = isNumber(searchParams?.limit) ? parseInt(String(searchParams.limit), 10) : 10
 
-  const { breadcrumbs, hasMoreDocuments, items } = await getFolderData({
-    docLimit,
+  const { breadcrumbs, documents, hasMoreDocuments, subfolders } = await getFolderData({
+    collectionSlugs: [],
     folderID: searchParamFolderID,
-    page: isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1,
     payload,
-    search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
+    user,
+    // search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
   })
 
   const folderID = breadcrumbs[breadcrumbs.length - 1]?.root
@@ -106,9 +106,10 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
       <FolderProvider
         initialData={{
           breadcrumbs,
+          documents,
           folderID,
           hasMoreDocuments,
-          items,
+          subfolders,
         }}
       >
         <div className={baseClass}>
