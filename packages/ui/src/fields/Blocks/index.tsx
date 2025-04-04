@@ -60,7 +60,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
@@ -98,7 +98,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     errorPaths,
     rows = [],
@@ -141,23 +141,19 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({
-        type: 'REMOVE_ROW',
+      removeFieldRow({
         path,
         rowIndex,
       })
-
-      setModified(true)
     },
-    [path, dispatchFields, setModified],
+    [path, removeFieldRow],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({ moveFromIndex, moveToIndex, path })
     },
-    [dispatchFields, path, setModified],
+    [moveFieldRow, path],
   )
 
   const toggleCollapseAll = useCallback(
@@ -166,6 +162,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         collapsed,
         rows,
       })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -179,6 +176,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -295,7 +293,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={RowLabels?.[i]}
+                      Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}

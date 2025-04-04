@@ -1,0 +1,43 @@
+@import '../../../../scss/styles.scss';
+@import '../../colors.scss';
+
+@layer payload-default {
+  .lexical-diff__diff-container {
+    .lexical-unknown-diff {
+      @extend %body;
+      @include shadow-sm;
+      max-width: fit-content;
+      display: flex;
+      align-items: center;
+      background: var(--theme-input-bg);
+      border-radius: $style-radius-s;
+      border: 1px solid var(--theme-elevation-100);
+      position: relative;
+      font-family: var(--font-body);
+      margin-block: base(0.5);
+      max-height: calc(var(--base) * 4);
+      padding: base(0.25);
+
+      &__specifier {
+        font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+      }
+
+      &[data-match-type='create'] {
+        border-color: var(--diff-create-pill-border);
+        color: var(--diff-create-parent-color);
+      }
+
+      &[data-match-type='delete'] {
+        border-color: var(--diff-delete-pill-border);
+        color: var(--diff-delete-parent-color);
+        text-decoration-line: none;
+        background-color: var(--diff-delete-pill-bg);
+
+        * {
+          text-decoration-line: none;
+          color: var(--diff-delete-parent-color);
+        }
+      }
+    }
+  }
+}

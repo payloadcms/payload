@@ -70,6 +70,7 @@ export const testEslintConfig = [
             'saveDocAndAssert',
             'runFilterOptionsTest',
             'assertNetworkRequests',
+            'assertRequestBody',
           ],
         },
       ],

@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
+import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm'
 import {
@@ -16,7 +16,7 @@ import {
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
@@ -25,7 +25,6 @@ import { operatorMap } from '../queries/operatorMap.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
-import { chainMethods } from './chainMethods.js'
 
 const flattenAllWherePaths = (where: Where, paths: string[]) => {
   for (const k in where) {
@@ -612,34 +611,6 @@ export const traverseFields = ({
             where: joinQueryWhere,
           })
 
-          const chainedMethods: ChainedMethods = []
-
-          joins.forEach(({ type, condition, table }) => {
-            chainedMethods.push({
-              args: [table, condition],
-              method: type ?? 'leftJoin',
-            })
-          })
-
-          if (page && limit !== 0) {
-            const offset = (page - 1) * limit - 1
-            if (offset > 0) {
-              chainedMethods.push({
-                args: [offset],
-                method: 'offset',
-              })
-            }
-          }
-
-          if (limit !== 0) {
-            chainedMethods.push({
-              args: [limit],
-              method: 'limit',
-            })
-          }
-
-          const db = adapter.drizzle as LibSQLDatabase
-
           for (let key in selectFields) {
             const val = selectFields[key]
 
@@ -654,14 +625,29 @@ export const traverseFields = ({
             selectFields.parent = newAliasTable.parent
           }
 
-          const subQuery = chainMethods({
-            methods: chainedMethods,
-            query: db
-              .select(selectFields as any)
-              .from(newAliasTable)
-              .where(subQueryWhere)
-              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-          }).as(subQueryAlias)
+          let query: SQLiteSelect = db
+            .select(selectFields as any)
+            .from(newAliasTable)
+            .where(subQueryWhere)
+            .orderBy(() => orderBy.map(({ column, order }) => order(column)))
+            .$dynamic()
+
+          joins.forEach(({ type, condition, table }) => {
+            query = query[type ?? 'leftJoin'](table, condition)
+          })
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit - 1
+            if (offset > 0) {
+              query = query.offset(offset)
+            }
+          }
+
+          if (limit !== 0) {
+            query = query.limit(limit)
+          }
+
+          const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
             currentArgs.extras[`${columnName}_count`] = sql`${db

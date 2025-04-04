@@ -2,7 +2,7 @@
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -478,7 +478,7 @@ export async function resizeAndTransformImageSizes({
 
       if (await fileExists(imagePath)) {
         try {
-          fs.unlinkSync(imagePath)
+          await fs.unlink(imagePath)
         } catch {
           // Ignore unlink errors
         }
