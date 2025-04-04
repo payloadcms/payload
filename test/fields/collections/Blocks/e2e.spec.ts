@@ -242,6 +242,8 @@ describe('Block fields', () => {
       blockLabel: 'Block B',
     })
 
+    await wait(1000)
+
     await page
       .locator('#blocksWithSimilarConfigs-row-1')
       .getByRole('button', { name: 'Add Item' })
