@@ -6,7 +6,8 @@ export const useFieldPath = () => {
   const context = React.useContext(FieldPathContext)
 
   if (!context) {
-    throw new Error('useFieldPath must be used within a FieldPathProvider')
+    // swallow the error, not all fields are wrapped in a FieldPathContext
+    return undefined
   }
 
   return context
