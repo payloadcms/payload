@@ -101,14 +101,15 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
-| `Description`     | A description of the Collection. [More details](#Description).                         |
-| `Upload`          | A file upload component. [More details](#Upload).                                      |
+| Path              | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                   |
+| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton).   |
+| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).            |
+| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).             |
+| `Description`     | A description of the Collection. [More details](#Description).                           |
+| `Status`          | A component that represents the status of the current document. [More details](#Status). |
+| `Upload`          | A file upload component. [More details](#Upload).                                        |
 
 #### Globals
 
@@ -133,13 +134,14 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
-| `Description`     | A description of the Global. [More details](#Description).                             |
+| Path              | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                   |
+| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton).   |
+| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).            |
+| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).             |
+| `Description`     | A description of the Global. [More details](#Description).                               |
+| `Status`          | A component that represents the status of the current document. [More details](#Status). |
 
 ### SaveButton
 
@@ -389,6 +391,29 @@ import type { ViewDescriptionClientProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
   return <div>This is a custom description component (Client)</div>
+}
+```
+
+### Status
+
+The `Status` property allows you to render a component that represents the collection or global status in the Edit View.
+
+To add an `Status` component, use the `components.edit.Status` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        Status: '/path/to/MyStatusComponent',
+        // highlight-end
+      },
+    },
+  },
 }
 ```
 

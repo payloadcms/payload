@@ -1,7 +1,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload } from '../../admin/types.js'
+import type { CustomStatus, CustomUpload } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -299,6 +299,10 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomComponent
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
