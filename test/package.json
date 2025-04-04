@@ -31,6 +31,7 @@
     "@payloadcms/db-sqlite": "workspace:*",
     "@payloadcms/db-vercel-postgres": "workspace:*",
     "@payloadcms/drizzle": "workspace:*",
+    "@payloadcms/ecommerce": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
