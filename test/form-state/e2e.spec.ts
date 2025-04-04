@@ -178,7 +178,7 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.text']?.lastRenderedPath,
+            body[0].args.formState['array.0.richText']?.lastRenderedPath,
         ),
     })
 
@@ -199,10 +199,38 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.text']?.lastRenderedPath &&
-            body[0].args.formState['array.1.text']?.lastRenderedPath,
+            body[0].args.formState['array.0.richText']?.lastRenderedPath &&
+            body[0].args.formState['array.1.richText']?.lastRenderedPath,
         ),
     })
+  })
+
+  test('should not render stale values for server components while form state is in flight', async () => {
+    await page.goto(postsUrl.create)
+
+    await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-0 #field-array__0__text').fill('1')
+
+    await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-1 #field-array__1__text').fill('2')
+
+    // block the next form state request from firing to ensure the field remains in stale state
+    await page.route(postsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+        await route.abort()
+      }
+
+      await route.continue()
+    })
+
+    // remove the first row
+    await page.locator('#field-array #array-row-0 .array-actions__button').click()
+
+    await page
+      .locator('#field-array #array-row-0 .array-actions__action.array-actions__remove')
+      .click()
+
+    await expect(page.locator('#field-array #array-row-0 #field-array__0__text')).toHaveValue('2')
   })
 
   test('should queue onChange functions', async () => {
