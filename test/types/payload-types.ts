@@ -64,6 +64,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -166,9 +167,10 @@ export interface PagesCategory {
   id: string;
   title?: string | null;
   relatedPages?: {
-    docs?: (string | Page)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Page)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
