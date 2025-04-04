@@ -158,7 +158,6 @@ export interface Post {
           };
           [k: string]: unknown;
         } | null;
-        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -269,7 +268,6 @@ export interface PostsSelect<T extends boolean = true> {
     | T
     | {
         richText?: T;
-        text?: T;
         id?: T;
       };
   updatedAt?: T;
