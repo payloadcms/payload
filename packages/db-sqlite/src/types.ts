@@ -56,6 +56,7 @@ export type Args = {
    * Store blocks as JSON column instead of storing them in relational structure.
    */
   blocksAsJSON?: boolean
+  casing?: DrizzleConfig['casing']
   client: Config
 } & BaseSQLiteArgs
 
@@ -127,6 +128,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
 export type SQLiteAdapter = {
+  casing: DrizzleConfig['casing']
   client: Client
   clientConfig: Args['client']
   drizzle: Drizzle
