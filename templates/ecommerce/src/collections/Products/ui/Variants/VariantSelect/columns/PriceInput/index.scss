@@ -1,0 +1,31 @@
+.formattedPrice {
+  .formattedPriceLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .formattedPriceContainer {
+    display: flex;
+    position: relative;
+    // border: 1px solid #ccc;
+    // border-radius: 4px;
+    // overflow: hidden;
+  }
+
+  .formattedPriceCurrencySymbol {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(calc(-50% + 0.1em));
+    color: var(--theme-elevation-500);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .formattedPriceInput {
+    padding: 0.5rem 0.5rem 0.5rem 1.75rem;
+  }
+}
