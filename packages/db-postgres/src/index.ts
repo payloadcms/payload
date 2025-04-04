@@ -54,6 +54,7 @@ import {
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -130,6 +131,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators: operatorMap,
+      pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
