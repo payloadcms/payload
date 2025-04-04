@@ -43,11 +43,12 @@ export default buildConfig({
 ### Configuration Options
 
 | Option                 | Description                                                              | Default |
-| ---------------------- | ------------------------------------------------------------------------ | ------- |
+| ---------------------- | ------------------------------------------------------------------------ | ------- | ------ | --- |
 | `enabled`              | Whether or not to enable the plugin                                      | `true`  |
 | `collections`          | Collections to apply the Azure Blob adapter to                           |         |
 | `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
 | `baseURL`              | Base URL for the Azure Blob storage account                              |         |
-| `connectionString`     | Azure Blob storage connection string                                     |         |
+| `connectionString`     | Azure Blob storage connection                                            |
+| `credential`           | Alternative to connection string you can use TokenCredential to connect  |         | string |     |
 | `containerName`        | Azure Blob storage container name                                        |         |
 | `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.            |         |

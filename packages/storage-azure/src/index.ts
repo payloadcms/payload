@@ -1,4 +1,4 @@
-import type { ContainerClient } from '@azure/storage-blob'
+import type { BatchSubRequest, ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
   ClientUploadsConfig,
@@ -44,12 +44,17 @@ export type AzureStorageOptions = {
   /**
    * Azure Blob storage connection string
    */
-  connectionString: string
+  connectionString?: string
 
   /**
    * Azure Blob storage container name
    */
   containerName: string
+
+  /**
+   * Instead of a connection string you can chose to use any object that implements the TokenCredential interface from `@azure/identity` package to authenticate requests to the service.
+   */
+  credential?: Pick<BatchSubRequest, 'credential'>['credential']
 
   /**
    * Whether or not to enable the plugin
@@ -66,8 +71,10 @@ export const azureStorage: AzureStoragePlugin =
   (incomingConfig: Config): Config => {
     const getStorageClient = () =>
       getStorageClientFunc({
+        baseURL: azureStorageOptions.baseURL,
         connectionString: azureStorageOptions.connectionString,
         containerName: azureStorageOptions.containerName,
+        credential: azureStorageOptions.credential,
       })
 
     const isPluginDisabled = azureStorageOptions.enabled === false
@@ -140,10 +147,16 @@ function azureStorageInternal(
     clientUploads,
     connectionString,
     containerName,
+    credential,
   }: AzureStorageOptions,
 ): Adapter {
   const createContainerIfNotExists = () => {
-    void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
+    void getStorageClientFunc({
+      baseURL,
+      connectionString,
+      containerName,
+      credential,
+    }).createIfNotExists({
       access: 'blob',
     })
   }
