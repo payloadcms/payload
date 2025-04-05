@@ -268,6 +268,41 @@ describe('Relationships', () => {
         expect(query.totalDocs).toEqual(2)
       })
 
+      it('should count documents correctly when queried by a relationship field', async () => {
+        const user = (
+          await payload.find({
+            collection: 'users',
+          })
+        ).docs[0]!
+
+        for (let i = 0; i < 8; i++) {
+          await payload.create({
+            collection: 'movieReviews',
+            data: {
+              movieReviewer: user.id,
+              visibility: 'public',
+            },
+          })
+        }
+
+        const { totalDocs: countReviewedByUser } = await payload.count({
+          collection: 'movieReviews',
+          where: {
+            'movieReviewer.email': { equals: user.email },
+          },
+        })
+
+        expect(countReviewedByUser).toEqual(8)
+
+        const { totalDocs: countReviewedByNonExistent } = await payload.count({
+          collection: 'movieReviews',
+          where: {
+            'movieReviewer.email': { equals: 'nonExistent@usermail.com' },
+          },
+        })
+        expect(countReviewedByNonExistent).toEqual(0)
+      })
+
       // https://github.com/payloadcms/payload/issues/4240
       it('should allow querying by relationship id field', async () => {
         /**
