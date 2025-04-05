@@ -26,7 +26,7 @@
     "payload": "3.32.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "sharp": "0.32.6"
+    "sharp": "0.34.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
