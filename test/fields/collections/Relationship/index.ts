@@ -126,6 +126,53 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
       hasMany: true,
     },
+    {
+      name: 'relationshipWithDrawerAppearance',
+      relationTo: 'text-fields',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+    },
+    {
+      name: 'readOnlyRelationshipWithDrawerAppearance',
+      relationTo: 'text-fields',
+      admin: {
+        readOnly: true,
+        appearance: 'drawer',
+      },
+      type: 'relationship',
+    },
+    {
+      name: 'polymorphicRelationshipWithDrawerAppearance',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: ['text-fields', 'array-fields'],
+    },
+    {
+      name: 'relationshipWithDrawerAppearanceAndAllowCreateFalse',
+      admin: {
+        allowCreate: false,
+        appearance: 'drawer',
+      },
+      type: 'relationship',
+      relationTo: 'text-fields',
+    },
+    {
+      name: 'filteredRelationshipWithDrawerAppearance',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      filterOptions: ({ relationTo }) => {
+        if (relationTo === 'text-fields') {
+          return {
+            text: {
+              equals: 'list drawer test',
+            },
+          }
+        } else {
+          return true
+        }
+      },
+    },
   ],
   slug: relationshipFieldsSlug,
 }
