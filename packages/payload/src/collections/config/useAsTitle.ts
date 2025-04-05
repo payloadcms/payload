@@ -33,9 +33,9 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
         }
       }
     } else {
-      if (useAsTitleField && fieldIsVirtual(useAsTitleField)) {
+      if (useAsTitleField && 'virtual' in useAsTitleField && useAsTitleField.virtual === true) {
         throw new InvalidConfiguration(
-          `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" in the collection "${config.slug}" is virtual. A virtual field cannot be used as the title.`,
+          `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" in the collection "${config.slug}" is virtual. A virtual field can be used as the title only when linked to a relationship field.`,
         )
       }
       if (!useAsTitleField) {
