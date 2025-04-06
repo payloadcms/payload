@@ -1,11 +1,11 @@
 'use client'
 
-import type { SelectType } from 'payload'
+import type { SelectType, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { mergeListSearchAndWhere, unflatten } from 'payload/shared'
+import { combineWhereConstraints, mergeListSearchAndWhere, unflatten } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -21,9 +21,9 @@ import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -110,22 +110,46 @@ const SaveDraftButton: React.FC<{
   )
 }
 
-export const EditManyDrawerContent: React.FC<
-  {
-    drawerSlug: string
-    selectedFields: FieldOption[]
-    setSelectedFields: (fields: FieldOption[]) => void
-  } & EditManyProps
-> = (props) => {
+type EditManyDrawerContentProps = {
+  /**
+   * The total count of selected items
+   */
+  count?: number
+  /**
+   * The slug of the drawer
+   */
+  drawerSlug: string
+  /**
+   * The IDs of the selected items
+   */
+  ids?: (number | string)[]
+  /**
+   * Whether all items are selected
+   */
+  selectAll?: boolean
+  /**
+   * The fields that are selected to bulk edit
+   */
+  selectedFields: FieldOption[]
+  /**
+   * The function to set the selected fields to bulk edit
+   */
+  setSelectedFields: (fields: FieldOption[]) => void
+} & EditManyProps
+export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (props) => {
   const {
-    collection: { fields, labels: { plural, singular } } = {},
     collection,
+    collection: { fields, labels: { plural, singular } } = {},
+    count,
     drawerSlug,
+    ids,
+    selectAll,
     selectedFields,
     setSelectedFields,
   } = props
 
   const { permissions, user } = useAuth()
+  const { code: locale } = useLocale()
 
   const { closeModal } = useModal()
 
@@ -138,7 +162,6 @@ export const EditManyDrawerContent: React.FC<
 
   const { getFormState } = useServerFunctions()
 
-  const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
 
   const [isInitializing, setIsInitializing] = useState(false)
@@ -189,26 +212,56 @@ export const EditManyDrawerContent: React.FC<
     }
   }, [])
 
-  const queryString = useMemo(() => {
+  const queryString = useMemo((): string => {
+    const whereConstraints: Where[] = []
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
     })
 
-    return getQueryParams(queryWithSearch)
-  }, [collection, searchParams, getQueryParams])
+    if (queryWithSearch) {
+      whereConstraints.push(queryWithSearch)
+    }
+
+    if (selectAll) {
+      // Match the current filter/search, or default to all docs
+      whereConstraints.push(
+        (parseSearchParams(searchParams)?.where as Where) || {
+          id: {
+            exists: true,
+          },
+        },
+      )
+    } else {
+      // If we're not selecting all, we need to select specific docs
+      whereConstraints.push({
+        id: {
+          in: ids || [],
+        },
+      })
+    }
+
+    return qs.stringify(
+      {
+        locale,
+        where: combineWhereConstraints(whereConstraints),
+      },
+      { addQueryPrefix: true },
+    )
+  }, [collection, searchParams, selectAll, ids, locale])
 
   const onSuccess = () => {
     router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),
-          page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined,
+          page: selectAll ? '1' : undefined,
         },
         { addQueryPrefix: true },
       ),
     )
-    clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
+    clearRouteCache()
     closeModal(drawerSlug)
   }
 

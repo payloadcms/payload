@@ -3,20 +3,31 @@ import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
+  ColumnPreference,
   ImportMap,
+  ListPreferences,
   SanitizedConfig,
+  Where,
 } from 'payload'
 
+import { FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { upsertPreferences } from '@payloadcms/ui/rsc'
+import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
-import React, { Fragment } from 'react'
+import { getFolderData } from 'payload'
+import {
+  combineWhereConstraints,
+  formatAdminURL,
+  isNumber,
+  transformColumnsToPreferences,
+} from 'payload/shared'
+import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
+import { getRouteData } from './getRouteData.js'
+import { RootViewComponent } from './RootViewComponent.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -64,12 +75,13 @@ export const RootPage = async ({
   const {
     DefaultView,
     documentSubViewType,
+    folderID,
     initPageOptions,
     serverProps,
     templateClassName,
     templateType,
     viewType,
-  } = getViewFromConfig({
+  } = getRouteData({
     adminRoute,
     config,
     currentRoute,
@@ -89,6 +101,10 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc))
 
+  /**
+   * This function is responsible for handling the case where the view is not found.
+   * The current route did not match any default views or custom route views.
+   */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
@@ -132,55 +148,155 @@ export const RootPage = async ({
     importMap,
   })
 
-  const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
-    Component: DefaultView.payloadComponent,
-    Fallback: DefaultView.Component,
+  const sharedServerProps = {
+    ...serverProps,
+    clientConfig,
+    docID: initPageResult?.docID,
+    folderID,
+    i18n: initPageResult?.req.i18n,
     importMap,
-    serverProps: {
-      ...serverProps,
-      clientConfig,
-      docID: initPageResult?.docID,
-      i18n: initPageResult?.req.i18n,
-      importMap,
-      initPageResult,
-      params,
-      payload: initPageResult?.req.payload,
-      searchParams,
-    } satisfies AdminViewServerPropsOnly,
-  })
+    initPageResult,
+    params,
+    payload: initPageResult?.req.payload,
+    searchParams,
+  }
 
-  return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={initPageResult?.collectionConfig?.slug}
-          docID={initPageResult?.docID}
+  if (viewType === 'collection-folders') {
+    const collectionConfig = initPageResult?.collectionConfig
+    const collectionSlug = collectionConfig?.slug
+    const page = isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1
+    const query = initPageResult?.req.query
+    const locale = initPageResult?.req.locale
+    const columns: ColumnPreference[] = transformColumnsToPreferences(
+      query?.columns as ColumnPreference[] | string,
+    )
+    const listPreferences = await upsertPreferences<ListPreferences>({
+      key: `${collectionSlug}-list`,
+      req: initPageResult.req,
+      value: {
+        columns,
+        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+        sort: query?.sort as string,
+      },
+    })
+    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    const sort =
+      listPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    const whereConstraints = [
+      mergeListSearchAndWhere({
+        collectionConfig,
+        search: typeof query?.search === 'string' ? query.search : undefined,
+        where: (query?.where as Where) || undefined,
+      }),
+    ]
+
+    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
+      const baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit,
+        page,
+        req: initPageResult.req,
+        sort,
+      })
+
+      if (baseListFilter) {
+        whereConstraints.push(baseListFilter)
+      }
+    }
+
+    const { breadcrumbs, documents, hasMoreDocuments, subfolders } = await getFolderData({
+      collectionSlugs: [collectionSlug],
+      docSort: initPageResult?.req.query?.sort as string,
+      docWhere: combineWhereConstraints(whereConstraints),
+      folderID,
+      locale,
+      payload: initPageResult.req.payload,
+      user: initPageResult.req.user,
+    })
+
+    const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.root
+      ? undefined
+      : breadcrumbs[breadcrumbs.length - 1]?.id
+
+    if (
+      (resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
+      (folderID && !resolvedFolderID)
+    ) {
+      return redirect(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/folders`,
+          serverURL: config.serverURL,
+        }),
+      )
+    }
+
+    const RenderedView = RenderServerComponent({
+      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+      Component: DefaultView.payloadComponent,
+      Fallback: DefaultView.Component,
+      importMap,
+      serverProps: {
+        ...sharedServerProps,
+        documents,
+        subfolders,
+      } satisfies {
+        documents: {
+          relationTo: string
+          value: any
+        }[]
+        subfolders: {
+          relationTo: string
+          value: any
+        }[]
+      } & AdminViewServerPropsOnly,
+    })
+
+    return (
+      <FolderProvider
+        collectionSlugs={[collectionSlug]}
+        initialData={{
+          breadcrumbs,
+          documents,
+          folderID,
+          hasMoreDocuments,
+          subfolders,
+        }}
+      >
+        <RootViewComponent
           documentSubViewType={documentSubViewType}
-          globalSlug={initPageResult?.globalConfig?.slug}
-          i18n={initPageResult?.req.i18n}
-          locale={initPageResult?.locale}
+          initPageResult={initPageResult}
           params={params}
-          payload={initPageResult?.req.payload}
-          permissions={initPageResult?.permissions}
+          RenderedView={RenderedView}
           searchParams={searchParams}
-          user={initPageResult?.req.user}
-          viewActions={serverProps.viewActions}
+          serverProps={serverProps}
+          templateClassName={templateClassName}
+          templateType={templateType}
           viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult?.visibleEntities?.collections,
-            globals: initPageResult?.visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
-    </Fragment>
-  )
+        />
+      </FolderProvider>
+    )
+  } else {
+    const RenderedView = RenderServerComponent({
+      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+      Component: DefaultView.payloadComponent,
+      Fallback: DefaultView.Component,
+      importMap,
+      serverProps: sharedServerProps satisfies AdminViewServerPropsOnly,
+    })
+    return (
+      <RootViewComponent
+        documentSubViewType={documentSubViewType}
+        initPageResult={initPageResult}
+        params={params}
+        RenderedView={RenderedView}
+        searchParams={searchParams}
+        serverProps={serverProps}
+        templateClassName={templateClassName}
+        templateType={templateType}
+        viewType={viewType}
+      />
+    )
+  }
 }

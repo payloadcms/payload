@@ -38,6 +38,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     collectionSlug,
     disableQueryPresets,
     enableColumns = true,
+    enableFilters = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
     queryPreset: activePreset,
@@ -185,16 +186,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   {t('general:columns')}
                 </Pill>
               )}
-              <Pill
-                aria-controls={`${baseClass}-where`}
-                aria-expanded={visibleDrawer === 'where'}
-                className={`${baseClass}__toggle-where`}
-                icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:filters')}
-              </Pill>
+              {enableFilters && (
+                <Pill
+                  aria-controls={`${baseClass}-where`}
+                  aria-expanded={visibleDrawer === 'where'}
+                  className={`${baseClass}__toggle-where`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+                  pillStyle="light"
+                >
+                  {t('general:filters')}
+                </Pill>
+              )}
               {enableSort && (
                 <Pill
                   aria-controls={`${baseClass}-sort`}

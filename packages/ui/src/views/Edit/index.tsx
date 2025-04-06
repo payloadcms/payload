@@ -307,6 +307,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,

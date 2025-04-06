@@ -1,0 +1,15 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .list-folder-pills {
+    display: flex;
+    gap: calc(var(--base) * 0.1);
+    margin-left: calc(var(--base) * 0.5);
+
+    &__button {
+      &:not(.list-folder-pills__button--active) {
+        background-color: transparent;
+      }
+    }
+  }
+}
