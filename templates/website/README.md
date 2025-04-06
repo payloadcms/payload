@@ -29,7 +29,7 @@ To spin up this example locally, follow these steps:
 
 ### Clone
 
-If you have not done so already, you need to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+If you have not done so already, you need to have a standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
 
 #### Method 1 (recommended)
 
@@ -104,7 +104,7 @@ See the [Globals](https://payloadcms.com/docs/configuration/globals) docs for de
 
 ## Access control
 
-Basic access control is setup to limit access to various content based based on publishing status.
+Basic access control is setup to limit access to various content based on publishing status.
 
 - `users`: Users can access the admin panel and create or edit content.
 - `posts`: Everyone can access published posts, but only users can create, update, or delete them.
@@ -142,7 +142,7 @@ In addition to draft previews you can also enable live preview to view your end 
 
 ## On-demand Revalidation
 
-We've added hooks to collections and globals so that all of your pages, posts, or footer or header, change they will automatically be updated in the frontend via on-demand revalidation supported by Nextjs.
+We've added hooks to collections and globals so that whenever any of your pages, posts, header, or footer change, they will automatically automatically be updated in the frontend via on-demand revalidation supported by Nextjs.
 
 > Note: if an image has been changed, for example it's been cropped, you will need to republish the page it's used on in order to be able to revalidate the Nextjs image cache.
 
@@ -152,7 +152,7 @@ This template comes pre-configured with the official [Payload SEO Plugin](https:
 
 ## Search
 
-This template also pre-configured with the official [Payload Search Plugin](https://payloadcms.com/docs/plugins/search) to showcase how SSR search features can easily be implemented into Next.js with Payload. See [Website](#website) for more details.
+This template is also pre-configured with the official [Payload Search Plugin](https://payloadcms.com/docs/plugins/search) to showcase how SSR search features can easily be implemented into Next.js with Payload. See [Website](#website) for more details.
 
 ## Redirects
 
@@ -166,7 +166,7 @@ We have configured [Scheduled Publish](https://payloadcms.com/docs/versions/draf
 
 ## Website
 
-This template includes a beautifully designed, production-ready front-end built with the [Next.js App Router](https://nextjs.org), served right alongside your Payload app in a instance. This makes it so that you can deploy both your backend and website where you need it.
+This template includes a beautifully designed, production-ready front-end built with the [Next.js App Router](https://nextjs.org), served right alongside your Payload app in an instance. This makes it so that you can deploy both your backend and website where you need it.
 
 Core features:
 
