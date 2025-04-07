@@ -101,11 +101,11 @@ const generateLabelFromValue = (
 }
 
 export const Relationship: RelationshipFieldDiffClientComponent = ({
-  comparisonValue,
+  comparisonValue: valueFrom,
   field,
   locale,
   parentIsLocalized,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { config } = useConfig()
@@ -116,48 +116,36 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
     config: { collections },
   } = useConfig()
 
-  let versionToRender: string | undefined = placeholder
-  let comparisonToRender: string | undefined = placeholder
+  let renderedValueTo: string | undefined = placeholder
+  let renderedValueFrom: string | undefined = placeholder
 
-  if (versionValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
-      versionToRender =
-        versionValue
+  if (valueTo) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(valueTo)) {
+      renderedValueTo =
+        valueTo
           .map((val) =>
             generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
           )
           .join(', ') || placeholder
     } else {
-      versionToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          versionValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
+      renderedValueTo =
+        generateLabelFromValue(collections, field, locale, valueTo, config, parentIsLocalized) ||
+        placeholder
     }
   }
 
-  if (comparisonValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
-      comparisonToRender =
-        comparisonValue
+  if (valueFrom) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(valueFrom)) {
+      renderedValueFrom =
+        valueFrom
           .map((val) =>
             generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
           )
           .join(', ') || placeholder
     } else {
-      comparisonToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          comparisonValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
+      renderedValueFrom =
+        generateLabelFromValue(collections, field, locale, valueFrom, config, parentIsLocalized) ||
+        placeholder
     }
   }
 
@@ -174,8 +162,8 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
       </FieldDiffLabel>
       <ReactDiffViewer
         hideLineNumbers
-        newValue={versionToRender}
-        oldValue={comparisonToRender}
+        newValue={renderedValueTo}
+        oldValue={renderedValueFrom}
         showDiffOnly={false}
         splitView
         styles={diffStyles}

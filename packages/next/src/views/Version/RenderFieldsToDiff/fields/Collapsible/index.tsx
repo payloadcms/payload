@@ -13,10 +13,10 @@ const baseClass = 'collapsible-diff'
 
 export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   baseVersionField,
-  comparisonValue,
+  comparisonValue: valueFrom,
   field,
   parentIsLocalized,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
@@ -28,7 +28,6 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparisonValue}
         fields={field.fields}
         label={
           'label' in field &&
@@ -37,7 +36,8 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
         }
         locales={selectedLocales}
         parentIsLocalized={parentIsLocalized || field.localized}
-        version={versionValue}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
       >
         <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>

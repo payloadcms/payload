@@ -47,9 +47,9 @@ export declare enum DiffMethod {
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
   /**
-   * Field value from the version being compared
+   * Field value from the version being compared from
    */
-  comparisonValue: unknown
+  comparisonValue: unknown // TODO: change to valueFrom in 4.0
   diffMethod: DiffMethod
   field: TClientField
   fieldPermissions:
@@ -63,9 +63,10 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
   locale?: string
   parentIsLocalized: boolean
   /**
-   * Field value from the current version
+   * Field value from the version being compared to
+   *
    */
-  versionValue: unknown
+  versionValue: unknown // TODO: change to valueTo in 4.0
 }
 
 export type FieldDiffServerProps<

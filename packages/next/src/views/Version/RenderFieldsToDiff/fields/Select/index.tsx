@@ -60,27 +60,27 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 }
 
 export const Select: SelectFieldDiffClientComponent = ({
-  comparisonValue,
+  comparisonValue: valueFrom,
   diffMethod,
   field,
   locale,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
 
-  if (versionValue == comparisonValue) {
+  if (valueTo == valueFrom) {
     placeholder = `[${i18n.t('general:noValue')}]`
   }
 
   const options = 'options' in field && field.options
 
-  const comparisonToRender =
-    typeof comparisonValue !== 'undefined'
+  const renderedValueFrom =
+    typeof valueFrom !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue),
+            typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom),
             options,
             field.hasMany,
           ),
@@ -88,11 +88,11 @@ export const Select: SelectFieldDiffClientComponent = ({
         )
       : placeholder
 
-  const versionToRender =
-    typeof versionValue !== 'undefined'
+  const renderedValueTo =
+    typeof valueTo !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue),
+            typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo),
             options,
             field.hasMany,
           ),
@@ -107,11 +107,11 @@ export const Select: SelectFieldDiffClientComponent = ({
         {'label' in field && getTranslation(field.label || '', i18n)}
       </FieldDiffLabel>
       <DiffViewer
-        comparisonToRender={comparisonToRender}
         diffMethod={diffMethod}
         diffStyles={diffStyles}
         placeholder={placeholder}
-        versionToRender={versionToRender}
+        renderedValueFrom={renderedValueFrom}
+        renderedValueTo={renderedValueTo}
       />
     </div>
   )

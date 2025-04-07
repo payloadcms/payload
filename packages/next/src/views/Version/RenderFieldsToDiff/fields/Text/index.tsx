@@ -12,24 +12,24 @@ import { DiffViewer } from './DiffViewer/index.js'
 const baseClass = 'text-diff'
 
 export const Text: TextFieldDiffClientComponent = ({
-  comparisonValue,
+  comparisonValue: valueFrom,
   diffMethod,
   field,
   locale,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
 
-  if (versionValue == comparisonValue) {
+  if (valueTo == valueFrom) {
     placeholder = `[${i18n.t('general:noValue')}]`
   }
 
-  const versionToRender: string =
-    typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue, null, 2)
-  const comparisonToRender =
-    typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue, null, 2)
+  const renderedValueTo: string =
+    typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo, null, 2)
+  const renderedValueFrom =
+    typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom, null, 2)
 
   return (
     <div className={baseClass}>
@@ -40,11 +40,11 @@ export const Text: TextFieldDiffClientComponent = ({
           getTranslation(field.label || '', i18n)}
       </FieldDiffLabel>
       <DiffViewer
-        comparisonToRender={comparisonToRender}
         diffMethod={diffMethod}
         diffStyles={diffStyles}
         placeholder={placeholder}
-        versionToRender={versionToRender}
+        renderedValueFrom={renderedValueFrom}
+        renderedValueTo={renderedValueTo}
       />
     </div>
   )

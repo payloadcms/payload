@@ -21,7 +21,7 @@ import { HtmlDiff } from './htmlDiff/index.js'
 const baseClass = 'lexical-diff'
 
 export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (args) => {
-  const { comparisonValue, field, i18n, locale, versionValue } = args
+  const { comparisonValue: valueFrom, field, i18n, locale, versionValue: valueTo } = args
 
   const converters: HTMLConvertersFunctionAsync = ({ defaultConverters }) => ({
     ...defaultConverters,
@@ -37,19 +37,19 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
     depth: 1,
     req: args.req,
   })
-  const comparisonHTML = await convertLexicalToHTMLAsync({
+  const fromHTML = await convertLexicalToHTMLAsync({
     converters,
-    data: comparisonValue as SerializedEditorState,
+    data: valueFrom as SerializedEditorState,
     populate: payloadPopulateFn,
   })
 
-  const versionHTML = await convertLexicalToHTMLAsync({
+  const toHTML = await convertLexicalToHTMLAsync({
     converters,
-    data: versionValue as SerializedEditorState,
+    data: valueTo as SerializedEditorState,
     populate: payloadPopulateFn,
   })
 
-  const diffHTML = new HtmlDiff(comparisonHTML, versionHTML)
+  const diffHTML = new HtmlDiff(fromHTML, toHTML)
 
   const [oldHTML, newHTML] = diffHTML.getSideBySideContents()
 
