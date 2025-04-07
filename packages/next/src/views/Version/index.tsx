@@ -1,21 +1,23 @@
 import type {
-  Document,
   DocumentViewServerProps,
   Locale,
   OptionObject,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
+  TypeWithVersion,
 } from 'payload'
 
+import { formatDate } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { getLatestVersion } from '../Versions/getLatestVersion.js'
+import { getLatestVersion, type GetLatestVersionReturnType } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
+import { formatVersionPill } from './SelectComparison/formatVersionPill.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
   const { i18n, initPageResult, routeSegments, searchParams } = props
@@ -29,7 +31,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
-  const versionID = routeSegments[routeSegments.length - 1]
+  const versionToID = routeSegments[routeSegments.length - 1]
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
@@ -38,7 +40,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     ? JSON.parse(searchParams.localeCodes as string)
     : null
 
-  const comparisonVersionIDFromParams: string = searchParams.compareValue as string
+  const versionFromIDFromParams: string = searchParams.versionFrom as string
 
   const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
@@ -47,9 +49,10 @@ export async function VersionView(props: DocumentViewServerProps) {
   let docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   let slug: string
 
-  let doc: Document
-  let latestPublishedVersion = null
-  let latestDraftVersion = null
+  let versionTo: TypeWithVersion<any>
+  let versionFrom: null | TypeWithVersion<any> = null
+  let latestPublishedVersion: GetLatestVersionReturnType = null
+  let latestDraftVersion: GetLatestVersionReturnType = null
 
   if (collectionSlug) {
     // /collections/:slug/:id/versions/:versionID
@@ -57,8 +60,8 @@ export async function VersionView(props: DocumentViewServerProps) {
     docPermissions = permissions.collections[collectionSlug]
 
     try {
-      doc = await payload.findVersionByID({
-        id: versionID,
+      versionTo = await payload.findVersionByID({
+        id: versionToID,
         collection: slug,
         depth: 0,
         locale: 'all',
@@ -66,6 +69,34 @@ export async function VersionView(props: DocumentViewServerProps) {
         req,
         user,
       })
+
+      if (versionFromIDFromParams) {
+        versionFrom = await payload.findVersionByID({
+          id: versionFromIDFromParams,
+          collection: collectionSlug,
+          depth: 0,
+          locale: 'all',
+          overrideAccess: false,
+          req,
+        })
+      } else {
+        // By default, we'll compare the previous version. => versionFrom = previous version of versionTo
+        versionFrom = (
+          await payload.findVersions({
+            collection: collectionSlug,
+            depth: 0,
+            limit: 1,
+            overrideAccess: false,
+            req,
+            sort: '-createdAt',
+            where: {
+              createdAt: {
+                less_than: new Date(versionTo?.createdAt),
+              },
+            },
+          })
+        ).docs[0]
+      }
 
       if (collectionConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion({
@@ -92,16 +123,14 @@ export async function VersionView(props: DocumentViewServerProps) {
     } catch (_err) {
       return notFound()
     }
-  }
-
-  if (globalSlug) {
+  } else if (globalSlug) {
     // /globals/:slug/versions/:versionID
     slug = globalSlug
     docPermissions = permissions.globals[globalSlug]
 
     try {
-      doc = await payload.findGlobalVersionByID({
-        id: versionID,
+      versionTo = await payload.findGlobalVersionByID({
+        id: versionToID,
         slug,
         depth: 0,
         locale: 'all',
@@ -109,6 +138,38 @@ export async function VersionView(props: DocumentViewServerProps) {
         req,
         user,
       })
+
+      if (versionFromIDFromParams) {
+        versionFrom = await payload.findGlobalVersionByID({
+          id: versionFromIDFromParams,
+          slug: globalSlug,
+          depth: 0,
+          locale: 'all',
+          overrideAccess: false,
+          req,
+        })
+      } else {
+        // By default, we'll compare the previous version. => versionFrom = previous version of versionTo
+        versionFrom = (
+          await payload.findGlobalVersions({
+            slug: globalSlug,
+            depth: 0,
+            limit: 1,
+            overrideAccess: false,
+            req,
+            sort: '-createdAt',
+            where: {
+              createdAt: {
+                less_than: new Date(versionTo?.createdAt),
+              },
+            },
+          })
+        ).docs[0]
+
+        if (!versionFrom) {
+          versionFrom = versionTo
+        }
+      }
 
       if (globalConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion({
@@ -133,6 +194,10 @@ export async function VersionView(props: DocumentViewServerProps) {
     } catch (_err) {
       return notFound()
     }
+  }
+
+  if (!versionTo) {
+    return notFound()
   }
 
   const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
@@ -169,44 +234,6 @@ export async function VersionView(props: DocumentViewServerProps) {
     }))
   }
 
-  const latestVersion =
-    latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
-      ? latestPublishedVersion
-      : latestDraftVersion
-
-  if (!doc) {
-    return notFound()
-  }
-
-  /**
-   * The doc to compare this version to is either the latest version, or a specific version if specified in the URL.
-   * This specific version is added to the URL when a user selects a version to compare to.
-   */
-  let comparisonDoc = null
-  if (comparisonVersionIDFromParams) {
-    if (collectionSlug) {
-      comparisonDoc = await payload.findVersionByID({
-        id: comparisonVersionIDFromParams,
-        collection: collectionSlug,
-        depth: 0,
-        locale: 'all',
-        overrideAccess: false,
-        req,
-      })
-    } else {
-      comparisonDoc = await payload.findGlobalVersionByID({
-        id: comparisonVersionIDFromParams,
-        slug: globalSlug,
-        depth: 0,
-        locale: 'all',
-        overrideAccess: false,
-        req,
-      })
-    }
-  } else {
-    comparisonDoc = latestVersion
-  }
-
   const schemaMap = getSchemaMap({
     collectionSlug,
     config,
@@ -222,10 +249,8 @@ export async function VersionView(props: DocumentViewServerProps) {
     payload,
     schemaMap,
   })
-
   const RenderedDiff = RenderDiff({
     clientSchemaMap,
-    comparisonSiblingData: comparisonDoc?.version,
     customDiffComponents: {},
     entitySlug: collectionSlug || globalSlug,
     fieldPermissions: docPermissions?.fields,
@@ -238,25 +263,49 @@ export async function VersionView(props: DocumentViewServerProps) {
     parentSchemaPath: '',
     req,
     selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
-    versionSiblingData: globalConfig
+    versionFromSiblingData: versionFrom?.version,
+    versionToSiblingData: globalConfig
       ? {
-          ...doc?.version,
-          createdAt: doc?.version?.createdAt || doc.createdAt,
-          updatedAt: doc?.version?.updatedAt || doc.updatedAt,
+          ...versionTo?.version,
+          createdAt: versionTo?.version?.createdAt || versionTo.createdAt,
+          updatedAt: versionTo?.version?.updatedAt || versionTo.updatedAt,
         }
-      : doc?.version,
+      : versionTo?.version,
   })
+
+  const versionToCreatedAt = versionTo?.updatedAt
+    ? formatDate({
+        date:
+          typeof versionTo.updatedAt === 'string'
+            ? new Date(versionTo.updatedAt)
+            : (versionTo.updatedAt as Date),
+        i18n,
+        pattern: config.admin.dateFormat,
+      })
+    : ''
 
   return (
     <DefaultVersionView
       canUpdate={docPermissions?.update}
-      doc={doc}
-      latestDraftVersion={latestDraftVersion?.id}
-      latestPublishedVersion={latestPublishedVersion?.id}
+      latestDraftVersionID={latestDraftVersion?.id}
+      latestPublishedVersionID={latestPublishedVersion?.id}
       modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}
-      versionID={versionID}
+      versionFromPill={formatVersionPill({
+        doc: versionFrom,
+        latestDraftVersionID: latestDraftVersion?.id,
+        latestPublishedVersionID: latestPublishedVersion?.id,
+      })}
+      versionTo={JSON.parse(JSON.stringify(versionTo))}
+      versionToCreatedAt={versionToCreatedAt}
+      VersionToCreatedAtLabel={
+        formatVersionPill({
+          doc: versionTo,
+          latestDraftVersionID: latestDraftVersion?.id,
+          latestPublishedVersionID: latestPublishedVersion?.id,
+        }).Label
+      }
     />
   )
 }

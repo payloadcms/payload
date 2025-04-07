@@ -4,6 +4,7 @@
   .restore-version {
     cursor: pointer;
     display: flex;
+    min-width: max-content;
 
     .popup-button {
       display: flex;

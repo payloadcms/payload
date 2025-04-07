@@ -1,19 +1,24 @@
-import type { Document, OptionObject } from 'payload'
+import type { OptionObject, TypeWithVersion } from 'payload'
 
 export type CompareOption = {
   label: React.ReactNode | string
-  options?: CompareOption[]
-  relationTo?: string
   value: string
+}
+
+export type VersionPill = {
+  id: string
+  Label: React.ReactNode
 }
 
 export type DefaultVersionsViewProps = {
   readonly canUpdate: boolean
-  readonly doc: Document
-  readonly latestDraftVersion?: string
-  readonly latestPublishedVersion?: string
+  readonly latestDraftVersionID: string
+  readonly latestPublishedVersionID: string
   modifiedOnly: boolean
   readonly RenderedDiff: React.ReactNode
   readonly selectedLocales: OptionObject[]
-  readonly versionID?: string
+  readonly versionFromPill: VersionPill
+  readonly versionTo: TypeWithVersion<any>
+  versionToCreatedAt: string
+  VersionToCreatedAtLabel: React.ReactNode
 }

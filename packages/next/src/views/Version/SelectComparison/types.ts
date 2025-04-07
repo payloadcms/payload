@@ -5,12 +5,12 @@ import type { CompareOption } from '../Default/types.js'
 export type Props = {
   baseURL: string
   draftsEnabled?: boolean
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
+  latestDraftVersionID?: string
+  latestPublishedVersionID?: string
   onChange: (val: CompareOption) => void
   parentID?: number | string
-  value: CompareOption
-  versionID: string
+  versionFromOption: CompareOption
+  versionToID: string
 }
 
 type CLEAR = {

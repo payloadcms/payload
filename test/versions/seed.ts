@@ -197,11 +197,44 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
   })
 
+  await _payload.db.updateOne({
+    collection: diffCollectionSlug,
+    id: diffDoc.id,
+    data: {
+      ...diffDoc,
+      createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+    },
+  })
+
+  const versions = await _payload.findVersions({
+    collection: diffCollectionSlug,
+    depth: 0,
+    where: {
+      parent: {
+        equals: diffDoc.id,
+      },
+    },
+  })
+
+  for (const version of versions.docs) {
+    await _payload.db.updateVersion({
+      id: version.id,
+      collection: diffCollectionSlug,
+      versionData: {
+        ...version.version,
+        createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+        updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+      },
+    })
+  }
+
   const updatedDiffDoc = await _payload.update({
     id: diffDoc.id,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
+      _status: 'published',
       array: [
         {
           textInArray: 'textInArray2',

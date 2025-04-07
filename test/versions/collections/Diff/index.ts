@@ -236,6 +236,7 @@ export const Diff: CollectionConfig = {
     },
   ],
   versions: {
+    drafts: true,
     maxPerDoc: 35,
   },
 }

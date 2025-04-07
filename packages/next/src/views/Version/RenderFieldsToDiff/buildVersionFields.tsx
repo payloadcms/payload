@@ -26,7 +26,6 @@ import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
 
 export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
-  comparisonSiblingData: object
   customDiffComponents: Partial<
     Record<FieldTypes, PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>>
   >
@@ -45,7 +44,8 @@ export type BuildVersionFieldsArgs = {
   parentSchemaPath: string
   req: PayloadRequest
   selectedLocales: string[]
-  versionSiblingData: object
+  versionFromSiblingData: object
+  versionToSiblingData: object
 }
 
 /**
@@ -57,7 +57,6 @@ export type BuildVersionFieldsArgs = {
  */
 export const buildVersionFields = ({
   clientSchemaMap,
-  comparisonSiblingData,
   customDiffComponents,
   entitySlug,
   fieldPermissions,
@@ -70,7 +69,8 @@ export const buildVersionFields = ({
   parentSchemaPath,
   req,
   selectedLocales,
-  versionSiblingData,
+  versionFromSiblingData,
+  versionToSiblingData,
 }: BuildVersionFieldsArgs): {
   versionFields: VersionField[]
 } => {
@@ -112,9 +112,9 @@ export const buildVersionFields = ({
 
     const fieldName: null | string = 'name' in field ? field.name : null
 
-    const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData
+    const versionValue = fieldName ? versionToSiblingData?.[fieldName] : versionToSiblingData
 
-    const comparisonValue = fieldName ? comparisonSiblingData?.[fieldName] : comparisonSiblingData
+    const comparisonValue = fieldName ? versionFromSiblingData?.[fieldName] : versionFromSiblingData
 
     if (isLocalized) {
       versionField.fieldByLocale = {}
@@ -213,7 +213,7 @@ const buildVersionField = ({
   versionValue: unknown
 } & Omit<
   BuildVersionFieldsArgs,
-  'comparisonSiblingData' | 'fields' | 'parentIndexPath' | 'versionSiblingData'
+  'fields' | 'parentIndexPath' | 'versionFromSiblingData' | 'versionToSiblingData'
 >): BaseVersionField | null => {
   const fieldName: null | string = 'name' in field ? field.name : null
 
@@ -290,7 +290,6 @@ const buildVersionField = ({
         name: 'name' in tab ? tab.name : null,
         fields: buildVersionFields({
           clientSchemaMap,
-          comparisonSiblingData: 'name' in tab ? comparisonValue?.[tab.name] : comparisonValue,
           customDiffComponents,
           entitySlug,
           fieldPermissions,
@@ -303,7 +302,8 @@ const buildVersionField = ({
           parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
           selectedLocales,
-          versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
+          versionFromSiblingData: 'name' in tab ? comparisonValue?.[tab.name] : comparisonValue,
+          versionToSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
         }).versionFields,
         label: tab.label,
       })
@@ -319,7 +319,6 @@ const buildVersionField = ({
         const versionRow = arrayValue?.[i] || {}
         baseVersionField.rows[i] = buildVersionFields({
           clientSchemaMap,
-          comparisonSiblingData: comparisonRow,
           customDiffComponents,
           entitySlug,
           fieldPermissions,
@@ -332,13 +331,13 @@ const buildVersionField = ({
           parentSchemaPath: schemaPath,
           req,
           selectedLocales,
-          versionSiblingData: versionRow,
+          versionFromSiblingData: comparisonRow,
+          versionToSiblingData: versionRow,
         }).versionFields
       }
     } else {
       baseVersionField.fields = buildVersionFields({
         clientSchemaMap,
-        comparisonSiblingData: comparisonValue as object,
         customDiffComponents,
         entitySlug,
         fieldPermissions,
@@ -351,7 +350,8 @@ const buildVersionField = ({
         parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
         req,
         selectedLocales,
-        versionSiblingData: versionValue as object,
+        versionFromSiblingData: comparisonValue as object,
+        versionToSiblingData: versionValue as object,
       }).versionFields
     }
   } else if (field.type === 'blocks') {
@@ -395,7 +395,6 @@ const buildVersionField = ({
 
       baseVersionField.rows[i] = buildVersionFields({
         clientSchemaMap,
-        comparisonSiblingData: comparisonRow,
         customDiffComponents,
         entitySlug,
         fieldPermissions,
@@ -408,26 +407,36 @@ const buildVersionField = ({
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,
         req,
         selectedLocales,
-        versionSiblingData: versionRow,
+        versionFromSiblingData: comparisonRow,
+        versionToSiblingData: versionRow,
       }).versionFields
     }
   }
 
-  const clientCellProps: FieldDiffClientProps = {
+  const clientDiffProps: FieldDiffClientProps = {
     baseVersionField: {
       ...baseVersionField,
       CustomComponent: undefined,
     },
+    /**
+     * TODO: Change to valueFrom in 4.0
+     */
     comparisonValue,
     diffMethod,
     field: clientField,
     fieldPermissions: subFieldPermissions,
     parentIsLocalized,
+    /**
+     * TODO: Change to valueTo in 4.0
+     */
     versionValue,
   }
+  if (locale) {
+    clientDiffProps.locale = locale
+  }
 
-  const serverCellProps: FieldDiffServerProps = {
-    ...clientCellProps,
+  const serverDiffProps: FieldDiffServerProps = {
+    ...clientDiffProps,
     clientField,
     field,
     i18n,
@@ -436,22 +445,12 @@ const buildVersionField = ({
   }
 
   baseVersionField.CustomComponent = RenderServerComponent({
-    clientProps: locale
-      ? ({
-          ...clientCellProps,
-          locale,
-        } as FieldDiffClientProps)
-      : clientCellProps,
+    clientProps: clientDiffProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,
     importMap: req.payload.importMap,
     key: 'diff component',
-    serverProps: locale
-      ? ({
-          ...serverCellProps,
-          locale,
-        } as FieldDiffServerProps)
-      : serverCellProps,
+    serverProps: serverDiffProps,
   })
 
   return baseVersionField
