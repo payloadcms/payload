@@ -397,6 +397,7 @@ export interface Diff {
   upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -857,6 +858,7 @@ export interface DiffSelect<T extends boolean = true> {
   upload?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
