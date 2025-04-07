@@ -1,22 +1,23 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  BaseVersionField,
-  ClientField,
-  ClientFieldSchemaMap,
-  Field,
-  FieldDiffClientProps,
-  FieldDiffServerProps,
-  FieldTypes,
-  FlattenedBlock,
-  PayloadComponent,
-  PayloadRequest,
-  SanitizedFieldPermissions,
-  VersionField,
-} from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
+import {
+  type BaseVersionField,
+  type ClientField,
+  type ClientFieldSchemaMap,
+  type Field,
+  type FieldDiffClientProps,
+  type FieldDiffServerProps,
+  type FieldTypes,
+  type FlattenedBlock,
+  MissingEditorProp,
+  type PayloadComponent,
+  type PayloadRequest,
+  type SanitizedFieldPermissions,
+  type VersionField,
+} from 'payload'
 import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
 
 import { diffMethods } from './fields/diffMethods.js'
@@ -238,7 +239,24 @@ const buildVersionField = ({
     return null
   }
 
-  const CustomComponent = field?.admin?.components?.Diff ?? customDiffComponents?.[field.type]
+  let CustomComponent = customDiffComponents?.[field.type]
+  if (field?.type === 'richText') {
+    if (!field?.editor) {
+      throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+    }
+
+    if (typeof field?.editor === 'function') {
+      throw new Error('Attempted to access unsanitized rich text editor.')
+    }
+
+    if (field.editor.CellComponent) {
+      CustomComponent = field.editor.DiffComponent
+    }
+  }
+  if (field?.admin?.components?.Diff) {
+    CustomComponent = field.admin.components.Diff
+  }
+
   const DefaultComponent = diffComponents?.[field.type]
 
   const baseVersionField: BaseVersionField = {
