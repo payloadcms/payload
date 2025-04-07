@@ -210,7 +210,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         globalSlug={globalSlug}
         id={originalDocID}
       />
-      <Gutter className={`${baseClass}__wrap`}>
+      <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext
           value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
         >

@@ -69,13 +69,6 @@
       }
     }
 
-    &__wrap {
-      padding-top: calc(var(--base) * 1.5);
-      display: flex;
-      flex-direction: column;
-      gap: var(--base);
-    }
-
     &__restore {
       margin: 0 0 0 var(--base);
       div {
@@ -89,11 +82,14 @@
       align-items: center;
     }
 
-    @include mid-break {
-      &__intro {
-        display: block;
-      }
+    &__diff-wrap {
+      padding-top: calc(var(--base) * 1.5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--base);
+    }
 
+    @include mid-break {
       &__controls {
         flex-direction: column;
         gap: calc(var(--base) / 4);
@@ -130,10 +126,8 @@
     }
 
     @include small-break {
-      // TODO: Remove and adjust for new wrap
-      &__wrap {
+      &__diff-wrap {
         padding-top: calc(var(--base) / 2);
-        gap: calc(var(--base) / 2);
       }
     }
   }
