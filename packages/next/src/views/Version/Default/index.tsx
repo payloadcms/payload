@@ -10,7 +10,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { type FormEventHandler, useCallback, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
@@ -64,24 +64,30 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const [modifiedOnly, setModifiedOnly] = useState(modifiedOnlyProp)
 
   const updateSearchParams = useCallback(
-    (versionFromID?: string) => {
+    (args: {
+      modifiedOnly?: boolean
+      selectedLocales?: OptionObject[]
+      versionFromID?: string
+    }) => {
       // If the selected comparison doc or locales change, update URL params so that version page
       // This is so that RSC can update the version comparison state
       const current = new URLSearchParams(Array.from(searchParams.entries()))
 
-      if (versionFromID) {
-        current.set('versionFrom', versionFromID)
+      if (args?.versionFromID) {
+        current.set('versionFrom', args?.versionFromID)
       }
 
-      if (!selectedLocales) {
-        current.delete('localeCodes')
-      } else {
-        current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
+      if (args?.selectedLocales) {
+        if (!selectedLocales.length) {
+          current.delete('localeCodes')
+        } else {
+          current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
+        }
       }
 
-      if (modifiedOnly === false) {
+      if (args?.modifiedOnly === false) {
         current.set('modifiedOnly', 'false')
-      } else {
+      } else if (args?.modifiedOnly === true) {
         current.delete('modifiedOnly')
       }
 
@@ -90,25 +96,36 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
       startRouteTransition(() => router.push(`${pathname}${query}`))
     },
-    [modifiedOnly, pathname, router, searchParams, selectedLocales, startRouteTransition],
+    [pathname, router, searchParams, selectedLocales, startRouteTransition],
   )
 
-  const onToggleModifiedOnly = useCallback(() => {
-    setModifiedOnly((prev) => !prev)
-    updateSearchParams()
-  }, [updateSearchParams])
+  const onToggleModifiedOnly: FormEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      const newModified = (event.target as HTMLInputElement).checked
+      setModifiedOnly(newModified)
+
+      updateSearchParams({
+        modifiedOnly: newModified,
+      })
+    },
+    [updateSearchParams],
+  )
 
   const onChangeSelectedLocales = useCallback(
     (locales: OptionObject[]) => {
       setSelectedLocales(locales)
-      updateSearchParams()
+      updateSearchParams({
+        selectedLocales: locales,
+      })
     },
     [updateSearchParams],
   )
 
   const onChangeVersionFrom: (val: CompareOption) => void = useCallback(
     (val) => {
-      updateSearchParams(val.value)
+      updateSearchParams({
+        versionFromID: val.value,
+      })
     },
     [updateSearchParams],
   )
