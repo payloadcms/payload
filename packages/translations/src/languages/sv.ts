@@ -176,7 +176,7 @@ export const svTranslations: DefaultTranslationsObject = {
   },
   folder: {
     deleteConfirmation:
-      'Nästlade mappar kommer att raderas. Nästlade dokument kommer att flyttas till den närmaste föräldramappen. Är du säker?',
+      'Eventuella underliggande mappar kommer också tas bort. Filerna i de mapparna flyttas upp till samma plats som mappen du tar bort. Är du säker?',
     deleteFolder: 'Ta bort mapp',
     folderName: 'Mappnamn',
     moveFolder: 'Flytta mapp',

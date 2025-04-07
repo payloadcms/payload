@@ -27,11 +27,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     forgotPassword: 'Մոռացե՞լ եք գաղտնաբառը',
     forgotPasswordEmailInstructions:
       'Խնդրում ենք մուտքագրել Ձեր էլ. փոստը։ Դուք կստանաք էլ. նամակ՝ գաղտնաբառը վերականգնելու հրահանգներով։',
+    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     forgotPasswordUsernameInstructions:
       'Խնդրում ենք ներքևում մուտքագրել Ձեր օգտանունը։ Գաղտնաբառը վերականգնելու հրահանգները կուղարկվեն Ձեր օգտանվան հետ կապված էլ. փոստի հասցեին։',
-    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
-
-    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     generate: 'Ստեղծել',
     generateNewAPIKey: 'Ստեղծել նոր API բանալի',
     generatingNewAPIKeyWillInvalidate:
@@ -68,6 +66,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Թոքենի թարմացումը հաջողվել է։',
     unableToVerify: 'Հնարավոր չէ հաստատել',
     username: 'Օգտանուն',
+    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
     verified: 'Ստուգված',
     verifiedSuccessfully: 'Հաջողությամբ ստուգված',
     verify: 'Ստուգել',
@@ -175,6 +174,17 @@ export const hyTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Միացնել/անջատել բլոկը',
     uploadNewLabel: 'Վերբեռնել նոր {{label}}',
   },
+  folder: {
+    deleteConfirmation:
+      'Տեղադրված թղթապանակները կջնջվեն։ Գործառույթ թղթապանակներում փաստաթուղթերը կտեղափոխվեն դեպի հարակից ծնող թղթապանակը։ Համոզված եք։',
+    deleteFolder: 'Ջնջել թղթապանակը',
+    folderName: 'Տեսակավորման անվանում',
+    moveFolder: 'Տեղափոխել թղթապանակը',
+    newFolder: 'Նոր թղթապանակ',
+    removeFromFolder: 'Հեռացնել թղթապանակից',
+    renameFolder: 'Վերանվանել թղթապանակը',
+    selectFolder: 'Ընտրել թղթապանակ',
+  },
   general: {
     aboutToDelete: 'Դուք պատրաստվում եք ջնջել {{label}} <1>{{title}}</1>-ը։ Համոզվա՞ծ եք։',
     aboutToDeleteCount_many: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
@@ -262,6 +272,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
     isEditing: 'խմբագրում է',
+    item: 'տարր',
+    items: 'տեսականի',
     language: 'Լեզու',
     lastModified: 'Վերջին փոփոխություն',
     leaveAnyway: 'Այնուամենայնիվ հեռանալ',
@@ -273,8 +285,14 @@ export const hyTranslations: DefaultTranslationsObject = {
     locales: 'Լոկալներ',
     menu: 'Մենյու',
     moreOptions: 'Լրացուցիչ ընտրանքներ',
+    move: 'Տեղափոխվել',
+    moveConfirm:
+      'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} -ը <1>{{destination}}</1> -ից։ Արդյո՞ք վստահ եք։',
+    moveCount: 'Տեղափոխել {{count}} {{label}}',
     moveDown: 'Տեղափոխել ներքև',
     moveUp: 'Տեղափոխել վերև',
+    moving: 'Տեղափոխվում',
+    movingCount: 'Տեղափոխվում է {{count}} {{label}}',
     newPassword: 'Նոր գաղտնաբառ',
     next: 'Հաջորդ',
     noDateSelected: 'Չկա ընտրված ամսաթիվ',
@@ -302,6 +320,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     reindex: 'Վերաինդեքսավորել',
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',
     remove: 'Հեռացնել',
+    rename: 'Վերանվանել',
     reset: 'Վերակայել',
     resetPreferences: 'Վերակայել նախընտրությունները',
     resetPreferencesDescription:
