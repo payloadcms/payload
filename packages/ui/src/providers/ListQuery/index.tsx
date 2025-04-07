@@ -27,7 +27,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
 }) => {
-  'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
