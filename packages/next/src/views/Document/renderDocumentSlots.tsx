@@ -133,6 +133,14 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
+    components.UploadControls = RenderServerComponent({
+      Component: collectionConfig.upload.admin.components.controls,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   return components
 }
 
