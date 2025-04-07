@@ -503,9 +503,11 @@ describe('Uploads', () => {
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+
+    // src has cacheTag by default in list view
     await expect(genericUploadImage).toHaveAttribute(
       'src',
-      'https://payloadcms.com/images/universal-truth.jpg',
+      /https:\/\/payloadcms\.com\/images\/universal-truth\.jpg(\?.*)?/,
     )
   })
 

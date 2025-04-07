@@ -26,33 +26,35 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
+  const src = React.useMemo(() => {
+    if (!fileSrc) {
+      return null
+    }
+
+    /**
+     * If an imageCacheTag is provided, append it to the fileSrc
+     * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+     */
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    return imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }, [fileSrc, imageCacheTag])
+
   React.useEffect(() => {
-    if (!fileSrc || (typeof mimeType === 'string' && !mimeType.startsWith('image'))) {
+    if (!src || (typeof mimeType === 'string' && !mimeType.startsWith('image'))) {
       setFileExists(false)
       return
     }
     setFileExists(undefined)
 
     const img = new Image()
-    img.src = fileSrc
+    img.src = src
     img.onload = () => {
       setFileExists(true)
     }
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc, mimeType])
-
-  let src: null | string = null
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
+  }, [src, mimeType])
 
   return (
     <div className={classNames}>
@@ -77,33 +79,35 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
-  React.useEffect(() => {
+  const src = React.useMemo(() => {
     if (!fileSrc) {
+      return null
+    }
+
+    /**
+     * If an imageCacheTag is provided, append it to the fileSrc
+     * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+     */
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    return imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }, [fileSrc, imageCacheTag])
+
+  React.useEffect(() => {
+    if (!src) {
       setFileExists(false)
       return
     }
     setFileExists(undefined)
 
     const img = new Image()
-    img.src = fileSrc
+    img.src = src
     img.onload = () => {
       setFileExists(true)
     }
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc])
-
-  let src: string = ''
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
+  }, [src])
 
   return (
     <div className={classNames}>
