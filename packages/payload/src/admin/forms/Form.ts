@@ -13,8 +13,12 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
+  customComponents?: {
+    RowLabel?: React.ReactNode
+  }
   id: string
   isLoading?: boolean
+  lastRenderedPath?: string
 }
 
 export type FilterOptionsResult = {
@@ -34,7 +38,6 @@ export type FieldState = {
     Error?: React.ReactNode
     Field?: React.ReactNode
     Label?: React.ReactNode
-    RowLabels?: React.ReactNode[]
   }
   disableFormData?: boolean
   errorMessage?: string
@@ -46,8 +49,16 @@ export type FieldState = {
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
+  /**
+   * The path of the field when its custom components were last rendered.
+   * This is used to denote if a field has been rendered, and if so,
+   * what path it was rendered under last.
+   *
+   * If this path is undefined, or, if it is different
+   * from the current path of a given field, the field's components will be re-rendered.
+   */
+  lastRenderedPath?: string
   passesCondition?: boolean
-  requiresRender?: boolean
   rows?: Row[]
   /**
    * The `serverPropsToIgnore` obj is used to prevent the various properties from being overridden across form state requests.
@@ -95,6 +106,13 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
+  /**
+   * If true, will not render RSCs and instead return a simple string in their place.
+   * This is useful for environments that lack RSC support, such as Jest.
+   * Form state can still be built, but any server components will be omitted.
+   * @default false
+   */
+  mockRSCs?: boolean
   operation?: 'create' | 'update'
   /*
     If true, will render field components within their state object
