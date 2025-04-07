@@ -9,7 +9,7 @@ import {
   type Where,
 } from 'payload'
 import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -27,6 +27,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { type ListDrawerProps, useListDrawer } from '../ListDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
@@ -186,7 +187,33 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       collectionSlug: selectedCollection,
     })
 
-  const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
+  const filter = useMemo(
+    () =>
+      data?.docs !== undefined
+        ? {
+            [selectedCollection]: {
+              id: { not_in: data.docs.map((doc) => doc.id) },
+            },
+          }
+        : undefined,
+    [selectedCollection, data?.docs],
+  )
+
+  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
+    collectionSlugs: [selectedCollection],
+    filterOptions: filter,
+  })
+
+  const onListDrawerSelect = useCallback<ListDrawerProps['onSelect']>(
+    (args) => {
+      closeListDrawer()
+
+      void renderTable([args.doc, ...data.docs])
+    },
+    [closeListDrawer, renderTable, data?.docs],
+  )
+
+  const onDocumentDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
       let withNewOrUpdatedDoc: PaginatedDocs['docs'] = undefined
@@ -204,16 +231,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [data?.docs, renderTable],
   )
 
-  const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
+  const onDocumentDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       closeDrawer()
 
-      void onDrawerSave(args)
+      void onDocumentDrawerSave(args)
     },
-    [closeDrawer, onDrawerSave],
+    [closeDrawer, onDocumentDrawerSave],
   )
 
-  const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
+  const onDocumentDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
       void renderTable(newDocs)
@@ -243,6 +270,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
+          <ListDrawerToggler>{i18n.t('fields:chooseFromExisting')}</ListDrawerToggler>
           {!Array.isArray(relationTo) && canCreate && (
             <DocumentDrawerToggler className={`${baseClass}__add-new`}>
               {i18n.t('fields:addNew')}
@@ -347,7 +375,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
                   columnState={columnState}
                   LinkedCellOverride={
-                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
+                    <DrawerLink
+                      onDrawerDelete={onDocumentDrawerDelete}
+                      onDrawerSave={onDocumentDrawerSave}
+                    />
                   }
                 >
                   <AnimateHeight
@@ -370,7 +401,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         </Fragment>
       )}
       {AfterInput}
-      <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
+      <DocumentDrawer initialData={initialDrawerData} onSave={onDocumentDrawerCreate} />
+      <ListDrawer allowCreate={false} onSelect={onListDrawerSelect} />
     </div>
   )
 }
