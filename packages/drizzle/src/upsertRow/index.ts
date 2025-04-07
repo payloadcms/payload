@@ -211,7 +211,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: textsToInsert,
+        rows: [...textsToInsert, ...rowToInsert.textsToDelete],
         tableName: textsTableName,
       })
     }
@@ -238,7 +238,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: numbersToInsert,
+        rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
         tableName: numbersTableName,
       })
     }
