@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -158,6 +159,7 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
+    Array,
     DisableDuplicate,
     DisableCopyToLocale,
     BaseListFilter,
