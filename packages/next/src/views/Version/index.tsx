@@ -282,14 +282,14 @@ export async function VersionView(props: DocumentViewServerProps) {
     parentSchemaPath: '',
     req,
     selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
-    versionFromSiblingData: versionFrom?.version,
-    versionToSiblingData: globalConfig
-      ? {
-          ...versionTo?.version,
-          createdAt: versionTo?.version?.createdAt || versionTo.createdAt,
-          updatedAt: versionTo?.version?.updatedAt || versionTo.updatedAt,
-        }
-      : versionTo?.version,
+    versionFromSiblingData: {
+      ...versionFrom?.version,
+      updatedAt: versionFrom.updatedAt,
+    },
+    versionToSiblingData: {
+      ...versionTo?.version,
+      updatedAt: versionTo.updatedAt,
+    },
   })
 
   const versionToCreatedAt = versionTo?.updatedAt
