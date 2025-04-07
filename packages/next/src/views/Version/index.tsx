@@ -85,14 +85,24 @@ export async function VersionView(props: DocumentViewServerProps) {
           await payload.findVersions({
             collection: collectionSlug,
             depth: 0,
+            draft: true,
             limit: 1,
             overrideAccess: false,
             req,
-            sort: '-createdAt',
+            sort: '-updatedAt',
             where: {
-              createdAt: {
-                less_than: new Date(versionTo?.createdAt),
-              },
+              and: [
+                {
+                  updatedAt: {
+                    less_than: versionTo?.updatedAt,
+                  },
+                },
+                {
+                  parent: {
+                    equals: id,
+                  },
+                },
+              ],
             },
           })
         ).docs[0]
@@ -157,11 +167,20 @@ export async function VersionView(props: DocumentViewServerProps) {
             limit: 1,
             overrideAccess: false,
             req,
-            sort: '-createdAt',
+            sort: '-updatedAt',
             where: {
-              createdAt: {
-                less_than: new Date(versionTo?.createdAt),
-              },
+              and: [
+                {
+                  updatedAt: {
+                    less_than: versionTo?.updatedAt,
+                  },
+                },
+                {
+                  parent: {
+                    equals: id,
+                  },
+                },
+              ],
             },
           })
         ).docs[0]
