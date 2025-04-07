@@ -740,34 +740,21 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
-        let revalidatedFormState: FormState = contextRef.current.fields
+        let serverState: FormState
 
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          revalidatedFormState = await onChangeFn({
+          serverState = await onChangeFn({
             formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
             submitted,
           })
         }
 
-        if (!revalidatedFormState) {
-          return
-        }
-
-        const { changed, newState } = mergeServerFormState({
-          existingState: contextRef.current.fields || {},
-          incomingState: revalidatedFormState,
+        dispatchFields({
+          type: 'MERGE_SERVER_STATE',
+          prevStateRef: prevFormState,
+          serverState,
         })
-
-        if (changed) {
-          prevFormState.current = newState
-
-          dispatchFields({
-            type: 'REPLACE_STATE',
-            optimize: false,
-            state: newState,
-          })
-        }
       }
     })
   })
