@@ -171,7 +171,12 @@ export const buildVersionFields = ({
       }
     }
 
-    versionFields.push(versionField)
+    if (
+      versionField.field ||
+      (versionField.fieldByLocale && Object.keys(versionField.fieldByLocale).length)
+    ) {
+      versionFields.push(versionField)
+    }
   }
 
   return {
@@ -285,7 +290,7 @@ const buildVersionField = ({
         parentPath,
         parentSchemaPath,
       })
-      baseVersionField.tabs.push({
+      const tabVersion = {
         name: 'name' in tab ? tab.name : null,
         fields: buildVersionFields({
           clientSchemaMap,
@@ -305,7 +310,14 @@ const buildVersionField = ({
           versionToSiblingData: 'name' in tab ? valueTo?.[tab.name] : valueTo,
         }).versionFields,
         label: tab.label,
-      })
+      }
+      if (tabVersion?.fields?.length) {
+        baseVersionField.tabs.push(tabVersion)
+      }
+    }
+
+    if (modifiedOnly && !baseVersionField.tabs.length) {
+      return null
     }
   } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
@@ -352,6 +364,10 @@ const buildVersionField = ({
         versionFromSiblingData: valueFrom as object,
         versionToSiblingData: valueTo as object,
       }).versionFields
+
+      if (modifiedOnly && !baseVersionField.fields?.length) {
+        return null
+      }
     }
   } else if (field.type === 'blocks') {
     baseVersionField.rows = []
