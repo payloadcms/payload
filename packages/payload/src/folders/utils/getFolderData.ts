@@ -10,7 +10,7 @@ type Args = {
   collectionSlugs: CollectionSlug[]
   docSort?: string
   docWhere?: Where
-  folderID: null | number | string
+  folderID?: number | string
   folderSlug?: CollectionSlug
   locale?: string
   payload: Payload

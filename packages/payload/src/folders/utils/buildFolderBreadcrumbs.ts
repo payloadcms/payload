@@ -6,7 +6,7 @@ import type { FolderBreadcrumb, FolderInterface } from '../types.js'
 import { foldersSlug, parentFolderFieldName } from '../constants.js'
 type BuildFolderBreadcrumbsArgs = {
   breadcrumbs?: FolderBreadcrumb[]
-  folderID: null | number | string
+  folderID?: number | string
   payload: Payload
   user?: User
 }

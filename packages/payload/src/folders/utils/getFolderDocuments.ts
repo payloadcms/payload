@@ -14,7 +14,7 @@ export async function getFolderDocuments({
   where,
 }: {
   collectionSlugs: CollectionSlug[]
-  folderID: number | string
+  folderID?: number | string
   folderSlug: CollectionSlug
   locale?: string
   payload: Payload

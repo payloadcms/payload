@@ -5,7 +5,7 @@ import type { FolderInterface } from '../types.js'
 import { foldersSlug } from '../constants.js'
 
 type GetSubfoldersArgs = {
-  folderID?: null | number | string
+  folderID?: number | string
   payload: Payload
   user?: User
 }
