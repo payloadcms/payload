@@ -23,10 +23,10 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
-import type { SortColumnProps } from '../../SortColumn/index.js'
+import type { SortColumnProps } from '../../../elements/SortColumn/index.js'
 
-import { RenderServerComponent } from '../../RenderServerComponent/index.js'
-import { SortColumn } from '../../SortColumn/index.js'
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { SortColumn } from '../../../elements/SortColumn/index.js'
 import { filterFields } from './filterFields.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'

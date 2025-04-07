@@ -9,10 +9,10 @@ import type {
 
 import { MissingEditorProp } from 'payload'
 
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
-import { RenderCustomComponent } from '../../RenderCustomComponent/index.js'
-import { RenderServerComponent } from '../../RenderServerComponent/index.js'
-import { DefaultCell } from '../../Table/DefaultCell/index.js'
 import { RenderDefaultCell } from '../RenderDefaultCell/index.js'
 
 type RenderCellArgs = {
