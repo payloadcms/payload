@@ -284,11 +284,11 @@ export async function VersionView(props: DocumentViewServerProps) {
     selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
     versionFromSiblingData: {
       ...versionFrom?.version,
-      updatedAt: versionFrom.updatedAt,
+      updatedAt: versionFrom?.updatedAt,
     },
     versionToSiblingData: {
       ...versionTo?.version,
-      updatedAt: versionTo.updatedAt,
+      updatedAt: versionTo?.updatedAt,
     },
   })
 
