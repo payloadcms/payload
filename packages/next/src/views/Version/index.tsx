@@ -175,11 +175,6 @@ export async function VersionView(props: DocumentViewServerProps) {
                     less_than: versionTo?.updatedAt,
                   },
                 },
-                {
-                  parent: {
-                    equals: id,
-                  },
-                },
               ],
             },
           })
