@@ -184,7 +184,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const { prevStateRef, serverState } = action
 
       const { changed, newState } = mergeServerFormState({
-        existingState: state || {},
+        currentState: state || {},
         incomingState: serverState,
       })
 

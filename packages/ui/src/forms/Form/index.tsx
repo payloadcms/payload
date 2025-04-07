@@ -371,7 +371,7 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               const { newState: mergedFormState } = mergeServerFormState({
                 acceptValues: true,
-                existingState: contextRef.current.fields || {},
+                currentState: contextRef.current.fields || {},
                 incomingState: newFormState,
               })
 
