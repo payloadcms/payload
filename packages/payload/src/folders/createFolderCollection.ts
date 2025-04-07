@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
-import { foldersSlug, parentFolderFieldName } from './constants.js'
+import { parentFolderFieldName } from './constants.js'
 import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
 import { createBaseFolderSearchField } from './fields/folderSearch.js'
 import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
@@ -9,12 +9,14 @@ import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 type CreateFolderCollectionArgs = {
   collectionSlugs: string[]
   debug?: boolean
+  slug: string
 }
 export const createFolderCollection = ({
+  slug,
   collectionSlugs,
   debug,
 }: CreateFolderCollectionArgs): CollectionConfig => ({
-  slug: foldersSlug,
+  slug,
   admin: {
     hidden: !debug,
     useAsTitle: 'name',
@@ -34,7 +36,7 @@ export const createFolderCollection = ({
         hidden: !debug,
       },
       index: true,
-      relationTo: foldersSlug,
+      relationTo: slug,
     },
     {
       name: 'documentsAndFolders',
@@ -42,7 +44,7 @@ export const createFolderCollection = ({
       admin: {
         hidden: !debug,
       },
-      collection: ['_folders', ...collectionSlugs],
+      collection: [slug, ...collectionSlugs],
       hasMany: true,
       on: parentFolderFieldName,
     },
@@ -54,7 +56,7 @@ export const createFolderCollection = ({
         collectionSlugs,
         parentFolderFieldName,
       }),
-      deleteSubfoldersAfterDelete({ parentFolderFieldName }),
+      deleteSubfoldersAfterDelete({ folderSlug: slug, parentFolderFieldName }),
     ],
   },
   labels: {

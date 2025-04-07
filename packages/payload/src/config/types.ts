@@ -1009,6 +1009,12 @@ export type Config = {
      * @default false
      */
     enabled?: boolean
+    /**
+     * Slug for the folder collection
+     *
+     * @default "_folders"
+     */
+    slug?: string
   }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs

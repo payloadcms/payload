@@ -14,12 +14,13 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
   if (config.folders?.enabled) {
     const enabledCollectionSlugs: CollectionSlug[] = []
     const debug = Boolean(config.folders?.debug)
+    config.folders.slug = config.folders.slug || foldersSlug
 
     for (let i = 0; i < config.collections.length; i++) {
       const collection = config.collections[i]
       if (config.folders.collections[collection.slug]) {
         if (collection) {
-          addFieldsToCollection({ collection, debug })
+          addFieldsToCollection({ collection, debug, folderSlug: config.folders.slug })
           enabledCollectionSlugs.push(collection.slug)
         }
       }
@@ -27,6 +28,7 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
 
     if (enabledCollectionSlugs.length) {
       let folderCollection = createFolderCollection({
+        slug: config.folders.slug,
         collectionSlugs: enabledCollectionSlugs,
         debug,
       })
@@ -47,9 +49,11 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
 function addFieldsToCollection({
   collection,
   debug,
+  folderSlug,
 }: {
   collection: CollectionConfig
   debug?: boolean
+  folderSlug: CollectionSlug
 }): void {
   let useAsTitle = collection.admin?.useAsTitle || (collection.upload ? 'filename' : 'id')
   const titleField = collection.fields.find((field): field is TextField => {
@@ -66,7 +70,7 @@ function addFieldsToCollection({
       type: 'relationship',
       hidden: !debug,
       index: true,
-      relationTo: foldersSlug,
+      relationTo: folderSlug,
     },
     {
       name: '_folderSearch',

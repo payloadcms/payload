@@ -36,7 +36,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableQueryPresets,
+    disableQueryPresets = true,
     enableColumns = true,
     enableFilters = true,
     enableSort = false,

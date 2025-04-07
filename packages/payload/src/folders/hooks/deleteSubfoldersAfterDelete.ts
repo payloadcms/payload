@@ -1,16 +1,16 @@
 import type { CollectionAfterDeleteHook } from '../../index.js'
 
-import { foldersSlug } from '../constants.js'
-
 type Args = {
+  folderSlug: string
   parentFolderFieldName: string
 }
 export const deleteSubfoldersAfterDelete = ({
+  folderSlug,
   parentFolderFieldName,
 }: Args): CollectionAfterDeleteHook => {
   return async ({ id, req }) => {
     await req.payload.delete({
-      collection: foldersSlug,
+      collection: folderSlug,
       req,
       where: {
         [parentFolderFieldName]: {

@@ -11,7 +11,6 @@ type Args = {
   docSort?: string
   docWhere?: Where
   folderID?: number | string
-  folderSlug?: CollectionSlug
   locale?: string
   payload: Payload
   user?: User
@@ -22,7 +21,6 @@ export const getFolderData = async ({
   docSort,
   docWhere,
   folderID: folderIDArg,
-  folderSlug = '_folders',
   locale,
   payload,
   user,
@@ -47,7 +45,6 @@ export const getFolderData = async ({
   const documents = getFolderDocuments({
     collectionSlugs,
     folderID,
-    folderSlug,
     locale,
     payload,
     sort: docSort,

@@ -6,7 +6,6 @@ import { combineWhereConstraints } from '../../utilities/combineWhereConstraints
 export async function getFolderDocuments({
   collectionSlugs,
   folderID,
-  folderSlug,
   locale,
   payload,
   sort,
@@ -15,7 +14,6 @@ export async function getFolderDocuments({
 }: {
   collectionSlugs: CollectionSlug[]
   folderID?: number | string
-  folderSlug: CollectionSlug
   locale?: string
   payload: Payload
   sort?: string
@@ -31,7 +29,7 @@ export async function getFolderDocuments({
   const parentFolderID = folderID
     ? parseDocumentID({
         id: folderID,
-        collectionSlug: folderSlug,
+        collectionSlug: payload.config.folders.slug,
         payload,
       })
     : undefined
@@ -61,7 +59,7 @@ export async function getFolderDocuments({
     } else if (parentFolderID) {
       // polymorphic queries must have parent folders
       const currentFolderQuery = await payload.find({
-        collection: folderSlug,
+        collection: payload.config.folders.slug,
         joins: {
           documentsAndFolders: {
             limit: 100_000,

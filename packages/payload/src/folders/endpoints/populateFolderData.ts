@@ -3,7 +3,6 @@ import * as qs from 'qs-esm'
 
 import type { Endpoint, Where } from '../../index.js'
 
-import { foldersSlug } from '../constants.js'
 import { getFolderData } from '../utils/getFolderData.js'
 
 export const populateFolderDataEndpoint: Endpoint = {
@@ -19,7 +18,7 @@ export const populateFolderDataEndpoint: Endpoint = {
       )
     }
 
-    const folderCollection = Boolean(req.payload.collections?.[foldersSlug])
+    const folderCollection = Boolean(req.payload.collections?.[req.payload.config.folders.slug])
 
     if (!folderCollection) {
       return Response.json(

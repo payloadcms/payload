@@ -59,12 +59,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const {
-    allowCreate,
-    createNewDrawerSlug,
-    drawerSlug: listDrawerSlug,
-    onBulkSelect,
-  } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -91,8 +86,12 @@ export function DefaultListView(props: ListViewClientProps) {
   } = useListQuery()
 
   const { openModal } = useModal()
-  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
-  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
+  const {
+    drawerSlug: bulkUploadDrawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -101,8 +100,6 @@ export function DefaultListView(props: ListViewClientProps) {
   const isUploadCollection = Boolean(upload)
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
-
-  const isInDrawer = Boolean(listDrawerSlug)
 
   const { i18n, t } = useTranslation()
 

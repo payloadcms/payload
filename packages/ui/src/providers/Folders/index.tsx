@@ -1,6 +1,6 @@
 'use client'
 
-import type { CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
@@ -40,6 +40,7 @@ export type FolderContextValue = {
   deleteCurrentFolder: () => Promise<Response>
   documents?: GetFolderDataResult['documents']
   focusedRowIndex: number
+  folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
@@ -72,6 +73,7 @@ const Context = React.createContext<FolderContextValue>({
   deleteCurrentFolder: () => Promise.resolve(undefined),
   documents: [],
   focusedRowIndex: -1,
+  folderCollectionConfig: null,
   folderCollectionSlug: '',
   folderID: undefined,
   getSelectedItems: () => [],
@@ -98,7 +100,6 @@ export type FolderProviderData = {
   folderID?: number | string
   subfolders?: GetFolderDataResult['subfolders']
 } & GetFolderDataResult
-const folderCollectionSlug = '_folders'
 type Props = {
   readonly allowMultiSelection?: boolean
   readonly children: React.ReactNode
@@ -120,6 +121,10 @@ export function FolderProvider({
   const { refineListData } = useListQuery()
   const { startRouteTransition } = useRouteTransition()
   const { clearRouteCache } = useRouteCache()
+  const [folderCollectionConfig] = React.useState(() =>
+    config.collections.find((collection) => collection.slug === config.folders.slug),
+  )
+  const folderCollectionSlug = folderCollectionConfig.slug
 
   const [isDragging, setIsDragging] = React.useState(false)
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
@@ -197,7 +202,7 @@ export function FolderProvider({
         setLoadingStatus('error')
       }
     },
-    [routes.api, serverURL, searchParams],
+    [routes.api, serverURL, searchParams, folderCollectionSlug],
   )
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
@@ -485,7 +490,7 @@ export function FolderProvider({
 
       toast.success(t('general:deletedSuccessfully'))
     },
-    [routes.api, serverURL, t, clearRouteCache],
+    [routes.api, serverURL, t, clearRouteCache, folderCollectionSlug],
   )
 
   const deleteCurrentFolder = React.useCallback(async () => {
@@ -496,7 +501,7 @@ export function FolderProvider({
       credentials: 'include',
       method: 'DELETE',
     })
-  }, [activeFolderID, routes.api, serverURL])
+  }, [activeFolderID, routes.api, serverURL, folderCollectionSlug])
 
   const moveToFolder: FolderContextValue['moveToFolder'] = React.useCallback(
     async (args) => {
@@ -598,7 +603,7 @@ export function FolderProvider({
       clearSelections()
       clearRouteCache()
     },
-    [t, clearSelections, clearRouteCache, serverURL, routes.api],
+    [t, clearSelections, clearRouteCache, serverURL, routes.api, folderCollectionSlug],
   )
 
   React.useEffect(() => {
@@ -629,6 +634,7 @@ export function FolderProvider({
         deleteCurrentFolder,
         documents,
         focusedRowIndex,
+        folderCollectionConfig,
         folderCollectionSlug,
         folderID: activeFolderID,
         getSelectedItems,

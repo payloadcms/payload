@@ -192,7 +192,7 @@ export const renderFolderTable = ({
             return (
               <DateCell
                 cellData={subfolder.value[column.accessor]}
-                collectionSlug="_folders"
+                collectionSlug={payload.config.folders.slug}
                 field={column.field as DateFieldClient}
                 key={columnIndex}
                 rowData={subfolder.value}

@@ -2,8 +2,6 @@ import type { PaginatedDocs, User } from '../../index.js'
 import type { Payload } from '../../types/index.js'
 import type { FolderInterface } from '../types.js'
 
-import { foldersSlug } from '../constants.js'
-
 type GetSubfoldersArgs = {
   folderID?: number | string
   payload: Payload
@@ -21,14 +19,14 @@ export const getFolderSubfolders = async ({
 > => {
   if (folderID) {
     const subfolderDocs = (await payload.find({
-      collection: foldersSlug,
+      collection: payload.config.folders.slug,
       joins: {
         documentsAndFolders: {
           limit: 100_000,
           sort: 'name',
           where: {
             relationTo: {
-              equals: foldersSlug,
+              equals: payload.config.folders.slug,
             },
           },
         },
@@ -47,7 +45,7 @@ export const getFolderSubfolders = async ({
   }
 
   const orphanedFolders = (await payload.find({
-    collection: foldersSlug,
+    collection: payload.config.folders.slug,
     limit: 0,
     overrideAccess: false,
     sort: 'name',
@@ -60,7 +58,7 @@ export const getFolderSubfolders = async ({
   })) as PaginatedDocs<FolderInterface>
 
   const orphanedDocsWithRelation = orphanedFolders?.docs.map((folder) => ({
-    relationTo: foldersSlug,
+    relationTo: payload.config.folders.slug,
     value: folder,
   }))
 

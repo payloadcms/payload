@@ -37,31 +37,6 @@
       }
     }
 
-    &__close-drawer-button {
-      flex-shrink: 0;
-      border: 0;
-      background-color: transparent;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-      overflow: hidden;
-      width: base(1);
-      height: base(1);
-
-      svg {
-        width: base(2);
-        height: base(2);
-        position: relative;
-        inset-inline-start: base(-0.5);
-        top: base(-0.5);
-
-        .stroke {
-          stroke-width: 2px;
-          vector-effect: non-scaling-stroke;
-        }
-      }
-    }
-
     &__select-collection-wrap {
       margin-top: base(1);
     }

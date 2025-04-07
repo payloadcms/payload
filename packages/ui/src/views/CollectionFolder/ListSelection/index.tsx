@@ -62,7 +62,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
 
   const count = items.length
   const singleNonFolderCollectionSelected =
-    Object.keys(groupedSelections).length === 1 && Object.keys(groupedSelections)[0] !== '_folders'
+    Object.keys(groupedSelections).length === 1 &&
+    Object.keys(groupedSelections)[0] !== config.folders.slug
   const collectionConfig = singleNonFolderCollectionSelected
     ? config.collections.find((collection) => {
         return collection.slug === Object.keys(groupedSelections)[0]
