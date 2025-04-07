@@ -45,7 +45,6 @@ type FormsManagerContext = {
   readonly hasPublishPermission: boolean
   readonly hasSavePermission: boolean
   readonly hasSubmitted: boolean
-  readonly isInBulkUploadContext: boolean
   readonly isInitializing: boolean
   readonly removeFile: (index: number) => void
   readonly resetUploadEdits?: () => void
@@ -75,7 +74,6 @@ const Context = React.createContext<FormsManagerContext>({
   hasPublishPermission: false,
   hasSavePermission: false,
   hasSubmitted: false,
-  isInBulkUploadContext: false,
   isInitializing: false,
   removeFile: () => {},
   saveAllDocs: () => Promise.resolve(),
@@ -574,7 +572,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         hasPublishPermission,
         hasSavePermission,
         hasSubmitted,
-        isInBulkUploadContext: true,
         isInitializing,
         removeFile,
         resetUploadEdits,
