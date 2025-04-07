@@ -112,9 +112,8 @@ export const buildVersionFields = ({
 
     const fieldName: null | string = 'name' in field ? field.name : null
 
-    const versionValue = fieldName ? versionToSiblingData?.[fieldName] : versionToSiblingData
-
-    const comparisonValue = fieldName ? versionFromSiblingData?.[fieldName] : versionFromSiblingData
+    const valueFrom = fieldName ? versionFromSiblingData?.[fieldName] : versionFromSiblingData
+    const valueTo = fieldName ? versionToSiblingData?.[fieldName] : versionToSiblingData
 
     if (isLocalized) {
       versionField.fieldByLocale = {}
@@ -123,7 +122,6 @@ export const buildVersionFields = ({
         const localizedVersionField = buildVersionField({
           clientField: clientField as ClientField,
           clientSchemaMap,
-          comparisonValue: comparisonValue?.[locale],
           customDiffComponents,
           entitySlug,
           field,
@@ -139,7 +137,8 @@ export const buildVersionFields = ({
           req,
           schemaPath,
           selectedLocales,
-          versionValue: versionValue?.[locale],
+          valueFrom: valueFrom?.[locale],
+          valueTo: valueTo?.[locale],
         })
         if (localizedVersionField) {
           versionField.fieldByLocale[locale] = localizedVersionField
@@ -149,7 +148,6 @@ export const buildVersionFields = ({
       const baseVersionField = buildVersionField({
         clientField: clientField as ClientField,
         clientSchemaMap,
-        comparisonValue,
         customDiffComponents,
         entitySlug,
         field,
@@ -164,7 +162,8 @@ export const buildVersionFields = ({
         req,
         schemaPath,
         selectedLocales,
-        versionValue,
+        valueFrom,
+        valueTo,
       })
 
       if (baseVersionField) {
@@ -183,7 +182,6 @@ export const buildVersionFields = ({
 const buildVersionField = ({
   clientField,
   clientSchemaMap,
-  comparisonValue,
   customDiffComponents,
   entitySlug,
   field,
@@ -199,10 +197,10 @@ const buildVersionField = ({
   req,
   schemaPath,
   selectedLocales,
-  versionValue,
+  valueFrom,
+  valueTo,
 }: {
   clientField: ClientField
-  comparisonValue: unknown
   field: Field
   indexPath: string
   locale?: string
@@ -210,7 +208,8 @@ const buildVersionField = ({
   parentIsLocalized: boolean
   path: string
   schemaPath: string
-  versionValue: unknown
+  valueFrom: unknown
+  valueTo: unknown
 } & Omit<
   BuildVersionFieldsArgs,
   'fields' | 'parentIndexPath' | 'versionFromSiblingData' | 'versionToSiblingData'
@@ -235,7 +234,7 @@ const buildVersionField = ({
     return null
   }
 
-  if (modifiedOnly && dequal(versionValue, comparisonValue)) {
+  if (modifiedOnly && dequal(valueFrom, valueTo)) {
     return null
   }
 
@@ -302,21 +301,21 @@ const buildVersionField = ({
           parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
           selectedLocales,
-          versionFromSiblingData: 'name' in tab ? comparisonValue?.[tab.name] : comparisonValue,
-          versionToSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
+          versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
+          versionToSiblingData: 'name' in tab ? valueTo?.[tab.name] : valueTo,
         }).versionFields,
         label: tab.label,
       })
     }
   } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
-    if (field.type === 'array' && versionValue) {
-      const arrayValue = Array.isArray(versionValue) ? versionValue : []
+    if (field.type === 'array' && valueTo) {
+      const arrayValue = Array.isArray(valueTo) ? valueTo : []
       baseVersionField.rows = []
 
       for (let i = 0; i < arrayValue.length; i++) {
-        const comparisonRow = comparisonValue?.[i] || {}
-        const versionRow = arrayValue?.[i] || {}
+        const fromRow = valueFrom?.[i] || {}
+        const toRow = arrayValue?.[i] || {}
         baseVersionField.rows[i] = buildVersionFields({
           clientSchemaMap,
           customDiffComponents,
@@ -331,8 +330,8 @@ const buildVersionField = ({
           parentSchemaPath: schemaPath,
           req,
           selectedLocales,
-          versionFromSiblingData: comparisonRow,
-          versionToSiblingData: versionRow,
+          versionFromSiblingData: fromRow,
+          versionToSiblingData: toRow,
         }).versionFields
       }
     } else {
@@ -350,21 +349,21 @@ const buildVersionField = ({
         parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
         req,
         selectedLocales,
-        versionFromSiblingData: comparisonValue as object,
-        versionToSiblingData: versionValue as object,
+        versionFromSiblingData: valueFrom as object,
+        versionToSiblingData: valueTo as object,
       }).versionFields
     }
   } else if (field.type === 'blocks') {
     baseVersionField.rows = []
 
-    const blocksValue = Array.isArray(versionValue) ? versionValue : []
+    const blocksValue = Array.isArray(valueTo) ? valueTo : []
 
     for (let i = 0; i < blocksValue.length; i++) {
-      const comparisonRow = comparisonValue?.[i] || {}
-      const versionRow = blocksValue[i] || {}
+      const fromRow = valueFrom?.[i] || {}
+      const toRow = blocksValue[i] || {}
 
-      const blockSlugToMatch: string = versionRow.blockType
-      const versionBlock =
+      const blockSlugToMatch: string = toRow.blockType
+      const toBlock =
         req.payload.blocks[blockSlugToMatch] ??
         ((field.blockReferences ?? field.blocks).find(
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
@@ -372,24 +371,21 @@ const buildVersionField = ({
 
       let fields = []
 
-      if (versionRow.blockType === comparisonRow.blockType) {
-        fields = versionBlock.fields
+      if (toRow.blockType === fromRow.blockType) {
+        fields = toBlock.fields
       } else {
-        const comparisonBlockSlugToMatch: string = versionRow.blockType
+        const fromBlockSlugToMatch: string = toRow.blockType // TODO: Verify this is correct
 
-        const comparisonBlock =
-          req.payload.blocks[comparisonBlockSlugToMatch] ??
+        const fromBlock =
+          req.payload.blocks[fromBlockSlugToMatch] ??
           ((field.blockReferences ?? field.blocks).find(
-            (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
+            (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 
-        if (comparisonBlock) {
-          fields = getUniqueListBy<Field>(
-            [...versionBlock.fields, ...comparisonBlock.fields],
-            'name',
-          )
+        if (fromBlock) {
+          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
         } else {
-          fields = versionBlock.fields
+          fields = toBlock.fields
         }
       }
 
@@ -404,11 +400,11 @@ const buildVersionField = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: path + '.' + i,
-        parentSchemaPath: schemaPath + '.' + versionBlock.slug,
+        parentSchemaPath: schemaPath + '.' + toBlock.slug,
         req,
         selectedLocales,
-        versionFromSiblingData: comparisonRow,
-        versionToSiblingData: versionRow,
+        versionFromSiblingData: fromRow,
+        versionToSiblingData: toRow,
       }).versionFields
     }
   }
@@ -421,7 +417,7 @@ const buildVersionField = ({
     /**
      * TODO: Change to valueFrom in 4.0
      */
-    comparisonValue,
+    comparisonValue: valueFrom,
     diffMethod,
     field: clientField,
     fieldPermissions: subFieldPermissions,
@@ -429,7 +425,7 @@ const buildVersionField = ({
     /**
      * TODO: Change to valueTo in 4.0
      */
-    versionValue,
+    versionValue: valueTo,
   }
   if (locale) {
     clientDiffProps.locale = locale
