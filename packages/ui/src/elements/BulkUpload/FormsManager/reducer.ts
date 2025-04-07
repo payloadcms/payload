@@ -120,6 +120,10 @@ export function formsManagementReducer(state: State, action: Action): State {
           ...updatedForms[action.index].formState,
           ...action.formState,
         },
+        uploadEdits: {
+          ...updatedForms[action.index].uploadEdits,
+          ...action.uploadEdits,
+        },
       }
 
       return {

@@ -1,17 +1,11 @@
 'use client'
-import type {
-  ClientUser,
-  DocumentPreferences,
-  SanitizedDocumentPermissions,
-  UploadEdits,
-} from 'payload'
+import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
-import { useFormsManager } from '../../elements/BulkUpload/FormsManager/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
@@ -364,15 +358,10 @@ const DocumentInfo: React.FC<
 export const DocumentInfoProvider: React.FC<
   {
     readonly children: React.ReactNode
-    initialUploadEdits?: UploadEdits
   } & DocumentInfoProps
 > = (props) => {
-  const { activeIndex, forms } = useFormsManager()
-
-  const initialUploadEdits = forms?.[activeIndex]?.uploadEdits
-
   return (
-    <UploadEditsProvider initialUploadEdits={initialUploadEdits}>
+    <UploadEditsProvider>
       <DocumentInfo {...props} />
     </UploadEditsProvider>
   )
