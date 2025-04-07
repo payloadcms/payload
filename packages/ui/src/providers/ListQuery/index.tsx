@@ -27,6 +27,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
 }) => {
+  'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
@@ -44,11 +45,19 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const { onQueryChange } = useListDrawerContext()
 
   const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
-    if (modifySearchParams) {
-      return searchParams
-    } else {
-      return {}
+    const initialQuery: ListQuery = {
+      limit: String(defaultLimit),
+      sort: defaultSort,
     }
+
+    if (modifySearchParams) {
+      return {
+        ...initialQuery,
+        ...searchParams,
+      }
+    }
+
+    return initialQuery
   })
 
   const refineListData = useCallback(
