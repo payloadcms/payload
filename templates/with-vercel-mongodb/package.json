@@ -15,17 +15,17 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.31.0",
-    "@payloadcms/next": "3.31.0",
-    "@payloadcms/payload-cloud": "3.31.0",
-    "@payloadcms/richtext-lexical": "3.31.0",
+    "@payloadcms/db-mongodb": "3.33.0",
+    "@payloadcms/next": "3.33.0",
+    "@payloadcms/payload-cloud": "3.33.0",
+    "@payloadcms/richtext-lexical": "3.33.0",
+    "@payloadcms/storage-vercel-blob": "3.33.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.2.3",
-    "payload": "3.31.0",
+    "payload": "3.33.0",
     "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "@payloadcms/storage-vercel-blob": "3.31.0"
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -37,9 +37,9 @@
     "prettier": "^3.4.2",
     "typescript": "5.7.3"
   },
+  "packageManager": "pnpm@10.7.1",
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9"
+    "node": "^18.20.2 || >=20.9.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
