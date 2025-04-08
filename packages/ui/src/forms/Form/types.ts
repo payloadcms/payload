@@ -151,7 +151,6 @@ export type ADD_ROW = {
 }
 
 export type MERGE_SERVER_STATE = {
-  contextRef: React.RefObject<Context>
   prevStateRef: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'

@@ -596,8 +596,6 @@ export const Form: React.FC<FormProps> = (props) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
-      console.log('ADDING ROW')
-
       // dispatch ADD_ROW adds a blank row to local form state.
       // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
@@ -739,26 +737,21 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  console.log('RENDER', formState)
-
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
         let serverState: FormState
 
-        console.log('TASK QUEUED', contextRef.current.fields)
-
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
             submitted,
           })
         }
 
         dispatchFields({
           type: 'MERGE_SERVER_STATE',
-          contextRef,
           prevStateRef: prevFormState,
           serverState,
         })
