@@ -4,6 +4,7 @@ import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
+import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
@@ -300,11 +301,7 @@ test.describe('Form State', () => {
       await route.continue()
     })
 
-    // the second row should not have disappeared
-    await expect(page.locator('#field-array #array-row-1')).toBeVisible()
-    await expect(
-      page.locator('#field-array #array-row-1 .collapsible__content .shimmer-effect'),
-    ).toBeVisible()
+    await assertElementStaysVisible(page, '#field-array #array-row-1')
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,
