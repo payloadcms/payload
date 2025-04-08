@@ -122,7 +122,7 @@ export interface Config {
   };
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };

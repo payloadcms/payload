@@ -50,6 +50,11 @@ export default buildConfigWithDefaults({
       await clearAndSeedEverything(payload)
     }
   },
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es'],
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

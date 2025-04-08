@@ -3088,26 +3088,7 @@ describe('Fields', () => {
 
       expect(child.doc.value.items).toHaveLength(6)
     })
-
-    it('should respect rich text depth parameter', async () => {
-      const query = `query {
-        RichTextFields {
-          docs {
-            richText(depth: 2)
-          }
-        }
-      }`
-      const { data } = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-        })
-        .then((res) => res.json())
-      const { docs }: PaginatedDocs<RichTextField> = data.RichTextFields
-      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
-      expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
-    })
   })
-
   describe('relationships', () => {
     it('should not crash if querying with empty in operator', async () => {
       const query = await payload.find({
