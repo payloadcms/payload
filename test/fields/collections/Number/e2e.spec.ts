@@ -124,7 +124,7 @@ describe('Number', () => {
 
     await addListFilter({
       page,
-      fieldLabel: 'Number',
+      fieldLabel: 'Has Many',
       operatorLabel: 'is in',
       value: '5',
     })
@@ -139,7 +139,7 @@ describe('Number', () => {
 
     await addListFilter({
       page,
-      fieldLabel: 'Number',
+      fieldLabel: 'Has Many',
       operatorLabel: 'is not in',
       value: '6',
     })
