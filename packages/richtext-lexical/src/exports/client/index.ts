@@ -20,7 +20,6 @@ export { StrikethroughFeatureClient } from '../../features/format/strikethrough/
 export { SubscriptFeatureClient } from '../../features/format/subscript/feature.client.js'
 export { SuperscriptFeatureClient } from '../../features/format/superscript/feature.client.js'
 export { UnderlineFeatureClient } from '../../features/format/underline/feature.client.js'
-export { TextColorFeatureClient } from '../../features/textColor/feature.client.js'
 export { TextStateFeatureClient } from '../../features/textState/feature.client.js'
 export { HeadingFeatureClient } from '../../features/heading/client/index.js'
 export { HorizontalRuleFeatureClient } from '../../features/horizontalRule/client/index.js'

@@ -4,7 +4,6 @@ import {
   defaultColors,
   FixedToolbarFeature,
   lexicalEditor,
-  TextColorFeature,
   TextStateFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
@@ -28,27 +27,6 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           FixedToolbarFeature(),
-
-          TextColorFeature({
-            textColors: ({ defaultColors }) => [
-              ...Object.values(defaultColors),
-              {
-                name: 'mycustomcolor',
-                label: 'Custom',
-                light: '#A1A1AA',
-                dark: '#52525B',
-              },
-            ],
-            backgroundColors: ({ defaultColors }) => [
-              ...Object.values(defaultColors),
-              {
-                name: 'mycustomcolor',
-                label: 'Custom',
-                light: '#A1A1AA',
-                dark: '#52525B',
-              },
-            ],
-          }),
 
           TextStateFeature({
             // prettier-ignore
