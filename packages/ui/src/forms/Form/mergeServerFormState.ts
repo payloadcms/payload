@@ -34,17 +34,17 @@ export const mergeServerFormState = ({
   }
 
   for (const [path, incomingField] of Object.entries(incomingState)) {
-    newState[path] = {
-      ...(newState?.[path] || {}),
-      ...incomingField,
-    }
-
     if (blackListedServerProps.length) {
       blackListedServerProps.forEach((prop) => {
         if (incomingField[prop] !== undefined) {
           delete incomingField[prop]
         }
       })
+    }
+
+    newState[path] = {
+      ...(newState?.[path] || {}),
+      ...incomingField,
     }
 
     /**
@@ -77,19 +77,21 @@ export const mergeServerFormState = ({
      * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
      * For example, the server response could come back with a row which has been deleted on the client
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
+     * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
      */
     if (Array.isArray(incomingField.rows)) {
+      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
+
       incomingField.rows.forEach((row) => {
-        const matchedExistingRowIndex = newState[path].rows.findIndex(
+        const indexInCurrentState = currentState[path].rows.findIndex(
           (existingRow) => existingRow.id === row.id,
         )
 
-        if (matchedExistingRowIndex > -1) {
+        if (indexInCurrentState > -1) {
           changed = true
-          newState[path].rows = [...newState[path].rows] // shallow copy to avoid mutating the original array
 
-          newState[path].rows[matchedExistingRowIndex] = {
-            ...newState[path].rows[matchedExistingRowIndex],
+          newState[path].rows[indexInCurrentState] = {
+            ...currentState[path].rows[indexInCurrentState],
             ...row,
           }
         }

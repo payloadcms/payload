@@ -78,7 +78,7 @@ export const PostsCollection: CollectionConfig = {
           type: 'text',
           admin: {
             components: {
-              Field: './collections/Posts/TextField.js#CustomTextField',
+              // Field: './collections/Posts/TextField.js#CustomTextField',
             },
           },
         },
