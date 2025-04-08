@@ -34,6 +34,7 @@ export const mergeServerFormState = ({
       'errorMessage',
       'errorPaths',
       'customComponents',
+      // 'rows',
     ]
 
     if (acceptValues) {
