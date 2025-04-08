@@ -305,10 +305,10 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
-          - fields__lexical__Lexical__e2e__main
-          - fields__lexical__Lexical__e2e__blocks
-          - fields__lexical__Lexical__e2e__blocks#config.blockreferences.ts
-          - fields__lexical__RichText
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
           - query-presets
           - form-state
           - live-preview
