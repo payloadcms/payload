@@ -20,12 +20,36 @@ Logs in a user by verifying credentials and setting the authentication cookie. T
 import { login } from '@payloadcms/next/server-functions'
 ```
 
+The login function needs your Payload config, which cannot be imported in a client component. To work around this, create a simple server function like the one below, and call it from your client.
+
+```ts
+'use server'
+
+import { login } from '@payloadcms/next/server-functions'
+import config from '@payload-config'
+
+export async function loginAction({
+  email,
+  password,
+}: {
+  email: string
+  password: string
+}) {
+  return login({
+    config,
+    collection: 'users',
+    email,
+    password,
+  })
+}
+```
+
 #### Example: Login Form (React Client Component)
 
 ```tsx
 'use client'
 import { useState } from 'react'
-import { login } from '@payloadcms/next/server-functions'
+import { loginAction } from '../loginAction'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
@@ -35,11 +59,7 @@ export default function LoginForm() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const response = await login({
-        collection: 'users',
-        email, // or username
-        password,
-      })
+      const response = await loginAction({ email, password })
       console.log('Logged in:', response)
     } catch (err) {
       setError(err.message)
@@ -79,15 +99,28 @@ Logs out the current user by clearing the authentication cookie.
 import { logout } from '@payloadcms/next/server-functions'
 ```
 
+Similar to the login function, you now need to pass your Payload config to this function and this cannot be done in a client component. Use a helper server function as shown below.
+
+```ts
+'use server'
+
+import { logout } from '@payloadcms/next/server-functions'
+import config from '@payload-config'
+
+export async function logoutAction() {
+  return logout({ config })
+}
+```
+
 #### Example: Logout Button (React Client Component)
 
 ```tsx
 'use client'
-import { logout } from '@payloadcms/next/server-functions'
+import { logoutAction } from '../logoutAction'
 
-export default LogoutButton = () => {
+export default function LogoutButton() {
   const handleLogout = async () => {
-    await logout()
+    await logoutAction()
     console.log('User logged out')
   }
 
@@ -105,15 +138,31 @@ Refreshes the authentication token for the logged-in user.
 import { refresh } from '@payloadcms/next/server-functions'
 ```
 
+As with login and logout, you need to pass your Payload config to this function. Create a helper server function like the one below. Passing the config directly to the client is not possible and will throw errors.
+
+```ts
+'use server'
+
+import { refresh } from '@payloadcms/next/server-functions'
+import config from '@payload-config'
+
+export async function refreshAction() {
+  return refresh({
+    config,
+    collection: 'users',
+  })
+}
+```
+
 #### Example: Refresh Token Button (React Client Component)
 
 ```tsx
 'use client'
-import { refresh } from '@payloadcms/next/server-functions'
+import { refreshAction } from '../actions/refreshAction'
 
-export default RefreshTokenButton = () => {
+export default function RefreshTokenButton() {
   const handleRefresh = async () => {
-    const response = await refresh({ collection: 'users' })
+    const response = await refreshAction()
     console.log('Token refreshed:', response)
   }
 
