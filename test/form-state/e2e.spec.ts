@@ -241,7 +241,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('should optimistically add rows while pending network requests', async () => {
+  test('optimistic rows should not disappear between pending network requests', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -302,7 +302,9 @@ test.describe('Form State', () => {
 
     // the second row should not have disappeared
     await expect(page.locator('#field-array #array-row-1')).toBeVisible()
-    await expect(page.locator('#field-array #array-row-1 .shimmer-effect')).toBeVisible()
+    await expect(
+      page.locator('#field-array #array-row-1 .collapsible__content .shimmer-effect'),
+    ).toBeVisible()
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,
