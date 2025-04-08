@@ -16,10 +16,179 @@ import {
   richTextFieldsSlug,
 } from './slugs.js'
 
+// import type { Payload } from 'payload'
+
+// import path from 'path'
+// import { getFileByPath } from 'payload'
+// import { fileURLToPath } from 'url'
+
+// import { devUser } from '../credentials.js'
+// import { seedDB } from '../helpers/seed.js'
+// import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
+// import { blocksDoc } from './collections/Blocks/shared.js'
+// import { codeDoc } from './collections/Code/shared.js'
+// import { collapsibleDoc } from './collections/Collapsible/shared.js'
+// import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+// import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
+// import { dateDoc } from './collections/Date/shared.js'
+// import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
+// import { groupDoc } from './collections/Group/shared.js'
+// import { jsonDoc } from './collections/JSON/shared.js'
+// import { lexicalDocData } from './collections/Lexical/data.js'
+// import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
+// import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
+// import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+// import { numberDoc } from './collections/Number/shared.js'
+// import { pointDoc } from './collections/Point/shared.js'
+// import { radiosDoc } from './collections/Radio/shared.js'
+// import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+// import { selectsDoc } from './collections/Select/shared.js'
+// import { tabsDoc } from './collections/Tabs/shared.js'
+// import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+// import { uploadsDoc } from './collections/Upload/shared.js'
+// import {
+//   arrayFieldsSlug,
+//   blockFieldsSlug,
+//   checkboxFieldsSlug,
+//   codeFieldsSlug,
+//   collapsibleFieldsSlug,
+//   collectionSlugs,
+//   conditionalLogicSlug,
+//   customIDSlug,
+//   customRowIDSlug,
+//   customTabIDSlug,
+//   dateFieldsSlug,
+//   emailFieldsSlug,
+//   groupFieldsSlug,
+//   jsonFieldsSlug,
+//   lexicalFieldsSlug,
+//   lexicalLocalizedFieldsSlug,
+//   lexicalMigrateFieldsSlug,
+//   lexicalRelationshipFieldsSlug,
+//   numberFieldsSlug,
+//   pointFieldsSlug,
+//   radioFieldsSlug,
+//   relationshipFieldsSlug,
+//   richTextFieldsSlug,
+//   selectFieldsSlug,
+//   tabsFieldsSlug,
+//   textFieldsSlug,
+//   uiSlug,
+//   uploads2Slug,
+//   uploadsMulti,
+//   uploadsMultiPoly,
+//   uploadsPoly,
+//   uploadsSlug,
+//   usersSlug,
+// } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
+  const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
+  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
+  const pngPath = path.resolve(dirname, './uploads/payload.png')
+
+  // Get both files in parallel
+  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+    getFileByPath(jpgPath),
+    getFileByPath(jpg480x320Path),
+    getFileByPath(pngPath),
+  ])
+
+  const createdArrayDoc = await _payload.create({
+    collection: arrayFieldsSlug,
+    data: arrayDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdTextDoc = await _payload.create({
+    collection: textFieldsSlug,
+    data: textDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdAnotherTextDoc = await _payload.create({
+    collection: textFieldsSlug,
+    data: anotherTextDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdPNGDoc = await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: pngFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdJPGDoc = await _payload.create({
+    collection: uploadsSlug,
+    data: {
+      ...uploadsDoc,
+      media: createdPNGDoc.id,
+    },
+    file: jpgFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: jpg480x320File,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  // const createdJPGDocSlug2 = await _payload.create({
+  //   collection: uploads2Slug,
+  //   data: {
+  //     ...uploadsDoc,
+  //   },
+  //   file: jpgFile,
+  //   depth: 0,
+  //   overrideAccess: true,
+  // })
+
+  // Create hasMany upload
+  await _payload.create({
+    collection: uploadsMulti,
+    data: {
+      media: [createdPNGDoc.id, createdJPGDoc.id],
+    },
+  })
+
+  // Create hasMany poly upload
+  // await _payload.create({
+  //   collection: uploadsMultiPoly,
+  //   data: {
+  //     media: [
+  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
+  //     ],
+  //   },
+  // })
+
+  // Create poly upload
+  await _payload.create({
+    collection: uploadsPoly,
+    data: {
+      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+    },
+  })
+  // Create poly upload
+  // await _payload.create({
+  //   collection: uploadsPoly,
+  //   data: {
+  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
+  //   },
+  // })
+
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
 
