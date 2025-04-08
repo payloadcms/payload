@@ -10,6 +10,7 @@ import open from 'open'
 import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
+import { staticConfigImports } from './config-imports.js'
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
@@ -55,13 +56,25 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
+if (!(testSuiteArg in staticConfigImports)) {
+  console.log(
+    chalk.red(
+      [
+        `ERROR: The test folder "${testSuiteArg}" exists, but you need to add`,
+        `it to the static config imports object in /test/config-imports.ts`,
+      ].join(' '),
+    ),
+  )
+  process.exit(0)
+}
+
 console.log(`Selected test suite: ${testSuiteArg}`)
 
 if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
+const { beforeTest } = createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
