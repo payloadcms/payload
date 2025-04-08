@@ -20,22 +20,10 @@ import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
-import {
-  getLexicalFieldsCollection,
-  lexicalBlocks,
-  lexicalInlineBlocks,
-} from './collections/Lexical/index.js'
-import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
-import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
-import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
-import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
-import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
-import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
-import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SelectVersionsFields from './collections/SelectVersions/index.js'
@@ -54,13 +42,6 @@ import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
-  getLexicalFieldsCollection({
-    blocks: lexicalBlocks,
-    inlineBlocks: lexicalInlineBlocks,
-  }),
-  LexicalMigrateFields,
-  LexicalLocalizedFields,
-  LexicalObjectReferenceBugCollection,
   {
     slug: 'users',
     admin: {
@@ -75,8 +56,6 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
-  LexicalInBlock,
-  LexicalAccessControl,
   SelectVersionsFields,
   ArrayFields,
   BlockFields,
@@ -97,8 +76,6 @@ export const collectionSlugs: CollectionConfig[] = [
   NumberFields,
   PointFields,
   RelationshipFields,
-  LexicalRelationshipsFields,
-  RichTextFields,
   SelectFields,
   TabsFields2,
   TabsFields,
