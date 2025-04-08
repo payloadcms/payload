@@ -1,6 +1,5 @@
 import type {
   AdminViewServerProps,
-  CollectionSlug,
   ColumnPreference,
   FolderListViewServerPropsOnly,
   ListPreferences,
@@ -9,18 +8,18 @@ import type {
   Where,
 } from 'payload'
 
-import { DefaultCollectionFolderView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultCollectionFolderView,
+  HydrateAuthProvider,
+  HydrateFolderProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderFolderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
-import { notFound } from 'next/navigation.js'
-import { parseDocumentID } from 'payload'
-import {
-  combineWhereConstraints,
-  formatFilesize,
-  isNumber,
-  transformColumnsToPreferences,
-} from 'payload/shared'
+import { notFound, redirect } from 'next/navigation.js'
+import { getFolderData, parseDocumentID } from 'payload'
+import { combineWhereConstraints, isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderFolderViewSlots } from './renderFolderViewSlots.js'
@@ -32,19 +31,11 @@ type RenderFolderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  documents: {
-    relationTo: CollectionSlug
-    value: any
-  }[]
   drawerSlug?: string
   enableRowSelections: boolean
   folderID?: number | string
   overrideEntityVisibility?: boolean
   query: ListQuery
-  subfolders: {
-    relationTo: CollectionSlug
-    value: any
-  }[]
 } & AdminViewServerProps
 
 export const renderFolderView = async (
@@ -57,7 +48,6 @@ export const renderFolderView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
-    documents,
     drawerSlug,
     enableRowSelections,
     folderID,
@@ -66,7 +56,6 @@ export const renderFolderView = async (
     params,
     query: queryFromArgs,
     searchParams,
-    subfolders,
     viewType,
   } = args
 
@@ -91,27 +80,27 @@ export const renderFolderView = async (
     throw new Error('not-found')
   }
 
-  const query = queryFromArgs || queryFromReq
-
-  const columns: ColumnPreference[] = transformColumnsToPreferences(
-    query?.columns as ColumnPreference[] | string,
-  )
-
-  const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
-    req,
-    value: {
-      columns,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      sort: query?.sort as string,
-    },
-  })
-
-  const {
-    routes: { admin: adminRoute },
-  } = config
-
   if (collectionConfig) {
+    const query = queryFromArgs || queryFromReq
+
+    const columns: ColumnPreference[] = transformColumnsToPreferences(
+      query?.columns as ColumnPreference[] | string,
+    )
+
+    const listPreferences = await upsertPreferences<ListPreferences>({
+      key: `${collectionSlug}-list`,
+      req,
+      value: {
+        columns,
+        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+        sort: query?.sort as string,
+      },
+    })
+
+    const {
+      routes: { admin: adminRoute },
+    } = config
+
     if (
       (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) ||
       !Object.keys(config.folders.collections).includes(collectionSlug)
@@ -138,6 +127,7 @@ export const renderFolderView = async (
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
         limit,
+        locale,
         page,
         req,
         sort,
@@ -162,32 +152,35 @@ export const renderFolderView = async (
       })
     }
 
-    const where = combineWhereConstraints(whereConstraints)
-
-    const data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: false,
-      includeLockStatus: true,
-      limit,
+    const { breadcrumbs, documents, hasMoreDocuments, subfolders } = await getFolderData({
+      type: 'monomorphic',
+      collectionSlugs: [collectionSlug],
+      docSort: initPageResult?.req.query?.sort as string,
+      docWhere: combineWhereConstraints(whereConstraints),
+      folderID,
       locale,
-      overrideAccess: false,
-      page,
-      req,
-      sort,
-      user,
-      where: where || {},
+      payload: initPageResult.req.payload,
+      search: query?.search as string,
+      user: initPageResult.req.user,
     })
 
-    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+    const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
 
-    if (clientCollectionConfig.upload) {
-      data.docs = data.docs.map((doc) => ({
-        ...doc,
-        filesize: formatFilesize(doc.filesize),
-      }))
+    if (
+      drawerSlug &&
+      ((resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
+        (folderID && !resolvedFolderID))
+    ) {
+      return redirect(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/folders`,
+          serverURL: config.serverURL,
+        }),
+      )
     }
+
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderFolderTable({
       clientCollectionConfig,
@@ -254,7 +247,13 @@ export const renderFolderView = async (
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
-          <ListQueryProvider data={null}>
+          <HydrateFolderProvider
+            breadcrumbs={breadcrumbs}
+            documents={documents}
+            folderID={folderID}
+            subfolders={subfolders}
+          />
+          <ListQueryProvider data={null} defaultLimit={0} modifySearchParams={!drawerSlug}>
             {RenderServerComponent({
               clientProps: {
                 ...folderViewSlots,

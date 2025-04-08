@@ -17,7 +17,7 @@ import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js
 
 type Props = {
   readonly drawerSlug: string
-  readonly onNewFolderSuccess: (doc: FolderInterface) => Promise<void>
+  readonly onNewFolderSuccess: (doc: FolderInterface) => Promise<void> | void
 }
 
 export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {

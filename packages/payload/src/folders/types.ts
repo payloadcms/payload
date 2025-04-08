@@ -15,7 +15,6 @@ export type FolderInterface = {
 export type FolderBreadcrumb = {
   id: null | number | string
   name: string
-  root?: boolean
 }
 
 export type Subfolder = {
@@ -35,7 +34,7 @@ export type FolderEnabledColection = {
   slug: CollectionSlug
 } & SanitizedCollectionConfig
 
-export type GetFolderDataResult<DocType = TypeWithID> = {
+export type GetFolderDataResult<FolderDocType = FolderInterface, DocType = TypeWithID> = {
   breadcrumbs: FolderBreadcrumb[] | null
   documents: {
     relationTo: string
@@ -44,6 +43,6 @@ export type GetFolderDataResult<DocType = TypeWithID> = {
   hasMoreDocuments: boolean
   subfolders: {
     relationTo: string
-    value: DocType | number | string
+    value: FolderDocType | number | string
   }[]
 }

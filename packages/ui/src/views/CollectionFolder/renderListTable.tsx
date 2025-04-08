@@ -220,6 +220,14 @@ export const renderFolderTable = ({
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
-    Table: <FolderListTable appearance={tableAppearance} columns={columnsToUse} key="table" />,
+    Table: (
+      <FolderListTable
+        appearance={tableAppearance}
+        columns={columnsToUse}
+        documents={docs}
+        key="table"
+        subfolders={subfolders}
+      />
+    ),
   }
 }

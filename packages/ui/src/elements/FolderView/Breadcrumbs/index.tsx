@@ -6,7 +6,6 @@ import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { useFolder } from '../../../providers/Folders/index.js'
 import './index.scss'
 
 const baseClass = 'folderBreadcrumbs'
@@ -15,6 +14,7 @@ type Props = {
   readonly breadcrumbs: {
     id: null | number | string
     name: React.ReactNode | string
+    onClick: () => void
   }[]
   className?: string
 }
@@ -24,7 +24,11 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
       {breadcrumbs?.map((crumb, index) => (
         <div className={`${baseClass}__crumb`} key={index}>
           {
-            <DroppableBreadcrumb className={`${baseClass}__crumb-item`} id={crumb.id}>
+            <DroppableBreadcrumb
+              className={`${baseClass}__crumb-item`}
+              id={crumb.id}
+              onClick={crumb.onClick}
+            >
               {crumb.name}
             </DroppableBreadcrumb>
           }
@@ -41,7 +45,11 @@ export function DroppableBreadcrumb({
   id,
   children,
   className,
-}: { children: React.ReactNode; className?: string } & Pick<FolderBreadcrumb, 'id'>) {
+  onClick,
+}: { children: React.ReactNode; className?: string; onClick: () => void } & Pick<
+  FolderBreadcrumb,
+  'id'
+>) {
   const { isOver, setNodeRef } = useDroppable({
     id: `folder-${id}`,
     data: {
@@ -49,16 +57,13 @@ export function DroppableBreadcrumb({
       type: 'folder',
     },
   })
-  const { setFolderID } = useFolder()
 
   return (
     <button
       className={['droppable-button', className, isOver && 'droppable-button--hover']
         .filter(Boolean)
         .join(' ')}
-      onClick={() => {
-        void setFolderID({ folderID: id })
-      }}
+      onClick={onClick}
       ref={setNodeRef as unknown as any}
       type="button"
     >

@@ -3,26 +3,15 @@ import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
-  ColumnPreference,
   ImportMap,
-  ListPreferences,
   SanitizedConfig,
-  Where,
 } from 'payload'
 
 import { FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { upsertPreferences } from '@payloadcms/ui/rsc'
-import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { getFolderData } from 'payload'
-import {
-  combineWhereConstraints,
-  formatAdminURL,
-  isNumber,
-  transformColumnsToPreferences,
-} from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { initPage } from '../../utilities/initPage/index.js'
@@ -162,108 +151,16 @@ export const RootPage = async ({
   }
 
   if (viewType === 'collection-folders') {
-    const collectionConfig = initPageResult?.collectionConfig
-    const collectionSlug = collectionConfig?.slug
-    const page = isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1
-    const query = initPageResult?.req.query
-    const locale = initPageResult?.req.locale
-    const columns: ColumnPreference[] = transformColumnsToPreferences(
-      query?.columns as ColumnPreference[] | string,
-    )
-    const listPreferences = await upsertPreferences<ListPreferences>({
-      key: `${collectionSlug}-list`,
-      req: initPageResult.req,
-      value: {
-        columns,
-        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-        sort: query?.sort as string,
-      },
-    })
-    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-    const sort =
-      listPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
-    const whereConstraints = [
-      mergeListSearchAndWhere({
-        collectionConfig,
-        search: typeof query?.search === 'string' ? query.search : undefined,
-        where: (query?.where as Where) || undefined,
-      }),
-    ]
-
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        page,
-        req: initPageResult.req,
-        sort,
-      })
-
-      if (baseListFilter) {
-        whereConstraints.push(baseListFilter)
-      }
-    }
-
-    const { breadcrumbs, documents, hasMoreDocuments, subfolders } = await getFolderData({
-      collectionSlugs: [collectionSlug],
-      docSort: initPageResult?.req.query?.sort as string,
-      docWhere: combineWhereConstraints(whereConstraints),
-      folderID,
-      locale,
-      payload: initPageResult.req.payload,
-      user: initPageResult.req.user,
-    })
-
-    const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.root
-      ? undefined
-      : breadcrumbs[breadcrumbs.length - 1]?.id
-
-    if (
-      (resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
-      (folderID && !resolvedFolderID)
-    ) {
-      return redirect(
-        formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}/folders`,
-          serverURL: config.serverURL,
-        }),
-      )
-    }
-
     const RenderedView = RenderServerComponent({
       clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
       Component: DefaultView.payloadComponent,
       Fallback: DefaultView.Component,
       importMap,
-      serverProps: {
-        ...sharedServerProps,
-        documents,
-        subfolders,
-      } satisfies {
-        documents: {
-          relationTo: string
-          value: any
-        }[]
-        subfolders: {
-          relationTo: string
-          value: any
-        }[]
-      } & AdminViewServerPropsOnly,
+      serverProps: sharedServerProps,
     })
 
     return (
-      <FolderProvider
-        collectionSlugs={[collectionSlug]}
-        initialData={{
-          breadcrumbs,
-          documents,
-          folderID,
-          hasMoreDocuments,
-          subfolders,
-        }}
-      >
+      <FolderProvider collectionSlugs={[initPageResult?.collectionConfig.slug]}>
         <RootViewComponent
           documentSubViewType={documentSubViewType}
           initPageResult={initPageResult}

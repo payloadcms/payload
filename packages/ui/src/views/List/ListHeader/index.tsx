@@ -83,9 +83,10 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
         className={`${drawerBaseClass}__header`}
         collectionConfig={getEntityConfig({ collectionSlug: selectedOption.value })}
         TitleActions={[
-          ListDrawerCreateNewDocButton({
-            hasCreatePermission,
-          }),
+          <ListDrawerCreateNewDocButton
+            hasCreatePermission={hasCreatePermission}
+            key="list-drawer-create-new-doc"
+          />,
         ].filter(Boolean)}
       />
     )
@@ -115,21 +116,24 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
       className={className}
       collectionConfig={collectionConfig}
       TitleActions={[
-        hasCreatePermission &&
-          ListCreateNewButton({
-            collectionConfig,
-            hasCreatePermission,
-            newDocumentURL,
-          }),
-        hasCreatePermission &&
-          isBulkUploadEnabled &&
-          ListBulkUploadButton({
-            collectionSlug: collectionConfig.slug,
-            hasCreatePermission,
-            isBulkUploadEnabled,
-            onBulkUploadSuccess,
-            openBulkUpload,
-          }),
+        hasCreatePermission && (
+          <ListCreateNewButton
+            collectionConfig={collectionConfig}
+            hasCreatePermission={hasCreatePermission}
+            key="list-header-create-new-doc"
+            newDocumentURL={newDocumentURL}
+          />
+        ),
+        hasCreatePermission && isBulkUploadEnabled && (
+          <ListBulkUploadButton
+            collectionSlug={collectionConfig.slug}
+            hasCreatePermission={hasCreatePermission}
+            isBulkUploadEnabled={isBulkUploadEnabled}
+            key="list-header-bulk-upload"
+            onBulkUploadSuccess={onBulkUploadSuccess}
+            openBulkUpload={openBulkUpload}
+          />
+        ),
       ].filter(Boolean)}
     />
   )

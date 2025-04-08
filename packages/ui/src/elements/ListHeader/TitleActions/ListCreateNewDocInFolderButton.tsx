@@ -1,9 +1,10 @@
 'use client'
 
-import type { CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
@@ -19,15 +20,31 @@ const newDocInFolderDrawerSlug = 'create-new-document-with-folder'
 const baseClass = 'create-new-doc-in-folder'
 
 export function ListCreateNewDocInFolderButton({
+  buttonLabel,
   collectionSlugs,
+  disableFolderCollection = false,
 }: {
+  buttonLabel: string
   collectionSlugs: CollectionSlug[]
+  disableFolderCollection?: boolean
 }) {
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { config } = useConfig()
-  const { folderCollectionConfig, folderID, populateFolderData, setSubfolders } = useFolder()
+  const router = useRouter()
+  const {
+    folderCollectionConfig,
+    folderCollectionSlug,
+    folderID,
+    populateFolderData,
+    setSubfolders,
+  } = useFolder()
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
+  const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
+    config.collections.filter(({ slug }) => {
+      return collectionSlugs.includes(slug) && config.folders.collections[slug]
+    }),
+  )
 
   const onNewFolderCreate = React.useCallback(
     async (doc) => {
@@ -35,47 +52,70 @@ export function ListCreateNewDocInFolderButton({
         return [
           ...prev,
           {
-            relationTo: config.folders.slug,
+            relationTo: folderCollectionSlug,
             value: doc,
           },
         ]
       })
       await populateFolderData({ folderID })
+      // @todo populateFolderData should return the `Table` component which we could set inside the `CollectionFolder/index.ts` file
+      // -- using router.refresh() is a temporary workaround
+      router.refresh()
       closeModal(newFolderDrawerSlug)
     },
-    [config.folders.slug, folderID, populateFolderData, setSubfolders, closeModal],
+    [populateFolderData, closeModal, folderID, router, folderCollectionSlug, setSubfolders],
   )
+
+  if (disableFolderCollection && enabledCollections.length === 0) {
+    return null
+  }
 
   return (
     <React.Fragment>
-      <Popup
-        button={
-          <Button
-            buttonStyle="pill"
-            className={`${baseClass}__popup-button`}
-            el="div"
-            icon="chevron"
-            size="small"
-          >
-            {t('general:createNew')}
-          </Button>
-        }
-        buttonType="default"
-        className={`${baseClass}__action-popup`}
-      >
-        <PopupList.ButtonGroup>
-          <PopupList.Button
-            onClick={() => {
+      {(disableFolderCollection && enabledCollections.length === 1) ||
+      (!disableFolderCollection && enabledCollections.length === 0) ? (
+        // If there is only 1 option, do not render a popup
+        <Button
+          buttonStyle="pill"
+          className={`${baseClass}__button`}
+          el="div"
+          onClick={() => {
+            if (!disableFolderCollection) {
               openModal(newFolderDrawerSlug)
-            }}
-          >
-            {getTranslation(folderCollectionConfig.labels.singular, i18n)}
-          </PopupList.Button>
-          {config.collections.map((collection, index) => {
-            if (
-              config.folders.collections[collection.slug] &&
-              collectionSlugs.includes(collection.slug)
-            ) {
+            } else {
+              setCreateCollectionSlug(enabledCollections[0].slug)
+              openModal(newDocInFolderDrawerSlug)
+            }
+          }}
+          size="small"
+        >
+          {buttonLabel}
+        </Button>
+      ) : (
+        <Popup
+          button={
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__popup-button`}
+              el="div"
+              icon="chevron"
+              size="small"
+            >
+              {buttonLabel}
+            </Button>
+          }
+          buttonType="default"
+          className={`${baseClass}__action-popup`}
+        >
+          <PopupList.ButtonGroup>
+            <PopupList.Button
+              onClick={() => {
+                openModal(newFolderDrawerSlug)
+              }}
+            >
+              {getTranslation(folderCollectionConfig.labels.singular, i18n)}
+            </PopupList.Button>
+            {enabledCollections.map((collection, index) => {
               const label =
                 typeof collection.labels.singular === 'string'
                   ? collection.labels.singular
@@ -91,29 +131,32 @@ export function ListCreateNewDocInFolderButton({
                   {label}
                 </PopupList.Button>
               )
+            })}
+          </PopupList.ButtonGroup>
+        </Popup>
+      )}
+
+      {createCollectionSlug && (
+        <DocumentDrawer
+          collectionSlug={createCollectionSlug}
+          drawerSlug="create-new-document-with-folder"
+          initialData={{
+            _parentFolder: folderID,
+          }}
+          onSave={({ operation }) => {
+            if (operation === 'create') {
+              closeModal(newDocInFolderDrawerSlug)
+              setCreateCollectionSlug(undefined)
+              router.refresh()
             }
-            return null
-          })}
-        </PopupList.ButtonGroup>
-      </Popup>
+          }}
+          redirectAfterCreate={false}
+        />
+      )}
 
-      <DocumentDrawer
-        collectionSlug={createCollectionSlug}
-        drawerSlug="create-new-document-with-folder"
-        initialData={{
-          _parentFolder: folderID,
-        }}
-        onSave={({ operation }) => {
-          if (operation === 'create') {
-            closeModal(newDocInFolderDrawerSlug)
-            setCreateCollectionSlug(undefined)
-            void populateFolderData({ folderID })
-          }
-        }}
-        redirectAfterCreate={false}
-      />
-
-      <NewFolderDrawer drawerSlug={newFolderDrawerSlug} onNewFolderSuccess={onNewFolderCreate} />
+      {!disableFolderCollection && (
+        <NewFolderDrawer drawerSlug={newFolderDrawerSlug} onNewFolderSuccess={onNewFolderCreate} />
+      )}
     </React.Fragment>
   )
 }

@@ -17,11 +17,18 @@ const baseClass = 'table'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
+  readonly documents?: Array<{ relationTo: string; value: number | string }>
+  readonly subfolders?: Array<{ relationTo: string; value: number | string }>
 }
 
 type ItemKey = `${string}-${number | string}`
 
-export const FolderListTable: React.FC<Props> = ({ appearance, columns }) => {
+export const FolderListTable: React.FC<Props> = ({
+  appearance,
+  columns,
+  documents: documentsFromArgs,
+  subfolders: subfoldersFromArgs,
+}) => {
   const activeColumns = columns?.filter((col) => col?.active)
   const tableRef = React.useRef<HTMLTableSectionElement>(null)
   useClickOutside(
@@ -37,18 +44,22 @@ export const FolderListTable: React.FC<Props> = ({ appearance, columns }) => {
   const router = useRouter()
   const { config } = useConfig()
   const {
-    documents,
+    documents: documentsFromContext,
     focusedRowIndex,
     folderCollectionSlug,
     getSelectedItems,
+    hasHydrated,
     isDragging,
     onItemClick,
     onItemKeyPress,
     selectedIndexes,
     setFocusedRowIndex,
     setFolderID,
-    subfolders,
+    subfolders: subfoldersFromContext,
   } = useFolder()
+
+  const subfolders = hasHydrated ? subfoldersFromContext : subfoldersFromArgs
+  const documents = hasHydrated ? documentsFromContext : documentsFromArgs
 
   const totalCount = subfolders.length + documents.length || 0
 

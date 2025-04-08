@@ -34,6 +34,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
+import { NoResults } from './NoResults/index.js'
 
 const baseClass = 'collection-folder-list'
 const drawerBaseClass = 'collection-folder-list-drawer'
@@ -88,14 +89,15 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     breadcrumbs,
     collectionUseAsTitles,
     documents,
+    folderCollectionConfig,
     getSelectedItems,
     lastSelectedIndex,
     moveToFolder,
     selectedIndexes,
+    setFolderID,
     setIsDragging,
     subfolders,
   } = useFolder()
-  const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -138,6 +140,9 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                     .join(' ')}
                   id={null}
                   key="root"
+                  onClick={() => {
+                    void setFolderID({ folderID: null })
+                  }}
                 >
                   <FolderIcon />
                   {getTranslation(labels?.plural, i18n)}
@@ -154,6 +159,9 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   className={`${baseClass}__step-nav-droppable`}
                   id={crumb.id}
                   key={crumb.id}
+                  onClick={() => {
+                    void setFolderID({ folderID: crumb.id })
+                  }}
                 >
                   {crumb.name}
                 </DroppableBreadcrumb>
@@ -162,7 +170,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
         }),
       ])
     }
-  }, [setStepNav, labels, drawerDepth, i18n, breadcrumbs])
+  }, [setStepNav, labels, drawerDepth, i18n, breadcrumbs, setFolderID])
 
   const totalDocsAndSubfolders = documents.length + subfolders.length
 
@@ -190,6 +198,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
           {BeforeFolderList}
           <Gutter className={`${baseClass}__wrap`}>
             {isInDrawer ? (
+              // The header within a drawer
               <CollectionListHeader
                 Actions={[<CloseModalButton key="close-button" slug={listDrawerSlug} />]}
                 AfterListHeaderContent={Description}
@@ -207,6 +216,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                 ].filter(Boolean)}
               />
             ) : (
+              // The header not within a drawer
               <CollectionListHeader
                 Actions={[
                   !smallBreak && (
@@ -225,14 +235,17 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                 AfterListHeaderContent={Description}
                 collectionConfig={collectionConfig}
                 TitleActions={[
-                  ListCreateNewDocInFolderButton({
-                    collectionSlugs: [collectionSlug],
-                  }),
-                  ListBulkUploadButton({
-                    collectionSlug,
-                    hasCreatePermission,
-                    isBulkUploadEnabled,
-                  }),
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={t('general:createNew')}
+                    collectionSlugs={[collectionSlug]}
+                    key="create-new-button"
+                  />,
+                  <ListBulkUploadButton
+                    collectionSlug={collectionSlug}
+                    hasCreatePermission={hasCreatePermission}
+                    isBulkUploadEnabled={isBulkUploadEnabled}
+                    key="bulk-upload-button"
+                  />,
                 ].filter(Boolean)}
               />
             )}
@@ -254,28 +267,31 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
             {BeforeFolderListTable}
             {totalDocsAndSubfolders > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
             {totalDocsAndSubfolders === 0 && (
-              <div className={`${baseClass}__no-results`}>
-                <p>
-                  {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
-                </p>
-                {hasCreatePermission && newDocumentURL && (
-                  <Fragment>
-                    {isInDrawer ? (
-                      <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
-                        {i18n.t('general:createNewLabel', {
-                          label: getTranslation(labels?.singular, i18n),
-                        })}
-                      </Button>
-                    ) : (
-                      <Button el="link" to={newDocumentURL}>
-                        {i18n.t('general:createNewLabel', {
-                          label: getTranslation(labels?.singular, i18n),
-                        })}
-                      </Button>
-                    )}
-                  </Fragment>
-                )}
-              </div>
+              <NoResults
+                Actions={[
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    collectionSlugs={[]}
+                    key="create-folder"
+                  />,
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    collectionSlugs={[collectionSlug]}
+                    disableFolderCollection
+                    key="create-document"
+                  />,
+                ].filter(Boolean)}
+                Message={
+                  <p>
+                    {i18n.t('general:noResults', {
+                      label: `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ${getTranslation(
+                        folderCollectionConfig.labels?.plural,
+                        i18n,
+                      )}`,
+                    })}
+                  </p>
+                }
+              />
             )}
             {AfterFolderListTable}
           </Gutter>

@@ -94,8 +94,8 @@ export const renderTable = ({
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
 
   let columnState: Column[]
-  let clientFields: ClientField[] = clientCollectionConfig.fields
-  let serverFields: Field[] = collectionConfig.fields
+  let clientFields: ClientField[] = clientCollectionConfig?.fields || []
+  let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
   if (isPolymorphic) {

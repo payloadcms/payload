@@ -1363,8 +1363,6 @@ export type {
 } from './fields/validations.js'
 export { buildFolderBreadcrumbs } from './folders/utils/buildFolderBreadcrumbs.js'
 export { getFolderData } from './folders/utils/getFolderData.js'
-export { getFolderDocuments } from './folders/utils/getFolderDocuments.js'
-export { getFolderSubfolders } from './folders/utils/getFolderSubfolders.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,

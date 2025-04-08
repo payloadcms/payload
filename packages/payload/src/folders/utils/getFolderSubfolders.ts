@@ -1,15 +1,19 @@
 import type { PaginatedDocs, User } from '../../index.js'
-import type { Payload } from '../../types/index.js'
+import type { Payload, Where } from '../../types/index.js'
 import type { FolderInterface } from '../types.js'
 
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
+
 type GetSubfoldersArgs = {
-  folderID?: number | string
+  parentFolderID?: number | string
   payload: Payload
+  search?: string
   user?: User
 }
 export const getFolderSubfolders = async ({
-  folderID,
+  parentFolderID,
   payload,
+  search,
   user,
 }: GetSubfoldersArgs): Promise<
   {
@@ -17,18 +21,30 @@ export const getFolderSubfolders = async ({
     value: FolderInterface
   }[]
 > => {
-  if (folderID) {
+  const whereConstraints: Where[] = []
+
+  if (search) {
+    whereConstraints.push({
+      name: {
+        contains: search,
+      },
+    })
+  }
+
+  if (parentFolderID) {
+    whereConstraints.push({
+      relationTo: {
+        equals: payload.config.folders.slug,
+      },
+    })
+
     const subfolderDocs = (await payload.find({
       collection: payload.config.folders.slug,
       joins: {
         documentsAndFolders: {
           limit: 100_000,
           sort: 'name',
-          where: {
-            relationTo: {
-              equals: payload.config.folders.slug,
-            },
-          },
+          where: combineWhereConstraints(whereConstraints),
         },
       },
       limit: 1,
@@ -36,7 +52,7 @@ export const getFolderSubfolders = async ({
       user,
       where: {
         id: {
-          equals: folderID,
+          equals: parentFolderID,
         },
       },
     })) as PaginatedDocs<FolderInterface>
@@ -44,17 +60,19 @@ export const getFolderSubfolders = async ({
     return subfolderDocs?.docs[0]?.documentsAndFolders?.docs || []
   }
 
+  whereConstraints.push({
+    _parentFolder: {
+      exists: false,
+    },
+  })
+
   const orphanedFolders = (await payload.find({
     collection: payload.config.folders.slug,
     limit: 0,
     overrideAccess: false,
     sort: 'name',
     user,
-    where: {
-      _parentFolder: {
-        exists: false,
-      },
-    },
+    where: combineWhereConstraints(whereConstraints),
   })) as PaginatedDocs<FolderInterface>
 
   const orphanedDocsWithRelation = orphanedFolders?.docs.map((folder) => ({

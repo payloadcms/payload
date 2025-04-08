@@ -85,8 +85,17 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
             {
               id: null,
               name: <FolderIcon />,
+              onClick: () => {
+                void folderContext.setFolderID({ folderID: null })
+              },
             },
-            ...folderContext.breadcrumbs,
+            ...folderContext.breadcrumbs.map((crumb) => ({
+              id: crumb.id,
+              name: crumb.name,
+              onClick: () => {
+                void folderContext.setFolderID({ folderID: crumb.id })
+              },
+            })),
           ]}
         />
 

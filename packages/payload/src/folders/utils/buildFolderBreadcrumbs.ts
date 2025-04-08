@@ -54,6 +54,7 @@ export const buildFolderBreadcrumbs = async ({
               ? folder[parentFolderFieldName]
               : folder[parentFolderFieldName].id,
           payload,
+          user,
         })
       }
     }

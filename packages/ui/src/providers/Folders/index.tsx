@@ -17,11 +17,11 @@ import { toast } from 'sonner'
 import type { PolymorphicRelationshipValue } from '../../elements/FolderView/types.js'
 
 import { useDrawerDepth } from '../../elements/Drawer/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useListQuery } from '../ListQuery/index.js'
+import { useRouteCache } from '../RouteCache/index.js'
+import { useRouteTransition } from '../RouteTransition/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { getMetaSelection, getShiftSelection } from './selection.js'
 export type FileCardData = {
@@ -44,7 +44,15 @@ export type FolderContextValue = {
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
+  hasHydrated: boolean
   hasMoreDocuments: boolean
+  hydrateProvider: (args: {
+    breadcrumbs?: FolderBreadcrumb[]
+    documents?: GetFolderDataResult['documents']
+    folderID?: number | string
+    hasMoreDocuments?: boolean
+    subfolders?: GetFolderDataResult['subfolders']
+  }) => void
   isDragging: boolean
   lastSelectedIndex: null | number
   loadingStatus?: 'error' | 'idle' | 'loading'
@@ -58,6 +66,7 @@ export type FolderContextValue = {
   removeItems: (args: PolymorphicRelationshipValue[]) => Promise<void>
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
+  setDocuments: React.Dispatch<React.SetStateAction<GetFolderDataResult['documents']>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
@@ -77,7 +86,9 @@ const Context = React.createContext<FolderContextValue>({
   folderCollectionSlug: '',
   folderID: undefined,
   getSelectedItems: () => [],
+  hasHydrated: false,
   hasMoreDocuments: true,
+  hydrateProvider: () => {},
   isDragging: false,
   lastSelectedIndex: null,
   loadingStatus: 'idle',
@@ -88,6 +99,7 @@ const Context = React.createContext<FolderContextValue>({
   removeItems: () => Promise.resolve(undefined),
   selectedIndexes: new Set(),
   setBreadcrumbs: () => {},
+  setDocuments: () => [],
   setFocusedRowIndex: () => -1,
   setFolderID: () => Promise.resolve(undefined),
   setIsDragging: () => false,
@@ -126,6 +138,7 @@ export function FolderProvider({
   )
   const folderCollectionSlug = folderCollectionConfig.slug
 
+  const [hasHydrated, setHasHydrated] = React.useState(false)
   const [isDragging, setIsDragging] = React.useState(false)
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
     initialData?.folderID,
@@ -135,7 +148,7 @@ export function FolderProvider({
   >(initialData?.breadcrumbs || [])
   const [subfolders, setSubfolders] = React.useState<
     GetFolderDataResult<FolderInterface>['subfolders']
-  >((initialData?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'])
+  >(initialData?.subfolders || [])
   const [documents, setDocuments] = React.useState<GetFolderDataResult['documents']>(
     initialData?.documents || [],
   )
@@ -186,9 +199,7 @@ export function FolderProvider({
         if (folderDataReq.status === 200) {
           const folderDataRes: GetFolderDataResult = await folderDataReq.json()
           setFolderBreadcrumbs(folderDataRes?.breadcrumbs || [])
-          setSubfolders(
-            (folderDataRes?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'],
-          )
+          setSubfolders(folderDataRes?.subfolders || [])
           setDocuments(folderDataRes?.documents || [])
           setHasMoreDocuments(Boolean(folderDataRes?.hasMoreDocuments))
         } else {
@@ -212,7 +223,7 @@ export function FolderProvider({
       if (drawerDepth === 1) {
         // not in a drawer (default is 1)
         if (collectionSlugs.length === 1) {
-          // looking at a single collection (collection folders)
+          // looking at a single collection (collection-folders)
           startRouteTransition(() =>
             router.push(
               formatAdminURL({
@@ -606,23 +617,41 @@ export function FolderProvider({
     [t, clearSelections, clearRouteCache, serverURL, routes.api, folderCollectionSlug],
   )
 
-  React.useEffect(() => {
-    // @todo is this necessary? is there a better way? likely.
-    if (initialData) {
-      setSubfolders(
-        (initialData?.subfolders || []) as GetFolderDataResult<FolderInterface>['subfolders'],
-      )
-      setDocuments(initialData?.documents || [])
-      setFolderBreadcrumbs(initialData?.breadcrumbs || [])
-      clearSelections()
-    }
-  }, [initialData, clearSelections])
+  const hydrateProvider = React.useCallback(
+    (args: {
+      breadcrumbs?: FolderBreadcrumb[]
+      documents?: GetFolderDataResult['documents']
+      folderID?: number | string
+      hasMoreDocuments?: boolean
+      subfolders?: GetFolderDataResult['subfolders']
+    }) => {
+      const {
+        breadcrumbs,
+        documents: newDocuments,
+        folderID,
+        hasMoreDocuments,
+        subfolders: newSubfolders,
+      } = args
 
-  React.useEffect(() => {
-    if (!initialData) {
-      void populateFolderData({ folderID: null })
-    }
-  }, [initialData, populateFolderData])
+      if (!hasHydrated) {
+        setActiveFolderID(folderID)
+        setSubfolders(newSubfolders || [])
+        setDocuments(newDocuments || [])
+        setFolderBreadcrumbs(breadcrumbs || [])
+        setHasMoreDocuments(hasMoreDocuments || false)
+        setHasHydrated(true)
+      }
+    },
+    [
+      hasHydrated,
+      setActiveFolderID,
+      setSubfolders,
+      setDocuments,
+      setFolderBreadcrumbs,
+      setHasMoreDocuments,
+      setHasHydrated,
+    ],
+  )
 
   return (
     <Context
@@ -638,7 +667,9 @@ export function FolderProvider({
         folderCollectionSlug,
         folderID: activeFolderID,
         getSelectedItems,
+        hasHydrated,
         hasMoreDocuments,
+        hydrateProvider,
         isDragging,
         lastSelectedIndex,
         loadingStatus,
@@ -649,6 +680,7 @@ export function FolderProvider({
         removeItems,
         selectedIndexes,
         setBreadcrumbs: setFolderBreadcrumbs,
+        setDocuments,
         setFocusedRowIndex,
         setFolderID: setNewActiveFolderID,
         setIsDragging,
