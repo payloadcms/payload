@@ -24,6 +24,7 @@ import './index.scss'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import { useDebouncedCallback } from '../utilities/useDebouncedCallback.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -117,11 +118,15 @@ const RichTextComponent: React.FC<
 
   const pathWithEditDepth = `${path}.${editDepth}`
 
+  const updateFieldValue = useDebouncedCallback((editorState: EditorState) => {
+    const newState = editorState.toJSON()
+    prevValueRef.current = newState
+    setValue(newState)
+  }, 500)
+
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      const newState = editorState.toJSON()
-      prevValueRef.current = newState
-      setValue(newState)
+      updateFieldValue(editorState)
     },
     [setValue],
   )
