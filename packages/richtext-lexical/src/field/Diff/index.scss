@@ -1,0 +1,95 @@
+@import '../../scss/styles.scss';
+@import './colors.scss';
+
+@layer payload-default {
+  .lexical-diff {
+    &__diff-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    blockquote {
+      font-size: base(0.8);
+      margin-block: base(0.8);
+      margin-inline: base(0.2);
+      border-inline-start-color: var(--theme-elevation-150);
+      border-inline-start-width: base(0.2);
+      border-inline-start-style: solid;
+      padding-inline-start: base(0.6);
+      padding-block: base(0.2);
+
+      &:has([data-match-type='create']) {
+        border-inline-start-color: var(--theme-success-150);
+      }
+
+      &:has([data-match-type='delete']) {
+        border-inline-start-color: var(--theme-error-150);
+      }
+    }
+
+    a {
+      border-bottom: 1px dotted;
+      text-decoration: none;
+    }
+
+    h1 {
+      padding: base(0.7) 0px base(0.55);
+      line-height: base(1.2);
+      font-weight: 600;
+      font-size: base(1.4);
+      font-family: var(--font-body);
+    }
+    h2 {
+      padding: base(0.7) 0px base(0.5);
+      line-height: base(1);
+      font-weight: 600;
+      font-size: base(1.25);
+      font-family: var(--font-body);
+    }
+    h3 {
+      padding: base(0.65) 0px base(0.45);
+      line-height: base(0.9);
+      font-weight: 600;
+      font-size: base(1.1);
+      font-family: var(--font-body);
+    }
+    h4 {
+      padding: base(0.65) 0px base(0.4);
+      line-height: base(0.7);
+      font-weight: 600;
+      font-size: base(1);
+      font-family: var(--font-body);
+    }
+    h5 {
+      padding: base(0.65) 0px base(0.35);
+      line-height: base(0.5);
+      font-weight: 600;
+      font-size: base(0.9);
+      font-family: var(--font-body);
+    }
+
+    h6 {
+      padding: base(0.65) 0px base(0.35);
+      line-height: base(0.5);
+      font-weight: 600;
+      font-size: base(0.8);
+      font-family: var(--font-body);
+    }
+
+    p {
+      padding: base(0.4) 0 base(0.4);
+
+      // First paraagraph has no top padding
+      &:first-child {
+        padding: 0 0 base(0.4);
+      }
+    }
+
+    ul,
+    ol {
+      padding-top: base(0.4);
+      padding-bottom: base(0.4);
+    }
+  }
+}

@@ -21,11 +21,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Form State', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true))
 
     const data = await restClient
       .POST('/users/login', {
@@ -57,6 +54,7 @@ describe('Form State', () => {
     })
 
     const { state } = await buildFormState({
+      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -95,7 +93,6 @@ describe('Form State', () => {
       validateUsingEvent: {},
       blocks: {
         initialValue: 0,
-        requiresRender: false,
         rows: [],
         value: 0,
       },
@@ -113,6 +110,7 @@ describe('Form State', () => {
     })
 
     const { state } = await buildFormState({
+      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -134,9 +132,89 @@ describe('Form State', () => {
       title: {
         value: postData.title,
         initialValue: postData.title,
+        lastRenderedPath: 'title',
       },
     })
   })
 
-  it.todo('should skip validation if specified')
+  it('should not render custom components when `lastRenderedPath` exists', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const { state: stateWithRow } = await buildFormState({
+      mockRSCs: true,
+      collectionSlug: postsSlug,
+      formState: {
+        array: {
+          rows: [
+            {
+              id: '123',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // Ensure that row 1 _DOES_ return with rendered components
+    expect(stateWithRow?.['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
+    expect(stateWithRow?.['array.0.richText']?.customComponents?.Field).toBeDefined()
+
+    const { state: stateWithTitle } = await buildFormState({
+      mockRSCs: true,
+      collectionSlug: postsSlug,
+      formState: {
+        array: {
+          rows: [
+            {
+              id: '123',
+            },
+            {
+              id: '456',
+            },
+          ],
+        },
+        'array.0.id': {
+          value: '123',
+          initialValue: '123',
+        },
+        'array.0.richText': {
+          lastRenderedPath: 'array.0.richText',
+        },
+        'array.1.id': {
+          value: '456',
+          initialValue: '456',
+        },
+      },
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      schemaPath: postsSlug,
+      req,
+    })
+
+    // Ensure that row 1 _DOES NOT_ return with rendered components
+    expect(stateWithTitle?.['array.0.richText']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('customComponents')
+
+    // Ensure that row 2 _DOES_ return with rendered components
+    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.1.richText']?.customComponents?.Field).toBeDefined()
+  })
 })

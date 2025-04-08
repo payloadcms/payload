@@ -41,8 +41,8 @@ export type IListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: Sort
-  orderableFieldName?: string
   modified: boolean
+  orderableFieldName?: string
   query: ListQuery
   refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
   setModified: (modified: boolean) => void

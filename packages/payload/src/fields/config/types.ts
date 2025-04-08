@@ -57,7 +57,7 @@ import type {
   EmailFieldLabelServerComponent,
   FieldDescriptionClientProps,
   FieldDescriptionServerProps,
-  FieldDiffClientComponent,
+  FieldDiffClientProps,
   FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
@@ -326,7 +326,7 @@ type Admin = {
   components?: {
     Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
     Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
-    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>
     Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
