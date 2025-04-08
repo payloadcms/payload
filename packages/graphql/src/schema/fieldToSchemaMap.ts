@@ -348,11 +348,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         name: joinName,
         fields: {
           docs: {
-            type: Array.isArray(field.collection)
-              ? GraphQLJSON
-              : new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
+            type: new GraphQLNonNull(
+              Array.isArray(field.collection)
+                ? GraphQLJSON
+                : new GraphQLList(
+                    new GraphQLNonNull(graphqlResult.collections[field.collection].graphQL.type),
+                  ),
+            ),
           },
-          hasNextPage: { type: GraphQLBoolean },
+          hasNextPage: { type: new GraphQLNonNull(GraphQLBoolean) },
         },
       }),
       args: {
@@ -379,6 +383,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { limit, page, sort, where } = args
         const { req } = context
 
+        const draft = Boolean(args.draft ?? context.req.query?.draft)
+
         const fullWhere = combineQueries(where, {
           [field.on]: { equals: parent._id ?? parent.id },
         })
@@ -390,6 +396,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         return await req.payload.find({
           collection,
           depth: 0,
+          draft,
           fallbackLocale: req.fallbackLocale,
           limit,
           locale: req.locale,
@@ -425,7 +432,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       ...objectTypeConfig,
       [formatName(field.name)]: formattedNameResolver({
         type: withNullableType({
-          type: field?.hasMany === true ? new GraphQLList(type) : type,
+          type: field?.hasMany === true ? new GraphQLList(new GraphQLNonNull(type)) : type,
           field,
           forceNullable,
           parentIsLocalized,
@@ -853,7 +860,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     ...objectTypeConfig,
     [formatName(field.name)]: formattedNameResolver({
       type: withNullableType({
-        type: field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+        type:
+          field.hasMany === true
+            ? new GraphQLList(new GraphQLNonNull(GraphQLString))
+            : GraphQLString,
         field,
         forceNullable,
         parentIsLocalized,

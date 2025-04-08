@@ -24,6 +24,12 @@ const isNodeReadableStream = (body: unknown): body is Readable => {
   )
 }
 
+const destroyStream = (object: AWS.GetObjectOutput | undefined) => {
+  if (object?.Body && isNodeReadableStream(object.Body)) {
+    object.Body.destroy()
+  }
+}
+
 // Convert a stream into a promise that resolves with a Buffer
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const streamToBuffer = async (readableStream: any) => {
@@ -36,12 +42,13 @@ const streamToBuffer = async (readableStream: any) => {
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
   return async (req, { params: { clientUploadContext, filename } }) => {
+    let object: AWS.GetObjectOutput | undefined = undefined
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
 
       const key = path.posix.join(prefix, filename)
 
-      const object = await getStorageClient().getObject({
+      object = await getStorageClient().getObject({
         Bucket: bucket,
         Key: key,
       })
@@ -54,7 +61,7 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const objectEtag = object.ETag
 
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
-        const response = new Response(null, {
+        return new Response(null, {
           headers: new Headers({
             'Accept-Ranges': String(object.AcceptRanges),
             'Content-Length': String(object.ContentLength),
@@ -63,13 +70,6 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
           }),
           status: 304,
         })
-
-        // Manually destroy stream before returning cached results to close socket
-        if (object.Body && isNodeReadableStream(object.Body)) {
-          object.Body.destroy()
-        }
-
-        return response
       }
 
       // On error, manually destroy stream to close socket
@@ -99,6 +99,8 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
     } catch (err) {
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
+    } finally {
+      destroyStream(object)
     }
   }
 }

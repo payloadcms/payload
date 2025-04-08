@@ -11,6 +11,7 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
+import type { Metadata } from 'next'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -48,6 +49,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
+import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -176,29 +178,12 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-export type OpenGraphConfig = {
-  description?: string
-  images?: OGImageConfig | OGImageConfig[]
-  siteName?: string
-  title?: string
-}
-
-export type IconConfig = {
-  color?: string
-  /**
-   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
-   */
-  fetchPriority?: 'auto' | 'high' | 'low'
-  media?: string
-  /** defaults to rel="icon" */
-  rel?: string
-  sizes?: string
-  type?: string
-  /**
-   * URL of the icon to use. You can use a relative path from the public folder (see https://nextjs.org/docs/app/building-your-application/optimizing/static-assets) or an absolute URL.
-   */
-  url: string
-}
+/**
+ * @todo find a way to remove the deep clone here.
+ * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
+ * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ */
+type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
 export type MetaConfig = {
   /**
@@ -209,38 +194,11 @@ export type MetaConfig = {
    */
   defaultOGImageType?: 'dynamic' | 'off' | 'static'
   /**
-   * Overrides the auto-generated <meta name="description"> of admin pages
-   * @example `"This is my custom CMS built with Payload."`
-   */
-  description?: string
-  /**
-   * Icons to be rendered by devices and browsers.
-   *
-   * For example browser tabs, phone home screens, and search engine results.
-   */
-  icons?: IconConfig[]
-  /**
-   * Overrides the auto-generated <meta name="keywords"> of admin pages
-   * @example `"CMS, Payload, Custom"`
-   */
-  keywords?: string
-  /**
-   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
-   *
-   * For example when sharing the Admin Panel on social media or through messaging services.
-   */
-  openGraph?: OpenGraphConfig
-  /**
-   * Overrides the auto-generated <title> of admin pages
-   * @example `"My Admin Panel"`
-   */
-  title?: string
-  /**
    * String to append to the auto-generated <title> of admin pages
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-}
+} & DeepClone<Metadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
@@ -551,9 +509,8 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
-  t,
-}: {
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
+  i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string
 
@@ -836,9 +793,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
-     * Each entry in this map generates an entry in the importMap,
-     * as well as an entry in the componentMap if the type of the
-     * dependency is 'component'
+     * Each entry in this map generates an entry in the importMap.
      */
     dependencies?: AdminDependencies
     /**
@@ -988,12 +943,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
-
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1083,7 +1038,6 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -1140,6 +1094,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -1148,6 +1103,25 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Allow you to save and share filters, columns, and sort orders for your collections.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  queryPresets?: {
+    access: {
+      create?: Access<QueryPreset>
+      delete?: Access<QueryPreset>
+      read?: Access<QueryPreset>
+      update?: Access<QueryPreset>
+    }
+    constraints: {
+      create?: QueryPresetConstraints
+      delete?: QueryPresetConstraints
+      read?: QueryPresetConstraints
+      update?: QueryPresetConstraints
+    }
+    labels?: CollectionConfig['labels']
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.
@@ -1224,6 +1198,10 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig

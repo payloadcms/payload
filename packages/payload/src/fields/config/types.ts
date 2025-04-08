@@ -4,6 +4,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
+import type React from 'react'
 import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
@@ -56,7 +57,7 @@ import type {
   EmailFieldLabelServerComponent,
   FieldDescriptionClientProps,
   FieldDescriptionServerProps,
-  FieldDiffClientComponent,
+  FieldDiffClientProps,
   FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
@@ -227,7 +228,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -250,7 +251,11 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-}) => boolean | Promise<boolean>
+}
+
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
+  args: FieldAccessArgs<TData, TSiblingData>,
+) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -321,7 +326,7 @@ type Admin = {
   components?: {
     Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
     Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
-    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>
     Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
@@ -432,8 +437,14 @@ export type Validate<
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
+export type OptionLabel =
+  | (() => React.JSX.Element)
+  | LabelFunction
+  | React.JSX.Element
+  | StaticLabel
+
 export type OptionObject = {
-  label: LabelFunction | StaticLabel
+  label: OptionLabel
   value: string
 }
 
@@ -788,6 +799,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
 } & Omit<FieldBase, 'required' | 'validate'>
@@ -819,11 +831,11 @@ export type UnnamedTab = {
 } & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
-
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
+} & {
+  tabs: Tab[]
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
@@ -1342,7 +1354,7 @@ export type BlockJSX = {
    */
   export: (props: {
     fields: BlockFields
-    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+    lexicalToMarkdown: (props: { editorState: Record<string, any> }) => string
   }) =>
     | {
         children?: string
@@ -1360,7 +1372,7 @@ export type BlockJSX = {
     children: string
     closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
     htmlToLexical?: ((props: { html: string }) => any) | null
-    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
   }) => BlockFields | false
@@ -1537,6 +1549,17 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
+  /**
+   * If true, enables custom ordering for the collection with the relationship, and joined documents can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   sanitizedMany?: JoinField[]
   type: 'join'
   validate?: never
@@ -1550,7 +1573,15 @@ export type JoinFieldClient = {
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
-    'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
+    | 'collection'
+    | 'defaultLimit'
+    | 'defaultSort'
+    | 'index'
+    | 'maxDepth'
+    | 'on'
+    | 'orderable'
+    | 'type'
+    | 'where'
   >
 
 export type FlattenedBlock = {

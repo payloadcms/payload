@@ -174,36 +174,12 @@ describe('Document View', () => {
     })
   })
 
-  describe('form state', () => {
-    test('collection — should re-enable fields after save', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-title').fill(title)
-      await saveDocAndAssert(page)
-      await expect(page.locator('#field-title')).toBeEnabled()
-    })
-
-    test('global — should re-enable fields after save', async () => {
-      await page.goto(globalURL.global(globalSlug))
-      await page.locator('#field-title').fill(title)
-      await saveDocAndAssert(page)
-      await expect(page.locator('#field-title')).toBeEnabled()
-    })
-
-    test('should thread proper event argument to validation functions', async () => {
-      await page.goto(postsUrl.create)
-      await page.locator('#field-title').fill(title)
-      await page.locator('#field-validateUsingEvent').fill('Not allowed')
-      await saveDocAndAssert(page, '#action-save', 'error')
-    })
-  })
-
   describe('document titles', () => {
     test('collection — should render fallback titles when creating new', async () => {
       await page.goto(postsUrl.create)
       await checkPageTitle(page, '[Untitled]')
       await checkBreadcrumb(page, 'Create New')
       await saveDocAndAssert(page)
-      expect(true).toBe(true)
     })
 
     test('collection — should render `useAsTitle` field', async () => {
@@ -213,7 +189,6 @@ describe('Document View', () => {
       await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
-      expect(true).toBe(true)
     })
 
     test('collection — should render `id` as `useAsTitle` fallback', async () => {

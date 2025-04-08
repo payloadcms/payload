@@ -11,8 +11,10 @@ Preview is a feature that allows you to generate a direct link to your front-end
 The Preview feature can also be used to achieve something known as "Draft Preview". With Draft Preview, you can navigate to your front-end application and enter "draft mode", where your queries are modified to fetch draft content instead of published content. This is useful for seeing how your content will look before being published. [More details](#draft-preview).
 
 <Banner type="warning">
-  **Note:**
-  Preview is different than [Live Preview](../live-preview/overview). Live Preview loads your app within an iframe and renders it in the Admin Panel allowing you to see changes in real-time. Preview, on the other hand, allows you to generate a direct link to your front-end application.
+  **Note:** Preview is different than [Live Preview](../live-preview/overview).
+  Live Preview loads your app within an iframe and renders it in the Admin Panel
+  allowing you to see changes in real-time. Preview, on the other hand, allows
+  you to generate a direct link to your front-end application.
 </Banner>
 
 To add Preview, pass a function to the `admin.preview` property in any [Collection Config](../configuration/collections#admin-options) or [Global Config](../configuration/globals#admin-options):
@@ -29,7 +31,7 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
-    }
+    },
   ],
 }
 ```
@@ -40,18 +42,18 @@ The `preview` function resolves to a string that points to your front-end applic
 
 The following arguments are provided to the `preview` function:
 
-| Path               | Description                                                                                                       |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **`doc`**         | The data of the Document being edited. This includes changes that have not yet been saved.                         |
-| **`options`**     | An object with additional properties.                                                                              |
+| Path          | Description                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **`doc`**     | The data of the Document being edited. This includes changes that have not yet been saved. |
+| **`options`** | An object with additional properties.                                                      |
 
 The `options` object contains the following properties:
 
-| Path               | Description                                                                                                       |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **`locale`**      | The current locale of the Document being edited.                                                                   |
-| **`req`**         | The Payload Request object.                                                                                        |
-| **`token`**       | The JWT token of the currently authenticated in user.                                                              |
+| Path         | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| **`locale`** | The current locale of the Document being edited.      |
+| **`req`**    | The Payload Request object.                           |
+| **`token`**  | The JWT token of the currently authenticated in user. |
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
@@ -84,17 +86,17 @@ export const Pages: CollectionConfig = {
         slug,
         collection,
         path: `/${slug}`,
-        previewSecret: process.env.PREVIEW_SECRET || ''
+        previewSecret: process.env.PREVIEW_SECRET || '',
       })
 
       return `/preview?${encodedParams.toString()}` // highlight-line
-    }
+    },
   },
   fields: [
     {
       name: 'slug',
       type: 'text',
-    }
+    },
   ],
 }
 ```
@@ -133,7 +135,9 @@ export async function GET(
   const previewSecret = searchParams.get('previewSecret')
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    return new Response('You are not allowed to preview this page', {
+      status: 403,
+    })
   }
 
   if (!path || !collection || !slug) {
@@ -141,7 +145,10 @@ export async function GET(
   }
 
   if (!path.startsWith('/')) {
-    return new Response('This endpoint can only be used for relative previews', { status: 500 })
+    return new Response(
+      'This endpoint can only be used for relative previews',
+      { status: 500 },
+    )
   }
 
   let user
@@ -152,15 +159,22 @@ export async function GET(
       headers: req.headers,
     })
   } catch (error) {
-    payload.logger.error({ err: error }, 'Error verifying token for live preview')
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    payload.logger.error(
+      { err: error },
+      'Error verifying token for live preview',
+    )
+    return new Response('You are not allowed to preview this page', {
+      status: 403,
+    })
   }
 
   const draft = await draftMode()
 
   if (!user) {
     draft.disable()
-    return new Response('You are not allowed to preview this page', { status: 403 })
+    return new Response('You are not allowed to preview this page', {
+      status: 403,
+    })
   }
 
   // You can add additional checks here to see if the user is allowed to preview this page
@@ -211,7 +225,9 @@ export default async function Page({ params: paramsPromise }) {
 ```
 
 <Banner type="success">
-  **Note:**
-  For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
+  **Note:** For fully working example of this, check of the official [Draft
+  Preview
+  Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview)
+  in the [Examples
+  Directory](https://github.com/payloadcms/payload/tree/main/examples).
 </Banner>
-

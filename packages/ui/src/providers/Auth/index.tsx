@@ -5,7 +5,7 @@ import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
@@ -307,7 +307,7 @@ export function AuthProvider({
   }, [tokenExpiration, openModal, i18n, setNewUser, user, redirectToInactivityRoute])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         fetchFullUser,
         logOut,
@@ -322,8 +322,8 @@ export function AuthProvider({
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
-export const useAuth = <T = ClientUser,>(): AuthContext<T> => useContext(Context) as AuthContext<T>
+export const useAuth = <T = ClientUser,>(): AuthContext<T> => use(Context) as AuthContext<T>

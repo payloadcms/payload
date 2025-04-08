@@ -27,6 +27,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
@@ -70,7 +71,7 @@ export const updateOperation = async <
     publishSpecificLocale,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -243,6 +244,11 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
+
+    const select = sanitizeSelect({
+      forceSelect: globalConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     if (!shouldSaveDraft) {
       // Ensure global has createdAt

@@ -111,7 +111,6 @@ describe('Number', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    expect(true).toBe(true) // the above fn contains the assertion
   })
 
   test('should fail min rows validation when rows are present', async () => {

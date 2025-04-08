@@ -16,10 +16,10 @@ Upload fields are useful for a variety of use cases, such as:
 - To give a layout building block the ability to feature a background image
 
 <LightDarkImage
-srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-alt="Shows an upload field in the Payload Admin Panel"
-caption="Admin Panel screenshot of an Upload field"
+  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+  alt="Shows an upload field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of an Upload field"
 />
 
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
@@ -37,16 +37,17 @@ export const MyUploadField: Field = {
 ```
 
 <Banner type="warning">
-  **Important:**
-  To use the Upload Field, you must have a [Collection](../configuration/collections) configured to allow [Uploads](../upload/overview).
+  **Important:** To use the Upload Field, you must have a
+  [Collection](../configuration/collections) configured to allow
+  [Uploads](../upload/overview).
 </Banner>
 
 ## Config Options
 
 | Option                 | Description                                                                                                                                                                 |
-|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`relationTo`** *    | Provide a single collection `slug` to allow this field to accept a relation to. **Note: the related collection must be configured to support Uploads.**        |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`relationTo`** \*    | Provide a single collection `slug` to allow this field to accept a relation to. **Note: the related collection must be configured to support Uploads.**                     |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
 | **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                |
 | **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                         |
@@ -64,13 +65,13 @@ export const MyUploadField: Field = {
 | **`displayPreview`**   | Enable displaying preview of the uploaded file. Overrides related Collection's `displayPreview` option. [More](/docs/upload/overview#collection-upload-options).            |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [Admin Options](./overview#admin-options).                                                                                               |
+| **`admin`**            | Admin-specific configuration. [Admin Options](./overview#admin-options).                                                                                                    |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
 | **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                         |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Example
 
@@ -102,7 +103,7 @@ prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
 | Property      | Description                                                                                           |
-|---------------|-------------------------------------------------------------------------------------------------------|
+| ------------- | ----------------------------------------------------------------------------------------------------- |
 | `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
 | `data`        | An object containing the full collection or global document currently being edited                    |
 | `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
@@ -128,10 +129,11 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   **Note:**
 
-  When an upload field has both **filterOptions** and a custom
-  **validate** function, the api will not validate **filterOptions**
-  unless you call the default upload field validation function imported from
-  **payload/shared** in your validate function.
+When an upload field has both **filterOptions** and a custom
+**validate** function, the api will not validate **filterOptions**
+unless you call the default upload field validation function imported from
+**payload/shared** in your validate function.
+
 </Banner>
 
 ## Bi-directional relationships

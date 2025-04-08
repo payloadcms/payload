@@ -1,0 +1,79 @@
+@import '../../../../scss/styles.scss';
+@import '../../colors.scss';
+
+@layer payload-default {
+  .lexical-diff__diff-container {
+    .lexical-relationship-diff {
+      @extend %body;
+      @include shadow-sm;
+      min-width: calc(var(--base) * 8);
+      max-width: fit-content;
+
+      display: flex;
+      align-items: center;
+      background-color: var(--theme-input-bg);
+      border-radius: $style-radius-s;
+      border: 1px solid var(--theme-elevation-100);
+      position: relative;
+      font-family: var(--font-body);
+      margin-block: base(0.5);
+      max-height: calc(var(--base) * 4);
+      padding: base(0.6);
+
+      &[data-match-type='create'] {
+        border-color: var(--diff-create-pill-border);
+        color: var(--diff-create-parent-color);
+
+        .lexical-relationship-diff__collectionLabel {
+          color: var(--diff-create-link-color);
+        }
+
+        [data-match-type='create'] {
+          color: var(--diff-create-parent-color);
+        }
+      }
+
+      &[data-match-type='delete'] {
+        border-color: var(--diff-delete-pill-border);
+        color: var(--diff-delete-parent-color);
+        text-decoration-line: none;
+        background-color: var(--diff-delete-pill-bg);
+
+        .lexical-relationship-diff__collectionLabel {
+          color: var(--diff-delete-link-color);
+        }
+
+        [data-match-type='delete'] {
+          text-decoration-line: none;
+        }
+
+        * {
+          color: var(--diff-delete-parent-color);
+        }
+      }
+
+      &__card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      &__title {
+        display: flex;
+        flex-direction: row;
+        font-weight: 600;
+      }
+
+      &__collectionLabel {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+}

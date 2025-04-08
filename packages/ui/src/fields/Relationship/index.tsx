@@ -101,6 +101,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     filterOptions,
     initialValue,
     setValue,
@@ -577,8 +578,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         showError && 'error',
         errorLoading && 'error-loading',
-        readOnly && `${baseClass}--read-only`,
-        !readOnly && allowCreate && `${baseClass}--allow-create`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
+        !(readOnly || disabled) && allowCreate && `${baseClass}--allow-create`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -611,7 +612,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 onDocumentDrawerOpen,
                 onSave,
               }}
-              disabled={readOnly || isDrawerOpen}
+              disabled={readOnly || disabled || isDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -625,7 +626,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               isMulti={hasMany}
               isSortable={isSortable}
               onChange={
-                !readOnly
+                !(readOnly || disabled)
                   ? (selected) => {
                       if (selected === null) {
                         setValue(hasMany ? [] : null)
@@ -689,7 +690,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!readOnly && allowCreate && (
+            {!(readOnly || disabled) && allowCreate && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}

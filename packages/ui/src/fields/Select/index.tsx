@@ -64,6 +64,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -74,7 +75,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
-      if (!readOnly) {
+      if (!readOnly || disabled) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
@@ -93,7 +94,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, hasMany, setValue, onChangeFromProps],
+    [readOnly, disabled, hasMany, setValue, onChangeFromProps],
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
@@ -116,7 +117,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       showError={showError}
       style={styles}

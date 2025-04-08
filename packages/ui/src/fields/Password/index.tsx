@@ -71,8 +71,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    formInitializing,
-    formProcessing,
+    disabled,
     setValue,
     showError,
     value,
@@ -80,8 +79,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = disabledFromProps || formInitializing || formProcessing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: false,
@@ -109,7 +106,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       }}
       path={path}
       placeholder={placeholder}
-      readOnly={disabled}
+      readOnly={disabled || disabledFromProps}
       required={required}
       rtl={renderRTL}
       showError={showError}

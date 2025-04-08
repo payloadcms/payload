@@ -1,4 +1,4 @@
-import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
@@ -47,19 +47,24 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+
+  const sortAggregation: PipelineStage[] = []
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
-      fields: collectionConfig.flattenedFields,
+      fields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
+      sortAggregation,
       timestamps: true,
+      versions: true,
     })
   }
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
   const versionQuery = await buildQuery({
     adapter: this,
     fields,
@@ -133,7 +138,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   })
 
   // build join aggregation
-  if (aggregate) {
+  if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,

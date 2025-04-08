@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -8,6 +9,8 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
 } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
@@ -54,6 +57,7 @@ type Args = {
    * the initial block data here, which will be used as `blockData` for the top-level fields, until the first block is encountered.
    */
   initialBlockData?: Data
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
@@ -70,6 +74,8 @@ type Args = {
   renderFieldFn?: RenderFieldMethod
   req: PayloadRequest
   schemaPath: string
+  select?: SelectType
+  selectMode?: SelectMode
   skipValidation?: boolean
 }
 
@@ -82,6 +88,7 @@ export const fieldSchemasToFormState = async ({
   fields,
   fieldSchemaMap,
   initialBlockData,
+  mockRSCs,
   operation,
   permissions,
   preferences,
@@ -90,6 +97,8 @@ export const fieldSchemasToFormState = async ({
   renderFieldFn,
   req,
   schemaPath,
+  select,
+  selectMode,
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
@@ -109,6 +118,8 @@ export const fieldSchemasToFormState = async ({
       fields,
       locale: req.locale,
       req,
+      select,
+      selectMode,
       siblingData: dataWithDefaultValues,
       user: req.user,
     })
@@ -131,6 +142,7 @@ export const fieldSchemasToFormState = async ({
       fields,
       fieldSchemaMap,
       fullData,
+      mockRSCs,
       operation,
       parentIndexPath: '',
       parentPassesCondition: true,
@@ -142,6 +154,8 @@ export const fieldSchemasToFormState = async ({
       renderAllFields,
       renderFieldFn,
       req,
+      select,
+      selectMode,
       skipValidation,
       state,
     })

@@ -390,6 +390,10 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
           },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+          },
         ],
         pasteURL: false,
       },
@@ -728,6 +732,31 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'best-fit',
+      fields: [
+        {
+          name: 'withAdminThumbnail',
+          type: 'upload',
+          relationTo: 'admin-thumbnail-function',
+        },
+        {
+          name: 'withinRange',
+          type: 'upload',
+          relationTo: enlargeSlug,
+        },
+        {
+          name: 'nextSmallestOutOfRange',
+          type: 'upload',
+          relationTo: 'focal-only',
+        },
+        {
+          name: 'original',
+          type: 'upload',
+          relationTo: 'focal-only',
         },
       ],
     },

@@ -16,8 +16,6 @@ import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
-export { generateAccountMetadata } from './meta.js'
-
 export async function Account({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
