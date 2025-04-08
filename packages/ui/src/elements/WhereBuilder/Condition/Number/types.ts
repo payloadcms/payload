@@ -5,5 +5,5 @@ import type { DefaultFilterProps } from '../types.js'
 export type Props = {
   readonly field: NumberFieldClient
   readonly onChange: (e: string) => void
-  readonly value: string
+  readonly value: number | number[]
 } & DefaultFilterProps
