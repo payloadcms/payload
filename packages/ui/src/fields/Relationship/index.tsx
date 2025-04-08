@@ -2,7 +2,7 @@
 import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -45,6 +45,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       admin: {
         allowCreate = true,
         allowEdit = true,
+        allowOpenInNewTab = false,
         className,
         description,
         isSortable = true,
@@ -555,6 +556,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     })
   }, [])
 
+  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ id, collectionSlug, hasReadPermission }) => {
+      if (hasReadPermission && id && collectionSlug) {
+        const docUrl = formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${collectionSlug}/${id}`,
+        })
+        window.open(docUrl, '_blank')
+      }
+    },
+    [config.routes.admin],
+  )
+
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
       openDrawer()
@@ -562,7 +576,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }
   }, [openDrawer, currentlyOpenRelationship])
 
-  const valueToRender = findOptionsByValue({ allowEdit, options, value })
+  const valueToRender = findOptionsByValue({ allowEdit, allowOpenInNewTab, options, value })
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
@@ -610,6 +624,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 disableKeyDown: isDrawerOpen,
                 disableMouseDown: isDrawerOpen,
                 onDocumentDrawerOpen,
+                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || disabled || isDrawerOpen}

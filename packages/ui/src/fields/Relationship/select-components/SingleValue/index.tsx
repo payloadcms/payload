@@ -9,9 +9,10 @@ import type { Option } from '../../types.js'
 
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
+import { NewTabIcon } from '../../../../icons/NewTab/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
-import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
+import { useTranslation } from '../../../../providers/Translation/index.js'
 
 const baseClass = 'relationship--single-value'
 
@@ -25,8 +26,8 @@ export const SingleValue: React.FC<
 > = (props) => {
   const {
     children,
-    data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
+    data: { allowEdit, allowOpenInNewTab, label, relationTo, value },
+    selectProps: { customProps: { onDocumentDrawerOpen, onDocumentOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
@@ -67,6 +68,37 @@ export const SingleValue: React.FC<
                   {t('general:edit')}
                 </Tooltip>
                 <EditIcon />
+              </button>
+            </Fragment>
+          )}
+          {relationTo && hasReadPermission && allowOpenInNewTab && (
+            <Fragment>
+              <button
+                aria-label={`Open ${label}`}
+                className={`${baseClass}__open-in-new-tab`}
+                onClick={() => {
+                  setShowTooltip(false)
+                  onDocumentOpen({
+                    id: value,
+                    collectionSlug: relationTo,
+                    hasReadPermission,
+                  })
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+                onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+                type="button"
+              >
+                <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+                  {t('fields:openInNewTab', { label: '' })}
+                </Tooltip>
+                <NewTabIcon />
               </button>
             </Fragment>
           )}
