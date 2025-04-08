@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-in-test */
 import type {
   SerializedBlockNode,
   SerializedLinkNode,
@@ -16,14 +17,6 @@ import { fileURLToPath } from 'url'
 import type { LexicalField, LexicalMigrateField, RichTextField } from '../fields/payload-types.js'
 
 import { devUser } from '../credentials.js'
-import {
-  arrayFieldsSlug,
-  lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
-  richTextFieldsSlug,
-  textFieldsSlug,
-  uploadsSlug,
-} from '../fields/slugs.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -35,6 +28,13 @@ import { generateLexicalRichText } from './collections/RichText/generateLexicalR
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import { clearAndSeedEverything } from './seed.js'
+import {
+  lexicalFieldsSlug,
+  lexicalMigrateFieldsSlug,
+  richTextFieldsSlug,
+  textFieldsSlug,
+  uploadsSlug,
+} from './slugs.js'
 
 let payload: Payload
 let restClient: NextRESTClient

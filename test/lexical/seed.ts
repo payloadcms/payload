@@ -87,15 +87,10 @@ const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
-  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
   // Get both files in parallel
-  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
-    getFileByPath(jpgPath),
-    getFileByPath(jpg480x320Path),
-    getFileByPath(pngPath),
-  ])
+  const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
   const createdArrayDoc = await _payload.create({
     collection: arrayFieldsSlug,
@@ -136,58 +131,6 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
     overrideAccess: true,
   })
-
-  await _payload.create({
-    collection: uploadsSlug,
-    data: {},
-    file: jpg480x320File,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  // const createdJPGDocSlug2 = await _payload.create({
-  //   collection: uploads2Slug,
-  //   data: {
-  //     ...uploadsDoc,
-  //   },
-  //   file: jpgFile,
-  //   depth: 0,
-  //   overrideAccess: true,
-  // })
-
-  // Create hasMany upload
-  await _payload.create({
-    collection: uploadsMulti,
-    data: {
-      media: [createdPNGDoc.id, createdJPGDoc.id],
-    },
-  })
-
-  // Create hasMany poly upload
-  // await _payload.create({
-  //   collection: uploadsMultiPoly,
-  //   data: {
-  //     media: [
-  //       { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-  //       { value: createdJPGDoc.id, relationTo: uploadsSlug },
-  //     ],
-  //   },
-  // })
-
-  // Create poly upload
-  await _payload.create({
-    collection: uploadsPoly,
-    data: {
-      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
-    },
-  })
-  // Create poly upload
-  // await _payload.create({
-  //   collection: uploadsPoly,
-  //   data: {
-  //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
-  //   },
-  // })
 
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
@@ -493,35 +436,6 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  await _payload.create({
-    collection: numberFieldsSlug,
-    data: { number: 2 },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: numberFieldsSlug,
-    data: { number: 3 },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: numberFieldsSlug,
-    data: numberDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: uiSlug,
-    data: {
-      text: 'text',
-    },
-    depth: 0,
-  })
-
   const getInlineBlock = () => ({
     type: 'inlineBlock',
     fields: {
@@ -667,30 +581,6 @@ export const seed = async (_payload: Payload) => {
     },
     depth: 0,
   })
-
-  await Promise.all([
-    _payload.create({
-      collection: customIDSlug,
-      data: {
-        id: nonStandardID,
-      },
-      depth: 0,
-    }),
-    _payload.create({
-      collection: customTabIDSlug,
-      data: {
-        id: customTabID,
-      },
-      depth: 0,
-    }),
-    _payload.create({
-      collection: customRowIDSlug,
-      data: {
-        id: customRowID,
-      },
-      depth: 0,
-    }),
-  ])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

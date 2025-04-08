@@ -15,6 +15,8 @@ import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import RichTextFields from './collections/RichText/index.js'
+import TextFields from './collections/Text/index.js'
+import Uploads from './collections/Upload/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,6 +35,8 @@ export default buildConfigWithDefaults({
     LexicalAccessControl,
     LexicalRelationshipsFields,
     RichTextFields,
+    TextFields,
+    Uploads,
   ],
   admin: {
     importMap: {
