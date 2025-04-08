@@ -23,7 +23,7 @@
     "@payloadcms/storage-vercel-blob": "3.33.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.2.3",
+    "next": "15.2.4",
     "payload": "3.33.0",
     "react": "19.0.0",
     "react-dom": "19.0.0"
