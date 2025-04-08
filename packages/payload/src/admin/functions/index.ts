@@ -60,6 +60,7 @@ export type BuildTableStateArgs = {
   columns?: ColumnPreference[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
     id: number | string

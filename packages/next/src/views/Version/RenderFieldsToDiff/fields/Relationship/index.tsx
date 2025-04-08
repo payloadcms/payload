@@ -7,12 +7,11 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useTranslation } from '@payloadcms/ui'
+import { FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 
-import Label from '../../Label/index.js'
 import './index.scss'
 import { diffStyles } from '../styles.js'
 
@@ -169,10 +168,10 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
 
   return (
     <div className={baseClass}>
-      <Label>
+      <FieldDiffLabel>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {getTranslation(label, i18n)}
-      </Label>
+      </FieldDiffLabel>
       <ReactDiffViewer
         hideLineNumbers
         newValue={versionToRender}

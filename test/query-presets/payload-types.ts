@@ -86,7 +86,7 @@ export interface Config {
     'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   globalsSelect: {};
@@ -122,7 +122,7 @@ export interface UserAuthOperations {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -133,7 +133,7 @@ export interface Page {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   roles?: ('admin' | 'user' | 'anonymous')[] | null;
   updatedAt: string;
@@ -152,7 +152,7 @@ export interface User {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -163,24 +163,24 @@ export interface Post {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -190,10 +190,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -213,7 +213,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -224,23 +224,23 @@ export interface PayloadMigration {
  * via the `definition` "payload-query-presets".
  */
 export interface PayloadQueryPreset {
-  id: string;
+  id: number;
   title: string;
   isShared?: boolean | null;
   access?: {
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
       roles?: ('admin' | 'user' | 'anonymous')[] | null;
     };
     update?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
       roles?: ('admin' | 'user' | 'anonymous')[] | null;
     };
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
     };
   };
   where?:

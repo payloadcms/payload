@@ -604,6 +604,29 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'aliases',
+      fields: [
+        {
+          name: 'thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName',
+          dbName: 'shortname',
+          type: 'array',
+          fields: [
+            {
+              name: 'nestedArray',
+              type: 'array',
+              dbName: 'short_nested_1',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {

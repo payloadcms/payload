@@ -367,3 +367,4 @@ export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'

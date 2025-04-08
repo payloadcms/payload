@@ -41,9 +41,9 @@ export const updateOne: UpdateOne = async function updateOne(
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
       adapter: this,
-      chainedMethods: [{ args: [1], method: 'limit' }],
       db,
       joins,
+      query: ({ query }) => query.limit(1),
       selectFields,
       tableName,
       where,
