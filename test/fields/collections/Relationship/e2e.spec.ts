@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -649,6 +650,36 @@ describe('relationship', () => {
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should not allow filtering by relationship field hasMany false / in & not in', async () => {
+    await page.goto(url.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+
+    await conditionField
+      .locator('.rs__option', {
+        hasText: exactText('Relationship'),
+      })
+      ?.click()
+
+    await expect(whereBuilder.locator('.condition__field')).toContainText('Relationship')
+
+    const operatorInput = whereBuilder.locator('.condition__operator')
+    await operatorInput.click()
+
+    const operatorOptions = operatorInput.locator('.rs__option')
+    const optionTexts = await operatorOptions.allTextContents()
+
+    await expect.poll(() => optionTexts).not.toContain('is in')
+    await expect.poll(() => optionTexts).not.toContain('is not in')
   })
 })
 
