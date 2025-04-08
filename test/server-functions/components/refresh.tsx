@@ -1,9 +1,9 @@
 'use client'
-import { refresh } from '@payloadcms/next/server-functions'
+import { refreshFunction } from './refreshFunction.js'
 
 const RefreshToken = () => {
   const handleRefresh = async () => {
-    const response = await refresh({ collection: 'users' })
+    const response = await refreshFunction({ collection: 'users' })
     console.log('Token refreshed:', response)
   }
 

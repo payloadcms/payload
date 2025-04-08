@@ -4,11 +4,8 @@ import type { CollectionSlug } from 'payload'
 
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { generatePayloadCookie, getPayload } from 'payload'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import config from '@payload-config'
 
-export async function refresh({ collection }: { collection: CollectionSlug }) {
+export async function refresh({ collection, config }: { collection: CollectionSlug; config: any }) {
   try {
     const payload = await getPayload({ config })
     const authConfig = payload.collections[collection]?.config.auth

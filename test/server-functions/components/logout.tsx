@@ -1,9 +1,10 @@
 'use client'
-import { logout } from '@payloadcms/next/server-functions'
+
+import { logoutFunction } from './logoutFunction.js'
 
 const LogoutButton = () => {
   const handleLogout = async () => {
-    await logout()
+    await logoutFunction()
     console.log('User logged out')
   }
 

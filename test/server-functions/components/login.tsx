@@ -1,8 +1,8 @@
 'use client'
-import type { ChangeEvent, FormEvent } from 'react'
 
-import { login } from '@payloadcms/next/server-functions'
-import { useState } from 'react'
+import { type ChangeEvent, type FormEvent, useState } from 'react'
+
+import { loginFunction } from './loginFunction.js'
 
 const LoginForm = () => {
   const [email, setEmail] = useState<string>('')
@@ -12,7 +12,7 @@ const LoginForm = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     try {
-      const response = await login({ collection: 'users', email, password })
+      await loginFunction({ email, password })
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
