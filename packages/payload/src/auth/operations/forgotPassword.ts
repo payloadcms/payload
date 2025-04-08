@@ -143,7 +143,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       Date.now() + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
     ).toISOString()
 
-    user = await payload.update({
+    user = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
       data: user,
