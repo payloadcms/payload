@@ -11,20 +11,20 @@ import {
   useAllFormFields,
   useForm,
   useFormModified,
-  useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useQueues } from '../../hooks/useQueues.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
+import './index.scss'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -54,12 +54,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
     updateSavedDocumentData,
   } = useDocumentInfo()
-  const queueRef = useRef([])
-  const isProcessingRef = useRef(false)
 
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
-  const isFormProcessing = useFormProcessing()
 
   const [fields] = useAllFormFields()
   const modified = useFormModified()
@@ -105,43 +102,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
-  const processQueue = React.useCallback(async () => {
-    if (isProcessingRef.current || queueRef.current.length === 0) {
-      return
-    }
-
-    // Do not autosave if the form is already processing (e.g. if the user clicked the publish button
-    // right before this autosave runs), as parallel updates could cause conflicts
-    if (isFormProcessing) {
-      queueRef.current = []
-      return
-    }
-
-    if (!isValidRef.current) {
-      // Clear queue so we don't end up in an infinite loop
-      queueRef.current = []
-      // Reset internal validation state so queue processing can run again
-      isValidRef.current = true
-      return
-    }
-    isProcessingRef.current = true
-
-    const latestAction = queueRef.current[queueRef.current.length - 1]
-    queueRef.current = []
-
-    setBackgroundProcessing(true)
-
-    try {
-      await latestAction()
-    } finally {
-      isProcessingRef.current = false
-      setBackgroundProcessing(false)
-      if (queueRef.current.length > 0) {
-        await processQueue()
-      }
-    }
-    setBackgroundProcessing(false)
-  }, [isFormProcessing, setBackgroundProcessing])
+  const { queueTask } = useQueues()
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -165,142 +126,155 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       }
     }
 
-    const autosave = async () => {
-      if (modified) {
-        startTimestamp = new Date().getTime()
+    queueTask(
+      async () => {
+        if (modified) {
+          startTimestamp = new Date().getTime()
 
-        setSaving(true)
+          setSaving(true)
 
-        let url: string
-        let method: string
-        let entitySlug: string
+          let url: string
+          let method: string
+          let entitySlug: string
 
-        if (collection && id) {
-          entitySlug = collection.slug
-          url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'PATCH'
-        }
+          if (collection && id) {
+            entitySlug = collection.slug
+            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'PATCH'
+          }
 
-        if (globalDoc) {
-          entitySlug = globalDoc.slug
-          url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'POST'
-        }
+          if (globalDoc) {
+            entitySlug = globalDoc.slug
+            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'POST'
+          }
 
-        if (url) {
-          if (modifiedRef.current) {
-            const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
+          if (url) {
+            if (modifiedRef.current) {
+              const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
 
-            data._status = 'draft'
+              data._status = 'draft'
 
-            const skipSubmission =
-              submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+              const skipSubmission =
+                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-            if (!skipSubmission && isValidRef.current) {
-              let res
-              try {
-                res = await fetch(url, {
-                  body: JSON.stringify(data),
-                  credentials: 'include',
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/json',
-                  },
-                  method,
-                })
-              } catch (error) {
-                // Swallow Error
-              }
+              if (!skipSubmission && isValidRef.current) {
+                let res
 
-              const newDate = new Date()
-              // We need to log the time in order to figure out if we need to trigger the state off later
-              endTimestamp = newDate.getTime()
-
-              if (res.status === 200) {
-                setLastUpdateTime(newDate.getTime())
-
-                reportUpdate({
-                  id,
-                  entitySlug,
-                  updatedAt: newDate.toISOString(),
-                })
-
-                if (!mostRecentVersionIsAutosaved) {
-                  incrementVersionCount()
-                  setMostRecentVersionIsAutosaved(true)
-                  setUnpublishedVersionCount((prev) => prev + 1)
-                }
-              }
-              const json = await res.json()
-
-              if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
-                if (Array.isArray(json.errors)) {
-                  const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                    ([fieldErrs, nonFieldErrs], err) => {
-                      const newFieldErrs = []
-                      const newNonFieldErrs = []
-
-                      if (err?.message) {
-                        newNonFieldErrs.push(err)
-                      }
-
-                      if (Array.isArray(err?.data)) {
-                        err.data.forEach((dataError) => {
-                          if (dataError?.field) {
-                            newFieldErrs.push(dataError)
-                          } else {
-                            newNonFieldErrs.push(dataError)
-                          }
-                        })
-                      }
-
-                      return [
-                        [...fieldErrs, ...newFieldErrs],
-                        [...nonFieldErrs, ...newNonFieldErrs],
-                      ]
+                try {
+                  res = await fetch(url, {
+                    body: JSON.stringify(data),
+                    credentials: 'include',
+                    headers: {
+                      'Accept-Language': i18n.language,
+                      'Content-Type': 'application/json',
                     },
-                    [[], []],
-                  )
+                    method,
+                  })
+                } catch (_err) {
+                  // Swallow Error
+                }
 
-                  dispatchFields({
-                    type: 'ADD_SERVER_ERRORS',
-                    errors: fieldErrors,
+                const newDate = new Date()
+                // We need to log the time in order to figure out if we need to trigger the state off later
+                endTimestamp = newDate.getTime()
+
+                if (res.status === 200) {
+                  setLastUpdateTime(newDate.getTime())
+
+                  reportUpdate({
+                    id,
+                    entitySlug,
+                    updatedAt: newDate.toISOString(),
                   })
 
-                  nonFieldErrors.forEach((err) => {
-                    toast.error(err.message || i18n.t('error:unknown'))
-                  })
-
-                  // Set valid to false internally so the queue doesn't process
-                  isValidRef.current = false
-                  setIsValid(false)
-                  setSubmitted(true)
-                  hideIndicator()
-                  return
+                  if (!mostRecentVersionIsAutosaved) {
+                    incrementVersionCount()
+                    setMostRecentVersionIsAutosaved(true)
+                    setUnpublishedVersionCount((prev) => prev + 1)
+                  }
                 }
-              } else {
-                // If it's not an error then we can update the document data inside the context
-                const document = json?.doc || json?.result
+                const json = await res.json()
 
-                // Manually update the data since this function doesn't fire the `submit` function from useForm
-                if (document) {
-                  setIsValid(true)
+                if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
+                  if (Array.isArray(json.errors)) {
+                    const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                      ([fieldErrs, nonFieldErrs], err) => {
+                        const newFieldErrs = []
+                        const newNonFieldErrs = []
 
-                  // Reset internal state allowing the queue to process
-                  isValidRef.current = true
-                  updateSavedDocumentData(document)
+                        if (err?.message) {
+                          newNonFieldErrs.push(err)
+                        }
+
+                        if (Array.isArray(err?.data)) {
+                          err.data.forEach((dataError) => {
+                            if (dataError?.field) {
+                              newFieldErrs.push(dataError)
+                            } else {
+                              newNonFieldErrs.push(dataError)
+                            }
+                          })
+                        }
+
+                        return [
+                          [...fieldErrs, ...newFieldErrs],
+                          [...nonFieldErrs, ...newNonFieldErrs],
+                        ]
+                      },
+                      [[], []],
+                    )
+
+                    dispatchFields({
+                      type: 'ADD_SERVER_ERRORS',
+                      errors: fieldErrors,
+                    })
+
+                    nonFieldErrors.forEach((err) => {
+                      toast.error(err.message || i18n.t('error:unknown'))
+                    })
+
+                    // Set valid to false internally so the queue doesn't process
+                    isValidRef.current = false
+                    setIsValid(false)
+                    setSubmitted(true)
+                    hideIndicator()
+                    return
+                  }
+                } else {
+                  // If it's not an error then we can update the document data inside the context
+                  const document = json?.doc || json?.result
+
+                  // Manually update the data since this function doesn't fire the `submit` function from useForm
+                  if (document) {
+                    setIsValid(true)
+
+                    // Reset internal state allowing the queue to process
+                    isValidRef.current = true
+                    updateSavedDocumentData(document)
+                  }
                 }
+
+                hideIndicator()
               }
-
-              hideIndicator()
             }
           }
         }
-      }
-    }
+      },
+      {
+        afterProcess: () => {
+          setBackgroundProcessing(false)
+        },
+        beforeProcess: () => {
+          if (!isValidRef.current) {
+            isValidRef.current = true
+            return false
+          }
 
-    queueRef.current.push(autosave)
-    void processQueue()
+          setBackgroundProcessing(true)
+        },
+      },
+    )
   })
 
   const didMount = useRef(false)

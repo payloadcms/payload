@@ -30,6 +30,7 @@ export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/c
 export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
 export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
+export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
 
 export { RelationshipFeatureClient } from '../../features/relationship/client/index.js'
 

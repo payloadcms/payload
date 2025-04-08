@@ -99,7 +99,14 @@ export const updateDocument = async <
   const password = data?.password
   const shouldSaveDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !shouldSaveDraft,
+  )
 
   // /////////////////////////////////////
   // Handle potentially locked documents

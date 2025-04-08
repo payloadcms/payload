@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -464,6 +465,7 @@ export interface Singular {
  */
 export interface Version {
   id: string;
+  title: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
   categoryVersions?: (string | CategoriesVersion)[] | null;
@@ -999,6 +1001,7 @@ export interface UploadsSelect<T extends boolean = true> {
  * via the `definition` "versions_select".
  */
 export interface VersionsSelect<T extends boolean = true> {
+  title?: T;
   category?: T;
   categoryVersion?: T;
   categoryVersions?: T;
@@ -1232,7 +1235,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
-
