@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, CDPSession, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { FormState } from 'payload'
 
@@ -22,6 +22,8 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+const { describe, beforeEach, afterEach } = test
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -44,6 +46,7 @@ test.describe('Form State', () => {
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
   })
@@ -154,11 +157,12 @@ test.describe('Form State', () => {
 
     // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
-          body?.[0]?.args?.formState?.['array'] && body[0].args.formState['array'].lastRenderedPath,
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
     })
 
@@ -172,13 +176,13 @@ test.describe('Form State', () => {
     // The `array` itself SHOULD still have a `lastRenderedPath`
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-            body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.richText']?.lastRenderedPath,
+            body[0].args.formState['array'].lastRenderedPath === 'array' &&
+            body[0].args.formState['array.0.text']?.lastRenderedPath === 'array.0.text',
         ),
     })
 
@@ -193,152 +197,170 @@ test.describe('Form State', () => {
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     // The rich text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.richText']?.lastRenderedPath &&
-            body[0].args.formState['array.1.richText']?.lastRenderedPath,
+            body[0].args.formState['array.0.text']?.lastRenderedPath === 'array.0.text' &&
+            body[0].args.formState['array.1.text']?.lastRenderedPath === 'array.1.text',
         ),
     })
   })
 
-  test('should queue onChange functions', async () => {
-    await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
+  describe('Throttled tests', () => {
+    let cdpSession: CDPSession
 
-    // only throttle test after initial load to avoid timeouts
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
+    beforeEach(async () => {
+      await page.goto(postsUrl.create)
+      const field = page.locator('#field-title')
+      await field.fill('Test')
+
+      cdpSession = await throttleTest({
+        page,
+        context,
+        delay: 'Slow 3G',
+      })
     })
 
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await field.fill('')
-        // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 275 })
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000, // watch network for 10 seconds to allow requests to build up
-      },
-    )
+    afterEach(async () => {
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        latency: 0,
+        downloadThroughput: -1,
+        uploadThroughput: -1,
+      })
 
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
+      await cdpSession.detach()
     })
 
-    await cdpSession.detach()
-  })
+    test('should queue onChange functions', async () => {
+      const field = page.locator('#field-title')
 
-  test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {
-    await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
-
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await field.fill('')
+          // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
+          await field.pressSequentially('Some text to type', { delay: 275 })
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000, // watch network for 10 seconds to allow requests to build up
+        },
+      )
     })
 
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await page.locator('#field-array .array-field__add-row').click()
-        await page.locator('#field-title').fill('Test 2')
+    test('should optimistically add rows while pending network requests', async () => {
+      let requestCount = 0
 
-        // use `waitForSelector` to ensure the element doesn't appear and then disappear
-        // eslint-disable-next-line playwright/no-wait-for-selector
-        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
-          timeout: TEST_TIMEOUT,
-        })
+      // increment the response count for form state requests
+      page.on('request', (request) => {
+        if (request.url() === postsUrl.create && request.method() === 'POST') {
+          requestCount++
+        }
+      })
 
-        await expect(
-          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
-        ).toBeVisible()
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000,
-      },
-    )
+      // Add the first row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
+      // Wait for the first request to be sent
+      await page.waitForRequest((request) => request.url() === postsUrl.create)
+
+      // Before the first request comes back, add the second row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // At this point there should have been a single request sent for the first row
+      expect(requestCount).toBe(1)
+
+      // Wait for the first request to finish
+      await page.waitForResponse(
+        (response) =>
+          response.url() === postsUrl.create &&
+          response.status() === 200 &&
+          response.headers()['content-type'] === 'text/x-component',
+      )
+
+      // block the second request from executing to ensure the form remains in stale state
+      await page.route(postsUrl.create, async (route) => {
+        if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+          await route.abort()
+          return
+        }
+
+        await route.continue()
+      })
+
+      // the second row should not have disappeared
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+      await expect(page.locator('#field-array #array-row-1 .shimmer-effect')).toBeVisible()
     })
 
-    await cdpSession.detach()
-  })
+    test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await page.locator('#field-array .array-field__add-row').click()
+          await page.locator('#field-title').fill('Test 2')
 
-  test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
-    await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 .field-type.text', {
+            timeout: TEST_TIMEOUT,
+          })
 
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
+          await expect(page.locator('#field-array #array-row-0 .field-type.text')).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
     })
 
-    // Add two rows quickly
-    // Test that the rich text fields within the rows do not disappear
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await page.locator('#field-array .array-field__add-row').click()
-        await page.locator('#field-array .array-field__add-row').click()
+    test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
+      // Add two rows quickly
+      // Test that the rich text fields within the rows do not disappear
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await page.locator('#field-array .array-field__add-row').click()
+          await page.locator('#field-array .array-field__add-row').click()
 
-        // use `waitForSelector` to ensure the element doesn't appear and then disappear
-        // eslint-disable-next-line playwright/no-wait-for-selector
-        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
-          timeout: TEST_TIMEOUT,
-        })
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 .field-type.text', {
+            timeout: TEST_TIMEOUT,
+          })
 
-        // use `waitForSelector` to ensure the element doesn't appear and then disappear
-        // eslint-disable-next-line playwright/no-wait-for-selector
-        await page.waitForSelector('#field-array #array-row-1 .field-type.rich-text-lexical', {
-          timeout: TEST_TIMEOUT,
-        })
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-1 .field-type.text', {
+            timeout: TEST_TIMEOUT,
+          })
 
-        await expect(
-          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
-        ).toBeVisible()
+          await expect(page.locator('#field-array #array-row-0 .field-type.text')).toBeVisible()
 
-        await expect(
-          page.locator('#field-array #array-row-1 .field-type.rich-text-lexical'),
-        ).toBeVisible()
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000,
-      },
-    )
-
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
+          await expect(page.locator('#field-array #array-row-1 .field-type.text')).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
     })
-
-    await cdpSession.detach()
   })
 })
 
