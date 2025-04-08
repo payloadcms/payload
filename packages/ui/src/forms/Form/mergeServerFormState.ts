@@ -12,11 +12,10 @@ type Args = {
 }
 
 /**
- * Merges certain properties from the server state into the client state. These do not include values,
- * as we do not want to update them on the client like that, which would cause flickering.
- *
- * We want to use this to update the error state, and other properties that are not user input, as the error state
- * is the thing we want to keep in sync with the server (where it's calculated) on the client.
+ * This function receives form state from the server and intelligently merges it into the client state.
+ * The server contains extra properties that the client may not have, e.g. custom components and error states.
+ * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
+ * Doing this would cause the client to lose any local changes to those fields.
  */
 export const mergeServerFormState = ({
   acceptValues,
@@ -25,116 +24,96 @@ export const mergeServerFormState = ({
 }: Args): { changed: boolean; newState: FormState } => {
   let changed = false
 
-  const newState = {}
+  const newState = { ...currentState }
 
-  if (currentState) {
-    const serverPropsToAccept: Array<keyof FieldState> = [
-      'passesCondition',
-      'valid',
-      'errorMessage',
-      'errorPaths',
-      'customComponents',
-    ]
+  const serverPropsToAccept: Array<keyof FieldState> = [
+    'passesCondition',
+    'valid',
+    'errorMessage',
+    'errorPaths',
+    'customComponents',
+  ]
 
-    if (acceptValues) {
-      serverPropsToAccept.push('value')
-      serverPropsToAccept.push('initialValue')
+  if (acceptValues) {
+    serverPropsToAccept.push('value')
+    serverPropsToAccept.push('initialValue')
+  }
+
+  for (const [path, incomingField] of Object.entries(incomingState)) {
+    newState[path] = {
+      ...(newState?.[path] || {}),
     }
 
-    for (const [path, field] of Object.entries(currentState)) {
-      const fieldState = { ...field }
+    /**
+     * Handle error paths
+     */
+    const errorPathsResult = mergeErrorPaths(
+      newState[path]?.errorPaths,
+      incomingField.errorPaths as unknown as string[],
+    )
 
-      if (!incomingState[path]) {
-        continue
+    if (errorPathsResult.result) {
+      if (errorPathsResult.changed) {
+        changed = errorPathsResult.changed
       }
 
-      /**
-       * Handle error paths
-       */
-      const errorPathsResult = mergeErrorPaths(
-        fieldState.errorPaths,
-        incomingState[path].errorPaths as unknown as string[],
-      )
+      newState[path].errorPaths = errorPathsResult.result
+    }
 
-      if (errorPathsResult.result) {
-        if (errorPathsResult.changed) {
-          changed = errorPathsResult.changed
-        }
-
-        fieldState.errorPaths = errorPathsResult.result
+    /**
+     * Handle filterOptions
+     */
+    if (incomingField.filterOptions || newState[path].filterOptions) {
+      if (!dequal(incomingField?.filterOptions, newState[path].filterOptions)) {
+        changed = true
+        newState[path].filterOptions = incomingField.filterOptions
       }
+    }
 
-      /**
-       * Handle filterOptions
-       */
-      if (incomingState[path]?.filterOptions || fieldState.filterOptions) {
-        if (!dequal(incomingState[path]?.filterOptions, fieldState.filterOptions)) {
+    /**
+     * Intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
+     * For example, the server response could come back with a row which has been deleted on the client
+     * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
+     */
+    if (Array.isArray(incomingField.rows)) {
+      incomingField.rows.forEach((row) => {
+        const matchedExistingRowIndex = newState[path].rows.findIndex(
+          (existingRow) => existingRow.id === row.id,
+        )
+
+        if (matchedExistingRowIndex > -1) {
           changed = true
-          fieldState.filterOptions = incomingState[path].filterOptions
-        }
-      }
+          newState[path].rows = [...newState[path].rows] // shallow copy to avoid mutating the original array
 
-      /**
-       * Need to intelligently merge the rows array to ensure changes to local state are not lost while the request was pending
-       * For example, the server response could come back with a row which has been deleted on the client
-       * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
-       */
-      if (Array.isArray(incomingState[path].rows)) {
-        incomingState[path].rows.forEach((row) => {
-          const matchedExistingRowIndex = fieldState.rows.findIndex(
-            (existingRow) => existingRow.id === row.id,
-          )
-
-          if (matchedExistingRowIndex > -1) {
-            changed = true
-            fieldState.rows = [...fieldState.rows] // shallow copy to avoid mutating the original array
-
-            fieldState.rows[matchedExistingRowIndex] = {
-              ...fieldState.rows[matchedExistingRowIndex],
-              ...row,
-            }
-          }
-        })
-      }
-
-      /**
-       * Handle adding all the remaining props that should be updated in the local form state from the server form state
-       */
-      serverPropsToAccept.forEach((propFromServer) => {
-        if (!dequal(incomingState[path]?.[propFromServer], fieldState[propFromServer])) {
-          changed = true
-
-          if (!(propFromServer in incomingState[path])) {
-            // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
-            // Thus, we simply re-use the initial render state
-            if (propFromServer !== 'customComponents') {
-              delete fieldState[propFromServer]
-            }
-          } else {
-            fieldState[propFromServer as any] = incomingState[path][propFromServer]
+          newState[path].rows[matchedExistingRowIndex] = {
+            ...newState[path].rows[matchedExistingRowIndex],
+            ...row,
           }
         }
       })
-
-      if (fieldState.valid !== false) {
-        fieldState.valid = true
-      }
-
-      if (fieldState.passesCondition !== false) {
-        fieldState.passesCondition = true
-      }
-
-      newState[path] = fieldState
     }
 
-    // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
-    // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
-    // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
-    for (const [path, field] of Object.entries(incomingState)) {
-      if (!currentState[path]) {
+    /**
+     * Handle all remaining properties
+     */
+    serverPropsToAccept.forEach((propFromServer) => {
+      if (!dequal(incomingField[propFromServer], newState[path][propFromServer])) {
         changed = true
-        newState[path] = field
+
+        if (propFromServer in incomingField) {
+          newState[path][propFromServer as any] = incomingField[propFromServer]
+        }
       }
+    })
+
+    // Mark undefined as valid
+    if (newState[path].valid !== false) {
+      newState[path].valid = true
+    }
+
+    // Mark undefined as passesCondition
+    if (newState[path].passesCondition !== false) {
+      newState[path].passesCondition = true
     }
   }
 

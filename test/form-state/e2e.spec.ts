@@ -178,7 +178,7 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.richText']?.lastRenderedPath,
+            body[0].args.formState['array.0.text']?.lastRenderedPath,
         ),
     })
 
@@ -199,8 +199,8 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.richText']?.lastRenderedPath &&
-            body[0].args.formState['array.1.richText']?.lastRenderedPath,
+            body[0].args.formState['array.0.text']?.lastRenderedPath &&
+            body[0].args.formState['array.1.text']?.lastRenderedPath,
         ),
     })
   })

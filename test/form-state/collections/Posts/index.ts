@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
@@ -76,9 +74,13 @@ export const PostsCollection: CollectionConfig = {
       },
       fields: [
         {
-          name: 'richText',
-          type: 'richText',
-          editor: lexicalEditor(),
+          name: 'text',
+          type: 'text',
+          admin: {
+            components: {
+              Field: './collections/Posts/TextField.js#CustomTextField',
+            },
+          },
         },
       ],
     },
