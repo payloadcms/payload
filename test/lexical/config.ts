@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import ArrayFields from './collections/Array/index.js'
 import {
   getLexicalFieldsCollection,
   lexicalBlocks,
@@ -17,7 +18,7 @@ import { LexicalRelationshipsFields } from './collections/LexicalRelationships/i
 import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
 import Uploads from './collections/Upload/index.js'
-
+import { clearAndSeedEverything } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -37,11 +38,17 @@ export default buildConfigWithDefaults({
     RichTextFields,
     TextFields,
     Uploads,
+    ArrayFields,
   ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  onInit: async (payload) => {
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await clearAndSeedEverything(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -9,22 +9,27 @@ import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJ
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 import {
+  arrayFieldsSlug,
+  collectionSlugs,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
+  textFieldsSlug,
+  uploadsSlug,
+  usersSlug,
 } from './slugs.js'
 
 // import type { Payload } from 'payload'
 
-// import path from 'path'
-// import { getFileByPath } from 'payload'
-// import { fileURLToPath } from 'url'
+import { getFileByPath } from 'payload'
 
-// import { devUser } from '../credentials.js'
-// import { seedDB } from '../helpers/seed.js'
-// import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
+import { devUser } from '../credentials.js'
+import { seedDB } from '../helpers/seed.js'
+import { arrayDoc } from './collections/Array/shared.js'
+import { textDoc } from './collections/Text/shared.js'
+import { uploadsDoc } from './collections/Upload/shared.js'
 // import { blocksDoc } from './collections/Blocks/shared.js'
 // import { codeDoc } from './collections/Code/shared.js'
 // import { collapsibleDoc } from './collections/Collapsible/shared.js'
@@ -106,13 +111,6 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
-  const createdAnotherTextDoc = await _payload.create({
-    collection: textFieldsSlug,
-    data: anotherTextDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
   const createdPNGDoc = await _payload.create({
     collection: uploadsSlug,
     data: {},
@@ -156,30 +154,9 @@ export const seed = async (_payload: Payload) => {
 
   const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
-  const blocksDocWithRichText = {
-    ...(blocksDoc as any),
-  }
-
-  blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-  blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
-
   await _payload.create({
     collection: richTextFieldsSlug,
     data: richTextBulletsDocWithRelId,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: emailFieldsSlug,
-    data: emailDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: emailFieldsSlug,
-    data: anotherEmailDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -219,132 +196,6 @@ export const seed = async (_payload: Payload) => {
     },
     overrideAccess: true,
   })
-
-  await _payload.create({
-    collection: collapsibleFieldsSlug,
-    data: collapsibleDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: conditionalLogicSlug,
-    data: conditionalLogicDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: groupFieldsSlug,
-    data: groupDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: selectFieldsSlug,
-    data: selectsDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: radioFieldsSlug,
-    data: radiosDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: tabsFieldsSlug,
-    data: tabsDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: pointFieldsSlug,
-    data: pointDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: dateFieldsSlug,
-    data: dateDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: checkboxFieldsSlug,
-    data: {
-      checkbox: true,
-    },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: checkboxFieldsSlug,
-    data: {
-      checkbox: false,
-    },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: codeFieldsSlug,
-    data: codeDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: jsonFieldsSlug,
-    data: jsonDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: blockFieldsSlug,
-    data: blocksDocWithRichText,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const relationshipField1 = await _payload.create({
-    collection: relationshipFieldsSlug,
-    data: {
-      text: 'Relationship 1',
-      relationship: {
-        relationTo: textFieldsSlug,
-        value: createdTextDoc.id,
-      },
-    },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  try {
-    await _payload.create({
-      collection: relationshipFieldsSlug,
-      data: {
-        text: 'Relationship 2',
-        relationToSelf: relationshipField1.id,
-        relationship: {
-          relationTo: textFieldsSlug,
-          value: createdAnotherTextDoc.id,
-        },
-      },
-      depth: 0,
-      overrideAccess: true,
-    })
-  } catch (e) {
-    console.error(e)
-  }
 
   await _payload.create({
     collection: lexicalFieldsSlug,

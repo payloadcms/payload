@@ -93,6 +93,7 @@ export interface Config {
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
+    'array-fields': ArrayField;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -110,6 +111,7 @@ export interface Config {
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
+    'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -648,6 +650,104 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields".
+ */
+export interface ArrayField {
+  id: string;
+  title?: string | null;
+  items: {
+    text: string;
+    anotherText?: string | null;
+    localizedText?: string | null;
+    subArray?:
+      | {
+          text?: string | null;
+          textTwo: string;
+          textInRow: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  collapsedArray?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  localized: {
+    text: string;
+    id?: string | null;
+  }[];
+  readOnly?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  potentiallyEmptyArray?:
+    | {
+        text?: string | null;
+        groupInRow?: {
+          textInGroupInRow?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Row labels rendered as react components.
+   */
+  rowLabelAsComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMinRows?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disableSort?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  externallyUpdatedArray?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  customArrayField?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -709,6 +809,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uploads';
         value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
       } | null)
     | ({
         relationTo: 'users';
@@ -953,6 +1057,106 @@ export interface UploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_select".
+ */
+export interface ArrayFieldsSelect<T extends boolean = true> {
+  title?: T;
+  items?:
+    | T
+    | {
+        text?: T;
+        anotherText?: T;
+        localizedText?: T;
+        subArray?:
+          | T
+          | {
+              text?: T;
+              textTwo?: T;
+              textInRow?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  collapsedArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  localized?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  readOnly?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  potentiallyEmptyArray?:
+    | T
+    | {
+        text?: T;
+        groupInRow?:
+          | T
+          | {
+              textInGroupInRow?: T;
+            };
+        id?: T;
+      };
+  rowLabelAsComponent?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  arrayWithMinRows?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  disableSort?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  nestedArrayLocalized?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  externallyUpdatedArray?:
+    | T
+    | {
+        id?: T;
+      };
+  customArrayField?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  arrayWithLabels?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
