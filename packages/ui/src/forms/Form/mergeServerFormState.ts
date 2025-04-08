@@ -26,22 +26,25 @@ export const mergeServerFormState = ({
 
   const newState = { ...currentState }
 
-  const serverPropsToAccept: Array<keyof FieldState> = [
-    'passesCondition',
-    'valid',
-    'errorMessage',
-    'errorPaths',
-    'customComponents',
-  ]
+  const blackListedServerProps: Array<keyof FieldState> = []
 
-  if (acceptValues) {
-    serverPropsToAccept.push('value')
-    serverPropsToAccept.push('initialValue')
+  if (!acceptValues) {
+    blackListedServerProps.push('value')
+    blackListedServerProps.push('initialValue')
   }
 
   for (const [path, incomingField] of Object.entries(incomingState)) {
     newState[path] = {
       ...(newState?.[path] || {}),
+      ...incomingField,
+    }
+
+    if (blackListedServerProps.length) {
+      blackListedServerProps.forEach((prop) => {
+        if (incomingField[prop] !== undefined) {
+          delete incomingField[prop]
+        }
+      })
     }
 
     /**
@@ -92,19 +95,6 @@ export const mergeServerFormState = ({
         }
       })
     }
-
-    /**
-     * Handle all remaining properties
-     */
-    serverPropsToAccept.forEach((propFromServer) => {
-      if (!dequal(incomingField[propFromServer], newState[path][propFromServer])) {
-        changed = true
-
-        if (propFromServer in incomingField) {
-          newState[path][propFromServer as any] = incomingField[propFromServer]
-        }
-      }
-    })
 
     // Mark undefined as valid
     if (newState[path].valid !== false) {
