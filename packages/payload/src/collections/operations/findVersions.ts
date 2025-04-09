@@ -10,7 +10,9 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   collection: Collection
@@ -40,7 +42,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
     sort,
     where,
@@ -68,6 +70,11 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     })
 
     const fullWhere = combineQueries(where, accessResults)
+
+    const select = sanitizeSelect({
+      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Find

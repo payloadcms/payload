@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -79,6 +80,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
     'compound-indexes': CompoundIndex;
+    aliases: Alias;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -99,6 +101,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
+    aliases: AliasesSelect<false> | AliasesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -151,6 +154,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  number?: number | null;
   D1?: {
     D2?: {
       D3?: {
@@ -419,6 +423,26 @@ export interface CompoundIndex {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "aliases".
+ */
+export interface Alias {
+  id: string;
+  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
+    | {
+        nestedArray?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -494,6 +518,10 @@ export interface PayloadLockedDocument {
         value: string | CompoundIndex;
       } | null)
     | ({
+        relationTo: 'aliases';
+        value: string | Alias;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -545,6 +573,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  number?: T;
   D1?:
     | T
     | {
@@ -788,6 +817,25 @@ export interface CompoundIndexesSelect<T extends boolean = true> {
     | T
     | {
         four?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "aliases_select".
+ */
+export interface AliasesSelect<T extends boolean = true> {
+  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
+    | T
+    | {
+        nestedArray?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

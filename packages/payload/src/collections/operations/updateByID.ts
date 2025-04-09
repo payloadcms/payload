@@ -26,6 +26,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
@@ -100,7 +101,7 @@ export const updateByIDOperation = async <
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -157,6 +158,11 @@ export const updateByIDOperation = async <
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
+    })
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
     })
 
     // ///////////////////////////////////////////////

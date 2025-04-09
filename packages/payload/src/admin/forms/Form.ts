@@ -4,7 +4,7 @@ import type { SanitizedDocumentPermissions } from '../../auth/types.js'
 import type { Field, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 
 export type Data = {
   [key: string]: any
@@ -13,8 +13,12 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
+  customComponents?: {
+    RowLabel?: React.ReactNode
+  }
   id: string
   isLoading?: boolean
+  lastRenderedPath?: string
 }
 
 export type FilterOptionsResult = {
@@ -34,7 +38,6 @@ export type FieldState = {
     Error?: React.ReactNode
     Field?: React.ReactNode
     Label?: React.ReactNode
-    RowLabels?: React.ReactNode[]
   }
   disableFormData?: boolean
   errorMessage?: string
@@ -46,9 +49,29 @@ export type FieldState = {
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
+  /**
+   * The path of the field when its custom components were last rendered.
+   * This is used to denote if a field has been rendered, and if so,
+   * what path it was rendered under last.
+   *
+   * If this path is undefined, or, if it is different
+   * from the current path of a given field, the field's components will be re-rendered.
+   */
+  lastRenderedPath?: string
   passesCondition?: boolean
-  requiresRender?: boolean
   rows?: Row[]
+  /**
+   * The `serverPropsToIgnore` obj is used to prevent the various properties from being overridden across form state requests.
+   * This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
+   * For example:
+   *   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
+   *   2. Another "add row" action will set `requiresRender: true` and queue a form state request
+   *   3. The first request will return with `requiresRender: false`
+   *   4. The second request will be dispatched with `requiresRender: false` but should be `true`
+   * To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
+   * See the `mergeServerFormState` function for implementation details.
+   */
+  serverPropsToIgnore?: Array<keyof FieldState>
   valid?: boolean
   validate?: Validate
   value?: unknown
@@ -83,6 +106,13 @@ export type BuildFormStateArgs = {
   */
   language?: keyof SupportedLanguages
   locale?: string
+  /**
+   * If true, will not render RSCs and instead return a simple string in their place.
+   * This is useful for environments that lack RSC support, such as Jest.
+   * Form state can still be built, but any server components will be omitted.
+   * @default false
+   */
+  mockRSCs?: boolean
   operation?: 'create' | 'update'
   /*
     If true, will render field components within their state object
@@ -91,6 +121,7 @@ export type BuildFormStateArgs = {
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string
+  select?: SelectType
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (

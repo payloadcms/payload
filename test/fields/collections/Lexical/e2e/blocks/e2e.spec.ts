@@ -1507,6 +1507,24 @@ describe('lexicalBlocks', () => {
         ),
       ).toHaveText('Some Description')
     })
+
+    test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
+      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+
+      await assertNetworkRequests(
+        page,
+        '/collections/LexicalInBlock/',
+        async () => {
+          await page.locator('.cell-id a').first().click()
+          await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+          await expect(
+            page.locator('.inline-block:has-text("Inline Block In Lexical")'),
+          ).toHaveCount(20)
+        },
+        { allowedNumberOfRequests: 1 },
+      )
+    })
   })
 
   describe('inline blocks', () => {

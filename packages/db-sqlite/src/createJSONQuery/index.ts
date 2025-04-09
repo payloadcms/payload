@@ -74,7 +74,7 @@ export const createJSONQuery = ({
   treatAsArray,
   value,
 }: CreateJSONQueryArgs): string => {
-  if (treatAsArray.includes(pathSegments[1])) {
+  if (treatAsArray?.includes(pathSegments[1]!) && table) {
     return fromArray({
       operator,
       pathSegments,

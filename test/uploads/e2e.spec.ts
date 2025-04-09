@@ -66,6 +66,7 @@ let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
+let bestFitURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -99,6 +100,7 @@ describe('Uploads', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
+    bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -892,7 +894,6 @@ describe('Uploads', () => {
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {
-      // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
 
       // Upload single file
@@ -900,12 +901,14 @@ describe('Uploads', () => {
         '.file-field input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
+
       const filename = page.locator('.file-field__filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
         hasText: exactText('Create New'),
       })
+
       await bulkUploadButton.click()
 
       const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
@@ -921,20 +924,17 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
-      await fieldSelector.click({ delay: 100 })
+      await page.locator('.edit-many-bulk-uploads__form .react-select').click({ delay: 100 })
       const options = page.locator('.rs__option')
-      // Select an option
+
       await options.locator('text=Prefix').click()
 
       await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
 
       await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
-
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
-      await saveButton.click()
-
+      await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+
       const itemCount = await page
         .locator('#field-hasManyUpload .upload--has-many__dragItem')
         .count()
@@ -976,7 +976,7 @@ describe('Uploads', () => {
       const errorCount = page
         .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
         .first()
-      await expect(errorCount).toHaveText('2')
+      await expect(errorCount).toHaveText('3')
 
       await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
@@ -998,6 +998,73 @@ describe('Uploads', () => {
       )
 
       await saveDocAndAssert(page)
+    })
+
+    test('should show validation error when bulk uploading files and then soft removing one of the files', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      await page
+        .locator('#bulk-upload-drawer-slug-1 .file-field__upload .file-field__remove')
+        .click()
+
+      const chevronRight = page.locator(
+        '#bulk-upload-drawer-slug-1 .bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+
+      await chevronRight.click()
+
+      await expect(
+        page
+          .locator(
+            '#bulk-upload-drawer-slug-1 .file-selections .file-selections__fileRow .file-selections__fileName',
+          )
+          .first(),
+      ).toContainText('No file')
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      const errorCount = page
+        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
+        .first()
+      await expect(errorCount).toHaveText('1')
     })
   })
 
@@ -1283,5 +1350,54 @@ describe('Uploads', () => {
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
+  })
+
+  describe('imageSizes best fit', () => {
+    test('should select adminThumbnail if one exists', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withAdminThumbnail button.upload__listToggler').click()
+      await page.locator('tr.row-1 td.cell-filename button.default-cell__first-cell').click()
+      const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        'https://payloadcms.com/images/universal-truth.jpg',
+      )
+    })
+
+    test('should select an image within target range', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withinRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+    })
+
+    test('should select next smallest image outside of range but smaller than original', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-nextSmallestOutOfRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+    })
+
+    test('should select original if smaller than next available size', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-original button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'small.png'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-original div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+    })
   })
 })

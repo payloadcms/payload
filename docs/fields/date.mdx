@@ -30,7 +30,7 @@ export const MyDateField: Field = {
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
@@ -43,11 +43,11 @@ export const MyDateField: Field = {
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
 | **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                               |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
-| **`timezone`** *           | Set to `true` to enable timezone selection on this field. [More details](#timezones).                                                                                                                                                                |
+| **`timezone`** \*      | Set to `true` to enable timezone selection on this field. [More details](#timezones).                                                                                       |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -58,7 +58,8 @@ import type { Field } from 'payload'
 
 export const MyDateField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
@@ -71,17 +72,17 @@ The Date Field inherits all of the default options from the base [Field Admin Co
 | **`placeholder`**              | Placeholder text for the field.                                                                                                        |
 | **`date`**                     | Pass options to customize date field appearance.                                                                                       |
 | **`date.displayFormat`**       | Format date to be shown in field **cell**.                                                                                             |
-| **`date.pickerAppearance`** * | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                            |
-| **`date.monthsToShow`** *     | Number of months to display max is 2. Defaults to 1.                                                                                   |
-| **`date.minDate`** *          | Min date value to allow.                                                                                                               |
-| **`date.maxDate`** *          | Max date value to allow.                                                                                                               |
-| **`date.minTime`** *          | Min time value to allow.                                                                                                               |
-| **`date.maxTime`** *          | Max date value to allow.                                                                                                               |
-| **`date.overrides`** *        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md) |
-| **`date.timeIntervals`** *    | Time intervals to display. Defaults to 30 minutes.                                                                                     |
-| **`date.timeFormat`** *       | Determines time format. Defaults to `'h:mm aa'`.                                                                                       |
+| **`date.pickerAppearance`** \* | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                            |
+| **`date.monthsToShow`** \*     | Number of months to display max is 2. Defaults to 1.                                                                                   |
+| **`date.minDate`** \*          | Min date value to allow.                                                                                                               |
+| **`date.maxDate`** \*          | Max date value to allow.                                                                                                               |
+| **`date.minTime`** \*          | Min time value to allow.                                                                                                               |
+| **`date.maxTime`** \*          | Max date value to allow.                                                                                                               |
+| **`date.overrides`** \*        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md) |
+| **`date.timeIntervals`** \*    | Time intervals to display. Defaults to 30 minutes.                                                                                     |
+| **`date.timeFormat`** \*       | Determines time format. Defaults to `'h:mm aa'`.                                                                                       |
 
-_* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)._
+_\* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)._
 
 ### Display Format and Picker Appearance
 
@@ -243,5 +244,6 @@ You can customise the available list of timezones in the [global admin config](.
   **Good to know:**
   The date itself will be stored in UTC so it's up to you to handle the conversion to the user's timezone when displaying the date in your frontend.
 
-  Dates without a specific time are normalised to 12:00 in the selected timezone.
+Dates without a specific time are normalised to 12:00 in the selected timezone.
+
 </Banner>

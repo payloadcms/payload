@@ -12,7 +12,7 @@ export const workflowRetries2TasksRetries0Workflow: WorkflowConfig<'workflowRetr
       },
     ],
     handler: async ({ job, tasks, req }) => {
-      await req.payload.update({
+      const updatedJob = await req.payload.update({
         collection: 'payload-jobs',
         data: {
           input: {
@@ -24,6 +24,7 @@ export const workflowRetries2TasksRetries0Workflow: WorkflowConfig<'workflowRetr
         },
         id: job.id,
       })
+      job.input = updatedJob.input as any
 
       await tasks.CreateSimpleRetries0('1', {
         input: {

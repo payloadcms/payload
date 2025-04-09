@@ -50,15 +50,17 @@ To customize Root Metadata, use the `admin.meta` key in your Payload Config:
 
 The following options are available for Root Metadata:
 
-| Key | Type | Description |
-| --- | --- | --- |
+| Key                  | Type                                    | Description                                                                                                                                                                                                                                                               |
+| -------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `defaultOGImageType` | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
-| `titleSuffix` | `string` | A suffix to append to the end of the title of every page. Defaults to "- Payload". |
-| `[keyof Metadata]` | `unknown` | Any other properties that Next.js supports within the `generateMetadata` function. [More details](https://nextjs.org/docs/app/api-reference/functions/generate-metadata). |
+| `titleSuffix`        | `string`                                | A suffix to append to the end of the title of every page. Defaults to "- Payload".                                                                                                                                                                                        |
+| `[keyof Metadata]`   | `unknown`                               | Any other properties that Next.js supports within the `generateMetadata` function. [More details](https://nextjs.org/docs/app/api-reference/functions/generate-metadata).                                                                                                 |
 
 <Banner type="success">
-  **Reminder:**
-  These are the _root-level_ options for the Admin Panel. You can also customize metadata on the [Collection](../configuration/collections), [Global](../configuration/globals), and Document levels through their respective configs.
+  **Reminder:** These are the _root-level_ options for the Admin Panel. You can
+  also customize metadata on the [Collection](../configuration/collections),
+  [Global](../configuration/globals), and Document levels through their
+  respective configs.
 </Banner>
 
 ### Icons
@@ -162,8 +164,9 @@ Disallow: /admin/
 ```
 
 <Banner type="info">
-  **Note:**
-  If you've customized the path to your Admin Panel via `config.routes`, be sure to update the `Disallow` directive to match your custom path.
+  **Note:** If you've customized the path to your Admin Panel via
+  `config.routes`, be sure to update the `Disallow` directive to match your
+  custom path.
 </Banner>
 
 ## Collection Metadata
@@ -180,7 +183,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     // highlight-start
     meta: {
-    // highlight-end
+      // highlight-end
       title: 'My Collection',
       description: 'The best collection in the world',
     },
@@ -204,7 +207,7 @@ export const MyGlobal: GlobalConfig = {
   admin: {
     // highlight-start
     meta: {
-    // highlight-end
+      // highlight-end
       title: 'My Global',
       description: 'The best admin panel in the world',
     },
@@ -236,3 +239,4 @@ To customize View Metadata, use the `meta` key within your View Config:
     },
   },
 }
+```

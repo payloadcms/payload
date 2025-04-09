@@ -172,7 +172,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
 
   const pluralLabel = collectionConfig?.labels?.plural
     ? typeof collectionConfig.labels.plural === 'function'
-      ? collectionConfig.labels.plural({ t })
+      ? collectionConfig.labels.plural({ i18n, t })
       : collectionConfig.labels.plural
     : globalConfig?.label
 
@@ -193,6 +193,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
             defaultLimit={limitToUse}
             defaultSort={sort as string}
             modifySearchParams
+            orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
           >
             <VersionsViewClient
               baseClass={baseClass}
