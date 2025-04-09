@@ -20,7 +20,7 @@ import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
 
 type Args = {
-  addedByServer: FieldState['addedByServer']
+  addedByServer?: FieldState['addedByServer']
   /**
    * The client field schema map is required for field rendering.
    * If fields should not be rendered (=> `renderFieldFn` is not provided),
