@@ -28,7 +28,7 @@ import { getFileByPath } from 'payload'
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import { arrayDoc } from './collections/Array/shared.js'
-import { textDoc } from './collections/Text/shared.js'
+import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 // import { blocksDoc } from './collections/Blocks/shared.js'
 // import { codeDoc } from './collections/Code/shared.js'
@@ -107,6 +107,13 @@ export const seed = async (_payload: Payload) => {
   const createdTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: textDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: textFieldsSlug,
+    data: anotherTextDoc,
     depth: 0,
     overrideAccess: true,
   })
