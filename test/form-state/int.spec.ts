@@ -135,6 +135,7 @@ describe('Form State', () => {
         value: postData.title,
         initialValue: postData.title,
         lastRenderedPath: 'title',
+        addedByServer: true,
       },
     })
   })
@@ -220,6 +221,85 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.text']?.customComponents?.Field).toBeDefined()
   })
 
+  it('should add `addedByServer` flag to fields that originate on the server', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.title?.addedByServer).toBe(true)
+
+    const { newState } = mergeServerFormState({
+      currentState: state,
+      incomingState: state,
+    })
+
+    expect(newState.title?.addedByServer).toBeUndefined()
+  })
+
+  it('should not omit value and initialValue from fields added by the server', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+          },
+        ],
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
+    }
+
+    const { newState } = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    expect(newState['array.0.text']).toStrictEqual({
+      passesCondition: true,
+      valid: true,
+      value: 'Test',
+      initialValue: 'Test',
+    })
+  })
+
   it('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
@@ -257,6 +337,11 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
     }
 
     const { newState } = mergeServerFormState({
@@ -283,6 +368,12 @@ describe('Form State', () => {
       'array.0.id': {
         value: '1',
         initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
         passesCondition: true,
         valid: true,
       },
@@ -326,9 +417,18 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
       'array.1.id': {
         value: '2',
         initialValue: '2',
+      },
+      'array.1.text': {
+        value: 'Test',
+        initialValue: 'Test',
       },
     }
 
@@ -352,6 +452,12 @@ describe('Form State', () => {
       'array.0.id': {
         value: '1',
         initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
         passesCondition: true,
         valid: true,
       },
@@ -383,7 +489,6 @@ describe('Form State', () => {
       'array.0.id': {
         value: '1',
         initialValue: '1',
-        addedByServer: true,
       },
       'array.0.text': {
         value: 'Test',
@@ -412,10 +517,14 @@ describe('Form State', () => {
       'array.0.id': {
         passesCondition: true,
         valid: true,
+        value: '1',
+        initialValue: '1',
       },
       'array.0.text': {
         passesCondition: true,
         valid: true,
+        value: 'Test',
+        initialValue: 'Test',
       },
     })
   })

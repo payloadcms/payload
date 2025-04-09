@@ -31,7 +31,7 @@ export const mergeServerFormState = ({
       continue
     }
 
-    if (!acceptValues) {
+    if (!acceptValues && !incomingField.addedByServer) {
       delete incomingField.value
       delete incomingField.initialValue
     }
