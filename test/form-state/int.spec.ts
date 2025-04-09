@@ -171,8 +171,10 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES_ return with rendered components
-    expect(stateWithRow?.['array.0.text']?.lastRenderedPath).toStrictEqual('array.0.text')
-    expect(stateWithRow?.['array.0.text']?.customComponents?.Field).toBeDefined()
+    expect(stateWithRow?.['array.0.customTextField']?.lastRenderedPath).toStrictEqual(
+      'array.0.customTextField',
+    )
+    expect(stateWithRow?.['array.0.customTextField']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
       mockRSCs: true,
@@ -192,8 +194,8 @@ describe('Form State', () => {
           value: '123',
           initialValue: '123',
         },
-        'array.0.text': {
-          lastRenderedPath: 'array.0.text',
+        'array.0.customTextField': {
+          lastRenderedPath: 'array.0.customTextField',
         },
         'array.1.id': {
           value: '456',
@@ -212,13 +214,13 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
-    expect(stateWithTitle?.['array.0.text']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.0.text']).not.toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.0.customTextField']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.customTextField']).not.toHaveProperty('customComponents')
 
     // Ensure that row 2 _DOES_ return with rendered components
-    expect(stateWithTitle?.['array.1.text']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.1.text']).toHaveProperty('customComponents')
-    expect(stateWithTitle?.['array.1.text']?.customComponents?.Field).toBeDefined()
+    expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
   it('should add `addedByServer` flag to fields that originate on the server', async () => {
@@ -280,7 +282,7 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         addedByServer: true,
@@ -292,7 +294,7 @@ describe('Form State', () => {
       incomingState: serverState,
     })
 
-    expect(newState['array.0.text']).toStrictEqual({
+    expect(newState['array.0.customTextField']).toStrictEqual({
       passesCondition: true,
       valid: true,
       value: 'Test',
@@ -306,7 +308,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
           {
             id: '2',
@@ -329,7 +331,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
@@ -337,7 +339,7 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         addedByServer: true,
@@ -357,7 +359,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
           {
             id: '2',
@@ -371,7 +373,7 @@ describe('Form State', () => {
         passesCondition: true,
         valid: true,
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
@@ -390,7 +392,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
@@ -405,11 +407,11 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
           {
             id: '2',
-            lastRenderedPath: 'array.1.text',
+            lastRenderedPath: 'array.1.customTextField',
           },
         ],
       },
@@ -417,7 +419,7 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         addedByServer: true,
@@ -426,7 +428,7 @@ describe('Form State', () => {
         value: '2',
         initialValue: '2',
       },
-      'array.1.text': {
+      'array.1.customTextField': {
         value: 'Test',
         initialValue: 'Test',
       },
@@ -445,7 +447,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
@@ -455,7 +457,7 @@ describe('Form State', () => {
         passesCondition: true,
         valid: true,
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
@@ -481,7 +483,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
           },
         ],
@@ -490,7 +492,7 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         value: 'Test',
         initialValue: 'Test',
         addedByServer: true,
@@ -509,7 +511,7 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
           },
         ],
@@ -520,7 +522,7 @@ describe('Form State', () => {
         value: '1',
         initialValue: '1',
       },
-      'array.0.text': {
+      'array.0.customTextField': {
         passesCondition: true,
         valid: true,
         value: 'Test',

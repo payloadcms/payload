@@ -175,7 +175,7 @@ test.describe('Form State', () => {
     )
 
     // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
+    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
@@ -183,7 +183,8 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath === 'array' &&
-            body[0].args.formState['array.0.text']?.lastRenderedPath === 'array.0.text',
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField',
         ),
     })
 
@@ -195,8 +196,8 @@ test.describe('Form State', () => {
     )
 
     // The `array` itself SHOULD still have a `lastRenderedPath`
-    // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
-    // The rich text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
+    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
+    // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
       action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
@@ -204,8 +205,10 @@ test.describe('Form State', () => {
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
             body[0].args.formState['array'].lastRenderedPath &&
-            body[0].args.formState['array.0.text']?.lastRenderedPath === 'array.0.text' &&
-            body[0].args.formState['array.1.text']?.lastRenderedPath === 'array.1.text',
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField' &&
+            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+              'array.1.customTextField',
         ),
     })
   })
@@ -213,9 +216,9 @@ test.describe('Form State', () => {
   test('new rows should contain default values', async () => {
     await page.goto(postsUrl.create)
     await page.locator('#field-array .array-field__add-row').click()
-    await expect(page.locator('#field-array #array-row-0 .field-type.text')).toHaveText(
-      'This is a default value',
-    )
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+    ).toHaveValue('This is a default value')
   })
 
   describe('Throttled tests', () => {
@@ -324,11 +327,15 @@ test.describe('Form State', () => {
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
-          await page.waitForSelector('#field-array #array-row-0 .field-type.text', {
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
             timeout: TEST_TIMEOUT,
           })
 
-          await expect(page.locator('#field-array #array-row-0 .field-type.text')).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
+
+          await expect(page.locator('#field-title')).toHaveValue('Test 2')
         },
         {
           allowedNumberOfRequests: 2,
@@ -339,7 +346,7 @@ test.describe('Form State', () => {
 
     test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
       // Add two rows quickly
-      // Test that the rich text fields within the rows do not disappear
+      // Test that the custom text field within the rows do not disappear
       await assertNetworkRequests(
         page,
         postsUrl.create,
@@ -349,19 +356,23 @@ test.describe('Form State', () => {
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
-          await page.waitForSelector('#field-array #array-row-0 .field-type.text', {
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
             timeout: TEST_TIMEOUT,
           })
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
           // eslint-disable-next-line playwright/no-wait-for-selector
-          await page.waitForSelector('#field-array #array-row-1 .field-type.text', {
+          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
             timeout: TEST_TIMEOUT,
           })
 
-          await expect(page.locator('#field-array #array-row-0 .field-type.text')).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
 
-          await expect(page.locator('#field-array #array-row-1 .field-type.text')).toBeVisible()
+          await expect(
+            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+          ).toBeVisible()
         },
         {
           allowedNumberOfRequests: 2,
