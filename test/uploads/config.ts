@@ -1,3 +1,5 @@
+import type { CollectionSlug } from 'payload'
+
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -18,6 +20,7 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
@@ -760,6 +763,25 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: listViewPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'imageUpload',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'imageRelationship',
+          type: 'relationship',
+          relationTo: 'media',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -932,6 +954,22 @@ export default buildConfigWithDefaults({
       },
       file: imageFile,
     })
+
+    for (let i = 0; i < 20; i++) {
+      const data = {
+        title: `List View Preview ${i + 1}`,
+        imageUpload: uploadedImage,
+        imageRelationship: uploadedImage,
+      }
+      if (i > 15) {
+        data.imageUpload = ''
+        data.imageRelationship = ''
+      }
+      await payload.create({
+        collection: listViewPreviewSlug as CollectionSlug,
+        data,
+      })
+    }
   },
   serverURL: undefined,
   upload: {
