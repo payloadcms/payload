@@ -27,7 +27,7 @@ module.exports = function (api) {
 
   return {
     plugins: [
-      // ['babel-plugin-react-compiler', ReactCompilerConfig], // must run first!
+      ['babel-plugin-react-compiler', ReactCompilerConfig], // must run first!
       /* [
          'babel-plugin-transform-remove-imports',
          {

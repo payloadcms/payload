@@ -208,19 +208,6 @@ export const renderTable = ({
     }
   }
 
-  columnsToUse.unshift({
-    accessor: '_dragHandle',
-    active: true,
-    field: {
-      admin: {
-        disabled: true,
-      },
-      hidden: true,
-    },
-    Heading: <SortHeader />,
-    renderedCells: docs.map((_, i) => <SortRow key={i} />),
-  } as Column)
-
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
