@@ -6,22 +6,20 @@ desc: Learn to use Local API operations with Server Functions in Payload to mana
 keywords: server functions, local API, Payload, CMS, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
 ---
 
-# **Using Local API Operations with Server Functions**
-
 In Next.js, **server functions** (previously called **server actions**) are special functions that run exclusively on the server, enabling secure backend logic execution while being callable from the frontend. These functions bridge the gap between client and server, allowing frontend components to perform backend operations without exposing sensitive logic.
 
-### **Why Use Server Functions?**
+### Why Use Server Functions?
 
 - **Executing Backend Logic from the Frontend**: The Local API is designed for server environments and cannot be directly accessed from client-side code. Server functions enable frontend components to trigger backend operations securely.
 - **Security Benefits**: Instead of exposing a full REST or GraphQL API, server functions restrict access to only the necessary operations, reducing potential security risks.
 - **Performance Optimizations**: Next.js handles server functions efficiently, offering benefits like caching, optimized database queries, and reduced network overhead compared to traditional API calls.
 - **Simplified Development Workflow**: Rather than setting up full API routes with authentication and authorization checks, server functions allow for lightweight, direct execution of necessary operations.
 
-### **When to Use Server Functions**
+### When to Use Server Functions
 
 Use server functions whenever you need to call Local API operations from the frontend. Since the Local API is only accessible from the backend, server functions act as a secure bridge, eliminating the need to expose additional API endpoints.
 
-## **Examples: Using Local API from Server Functions**
+## Examples: Using Local API from Server Functions
 
 All Local API operations can be used within server functions, allowing you to interact with Payload's backend securely.
 
@@ -34,7 +32,7 @@ In the following examples, we'll cover some common use cases, including:
 - Handling file uploads when creating or updating a document
 - Authenticating a user
 
-### **Creating a Document**
+### Creating a Document
 
 First, let's create our server function. Here are some key points for this process:
 
@@ -95,7 +93,7 @@ export const PostForm: React.FC = () => {
 };
 ```
 
-### **Updating a Document**
+### Updating a Document
 
 The key points from the previous example also apply here.
 
@@ -156,7 +154,7 @@ export const UpdatePostForm: React.FC = () => {
 
 ```
 
-### **Authenticating a User**
+### Authenticating a User
 
 In this example, we will check if a user is authenticated using Payload's authentication system. Here's how it works:
 
@@ -218,7 +216,7 @@ export const AuthComponent: React.FC = () => {
 };
 ```
 
-### **Creating a Document with File Upload**
+### Creating a Document with File Upload
 
 This example demonstrates how to write a server function that creates a document with a file upload. Here are the key steps:
 
@@ -310,15 +308,15 @@ export const PostForm: React.FC = () => {
 };
 ```
 
-## **Reusable Payload Server Functions**
+## Reusable Payload Server Functions
 
 Coming soon…
 
-## **Error Handling in Server Functions**
+## Error Handling in Server Functions
 
 When using server functions, proper error handling is essential to prevent unhandled exceptions and provide meaningful feedback to the frontend.
 
-### **Best Practices**
+### Best Practices#error-handling-best-practices
 
 - **Wrap Local API calls in try/catch blocks** to catch potential errors.
 - **Log errors on the server** for debugging purposes.
@@ -338,11 +336,11 @@ export async function createPost(data) {
 }
 ```
 
-## **Security Considerations**
+## Security Considerations
 
 Using server functions helps prevent direct exposure of Local API operations to the frontend, but additional security best practices should be followed:
 
-### **Best Practices**
+### Best Practices#security-best-practices
 
 1. **Restrict access**: Ensure that sensitive actions (like user management) are only callable by authorized users.
 2. **Avoid passing sensitive data**: Do not return sensitive information such as user data, passwords, etc.
