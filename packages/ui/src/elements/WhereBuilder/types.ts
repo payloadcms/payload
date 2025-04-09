@@ -14,6 +14,8 @@ export type WhereBuilderProps = {
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
+export type Value = Date | number | number[] | string | string[]
+
 export type ReducedField = {
   field: ClientField
   label: React.ReactNode
@@ -21,7 +23,7 @@ export type ReducedField = {
     label: string
     value: Operator
   }[]
-  value: string
+  value: Value
 }
 
 export type Relation = 'and' | 'or'
@@ -78,7 +80,7 @@ export type UpdateCondition = ({
   field: ReducedField
   operator: string
   orIndex: number
-  value: string
+  value: Value
 }) => Promise<void> | void
 
 export type RemoveCondition = ({

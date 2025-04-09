@@ -1,7 +1,13 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { AddCondition, ReducedField, RemoveCondition, UpdateCondition } from '../types.js'
+import type {
+  AddCondition,
+  ReducedField,
+  RemoveCondition,
+  UpdateCondition,
+  Value,
+} from '../types.js'
 
 export type Props = {
   readonly addCondition: AddCondition
@@ -14,7 +20,7 @@ export type Props = {
   readonly removeCondition: RemoveCondition
   readonly RenderedFilter: React.ReactNode
   readonly updateCondition: UpdateCondition
-  readonly value: string
+  readonly value: Value
 }
 
 import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
@@ -51,7 +57,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const reducedField = reducedFields.find((field) => field.value === fieldName)
 
-  const [internalValue, setInternalValue] = useState<string>(value)
+  const [internalValue, setInternalValue] = useState<Value>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
 
