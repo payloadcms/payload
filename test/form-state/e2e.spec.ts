@@ -22,7 +22,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
-const { describe, beforeAll, afterAll } = test
+const { describe, beforeEach, afterEach } = test
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -209,46 +209,10 @@ test.describe('Form State', () => {
     })
   })
 
-  test('should queue onChange functions', async () => {
-    await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
-
-    // only throttle test after initial load to avoid timeouts
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
-    })
-
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await field.fill('')
-        // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 275 })
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000, // watch network for 10 seconds to allow requests to build up
-      },
-    )
-
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
-    })
-
-    await cdpSession.detach()
-  })
-
   describe('Throttled tests', () => {
     let cdpSession: CDPSession
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       await page.goto(postsUrl.create)
       const field = page.locator('#field-title')
       await field.fill('Test')
@@ -260,7 +224,7 @@ test.describe('Form State', () => {
       })
     })
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cdpSession.send('Network.emulateNetworkConditions', {
         offline: false,
         latency: 0,
@@ -269,6 +233,77 @@ test.describe('Form State', () => {
       })
 
       await cdpSession.detach()
+    })
+
+    test('should queue onChange functions', async () => {
+      const field = page.locator('#field-title')
+
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await field.fill('')
+          // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
+          await field.pressSequentially('Some text to type', { delay: 275 })
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000, // watch network for 10 seconds to allow requests to build up
+        },
+      )
+    })
+
+    test('should optimistically add rows while pending network requests', async () => {
+      let requestCount = 0
+
+      // increment the response count for form state requests
+      page.on('request', (request) => {
+        if (request.url() === postsUrl.create && request.method() === 'POST') {
+          requestCount++
+        }
+      })
+
+      // Add the first row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // Wait for the first request to be sent
+      await page.waitForRequest((request) => request.url() === postsUrl.create)
+
+      // Before the first request comes back, add the second row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // At this point there should have been a single request sent for the first row
+      expect(requestCount).toBe(1)
+
+      // Wait for the first request to finish
+      await page.waitForResponse(
+        (response) =>
+          response.url() === postsUrl.create &&
+          response.status() === 200 &&
+          response.headers()['content-type'] === 'text/x-component',
+      )
+
+      // block the second request from executing to ensure the form remains in stale state
+      await page.route(postsUrl.create, async (route) => {
+        if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+          await route.abort()
+          return
+        }
+
+        await route.continue()
+      })
+
+      // the second row should not have disappeared
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+      await expect(page.locator('#field-array #array-row-1 .shimmer-effect')).toBeVisible()
     })
 
     test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {

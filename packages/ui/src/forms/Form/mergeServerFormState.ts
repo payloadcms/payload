@@ -1,5 +1,5 @@
 'use client'
-import type { FieldState, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
@@ -24,22 +24,12 @@ export const mergeServerFormState = ({
 }: Args): { changed: boolean; newState: FormState } => {
   let changed = false
 
-  const newState = { ...currentState }
+  const newState = { ...(currentState || {}) }
 
-  const blackListedServerProps: Array<keyof FieldState> = []
-
-  if (!acceptValues) {
-    blackListedServerProps.push('value')
-    blackListedServerProps.push('initialValue')
-  }
-
-  for (const [path, incomingField] of Object.entries(incomingState)) {
-    if (blackListedServerProps.length) {
-      blackListedServerProps.forEach((prop) => {
-        if (incomingField[prop] !== undefined) {
-          delete incomingField[prop]
-        }
-      })
+  for (const [path, incomingField] of Object.entries(incomingState || {})) {
+    if (!acceptValues) {
+      delete incomingField.value
+      delete incomingField.initialValue
     }
 
     newState[path] = {
