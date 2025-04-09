@@ -27,7 +27,7 @@ export const mergeServerFormState = ({
   const newState = { ...(currentState || {}) }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
-    if (!(path in currentState)) {
+    if (!(path in currentState) && !incomingField.addedByServer) {
       continue
     }
 
@@ -35,6 +35,8 @@ export const mergeServerFormState = ({
       delete incomingField.value
       delete incomingField.initialValue
     }
+
+    delete incomingField.addedByServer
 
     newState[path] = {
       ...currentState[path],

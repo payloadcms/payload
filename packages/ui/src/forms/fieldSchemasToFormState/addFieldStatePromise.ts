@@ -152,11 +152,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     )
   }
 
-  const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
-
   let fieldPermissions: SanitizedFieldPermissions = true
 
   const fieldState: FieldState = {}
+
+  const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
+  const addedByServer = !previousFormState?.[path]
+
+  if (addedByServer) {
+    fieldState.addedByServer = true
+  }
 
   if (lastRenderedPath) {
     fieldState.lastRenderedPath = lastRenderedPath
@@ -285,6 +290,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             acc.promises.push(
               iterateFields({
                 id,
+                addedByServer,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 blockData,
@@ -471,6 +477,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
+                  addedByServer,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
                   blockData: row,
@@ -581,6 +588,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         await iterateFields({
           id,
+          addedByServer,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
           blockData,
@@ -737,6 +745,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       select,
       selectMode,
       // passthrough parent functionality
+      addedByServer,
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
       blockData,
@@ -829,6 +838,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       return iterateFields({
         id,
+        addedByServer,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
         blockData,

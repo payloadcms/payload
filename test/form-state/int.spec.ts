@@ -383,6 +383,12 @@ describe('Form State', () => {
       'array.0.id': {
         value: '1',
         initialValue: '1',
+        addedByServer: true,
+      },
+      'array.0.text': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
       },
     }
 
@@ -404,8 +410,10 @@ describe('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
-        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.text': {
         passesCondition: true,
         valid: true,
       },

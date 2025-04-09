@@ -5,6 +5,7 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FieldSchemaMap,
+  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -22,6 +23,7 @@ import type { RenderFieldMethod } from './types.js'
 import { addFieldStatePromise } from './addFieldStatePromise.js'
 
 type Args = {
+  addedByServer: FieldState['addedByServer']
   addErrorPathToParent: (fieldPath: string) => void
   /**
    * if any parents is localized, then the field is localized. @default false

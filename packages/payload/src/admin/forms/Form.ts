@@ -26,6 +26,13 @@ export type FilterOptionsResult = {
 }
 
 export type FieldState = {
+  /**
+   * This is used to determine if the field was added by the server.
+   * This ensures the field is not ignored by the client when merging form state.
+   * This can happen because the current local state is treated as the source of truth.
+   * See `mergeServerFormState` for more details.
+   */
+  addedByServer?: boolean
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used
