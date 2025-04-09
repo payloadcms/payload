@@ -4,6 +4,7 @@ import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
+import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
@@ -233,6 +234,57 @@ test.describe('Form State', () => {
       })
 
       await cdpSession.detach()
+    })
+
+    test('optimistic rows should not disappear between pending network requests', async () => {
+      let requestCount = 0
+
+      // increment the response count for form state requests
+      page.on('request', (request) => {
+        if (request.url() === postsUrl.create && request.method() === 'POST') {
+          requestCount++
+        }
+      })
+
+      // Add the first row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // Wait for the first request to be sent
+      await page.waitForRequest((request) => request.url() === postsUrl.create)
+
+      // Before the first request comes back, add the second row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // At this point there should have been a single request sent for the first row
+      expect(requestCount).toBe(1)
+
+      // Wait for the first request to finish
+      await page.waitForResponse(
+        (response) =>
+          response.url() === postsUrl.create &&
+          response.status() === 200 &&
+          response.headers()['content-type'] === 'text/x-component',
+      )
+
+      // block the second request from executing to ensure the form remains in stale state
+      await page.route(postsUrl.create, async (route) => {
+        if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+          await route.abort()
+          return
+        }
+
+        await route.continue()
+      })
+
+      await assertElementStaysVisible(page, '#field-array #array-row-1')
     })
 
     test('should queue onChange functions', async () => {

@@ -21,6 +21,7 @@ import {
   killTransaction,
   QueryError,
 } from 'payload'
+import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
 import type { Global2 } from './payload-types.js'
@@ -782,6 +783,28 @@ describe('database', () => {
       expect(doc.array[0].localizedText).toStrictEqual('goodbye')
       expect(doc.blocks[0].text).toStrictEqual('hello')
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
+
+    it('arrays should work with both long field names and dbName', async () => {
+      const { id } = await payload.create({
+        collection: 'aliases',
+        data: {
+          thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName: [
+            {
+              nestedArray: [{ text: 'some-text' }],
+            },
+          ],
+        },
+      })
+      const res = await payload.findByID({ collection: 'aliases', id })
+      expect(
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
+      ).toHaveLength(1)
+      const item =
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?.[0]
+      assert(item)
+      expect(item.nestedArray).toHaveLength(1)
+      expect(item.nestedArray?.[0]?.text).toBe('some-text')
     })
   })
 
