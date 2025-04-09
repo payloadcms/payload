@@ -52,7 +52,6 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
-import { mergeServerFormState } from './mergeServerFormState.js'
 
 const baseClass = 'form'
 
@@ -368,17 +367,12 @@ export const Form: React.FC<FormProps> = (props) => {
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json)
-            if (newFormState) {
-              const { newState: mergedFormState } = mergeServerFormState({
-                acceptValues: true,
-                currentState: contextRef.current.fields || {},
-                incomingState: newFormState,
-              })
 
+            if (newFormState) {
               dispatchFields({
-                type: 'REPLACE_STATE',
-                optimize: false,
-                state: mergedFormState,
+                type: 'MERGE_SERVER_STATE',
+                prevStateRef: prevFormState,
+                serverState: newFormState,
               })
             }
           }

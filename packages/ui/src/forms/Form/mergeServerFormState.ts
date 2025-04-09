@@ -7,7 +7,7 @@ import { mergeErrorPaths } from './mergeErrorPaths.js'
 
 type Args = {
   acceptValues?: boolean
-  currentState: FormState
+  currentState?: FormState
   incomingState: FormState
 }
 
@@ -16,15 +16,18 @@ type Args = {
  * The server contains extra properties that the client may not have, e.g. custom components and error states.
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
  * Doing this would cause the client to lose any local changes to those fields.
+ *
+ * This function will also a few defaults, as well as clean up the server response in preparation for the client.
+ * e.g. it will set `valid` and `passesCondition` to true if undefined, and remove `addedByServer` from the response.
  */
 export const mergeServerFormState = ({
   acceptValues,
-  currentState,
+  currentState = {},
   incomingState,
-}: Args): { changed: boolean; newState: FormState } => {
+}: Args): { changed: boolean; formState: FormState } => {
   let changed = false
 
-  const newState = { ...(currentState || {}) }
+  const newState = { ...currentState }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
@@ -94,36 +97,16 @@ export const mergeServerFormState = ({
       })
     }
 
-    // Ensure that all top-level fields that correspond to each row are present
-    // This is because we skipped over these fields since they were not originally a part of local state
-    // However, the server may have added them, therefore, we need to add them to the new state
-    if (Array.isArray(newState[path]?.rows)) {
-      newState[path].rows.forEach((row, index) => {
-        const fieldPathPrefix = `${path}.${index}`
-        // Find all rows within incoming state that begin with the same prefix
-        for (const [path, incomingField] of Object.entries(incomingState || {})) {
-          if (path.startsWith(fieldPathPrefix)) {
-            // If its not yet in the new state, add it
-            if (!newState[path]) {
-              newState[path] = incomingField
-              newState[path].passesCondition = newState[path].passesCondition ?? true
-              newState[path].valid = newState[path].valid ?? true
-            }
-          }
-        }
-      })
-    }
-
     // Mark undefined as valid
-    if (newState[path].valid !== false) {
+    if (incomingField.valid !== false) {
       newState[path].valid = true
     }
 
     // Mark undefined as passesCondition
-    if (newState[path].passesCondition !== false) {
+    if (incomingField.passesCondition !== false) {
       newState[path].passesCondition = true
     }
   }
 
-  return { changed, newState }
+  return { changed, formState: newState }
 }

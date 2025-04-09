@@ -157,7 +157,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const fieldState: FieldState = {}
 
   const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
-  const addedByServer = !previousFormState?.[path]
+
+  // If we're rendering all fields, no need to flag this as added by server
+  const addedByServer = !renderAllFields && !previousFormState?.[path]
 
   if (addedByServer) {
     fieldState.addedByServer = true
