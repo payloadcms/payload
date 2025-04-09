@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
+// TODO: decouple blocks from both test suites
+import { richTextDocData } from '../lexical/collections/RichText/data.js'
+import { arrayDoc } from './collections/Array/shared.js'
+import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
@@ -22,6 +26,8 @@ import { tabsDoc } from './collections/Tabs/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
   checkboxFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
@@ -62,6 +68,13 @@ export const seed = async (_payload: Payload) => {
     getFileByPath(jpg480x320Path),
     getFileByPath(pngPath),
   ])
+
+  const createdArrayDoc = await _payload.create({
+    collection: arrayFieldsSlug,
+    data: arrayDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
 
   const createdTextDoc = await _payload.create({
     collection: textFieldsSlug,
@@ -147,6 +160,28 @@ export const seed = async (_payload: Payload) => {
   //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
   //   },
   // })
+  const formattedID =
+    _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
+
+  const formattedJPGID =
+    _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
+
+  const formattedTextID =
+    _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
+
+  const richTextDocWithRelId = JSON.parse(
+    JSON.stringify(richTextDocData)
+      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+  )
+  const blocksDocWithRichText = {
+    ...(blocksDoc as any),
+  }
+  const richTextDocWithRelationship = { ...richTextDocWithRelId }
+
+  blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
+  blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
   await _payload.create({
     collection: emailFieldsSlug,
@@ -256,6 +291,13 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: jsonFieldsSlug,
     data: jsonDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: blockFieldsSlug,
+    data: blocksDocWithRichText,
     depth: 0,
     overrideAccess: true,
   })
