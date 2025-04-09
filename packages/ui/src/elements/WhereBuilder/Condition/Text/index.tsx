@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { TextFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'

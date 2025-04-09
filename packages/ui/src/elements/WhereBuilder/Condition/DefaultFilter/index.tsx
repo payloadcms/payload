@@ -8,7 +8,7 @@ import type {
 
 import React from 'react'
 
-import type { ReducedField } from '../../types.js'
+import type { ReducedField, Value } from '../../types.js'
 
 import { DateFilter } from '../Date/index.js'
 import { NumberFilter } from '../Number/index.js'
@@ -24,7 +24,7 @@ type Props = {
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
   options: Option[]
-  value: unknown
+  value: Value
 }
 
 export const DefaultFilter: React.FC<Props> = ({
