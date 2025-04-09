@@ -26,7 +26,7 @@
     }
   ],
   "type": "module",
-  "sideEffectsDisabled": false,
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./src/index.ts",

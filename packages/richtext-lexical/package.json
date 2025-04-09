@@ -17,7 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffectsDisabled": [
+  "sideEffects": [
     "*.scss",
     "*.css"
   ],

@@ -11,7 +11,7 @@
     "seo",
     "yoast"
   ],
-  "sideEffectsDisabled": [
+  "sideEffects": [
     "*.scss",
     "*.css"
   ],
