@@ -1,4 +1,4 @@
-import type { Payload, User } from 'payload'
+import type { FormState, Payload, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
@@ -10,6 +10,8 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
 let payload: Payload
 let token: string
@@ -216,5 +218,54 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.richText']).toHaveProperty('lastRenderedPath')
     expect(stateWithTitle?.['array.1.richText']).toHaveProperty('customComponents')
     expect(stateWithTitle?.['array.1.richText']?.customComponents?.Field).toBeDefined()
+  })
+
+  it('should merge array rows without losing current state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+          },
+          {
+            id: '2',
+            isLoading: true,
+          },
+        ],
+      },
+    }
+
+    const incomingState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+          },
+        ],
+      },
+    }
+
+    const { newState } = mergeServerFormState({
+      existingState: currentState,
+      incomingState,
+    })
+
+    expect(newState).toStrictEqual({
+      array: {
+        passesCondition: true,
+        valid: true,
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+          },
+          {
+            id: '2',
+            isLoading: true,
+          },
+        ],
+      },
+    })
   })
 })
