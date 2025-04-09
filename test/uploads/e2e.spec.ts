@@ -1418,7 +1418,7 @@ describe('Uploads', () => {
     await expect(pageTwoButton).toBeVisible()
     await pageTwoButton.click()
 
-    const imageUploadImg = imageUploadCell.locator('img')
+    const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
     await expect(imageRelationshipCell).toHaveText('image.png')
 
