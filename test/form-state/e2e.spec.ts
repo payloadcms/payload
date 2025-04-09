@@ -155,7 +155,7 @@ test.describe('Form State', () => {
 
     // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -173,7 +173,7 @@ test.describe('Form State', () => {
     // The `array` itself SHOULD still have a `lastRenderedPath`
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -194,7 +194,7 @@ test.describe('Form State', () => {
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     // The rich text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
