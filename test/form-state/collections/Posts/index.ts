@@ -76,9 +76,10 @@ export const PostsCollection: CollectionConfig = {
         {
           name: 'text',
           type: 'text',
+          defaultValue: 'This is a default value',
           admin: {
             components: {
-              // Field: './collections/Posts/TextField.js#CustomTextField',
+              Field: './collections/Posts/TextField.js#CustomTextField',
             },
           },
         },

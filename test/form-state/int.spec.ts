@@ -220,12 +220,13 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.text']?.customComponents?.Field).toBeDefined()
   })
 
-  it('should merge array rows without losing current state', () => {
+  it('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
         rows: [
           {
             id: '1',
+            lastRenderedPath: 'array.0.text',
           },
           {
             id: '2',
@@ -233,9 +234,17 @@ describe('Form State', () => {
           },
         ],
       },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
     }
 
-    const incomingState: FormState = {
+    const serverState: FormState = {
       array: {
         rows: [
           {
@@ -244,13 +253,18 @@ describe('Form State', () => {
           },
         ],
       },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
     }
 
     const { newState } = mergeServerFormState({
-      existingState: currentState,
-      incomingState,
+      currentState,
+      incomingState: serverState,
     })
 
+    // Row 2 should still exist
     expect(newState).toStrictEqual({
       array: {
         passesCondition: true,
@@ -265,6 +279,135 @@ describe('Form State', () => {
             isLoading: true,
           },
         ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
+    })
+  })
+
+  it('should merge array rows without bringing back rows deleted from local state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+          },
+          {
+            id: '2',
+            lastRenderedPath: 'array.1.text',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
+    }
+
+    const { newState } = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    // Row 2 should not exist
+    expect(newState).toStrictEqual({
+      array: {
+        passesCondition: true,
+        valid: true,
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+    })
+  })
+
+  it('should merge new fields returned from the server that do not yet exist in local state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            isLoading: true,
+          },
+        ],
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+            isLoading: false,
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+    }
+
+    const { newState } = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    expect(newState).toStrictEqual({
+      array: {
+        passesCondition: true,
+        valid: true,
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.text',
+            isLoading: false,
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
       },
     })
   })
