@@ -24,9 +24,7 @@ export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
   incomingState,
-}: Args): { changed: boolean; formState: FormState } => {
-  let changed = false
-
+}: Args): FormState => {
   const newState = { ...currentState }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
@@ -55,10 +53,6 @@ export const mergeServerFormState = ({
     )
 
     if (errorPathsResult.result) {
-      if (errorPathsResult.changed) {
-        changed = errorPathsResult.changed
-      }
-
       newState[path].errorPaths = errorPathsResult.result
     }
 
@@ -67,7 +61,6 @@ export const mergeServerFormState = ({
      */
     if (incomingField.filterOptions || newState[path].filterOptions) {
       if (!dequal(incomingField?.filterOptions, newState[path].filterOptions)) {
-        changed = true
         newState[path].filterOptions = incomingField.filterOptions
       }
     }
@@ -87,8 +80,6 @@ export const mergeServerFormState = ({
         )
 
         if (indexInCurrentState > -1) {
-          changed = true
-
           newState[path].rows[indexInCurrentState] = {
             ...currentState[path].rows[indexInCurrentState],
             ...row,
@@ -97,16 +88,16 @@ export const mergeServerFormState = ({
       })
     }
 
-    // Mark undefined as valid
+    // Mark `undefined` as `valid: true`
     if (incomingField.valid !== false) {
       newState[path].valid = true
     }
 
-    // Mark undefined as passesCondition
+    // Mark `undefined` as `passesCondition: true`
     if (incomingField.passesCondition !== false) {
       newState[path].passesCondition = true
     }
   }
 
-  return { changed, formState: newState }
+  return newState
 }
