@@ -4,6 +4,7 @@ import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
+import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
@@ -154,7 +155,7 @@ test.describe('Form State', () => {
 
     // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -172,7 +173,7 @@ test.describe('Form State', () => {
     // The `array` itself SHOULD still have a `lastRenderedPath`
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -193,7 +194,7 @@ test.describe('Form State', () => {
     // The rich text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
     // The rich text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
     await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
-      action: await page.locator('#field-array .array-field__add-row').click(),
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
       url: postsUrl.create,
       expect: (body) =>
         Boolean(
@@ -230,6 +231,77 @@ test.describe('Form State', () => {
         timeout: 10000, // watch network for 10 seconds to allow requests to build up
       },
     )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('optimistic rows should not disappear between pending network requests', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    // only throttle test after initial load to avoid timeouts
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    let requestCount = 0
+
+    // increment the response count for form state requests
+    page.on('request', (request) => {
+      if (request.url() === postsUrl.create && request.method() === 'POST') {
+        requestCount++
+      }
+    })
+
+    // Add the first row and expect an optimistic loading state
+    await page.locator('#field-array .array-field__add-row').click()
+    await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+    // use waitForSelector because the shimmer effect is not always visible
+    // eslint-disable-next-line playwright/no-wait-for-selector
+    await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+    // Wait for the first request to be sent
+    await page.waitForRequest((request) => request.url() === postsUrl.create)
+
+    // Before the first request comes back, add the second row and expect an optimistic loading state
+    await page.locator('#field-array .array-field__add-row').click()
+    await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+    // use waitForSelector because the shimmer effect is not always visible
+    // eslint-disable-next-line playwright/no-wait-for-selector
+    await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+    // At this point there should have been a single request sent for the first row
+    expect(requestCount).toBe(1)
+
+    // Wait for the first request to finish
+    await page.waitForResponse(
+      (response) =>
+        response.url() === postsUrl.create &&
+        response.status() === 200 &&
+        response.headers()['content-type'] === 'text/x-component',
+    )
+
+    // block the second request from executing to ensure the form remains in stale state
+    await page.route(postsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+        await route.abort()
+        return
+      }
+
+      await route.continue()
+    })
+
+    await assertElementStaysVisible(page, '#field-array #array-row-1')
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,
