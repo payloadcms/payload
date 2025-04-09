@@ -27,13 +27,13 @@ export const mergeServerFormState = ({
   const newState = { ...(currentState || {}) }
 
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
+    if (!(path in currentState)) {
+      continue
+    }
+
     if (!acceptValues) {
       delete incomingField.value
       delete incomingField.initialValue
-    }
-
-    if (!(path in currentState)) {
-      continue
     }
 
     newState[path] = {
@@ -87,6 +87,26 @@ export const mergeServerFormState = ({
           newState[path].rows[indexInCurrentState] = {
             ...currentState[path].rows[indexInCurrentState],
             ...row,
+          }
+        }
+      })
+    }
+
+    // Ensure that all top-level fields that correspond to each row are present
+    // This is because we skipped over these fields since they were not originally a part of local state
+    // However, the server may have added them, therefore, we need to add them to the new state
+    if (Array.isArray(newState[path]?.rows)) {
+      newState[path].rows.forEach((row, index) => {
+        const fieldPathPrefix = `${path}.${index}`
+        // Find all rows within incoming state that begin with the same prefix
+        for (const [path, incomingField] of Object.entries(incomingState || {})) {
+          if (path.startsWith(fieldPathPrefix)) {
+            // If its not yet in the new state, add it
+            if (!newState[path]) {
+              newState[path] = incomingField
+              newState[path].passesCondition = newState[path].passesCondition ?? true
+              newState[path].valid = newState[path].valid ?? true
+            }
           }
         }
       })
