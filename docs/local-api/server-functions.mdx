@@ -19,7 +19,7 @@ In Next.js, **server functions** (previously called **server actions**) are spec
 
 Use server functions whenever you need to call Local API operations from the frontend. Since the Local API is only accessible from the backend, server functions act as a secure bridge, eliminating the need to expose additional API endpoints.
 
-## Examples: Using Local API from Server Functions
+## Examples
 
 All Local API operations can be used within server functions, allowing you to interact with Payload's backend securely.
 
@@ -63,7 +63,7 @@ export async function createPost(data) {
 }
 ```
 
-Now, let's look at how to call the \`createPost\` function we just created from the frontend in a React component when a user clicks a button:
+Now, let's look at how to call the `createPost` function we just created from the frontend in a React component when a user clicks a button:
 
 ```ts
 'use client';
@@ -123,7 +123,7 @@ export async function updatePost(id, data) {
 }
 ```
 
-Here is how you would call the \`updatePost\` function from a frontend React component:
+Here is how you would call the `updatePost` function from a frontend React component:
 
 ```ts
 'use client';
@@ -158,8 +158,8 @@ export const UpdatePostForm: React.FC = () => {
 
 In this example, we will check if a user is authenticated using Payload's authentication system. Here's how it works:
 
-- First, we use the headers function from next/headers to retrieve the request headers.
-- Next, we pass these headers to payload.auth() to fetch the user's authentication details.
+- First, we use the headers function from `next/headers` to retrieve the request headers.
+- Next, we pass these headers to `payload.auth()` to fetch the user's authentication details.
 - If the user is authenticated, their information is returned. If not, handle the unauthenticated case accordingly.
 
 Here's the server function to authenticate a user:
@@ -220,9 +220,9 @@ export const AuthComponent: React.FC = () => {
 
 This example demonstrates how to write a server function that creates a document with a file upload. Here are the key steps:
 
-- Pass two arguments: data for the document content and upload for the file
+- Pass two arguments: **data** for the document content and **upload** for the file
 - Merge the upload file into the document data as the media field
-- Use payload.create() to create a new post document with both the document data and file
+- Use `payload.create()` to create a new post document with both the document data and file
 
 ```ts
 'use server'
@@ -255,9 +255,9 @@ export async function createPostWithUpload(data, upload) {
 Here is how you would use the server function we just created in a frontend component to allow users to submit a post along with a file upload:
 
 - The user enters the post title and selects a file to upload.
-- When the form is submitted, the handleSubmit function checks if a file has been chosen.
-- If a file is selected, it passes both the title and the file to the createPostWithFile server function.
-- And you are done\!
+- When the form is submitted, the `handleSubmit` function checks if a file has been chosen.
+- If a file is selected, it passes both the title and the file to the `createPostWithFile` server function.
+- And you are done!
 
 ```ts
 'use client';
@@ -318,9 +318,9 @@ When using server functions, proper error handling is essential to prevent unhan
 
 ### Best Practices#error-handling-best-practices
 
-- **Wrap Local API calls in try/catch blocks** to catch potential errors.
-- **Log errors on the server** for debugging purposes.
-- **Return structured error responses** instead of exposing raw errors to the frontend.
+- Wrap Local API calls in **try/catch blocks** to catch potential errors.
+- **Log errors** on the server for debugging purposes.
+- Return structured **error responses** instead of exposing raw errors to the frontend.
 
 Example of good error handling:
 
@@ -342,9 +342,9 @@ Using server functions helps prevent direct exposure of Local API operations to 
 
 ### Best Practices#security-best-practices
 
-1. **Restrict access**: Ensure that sensitive actions (like user management) are only callable by authorized users.
-2. **Avoid passing sensitive data**: Do not return sensitive information such as user data, passwords, etc.
-3. **Use authentication & authorization**: Check user roles before performing actions.
+- **Restrict access**: Ensure that sensitive actions (like user management) are only callable by authorized users.
+- **Avoid passing sensitive data**: Do not return sensitive information such as user data, passwords, etc.
+- **Use authentication & authorization**: Check user roles before performing actions.
 
 Example of restricting access based on user role:
 
