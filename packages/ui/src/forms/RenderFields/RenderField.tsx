@@ -46,6 +46,7 @@ export function RenderField({
   indexPath,
   parentPath,
   parentSchemaPath,
+  path,
   permissions,
   readOnly,
   schemaPath,
