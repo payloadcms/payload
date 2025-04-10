@@ -21,7 +21,7 @@ import { expect } from '@playwright/test'
 export const assertRequestBody = async <T>(
   page: Page,
   options: {
-    action: Promise<void> | void
+    action: () => Promise<void> | void
     expect?: (requestBody: T) => boolean | Promise<boolean>
     requestMethod?: string
     url: string
@@ -34,7 +34,7 @@ export const assertRequestBody = async <T>(
           (request.method() === options.requestMethod || 'POST'),
       ),
     ),
-    await options.action,
+    await options.action(),
   ])
 
   const requestBody = request.postData()

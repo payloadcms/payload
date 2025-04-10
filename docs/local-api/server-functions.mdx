@@ -1,0 +1,360 @@
+---
+title: Using Local API Operations with Server Functions
+label: Server Functions
+order: 30
+desc: Learn to use Local API operations with Server Functions in Payload to manage server-side logic, data interactions, and custom workflows directly within your CMS.
+keywords: server functions, local API, Payload, CMS, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
+---
+
+In Next.js, **server functions** (previously called **server actions**) are special functions that run exclusively on the server, enabling secure backend logic execution while being callable from the frontend. These functions bridge the gap between client and server, allowing frontend components to perform backend operations without exposing sensitive logic.
+
+### Why Use Server Functions?
+
+- **Executing Backend Logic from the Frontend**: The Local API is designed for server environments and cannot be directly accessed from client-side code. Server functions enable frontend components to trigger backend operations securely.
+- **Security Benefits**: Instead of exposing a full REST or GraphQL API, server functions restrict access to only the necessary operations, reducing potential security risks.
+- **Performance Optimizations**: Next.js handles server functions efficiently, offering benefits like caching, optimized database queries, and reduced network overhead compared to traditional API calls.
+- **Simplified Development Workflow**: Rather than setting up full API routes with authentication and authorization checks, server functions allow for lightweight, direct execution of necessary operations.
+
+### When to Use Server Functions
+
+Use server functions whenever you need to call Local API operations from the frontend. Since the Local API is only accessible from the backend, server functions act as a secure bridge, eliminating the need to expose additional API endpoints.
+
+## Examples
+
+All Local API operations can be used within server functions, allowing you to interact with Payload's backend securely.
+
+For a full list of available operations, see the [Local API](https://payloadcms.com/docs/local-api/overview) overview.
+
+In the following examples, we'll cover some common use cases, including:
+
+- Creating a document
+- Updating a document
+- Handling file uploads when creating or updating a document
+- Authenticating a user
+
+### Creating a Document
+
+First, let's create our server function. Here are some key points for this process:
+
+- Begin by adding `'use server'` at the top of the file.
+- You can still use utilities such as `getPayload()`.
+- Once the function structure is in place, call the Local API operation `payload.create()` and pass in the relevant data.
+- It's good practice to wrap this in a `try...catch` block for error handling.
+- Finally, make sure to return the created document (don't just run the operation).
+
+```ts
+'use server'
+
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+export async function createPost(data) {
+  const payload = await getPayload({ config })
+
+  try {
+    const post = await payload.create({
+      collection: 'posts',
+      data,
+    })
+    return post
+  } catch (error) {
+    throw new Error(`Error creating post: ${error.message}`)
+  }
+}
+```
+
+Now, let's look at how to call the `createPost` function we just created from the frontend in a React component when a user clicks a button:
+
+```ts
+'use client';
+
+import React, { useState } from 'react';
+import { createPost } from '../server/actions'; // import the server function
+
+export const PostForm: React.FC = () => {
+  const [result, setResult] = useState<string>('');
+
+  return (
+    <>
+      <p>{result}</p>
+
+      <button
+        type="button"
+        onClick={async () => {
+          // Call the server function
+          const newPost = await createPost({ title: 'Sample Post' });
+          setResult('Post created: ' + newPost.title);
+        }}
+      >
+        Create Post
+      </button>
+    </>
+  );
+};
+```
+
+### Updating a Document
+
+The key points from the previous example also apply here.
+
+To update a document instead of creating one, you would use `payload.update()` with the relevant data and **passing the document ID.**
+
+Here's how the server function would look:
+
+```ts
+'use server'
+
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+export async function updatePost(id, data) {
+  const payload = await getPayload({ config })
+
+  try {
+    const post = await payload.update({
+      collection: 'posts',
+      id, // the document id is required
+      data,
+    })
+    return post
+  } catch (error) {
+    throw new Error(`Error updating post: ${error.message}`)
+  }
+}
+```
+
+Here is how you would call the `updatePost` function from a frontend React component:
+
+```ts
+'use client';
+
+import React, { useState } from 'react';
+import { updatePost } from '../server/actions'; // import the server function
+
+export const UpdatePostForm: React.FC = () => {
+  const [result, setResult] = useState<string>('');
+
+  return (
+    <>
+      <p>{result}</p>
+
+      <button
+        type="button"
+        onClick={async () => {
+          // Call the server function to update the post
+          const updatedPost = await updatePost('your-post-id-123', { title: 'Updated Post' });
+          setResult('Post updated: ' + updatedPost.title);
+        }}
+      >
+        Update Post
+      </button>
+    </>
+  );
+};
+
+```
+
+### Authenticating a User
+
+In this example, we will check if a user is authenticated using Payload's authentication system. Here's how it works:
+
+- First, we use the headers function from `next/headers` to retrieve the request headers.
+- Next, we pass these headers to `payload.auth()` to fetch the user's authentication details.
+- If the user is authenticated, their information is returned. If not, handle the unauthenticated case accordingly.
+
+Here's the server function to authenticate a user:
+
+```ts
+'use server'
+
+import { headers as getHeaders } from 'next/headers'
+import config from '@payload-config'
+import { getPayload } from 'payload'
+
+export const authenticateUser = async () => {
+  const payload = await getPayload({ config })
+  const headers = await getHeaders()
+  const { user } = await payload.auth({ headers })
+
+  if (user) {
+    return { hello: user.email }
+  }
+
+  return { hello: 'Not authenticated' }
+}
+```
+
+Here's a basic example of how to call the authentication server function from the frontend to test it:
+
+```ts
+'use client';
+
+import React, { useState } from 'react';
+
+import { authenticateUser } from '../server/actions'; // Import the server function
+
+export const AuthComponent: React.FC = () => {
+  const [userInfo, setUserInfo] = useState<string>('');
+
+
+  return (
+    <React.Fragment>
+      <p>{userInfo}</p>
+
+      <button
+        onClick={async () => {
+          // Call the server function to authenticate the user
+          const result = await authenticateUser();
+          setUserInfo(result.hello);
+        }}
+        type="button"
+      >
+        Check Authentication
+      </button>
+    </React.Fragment>
+  );
+};
+```
+
+### Creating a Document with File Upload
+
+This example demonstrates how to write a server function that creates a document with a file upload. Here are the key steps:
+
+- Pass two arguments: **data** for the document content and **upload** for the file
+- Merge the upload file into the document data as the media field
+- Use `payload.create()` to create a new post document with both the document data and file
+
+```ts
+'use server'
+
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+export async function createPostWithUpload(data, upload) {
+  const payload = await getPayload({ config })
+
+  try {
+    // Prepare the data with the file
+    const postData = {
+      ...data,
+      media: upload,
+    }
+
+    const post = await payload.create({
+      collection: 'posts',
+      data: postData,
+    })
+
+    return post
+  } catch (error) {
+    throw new Error(`Error creating post: ${error.message}`)
+  }
+}
+```
+
+Here is how you would use the server function we just created in a frontend component to allow users to submit a post along with a file upload:
+
+- The user enters the post title and selects a file to upload.
+- When the form is submitted, the `handleSubmit` function checks if a file has been chosen.
+- If a file is selected, it passes both the title and the file to the `createPostWithFile` server function.
+- And you are done!
+
+```ts
+'use client';
+
+import React, { useState } from 'react';
+import { createPostWithUpload } from '../server/actions';
+
+export const PostForm: React.FC = () => {
+  const [title, setTitle] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [result, setResult] = useState<string>('');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      setResult('Please upload a file.');
+      return;
+    }
+
+    try {
+      // Call the server function to create the post with the file
+      const newPost = await createPostWithUpload({ title }, file);
+      setResult('Post created with file: ' + newPost.title);
+    } catch (error) {
+      setResult('Error: ' + error.message);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Post Title"
+      />
+      <input type="file" onChange={handleFileChange} />
+      <button type="submit">Create Post</button>
+      <p>{result}</p>
+    </form>
+  );
+};
+```
+
+## Reusable Payload Server Functions
+
+Coming soon…
+
+## Error Handling in Server Functions
+
+When using server functions, proper error handling is essential to prevent unhandled exceptions and provide meaningful feedback to the frontend.
+
+### Best Practices#error-handling-best-practices
+
+- Wrap Local API calls in **try/catch blocks** to catch potential errors.
+- **Log errors** on the server for debugging purposes.
+- Return structured **error responses** instead of exposing raw errors to the frontend.
+
+Example of good error handling:
+
+```ts
+export async function createPost(data) {
+  try {
+    const payload = await getPayload({ config })
+    return await payload.create({ collection: 'posts', data })
+  } catch (error) {
+    console.error('Error creating post:', error)
+    return { error: 'Failed to create post' }
+  }
+}
+```
+
+## Security Considerations
+
+Using server functions helps prevent direct exposure of Local API operations to the frontend, but additional security best practices should be followed:
+
+### Best Practices#security-best-practices
+
+- **Restrict access**: Ensure that sensitive actions (like user management) are only callable by authorized users.
+- **Avoid passing sensitive data**: Do not return sensitive information such as user data, passwords, etc.
+- **Use authentication & authorization**: Check user roles before performing actions.
+
+Example of restricting access based on user role:
+
+```ts
+export async function deletePost(postId, user) {
+  if (!user || user.role !== 'admin') {
+    throw new Error('Unauthorized')
+  }
+
+  const payload = await getPayload({ config })
+  return await payload.delete({ collection: 'posts', id: postId })
+}
+```
