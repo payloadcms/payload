@@ -56,16 +56,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ...(nextConfig?.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
-    experimental: {
-      ...(nextConfig?.experimental || {}),
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          'payload-mock-package': 'payload-mock-package',
-        },
-      },
-    },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
