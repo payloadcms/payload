@@ -533,4 +533,29 @@ describe('Form State', () => {
       },
     })
   })
+
+  it('should return the same object reference when only modifying a value', () => {
+    const currentState = {
+      title: {
+        value: 'Test Post',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: {
+        title: {
+          value: 'Test Post (modified)',
+          initialValue: 'Test Post',
+          valid: true,
+          passesCondition: true,
+        },
+      },
+    })
+
+    expect(newState === currentState).toBe(true)
+  })
 })
