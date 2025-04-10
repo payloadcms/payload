@@ -296,7 +296,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             acc.promises.push(
               iterateFields({
                 id,
-                addedByServer,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 blockData,
@@ -483,7 +482,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
-                  addedByServer,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
                   blockData: row,
@@ -594,7 +592,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         await iterateFields({
           id,
-          addedByServer,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
           blockData,
@@ -733,7 +730,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   } else if (fieldHasSubFields(field) && !fieldAffectsData(field)) {
-    // Handle field types that do not use names (row, etc)
+    // Handle field types that do not use names (row, collapsible, etc)
 
     if (!filter || filter(args)) {
       state[path] = {
@@ -751,7 +748,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       select,
       selectMode,
       // passthrough parent functionality
-      addedByServer,
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
       blockData,
@@ -844,7 +840,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       return iterateFields({
         id,
-        addedByServer,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
         blockData,
@@ -887,8 +882,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
-    const fieldState = state[path]
-
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
     if (!fieldConfig && !mockRSCs) {
@@ -899,10 +892,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
-    if (!fieldState) {
+    if (!state[path]) {
       // Some fields (ie `Tab`) do not live in form state
       // therefore we cannot attach customComponents to them
       return
+    }
+
+    if (addedByServer) {
+      state[path].addedByServer = addedByServer
     }
 
     renderFieldFn({
@@ -912,7 +909,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,
-      fieldState,
+      fieldState: state[path],
       formState: state,
       indexPath,
       lastRenderedPath,
