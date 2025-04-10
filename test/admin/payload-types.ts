@@ -247,6 +247,7 @@ export interface Post {
   sidebarField?: string | null;
   wavelengths?: ('fm' | 'am') | null;
   selectField?: ('option1' | 'option2')[] | null;
+  file?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -665,6 +666,7 @@ export interface PostsSelect<T extends boolean = true> {
   sidebarField?: T;
   wavelengths?: T;
   selectField?: T;
+  file?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
