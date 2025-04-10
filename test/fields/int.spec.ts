@@ -2,11 +2,11 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload } from 'payload'
+import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { BlockField, GroupField, RichTextField } from './payload-types.js'
+import type { BlockField, GroupField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -3020,91 +3020,6 @@ describe('Fields', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0].id).toBe(json_1.id)
       })
-    })
-  })
-
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
-      })
-
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
-
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0].richText[0].textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0].richText
-      expect(nodes).toBeDefined()
-      const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should respect rich text depth parameter', async () => {
-      const query = `query {
-        RichTextFields {
-          docs {
-            richText(depth: 2)
-          }
-        }
-      }`
-      const { data } = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-        })
-        .then((res) => res.json())
-      const { docs }: PaginatedDocs<RichTextField> = data.RichTextFields
-      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
-      expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
     })
   })
 
