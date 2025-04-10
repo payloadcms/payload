@@ -14,7 +14,6 @@ import { postsSlug } from './collections/Posts/index.js'
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
 let payload: Payload
-let token: string
 let restClient: NextRESTClient
 let user: User
 
@@ -35,7 +34,6 @@ describe('Form State', () => {
       })
       .then((res) => res.json())
 
-    token = data.token
     user = data.user
   })
 
@@ -251,7 +249,8 @@ describe('Form State', () => {
 
     expect(state.title?.addedByServer).toBe(true)
 
-    const { newState } = mergeServerFormState({
+    // Ensure that `addedByServer` is removed after being received by the client
+    const newState = mergeServerFormState({
       currentState: state,
       incomingState: state,
     })
@@ -289,7 +288,7 @@ describe('Form State', () => {
       },
     }
 
-    const { newState } = mergeServerFormState({
+    const newState = mergeServerFormState({
       currentState,
       incomingState: serverState,
     })
@@ -346,7 +345,7 @@ describe('Form State', () => {
       },
     }
 
-    const { newState } = mergeServerFormState({
+    const newState = mergeServerFormState({
       currentState,
       incomingState: serverState,
     })
@@ -434,7 +433,7 @@ describe('Form State', () => {
       },
     }
 
-    const { newState } = mergeServerFormState({
+    const newState = mergeServerFormState({
       currentState,
       incomingState: serverState,
     })
@@ -476,6 +475,10 @@ describe('Form State', () => {
           },
         ],
       },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
     }
 
     const serverState: FormState = {
@@ -499,7 +502,7 @@ describe('Form State', () => {
       },
     }
 
-    const { newState } = mergeServerFormState({
+    const newState = mergeServerFormState({
       currentState,
       incomingState: serverState,
     })

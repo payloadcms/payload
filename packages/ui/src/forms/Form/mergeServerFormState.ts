@@ -3,8 +3,6 @@ import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 
-import { mergeErrorPaths } from './mergeErrorPaths.js'
-
 type Args = {
   acceptValues?: boolean
   currentState?: FormState
@@ -37,32 +35,9 @@ export const mergeServerFormState = ({
       delete incomingField.initialValue
     }
 
-    delete incomingField.addedByServer
-
     newState[path] = {
       ...currentState[path],
       ...incomingField,
-    }
-
-    /**
-     * Handle error paths
-     */
-    const errorPathsResult = mergeErrorPaths(
-      newState[path]?.errorPaths,
-      incomingField.errorPaths as unknown as string[],
-    )
-
-    if (errorPathsResult.result) {
-      newState[path].errorPaths = errorPathsResult.result
-    }
-
-    /**
-     * Handle filterOptions
-     */
-    if (incomingField.filterOptions || newState[path].filterOptions) {
-      if (!dequal(incomingField?.filterOptions, newState[path].filterOptions)) {
-        newState[path].filterOptions = incomingField.filterOptions
-      }
     }
 
     /**
@@ -88,16 +63,22 @@ export const mergeServerFormState = ({
       })
     }
 
-    // Mark `undefined` as `valid: true`
+    // If `valid` is `undefined`, mark it as `true`
     if (incomingField.valid !== false) {
       newState[path].valid = true
     }
 
-    // Mark `undefined` as `passesCondition: true`
+    // If `passesCondition` is `undefined`, mark it as `true`
     if (incomingField.passesCondition !== false) {
       newState[path].passesCondition = true
     }
+
+    // Strip away the `addedByServer` property from the client
+    // This will prevent it from being passed back to the server
+    delete newState[path].addedByServer
   }
 
-  return newState
+  // Return the original object reference if the state is unchanged
+  // This will avoid unnecessary re-renders and dependency updates
+  return dequal(newState, currentState) ? currentState : newState
 }

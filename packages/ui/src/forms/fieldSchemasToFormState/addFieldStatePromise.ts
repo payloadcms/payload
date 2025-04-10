@@ -158,21 +158,25 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const lastRenderedPath = previousFormState?.[path]?.lastRenderedPath
 
-  // If we're rendering all fields, no need to flag this as added by server
-  const addedByServer = !renderAllFields && !previousFormState?.[path]
-
-  if (addedByServer) {
-    fieldState.addedByServer = true
-  }
-
+  // Append only if true to avoid sending '$undefined' through the network
   if (lastRenderedPath) {
     fieldState.lastRenderedPath = lastRenderedPath
   }
 
+  // If we're rendering all fields, no need to flag this as added by server
+  const addedByServer = !renderAllFields && !previousFormState?.[path]
+
+  // Append only if true to avoid sending '$undefined' through the network
+  if (addedByServer) {
+    fieldState.addedByServer = true
+  }
+
+  // Append only if true to avoid sending '$undefined' through the network
   if (passesCondition === false) {
     fieldState.passesCondition = false
   }
 
+  // Append only if true to avoid sending '$undefined' through the network
   if (includeSchema) {
     fieldState.fieldSchema = field
   }
