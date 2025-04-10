@@ -371,6 +371,7 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
+                acceptValues: true,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
