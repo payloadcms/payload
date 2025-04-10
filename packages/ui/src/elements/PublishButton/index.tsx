@@ -83,7 +83,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     scheduledPublishEnabled &&
       hasPublishPermission &&
       (globalSlug || (collectionSlug && id)) &&
-      (hasAutosave ?? !modified),
+      (hasAutosave || !modified),
   )
 
   const operation = useOperation()
