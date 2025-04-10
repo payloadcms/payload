@@ -117,11 +117,19 @@ const RichTextComponent: React.FC<
 
   const pathWithEditDepth = `${path}.${editDepth}`
 
+  const updateFieldValue = (editorState: EditorState) => {
+    const newState = editorState.toJSON()
+    prevValueRef.current = newState
+    setValue(newState)
+  }
+
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      const newState = editorState.toJSON()
-      prevValueRef.current = newState
-      setValue(newState)
+      if (typeof window.requestIdleCallback === 'function') {
+        requestIdleCallback(() => updateFieldValue(editorState))
+      } else {
+        updateFieldValue(editorState)
+      }
     },
     [setValue],
   )
