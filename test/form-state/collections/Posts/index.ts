@@ -83,6 +83,15 @@ export const PostsCollection: CollectionConfig = {
             },
           },
         },
+        {
+          name: 'text',
+          type: 'text',
+          admin: {
+            components: {
+              Field: './collections/Posts/TextField.js#CustomTextField',
+            },
+          },
+        },
       ],
     },
   ],

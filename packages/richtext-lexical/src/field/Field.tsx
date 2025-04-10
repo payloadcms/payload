@@ -36,19 +36,16 @@ const RichTextComponent: React.FC<
     editorConfig,
     field,
     field: {
-      name,
       admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
       required,
     },
-    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-  const path = pathFromProps ?? name
 
   const editDepth = useEditDepth()
 
@@ -70,11 +67,11 @@ const RichTextComponent: React.FC<
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField<SerializedEditorState>({
-    path,
     validate: memoizedValidate,
   })
 

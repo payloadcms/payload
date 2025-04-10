@@ -21,7 +21,7 @@ import type {
 type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
 type JoinFieldBaseClientProps = {
-  readonly path: string
+  readonly path?: string
 }
 
 type JoinFieldBaseServerProps = Pick<FieldPaths, 'path'>

@@ -144,6 +144,7 @@ export interface Post {
   array?:
     | {
         customTextField?: string | null;
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -254,6 +255,7 @@ export interface PostsSelect<T extends boolean = true> {
     | T
     | {
         customTextField?: T;
+        text?: T;
         id?: T;
       };
   updatedAt?: T;

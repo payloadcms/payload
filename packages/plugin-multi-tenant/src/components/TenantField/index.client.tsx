@@ -16,8 +16,8 @@ type Props = {
 } & RelationshipFieldClientProps
 
 export const TenantField = (args: Props) => {
-  const { debug, path, unique } = args
-  const { setValue, value } = useField<number | string>({ path })
+  const { debug, unique } = args
+  const { setValue, value } = useField<number | string>()
   const { options, selectedTenantID, setPreventRefreshOnChange, setTenant } = useTenantSelection()
 
   const hasSetValueRef = React.useRef(false)

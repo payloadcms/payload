@@ -269,15 +269,13 @@ function TabContent({
   parentIndexPath,
   parentPath,
   parentSchemaPath,
-  path,
   permissions,
   readOnly,
 }: ActiveTabProps) {
   const { i18n } = useTranslation()
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField({
-    path,
-  })
+  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {}, path } =
+    useField()
 
   if (Field) {
     return Field

@@ -11,9 +11,8 @@ import './index.scss'
 
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },
-  path,
 }) => {
-  const { value } = useField({ path })
+  const { path, value } = useField()
 
   return (
     <div className="field-type query-preset-columns-field">
