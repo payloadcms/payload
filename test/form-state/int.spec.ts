@@ -14,7 +14,6 @@ import { postsSlug } from './collections/Posts/index.js'
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
 let payload: Payload
-let token: string
 let restClient: NextRESTClient
 let user: User
 
@@ -35,7 +34,6 @@ describe('Form State', () => {
       })
       .then((res) => res.json())
 
-    token = data.token
     user = data.user
   })
 
@@ -135,6 +133,7 @@ describe('Form State', () => {
         value: postData.title,
         initialValue: postData.title,
         lastRenderedPath: 'title',
+        addedByServer: true,
       },
     })
   })
@@ -170,8 +169,10 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES_ return with rendered components
-    expect(stateWithRow?.['array.0.richText']?.lastRenderedPath).toStrictEqual('array.0.richText')
-    expect(stateWithRow?.['array.0.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWithRow?.['array.0.customTextField']?.lastRenderedPath).toStrictEqual(
+      'array.0.customTextField',
+    )
+    expect(stateWithRow?.['array.0.customTextField']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
       mockRSCs: true,
@@ -191,8 +192,8 @@ describe('Form State', () => {
           value: '123',
           initialValue: '123',
         },
-        'array.0.richText': {
-          lastRenderedPath: 'array.0.richText',
+        'array.0.customTextField': {
+          lastRenderedPath: 'array.0.customTextField',
         },
         'array.1.id': {
           value: '456',
@@ -211,21 +212,102 @@ describe('Form State', () => {
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
-    expect(stateWithTitle?.['array.0.richText']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.0.richText']).not.toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.0.customTextField']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.0.customTextField']).not.toHaveProperty('customComponents')
 
     // Ensure that row 2 _DOES_ return with rendered components
-    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('lastRenderedPath')
-    expect(stateWithTitle?.['array.1.richText']).toHaveProperty('customComponents')
-    expect(stateWithTitle?.['array.1.richText']?.customComponents?.Field).toBeDefined()
+    expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('lastRenderedPath')
+    expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('customComponents')
+    expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
-  it('should merge array rows without losing current state', () => {
+  it('should add `addedByServer` flag to fields that originate on the server', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.title?.addedByServer).toBe(true)
+
+    // Ensure that `addedByServer` is removed after being received by the client
+    const newState = mergeServerFormState({
+      currentState: state,
+      incomingState: state,
+    })
+
+    expect(newState.title?.addedByServer).toBeUndefined()
+  })
+
+  it('should not omit value and initialValue from fields added by the server', () => {
     const currentState: FormState = {
       array: {
         rows: [
           {
             id: '1',
+          },
+        ],
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    expect(newState['array.0.customTextField']).toStrictEqual({
+      passesCondition: true,
+      valid: true,
+      value: 'Test',
+      initialValue: 'Test',
+    })
+  })
+
+  it('should merge array rows without losing rows added to local state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
           },
           {
             id: '2',
@@ -233,22 +315,196 @@ describe('Form State', () => {
           },
         ],
       },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
     }
 
-    const incomingState: FormState = {
+    const serverState: FormState = {
       array: {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
     }
 
-    const { newState } = mergeServerFormState({
-      existingState: currentState,
-      incomingState,
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    // Row 2 should still exist
+    expect(newState).toStrictEqual({
+      array: {
+        passesCondition: true,
+        valid: true,
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+          },
+          {
+            id: '2',
+            isLoading: true,
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
+    })
+  })
+
+  it('should merge array rows without bringing back rows deleted from local state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+          },
+          {
+            id: '2',
+            lastRenderedPath: 'array.1.customTextField',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
+      'array.1.id': {
+        value: '2',
+        initialValue: '2',
+      },
+      'array.1.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+      },
+    }
+
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
+    })
+
+    // Row 2 should not exist
+    expect(newState).toStrictEqual({
+      array: {
+        passesCondition: true,
+        valid: true,
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        passesCondition: true,
+        valid: true,
+      },
+    })
+  })
+
+  it('should merge new fields returned from the server that do not yet exist in local state', () => {
+    const currentState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            isLoading: true,
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+    }
+
+    const serverState: FormState = {
+      array: {
+        rows: [
+          {
+            id: '1',
+            lastRenderedPath: 'array.0.customTextField',
+            isLoading: false,
+          },
+        ],
+      },
+      'array.0.id': {
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.customTextField': {
+        value: 'Test',
+        initialValue: 'Test',
+        addedByServer: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: serverState,
     })
 
     expect(newState).toStrictEqual({
@@ -258,14 +514,48 @@ describe('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.text',
-          },
-          {
-            id: '2',
-            isLoading: true,
+            lastRenderedPath: 'array.0.customTextField',
+            isLoading: false,
           },
         ],
       },
+      'array.0.id': {
+        passesCondition: true,
+        valid: true,
+        value: '1',
+        initialValue: '1',
+      },
+      'array.0.customTextField': {
+        passesCondition: true,
+        valid: true,
+        value: 'Test',
+        initialValue: 'Test',
+      },
     })
+  })
+
+  it('should return the same object reference when only modifying a value', () => {
+    const currentState = {
+      title: {
+        value: 'Test Post',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+      },
+    }
+
+    const newState = mergeServerFormState({
+      currentState,
+      incomingState: {
+        title: {
+          value: 'Test Post (modified)',
+          initialValue: 'Test Post',
+          valid: true,
+          passesCondition: true,
+        },
+      },
+    })
+
+    expect(newState === currentState).toBe(true)
   })
 })
