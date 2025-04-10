@@ -29,7 +29,7 @@ export const OrderableTable: React.FC<Props> = ({
   columns,
   data: initialData,
 }) => {
-  const { data: listQueryData, handleSortChange, orderableFieldName, query } = useListQuery()
+  const { data: listQueryData, orderableFieldName, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
