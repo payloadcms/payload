@@ -38,7 +38,6 @@ import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
 import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
-import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
@@ -92,7 +91,6 @@ export const collectionSlugs: CollectionConfig[] = [
 
 export const baseConfig: Partial<Config> = {
   collections: collectionSlugs,
-  globals: [TabsWithRichText],
   blocks: [
     {
       slug: 'ConfigBlockTest',

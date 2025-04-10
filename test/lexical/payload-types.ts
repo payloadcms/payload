@@ -120,8 +120,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    tabsWithRichText: TabsWithRichText;
+  };
+  globalsSelect: {
+    tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
+  };
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
@@ -1204,6 +1208,68 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabsWithRichText".
+ */
+export interface TabsWithRichText {
+  id: string;
+  tab1?: {
+    rt1?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  tab2?: {
+    rt2?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabsWithRichText_select".
+ */
+export interface TabsWithRichTextSelect<T extends boolean = true> {
+  tab1?:
+    | T
+    | {
+        rt1?: T;
+      };
+  tab2?:
+    | T
+    | {
+        rt2?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -17,7 +17,9 @@ import { LexicalRelationshipsFields } from './collections/LexicalRelationships/i
 import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
 import Uploads from './collections/Upload/index.js'
+import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -39,6 +41,7 @@ export const baseConfig: Partial<Config> = {
     Uploads,
     ArrayFields,
   ],
+  globals: [TabsWithRichText],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
