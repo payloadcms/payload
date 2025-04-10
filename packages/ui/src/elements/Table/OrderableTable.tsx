@@ -11,8 +11,6 @@ import { toast } from 'sonner'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { SortHeader } from '../SortHeader/index.js'
-import { SortRow } from '../SortRow/index.js'
 import { OrderableRow } from './OrderableRow.js'
 import { OrderableRowDragPreview } from './OrderableRowDragPreview.js'
 
@@ -50,21 +48,6 @@ export const OrderableTable: React.FC<Props> = ({
       Object.fromEntries(serverData.map((item, index) => [String(item.id ?? item._id), index])),
     )
   }, [serverData])
-
-  if (columns[0]?.accessor !== '_dragHandle') {
-    columns.unshift({
-      accessor: '_dragHandle',
-      active: true,
-      field: {
-        admin: {
-          disabled: true,
-        },
-        hidden: true,
-      },
-      Heading: <SortHeader />,
-      renderedCells: initialData.map((_, i) => <SortRow key={i} />),
-    } as Column)
-  }
 
   const activeColumns = columns?.filter((col) => col?.active)
 
