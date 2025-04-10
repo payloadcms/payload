@@ -773,12 +773,13 @@ export default buildConfigWithDefaults({
         {
           name: 'imageUpload',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
         },
         {
           name: 'imageRelationship',
           type: 'relationship',
-          relationTo: 'media',
+          relationTo: mediaWithRelationPreviewSlug,
         },
       ],
     },
@@ -958,8 +959,8 @@ export default buildConfigWithDefaults({
     for (let i = 0; i < 20; i++) {
       const data = {
         title: `List View Preview ${i + 1}`,
-        imageUpload: uploadedImage,
-        imageRelationship: uploadedImage,
+        imageUpload: uploadedImageWithPreview,
+        imageRelationship: uploadedImageWithPreview,
       }
       if (i > 15) {
         data.imageUpload = ''
