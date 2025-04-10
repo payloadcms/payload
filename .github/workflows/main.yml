@@ -309,6 +309,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - hooks
           - query-presets
           - form-state
           - live-preview
@@ -320,6 +321,7 @@ jobs:
           - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
+          - sort
           - versions
           - uploads
     env:

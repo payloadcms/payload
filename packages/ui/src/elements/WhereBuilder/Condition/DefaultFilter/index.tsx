@@ -96,7 +96,7 @@ export const DefaultFilter: React.FC<Props> = ({
           field={internalField?.field as TextFieldClient}
           onChange={onChange}
           operator={operator}
-          value={value as string}
+          value={value as string | string[]}
         />
       )
     }

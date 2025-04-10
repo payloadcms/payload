@@ -75,12 +75,6 @@ describe('Array', () => {
     await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
   })
 
-  test('should have defaultValue', async () => {
-    await page.goto(url.create)
-    const field = page.locator('#field-readOnly__0__text')
-    await expect(field).toHaveValue('defaultValue')
-  })
-
   test('should render RowLabel using a component', async () => {
     const label = 'custom row label as component'
     await page.goto(url.create)

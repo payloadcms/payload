@@ -31,6 +31,7 @@ import {
   customUploadFieldSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
@@ -55,6 +56,7 @@ let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
+let listViewPreviewURL: AdminUrlUtil
 let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
@@ -89,6 +91,7 @@ describe('Uploads', () => {
       serverURL,
       adminThumbnailWithSearchQueries,
     )
+    listViewPreviewURL = new AdminUrlUtil(serverURL, listViewPreviewSlug)
     mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
@@ -1399,5 +1402,31 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-original div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
     })
+  })
+
+  test('should show correct image preview or placeholder after paginating', async () => {
+    await page.goto(listViewPreviewURL.list)
+    const firstRow = page.locator('.row-1')
+
+    const imageUploadCell = firstRow.locator('.cell-imageUpload .relationship-cell')
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+
+    const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+
+    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
+    await expect(pageTwoButton).toBeVisible()
+    await pageTwoButton.click()
+
+    const imageUploadImg = imageUploadCell.locator('.thumbnail')
+    await expect(imageUploadImg).toBeVisible()
+    await expect(imageRelationshipCell).toHaveText('image-1.png')
+
+    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
+    await expect(pageOneButton).toBeVisible()
+    await pageOneButton.click()
+
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
   })
 })

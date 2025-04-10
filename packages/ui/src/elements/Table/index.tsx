@@ -40,7 +40,14 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         <tbody>
           {data &&
             data.map((row, rowIndex) => (
-              <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
+              <tr
+                className={`row-${rowIndex + 1}`}
+                key={
+                  typeof row.id === 'string' || typeof row.id === 'number'
+                    ? String(row.id)
+                    : rowIndex
+                }
+              >
                 {activeColumns.map((col, colIndex) => {
                   const { accessor } = col
 
