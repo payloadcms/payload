@@ -113,6 +113,7 @@ export interface Config {
       localizedPolymorphic: 'posts';
       localizedPolymorphics: 'posts';
       filtered: 'posts';
+      inTab: 'posts';
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -316,6 +317,12 @@ export interface Post {
         blockType: 'block';
       }[]
     | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -425,6 +432,11 @@ export interface Category {
     totalDocs?: number;
   };
   filtered?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  inTab?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -935,6 +947,16 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  first?:
+    | T
+    | {
+        tabText?: T;
+      };
+  tab?:
+    | T
+    | {
+        category?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -963,6 +985,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
+  inTab?: T;
   joinWithError?: T;
   enableErrorOnJoin?: T;
   updatedAt?: T;
