@@ -63,14 +63,16 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const hasNewerVersions = unpublishedVersionCount > 0
 
+  const schedulePublish =
+    typeof entityConfig?.versions?.drafts === 'object' &&
+    entityConfig?.versions?.drafts.schedulePublish
+
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const scheduledPublishEnabled =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
+  const scheduledPublishEnabled = Boolean(schedulePublish)
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
@@ -239,6 +241,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
+          schedulePublishConfig={typeof schedulePublish === 'object' && schedulePublish}
           slug={drawerSlug}
         />
       )}

@@ -21,7 +21,7 @@ const removeCSSImports = {
 async function build() {
   // Bundle only the .scss files into a single css file
   await esbuild.build({
-    entryPoints: ['src/exports/client/index.ts'],
+    entryPoints: ['src/exports/cssEntry.ts'],
     bundle: true,
     minify: true,
     outdir: 'dist/bundled_scss',
@@ -35,7 +35,7 @@ async function build() {
   fs.mkdirSync('dist/exports/client_optimized')
 
   try {
-    fs.renameSync('dist/bundled_scss/index.css', 'dist/field/bundled.css')
+    fs.renameSync('dist/bundled_scss/cssEntry.css', 'dist/field/bundled.css')
     fs.copyFileSync('dist/field/bundled.css', 'dist/exports/client_optimized/bundled.css')
     fs.rmSync('dist/bundled_scss', { recursive: true })
   } catch (err) {

@@ -150,6 +150,13 @@ export type ADD_ROW = {
   type: 'ADD_ROW'
 }
 
+export type MERGE_SERVER_STATE = {
+  acceptValues?: boolean
+  prevStateRef: React.RefObject<FormState>
+  serverState: FormState
+  type: 'MERGE_SERVER_STATE'
+}
+
 export type REPLACE_ROW = {
   blockType?: string
   path: string
@@ -192,6 +199,7 @@ export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS
   | DUPLICATE_ROW
+  | MERGE_SERVER_STATE
   | MODIFY_CONDITION
   | MOVE_ROW
   | REMOVE
