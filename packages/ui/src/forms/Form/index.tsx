@@ -492,7 +492,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       let file = data?.file
 
-      if ('upload' in docConfig && docConfig.upload && file) {
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         delete data.file
 
         const handler = getUploadHandler({ collectionSlug })
@@ -529,7 +529,7 @@ export const Form: React.FC<FormProps> = (props) => {
         _payload: JSON.stringify(data),
       }
 
-      if ('upload' in docConfig && docConfig.upload && file) {
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         dataToSerialize.file = file
       }
 
