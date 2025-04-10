@@ -467,6 +467,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     data: doc,
     fields,
     joinQuery: false,
+    tableName,
   })
 
   return result

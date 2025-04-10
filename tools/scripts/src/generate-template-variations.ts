@@ -435,9 +435,10 @@ function header(message: string) {
 function log(message: string) {
   console.log(chalk.dim(message))
 }
+
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
-    console.log(`Executing: ${command}`)
+    log(`Executing: ${command}`)
     execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
@@ -492,6 +493,11 @@ async function bumpPackageJson({
   )
 }
 
+/**
+ * Fetches the latest version of a package from the NPM registry.
+ *
+ * Used in determining the latest version of Payload to use in the generated templates.
+ */
 async function getLatestPackageVersion({
   packageName = 'payload',
 }: {
@@ -508,6 +514,8 @@ async function getLatestPackageVersion({
     const response = await fetch(`https://registry.npmjs.org/${packageName}`)
     const data = await response.json()
     const latestVersion = data['dist-tags'].latest
+
+    log(`Found latest version of ${packageName}: ${latestVersion}`)
 
     return latestVersion
   } catch (error) {
