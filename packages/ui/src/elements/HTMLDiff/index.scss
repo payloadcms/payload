@@ -10,6 +10,11 @@
       color: var(--theme-elevation-400);
     }
 
+    pre {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
     // Apply background color to parents that have children with diffs
     p,
     h1,
@@ -18,6 +23,7 @@
     h4,
     h5,
     blockquote,
+    pre,
     h6 {
       &:has([data-match-type='create']) {
         position: relative;
