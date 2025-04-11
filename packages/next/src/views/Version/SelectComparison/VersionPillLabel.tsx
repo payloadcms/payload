@@ -56,7 +56,7 @@ export const VersionPillLabel: React.FC<{
   }
 
   return (
-    <div>
+    <div className={`version-pill-label`}>
       {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
       &nbsp;&nbsp;
       {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}

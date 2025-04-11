@@ -9,6 +9,39 @@ import React from 'react'
 
 const baseClass = 'text-diff'
 
+function formatValue(value: unknown): {
+  tokenizeByCharacter: boolean
+  value: string
+} {
+  if (typeof value === 'string') {
+    return { tokenizeByCharacter: true, value }
+  }
+  if (typeof value === 'number') {
+    return {
+      tokenizeByCharacter: true,
+      value: String(value),
+    }
+  }
+  if (typeof value === 'boolean') {
+    return {
+      tokenizeByCharacter: false,
+      value: String(value),
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    return {
+      tokenizeByCharacter: false,
+      value: `<pre>${JSON.stringify(value, null, 2)}</pre>`,
+    }
+  }
+
+  return {
+    tokenizeByCharacter: true,
+    value: undefined,
+  }
+}
+
 export const Text: TextFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,
@@ -23,23 +56,23 @@ export const Text: TextFieldDiffClientComponent = ({
     placeholder = `<span class="html-diff-no-value">${i18n.t('general:noValue')}<span>`
   }
 
-  const renderedValueTo: string =
-    typeof valueTo === 'string'
-      ? valueTo
-      : valueTo
-        ? `<pre>${JSON.stringify(valueTo, null, 2)}</pre>`
-        : placeholder
-  const renderedValueFrom =
-    typeof valueFrom === 'string'
-      ? valueFrom
-      : valueFrom
-        ? `<pre>${JSON.stringify(valueFrom, null, 2)}</pre>`
-        : placeholder
+  const formattedValueFrom = formatValue(valueFrom)
+  const formattedValueTo = formatValue(valueTo)
+
+  let tokenizeByCharacter = true
+  if (formattedValueFrom.value?.length) {
+    tokenizeByCharacter = formattedValueFrom.tokenizeByCharacter
+  } else if (formattedValueTo.value?.length) {
+    tokenizeByCharacter = formattedValueTo.tokenizeByCharacter
+  }
+
+  const renderedValueFrom = formattedValueFrom.value ?? placeholder
+  const renderedValueTo: string = formattedValueTo.value ?? placeholder
 
   const { From, To } = getHTMLDiffComponents({
     fromHTML: '<p>' + renderedValueFrom + '</p>',
     toHTML: '<p>' + renderedValueTo + '</p>',
-    tokenizeByCharacter: true,
+    tokenizeByCharacter,
   })
 
   return (

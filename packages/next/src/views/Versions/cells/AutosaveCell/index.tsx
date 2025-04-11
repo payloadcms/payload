@@ -22,7 +22,6 @@ export const renderPill = (data, latestVersion, currentLabel, previousLabel, pil
       ) : (
         <Pill>{previousLabel}</Pill>
       )}
-      &nbsp;&nbsp;
     </React.Fragment>
   )
 }
