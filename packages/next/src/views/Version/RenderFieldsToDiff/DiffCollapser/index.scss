@@ -19,10 +19,10 @@
         &::before {
           content: '';
           position: absolute;
-          top: -(base(0.2));
-          left: -(base(0.2));
-          right: -(base(0.2));
-          bottom: -(base(0.2));
+          top: -(base(0.15));
+          left: -(base(0.15));
+          right: -(base(0.15));
+          bottom: -(base(0.15));
           background-color: var(--theme-elevation-50);
           border-radius: var(--style-radius-s);
           z-index: -1;
@@ -39,6 +39,9 @@
       // Reset the font weight of the change count to normal
       font-weight: normal;
       margin-left: calc(var(--base) * 0.3);
+      padding: calc(var(--base) * 0.2);
+      background: var(--theme-elevation-100);
+      border-radius: var(--style-radius-s);
     }
 
     &__content {

@@ -2,8 +2,8 @@
   .iterable-diff {
     &__locale-label {
       background: var(--theme-elevation-100);
-      border-radius: var(--style-radius-m);
-      padding: calc(var(--base) * 0.25);
+      border-radius: var(--style-radius-s);
+      padding: calc(var(--base) * 0.2);
       // border-radius: $style-radius-m;
       [dir='ltr'] & {
         margin-right: calc(var(--base) * 0.25);
