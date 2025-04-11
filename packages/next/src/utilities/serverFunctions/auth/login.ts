@@ -5,19 +5,26 @@ import type { CollectionSlug } from 'payload'
 import { cookies as getCookies } from 'next/headers.js'
 import { generatePayloadCookie, getPayload } from 'payload'
 
-export async function login({
-  collection,
-  config,
-  email,
-  password,
-  username,
-}: {
+import { setPayloadAuthCookie } from '../../setPayloadAuthCookie.js'
+
+type LoginWithEmail = {
   collection: CollectionSlug
   config: any
-  email?: string
+  email: string
   password: string
-  username?: string
-}): Promise<{
+  username?: never
+}
+
+type LoginWithUsername = {
+  collection: CollectionSlug
+  config: any
+  email?: never
+  password: string
+  username: string
+}
+type LoginArgs = LoginWithEmail | LoginWithUsername
+
+export async function login({ collection, config, email, password, username }: LoginArgs): Promise<{
   token?: string
   user: any
 }> {
@@ -32,18 +39,15 @@ export async function login({
 
   if (loginWithUsername) {
     if (loginWithUsername.allowEmailLogin) {
-      // if loginWithUsername and allowEmailLogin are true then we accept email or username.
       if (!email && !username) {
         throw new Error('Email or username is required.')
       }
     } else {
-      // if loginWithUsername is true and allowEmailLogin is false, we only accept username.
       if (!username) {
         throw new Error('Username is required.')
       }
     }
   } else {
-    // if loginWithUsername is false, we only accept email.
     if (!email) {
       throw new Error('Email is required.')
     }
@@ -64,32 +68,11 @@ export async function login({
     })
 
     if (result.token) {
-      const cookies = await getCookies()
-      const cookiePrefix = payload.config.cookiePrefix || 'payload'
-      const cookieExpiration = authConfig.tokenExpiration
-        ? new Date(Date.now() + authConfig.tokenExpiration)
-        : undefined
-
-      const payloadCookie = generatePayloadCookie({
-        collectionAuthConfig: authConfig,
-        cookiePrefix,
-        expires: cookieExpiration,
-        returnCookieAsObject: true,
+      await setPayloadAuthCookie({
+        authConfig,
+        cookiePrefix: payload.config.cookiePrefix,
         token: result.token,
       })
-
-      if (payloadCookie.value) {
-        // must pass authConfig.cookies options: domain, sameSite and secure
-        const cookieOptions = {
-          domain: authConfig.cookies.domain,
-          expires: payloadCookie.expires ? new Date(payloadCookie.expires) : undefined,
-          httpOnly: true,
-          sameSite: (authConfig.cookies.sameSite as any) || 'lax',
-          secure: authConfig.cookies.secure || false,
-        }
-
-        cookies.set(payloadCookie.name, payloadCookie.value, cookieOptions)
-      }
     }
 
     if ('removeTokenFromResponses' in config && config.removeTokenFromResponses) {

@@ -1,5 +1,5 @@
 'use server'
-import { login } from '@payloadcms/next/server-functions'
+import { login } from '@payloadcms/next/auth'
 
 import config from '../config.js'
 
@@ -9,10 +9,15 @@ type LoginArgs = {
 }
 
 export async function loginFunction({ email, password }: LoginArgs) {
-  return await login({
-    collection: 'users',
-    config,
-    email,
-    password,
-  })
+  try {
+    const result = await login({
+      collection: 'users',
+      config,
+      email,
+      password,
+    })
+    return result
+  } catch (error) {
+    throw new Error(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 }

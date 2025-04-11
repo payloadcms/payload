@@ -319,7 +319,7 @@ Logs in a user by verifying credentials and setting the authentication cookie. T
 #### Importing the `login` function
 
 ```ts
-import { login } from '@payloadcms/next/server-functions'
+import { login } from '@payloadcms/next/auth'
 ```
 
 The login function needs your Payload config, which cannot be imported in a client component. To work around this, create a simple server function like the one below, and call it from your client.
@@ -327,7 +327,7 @@ The login function needs your Payload config, which cannot be imported in a clie
 ```ts
 'use server'
 
-import { login } from '@payloadcms/next/server-functions'
+import { login } from '@payloadcms/next/auth'
 import config from '@payload-config'
 
 export async function loginAction({
@@ -337,12 +337,19 @@ export async function loginAction({
   email: string
   password: string
 }) {
-  return login({
-    config,
-    collection: 'users',
-    email,
-    password,
-  })
+  try {
+    const result = await login({
+      collection: 'users',
+      config,
+      email,
+      password,
+    })
+    return result
+  } catch (error) {
+    throw new Error(
+      `Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
+  }
 }
 ```
 
@@ -354,38 +361,30 @@ import { useState } from 'react'
 import { loginAction } from '../loginAction'
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    try {
-      const response = await loginAction({ email, password })
-      console.log('Logged in:', response)
-    } catch (err) {
-      setError(err.message)
-    }
-  }
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={() => loginAction({ email, password })}>
+      <label htmlFor="email">Email</label>
       <input
+        id="email"
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setEmail(e.target.value)
+        }
         type="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        required
       />
+      <label htmlFor="password">Password</label>
       <input
+        id="password"
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPassword(e.target.value)
+        }
         type="password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        required
       />
       <button type="submit">Login</button>
-      {error && <p>{error}</p>}
     </form>
   )
 }
@@ -398,7 +397,7 @@ Logs out the current user by clearing the authentication cookie.
 #### Importing the `logout` function
 
 ```ts
-import { logout } from '@payloadcms/next/server-functions'
+import { logout } from '@payloadcms/next/auth'
 ```
 
 Similar to the login function, you now need to pass your Payload config to this function and this cannot be done in a client component. Use a helper server function as shown below.
@@ -406,11 +405,17 @@ Similar to the login function, you now need to pass your Payload config to this 
 ```ts
 'use server'
 
-import { logout } from '@payloadcms/next/server-functions'
+import { logout } from '@payloadcms/next/auth'
 import config from '@payload-config'
 
 export async function logoutAction() {
-  return logout({ config })
+  try {
+    return await logout({ config })
+  } catch (error) {
+    throw new Error(
+      `Logout failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
+  }
 }
 ```
 
@@ -421,12 +426,7 @@ export async function logoutAction() {
 import { logoutAction } from '../logoutAction'
 
 export default function LogoutButton() {
-  const handleLogout = async () => {
-    await logoutAction()
-    console.log('User logged out')
-  }
-
-  return <button onClick={handleLogout}>Logout</button>
+  return <button onClick={() => logoutFunction()}>Logout</button>
 }
 ```
 
@@ -437,7 +437,7 @@ Refreshes the authentication token for the logged-in user.
 #### Importing the `refresh` function
 
 ```ts
-import { refresh } from '@payloadcms/next/server-functions'
+import { refresh } from '@payloadcms/next/auth'
 ```
 
 As with login and logout, you need to pass your Payload config to this function. Create a helper server function like the one below. Passing the config directly to the client is not possible and will throw errors.
@@ -445,14 +445,20 @@ As with login and logout, you need to pass your Payload config to this function.
 ```ts
 'use server'
 
-import { refresh } from '@payloadcms/next/server-functions'
+import { refresh } from '@payloadcms/next/auth'
 import config from '@payload-config'
 
 export async function refreshAction() {
-  return refresh({
-    config,
-    collection: 'users',
-  })
+  try {
+    return await refresh({
+      collection: 'users', // update this to your collection slug
+      config,
+    })
+  } catch (error) {
+    throw new Error(
+      `Refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
+  }
 }
 ```
 
@@ -463,12 +469,7 @@ export async function refreshAction() {
 import { refreshAction } from '../actions/refreshAction'
 
 export default function RefreshTokenButton() {
-  const handleRefresh = async () => {
-    const response = await refreshAction()
-    console.log('Token refreshed:', response)
-  }
-
-  return <button onClick={handleRefresh}>Refresh Token</button>
+  return <button onClick={() => refreshFunction()}>Refresh</button>
 }
 ```
 

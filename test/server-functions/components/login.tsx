@@ -7,23 +7,9 @@ import { loginFunction } from './loginFunction.js'
 const LoginForm = () => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  const [error, setError] = useState<null | string>(null)
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    try {
-      await loginFunction({ email, password })
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('An unknown error occurred')
-      }
-    }
-  }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={() => loginFunction({ email, password })}>
       <label htmlFor="email">Email</label>
       <input
         id="email"
@@ -43,7 +29,6 @@ const LoginForm = () => {
         value={password}
       />
       <button type="submit">Custom Login</button>
-      {error && <p>{error}</p>}
     </form>
   )
 }

@@ -1,17 +1,16 @@
 'use server'
-import type { CollectionSlug } from 'payload'
 
-import { refresh } from '@payloadcms/next/server-functions'
+import { refresh } from '@payloadcms/next/auth'
 
 import config from '../config.js'
 
-type RefreshArgs = {
-  collection: CollectionSlug
-}
-
-export async function refreshFunction({ collection }: RefreshArgs) {
-  return await refresh({
-    collection,
-    config,
-  })
+export async function refreshFunction() {
+  try {
+    return await refresh({
+      collection: 'users', // update this to your collection slug
+      config,
+    })
+  } catch (error) {
+    throw new Error(`Refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 }
