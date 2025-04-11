@@ -5,7 +5,7 @@ import type { CollectionSlug } from 'payload'
 import { cookies as getCookies } from 'next/headers.js'
 import { generatePayloadCookie, getPayload } from 'payload'
 
-import { setPayloadAuthCookie } from '../../setPayloadAuthCookie.js'
+import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
 type LoginWithEmail = {
   collection: CollectionSlug

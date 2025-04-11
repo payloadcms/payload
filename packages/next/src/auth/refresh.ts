@@ -5,8 +5,8 @@ import type { CollectionSlug } from 'payload'
 import { headers as nextHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 
-import { getExistingAuthToken } from '../../getExistingAuthToken.js'
-import { setPayloadAuthCookie } from '../../setPayloadAuthCookie.js'
+import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
+import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
 export async function refresh({ collection, config }: { collection: CollectionSlug; config: any }) {
   try {

@@ -3,7 +3,7 @@
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { getPayload } from 'payload'
 
-import { getExistingAuthToken } from '../../getExistingAuthToken.js'
+import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 
 export async function logout({ config }: { config: any }) {
   try {
