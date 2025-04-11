@@ -51,7 +51,7 @@ export const FieldDiffContainer: React.FC<{
         style={
           nestingLevel
             ? {
-                gridTemplateColumns: `calc(var(--left-offset) - 10px) calc(50% - 10px + calc(50% - var(--left-offset)))`,
+                gridTemplateColumns: `calc(var(--left-offset) - calc(var(--base)*0.5) )     calc(50% - calc(var(--base)*0.5) + calc(50% - var(--left-offset)))`,
               }
             : undefined
         }

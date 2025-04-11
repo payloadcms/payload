@@ -1,7 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 @layer payload-default {
-  .lexical-unknown-diff {
+  .lexical-diff .lexical-unknown-diff {
     @extend %body;
     @include shadow-sm;
     max-width: fit-content;

@@ -32,11 +32,11 @@
     &-container {
       display: grid;
       // Need to use 50% 50% so that we can apply overflow-x without the column shrinking to the content width.
-      // Need -10px to enure the gap is center aligned - this is required when using 50% over 1fr.
-      grid-template-columns: calc(50% - 10px) calc(50% - 10px);
+      // Need -base(0.5) to enure the gap is center aligned - this is required when using 50% over 1fr.
+      grid-template-columns: calc(50% - base(0.5)) calc(50% - base(0.5));
       gap: base(1);
       background: var(--theme-elevation-50);
-      padding: 6px;
+      padding: base(0.5);
     }
   }
 }

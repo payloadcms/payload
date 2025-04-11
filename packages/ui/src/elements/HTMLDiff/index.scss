@@ -25,10 +25,10 @@
         &::before {
           content: '';
           position: absolute;
-          top: -6px;
-          bottom: -6px;
+          top: -(base(0.5));
+          bottom: -(base(0.5));
           left: -10px;
-          right: -6px;
+          right: -(base(0.5));
           display: block;
           background-color: var(--diff-create-parent-bg);
           color: var(--diff-create-parent-color);
@@ -42,9 +42,9 @@
         &::before {
           content: '';
           position: absolute;
-          top: -6px;
-          bottom: -6px;
-          left: -6px;
+          top: -(base(0.5));
+          bottom: -(base(0.5));
+          left: -(base(0.5));
           right: -10px;
           display: block;
           background-color: var(--diff-delete-parent-bg);
@@ -64,7 +64,7 @@
           top: 0;
           bottom: 0;
           left: -10px;
-          right: -6px;
+          right: -(base(0.5));
           display: block;
           background-color: var(--diff-create-parent-bg);
           color: var(--diff-create-parent-color);
@@ -80,7 +80,7 @@
           position: absolute;
           top: 0;
           bottom: 0;
-          left: -6px;
+          left: -(base(0.5));
           right: -10px;
           display: block;
           background-color: var(--diff-delete-parent-bg);
