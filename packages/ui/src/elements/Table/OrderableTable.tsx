@@ -8,6 +8,7 @@ import { DragOverlay } from '@dnd-kit/core'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
@@ -29,6 +30,7 @@ export const OrderableTable: React.FC<Props> = ({
   columns,
   data: initialData,
 }) => {
+  const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
@@ -114,7 +116,7 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`/api/reorder`, {
+      const response = await fetch(`${config.routes.api}/reorder`, {
         body: JSON.stringify(jsonBody),
         headers: {
           'Content-Type': 'application/json',
