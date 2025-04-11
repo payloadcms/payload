@@ -222,8 +222,12 @@ export const handleEndpoints = async ({
     }
 
     const response = await handler(req)
+
     return new Response(response.body, {
-      headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+      headers: headersWithCors({
+        headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+        req,
+      }),
       status: response.status,
       statusText: response.statusText,
     })
