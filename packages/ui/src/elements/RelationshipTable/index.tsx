@@ -335,6 +335,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
+                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 orderableFieldName={
