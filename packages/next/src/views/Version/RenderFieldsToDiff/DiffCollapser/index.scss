@@ -7,9 +7,26 @@
       cursor: pointer;
       // Align the chevron visually with the label text
       vertical-align: 1px;
+      position: relative;
+      z-index: 1;
 
       .icon {
         color: var(--theme-elevation-500);
+      }
+
+      &:hover {
+        // Apply background color but with padding, thus we use after
+        &::before {
+          content: '';
+          position: absolute;
+          top: -(base(0.2));
+          left: -(base(0.2));
+          right: -(base(0.2));
+          bottom: -(base(0.2));
+          background-color: var(--theme-elevation-50);
+          border-radius: var(--style-radius-s);
+          z-index: -1;
+        }
       }
     }
 
