@@ -927,6 +927,10 @@ export const getPayload = async (
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
+        const hasHTTPS =
+          process.argv.includes('--experimental-https') ??
+          process.env.__NEXT_ASSET_PREFIX?.includes('https:')
+        const protocol = hasHTTPS ? 'wss' : 'ws'
         const port = process.env.PORT || '3000'
 
         const path = '/_next/webpack-hmr'
@@ -934,7 +938,7 @@ export const getPayload = async (
         const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
 
         cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
