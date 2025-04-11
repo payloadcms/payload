@@ -6,6 +6,9 @@ import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['scripts/**'],
+  },
+  {
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,
