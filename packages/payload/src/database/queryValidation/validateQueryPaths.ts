@@ -28,22 +28,6 @@ type Args = {
     }
 )
 
-const flattenWhere = (query: Where): WhereField[] => {
-  const flattenedConstraints: WhereField[] = []
-
-  for (const [key, val] of Object.entries(query)) {
-    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      for (const subVal of val) {
-        flattenedConstraints.push(...flattenWhere(subVal))
-      }
-    } else {
-      flattenedConstraints.push({ [key]: val })
-    }
-  }
-
-  return flattenedConstraints
-}
-
 export async function validateQueryPaths({
   collectionConfig,
   errors = [],
@@ -61,17 +45,47 @@ export async function validateQueryPaths({
   const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
 
   if (typeof where === 'object') {
-    const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
-    for (const constraint of whereFields) {
-      for (const path in constraint) {
-        for (const operator in constraint[path]) {
-          const val = constraint[path][operator]
+    for (const path in where) {
+      const constraint = where[path]
+
+      if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
+        for (const item of constraint) {
+          if (collectionConfig) {
+            promises.push(
+              validateQueryPaths({
+                collectionConfig,
+                errors,
+                overrideAccess,
+                policies,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          } else {
+            promises.push(
+              validateQueryPaths({
+                errors,
+                globalConfig,
+                overrideAccess,
+                policies,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          }
+        }
+      } else if (!Array.isArray(constraint)) {
+        for (const operator in constraint) {
+          const val = constraint[operator]
           if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
                 collectionConfig,
+                constraint: where as WhereField,
                 errors,
                 fields,
                 globalConfig,
