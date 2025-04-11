@@ -50,6 +50,7 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  casing?: DrizzleConfig['casing']
   client: Config
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
@@ -139,6 +140,7 @@ export type SQLiteAdapter = {
   afterSchemaInit: SQLiteSchemaHook[]
   autoIncrement: boolean
   beforeSchemaInit: SQLiteSchemaHook[]
+  casing: DrizzleConfig['casing']
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
