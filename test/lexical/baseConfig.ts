@@ -9,6 +9,7 @@ import {
   lexicalInlineBlocks,
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
+import { LexicalFullyFeatured } from './collections/LexicalFullyFeatured/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
@@ -26,6 +27,7 @@ const dirname = path.dirname(filename)
 export const baseConfig: Partial<Config> = {
   // ...extend config here
   collections: [
+    LexicalFullyFeatured,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
       inlineBlocks: lexicalInlineBlocks,
@@ -42,9 +44,17 @@ export const baseConfig: Partial<Config> = {
     ArrayFields,
   ],
   globals: [TabsWithRichText],
+
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      beforeDashboard: [
+        {
+          path: './components/CollectionsExplained.tsx#CollectionsExplained',
+        },
+      ],
     },
   },
   onInit: async (payload) => {
