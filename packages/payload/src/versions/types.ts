@@ -8,6 +8,23 @@ export type Autosave = {
   interval?: number
 }
 
+export type SchedulePublish = {
+  /**
+   * Define a date format to use for the time picker.
+   *
+   * @example 'hh:mm' will give a 24 hour clock
+   *
+   * @default 'h:mm aa' which is a 12 hour clock
+   */
+  timeFormat?: string
+  /**
+   * Intervals for the time picker.
+   *
+   * @default 5
+   */
+  timeIntervals?: number
+}
+
 export type IncomingDrafts = {
   /**
    * Enable autosave to automatically save progress while documents are edited.
@@ -17,7 +34,7 @@ export type IncomingDrafts = {
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
-  schedulePublish?: boolean
+  schedulePublish?: boolean | SchedulePublish
   /**
    * Set validate to true to validate draft documents when saved.
    *
@@ -35,7 +52,7 @@ export type SanitizedDrafts = {
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
-  schedulePublish: boolean
+  schedulePublish: boolean | SchedulePublish
   /**
    * Set validate to true to validate draft documents when saved.
    *

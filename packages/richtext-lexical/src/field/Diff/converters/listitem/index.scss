@@ -1,0 +1,48 @@
+@import '../../../../scss/styles.scss';
+@import '../../colors.scss';
+
+@layer payload-default {
+  .lexical-diff {
+    ul.list-check {
+      padding-left: 0;
+    }
+
+    .checkboxItem {
+      list-style-type: none;
+
+      &__wrapper {
+        display: flex;
+        align-items: center;
+      }
+
+      &__icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px; // Spacing before label text
+        border: 1px solid var(--theme-text);
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // Because the checkbox is non-interactive:
+        pointer-events: none;
+
+        .icon--check {
+          height: 11px;
+        }
+
+        &[data-match-type='create'] {
+          border-color: var(--diff-create-pill-color);
+        }
+
+        &[data-match-type='delete'] {
+          border-color: var(--diff-delete-pill-color);
+        }
+      }
+
+      &--nested {
+        margin-left: 1.5rem;
+      }
+    }
+  }
+}

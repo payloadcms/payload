@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -139,6 +140,12 @@ export interface Post {
             blockType: 'number';
           }
       )[]
+    | null;
+  array?:
+    | {
+        customTextField?: string | null;
+        id?: string | null;
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -242,6 +249,12 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  array?:
+    | T
+    | {
+        customTextField?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

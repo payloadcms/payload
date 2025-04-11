@@ -1,9 +1,11 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
   FieldSchemaMap,
+  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -56,6 +58,7 @@ type Args = {
    * the initial block data here, which will be used as `blockData` for the top-level fields, until the first block is encountered.
    */
   initialBlockData?: Data
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
@@ -86,6 +89,7 @@ export const fieldSchemasToFormState = async ({
   fields,
   fieldSchemaMap,
   initialBlockData,
+  mockRSCs,
   operation,
   permissions,
   preferences,
@@ -139,6 +143,7 @@ export const fieldSchemasToFormState = async ({
       fields,
       fieldSchemaMap,
       fullData,
+      mockRSCs,
       operation,
       parentIndexPath: '',
       parentPassesCondition: true,

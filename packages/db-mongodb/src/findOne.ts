@@ -14,7 +14,7 @@ import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection: collectionSlug, joins, locale, req, select, where = {} },
+  { collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
@@ -42,6 +42,7 @@ export const findOne: FindOne = async function findOne(
     adapter: this,
     collection: collectionSlug,
     collectionConfig,
+    draftsEnabled,
     joins,
     locale,
     projection,

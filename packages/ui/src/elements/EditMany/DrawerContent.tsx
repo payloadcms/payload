@@ -1,16 +1,17 @@
 'use client'
 
-import type { FieldWithPathClient, SelectType } from 'payload'
+import type { SelectType } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { unflatten } from 'payload/shared'
+import { mergeListSearchAndWhere, unflatten } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -26,7 +27,6 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass, type EditManyProps } from './index.js'
@@ -113,8 +113,8 @@ const SaveDraftButton: React.FC<{
 export const EditManyDrawerContent: React.FC<
   {
     drawerSlug: string
-    selectedFields: FieldWithPathClient[]
-    setSelectedFields: React.Dispatch<React.SetStateAction<FieldWithPathClient[]>>
+    selectedFields: FieldOption[]
+    setSelectedFields: (fields: FieldOption[]) => void
   } & EditManyProps
 > = (props) => {
   const {
@@ -151,8 +151,8 @@ export const EditManyDrawerContent: React.FC<
 
   const select = useMemo<SelectType>(() => {
     return unflatten(
-      selectedFields.reduce((acc, field) => {
-        acc[field.path] = true
+      selectedFields.reduce((acc, option) => {
+        acc[option.value.path] = true
         return acc
       }, {} as SelectType),
     )
@@ -216,11 +216,7 @@ export const EditManyDrawerContent: React.FC<
     async ({ dispatchFields, formState, selected }) => {
       setIsInitializing(true)
 
-      if (selected === null) {
-        setSelectedFields([])
-      } else {
-        setSelectedFields(selected.map(({ value }) => value))
-      }
+      setSelectedFields(selected || [])
 
       const { state } = await getFormState({
         collectionSlug: collection.slug,
@@ -286,11 +282,17 @@ export const EditManyDrawerContent: React.FC<
             onChange={[onChange]}
             onSuccess={onSuccess}
           >
-            <FieldSelect fields={fields} onChange={onFieldSelect} />
+            <FieldSelect
+              fields={fields}
+              onChange={onFieldSelect}
+              permissions={collectionPermissions.fields}
+            />
             {selectedFields.length === 0 ? null : (
               <div className="render-fields">
-                {selectedFields.map((field, i) => {
-                  const { path } = field
+                {selectedFields.map((option, i) => {
+                  const {
+                    value: { field, fieldPermissions, path },
+                  } = option
 
                   return (
                     <RenderField
@@ -300,15 +302,7 @@ export const EditManyDrawerContent: React.FC<
                       parentPath=""
                       parentSchemaPath=""
                       path={path}
-                      permissions={
-                        collectionPermissions.fields === undefined ||
-                        collectionPermissions.fields === null ||
-                        collectionPermissions.fields === true
-                          ? true
-                          : 'name' in field
-                            ? collectionPermissions.fields?.[field.name]
-                            : undefined
-                      }
+                      permissions={fieldPermissions}
                     />
                   )
                 })}

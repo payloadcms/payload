@@ -417,7 +417,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
-                permissions={permissions}
+                permissions={true}
                 readOnly={false}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
