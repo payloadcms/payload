@@ -15,7 +15,7 @@ test-results
 /migrations
 .localstack
 .turbo
-
+dev-certs
 meta_client.json
 meta_server.json
 meta_index.json
