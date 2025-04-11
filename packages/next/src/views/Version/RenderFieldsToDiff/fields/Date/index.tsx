@@ -22,6 +22,7 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
   diffMethod,
   field,
   locale,
+  nestingLevel,
   versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
@@ -68,6 +69,7 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
         label: field.label,
         locale,
       }}
+      nestingLevel={nestingLevel}
       To={To}
     />
   )

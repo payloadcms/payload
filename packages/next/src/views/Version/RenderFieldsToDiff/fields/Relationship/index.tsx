@@ -106,6 +106,7 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,
   locale,
+  nestingLevel,
   parentIsLocalized,
   versionValue: valueTo,
 }) => {
@@ -166,6 +167,7 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
         label: field.label,
         locale,
       }}
+      nestingLevel={nestingLevel}
       To={To}
     />
   )

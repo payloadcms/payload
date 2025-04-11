@@ -21,7 +21,14 @@ import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
 const baseClass = 'lexical-diff'
 
 export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (args) => {
-  const { comparisonValue: valueFrom, field, i18n, locale, versionValue: valueTo } = args
+  const {
+    comparisonValue: valueFrom,
+    field,
+    i18n,
+    locale,
+    nestingLevel,
+    versionValue: valueTo,
+  } = args
 
   const converters: HTMLConvertersFunctionAsync = ({ defaultConverters }) => ({
     ...defaultConverters,
@@ -65,6 +72,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
         label: field.label,
         locale,
       }}
+      nestingLevel={nestingLevel}
       To={To}
     />
   )

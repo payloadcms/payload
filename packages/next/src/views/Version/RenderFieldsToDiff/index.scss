@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
+    position: relative;
 
     [role='banner'] {
       display: none !important;
@@ -19,6 +20,20 @@
 
     @include small-break {
       gap: calc(var(--base) / 2);
+    }
+
+    &--parent {
+      // Vertical separator line
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        background-color: var(--theme-elevation-100);
+        transform: translateX(-50%); // Center the line
+      }
     }
   }
 }

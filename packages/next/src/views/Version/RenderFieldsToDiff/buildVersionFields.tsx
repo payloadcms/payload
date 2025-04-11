@@ -36,6 +36,7 @@ export type BuildVersionFieldsArgs = {
   fields: Field[]
   i18n: I18nClient
   modifiedOnly: boolean
+  nestingLevel?: number
   parentIndexPath: string
   parentIsLocalized: boolean
   parentPath: string
@@ -61,6 +62,7 @@ export const buildVersionFields = ({
   fields,
   i18n,
   modifiedOnly,
+  nestingLevel = 0,
   parentIndexPath,
   parentIsLocalized,
   parentPath,
@@ -128,6 +130,7 @@ export const buildVersionFields = ({
           indexPath,
           locale,
           modifiedOnly,
+          nestingLevel,
           parentIsLocalized: true,
           parentPath,
           parentSchemaPath,
@@ -153,6 +156,7 @@ export const buildVersionFields = ({
         i18n,
         indexPath,
         modifiedOnly,
+        nestingLevel,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath,
         parentSchemaPath,
@@ -193,6 +197,7 @@ const buildVersionField = ({
   indexPath,
   locale,
   modifiedOnly,
+  nestingLevel,
   parentIsLocalized,
   parentPath,
   parentSchemaPath,
@@ -208,6 +213,7 @@ const buildVersionField = ({
   indexPath: string
   locale?: string
   modifiedOnly?: boolean
+  nestingLevel: number
   parentIsLocalized: boolean
   path: string
   schemaPath: string
@@ -296,6 +302,7 @@ const buildVersionField = ({
           fields: tab.fields,
           i18n,
           modifiedOnly,
+          nestingLevel: nestingLevel + 1,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || tab.localized,
           parentPath: isNamedTab ? tabPath : path,
@@ -332,6 +339,7 @@ const buildVersionField = ({
           fields: field.fields,
           i18n,
           modifiedOnly,
+          nestingLevel: nestingLevel + 2,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: path + '.' + i,
@@ -351,6 +359,7 @@ const buildVersionField = ({
         fields: field.fields,
         i18n,
         modifiedOnly,
+        nestingLevel: field.type !== 'row' ? nestingLevel + 1 : nestingLevel,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: 'name' in field ? path : parentPath,
@@ -409,6 +418,7 @@ const buildVersionField = ({
         fields,
         i18n,
         modifiedOnly,
+        nestingLevel: nestingLevel + 2,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: path + '.' + i,
@@ -437,6 +447,8 @@ const buildVersionField = ({
     field: clientField,
     fieldPermissions: subFieldPermissions,
     parentIsLocalized,
+
+    nestingLevel: nestingLevel ? nestingLevel : undefined,
     /**
      * TODO: Change to valueTo in 4.0
      */

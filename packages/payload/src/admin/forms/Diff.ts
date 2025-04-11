@@ -66,6 +66,7 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
    * If this field is localized, this will be the locale of the field
    */
   locale?: string
+  nestingLevel?: number
   parentIsLocalized: boolean
   /**
    * Field value from the version being compared to

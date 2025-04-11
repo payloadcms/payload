@@ -62,6 +62,7 @@ export const Select: SelectFieldDiffClientComponent = ({
   diffMethod,
   field,
   locale,
+  nestingLevel,
   versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
@@ -113,6 +114,7 @@ export const Select: SelectFieldDiffClientComponent = ({
         label: field.label,
         locale,
       }}
+      nestingLevel={nestingLevel}
       To={To}
     />
   )

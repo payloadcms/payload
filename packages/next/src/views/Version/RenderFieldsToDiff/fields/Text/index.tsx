@@ -46,6 +46,7 @@ export const Text: TextFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
   field,
   locale,
+  nestingLevel,
   versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
@@ -84,6 +85,7 @@ export const Text: TextFieldDiffClientComponent = ({
         label: field.label,
         locale,
       }}
+      nestingLevel={nestingLevel}
       To={To}
     />
   )
