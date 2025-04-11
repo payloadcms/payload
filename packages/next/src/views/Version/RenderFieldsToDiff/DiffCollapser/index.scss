@@ -15,18 +15,19 @@
 
     &__label {
       // Add space between label, chevron, and change count
-      margin: 0 calc(var(--base) * 0.25);
+      margin: 0 calc(var(--base) * 0.3) 0 0;
     }
 
     &__field-change-count {
       // Reset the font weight of the change count to normal
       font-weight: normal;
+      margin-left: calc(var(--base) * 0.3);
     }
 
     &__content {
       [dir='ltr'] & {
         // Vertical gutter
-        border-left: 3px solid var(--theme-elevation-50);
+        border-left: 2px solid var(--theme-elevation-100);
         // Center-align the gutter with the chevron
         margin-left: 3px;
         // Content indentation
@@ -34,7 +35,7 @@
       }
       [dir='rtl'] & {
         // Vertical gutter
-        border-right: 3px solid var(--theme-elevation-50);
+        border-right: 2px solid var(--theme-elevation-100);
         // Center-align the gutter with the chevron
         margin-right: 3px;
         // Content indentation
