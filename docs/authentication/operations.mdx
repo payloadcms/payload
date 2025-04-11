@@ -158,13 +158,20 @@ mutation {
 
 ```ts
 const result = await payload.login({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',
   },
 })
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload offers a ready-to-use `login` server function
+  that utilizes the Local API. For integration details and examples, check out
+  the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
 
 ## Logout
 
@@ -188,6 +195,13 @@ mutation {
   logout[collection-singular-label]
 }
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload provides a ready-to-use `logout` server function
+  that manages the user's cookie for a seamless logout. For integration details
+  and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
 
 ## Refresh
 
@@ -240,6 +254,13 @@ mutation {
 }
 ```
 
+<Banner type="success">
+  **Server Functions:** Payload exports a ready-to-use `refresh` server function
+  that automatically renews the user's token and updates the associated cookie.
+  For integration details and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
+
 ## Verify by Email
 
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
@@ -270,7 +291,7 @@ mutation {
 
 ```ts
 const result = await payload.verifyEmail({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   token: 'TOKEN_HERE',
 })
 ```
@@ -308,7 +329,7 @@ mutation {
 
 ```ts
 const result = await payload.unlock({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
 })
 ```
 
@@ -349,7 +370,7 @@ mutation {
 
 ```ts
 const token = await payload.forgotPassword({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
   },
