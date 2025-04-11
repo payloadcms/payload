@@ -1094,10 +1094,15 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'draft-posts';
-      value: string | DraftPost;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'autosave-posts';
+          value: string | AutosavePost;
+        } | null)
+      | ({
+          relationTo: 'draft-posts';
+          value: string | DraftPost;
+        } | null);
     global?: 'draft-global' | null;
     user?: (string | null) | User;
   };
