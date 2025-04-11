@@ -1,0 +1,61 @@
+@import '@payloadcms/ui/scss';
+
+.variantSelectorWrapper {
+}
+
+.variantSelector {
+  .variantSelectorVariantsTable {
+    .cell-active {
+      min-width: unset;
+      padding: 12px;
+      width: 1rem;
+      vertical-align: middle;
+
+      .checkboxContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .cell-keys {
+      min-width: 5rem;
+      vertical-align: middle;
+    }
+
+    .cell-stock {
+      min-width: 3rem;
+      max-width: 5rem;
+      vertical-align: middle;
+    }
+
+    .cell-price {
+      min-width: 3rem;
+      max-width: 5rem;
+      vertical-align: middle;
+    }
+
+    th {
+      min-width: unset;
+
+      &:first-child {
+        padding-inline-start: 6px;
+      }
+    }
+  }
+
+  .keysList {
+    display: flex;
+    // flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+
+    .key {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      background: var(--theme-elevation-100);
+    }
+  }
+}
