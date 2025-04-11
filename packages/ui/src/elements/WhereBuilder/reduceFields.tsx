@@ -130,7 +130,15 @@ export const reduceFields = ({
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
 
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      let fieldTypeOperators = [...fieldTypes[field.type].operators]
+
+      if (field.type === 'relationship' && field.hasMany !== true) {
+        fieldTypeOperators = fieldTypeOperators.filter(
+          (op) => op.value !== 'in' && op.value !== 'not_in',
+        )
+      }
+
+      const operators = fieldTypeOperators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
