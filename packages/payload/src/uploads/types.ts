@@ -178,6 +178,7 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
+      headers: Headers
       params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
@@ -200,7 +201,7 @@ export type UploadConfig = {
    * Ability to modify the response headers fetching a file.
    * @default undefined
    */
-  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
+  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers | void
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
