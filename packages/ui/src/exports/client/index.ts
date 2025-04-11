@@ -68,6 +68,7 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -372,3 +373,4 @@ export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
+export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'

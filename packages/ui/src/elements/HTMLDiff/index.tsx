@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { HtmlDiff } from './diff.js'
+import { HtmlDiff } from './diff/index.js'
 import './index.scss'
 
 const baseClass = 'html-diff'

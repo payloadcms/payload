@@ -1,12 +1,12 @@
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextFieldDiffServerComponent } from 'payload'
 
-import { FieldDiffContainer } from '@payloadcms/ui/rsc'
-import React from 'react'
+import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import './htmlDiff/index.scss'
 import './index.scss'
 import '../bundled.css'
+
+import React from 'react'
 
 import type { HTMLConvertersFunctionAsync } from '../../features/converters/lexicalToHtml/async/types.js'
 
@@ -17,7 +17,6 @@ import { ListItemDiffHTMLConverterAsync } from './converters/listitem/index.js'
 import { RelationshipDiffHTMLConverterAsync } from './converters/relationship/index.js'
 import { UnknownDiffHTMLConverterAsync } from './converters/unknown/index.js'
 import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
-import { getHTMLDiffComponents } from './htmlDiff/index.js'
 
 const baseClass = 'lexical-diff'
 
