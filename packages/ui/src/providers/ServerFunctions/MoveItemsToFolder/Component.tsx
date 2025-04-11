@@ -4,15 +4,12 @@ import type { FolderBreadcrumb, GetFolderDataResult } from 'payload/shared'
 
 import React from 'react'
 
-import type {
-  GetMoveItemsToFolderDrawerContentArgs,
-  GetMoveItemsToFolderDrawerContentResult,
-} from './serverFunction.js'
+import type { GetMoveItemsToFolderArgs, GetMoveItemsToFolderResult } from './serverFunction.js'
 
-import { MoveItemsToFolderDrawerContent } from '../../../elements/FolderView/Drawers/MoveToFolder/DrawerContent.js'
 import { useMoveItemsToFolder } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
+import { MoveItemsToFolder } from '../../../elements/FolderView/MoveItemsToFolder/index.js'
 import { useServerFunctions } from '../index.js'
-import { getMoveItemsToFolderDrawerContentKey } from './_key.js'
+import { getMoveItemsToFolderKey } from './_key.js'
 
 type ClientComponentProps = {
   breadcrumbs: FolderBreadcrumb[]
@@ -46,10 +43,10 @@ export function MoveItemsToFolderRSC_ClientComponent({
   const onNavigateToFolder = React.useCallback(
     async ({ folderID }) => {
       const { Component } = await serverFunction<
-        GetMoveItemsToFolderDrawerContentArgs,
-        GetMoveItemsToFolderDrawerContentResult
+        GetMoveItemsToFolderArgs,
+        GetMoveItemsToFolderResult
       >({
-        name: getMoveItemsToFolderDrawerContentKey,
+        name: getMoveItemsToFolderKey,
         args: {
           drawerSlug,
           folderID,
@@ -66,7 +63,7 @@ export function MoveItemsToFolderRSC_ClientComponent({
   }
 
   return (
-    <MoveItemsToFolderDrawerContent
+    <MoveItemsToFolder
       breadcrumbs={breadcrumbs}
       drawerSlug={drawerSlug}
       folderID={_folderID}

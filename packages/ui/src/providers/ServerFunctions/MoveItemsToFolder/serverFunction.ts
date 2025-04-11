@@ -20,7 +20,7 @@ type ClientRSCMoveToFolderViewProps = {
   subfolders: GetFolderDataResult['subfolders']
 }
 
-export type GetMoveItemsToFolderDrawerContentArgs = {
+export type GetMoveItemsToFolderArgs = {
   drawerSlug: string
   folderID: number | string
   itemsToMove: {
@@ -28,18 +28,18 @@ export type GetMoveItemsToFolderDrawerContentArgs = {
     value: any
   }[]
 }
-export type GetMoveItemsToFolderDrawerContentResult = Promise<{
+export type GetMoveItemsToFolderResult = Promise<{
   Component: React.ReactNode
 }>
 
-export async function getMoveItemsToFolderDrawerContent({
+export async function getMoveItemsToFolder({
   drawerSlug,
   folderID,
   itemsToMove,
   req,
 }: {
   req: PayloadRequest
-} & GetMoveItemsToFolderDrawerContentArgs): GetMoveItemsToFolderDrawerContentResult {
+} & GetMoveItemsToFolderArgs): GetMoveItemsToFolderResult {
   const { locale, payload, user } = req
   const { breadcrumbs, subfolders } = await getFolderData({
     type: 'monomorphic',

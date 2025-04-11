@@ -3,15 +3,14 @@
 import React, { createContext, use } from 'react'
 
 import type {
-  GetMoveItemsToFolderDrawerContentArgs,
-  GetMoveItemsToFolderDrawerContentResult,
+  GetMoveItemsToFolderArgs,
+  GetMoveItemsToFolderResult,
 } from '../../../../providers/ServerFunctions/MoveItemsToFolder/serverFunction.js'
 import type { PolymorphicRelationshipValue } from '../../types.js'
 
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
-import { getMoveItemsToFolderDrawerContentKey } from '../../../../providers/ServerFunctions/MoveItemsToFolder/_key.js'
+import { getMoveItemsToFolderKey } from '../../../../providers/ServerFunctions/MoveItemsToFolder/_key.js'
 import { Drawer } from '../../../Drawer/index.js'
-import './index.scss'
 
 type Props = {
   readonly drawerSlug: string
@@ -22,7 +21,7 @@ type Props = {
 /**
  * This component renders a drawer. The children for the drawer comes from
  * the response of a server function, the sever function returns a component
- * that _uses_ the `<MoveItemsToFolderDrawerContent />` component.
+ * that _uses_ the `<MoveItemsToFolder />` component.
  */
 export function MoveItemsToFolderDrawer({ drawerSlug, folderID, itemsToMove, onConfirm }: Props) {
   const [ViewToRender, setViewToRender] = React.useState(null)
@@ -32,10 +31,10 @@ export function MoveItemsToFolderDrawer({ drawerSlug, folderID, itemsToMove, onC
   React.useEffect(() => {
     async function loadInitialDrawerContent() {
       const { Component } = await serverFunction<
-        GetMoveItemsToFolderDrawerContentArgs,
-        GetMoveItemsToFolderDrawerContentResult
+        GetMoveItemsToFolderArgs,
+        GetMoveItemsToFolderResult
       >({
-        name: getMoveItemsToFolderDrawerContentKey,
+        name: getMoveItemsToFolderKey,
         args: {
           drawerSlug,
           folderID,

@@ -1,1 +1,1 @@
-export const getMoveItemsToFolderDrawerContentKey = 'build-move-to-folder-view'
+export const getMoveItemsToFolderKey = 'build-move-to-folder-view'

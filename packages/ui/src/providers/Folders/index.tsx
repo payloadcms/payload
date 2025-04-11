@@ -95,7 +95,7 @@ export type FolderProviderData = {
   folderID?: number | string
   subfolders?: GetFolderDataResult['subfolders']
 } & GetFolderDataResult
-type Props = {
+export type FolderProviderProps = {
   readonly allowMultiSelection?: boolean
   readonly breadcrumbs?: FolderBreadcrumb[]
   readonly children: React.ReactNode
@@ -112,7 +112,7 @@ export function FolderProvider({
   documents: documentsFromServer = [],
   folderID: folderIDFromServer = undefined,
   subfolders: subfoldersFromServer = [],
-}: Props) {
+}: FolderProviderProps) {
   const { config } = useConfig()
   const { routes, serverURL } = config
   const drawerDepth = useDrawerDepth()
