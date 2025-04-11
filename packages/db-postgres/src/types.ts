@@ -12,6 +12,8 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 import type { Pool, PoolConfig } from 'pg'
 
+type PgDependency = typeof import('pg')
+
 export type Args = {
   /**
    * Transform the schema after it's built.
@@ -45,6 +47,7 @@ export type Args = {
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  pg?: PgDependency
   pool: PoolConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -74,6 +77,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 export type PostgresAdapter = {
   drizzle: Drizzle
+  pg: PgDependency
   pool: Pool
   poolOptions: PoolConfig
 } & BasePostgresAdapter
@@ -98,6 +102,8 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @payloadcms/plugin-sentry. */
+    pg?: PgDependency
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
     poolOptions: Args['pool']
