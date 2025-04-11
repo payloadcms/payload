@@ -41,12 +41,14 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   const fromHTML = await convertLexicalToHTMLAsync({
     converters,
     data: valueFrom as SerializedEditorState,
+    disableContainer: true,
     populate: payloadPopulateFn,
   })
 
   const toHTML = await convertLexicalToHTMLAsync({
     converters,
     data: valueTo as SerializedEditorState,
+    disableContainer: true,
     populate: payloadPopulateFn,
   })
 

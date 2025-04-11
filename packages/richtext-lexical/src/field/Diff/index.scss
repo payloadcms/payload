@@ -3,10 +3,24 @@
 
 @layer payload-default {
   .lexical-diff {
+    position: relative;
+
+    // Vertical separator line
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background-color: var(--theme-elevation-100);
+      transform: translateX(-50%); // Center the line
+    }
+
     &__diff-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: base(1);
     }
 
     blockquote {
