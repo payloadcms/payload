@@ -214,7 +214,7 @@ describe('Block fields', () => {
     ).toBeVisible()
   })
 
-  test.skip('should add different blocks with similar field configs', async () => {
+  test('should add different blocks with similar field configs', async () => {
     await page.goto(url.create)
 
     await addBlock({

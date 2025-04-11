@@ -3,10 +3,11 @@ import type { FormField, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObjectSimple, deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
+import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -175,6 +176,20 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           value: rows.length,
         },
       }
+
+      return newState
+    }
+
+    case 'MERGE_SERVER_STATE': {
+      const { acceptValues, prevStateRef, serverState } = action
+
+      const newState = mergeServerFormState({
+        acceptValues,
+        currentState: state || {},
+        incomingState: serverState,
+      })
+
+      prevStateRef.current = newState
 
       return newState
     }

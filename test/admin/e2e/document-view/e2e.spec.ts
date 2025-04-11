@@ -512,6 +512,17 @@ describe('Document View', () => {
       await expect(publishButton).toContainText('Publish in English')
     })
   })
+
+  describe('reserved field names', () => {
+    test('should allow creation of field named file in non-upload enabled collection', async () => {
+      await page.goto(postsUrl.create)
+      const fileField = page.locator('#field-file')
+      await fileField.fill('some file text')
+      await saveDocAndAssert(page)
+
+      await expect(fileField).toHaveValue('some file text')
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {

@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-in-test */
 import type {
   SerializedBlockNode,
   SerializedLinkNode,
@@ -677,6 +678,73 @@ describe('Lexical', () => {
       expect(
         (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
       ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
+    })
+  })
+
+  describe('richText', () => {
+    it('should allow querying on rich text content', async () => {
+      const emptyRichTextQuery = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'doesnt exist',
+          },
+        },
+      })
+
+      expect(emptyRichTextQuery.docs).toHaveLength(0)
+
+      const workingRichTextQuery = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      })
+
+      expect(workingRichTextQuery.docs).toHaveLength(1)
+    })
+
+    it('should show center alignment', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      })
+
+      expect(query.docs[0]?.richText[0]?.textAlign).toEqual('center')
+    })
+
+    it('should populate link relationship', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.linkType': {
+            equals: 'internal',
+          },
+        },
+      })
+
+      const nodes = query.docs[0]?.richText
+      expect(nodes).toBeDefined()
+      const child = nodes?.flatMap((n) => n.children).find((c) => c?.doc)
+      expect(child).toMatchObject({
+        type: 'link',
+        linkType: 'internal',
+      })
+      expect(child.doc.relationTo).toEqual('array-fields')
+
+      if (payload.db.defaultIDType === 'number') {
+        expect(typeof child.doc.value.id).toBe('number')
+      } else {
+        expect(typeof child.doc.value.id).toBe('string')
+      }
+
+      expect(child.doc.value.items).toHaveLength(6)
     })
   })
 })

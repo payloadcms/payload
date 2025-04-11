@@ -58,15 +58,12 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
 
-  const {
-    customComponents: { AfterInput, BeforeInput, Label },
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  }: FieldType<string> = useField({
-    path,
-  } as Options)
+  const { customComponents, errorMessage, setValue, showError, value }: FieldType<string> =
+    useField({
+      path,
+    } as Options)
+
+  const { AfterInput, BeforeInput, Label } = customComponents ?? {}
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
@@ -85,7 +82,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<
