@@ -3,25 +3,9 @@
 
 @layer payload-default {
   .lexical-diff {
-    position: relative;
-
-    // Vertical separator line
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: 1px;
-      background-color: var(--theme-elevation-100);
-      transform: translateX(-50%); // Center the line
-    }
-
-    &__diff-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: base(1);
-    }
+    font-family: var(--font-serif);
+    font-size: base(0.8);
+    letter-spacing: 0.02em;
 
     blockquote {
       font-size: base(0.8);

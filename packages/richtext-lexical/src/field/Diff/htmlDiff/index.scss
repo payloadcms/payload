@@ -2,11 +2,7 @@
 @import '../colors.scss';
 
 @layer payload-default {
-  .lexical-diff__diff-container {
-    font-family: var(--font-serif);
-    font-size: base(0.8);
-    letter-spacing: 0.02em;
-
+  .html-diff {
     // Apply background color to parents that have children with diffs
     p,
     li,

@@ -1,3 +1,4 @@
+export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
