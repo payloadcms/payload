@@ -655,6 +655,7 @@ describe('Versions', () => {
   describe('Scheduled publish', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     test('should schedule publish', async () => {
@@ -721,6 +722,26 @@ describe('Versions', () => {
       // We customised it in config to not contain a 12 hour clock
       await expect(async () => {
         await expect(listItem).toHaveText('00:00')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    test('can still schedule publish once autosave is triggered', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      await saveDocAndAssert(page)
+
+      await page.locator('#field-title').fill('scheduled publish updated')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.locator('#action-save-popup').click()
+
+      await expect(async () => {
+        await expect(page.locator('#schedule-publish')).toBeVisible()
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
