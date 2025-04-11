@@ -354,6 +354,15 @@ export interface Diff {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   radio?: ('option1' | 'option2') | null;
   relationship?: (string | null) | DraftPost;
   richtext?: {
@@ -841,6 +850,7 @@ export interface DiffSelect<T extends boolean = true> {
       };
   number?: T;
   point?: T;
+  json?: T;
   radio?: T;
   relationship?: T;
   richtext?: T;

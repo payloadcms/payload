@@ -4,6 +4,18 @@
   .field-diff {
     position: relative;
 
+    &__locale-label {
+      [dir='ltr'] & {
+        margin-right: calc(var(--base) * 0.25);
+      }
+      [dir='rtl'] & {
+        margin-left: calc(var(--base) * 0.25);
+      }
+      background: var(--theme-elevation-100);
+      padding: calc(var(--base) * 0.25);
+      // border-radius: $style-radius-m;
+    }
+
     // Vertical separator line
     &::after {
       content: '';
@@ -20,6 +32,8 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: base(1);
+      background: var(--theme-elevation-50);
+      padding: 6px;
     }
   }
 }

@@ -144,6 +144,10 @@ export const Diff: CollectionConfig = {
       name: 'point',
     },
     {
+      type: 'json',
+      name: 'json',
+    },
+    {
       type: 'radio',
       name: 'radio',
       options: [

@@ -3,9 +3,15 @@
 
 @layer payload-default {
   .html-diff {
+    font-size: base(0.7);
+    letter-spacing: 0.02em;
+
+    &-no-value {
+      color: var(--theme-elevation-400);
+    }
+
     // Apply background color to parents that have children with diffs
     p,
-    li,
     h1,
     h2,
     h3,
@@ -14,13 +20,73 @@
     blockquote,
     h6 {
       &:has([data-match-type='create']) {
-        background-color: var(--diff-create-parent-bg);
-        color: var(--diff-create-parent-color);
+        position: relative;
+        z-index: 1;
+        &::before {
+          content: '';
+          position: absolute;
+          top: -6px;
+          bottom: -6px;
+          left: -10px;
+          right: -6px;
+          display: block;
+          background-color: var(--diff-create-parent-bg);
+          color: var(--diff-create-parent-color);
+          z-index: -1; /* Place behind the text */
+        }
       }
 
       &:has([data-match-type='delete']) {
-        background-color: var(--diff-delete-parent-bg);
-        color: var(--diff-delete-parent-color);
+        position: relative;
+        z-index: 1;
+        &::before {
+          content: '';
+          position: absolute;
+          top: -6px;
+          bottom: -6px;
+          left: -6px;
+          right: -10px;
+          display: block;
+          background-color: var(--diff-delete-parent-bg);
+          color: var(--diff-delete-parent-color);
+          z-index: -1; /* Place behind the text */
+        }
+      }
+    }
+
+    li {
+      &:has([data-match-type='create']) {
+        position: relative;
+        z-index: 1;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: -10px;
+          right: -6px;
+          display: block;
+          background-color: var(--diff-create-parent-bg);
+          color: var(--diff-create-parent-color);
+          z-index: -1; /* Place behind the text */
+        }
+      }
+
+      &:has([data-match-type='delete']) {
+        position: relative;
+        z-index: 1;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: -6px;
+          right: -10px;
+          display: block;
+          background-color: var(--diff-delete-parent-bg);
+          color: var(--diff-delete-parent-color);
+          z-index: -1; /* Place behind the text */
+        }
       }
     }
 

@@ -1,5 +1,4 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
@@ -20,7 +19,6 @@ import {
 } from 'payload'
 import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
 
-import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
 import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
 
@@ -220,8 +218,6 @@ const buildVersionField = ({
   'fields' | 'parentIndexPath' | 'versionFromSiblingData' | 'versionToSiblingData'
 >): BaseVersionField | null => {
   const fieldName: null | string = 'name' in field ? field.name : null
-
-  const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
   const hasPermission =
     fieldPermissions === true ||
@@ -434,7 +430,10 @@ const buildVersionField = ({
      * TODO: Change to valueFrom in 4.0
      */
     comparisonValue: valueFrom,
-    diffMethod,
+    /**
+     * @deprecated remove in 4.0. Each field should handle its own diffing logic
+     */
+    diffMethod: 'diffWordsWithSpace',
     field: clientField,
     fieldPermissions: subFieldPermissions,
     parentIsLocalized,

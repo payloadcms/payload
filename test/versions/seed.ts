@@ -178,6 +178,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       number: 1,
       point: [1, 2],
+      json: {
+        text: 'json',
+        number: 1,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson',
+          },
+        ],
+      },
       radio: 'option1',
       relationship: manyDraftsID,
       richtext: generateLexicalData({
@@ -274,6 +284,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textInNamedTab1: 'textInNamedTab12',
       },
       number: 2,
+      json: {
+        text: 'json2',
+        number: 2,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson2',
+          },
+        ],
+      },
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,

@@ -3,12 +3,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffLabel, useTranslation } from '@payloadcms/ui'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
-import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'select-diff'
 
@@ -100,19 +98,22 @@ export const Select: SelectFieldDiffClientComponent = ({
         )
       : placeholder
 
+  const { From, To } = getHTMLDiffComponents({
+    fromHTML: '<p>' + renderedValueFrom + '</p>',
+    toHTML: '<p>' + renderedValueTo + '</p>',
+    tokenizeByCharacter: true,
+  })
+
   return (
-    <div className={baseClass}>
-      <FieldDiffLabel>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {'label' in field && getTranslation(field.label || '', i18n)}
-      </FieldDiffLabel>
-      <DiffViewer
-        diffMethod={diffMethod}
-        diffStyles={diffStyles}
-        placeholder={placeholder}
-        renderedValueFrom={renderedValueFrom}
-        renderedValueTo={renderedValueTo}
-      />
-    </div>
+    <FieldDiffContainer
+      className={baseClass}
+      From={From}
+      i18n={i18n}
+      label={{
+        label: field.label,
+        locale,
+      }}
+      To={To}
+    />
   )
 }

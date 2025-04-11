@@ -8,14 +8,18 @@ const baseClass = 'html-diff'
 export const getHTMLDiffComponents = ({
   fromHTML,
   toHTML,
+  tokenizeByCharacter,
 }: {
   fromHTML: string
   toHTML: string
+  tokenizeByCharacter?: boolean
 }): {
   From: React.ReactNode
   To: React.ReactNode
 } => {
-  const diffHTML = new HtmlDiff(fromHTML, toHTML)
+  const diffHTML = new HtmlDiff(fromHTML, toHTML, {
+    tokenizeByCharacter,
+  })
 
   const [oldHTML, newHTML] = diffHTML.getSideBySideContents()
 

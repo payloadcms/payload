@@ -1,3 +1,5 @@
+@import '../../../../scss/styles.scss';
+
 @layer payload-default {
   .diff-collapser {
     &__toggle-button {
@@ -5,6 +7,10 @@
       cursor: pointer;
       // Align the chevron visually with the label text
       vertical-align: 1px;
+
+      .icon {
+        color: var(--theme-elevation-500);
+      }
     }
 
     &__label {
