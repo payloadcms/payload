@@ -2,7 +2,7 @@ import type { ArrayField, Block, TextFieldSingleValidation } from 'payload'
 
 import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { textFieldsSlug } from '../Text/shared.js'
+import { textFieldsSlug } from '../../slugs.js'
 
 async function asyncFunction(param: string) {
   return new Promise((resolve) => {

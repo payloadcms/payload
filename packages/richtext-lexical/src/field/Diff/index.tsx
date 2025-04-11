@@ -7,6 +7,7 @@ import React from 'react'
 
 import './htmlDiff/index.scss'
 import './index.scss'
+import '../bundled.css'
 
 import type { HTMLConvertersFunctionAsync } from '../../features/converters/lexicalToHtml/async/types.js'
 

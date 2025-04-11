@@ -13,6 +13,7 @@ type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
   policies?: EntityPolicies
+  polymorphicJoin?: boolean
   req: PayloadRequest
   versionFields?: FlattenedField[]
   where: Where
@@ -52,6 +53,7 @@ export async function validateQueryPaths({
     collections: {},
     globals: {},
   },
+  polymorphicJoin,
   req,
   versionFields,
   where,
@@ -77,6 +79,7 @@ export async function validateQueryPaths({
                 overrideAccess,
                 path,
                 policies,
+                polymorphicJoin,
                 req,
                 val,
                 versionFields,
