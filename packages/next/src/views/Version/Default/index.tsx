@@ -78,10 +78,13 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       }
 
       if (args?.selectedLocales) {
-        if (!selectedLocales.length) {
+        if (!args.selectedLocales.length) {
           current.delete('localeCodes')
         } else {
-          current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
+          current.set(
+            'localeCodes',
+            JSON.stringify(args.selectedLocales.map((locale) => locale.value)),
+          )
         }
       }
 
@@ -96,7 +99,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
       startRouteTransition(() => router.push(`${pathname}${query}`))
     },
-    [pathname, router, searchParams, selectedLocales, startRouteTransition],
+    [pathname, router, searchParams, startRouteTransition],
   )
 
   const onToggleModifiedOnly: FormEventHandler<HTMLInputElement> = useCallback(
