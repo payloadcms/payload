@@ -53,8 +53,6 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
                   value: payload.value,
                 },
               })
-              // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
-              $insertNodeToNearestRoot(uploadNode)
 
               const { focus } = selection
               const focusNode = focus.getNode()
@@ -67,6 +65,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
               ) {
                 focusNode.remove()
               }
+              $insertNodeToNearestRoot(uploadNode)
             }
           })
 

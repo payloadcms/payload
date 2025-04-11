@@ -56,8 +56,6 @@ export const BlocksPlugin: PluginComponent = () => {
 
             if ($isRangeSelection(selection)) {
               const blockNode = $createBlockNode(payload)
-              // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
-              $insertNodeToNearestRoot(blockNode)
 
               const { focus } = selection
               const focusNode = focus.getNode()
@@ -74,6 +72,7 @@ export const BlocksPlugin: PluginComponent = () => {
               ) {
                 focusNode.remove()
               }
+              $insertNodeToNearestRoot(blockNode)
             }
           })
 
