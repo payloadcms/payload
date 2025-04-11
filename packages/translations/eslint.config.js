@@ -6,9 +6,10 @@ import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 export const index = [
   ...rootEslintConfig,
   {
-    ignores: ['scripts/**'],
+    ignores: ['scripts/**', 'scripts/translateNewKeys/translateText.ts'],
   },
   {
+    ignores: ['scripts/**', 'scripts/translateNewKeys/translateText.ts'],
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,
