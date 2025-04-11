@@ -21,10 +21,8 @@ export const RouteCache: React.FC<{ cachingEnabled?: boolean; children: React.Re
   const router = useRouter()
 
   const clearRouteCache = useCallback(() => {
-    if (cachingEnabled) {
-      router.refresh()
-    }
-  }, [router, cachingEnabled])
+    router.refresh()
+  }, [router])
 
   useEffect(() => {
     if (cachingEnabled) {

@@ -7,7 +7,6 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
@@ -137,63 +136,36 @@ export const RootPage = async ({
     importMap,
   })
 
-  const sharedServerProps = {
-    ...serverProps,
-    clientConfig,
-    docID: initPageResult?.docID,
-    folderID,
-    i18n: initPageResult?.req.i18n,
+  const RenderedView = RenderServerComponent({
+    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+    Component: DefaultView.payloadComponent,
+    Fallback: DefaultView.Component,
     importMap,
-    initPageResult,
-    params,
-    payload: initPageResult?.req.payload,
-    searchParams,
-  }
-
-  if (viewType === 'collection-folders') {
-    const RenderedView = RenderServerComponent({
-      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
-      Component: DefaultView.payloadComponent,
-      Fallback: DefaultView.Component,
+    serverProps: {
+      ...serverProps,
+      clientConfig,
+      docID: initPageResult?.docID,
+      folderID,
+      i18n: initPageResult?.req.i18n,
       importMap,
-      serverProps: sharedServerProps,
-    })
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    } satisfies AdminViewServerPropsOnly,
+  })
 
-    return (
-      <FolderProvider collectionSlugs={[initPageResult?.collectionConfig.slug]}>
-        <RootViewComponent
-          documentSubViewType={documentSubViewType}
-          initPageResult={initPageResult}
-          params={params}
-          RenderedView={RenderedView}
-          searchParams={searchParams}
-          serverProps={serverProps}
-          templateClassName={templateClassName}
-          templateType={templateType}
-          viewType={viewType}
-        />
-      </FolderProvider>
-    )
-  } else {
-    const RenderedView = RenderServerComponent({
-      clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
-      Component: DefaultView.payloadComponent,
-      Fallback: DefaultView.Component,
-      importMap,
-      serverProps: sharedServerProps satisfies AdminViewServerPropsOnly,
-    })
-    return (
-      <RootViewComponent
-        documentSubViewType={documentSubViewType}
-        initPageResult={initPageResult}
-        params={params}
-        RenderedView={RenderedView}
-        searchParams={searchParams}
-        serverProps={serverProps}
-        templateClassName={templateClassName}
-        templateType={templateType}
-        viewType={viewType}
-      />
-    )
-  }
+  return (
+    <RootViewComponent
+      documentSubViewType={documentSubViewType}
+      initPageResult={initPageResult}
+      params={params}
+      RenderedView={RenderedView}
+      searchParams={searchParams}
+      serverProps={serverProps}
+      templateClassName={templateClassName}
+      templateType={templateType}
+      viewType={viewType}
+    />
+  )
 }

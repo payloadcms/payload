@@ -1,142 +1,81 @@
 'use client'
 
-import { useModal } from '@faceless-ui/modal'
-import { extractID } from 'payload/shared'
-import React from 'react'
+import React, { createContext, use } from 'react'
 
+import type {
+  GetMoveItemsToFolderDrawerContentArgs,
+  GetMoveItemsToFolderDrawerContentResult,
+} from '../../../../providers/ServerFunctions/MoveItemsToFolder/serverFunction.js'
 import type { PolymorphicRelationshipValue } from '../../types.js'
 
-import { FolderIcon } from '../../../../icons/Folder/index.js'
-import { useFolder } from '../../../../providers/Folders/index.js'
-import { useTranslation } from '../../../../providers/Translation/index.js'
-import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
-import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
-import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
-import { Translation } from '../../../Translation/index.js'
-import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
-import { DisplayItems } from '../../DisplayItems/index.js'
-import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
+import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
+import { getMoveItemsToFolderDrawerContentKey } from '../../../../providers/ServerFunctions/MoveItemsToFolder/_key.js'
+import { Drawer } from '../../../Drawer/index.js'
 import './index.scss'
-
-const baseClass = 'move-folder-drawer'
-const confirmModalSlug = 'move-folder-drawer-confirm'
 
 type Props = {
   readonly drawerSlug: string
+  readonly folderID: number | string
   readonly itemsToMove: PolymorphicRelationshipValue[]
-  readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
+  readonly onConfirm: (folderID: number | string) => Promise<void> | void
 }
-export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
-  const { drawerSlug, itemsToMove, onMoveConfirm } = props
-  const [count] = React.useState(() => itemsToMove.length)
-  const folderContext = useFolder()
-  const { closeModal, openModal } = useModal()
-  const { t } = useTranslation()
+/**
+ * This component renders a drawer. The children for the drawer comes from
+ * the response of a server function, the sever function returns a component
+ * that _uses_ the `<MoveItemsToFolderDrawerContent />` component.
+ */
+export function MoveItemsToFolderDrawer({ drawerSlug, folderID, itemsToMove, onConfirm }: Props) {
+  const [ViewToRender, setViewToRender] = React.useState(null)
+  const { serverFunction } = useServerFunctions()
+  const loadedRef = React.useRef(false)
 
-  const getSelectedFolder = React.useCallback(
-    ({ key }: { key: 'id' | 'name' }) => {
-      let value =
-        key === 'id'
-          ? folderContext?.folderID || null
-          : folderContext?.breadcrumbs?.[folderContext.breadcrumbs.length - 1]?.name || ''
-      if (folderContext.selectedIndexes.size > 0) {
-        const index = Array.from(folderContext.selectedIndexes).pop()
-        if (typeof index === 'number') {
-          const folderObject = folderContext.subfolders[index].value
-          const folderID = extractID(folderObject)
-          value =
-            key === 'id'
-              ? folderID
-              : typeof folderObject === 'object'
-                ? folderObject.name
-                : folderID
-        }
-      }
+  React.useEffect(() => {
+    async function loadInitialDrawerContent() {
+      const { Component } = await serverFunction<
+        GetMoveItemsToFolderDrawerContentArgs,
+        GetMoveItemsToFolderDrawerContentResult
+      >({
+        name: getMoveItemsToFolderDrawerContentKey,
+        args: {
+          drawerSlug,
+          folderID,
+          itemsToMove,
+        },
+      })
+      loadedRef.current = true
+      setViewToRender(Component)
+    }
 
-      return value
-    },
-    [
-      folderContext?.breadcrumbs,
-      folderContext?.folderID,
-      folderContext?.selectedIndexes,
-      folderContext?.subfolders,
-    ],
-  )
+    if (loadedRef.current) {
+      return
+    }
+    void loadInitialDrawerContent()
+  }, [drawerSlug, folderID, itemsToMove, serverFunction])
 
   return (
-    <>
-      <DrawerActionHeader
-        onCancel={() => {
-          closeModal(drawerSlug)
-        }}
-        onSave={() => {
-          openModal(confirmModalSlug)
-        }}
-        saveLabel={t('folder:selectFolder')}
-        title={t('general:movingCount', {
-          count,
-          label: count > 1 ? t('general:items') : t('general:item'),
-        })}
-      />
-
-      <DrawerContentContainer className={baseClass}>
-        <FolderBreadcrumbs
-          breadcrumbs={[
-            {
-              id: null,
-              name: <FolderIcon />,
-              onClick: () => {
-                void folderContext.setFolderID({ folderID: null })
-              },
-            },
-            ...folderContext.breadcrumbs.map((crumb) => ({
-              id: crumb.id,
-              name: crumb.name,
-              onClick: () => {
-                void folderContext.setFolderID({ folderID: crumb.id })
-              },
-            })),
-          ]}
-        />
-
-        <div>
-          <DisplayItems
-            collectionUseAsTitles={folderContext.collectionUseAsTitles}
-            disabledItems={itemsToMove}
-            folderCollectionSlug={folderContext.folderCollectionSlug}
-            selectedItems={folderContext.getSelectedItems()}
-            setFolderID={folderContext.setFolderID}
-            subfolders={folderContext.subfolders}
-            viewType="grid"
-          />
-        </div>
-      </DrawerContentContainer>
-
-      <ConfirmationModal
-        body={
-          <Translation
-            elements={{
-              1: ({ children }) => <strong>{children}</strong>,
-            }}
-            i18nKey="general:moveConfirm"
-            t={t}
-            variables={{
-              count,
-              destination: getSelectedFolder({ key: 'name' }),
-              label: count > 1 ? t('general:items') : t('general:item'),
-            }}
-          />
-        }
-        confirmingLabel={t('general:moving')}
-        heading={t('general:moveCount', {
-          count,
-          label: count > 1 ? t('general:items') : t('general:item'),
-        })}
-        modalSlug={confirmModalSlug}
-        onConfirm={async () => {
-          await onMoveConfirm(getSelectedFolder({ key: 'id' }))
-        }}
-      />
-    </>
+    <Drawer gutter={false} Header={null} slug={drawerSlug}>
+      <MoveItemsToFolderProvider onConfirm={onConfirm}>{ViewToRender}</MoveItemsToFolderProvider>
+    </Drawer>
   )
-})
+}
+
+type MoveItemsToFolderContextType = {
+  onConfirm: (folderID: number | string) => Promise<void> | void
+}
+
+const MoveItemsToFolderContext = createContext<MoveItemsToFolderContextType | undefined>(undefined)
+
+export const MoveItemsToFolderProvider: React.FC<{
+  children: React.ReactNode
+  onConfirm: (folderID: number | string) => Promise<void> | void
+}> = ({ children, onConfirm }) => {
+  return <MoveItemsToFolderContext value={{ onConfirm }}>{children}</MoveItemsToFolderContext>
+}
+
+export const useMoveItemsToFolder = (): MoveItemsToFolderContextType => {
+  const context = use(MoveItemsToFolderContext)
+  if (!context) {
+    throw new Error('useMoveItemsToFolder must be used within a MoveItemsToFolderProvider')
+  }
+  return context
+}

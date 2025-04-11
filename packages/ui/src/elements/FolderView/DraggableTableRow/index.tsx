@@ -83,7 +83,7 @@ export function DraggableTableRow({
           ]
             .filter(Boolean)
             .join(' ')}
-          key={i}
+          key={`${itemKey}-${i}`}
         >
           {col}
         </TableCell>

@@ -92,13 +92,7 @@ export async function getFolderPolymorphicDocuments({
   }[]
   hasMoreDocuments: boolean
 }> {
-  const whereConstraints: Where[] = [
-    {
-      relationTo: {
-        not_equals: payload.config.folders.slug,
-      },
-    },
-  ]
+  const whereConstraints: Where[] = []
 
   if (search) {
     whereConstraints.push({
@@ -112,6 +106,12 @@ export async function getFolderPolymorphicDocuments({
     whereConstraints.push({
       relationTo: {
         in: collectionSlugs,
+      },
+    })
+  } else {
+    whereConstraints.push({
+      relationTo: {
+        not_equals: payload.config.folders.slug,
       },
     })
   }

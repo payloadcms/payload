@@ -6,6 +6,15 @@
       @extend %h2;
     }
 
+    &__header {
+      margin-top: base(2.5);
+      width: 100%;
+
+      @include mid-break {
+        margin-top: base(1.5);
+      }
+    }
+
     .doc-drawer__toggler.list-header__create-new-button {
       background: transparent;
       border: 0;

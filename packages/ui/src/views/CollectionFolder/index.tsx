@@ -5,9 +5,9 @@ import type { FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation.js'
+import React, { Fragment, useState } from 'react'
 
-import { Button } from '../../elements/Button/index.js'
 import { CloseModalButton } from '../../elements/CloseModalButton/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
@@ -20,7 +20,6 @@ import {
   ListBulkUploadButton,
   ListCreateNewDocInFolderButton,
 } from '../../elements/ListHeader/TitleActions/index.js'
-import { useModal } from '../../elements/Modal/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
@@ -29,12 +28,13 @@ import { FolderIcon } from '../../icons/Folder/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useFolder } from '../../providers/Folders/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
+import { NoListResults } from './NoListResults/index.js'
 import './index.scss'
-import { NoResults } from './NoResults/index.js'
 
 const baseClass = 'collection-folder-list'
 const drawerBaseClass = 'collection-folder-list-drawer'
@@ -54,17 +54,17 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    newDocumentURL,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
   } = props
 
+  const router = useRouter()
+  const { clearRouteCache } = useRouteCache()
   const [Table, setTable] = useState(InitialTable)
 
   const {
     allowCreate,
-    createNewDrawerSlug,
     DocumentDrawerToggler,
     drawerSlug: listDrawerSlug,
     isInDrawer,
@@ -76,12 +76,6 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     allowCreate !== undefined
       ? allowCreate && hasCreatePermissionFromProps
       : hasCreatePermissionFromProps
-
-  useEffect(() => {
-    if (InitialTable) {
-      setTable(InitialTable)
-    }
-  }, [InitialTable])
 
   const { getEntityConfig } = useConfig()
 
@@ -117,7 +111,30 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  useEffect(() => {
+  const onDragEnd = React.useCallback(
+    async (event: DragEndEvent) => {
+      if (!event.over) {
+        return
+      }
+
+      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
+        await moveToFolder({
+          itemsToMove: getSelectedItems(),
+          toFolderID: event.over.data.current.id || null,
+        })
+        clearRouteCache()
+      }
+    },
+    [moveToFolder, getSelectedItems, clearRouteCache],
+  )
+
+  const onCreateSuccess = React.useCallback(() => {
+    if (!isInDrawer) {
+      clearRouteCache()
+    }
+  }, [router, isInDrawer])
+
+  React.useEffect(() => {
     if (!drawerDepth) {
       setStepNav([
         !breadcrumbs.length
@@ -172,23 +189,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     }
   }, [setStepNav, labels, drawerDepth, i18n, breadcrumbs, setFolderID])
 
+  React.useEffect(() => {
+    if (InitialTable) {
+      setTable(InitialTable)
+    }
+  }, [InitialTable])
+
   const totalDocsAndSubfolders = documents.length + subfolders.length
-
-  const onDragEnd = React.useCallback(
-    async (event: DragEndEvent) => {
-      if (!event.over) {
-        return
-      }
-
-      if (event.over.data.current.type === 'folder' && 'id' in event.over.data.current) {
-        await moveToFolder({
-          itemsToMove: getSelectedItems(),
-          toFolderID: event.over.data.current.id || null,
-        })
-      }
-    },
-    [moveToFolder, getSelectedItems],
-  )
 
   return (
     <Fragment>
@@ -239,6 +246,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                     buttonLabel={t('general:createNew')}
                     collectionSlugs={[collectionSlug]}
                     key="create-new-button"
+                    onCreateSuccess={onCreateSuccess}
                   />,
                   <ListBulkUploadButton
                     collectionSlug={collectionSlug}
@@ -267,12 +275,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
             {BeforeFolderListTable}
             {totalDocsAndSubfolders > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
             {totalDocsAndSubfolders === 0 && (
-              <NoResults
+              <NoListResults
                 Actions={[
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[]}
                     key="create-folder"
+                    onCreateSuccess={onCreateSuccess}
                   />,
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}

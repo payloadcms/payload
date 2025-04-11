@@ -1,7 +1,8 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference } from '../../index.js'
+import type { FolderBreadcrumb } from '../../folders/types.js'
+import type { CollectionSlug, ColumnPreference, ListPreferences } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
@@ -15,12 +16,17 @@ export type ServerFunctionArgs = {
   name: string
 }
 
-export type ServerFunctionClientArgs = {
-  args: Record<string, unknown>
+export type ServerFunctionClientArgs<Args = Record<string, unknown>> = {
+  args: Args
   name: string
 }
 
-export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
+export type ServerFunctionClient = <
+  Args = Record<string, unknown>,
+  Result = Promise<unknown> | unknown,
+>(
+  args: ServerFunctionClientArgs<Args>,
+) => Result
 
 export type ServerFunction = (
   args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
@@ -70,4 +76,20 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewHandlerArgs = {
+  collectionSlug: string
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  enableRowSelections: boolean
+  folderID?: number | string
+  isInDrawer?: boolean
+  overrideEntityVisibility?: boolean
+  query: ListQuery
+  viewType: 'collection-folders' | 'folders'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
 }

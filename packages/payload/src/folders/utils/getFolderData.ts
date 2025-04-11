@@ -10,14 +10,57 @@ import {
 import { getFolderSubfolders } from './getFolderSubfolders.js'
 
 type Args = {
+  /**
+   * The collection slugs to query documents from
+   * - If empty, no documents will be queried, just subfolders
+   * - If `type` is `monomorphic`, only the first slug will be used
+   * - If `type` is `polymorphic`, all slugs will be used
+   * @default []
+   * @example ['posts', 'pages']
+   */
   collectionSlugs: CollectionSlug[]
+  /**
+   * The sort to apply to documents
+   * @default undefined
+   * @example 'createdAt_desc'
+   */
   docSort?: string
+  /**
+   * The where clause to apply to documents
+   * @default undefined
+   */
   docWhere?: Where
+  /**
+   * The ID of the folder to query documents from
+   * @default undefined
+   */
   folderID?: number | string
+  /**
+   * The locale to use for the document query
+   * @default undefined
+   */
   locale?: string
+  /**
+   * A Payload instance
+   */
   payload: Payload
+  /**
+   * The search string to apply to documents and subfolders
+   * - If `type` is `monomorphic`, `listSearchableFields` will be used
+   * - If `type` is `polymorphic`, `_folderSearch` will be used
+   * @default undefined
+   */
   search?: string
+  /**
+   * How the documents should be queried
+   * - `monomorphic` - query documents their collections
+   * - `polymorphic` - query documents from the parent folder join field
+   */
   type: 'monomorphic' | 'polymorphic'
+  /**
+   * The user making the request
+   * @default undefined
+   */
   user?: User
 }
 /**
@@ -57,27 +100,33 @@ export const getFolderData = async ({
 
   let documentsPromise
 
-  if (type === 'monomorphic') {
-    documentsPromise = getFolderMonomorphicDocuments({
-      collectionSlug: collectionSlugs[0],
-      locale,
-      parentFolderID,
-      payload,
-      search,
-      sort: docSort,
-      user,
-      where: docWhere,
+  if (!collectionSlugs.length) {
+    documentsPromise = Promise.resolve({
+      docs: [],
     })
   } else {
-    documentsPromise = getFolderPolymorphicDocuments({
-      collectionSlugs,
-      locale,
-      parentFolderID,
-      payload,
-      search,
-      sort: docSort,
-      user,
-    })
+    if (type === 'monomorphic') {
+      documentsPromise = getFolderMonomorphicDocuments({
+        collectionSlug: collectionSlugs[0],
+        locale,
+        parentFolderID,
+        payload,
+        search,
+        sort: docSort,
+        user,
+        where: docWhere,
+      })
+    } else {
+      documentsPromise = getFolderPolymorphicDocuments({
+        collectionSlugs,
+        locale,
+        parentFolderID,
+        payload,
+        search,
+        sort: docSort,
+        user,
+      })
+    }
   }
 
   const [breadcrumbs, subfolders, documents] = await Promise.all([
@@ -89,7 +138,6 @@ export const getFolderData = async ({
   return {
     breadcrumbs: breadcrumbs || [],
     documents: documents?.docs || [],
-    hasMoreDocuments: Boolean(documents?.hasMoreDocuments),
     subfolders: subfolders || [],
   }
 }

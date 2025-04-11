@@ -17,18 +17,11 @@ const baseClass = 'table'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly documents?: Array<{ relationTo: string; value: number | string }>
-  readonly subfolders?: Array<{ relationTo: string; value: number | string }>
 }
 
 type ItemKey = `${string}-${number | string}`
 
-export const FolderListTable: React.FC<Props> = ({
-  appearance,
-  columns,
-  documents: documentsFromArgs,
-  subfolders: subfoldersFromArgs,
-}) => {
+export const FolderListTable: React.FC<Props> = ({ appearance, columns }) => {
   const activeColumns = columns?.filter((col) => col?.active)
   const tableRef = React.useRef<HTMLTableSectionElement>(null)
   useClickOutside(
@@ -44,22 +37,18 @@ export const FolderListTable: React.FC<Props> = ({
   const router = useRouter()
   const { config } = useConfig()
   const {
-    documents: documentsFromContext,
+    documents,
     focusedRowIndex,
     folderCollectionSlug,
     getSelectedItems,
-    hasHydrated,
     isDragging,
     onItemClick,
     onItemKeyPress,
     selectedIndexes,
     setFocusedRowIndex,
     setFolderID,
-    subfolders: subfoldersFromContext,
+    subfolders,
   } = useFolder()
-
-  const subfolders = hasHydrated ? subfoldersFromContext : subfoldersFromArgs
-  const documents = hasHydrated ? documentsFromContext : documentsFromArgs
 
   const totalCount = subfolders.length + documents.length || 0
 
@@ -163,7 +152,7 @@ export const FolderListTable: React.FC<Props> = ({
                       isSelected={selectedItemKeys.has(itemKey)}
                       isSelecting={selectedIndexes.size > 0}
                       itemKey={itemKey}
-                      key={rowIndex}
+                      key={`${rowIndex}-${itemKey}`}
                       onClick={(event) => {
                         void handleItemClick({
                           event,

@@ -562,6 +562,8 @@ export type DocumentSlots = {
 }
 
 export type {
+  BuildCollectionFolderViewHandlerArgs as BuildCollectionFolderViewStateHandlerArgs,
+  BuildCollectionFolderViewResult as BuildCollectionFolderViewStateResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
   ListQuery,

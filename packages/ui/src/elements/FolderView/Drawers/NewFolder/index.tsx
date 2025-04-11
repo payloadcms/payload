@@ -34,12 +34,12 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
         handleResponse={async (res, successToast, errorToast) => {
           try {
             const { doc } = await res.json()
-            await onNewFolderSuccess(doc)
             successToast(
               t('general:successfullyCreated', {
                 label: `"${doc.name}"`,
               }),
             )
+            await onNewFolderSuccess(doc)
           } catch (_) {
             errorToast(t('general:error'))
           }

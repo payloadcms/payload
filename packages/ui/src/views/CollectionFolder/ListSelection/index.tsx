@@ -10,7 +10,7 @@ import React, { Fragment } from 'react'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
-import { MoveToFolderDrawer } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
+import { MoveItemsToFolderDrawer } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
@@ -19,6 +19,8 @@ import { useFolder } from '../../../providers/Folders/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { parseSearchParams } from '../../../utilities/parseSearchParams.js'
+
+const moveToFolderDrawerSlug = 'move-to-folder'
 
 type GroupedSelections = {
   [relationTo: string]: {
@@ -47,13 +49,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()
   const groupedSelections: GroupedSelections = items.reduce((acc, item) => {
-    if (acc[item.relationTo]) {
-      acc[item.relationTo].ids.push(extractID(item.value))
-      acc[item.relationTo].totalCount += 1
-    } else {
-      acc[item.relationTo] = {
-        ids: [extractID(item.value)],
-        totalCount: 1,
+    if (item) {
+      if (acc[item.relationTo]) {
+        acc[item.relationTo].ids.push(extractID(item.value))
+        acc[item.relationTo].totalCount += 1
+      } else {
+        acc[item.relationTo] = {
+          ids: [extractID(item.value)],
+          totalCount: 1,
+        }
       }
     }
 
@@ -109,9 +113,10 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         !disableBulkDelete && (
           <DeleteMany_v4
             afterDelete={() => {
-              router.replace(
-                qs.stringify(parseSearchParams(searchParams), { addQueryPrefix: true }),
-              )
+              // router.replace(
+              //   qs.stringify(parseSearchParams(searchParams), { addQueryPrefix: true }),
+              // )
+              clearSelections()
               clearRouteCache()
             }}
             key="bulk-delete"
@@ -121,18 +126,19 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           />
         ),
         count > 0 ? (
-          <React.Fragment key="move-to-folder">
-            <MoveToFolderDrawer
-              drawerSlug="move-to-folder"
-              itemsToMove={items}
-              onMoveConfirm={async (folderID) => {
+          <React.Fragment key={moveToFolderDrawerSlug}>
+            <MoveItemsToFolderDrawer
+              drawerSlug={moveToFolderDrawerSlug}
+              folderID={null}
+              itemsToMove={getSelectedItems()}
+              onConfirm={async (folderID) => {
                 await moveToFolder({
-                  itemsToMove: items,
+                  itemsToMove: getSelectedItems(),
                   toFolderID: folderID,
                 })
               }}
             />
-            <ListSelectionButton onClick={() => openModal('move-to-folder')} type="button">
+            <ListSelectionButton onClick={() => openModal(moveToFolderDrawerSlug)} type="button">
               {t('general:move')}
             </ListSelectionButton>
           </React.Fragment>

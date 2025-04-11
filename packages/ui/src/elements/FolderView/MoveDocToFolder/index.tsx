@@ -7,7 +7,7 @@ import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { MoveFolderIcon } from '../../../icons/MoveFolder/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { Button } from '../../Button/index.js'
-import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
+import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
 
 const baseClass = 'move-doc-to-folder'
@@ -28,15 +28,16 @@ export function MoveDocToFolder({ className = '' }) {
         </Button>
       </div>
 
-      <MoveToFolderDrawer
+      <MoveItemsToFolderDrawer
         drawerSlug={moveDocToFolderDrawerSlug}
+        folderID={currentParentFolder?.value as string}
         itemsToMove={[
           {
             relationTo: collectionSlug,
             value: { ...initialData, id },
           },
         ]}
-        onMoveConfirm={(destinationFolderID) => {
+        onConfirm={(destinationFolderID) => {
           if (currentParentFolder !== destinationFolderID) {
             dispatchField({
               type: 'UPDATE',

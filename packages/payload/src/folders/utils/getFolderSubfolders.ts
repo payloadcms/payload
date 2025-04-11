@@ -26,7 +26,7 @@ export const getFolderSubfolders = async ({
   if (search) {
     whereConstraints.push({
       name: {
-        contains: search,
+        like: search,
       },
     })
   }

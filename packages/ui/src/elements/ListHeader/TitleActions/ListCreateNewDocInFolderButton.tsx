@@ -23,47 +23,23 @@ export function ListCreateNewDocInFolderButton({
   buttonLabel,
   collectionSlugs,
   disableFolderCollection = false,
+  onCreateSuccess,
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
   disableFolderCollection?: boolean
+  onCreateSuccess?: (doc: any) => Promise<void> | void
 }) {
   const { i18n } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { config } = useConfig()
   const router = useRouter()
-  const {
-    folderCollectionConfig,
-    folderCollectionSlug,
-    folderID,
-    populateFolderData,
-    setSubfolders,
-  } = useFolder()
+  const { folderCollectionConfig, folderID } = useFolder()
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
     config.collections.filter(({ slug }) => {
       return collectionSlugs.includes(slug) && config.folders.collections[slug]
     }),
-  )
-
-  const onNewFolderCreate = React.useCallback(
-    async (doc) => {
-      setSubfolders((prev) => {
-        return [
-          ...prev,
-          {
-            relationTo: folderCollectionSlug,
-            value: doc,
-          },
-        ]
-      })
-      await populateFolderData({ folderID })
-      // @todo populateFolderData should return the `Table` component which we could set inside the `CollectionFolder/index.ts` file
-      // -- using router.refresh() is a temporary workaround
-      router.refresh()
-      closeModal(newFolderDrawerSlug)
-    },
-    [populateFolderData, closeModal, folderID, router, folderCollectionSlug, setSubfolders],
   )
 
   if (disableFolderCollection && enabledCollections.length === 0) {
@@ -155,7 +131,15 @@ export function ListCreateNewDocInFolderButton({
       )}
 
       {!disableFolderCollection && (
-        <NewFolderDrawer drawerSlug={newFolderDrawerSlug} onNewFolderSuccess={onNewFolderCreate} />
+        <NewFolderDrawer
+          drawerSlug={newFolderDrawerSlug}
+          onNewFolderSuccess={(doc) => {
+            closeModal(newFolderDrawerSlug)
+            if (typeof onCreateSuccess === 'function') {
+              void onCreateSuccess(doc)
+            }
+          }}
+        />
       )}
     </React.Fragment>
   )

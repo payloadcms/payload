@@ -8,7 +8,7 @@ type NoResultsProps = {
   Actions?: React.ReactNode[]
   Message: React.ReactNode
 }
-export function NoResults({ Actions, Message }: NoResultsProps) {
+export function NoListResults({ Actions, Message }: NoResultsProps) {
   return (
     <div className={baseClass}>
       {Message}

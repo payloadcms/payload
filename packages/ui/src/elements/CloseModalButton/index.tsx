@@ -2,6 +2,7 @@ import { useModal } from '@faceless-ui/modal'
 
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import './index.scss'
 
 const baseClass = 'close-modal-button'
 

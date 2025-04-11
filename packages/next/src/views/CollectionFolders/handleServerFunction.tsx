@@ -1,41 +1,29 @@
-import type { ListPreferences, ListQuery, PayloadRequest, VisibleEntities } from 'payload'
+import type {
+  BuildCollectionFolderViewStateHandlerArgs,
+  BuildCollectionFolderViewStateResult,
+  PayloadRequest,
+} from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
-import { renderFolderView } from './index.js'
+import { buildCollectionFolderView } from './components/buildCollectionFolderView.js'
 
-type RenderListResult = {
-  List: React.ReactNode
-  preferences: ListPreferences
-}
-
-export const renderListHandler = async (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  documentDrawerSlug: string
-  drawerSlug?: string
-  enableRowSelections: boolean
-  overrideEntityVisibility?: boolean
-  query: ListQuery
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
-  req: PayloadRequest
-}): Promise<RenderListResult> => {
+export const buildCollectionFolderViewStateHandler = async (
+  args: {
+    req: PayloadRequest
+  } & BuildCollectionFolderViewStateHandlerArgs,
+): Promise<BuildCollectionFolderViewStateResult> => {
   const {
     collectionSlug,
-    disableActions,
     disableBulkDelete,
     disableBulkEdit,
-    drawerSlug,
     enableRowSelections,
+    folderID,
+    isInDrawer,
     overrideEntityVisibility,
     query,
-    redirectAfterDelete,
-    redirectAfterDuplicate,
     req,
     req: {
       i18n,
@@ -43,14 +31,10 @@ export const renderListHandler = async (args: {
       payload: { config },
       user,
     },
+    viewType,
   } = args
 
-  const headers = await getHeaders()
-
-  const cookies = parseCookies(headers)
-
   const incomingUserSlug = user?.collection
-
   const adminUserSlug = config.admin.user
 
   // If we have a user slug, test it against the functions
@@ -76,93 +60,53 @@ export const renderListHandler = async (args: {
       pagination: false,
     })
 
-    // If there are users, we should not allow access because of /create-first-user
+    // If there are no users, we should not allow access because of /create-first-user
     if (hasUsers.docs.length) {
       throw new Error('Unauthorized')
     }
   }
 
-  const clientConfig = getClientConfig({
-    config,
-    i18n,
-    importMap: payload.importMap,
-  })
-
-  const preferencesKey = `${collectionSlug}-list`
-
-  const preferences = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: user.id,
-            },
-          },
-        ],
-      },
-    })
-    .then((res) => res.docs[0]?.value as ListPreferences)
-
-  const visibleEntities: VisibleEntities = {
-    collections: payload.config.collections
-      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
-      .filter(Boolean),
-    globals: payload.config.globals
-      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
-      .filter(Boolean),
-  }
-
-  const permissions = await getAccessResults({
-    req,
-  })
-
-  const { List } = await renderFolderView({
-    clientConfig,
-    disableActions,
+  return buildCollectionFolderView({
+    clientConfig: getClientConfig({
+      config,
+      i18n,
+      importMap: payload.importMap,
+    }),
     disableBulkDelete,
     disableBulkEdit,
-    drawerSlug,
     enableRowSelections,
     i18n,
     importMap: payload.importMap,
     initPageResult: {
+      // will need to adjust for viewType === 'folders' as it is polymorphic
       collectionConfig: payload?.collections?.[collectionSlug]?.config,
-      cookies,
-      globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
+      cookies: parseCookies(await getHeaders()),
       languageOptions: undefined, // TODO
-      permissions,
+      permissions: await getAccessResults({
+        req,
+      }),
       req,
       translations: undefined, // TODO
-      visibleEntities,
+      visibleEntities: {
+        collections: payload.config.collections
+          .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+          .filter(Boolean),
+        globals: undefined,
+      },
     },
+    isInDrawer,
     overrideEntityVisibility,
     params: {
-      segments: ['collections', collectionSlug],
+      segments: [
+        viewType === 'collection-folders' && 'collections',
+        viewType === 'collection-folders' && collectionSlug,
+        'folders',
+        typeof folderID === 'number' ? String(folderID) : folderID,
+      ].filter(Boolean),
     },
     payload,
     query,
-    redirectAfterDelete,
-    redirectAfterDuplicate,
     searchParams: {},
-    viewType: 'list',
+    viewType,
   })
-
-  return {
-    List,
-    preferences,
-  }
 }

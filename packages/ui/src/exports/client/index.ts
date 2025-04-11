@@ -22,6 +22,10 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+export { FolderListTable } from '../../elements/FolderView/FolderListTable/index.js'
+
+export { MoveItemsToFolderRSC_ClientComponent } from '../../providers/ServerFunctions/MoveItemsToFolder/Component.js'
+
 // query preset elements
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
 export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
@@ -41,6 +45,7 @@ export {
   RenderDefaultCell,
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
+export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -85,7 +90,6 @@ export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
-export { HydrateFolderProvider } from '../../providers/Folders/HydrateFolderProvider.js'
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
@@ -118,7 +122,6 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderBreadcrumbs } from '../../elements/FolderView/Breadcrumbs/index.js'
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { FoldersAndDocuments } from '../../elements/FolderView/FoldersAndDocuments/index.js'
 export { MoveDocToFolder } from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
@@ -261,6 +264,7 @@ export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
 export { FolderIcon } from '../../icons/Folder/index.js'
+export { DocumentIcon } from '../../icons/Document/index.js'
 export { MoveFolderIcon } from '../../icons/MoveFolder/index.js'
 export { GridViewIcon } from '../../icons/GridView/index.js'
 export { ListViewIcon } from '../../icons/ListView/index.js'

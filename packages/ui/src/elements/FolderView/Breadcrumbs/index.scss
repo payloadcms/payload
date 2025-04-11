@@ -3,7 +3,6 @@
 @layer payload-default {
   .droppable-button {
     @include btn-reset;
-    font-size: calc(var(--base) * 0.65);
     &:hover {
       cursor: pointer;
     }
@@ -13,12 +12,11 @@
 
     &__crumb,
     &__crumb-item.droppable-button {
+      @extend %h4;
       display: flex;
       align-items: center;
-      font-size: calc(var(--base) * 1.25);
-      font-weight: bold;
+      font-weight: 600;
       margin: 0;
-      line-height: normal;
       font-family: inherit;
 
       &:has(.icon--folder) {

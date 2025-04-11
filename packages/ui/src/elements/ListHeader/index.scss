@@ -16,7 +16,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
-      gap: calc(var(--base) * 0.8);
+      gap: calc(var(--base) * 0.5);
     }
 
     &__title {
@@ -26,7 +26,7 @@
     &__title-actions {
       margin-bottom: 4px;
       display: flex;
-      gap: calc(var(--base) * 0.8);
+      gap: calc(var(--base) * 0.5);
     }
 
     &__actions {

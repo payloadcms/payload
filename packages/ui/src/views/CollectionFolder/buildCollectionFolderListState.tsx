@@ -14,16 +14,25 @@ import type {
   SanitizedCollectionConfig,
 } from 'payload'
 
-import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import {
+  extractID,
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  flattenTopLevelFields,
+} from 'payload/shared'
 import React from 'react'
 
 import type { BuildColumnStateArgs } from '../../providers/TableColumns/buildColumnState/index.js'
 
-import { FolderListTable } from '../../elements/FolderView/FolderListTable/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
-import { DocumentIcon } from '../../icons/Document/index.js'
-import { FolderIcon } from '../../icons/Folder/index.js'
+import {
+  DateCell,
+  DocumentIcon,
+  FolderIcon,
+  FolderListTable,
+  // This is important! https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+  // eslint-disable-next-line payload/no-imports-from-exports-dir
+} from '../../exports/client/index.js'
 import { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../../providers/TableColumns/buildColumnState/index.js'
 import { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
@@ -52,7 +61,7 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
-export const renderFolderTable = ({
+export const buildCollectionFolderListState = ({
   clientCollectionConfig,
   clientConfig,
   collectionConfig,
@@ -79,7 +88,6 @@ export const renderFolderTable = ({
     relationTo: string
     value: any
   }[]
-  drawerSlug?: string
   enableRowSelections: boolean
   i18n: I18nClient
   payload: Payload
@@ -96,8 +104,8 @@ export const renderFolderTable = ({
 } => {
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
 
-  let clientFields: ClientField[] = clientCollectionConfig.fields
-  let serverFields: Field[] = collectionConfig.fields
+  let clientFields: ClientField[] = clientCollectionConfig?.fields
+  let serverFields: Field[] = collectionConfig?.fields
   const isPolymorphic = collections
 
   if (isPolymorphic) {
@@ -130,7 +138,7 @@ export const renderFolderTable = ({
     }
   }
 
-  const columnPreferences2: ColumnPreference[] = columnsFromArgs
+  const columns: ColumnPreference[] = columnsFromArgs
     ? columnsFromArgs?.filter((column) =>
         flattenTopLevelFields(clientFields, true)?.some(
           (field) => 'name' in field && field.name === column.accessor,
@@ -156,7 +164,7 @@ export const renderFolderTable = ({
   > = {
     clientFields,
     columnPreferences,
-    columns: columnPreferences2,
+    columns,
     enableRowSelections,
     i18n,
     // sortColumnProps,
@@ -175,15 +183,20 @@ export const renderFolderTable = ({
   })
 
   let columnsToUse = [...columnState]
+  let firstActiveColumnIndex: number | undefined
 
   columnsToUse = columnState.map((column, columnIndex) => {
+    if (firstActiveColumnIndex === undefined && column.active) {
+      firstActiveColumnIndex = columnIndex
+    }
     return {
       ...column,
       renderedCells: [
-        ...subfolders.map((subfolder) => {
-          if (columnIndex === 0) {
+        ...subfolders.map((subfolder, rowIndex) => {
+          const key = `${rowIndex}-${columnIndex}-${extractID(subfolder.value)}`
+          if (firstActiveColumnIndex === columnIndex) {
             return (
-              <div className="cell-with-icon" key={columnIndex}>
+              <div className="cell-with-icon" key={key}>
                 <FolderIcon />
                 {subfolder?.value?.name}
               </div>
@@ -194,18 +207,18 @@ export const renderFolderTable = ({
                 cellData={subfolder.value[column.accessor]}
                 collectionSlug={payload.config.folders.slug}
                 field={column.field as DateFieldClient}
-                key={columnIndex}
+                key={key}
                 rowData={subfolder.value}
               />
             )
           } else {
-            return <React.Fragment key={columnIndex}>—</React.Fragment>
+            return <React.Fragment key={key}>—</React.Fragment>
           }
         }),
-        ...column.renderedCells.map((cell) => {
-          if (columnIndex === 0) {
+        ...column.renderedCells.map((cell, rowIndex) => {
+          if (firstActiveColumnIndex === columnIndex) {
             return (
-              <div className="cell-with-icon" key={`${columnIndex}-${column.accessor}`}>
+              <div className="cell-with-icon" key={`${columnIndex}-${rowIndex}-${column.accessor}`}>
                 <DocumentIcon />
                 {cell}
               </div>
@@ -220,14 +233,6 @@ export const renderFolderTable = ({
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
-    Table: (
-      <FolderListTable
-        appearance={tableAppearance}
-        columns={columnsToUse}
-        documents={docs}
-        key="table"
-        subfolders={subfolders}
-      />
-    ),
+    Table: <FolderListTable appearance={tableAppearance} columns={columnsToUse} key="table" />,
   }
 }

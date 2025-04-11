@@ -40,7 +40,6 @@ export type GetFolderDataResult<FolderDocType = FolderInterface, DocType = TypeW
     relationTo: string
     value: DocType | number | string
   }[]
-  hasMoreDocuments: boolean
   subfolders: {
     relationTo: string
     value: FolderDocType | number | string
