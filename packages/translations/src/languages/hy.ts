@@ -27,11 +27,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     forgotPassword: 'Մոռացե՞լ եք գաղտնաբառը',
     forgotPasswordEmailInstructions:
       'Խնդրում ենք մուտքագրել Ձեր էլ. փոստը։ Դուք կստանաք էլ. նամակ՝ գաղտնաբառը վերականգնելու հրահանգներով։',
+    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     forgotPasswordUsernameInstructions:
       'Խնդրում ենք ներքևում մուտքագրել Ձեր օգտանունը։ Գաղտնաբառը վերականգնելու հրահանգները կուղարկվեն Ձեր օգտանվան հետ կապված էլ. փոստի հասցեին։',
-    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
-
-    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     generate: 'Ստեղծել',
     generateNewAPIKey: 'Ստեղծել նոր API բանալի',
     generatingNewAPIKeyWillInvalidate:
@@ -68,6 +66,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Թոքենի թարմացումը հաջողվել է։',
     unableToVerify: 'Հնարավոր չէ հաստատել',
     username: 'Օգտանուն',
+    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
     verified: 'Ստուգված',
     verifiedSuccessfully: 'Հաջողությամբ ստուգված',
     verify: 'Ստուգել',
@@ -463,12 +462,14 @@ export const hyTranslations: DefaultTranslationsObject = {
     changedFieldsCount_one: '{{count}} փոփոխված դաշտ',
     changedFieldsCount_other: '{{count}} փոփոխված դաշտեր',
     compareVersion: 'Համեմատել տարբերակը հետևյալի հետ՝',
+    compareVersions: 'Համեմատել տարբերակները',
     confirmPublish: 'Հաստատել հրապարակումը',
     confirmRevertToSaved: 'Հաստատել վերադարձը պահպանված վիճակին',
     confirmUnpublish: 'Հաստատել վերադարձը չհրապարակված վիճակին։',
     confirmVersionRestoration: 'Հաստատել տարբերակի վերականգնումը',
     currentDocumentStatus: 'Ընթացիկ {{docStatus}} փաստաթուղթ',
     currentDraft: 'Ընթացիկ սևագիր',
+    currentlyPublished: 'Ներկայումս հրատարակված',
     currentPublishedVersion: 'Ընթացիկ հրապարակված տարբերակ',
     draft: 'Սևագիր',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',

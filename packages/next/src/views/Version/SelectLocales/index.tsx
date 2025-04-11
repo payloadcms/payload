@@ -28,8 +28,10 @@ export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => 
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__label`}>{t('version:showLocales')}</div>
       <ReactSelect
+        customProps={{
+          valueContainerLabel: t('general:locales'),
+        }}
         isMulti
         onChange={onChange}
         options={format(options)}

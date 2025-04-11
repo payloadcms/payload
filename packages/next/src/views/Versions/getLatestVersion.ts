@@ -2,7 +2,7 @@ import type { Payload, PayloadRequest, Where } from 'payload'
 
 import { logError } from 'payload'
 
-type ReturnType = {
+export type GetLatestVersionReturnType = {
   id: string
   updatedAt: string
 } | null
@@ -17,7 +17,7 @@ type Args = {
   status: 'draft' | 'published'
   type: 'collection' | 'global'
 }
-export async function getLatestVersion(args: Args): Promise<ReturnType> {
+export async function getLatestVersion(args: Args): Promise<GetLatestVersionReturnType> {
   const { slug, type = 'collection', locale, overrideAccess, parentID, payload, req, status } = args
 
   const and: Where[] = [

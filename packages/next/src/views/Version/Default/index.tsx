@@ -9,9 +9,8 @@ import {
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { type FormEventHandler, useCallback, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
@@ -26,13 +25,15 @@ const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   canUpdate,
-  doc,
-  latestDraftVersion,
-  latestPublishedVersion,
+  latestDraftVersionID,
+  latestPublishedVersionID,
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
   selectedLocales: selectedLocalesProp,
-  versionID,
+  versionFromPill,
+  versionTo,
+  versionToCreatedAt,
+  VersionToCreatedAtLabel,
 }) => {
   const { config, getEntityConfig } = useConfig()
 
@@ -48,7 +49,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   )
 
   const { i18n } = useTranslation()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id: originalDocID, collectionSlug, globalSlug } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
@@ -57,63 +58,86 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const [selectedLocales, setSelectedLocales] = useState<OptionObject[]>(selectedLocalesProp)
 
-  const [compareValue, setCompareValue] = useState<CompareOption>()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [modifiedOnly, setModifiedOnly] = useState(modifiedOnlyProp)
-  function onToggleModifiedOnly() {
-    setModifiedOnly(!modifiedOnly)
-  }
 
-  useEffect(() => {
-    // If the selected comparison doc or locales change, update URL params so that version page
-    // This is so that RSC can update the version comparison state
-    const current = new URLSearchParams(Array.from(searchParams.entries()))
+  const updateSearchParams = useCallback(
+    (args: {
+      modifiedOnly?: boolean
+      selectedLocales?: OptionObject[]
+      versionFromID?: string
+    }) => {
+      // If the selected comparison doc or locales change, update URL params so that version page
+      // This is so that RSC can update the version comparison state
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
 
-    if (!compareValue) {
-      current.delete('compareValue')
-    } else {
-      current.set('compareValue', compareValue?.value)
-    }
+      if (args?.versionFromID) {
+        current.set('versionFrom', args?.versionFromID)
+      }
 
-    if (!selectedLocales) {
-      current.delete('localeCodes')
-    } else {
-      current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
-    }
+      if (args?.selectedLocales) {
+        if (!args.selectedLocales.length) {
+          current.delete('localeCodes')
+        } else {
+          current.set(
+            'localeCodes',
+            JSON.stringify(args.selectedLocales.map((locale) => locale.value)),
+          )
+        }
+      }
 
-    if (modifiedOnly === false) {
-      current.set('modifiedOnly', 'false')
-    } else {
-      current.delete('modifiedOnly')
-    }
+      if (args?.modifiedOnly === false) {
+        current.set('modifiedOnly', 'false')
+      } else if (args?.modifiedOnly === true) {
+        current.delete('modifiedOnly')
+      }
 
-    const search = current.toString()
-    const query = search ? `?${search}` : ''
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
 
-    // TODO: this transition occurs multiple times during the initial rendering phases, need to evaluate
-    startRouteTransition(() => router.push(`${pathname}${query}`))
-  }, [
-    compareValue,
-    pathname,
-    router,
-    searchParams,
-    selectedLocales,
-    modifiedOnly,
-    startRouteTransition,
-  ])
+      startRouteTransition(() => router.push(`${pathname}${query}`))
+    },
+    [pathname, router, searchParams, startRouteTransition],
+  )
+
+  const onToggleModifiedOnly: FormEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      const newModified = (event.target as HTMLInputElement).checked
+      setModifiedOnly(newModified)
+
+      updateSearchParams({
+        modifiedOnly: newModified,
+      })
+    },
+    [updateSearchParams],
+  )
+
+  const onChangeSelectedLocales = useCallback(
+    (locales: OptionObject[]) => {
+      setSelectedLocales(locales)
+      updateSearchParams({
+        selectedLocales: locales,
+      })
+    },
+    [updateSearchParams],
+  )
+
+  const onChangeVersionFrom: (val: CompareOption) => void = useCallback(
+    (val) => {
+      updateSearchParams({
+        versionFromID: val.value,
+      })
+    },
+    [updateSearchParams],
+  )
 
   const {
-    admin: { dateFormat },
     localization,
     routes: { api: apiRoute },
     serverURL,
   } = config
-
-  const versionCreatedAt = doc?.updatedAt
-    ? formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })
-    : ''
 
   const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
     collectionSlug || globalSlug
@@ -123,36 +147,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetStepNav
-        collectionConfig={collectionConfig}
-        collectionSlug={collectionSlug}
-        doc={doc}
-        fields={(collectionConfig || globalConfig)?.fields}
-        globalConfig={globalConfig}
-        globalSlug={globalSlug}
-        id={id}
-      />
-      <Gutter className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__header-wrap`}>
-          <p className={`${baseClass}__created-at`}>
-            {i18n.t('version:versionCreatedOn', {
-              version: i18n.t(doc?.autosave ? 'version:autosavedVersion' : 'version:version'),
-            })}
-          </p>
-          <header className={`${baseClass}__header`}>
-            <h2>{versionCreatedAt}</h2>
-            {canUpdate && (
-              <Restore
-                className={`${baseClass}__restore`}
-                collectionSlug={collectionSlug}
-                globalSlug={globalSlug}
-                label={collectionConfig?.labels.singular || globalConfig?.label}
-                originalDocID={id}
-                status={doc?.version?._status}
-                versionDate={versionCreatedAt}
-                versionID={versionID}
-              />
-            )}
+      <Gutter className={`${baseClass}-controls-top`}>
+        <div className={`${baseClass}-controls-top__wrapper`}>
+          <h2>{i18n.t('version:compareVersions')}</h2>
+          <div className={`${baseClass}-controls-top__wrapper-actions`}>
             <span className={`${baseClass}__modifiedCheckBox`}>
               <CheckboxInput
                 checked={modifiedOnly}
@@ -161,31 +159,65 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 onToggle={onToggleModifiedOnly}
               />
             </span>
-          </header>
+            {localization && (
+              <SelectLocales
+                onChange={onChangeSelectedLocales}
+                options={availableLocales}
+                value={selectedLocales}
+              />
+            )}
+          </div>
         </div>
-        <div className={`${baseClass}__controls`}>
-          <SelectComparison
-            baseURL={compareBaseURL}
-            draftsEnabled={draftsEnabled}
-            latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
-            onChange={setCompareValue}
-            parentID={id}
-            value={compareValue}
-            versionID={versionID}
-          />
-          {localization && (
-            <SelectLocales
-              onChange={setSelectedLocales}
-              options={availableLocales}
-              value={selectedLocales}
+      </Gutter>
+      <Gutter className={`${baseClass}-controls-bottom`}>
+        <div className={`${baseClass}-controls-bottom__wrapper`}>
+          <div className={`${baseClass}-controls-bottom__version-from`}>
+            <SelectComparison
+              baseURL={compareBaseURL}
+              draftsEnabled={draftsEnabled}
+              latestDraftVersionID={latestDraftVersionID}
+              latestPublishedVersionID={latestPublishedVersionID}
+              onChange={onChangeVersionFrom}
+              parentID={originalDocID}
+              versionFromOption={{
+                label: versionFromPill.Label,
+                value: versionFromPill.id,
+              }}
+              versionToID={versionTo.id}
             />
-          )}
+          </div>
+
+          <div className={`${baseClass}-controls-bottom__version-to`}>
+            {VersionToCreatedAtLabel}
+            {canUpdate && (
+              <Restore
+                className={`${baseClass}__restore`}
+                collectionSlug={collectionSlug}
+                globalSlug={globalSlug}
+                label={collectionConfig?.labels.singular || globalConfig?.label}
+                originalDocID={originalDocID}
+                status={versionTo?.version?._status}
+                versionDate={versionToCreatedAt}
+                versionID={versionTo?.id}
+              />
+            )}
+          </div>
         </div>
+      </Gutter>
+      <SetStepNav
+        collectionConfig={collectionConfig}
+        collectionSlug={collectionSlug}
+        doc={versionTo}
+        fields={(collectionConfig || globalConfig)?.fields}
+        globalConfig={globalConfig}
+        globalSlug={globalSlug}
+        id={originalDocID}
+      />
+      <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext
           value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
         >
-          {doc?.version && RenderedDiff}
+          {versionTo?.version && RenderedDiff}
         </SelectedLocalesContext>
       </Gutter>
     </main>

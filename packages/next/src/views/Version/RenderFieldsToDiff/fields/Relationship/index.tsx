@@ -6,14 +6,16 @@ import type {
   RelationshipFieldDiffClientComponent,
 } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
+import {
+  FieldDiffContainer,
+  getHTMLDiffComponents,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
-import ReactDiffViewer from 'react-diff-viewer-continued'
 
 import './index.scss'
-import { diffStyles } from '../styles.js'
 
 const baseClass = 'relationship-diff'
 
@@ -101,11 +103,12 @@ const generateLabelFromValue = (
 }
 
 export const Relationship: RelationshipFieldDiffClientComponent = ({
-  comparisonValue,
+  comparisonValue: valueFrom,
   field,
   locale,
+  nestingLevel,
   parentIsLocalized,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { config } = useConfig()
@@ -116,70 +119,56 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
     config: { collections },
   } = useConfig()
 
-  let versionToRender: string | undefined = placeholder
-  let comparisonToRender: string | undefined = placeholder
+  let renderedValueTo: string | undefined = placeholder
+  let renderedValueFrom: string | undefined = placeholder
 
-  if (versionValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
-      versionToRender =
-        versionValue
+  if (valueTo) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(valueTo)) {
+      renderedValueTo =
+        valueTo
           .map((val) =>
             generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
           )
           .join(', ') || placeholder
     } else {
-      versionToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          versionValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
+      renderedValueTo =
+        generateLabelFromValue(collections, field, locale, valueTo, config, parentIsLocalized) ||
+        placeholder
     }
   }
 
-  if (comparisonValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
-      comparisonToRender =
-        comparisonValue
+  if (valueFrom) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(valueFrom)) {
+      renderedValueFrom =
+        valueFrom
           .map((val) =>
             generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
           )
           .join(', ') || placeholder
     } else {
-      comparisonToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          comparisonValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
+      renderedValueFrom =
+        generateLabelFromValue(collections, field, locale, valueFrom, config, parentIsLocalized) ||
+        placeholder
     }
   }
 
-  const label =
-    'label' in field && typeof field.label !== 'boolean' && typeof field.label !== 'function'
-      ? field.label
-      : ''
+  const { From, To } = getHTMLDiffComponents({
+    fromHTML: '<p>' + renderedValueFrom + '</p>',
+    toHTML: '<p>' + renderedValueTo + '</p>',
+    tokenizeByCharacter: false,
+  })
 
   return (
-    <div className={baseClass}>
-      <FieldDiffLabel>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(label, i18n)}
-      </FieldDiffLabel>
-      <ReactDiffViewer
-        hideLineNumbers
-        newValue={versionToRender}
-        oldValue={comparisonToRender}
-        showDiffOnly={false}
-        splitView
-        styles={diffStyles}
-      />
-    </div>
+    <FieldDiffContainer
+      className={baseClass}
+      From={From}
+      i18n={i18n}
+      label={{
+        label: field.label,
+        locale,
+      }}
+      nestingLevel={nestingLevel}
+      To={To}
+    />
   )
 }
