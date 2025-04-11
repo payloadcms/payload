@@ -56,7 +56,8 @@ import { initContextState } from './initContextState.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
+    useDocumentInfo()
 
   const {
     action,
@@ -491,8 +492,28 @@ export const Form: React.FC<FormProps> = (props) => {
 
       let file = data?.file
 
-      if (file) {
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         delete data.file
+
+        const handler = getUploadHandler({ collectionSlug })
+
+        if (typeof handler === 'function') {
+          let filename = file.name
+          const clientUploadContext = await handler({
+            file,
+            updateFilename: (value) => {
+              filename = value
+            },
+          })
+
+          file = JSON.stringify({
+            clientUploadContext,
+            collectionSlug,
+            filename,
+            mimeType: file.type,
+            size: file.size,
+          })
+        }
       }
 
       if (mergeOverrideData) {
@@ -504,37 +525,23 @@ export const Form: React.FC<FormProps> = (props) => {
         data = overrides
       }
 
-      const handler = getUploadHandler({ collectionSlug })
-
-      if (file && typeof handler === 'function') {
-        let filename = file.name
-        const clientUploadContext = await handler({
-          file,
-          updateFilename: (value) => {
-            filename = value
-          },
-        })
-
-        file = JSON.stringify({
-          clientUploadContext,
-          collectionSlug,
-          filename,
-          mimeType: file.type,
-          size: file.size,
-        })
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify(data),
       }
 
-      const dataToSerialize = {
-        _payload: JSON.stringify(data),
-        file,
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
+        dataToSerialize.file = file
       }
 
       // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-      const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+      const formData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
 
       return formData
     },
-    [collectionSlug, getUploadHandler],
+    [collectionSlug, docConfig, getUploadHandler],
   )
 
   const reset = useCallback(

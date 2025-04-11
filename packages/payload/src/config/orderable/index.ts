@@ -109,7 +109,6 @@ export const addOrderableFieldsAndHook = (
   const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
     for (const orderableFieldName of orderableFieldNames) {
       if (!data[orderableFieldName] && !originalDoc?.[orderableFieldName]) {
-        console.log('do not enter')
         const lastDoc = await req.payload.find({
           collection: collection.slug,
           depth: 0,

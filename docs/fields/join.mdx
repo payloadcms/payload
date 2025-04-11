@@ -271,21 +271,6 @@ const result = await payload.find({
   and blocks.
 </Banner>
 
-<Banner type="warning">
-  Currently, querying by the Join Field itself is not supported, meaning:
-  ```ts
-  payload.find({
-    collection: 'categories',
-    where: {
-      'relatedPosts.title': { // relatedPosts is a join field
-        equals: "post"
-      }
-    }
-  })
-  ```
-  does not work yet.
-</Banner>
-
 ### Rest API
 
 The REST API supports the same query options as the Local API. You can use the `joins` query parameter to customize the

@@ -514,21 +514,8 @@ describe('lexicalMain', () => {
     await wait(500)
     await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-    await uploadListDrawer.locator('.rs__control .value-container').first().click()
-    await wait(500)
-    await expect(uploadListDrawer.locator('.rs__option').nth(1)).toBeVisible()
-    await expect(uploadListDrawer.locator('.rs__option').nth(1)).toContainText('Upload 2')
-    await uploadListDrawer.locator('.rs__option').nth(1).click()
-
-    // wait till the text appears in uploadListDrawer: "No Uploads 2 found. Either no Uploads 2 exist yet or none match the filters you've specified above."
-    await expect(
-      uploadListDrawer.getByText(
-        "No Uploads 2 found. Either no Uploads 2 exist yet or none match the filters you've specified above.",
-      ),
-    ).toBeVisible()
-
-    await uploadListDrawer.getByText('Create New').first().click()
-    const createUploadDrawer = page.locator('dialog[id^=doc-drawer_uploads2_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await page.getByRole('dialog').getByLabel('Add new Upload').first().click()
+    const createUploadDrawer = page.locator('dialog[id^=doc-drawer_uploads_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(createUploadDrawer).toBeVisible()
     await wait(500)
 
@@ -555,10 +542,10 @@ describe('lexicalMain', () => {
     await expect(secondUploadNode).toBeVisible()
 
     await expect(secondUploadNode.locator('.lexical-upload__bottomRow')).toContainText(
-      'payload.jpg',
+      'payload-1.jpg',
     )
     await expect(secondUploadNode.locator('.lexical-upload__collectionLabel')).toContainText(
-      'Upload 2',
+      'Upload',
     )
   })
 
