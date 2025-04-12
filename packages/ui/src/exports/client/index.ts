@@ -60,6 +60,8 @@ export {
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
+export { AnimateHeight } from '../../elements/AnimateHeight/index.js'
+export { PillSelector, type SelectablePill } from '../../elements/PillSelector/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
 export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'

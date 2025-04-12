@@ -1,23 +1,26 @@
 'use client'
-import type { OptionObject } from 'payload'
 
 import {
   CheckboxInput,
+  ChevronIcon,
   Gutter,
+  Pill,
+  type SelectablePill,
   useConfig,
   useDocumentInfo,
+  useLocale,
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { type FormEventHandler, useCallback, useMemo, useState } from 'react'
+import React, { type FormEventHandler, useCallback, useEffect, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'
-import { SelectLocales } from '../SelectLocales/index.js'
+import { type SelectedLocaleOnChange, SelectLocales } from '../SelectLocales/index.js'
 import { SelectedLocalesContext } from './SelectedLocalesContext.js'
 import { SetStepNav } from './SetStepNav.js'
 
@@ -29,34 +32,43 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   latestPublishedVersionID,
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
-  selectedLocales: selectedLocalesProp,
+  selectedLocales: selectedLocalesFromProps,
   versionFromPill,
   versionTo,
   versionToCreatedAt,
   VersionToCreatedAtLabel,
 }) => {
   const { config, getEntityConfig } = useConfig()
+  const { code } = useLocale()
+  const { i18n, t } = useTranslation()
 
-  const availableLocales = useMemo(
-    () =>
-      config.localization
-        ? config.localization.locales.map((locale) => ({
-            label: locale.label,
-            value: locale.code,
-          }))
-        : [],
-    [config.localization],
-  )
+  const [locales, setLocales] = useState<SelectablePill[]>([])
+  const [localeSelectorOpen, setLocaleSelectorOpen] = React.useState(false)
 
-  const { i18n } = useTranslation()
+  useEffect(() => {
+    if (config.localization) {
+      const updatedLocales = config.localization.locales.map((locale) => {
+        let label = locale.label
+        if (typeof locale.label !== 'string' && locale.label[code]) {
+          label = locale.label[code]
+        }
+
+        return {
+          name: locale.code,
+          Label: label,
+          selected: selectedLocalesFromProps.includes(locale.code),
+        } as SelectablePill
+      })
+      setLocales(updatedLocales)
+    }
+  }, [code, config.localization, selectedLocalesFromProps])
+
   const { id: originalDocID, collectionSlug, globalSlug } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
   const [globalConfig] = useState(() => getEntityConfig({ globalSlug }))
-
-  const [selectedLocales, setSelectedLocales] = useState<OptionObject[]>(selectedLocalesProp)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -66,7 +78,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const updateSearchParams = useCallback(
     (args: {
       modifiedOnly?: boolean
-      selectedLocales?: OptionObject[]
+      selectedLocales?: SelectablePill[]
       versionFromID?: string
     }) => {
       // If the selected comparison doc or locales change, update URL params so that version page
@@ -81,10 +93,13 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         if (!args.selectedLocales.length) {
           current.delete('localeCodes')
         } else {
-          current.set(
-            'localeCodes',
-            JSON.stringify(args.selectedLocales.map((locale) => locale.value)),
-          )
+          const selectedLocaleCodes: string[] = []
+          for (const locale of args.selectedLocales) {
+            if (locale.selected) {
+              selectedLocaleCodes.push(locale.name)
+            }
+          }
+          current.set('localeCodes', JSON.stringify(selectedLocaleCodes))
         }
       }
 
@@ -114,9 +129,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     [updateSearchParams],
   )
 
-  const onChangeSelectedLocales = useCallback(
-    (locales: OptionObject[]) => {
-      setSelectedLocales(locales)
+  const onChangeSelectedLocales: SelectedLocaleOnChange = useCallback(
+    ({ locales }) => {
+      setLocales(locales)
       updateSearchParams({
         selectedLocales: locales,
       })
@@ -160,14 +175,27 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               />
             </span>
             {localization && (
-              <SelectLocales
-                onChange={onChangeSelectedLocales}
-                options={availableLocales}
-                value={selectedLocales}
-              />
+              <Pill
+                aria-controls={`${baseClass}-locales`}
+                aria-expanded={localeSelectorOpen}
+                className={`${baseClass}__toggle-locales`}
+                icon={<ChevronIcon direction={localeSelectorOpen ? 'up' : 'down'} />}
+                onClick={() => setLocaleSelectorOpen((localeSelectorOpen) => !localeSelectorOpen)}
+                pillStyle="light"
+              >
+                {t('general:locales')}
+              </Pill>
             )}
           </div>
         </div>
+
+        {localization && (
+          <SelectLocales
+            locales={locales}
+            localeSelectorOpen={localeSelectorOpen}
+            onChange={onChangeSelectedLocales}
+          />
+        )}
       </Gutter>
       <Gutter className={`${baseClass}-controls-bottom`}>
         <div className={`${baseClass}-controls-bottom__wrapper`}>
@@ -214,9 +242,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         id={originalDocID}
       />
       <Gutter className={`${baseClass}__diff-wrap`}>
-        <SelectedLocalesContext
-          value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
-        >
+        <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>
           {versionTo?.version && RenderedDiff}
         </SelectedLocalesContext>
       </Gutter>

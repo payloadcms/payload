@@ -223,7 +223,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     }
   }
 
-  let selectedLocales: OptionObject[] = []
+  let selectedLocales: string[] = []
   if (localization) {
     let locales: Locale[] = []
     if (localeCodesFromParams) {
@@ -242,10 +242,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       locales = (await localization.filterAvailableLocales({ locales, req })) || []
     }
 
-    selectedLocales = locales.map((locale) => ({
-      label: locale.label,
-      value: locale.code,
-    }))
+    selectedLocales = locales.map((locale) => locale.code)
   }
 
   const schemaMap = getSchemaMap({
@@ -276,7 +273,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     parentPath: '',
     parentSchemaPath: '',
     req,
-    selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
+    selectedLocales,
     versionFromSiblingData: {
       ...versionFrom?.version,
       updatedAt: versionFrom?.updatedAt,
