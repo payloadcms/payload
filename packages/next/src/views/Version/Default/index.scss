@@ -99,6 +99,7 @@
         width: 1px;
         background-color: var(--theme-elevation-100);
         transform: translateX(-50%); // Center the line
+        z-index: 2;
       }
     }
 

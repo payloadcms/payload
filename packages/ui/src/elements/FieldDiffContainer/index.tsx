@@ -35,7 +35,7 @@ export const FieldDiffContainer: React.FC<{
         nestingLevel
           ? ({
               // Need to use % instead of fr, as calc() doesn't work with fr when this is used in gridTemplateColumns
-              '--left-offset': `calc(50%  - (${nestingLevel} * calc( calc(var(--base)* 0.5) - 2px  )))`,
+              '--left-offset': `calc(50%  - (${nestingLevel} * calc( calc(var(--base)* 0.5) - 2.5px  )))`,
             } as React.CSSProperties)
           : ({
               '--left-offset': '50%',
