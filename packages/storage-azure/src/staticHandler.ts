@@ -29,7 +29,21 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
 
       const response = blob._response
 
-      let headers = new Headers({ ...incomingHeaders, ...response.headers.rawHeaders() })
+      const rawHeaders = { ...response.headers.rawHeaders() }
+
+      let initHeaders: HeadersInit = {
+        ...rawHeaders,
+      }
+
+      // Typescript is difficult here with merging these types from Azure
+      if (incomingHeaders) {
+        initHeaders = {
+          ...initHeaders,
+          ...incomingHeaders,
+        }
+      }
+
+      let headers = new Headers(initHeaders)
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = response.headers.get('etag')

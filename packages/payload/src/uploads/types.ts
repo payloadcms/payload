@@ -178,7 +178,7 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      headers: Headers
+      headers?: Headers
       params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
