@@ -10,6 +10,12 @@ export type FixedToolbarFeatureProps = {
    */
   applyToFocusedEditor?: boolean
   /**
+   * Custom ordering for toolbar groups
+   * Key is the group key (e.g. 'format', 'text', 'align')
+   * Value is the new order number
+   */
+  customGroupOrders?: Record<string, number>
+  /**
    * @default false
    *
    * If there is a parent editor with a fixed toolbar, this will disable the toolbar for this editor.
@@ -26,6 +32,7 @@ export const FixedToolbarFeature = createServerFeature<
     const sanitizedProps: FixedToolbarFeatureProps = {
       applyToFocusedEditor:
         props?.applyToFocusedEditor === undefined ? false : props.applyToFocusedEditor,
+      customGroupOrders: props?.customGroupOrders,
       disableIfParentHasFixedToolbar:
         props?.disableIfParentHasFixedToolbar === undefined
           ? false
