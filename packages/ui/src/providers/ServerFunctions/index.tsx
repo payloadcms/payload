@@ -44,6 +44,7 @@ type RenderDocument = (args: {
   initialData?: Data
   locale?: Locale
   overrideEntityVisibility?: boolean
+  redirectAfterCreate?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal

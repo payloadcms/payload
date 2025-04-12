@@ -26,7 +26,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.27.1'
+export const lexicalTargetVersion = '0.28.0'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
@@ -96,6 +96,13 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     return {
       CellComponent: {
         path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+        serverProps: {
+          admin: args?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
+        },
+      },
+      DiffComponent: {
+        path: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
         serverProps: {
           admin: args?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,
@@ -870,32 +877,36 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { lexicalHTMLField } from './features/converters/html/async/field/index.js'
+export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
-export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
-export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'
+export { lexicalHTMLField } from './features/converters/lexicalToHtml/async/field/index.js'
+export { LinebreakHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/linebreak.js'
 
-export { TabHTMLConverter } from './features/converters/html_deprecated/converter/converters/tab.js'
+export { ParagraphHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/paragraph.js'
 
-export { TextHTMLConverter } from './features/converters/html_deprecated/converter/converters/text.js'
-export { defaultHTMLConverters } from './features/converters/html_deprecated/converter/defaultConverters.js'
+export { TabHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/tab.js'
+export { TextHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/text.js'
+export { defaultHTMLConverters } from './features/converters/lexicalToHtml_deprecated/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
-} from './features/converters/html_deprecated/converter/index.js'
-
-export type { HTMLConverter } from './features/converters/html_deprecated/converter/types.js'
+} from './features/converters/lexicalToHtml_deprecated/converter/index.js'
+export type { HTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/types.js'
 export {
   consolidateHTMLConverters,
   lexicalHTML,
-} from './features/converters/html_deprecated/field/index.js'
+} from './features/converters/lexicalToHtml_deprecated/field/index.js'
 export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
-} from './features/converters/html_deprecated/index.js'
-export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
+} from './features/converters/lexicalToHtml_deprecated/index.js'
+export { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
+export { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
 export { getPayloadPopulateFn } from './features/converters/utilities/payloadPopulateFn.js'
+
 export { getRestPopulateFn } from './features/converters/utilities/restPopulateFn.js'
+export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
@@ -977,8 +988,8 @@ export type {
 
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 
-export { UploadFeature } from './features/upload/server/feature.server.js'
-export type { UploadFeatureProps } from './features/upload/server/feature.server.js'
+export { UploadFeature } from './features/upload/server/index.js'
+export type { UploadFeatureProps } from './features/upload/server/index.js'
 
 export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'

@@ -28,6 +28,95 @@ const width: Field = {
   label: 'Field Width (percentage)',
 }
 
+const placeholder: Field = {
+  name: 'placeholder',
+  type: 'text',
+  label: 'Placeholder',
+}
+
+const Radio: Block = {
+  slug: 'radio',
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'defaultValue',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+          label: 'Default Value',
+          localized: true,
+        },
+      ],
+    },
+    {
+      name: 'options',
+      type: 'array',
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              admin: {
+                width: '50%',
+              },
+              label: 'Label',
+              localized: true,
+              required: true,
+            },
+            {
+              name: 'value',
+              type: 'text',
+              admin: {
+                width: '50%',
+              },
+              label: 'Value',
+              required: true,
+            },
+          ],
+        },
+      ],
+      label: 'Radio Attribute Options',
+      labels: {
+        plural: 'Options',
+        singular: 'Option',
+      },
+    },
+    required,
+  ],
+  labels: {
+    plural: 'Radio Fields',
+    singular: 'Radio',
+  },
+}
+
 const Select: Block = {
   slug: 'select',
   fields: [
@@ -65,6 +154,14 @@ const Select: Block = {
           },
           label: 'Default Value',
           localized: true,
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...placeholder,
         },
       ],
     },
@@ -576,6 +673,7 @@ export const fields = {
   message: Message,
   number: Number,
   payment: Payment,
+  radio: Radio,
   select: Select,
   state: State,
   text: Text,

@@ -138,64 +138,6 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
-      name: 'arrayOfFields',
-      type: 'array',
-      admin: {
-        initCollapsed: true,
-      },
-      fields: [
-        {
-          name: 'optional',
-          type: 'text',
-        },
-        {
-          name: 'innerArrayOfFields',
-          type: 'array',
-          fields: [
-            {
-              name: 'innerOptional',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'group',
-      type: 'group',
-      fields: [
-        {
-          name: 'defaultValueField',
-          type: 'text',
-          defaultValue: 'testing',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      name: 'someBlock',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'textBlock',
-          fields: [
-            {
-              name: 'textFieldForBlock',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'defaultValueField',
-      type: 'text',
-      defaultValue: 'testing',
-    },
-    {
       name: 'relationship',
       type: 'relationship',
       admin: {
@@ -262,6 +204,41 @@ export const Posts: CollectionConfig = {
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
       },
+    },
+    {
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
+      type: 'text',
     },
   ],
   labels: {

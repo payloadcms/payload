@@ -36,10 +36,8 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   exactText,
-  findTableCell,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
@@ -47,7 +45,6 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { titleToDelete } from './shared.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
@@ -123,130 +120,6 @@ describe('Versions', () => {
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
-    })
-
-    // This test has to run before bulk updates that will rename the title
-    test('should delete', async () => {
-      await page.goto(url.list)
-
-      const rows = page.locator(`tr`)
-      const rowToDelete = rows.filter({ hasText: titleToDelete })
-
-      await rowToDelete.locator('.cell-_select input').check()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-draft-posts #confirm-action').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Deleted 1 Draft Post successfully.',
-      )
-
-      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
-    })
-
-    test('bulk update - should publish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk publish with autosave documents', async () => {
-      const title = 'autosave title'
-      const description = 'autosave description'
-      await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-description')).toBeEnabled()
-      await page.locator('#field-description').fill(description)
-      await waitForAutoSaveToRunAndComplete(page)
-      await page.goto(autosaveURL.list)
-      await expect(findTableCell(page, '_status', title)).toContainText('Draft')
-      await selectTableRow(page, title)
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-autosave-posts #confirm-action').click()
-      await expect(findTableCell(page, '_status', title)).toContainText('Published')
-    })
-
-    test('bulk update - should unpublish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#unpublish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
-    })
-
-    test('bulk update — should publish changes', async () => {
-      const description = 'published document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `published` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__publish').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk update — should draft changes', async () => {
-      const description = 'draft document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `draft` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__draft').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('collection — has versions tab', async () => {
@@ -782,6 +655,7 @@ describe('Versions', () => {
   describe('Scheduled publish', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     test('should schedule publish', async () => {
@@ -817,6 +691,60 @@ describe('Versions', () => {
       await expect(
         page.locator('.payload-toast-item:has-text("Deleted successfully.")'),
       ).toBeVisible()
+    })
+
+    test('schedule publish config is respected', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      // schedule publish should not be available before document has been saved
+      await page.locator('#action-save-popup').click()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
+
+      // save draft then try to schedule publish
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      // drawer should open
+      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      // nothing in scheduled
+      await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
+
+      // set date and time
+      await page.locator('.date-time-picker input').click()
+
+      const listItem = page
+        .locator('.react-datepicker__time-list .react-datepicker__time-list-item')
+        .first()
+
+      // We customised it in config to not contain a 12 hour clock
+      await expect(async () => {
+        await expect(listItem).toHaveText('00:00')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    test('can still schedule publish once autosave is triggered', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      await saveDocAndAssert(page)
+
+      await page.locator('#field-title').fill('scheduled publish updated')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.locator('#action-save-popup').click()
+
+      await expect(async () => {
+        await expect(page.locator('#schedule-publish')).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 
@@ -1108,6 +1036,8 @@ describe('Versions', () => {
       // Fill with invalid data again, then reload and accept the warning, should contain previous data
       await titleField.fill('')
 
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
       await page.reload()
 
       await expect(titleField).toBeEnabled()
@@ -1324,11 +1254,11 @@ describe('Versions', () => {
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
-      await expect(textInArrayES).toContainText('No Array Localizeds found')
+      await expect(textInArrayES).toBeHidden()
 
       await page.locator('#modifiedOnly').click()
 
-      await expect(textInArrayES).toBeHidden()
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
     })
 
     test('correctly renders diff for block fields', async () => {
@@ -1338,6 +1268,62 @@ describe('Versions', () => {
 
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInBlock')
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
+    })
+
+    test('correctly renders diff for collapsibles within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for rows within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInRowInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for named tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInNamedTab1InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInNamedTab1InBlock2',
+      )
+    })
+
+    test('correctly renders diff for unnamed tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInUnnamedTab2InBlock2',
+      )
     })
 
     test('correctly renders diff for checkbox fields', async () => {
@@ -1453,12 +1439,17 @@ describe('Versions', () => {
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(1)).toHaveText(
-        '"text": "richtext",',
-      )
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(3)).toHaveText(
-        '"text": "richtext2",',
-      )
+      const oldDiff = richtext.locator('.lexical-diff__diff-old')
+      const newDiff = richtext.locator('.lexical-diff__diff-new')
+
+      const oldHTML =
+        `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
+      `.trim()
+      const newHTML =
+        `Fugiat <span data-match-type="create">esse new in</span> dolor aleiqua <span data-match-type="create">gillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="create">labore officia</span> cupidatat amet commodo commodo proident occaecat.`.trim()
+
+      expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
+      expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

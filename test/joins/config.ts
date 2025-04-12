@@ -232,6 +232,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-parents',
+      access: { read: () => true },
       fields: [
         {
           type: 'join',
@@ -246,6 +247,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-1',
+      access: { read: () => true },
       admin: { useAsTitle: 'title' },
       fields: [
         {
@@ -265,6 +267,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'multiple-collections-2',
+      access: { read: () => true },
       admin: { useAsTitle: 'title' },
       fields: [
         {

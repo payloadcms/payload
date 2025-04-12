@@ -22,6 +22,17 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+export { SortHeader } from '../../elements/SortHeader/index.js'
+export { SortRow } from '../../elements/SortRow/index.js'
+export { OrderableTable } from '../../elements/Table/OrderableTable.js'
+
+// query preset elements
+export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
+export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
+export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
+export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
+export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
+
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
@@ -29,11 +40,11 @@ export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-export { TableColumnsProvider, useTableColumns } from '../../elements/TableColumns/index.js'
+export { TableColumnsProvider, useTableColumns } from '../../providers/TableColumns/index.js'
 export {
   RenderDefaultCell,
   useCellProps,
-} from '../../elements/TableColumns/RenderDefaultCell/index.js'
+} from '../../providers/TableColumns/RenderDefaultCell/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -360,3 +371,4 @@ export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'

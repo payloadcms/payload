@@ -33,6 +33,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
@@ -40,8 +41,10 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
+
   const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, errorPaths } =
     useField({ path })
+
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0

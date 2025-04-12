@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Column, Where } from 'payload'
+import type { Column, SchedulePublish, Where } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
@@ -28,8 +28,8 @@ import { Drawer } from '../../Drawer/index.js'
 import { Gutter } from '../../Gutter/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
-import { Table } from '../../Table/index.js'
 import './index.scss'
+import { Table } from '../../Table/index.js'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 
@@ -37,6 +37,7 @@ const baseClass = 'schedule-publish'
 
 type Props = {
   defaultType?: PublishType
+  schedulePublishConfig?: SchedulePublish
   slug: string
 }
 
@@ -45,7 +46,7 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
+export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePublishConfig }) => {
   const { toggleModal } = useModal()
   const {
     config: {
@@ -148,11 +149,23 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         docs,
         i18n,
         localization,
+        supportedTimezones,
         t,
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, serverURL, api, dateFormat, id, t, i18n, localization])
+  }, [
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -202,7 +215,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         timezone,
       })
 
-      setTimezone(defaultTimezone)
       setDate(undefined)
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
@@ -222,7 +234,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
     id,
     globalSlug,
     timezone,
-    defaultTimezone,
     fetchUpcoming,
   ])
 
@@ -321,7 +332,8 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
           onChange={(e) => onChangeDate(e)}
           pickerAppearance="dayAndTime"
           readOnly={processing}
-          timeIntervals={5}
+          timeFormat={schedulePublishConfig?.timeFormat}
+          timeIntervals={schedulePublishConfig?.timeIntervals ?? 5}
           value={displayedValue}
         />
         {supportedTimezones.length > 0 && (

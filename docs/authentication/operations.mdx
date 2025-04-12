@@ -353,7 +353,7 @@ const token = await payload.forgotPassword({
   data: {
     email: 'dev@payloadcms.com',
   },
-  disableEmail: false, // you can disable the auto-generation of email via local API
+  disableEmail: false, // you can disable the auto-generation of email via Local API
 })
 ```
 
@@ -370,7 +370,7 @@ const token = await payload.forgotPassword({
 <Banner type="success">
   **Tip:**
 
-You can stop the reset-password email from being sent via using the local API. This is helpful if
+You can stop the reset-password email from being sent via using the Local API. This is helpful if
 you need to create user accounts programmatically, but not set their password for them. This
 effectively generates a reset password token which you can then use to send to a page you create,
 allowing a user to "complete" their account by setting their password. In the background, you'd
