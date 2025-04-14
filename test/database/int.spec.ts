@@ -1979,6 +1979,19 @@ describe('database', () => {
     })
   })
 
+  it('should convert numbers to text', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing',
+        // @ts-expect-error hardcoding a number and expecting that it will convert to string
+        text: 1,
+      },
+    })
+
+    expect(result.text).toStrictEqual('1')
+  })
+
   it('should not allow to query by a field with `virtual: true`', async () => {
     await expect(
       payload.find({
