@@ -133,9 +133,23 @@ export const DocumentControls: React.FC<{
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
+  const collectionConfigDrafts = collectionConfig?.versions?.drafts
+  const globalConfigDrafts = globalConfig?.versions?.drafts
+
   const autosaveEnabled =
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-    (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
+    (collectionConfigDrafts && collectionConfigDrafts?.autosave) ||
+    (globalConfigDrafts && globalConfigDrafts?.autosave)
+
+  const collectionAutosaveEnabled = collectionConfigDrafts && collectionConfigDrafts?.autosave
+  const globalAutosaveEnabled = globalConfigDrafts && globalConfigDrafts?.autosave
+
+  const allowSaveDraftButton =
+    (collectionAutosaveEnabled &&
+      collectionConfigDrafts.autosave !== false &&
+      collectionConfigDrafts.autosave.allowSaveDraftButton === true) ||
+    (globalAutosaveEnabled &&
+      globalConfigDrafts.autosave !== false &&
+      globalConfigDrafts.autosave.allowSaveDraftButton === true)
 
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
@@ -218,7 +232,7 @@ export const DocumentControls: React.FC<{
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
-                    {(unsavedDraftWithValidations || !autosaveEnabled) && (
+                    {(unsavedDraftWithValidations || !autosaveEnabled || allowSaveDraftButton) && (
                       <RenderCustomComponent
                         CustomComponent={CustomSaveDraftButton}
                         Fallback={<SaveDraftButton />}
