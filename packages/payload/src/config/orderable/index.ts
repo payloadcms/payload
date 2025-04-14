@@ -257,7 +257,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         },
         depth: 0,
         req,
-        select: { id: true },
       })
     }
 
