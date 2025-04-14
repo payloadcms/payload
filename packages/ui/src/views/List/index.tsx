@@ -27,7 +27,7 @@ import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListHeader } from './ListHeader/index.js'
+import { CollectionListHeader } from './ListHeader/index.js'
 import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
@@ -154,7 +154,7 @@ export function DefaultListView(props: ListViewClientProps) {
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
-              <ListHeader
+              <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
                   <div className={`${baseClass}__sub-header`}>

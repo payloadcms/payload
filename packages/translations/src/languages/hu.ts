@@ -181,6 +181,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Beágyazott mappák törlődnek. Beágyazott dokumentumok átkerülnek a legközelebbi szülő mappába. Biztos benne?',
     deleteFolder: 'Mappa törlése',
     folderName: 'Mappa neve',
+    folders: 'Mappák',
     moveFolder: 'Mappa áthelyezése',
     newFolder: 'Új Mappa',
     removeFromFolder: 'Távolítsa el a mappából',

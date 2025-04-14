@@ -180,6 +180,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Вкладені папки будуть видалені. Вкладені документи будуть переміщені до найближчої батьківської папки. Ви впевнені?',
     deleteFolder: 'Видалити папку',
     folderName: 'Назва папки',
+    folders: 'Папки',
     moveFolder: 'Перемістити папку',
     newFolder: 'Нова папка',
     removeFromFolder: 'Видалити з папки',

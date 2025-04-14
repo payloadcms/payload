@@ -181,6 +181,7 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Įdėti aplankai bus ištrinti. Įdėti dokumentai bus perkelti į artimiausią tėvinį aplanką. Ar esate įsitikinęs?',
     deleteFolder: 'Ištrinti aplanką',
     folderName: 'Aplanko pavadinimas',
+    folders: 'Aplankai',
     moveFolder: 'Perkelti aplanką',
     newFolder: 'Naujas aplankas',
     removeFromFolder: 'Pašalinti iš aplanko',

@@ -180,6 +180,7 @@ export const caTranslations: DefaultTranslationsObject = {
       "Les carpetes imbricades seran eliminades. Els documents imbricats es mouran a la carpeta principal més propera. N'estàs segur?",
     deleteFolder: 'Esborra la carpeta',
     folderName: 'Nom de la Carpeta',
+    folders: 'Carpetes',
     moveFolder: 'Mou la carpeta',
     newFolder: 'Nova carpeta',
     removeFromFolder: 'Elimina de la carpeta',

@@ -179,6 +179,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Vnořené složky budou smazány. Vnořené dokumenty se přesunou do nejbližší nadřazené složky. Jste si jistý?',
     deleteFolder: 'Smazat složku',
     folderName: 'Název složky',
+    folders: 'Složky',
     moveFolder: 'Přesunout složku',
     newFolder: 'Nová složka',
     removeFromFolder: 'Odebrat ze složky',

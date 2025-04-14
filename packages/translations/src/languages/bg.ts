@@ -179,6 +179,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Вложените папки ще бъдат изтрити. Вложените документи ще се преместят в най-близката родителска папка. Сигурни ли сте?',
     deleteFolder: 'Изтрий папка',
     folderName: 'Име на папка',
+    folders: 'Папки',
     moveFolder: 'Премести папка',
     newFolder: 'Нова папка',
     removeFromFolder: 'Премахване от папката',

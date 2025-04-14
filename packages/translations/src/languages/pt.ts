@@ -179,6 +179,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'As pastas aninhadas serão excluídas. Os documentos aninhados serão movidos para a pasta pai mais próxima. Você tem certeza?',
     deleteFolder: 'Apagar Pasta',
     folderName: 'Nome da Pasta',
+    folders: 'Pastas',
     moveFolder: 'Mover Pasta',
     newFolder: 'Nova Pasta',
     removeFromFolder: 'Remover da Pasta',

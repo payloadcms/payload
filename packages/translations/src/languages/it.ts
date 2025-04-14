@@ -183,6 +183,7 @@ export const itTranslations: DefaultTranslationsObject = {
       'Le cartelle annidate verranno eliminate. I documenti annidati si sposteranno nella cartella genitore più vicina. Sei sicuro?',
     deleteFolder: 'Elimina cartella',
     folderName: 'Nome Cartella',
+    folders: 'Cartelle',
     moveFolder: 'Sposta Cartella',
     newFolder: 'Nuova Cartella',
     removeFromFolder: 'Rimuovi dalla cartella',

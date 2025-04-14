@@ -52,6 +52,31 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
+  const mergeQuery = useCallback(
+    (newQuery: ListQuery): ListQuery => {
+      let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
+
+      if ('where' in newQuery || 'search' in newQuery) {
+        page = '1'
+      }
+
+      const mergedQuery: ListQuery = {
+        ...currentQuery,
+        ...newQuery,
+        columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
+        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? String(defaultLimit)),
+        page,
+        preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
+        search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
+        sort: 'sort' in newQuery ? newQuery.sort : ((currentQuery?.sort as string) ?? defaultSort),
+        where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
+      }
+
+      return mergedQuery
+    },
+    [currentQuery, defaultLimit, defaultSort],
+  )
+
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
@@ -61,38 +86,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         setModified(true)
       }
 
-      let page = 'page' in incomingQuery ? incomingQuery.page : currentQuery?.page
-
-      if ('where' in incomingQuery || 'search' in incomingQuery) {
-        page = '1'
-      }
-
-      const newQuery: ListQuery = {
-        ...currentQuery,
-        ...incomingQuery,
-        columns: 'columns' in incomingQuery ? incomingQuery.columns : currentQuery.columns,
-        limit:
-          'limit' in incomingQuery
-            ? incomingQuery.limit
-            : (currentQuery?.limit ?? String(defaultLimit)),
-        page,
-        preset: 'preset' in incomingQuery ? incomingQuery.preset : currentQuery?.preset,
-        search: 'search' in incomingQuery ? incomingQuery.search : currentQuery?.search,
-        sort:
-          'sort' in incomingQuery
-            ? incomingQuery.sort
-            : ((currentQuery?.sort as string) ?? defaultSort),
-        where: 'where' in incomingQuery ? incomingQuery.where : currentQuery?.where,
-      }
+      const newQuery = mergeQuery(incomingQuery)
 
       if (modifySearchParams) {
         startRouteTransition(() =>
-          router.replace(
-            `${qs.stringify(
-              { ...newQuery, columns: JSON.stringify(newQuery.columns) },
-              { addQueryPrefix: true },
-            )}`,
-          ),
+          router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`),
         )
       } else if (
         typeof onQueryChange === 'function' ||
@@ -105,9 +103,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery,
-      defaultLimit,
-      defaultSort,
+      mergeQuery,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
@@ -204,6 +200,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        mergeQuery,
         orderableFieldName,
         query: currentQuery,
         refineListData,

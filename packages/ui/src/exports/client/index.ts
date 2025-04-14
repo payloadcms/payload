@@ -99,7 +99,7 @@ export type {
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
-export { ListHeader } from '../../views/List/ListHeader/index.js'
+export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
@@ -334,6 +334,7 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
+export { DefaultFolderView } from '../../views/Folders/index.js'
 
 export type {
   /**

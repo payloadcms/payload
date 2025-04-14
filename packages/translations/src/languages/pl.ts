@@ -179,6 +179,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Zagnieżdżone foldery zostaną usunięte. Zagnieżdżone dokumenty zostaną przeniesione do najbliższego folderu nadrzędnego. Czy jesteś pewien?',
     deleteFolder: 'Usuń folder',
     folderName: 'Nazwa folderu',
+    folders: 'Foldery',
     moveFolder: 'Przenieś folder',
     newFolder: 'Nowy folder',
     removeFromFolder: 'Usuń z folderu',

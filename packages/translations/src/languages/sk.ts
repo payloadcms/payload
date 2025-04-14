@@ -182,6 +182,7 @@ export const skTranslations: DefaultTranslationsObject = {
       'Vnorené priečinky budú vymazané. Vnorené dokumenty sa presunú do najbližšej nadradenej zložky. Ste si istý?',
     deleteFolder: 'Odstrániť priečinok',
     folderName: 'Názov priečinka',
+    folders: 'Priečinky',
     moveFolder: 'Presunúť priečinok',
     newFolder: 'Nový priečinok',
     removeFromFolder: 'Odstrániť z priečinka',

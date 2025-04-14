@@ -3,6 +3,8 @@
 @layer payload-default {
   .droppable-button {
     @include btn-reset;
+    font-weight: 600;
+    font-family: inherit;
     &:hover {
       cursor: pointer;
     }
@@ -15,9 +17,7 @@
       @extend %h4;
       display: flex;
       align-items: center;
-      font-weight: 600;
       margin: 0;
-      font-family: inherit;
 
       &:has(.icon--folder) {
         height: calc(var(--base) * 1.6);

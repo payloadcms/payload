@@ -177,6 +177,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'پوشه های تو در تو حذف خواهند شد. اسناد تو در تو به نزدیک ترین پوشه اصلی منتقل خواهند شد. آیا مطمئن هستید؟',
     deleteFolder: 'حذف پوشه',
     folderName: 'نام پوشه',
+    folders: 'پوشه‌ها',
     moveFolder: 'انتقال پوشه',
     newFolder: 'پوشه جدید',
     removeFromFolder: 'از پوشه بردارید',

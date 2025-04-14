@@ -70,21 +70,15 @@ export interface Config {
     posts: Post;
     media: Media;
     users: User;
-    _folders: FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    _folders: {
-      documentsAndFolders: '_folders';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    _folders: _FoldersSelect<false> | _FoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -213,28 +207,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "_folders".
- */
-export interface FolderInterface {
-  id: string;
-  name: string;
-  _parentFolder?: (string | null) | FolderInterface;
-  isRoot?: boolean | null;
-  documentsAndFolders?: {
-    docs?:
-      | {
-          relationTo?: '_folders';
-          value: string | FolderInterface;
-        }[]
-      | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  _folderSearch?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -251,10 +223,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: '_folders';
-        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -373,19 +341,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "_folders_select".
- */
-export interface _FoldersSelect<T extends boolean = true> {
-  name?: T;
-  _parentFolder?: T;
-  isRoot?: T;
-  documentsAndFolders?: T;
-  _folderSearch?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

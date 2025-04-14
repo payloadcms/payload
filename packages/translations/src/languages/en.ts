@@ -179,6 +179,7 @@ export const enTranslations = {
       'Nested folders will be deleted. Nested documents will move to the nearest parent folder. Are you sure?',
     deleteFolder: 'Delete Folder',
     folderName: 'Folder Name',
+    folders: 'Folders',
     moveFolder: 'Move Folder',
     newFolder: 'New Folder',
     removeFromFolder: 'Remove from Folder',

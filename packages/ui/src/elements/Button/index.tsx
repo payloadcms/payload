@@ -64,6 +64,7 @@ export const Button: React.FC<Props> = (props) => {
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
+    margin = true,
     newTab,
     onClick,
     onMouseDown,
@@ -88,6 +89,7 @@ export const Button: React.FC<Props> = (props) => {
     icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
     !SubMenuPopupContent && `${baseClass}--withoutPopup`,
+    !margin && `${baseClass}--no-margin`,
   ]
     .filter(Boolean)
     .join(' ')

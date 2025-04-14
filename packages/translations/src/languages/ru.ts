@@ -181,6 +181,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Вложенные папки будут удалены. Вложенные документы будут перемещены в ближайшую родительскую папку. Вы уверены?',
     deleteFolder: 'Удалить папку',
     folderName: 'Название папки',
+    folders: 'Папки',
     moveFolder: 'Переместить папку',
     newFolder: 'Новая папка',
     removeFromFolder: 'Удалить из папки',

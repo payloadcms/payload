@@ -56,7 +56,7 @@ export type FolderContextValue = {
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setDocuments: React.Dispatch<React.SetStateAction<GetFolderDataResult['documents']>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
-  setFolderID: (args: { folderID: number | string }) => Promise<void> | void
+  setFolderID: (args: { folderID: number | string }) => void
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
   setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['subfolders']>>
   subfolders?: GetFolderDataResult<FolderInterface>['subfolders']
@@ -84,7 +84,7 @@ const Context = React.createContext<FolderContextValue>({
   setBreadcrumbs: () => {},
   setDocuments: () => [],
   setFocusedRowIndex: () => -1,
-  setFolderID: () => Promise.resolve(undefined),
+  setFolderID: () => null,
   setIsDragging: () => false,
   setSubfolders: () => {},
   subfolders: [],
@@ -160,7 +160,7 @@ export function FolderProvider({
   }, [])
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
-    async ({ folderID: toFolderID }) => {
+    ({ folderID: toFolderID }) => {
       clearSelections()
       if (drawerDepth === 1) {
         // not in a drawer (default is 1)
@@ -176,9 +176,14 @@ export function FolderProvider({
           )
         } else {
           // looking at many collections (dashboard folders)
-          await refineListData({
-            folder: toFolderID !== breadcrumbs?.[0]?.id ? toFolderID : undefined,
-          })
+          startRouteTransition(() =>
+            router.push(
+              formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: `${config.admin.routes.folders}${toFolderID ? `/${toFolderID}` : ''}`,
+              }),
+            ),
+          )
         }
       } else {
         // @todo in a drawer — need to update:
@@ -192,13 +197,12 @@ export function FolderProvider({
     },
     [
       clearSelections,
-      config.routes.admin,
       drawerDepth,
-      router,
       collectionSlugs,
-      refineListData,
-      breadcrumbs,
       startRouteTransition,
+      router,
+      config.routes.admin,
+      config.admin.routes.folders,
     ],
   )
 

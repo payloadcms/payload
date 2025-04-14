@@ -180,6 +180,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Ugniježđene mape bit će izbrisane. Ugniježđeni dokumenti premjestit će se u najbližu nadređenu mapu. Jeste li sigurni?',
     deleteFolder: 'Izbriši mapu',
     folderName: 'Naziv mape',
+    folders: 'Mape',
     moveFolder: 'Premjesti mapu',
     newFolder: 'Nova mapa',
     removeFromFolder: 'Ukloni iz mape',

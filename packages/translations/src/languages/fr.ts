@@ -185,6 +185,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Les dossiers imbriqués seront supprimés. Les documents imbriqués seront déplacés vers le dossier parent le plus proche. Êtes-vous sûr ?',
     deleteFolder: 'Supprimer le dossier',
     folderName: 'Nom du dossier',
+    folders: 'Dossiers',
     moveFolder: 'Déplacer le dossier',
     newFolder: 'Nouveau Dossier',
     removeFromFolder: 'Retirer du dossier',

@@ -180,6 +180,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ugnježđene fascikle će biti obrisane. Ugnježđeni dokumenti će biti premješteni u najbližu roditeljsku fasciklu. Da li ste sigurni?',
     deleteFolder: 'Obriši mapu',
     folderName: 'Naziv fascikle',
+    folders: 'Fascikle',
     moveFolder: 'Premesti folder',
     newFolder: 'Novi Folder',
     removeFromFolder: 'Ukloni iz fascikle',

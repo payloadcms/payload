@@ -183,6 +183,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'Folderele înglobate vor fi șterse. Documentele înglobate se vor muta în folderul părinte cel mai apropiat. Sunteți sigur(a)?',
     deleteFolder: 'Ștergeți dosarul',
     folderName: 'Nume dosar',
+    folders: 'Dosare',
     moveFolder: 'Mutare Dosar',
     newFolder: 'Dosar nou',
     removeFromFolder: 'Eliminați din dosar',

@@ -128,6 +128,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
 
   'folder:deleteConfirmation',
   'folder:deleteFolder',
+  'folder:folders',
   'folder:folderName',
   'folder:moveFolder',
   'folder:newFolder',

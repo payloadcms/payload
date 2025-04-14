@@ -179,6 +179,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'Vgnešene mape bodo izbrisane. Vgnešeni dokumenti se bodo premaknili v najbližjo starševsko mapo. Ste prepričani?',
     deleteFolder: 'Izbriši mapo',
     folderName: 'Ime mape',
+    folders: 'Mape',
     moveFolder: 'Premakni mapo',
     newFolder: 'Nova mapa',
     removeFromFolder: 'Odstrani iz mape',

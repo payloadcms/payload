@@ -1,31 +1,22 @@
-import type { ClientCollectionConfig } from 'payload'
-
-import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'list-header'
 
-type CollectionListHeaderProps = {
+type ListHeaderProps = {
   readonly Actions?: React.ReactNode[]
   readonly AfterListHeaderContent?: React.ReactNode
   readonly className?: string
-  readonly collectionConfig: ClientCollectionConfig
-  readonly title?: string
+  readonly title: string
   readonly TitleActions?: React.ReactNode[]
 }
-export const CollectionListHeader: React.FC<CollectionListHeaderProps> = (props) => {
-  const { i18n } = useTranslation()
-
+export const ListHeader: React.FC<ListHeaderProps> = (props) => {
   return (
     <header className={[baseClass, props.className].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__title-and-actions`}>
-          <h1 className={`${baseClass}__title`}>
-            {getTranslation(props.collectionConfig?.labels?.plural, i18n)}
-          </h1>
+          <h1 className={`${baseClass}__title`}>{props.title}</h1>
           {props.TitleActions.length ? (
             <div className={`${baseClass}__title-actions`}>{props.TitleActions}</div>
           ) : null}

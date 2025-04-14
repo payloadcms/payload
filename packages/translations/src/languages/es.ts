@@ -183,6 +183,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Las carpetas anidadas serán eliminadas. Los documentos anidados se moverán a la carpeta principal más cercana. ¿Está seguro?',
     deleteFolder: 'Eliminar Carpeta',
     folderName: 'Nombre de la Carpeta',
+    folders: 'Carpetas',
     moveFolder: 'Mover Carpeta',
     newFolder: 'Nueva Carpeta',
     removeFromFolder: 'Eliminar de la carpeta',

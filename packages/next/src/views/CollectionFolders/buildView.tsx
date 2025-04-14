@@ -27,10 +27,8 @@ import { getFolderData, parseDocumentID } from 'payload'
 import { combineWhereConstraints, isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React from 'react'
 
-import { renderFolderViewSlots } from '../renderFolderViewSlots.js'
-import { resolveAllFilterOptions } from '../resolveAllFilterOptions.js'
-
-export { generateFolderMetadata as generateListMetadata } from '../meta.js'
+import { renderFolderViewSlots } from './renderFolderViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export type BuildCollectionFolderViewStateArgs = {
   customCellProps?: Record<string, any>

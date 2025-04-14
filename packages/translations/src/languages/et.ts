@@ -178,6 +178,7 @@ export const etTranslations: DefaultTranslationsObject = {
       'Pesastatud kaustad kustutatakse. Pesastatud dokumendid liiguvad lähimasse ülemkausta. Kas olete kindel?',
     deleteFolder: 'Kustuta kaust',
     folderName: 'Kausta nimi',
+    folders: 'Kaustad',
     moveFolder: 'Liiguta kausta',
     newFolder: 'Uus kaust',
     removeFromFolder: 'Eemalda kaustast',

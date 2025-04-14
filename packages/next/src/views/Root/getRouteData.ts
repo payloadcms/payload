@@ -18,6 +18,7 @@ import { CollectionFolderView } from '../CollectionFolders/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
+import { FolderView } from '../Folders/index.js'
 import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
@@ -32,6 +33,7 @@ import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
   account: 'account',
+  folders: 'folders',
   forgot: forgotPasswordBaseClass,
   login: loginBaseClass,
   reset: resetPasswordBaseClass,
@@ -50,6 +52,7 @@ export type ViewFromConfig = {
 const oneSegmentViews: OneSegmentViews = {
   account: Account,
   createFirstUser: CreateFirstUserView,
+  folders: FolderView,
   forgot: ForgotPasswordView,
   inactivity: LogoutInactivity,
   login: LoginView,
@@ -156,6 +159,7 @@ export const getRouteData = ({
       if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
+        // --> /folders
         // --> /forgot
         // --> /login
         // --> /logout
@@ -168,6 +172,11 @@ export const getRouteData = ({
 
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
+
+        if (viewKey === 'folders') {
+          templateType = 'default'
+          viewType = 'folders'
+        }
 
         if (viewKey === 'account') {
           templateType = 'default'
@@ -185,9 +194,16 @@ export const getRouteData = ({
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
         viewType = 'reset'
-      }
-
-      if (isCollection && matchedCollection) {
+      } else if (`/${segmentOne}` === config.admin.routes.folders) {
+        // --> /folders/:folderID
+        ViewToRender = {
+          Component: oneSegmentViews.folders,
+        }
+        templateClassName = baseClasses.folders
+        templateType = 'default'
+        viewType = 'folders'
+        folderID = segmentTwo
+      } else if (isCollection && matchedCollection) {
         // --> /collections/:collectionSlug
 
         ViewToRender = {

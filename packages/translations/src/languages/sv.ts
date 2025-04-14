@@ -179,6 +179,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Eventuella underliggande mappar kommer också tas bort. Filerna i de mapparna flyttas upp till samma plats som mappen du tar bort. Är du säker?',
     deleteFolder: 'Ta bort mapp',
     folderName: 'Mappnamn',
+    folders: 'Mappar',
     moveFolder: 'Flytta mapp',
     newFolder: 'Ny mapp',
     removeFromFolder: 'Ta bort från mapp',

@@ -24,6 +24,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     routes: {
       account: '/account',
       createFirstUser: '/create-first-user',
+      folders: '/folders',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
       login: '/login',
@@ -104,6 +105,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     routes: {
       account: '/account',
       createFirstUser: '/create-first-user',
+      folders: '/folders',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
       login: '/login',

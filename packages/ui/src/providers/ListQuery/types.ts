@@ -4,7 +4,6 @@ import type {
   ListPreferences,
   ListQuery,
   PaginatedDocs,
-  QueryPreset,
   Sort,
   Where,
 } from 'payload'
@@ -41,6 +40,7 @@ export type IListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: Sort
+  mergeQuery?: (query: ListQuery) => ListQuery
   modified: boolean
   orderableFieldName?: string
   query: ListQuery

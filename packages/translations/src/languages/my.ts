@@ -180,6 +180,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'နဂိုဖိုလ်ဒါများကို ဖျက်သွားပါမည်။ ဂုဏ်ယူပါတယ်ဖိုင်များကို အနီးဆုံးမှတ်တမ်းဖိ',
     deleteFolder: 'Padam Folder',
     folderName: 'ဖိုင်နာမည်',
+    folders: 'Fail',
     moveFolder: 'Pindah Folder',
     newFolder: 'Folder Baru',
     removeFromFolder: 'Dari Folder Buang',

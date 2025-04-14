@@ -179,6 +179,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '중첩 폴더는 삭제됩니다. 중첩 문서는 가장 가까운 부모 폴더로 이동하게 됩니다. 확실합니까?',
     deleteFolder: '폴더 삭제',
     folderName: '폴더 이름',
+    folders: '폴더들',
     moveFolder: '폴더 이동',
     newFolder: '새 폴더',
     removeFromFolder: '폴더에서 제거하십시오',

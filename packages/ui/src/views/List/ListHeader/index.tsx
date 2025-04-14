@@ -9,7 +9,7 @@ import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListFolderPills } from '../../../elements/ListFolderPills/index.js'
 import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
 import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
-import { CollectionListHeader } from '../../../elements/ListHeader/index.js'
+import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
   ListCreateNewButton,
@@ -45,7 +45,7 @@ export type ListHeaderProps = {
   viewType?: 'folders' | 'list'
 }
 
-export const ListHeader: React.FC<ListHeaderProps> = ({
+export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,
   Description,
@@ -66,7 +66,7 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
 
   if (isInDrawer) {
     return (
-      <CollectionListHeader
+      <ListHeader
         Actions={[
           <CloseModalButton
             className={`${drawerBaseClass}__header-close`}
@@ -81,7 +81,10 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
           </>
         }
         className={`${drawerBaseClass}__header`}
-        collectionConfig={getEntityConfig({ collectionSlug: selectedOption.value })}
+        title={getTranslation(
+          getEntityConfig({ collectionSlug: selectedOption.value })?.labels?.plural,
+          i18n,
+        )}
         TitleActions={[
           <ListDrawerCreateNewDocButton
             hasCreatePermission={hasCreatePermission}
@@ -93,7 +96,7 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
   }
 
   return (
-    <CollectionListHeader
+    <ListHeader
       Actions={[
         !smallBreak && (
           <ListSelection
@@ -114,7 +117,7 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
       ].filter(Boolean)}
       AfterListHeaderContent={Description}
       className={className}
-      collectionConfig={collectionConfig}
+      title={getTranslation(collectionConfig?.labels?.plural, i18n)}
       TitleActions={[
         hasCreatePermission && (
           <ListCreateNewButton

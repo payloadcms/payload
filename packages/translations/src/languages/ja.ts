@@ -180,6 +180,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       'ネストされたフォルダは削除されます。ネストされたドキュメントは最も近い親フォルダに移動します。よろしいですか？',
     deleteFolder: 'フォルダを削除する',
     folderName: 'フォルダ名',
+    folders: 'フォルダー',
     moveFolder: 'フォルダを移動する',
     newFolder: '新しいフォルダ',
     removeFromFolder: 'フォルダから削除します',

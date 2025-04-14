@@ -179,6 +179,7 @@ export const azTranslations: DefaultTranslationsObject = {
       'İç içə qovşaqlar silinəcək. İç içə sənədlər ən yaxın ana qovşağa köçəriləcək. Eminsiniz?',
     deleteFolder: 'Qovluğu Sil',
     folderName: 'Qovluq Adı',
+    folders: 'Qovluqlar',
     moveFolder: 'Qovluğu Köçür',
     newFolder: 'Yeni Qovluq',
     removeFromFolder: 'Qovluqdan çıxarın',

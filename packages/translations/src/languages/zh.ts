@@ -172,6 +172,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     deleteConfirmation: '嵌套文件夹将被删除。嵌套文件将移至最近的父文件夹。你确定吗？',
     deleteFolder: '删除文件夹',
     folderName: '文件夹名称',
+    folders: '文件夹',
     moveFolder: '移动文件夹',
     newFolder: '新文件夹',
     removeFromFolder: '从文件夹中移除',

@@ -177,6 +177,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'سيتم حذف المجلدات المتداخلة. ستنتقل المستندات المتداخلة إلى المجلد الأصل الأقرب. هل أنت متأكد؟',
     deleteFolder: 'حذف المجلد',
     folderName: 'اسم المجلد',
+    folders: 'مجلدات',
     moveFolder: 'نقل المجلد',
     newFolder: 'مجلد جديد',
     removeFromFolder: 'أزل من المجلد',

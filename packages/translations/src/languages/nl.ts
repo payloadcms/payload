@@ -181,6 +181,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
     deleteFolder: 'Verwijder map',
     folderName: 'Mapnaam',
+    folders: 'Mappen',
     moveFolder: 'Verplaats Map',
     newFolder: 'Nieuwe Map',
     removeFromFolder: 'Verwijderen uit map',

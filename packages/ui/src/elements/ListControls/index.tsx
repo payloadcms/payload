@@ -157,14 +157,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <div className={`${baseClass}__wrap`}>
           <SearchIcon />
           <SearchFilter
-            fieldName={titleField && 'name' in titleField ? titleField?.name : null}
-            handleChange={(search) => {
-              return void handleSearchChange(search)
-            }}
-            // @ts-expect-error @todo: fix types
-            initialParams={query}
+            handleChange={handleSearchChange}
             key={collectionSlug}
             label={searchLabelTranslated.current}
+            searchQueryParam={query?.search}
           />
           {activePreset && hasModifiedPreset ? (
             <div className={`${baseClass}__modified`}>Modified</div>

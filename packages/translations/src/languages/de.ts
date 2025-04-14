@@ -183,6 +183,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Verschachtelte Ordner werden gelöscht. Verschachtelte Dokumente werden in den nächstgelegenen übergeordneten Ordner verschoben. Sind Sie sicher?',
     deleteFolder: 'Ordner löschen',
     folderName: 'Ordnername',
+    folders: 'Ordner',
     moveFolder: 'Ordner verschieben',
     newFolder: 'Neuer Ordner',
     removeFromFolder: 'Aus dem Ordner entfernen',

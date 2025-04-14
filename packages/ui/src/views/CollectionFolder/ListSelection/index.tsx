@@ -3,9 +3,8 @@
 import type { Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useRouter, useSearchParams } from 'next/navigation.js'
+import { useSearchParams } from 'next/navigation.js'
 import { extractID } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
@@ -44,7 +43,6 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { t } = useTranslation()
   const { openModal } = useModal()
   const items = getSelectedItems()
-  const router = useRouter()
 
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()
@@ -113,9 +111,6 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         !disableBulkDelete && (
           <DeleteMany_v4
             afterDelete={() => {
-              // router.replace(
-              //   qs.stringify(parseSearchParams(searchParams), { addQueryPrefix: true }),
-              // )
               clearSelections()
               clearRouteCache()
             }}

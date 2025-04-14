@@ -128,7 +128,7 @@ export async function getFolderPolymorphicDocuments({
     },
     limit: 1,
     locale,
-    overrideAccess: false,
+    // overrideAccess: false, // @todo: bug in core, throws "QueryError: The following paths cannot be queried: relationTo"
     user,
     where: {
       id: {

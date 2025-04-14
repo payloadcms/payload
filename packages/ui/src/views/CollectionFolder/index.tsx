@@ -5,7 +5,6 @@ import type { FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useState } from 'react'
 
 import { CloseModalButton } from '../../elements/CloseModalButton/index.js'
@@ -15,11 +14,12 @@ import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListFolderPills } from '../../elements/ListFolderPills/index.js'
-import { CollectionListHeader } from '../../elements/ListHeader/index.js'
+import { ListHeader } from '../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
   ListCreateNewDocInFolderButton,
 } from '../../elements/ListHeader/TitleActions/index.js'
+import { NoListResults } from '../../elements/NoListResults/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
@@ -33,7 +33,6 @@ import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
-import { NoListResults } from './NoListResults/index.js'
 import './index.scss'
 
 const baseClass = 'collection-folder-list'
@@ -59,10 +58,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     Table: InitialTable,
   } = props
 
-  const router = useRouter()
-  const { clearRouteCache } = useRouteCache()
   const [Table, setTable] = useState(InitialTable)
 
+  const { getEntityConfig } = useConfig()
+  const { i18n, t } = useTranslation()
+  const drawerDepth = useEditDepth()
+  const { setStepNav } = useStepNav()
+  const { clearRouteCache } = useRouteCache()
   const {
     allowCreate,
     DocumentDrawerToggler,
@@ -71,14 +73,6 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     onBulkSelect,
     selectedOption,
   } = useListDrawerContext()
-
-  const hasCreatePermission =
-    allowCreate !== undefined
-      ? allowCreate && hasCreatePermissionFromProps
-      : hasCreatePermissionFromProps
-
-  const { getEntityConfig } = useConfig()
-
   const {
     breadcrumbs,
     collectionUseAsTitles,
@@ -95,17 +89,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
+  const hasCreatePermission =
+    allowCreate !== undefined
+      ? allowCreate && hasCreatePermissionFromProps
+      : hasCreatePermissionFromProps
   const { labels, upload } = collectionConfig
-
   const isUploadCollection = Boolean(upload)
-
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
-
-  const { i18n, t } = useTranslation()
-
-  const drawerDepth = useEditDepth()
-
-  const { setStepNav } = useStepNav()
 
   const {
     breakpoints: { s: smallBreak },
@@ -132,7 +122,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     if (!isInDrawer) {
       clearRouteCache()
     }
-  }, [router, isInDrawer])
+  }, [isInDrawer, clearRouteCache])
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -206,11 +196,14 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
           <Gutter className={`${baseClass}__wrap`}>
             {isInDrawer ? (
               // The header within a drawer
-              <CollectionListHeader
+              <ListHeader
                 Actions={[<CloseModalButton key="close-button" slug={listDrawerSlug} />]}
                 AfterListHeaderContent={Description}
                 className={`${drawerBaseClass}__header`}
-                collectionConfig={getEntityConfig({ collectionSlug: selectedOption.value })}
+                title={getTranslation(
+                  getEntityConfig({ collectionSlug: selectedOption.value })?.labels?.plural,
+                  i18n,
+                )}
                 TitleActions={[
                   hasCreatePermission && (
                     <DocumentDrawerToggler
@@ -224,7 +217,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
               />
             ) : (
               // The header not within a drawer
-              <CollectionListHeader
+              <ListHeader
                 Actions={[
                   !smallBreak && (
                     <ListSelection
@@ -240,7 +233,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   />,
                 ].filter(Boolean)}
                 AfterListHeaderContent={Description}
-                collectionConfig={collectionConfig}
+                title={getTranslation(labels?.plural, i18n)}
                 TitleActions={[
                   <ListCreateNewDocInFolderButton
                     buttonLabel={t('general:createNew')}

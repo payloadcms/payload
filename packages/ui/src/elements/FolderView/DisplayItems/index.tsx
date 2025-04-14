@@ -82,9 +82,9 @@ export function DisplayItems(props: Props) {
   )
 
   const navigateAfterClick = React.useCallback(
-    async ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
+    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
       if (collectionSlug === folderCollectionSlug) {
-        await setFolderID({ folderID: docID })
+        setFolderID({ folderID: docID })
       } else if (collectionSlug) {
         router.push(`${config.routes.admin}/collections/${collectionSlug}/${docID}`)
       }
@@ -93,34 +93,34 @@ export function DisplayItems(props: Props) {
   )
 
   const handleItemKeyPress = React.useCallback(
-    async ({
+    ({
       event,
       item,
     }: {
       event: React.KeyboardEvent
       item: { id: number | string; index: number; relationTo: string }
-    }): Promise<void> => {
+    }): void => {
       const { keyCode } = onItemKeyPress({ event, index: item.index })
 
       if (selectedIndexes.size === 1 && keyCode === 'Enter') {
-        await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
+        navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
     [onItemKeyPress, selectedIndexes, navigateAfterClick],
   )
 
   const handleItemClick = React.useCallback(
-    async ({
+    ({
       event,
       item,
     }: {
       event: React.MouseEvent
       item: { id: number | string; index: number; relationTo: string }
-    }): Promise<void> => {
+    }): void => {
       const { doubleClicked } = onItemClick({ event, index: item.index })
 
       if (doubleClicked) {
-        await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
+        navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
     [onItemClick, navigateAfterClick],

@@ -179,6 +179,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Տեղադրված թղթապանակները կջնջվեն։ Գործառույթ թղթապանակներում փաստաթուղթերը կտեղափոխվեն դեպի հարակից ծնող թղթապանակը։ Համոզված եք։',
     deleteFolder: 'Ջնջել թղթապանակը',
     folderName: 'Տեսակավորման անվանում',
+    folders: 'Պատուհաններ',
     moveFolder: 'Տեղափոխել թղթապանակը',
     newFolder: 'Նոր թղթապանակ',
     removeFromFolder: 'Հեռացնել թղթապանակից',

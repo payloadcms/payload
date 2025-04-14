@@ -178,6 +178,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Indlejrede mapper vil blive slettet. Indlejrede dokumenter vil blive flyttet til den nærmeste forældremappe. Er du sikker?',
     deleteFolder: 'Slet mappe',
     folderName: 'Mappenavn',
+    folders: 'Mapper',
     moveFolder: 'Flyt Mappe',
     newFolder: 'Ny Mappe',
     removeFromFolder: 'Fjern fra mappe',

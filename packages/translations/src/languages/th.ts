@@ -176,6 +176,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'โฟลเดอร์ที่ซ้อนกันจะถูกลบ ส่วนเอกสารที่ซ้อนกันจะถูกย้ายไปยังโฟลเดอร์แม่ที่ใกล้ที่สุด คุณแน่ใจหรือไม่?',
     deleteFolder: 'ลบโฟลเดอร์',
     folderName: 'ชื่อโฟลเดอร์',
+    folders: 'โฟลเดอร์',
     moveFolder: 'ย้ายโฟลเดอร์',
     newFolder: 'โฟลเดอร์ใหม่',
     removeFromFolder: 'นำออกจากโฟลเดอร์',

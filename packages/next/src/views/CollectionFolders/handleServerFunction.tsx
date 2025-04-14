@@ -8,7 +8,7 @@ import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
-import { buildCollectionFolderView } from './components/buildCollectionFolderView.js'
+import { buildCollectionFolderView } from './buildView.js'
 
 export const buildCollectionFolderViewStateHandler = async (
   args: {

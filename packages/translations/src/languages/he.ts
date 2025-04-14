@@ -175,6 +175,7 @@ export const heTranslations: DefaultTranslationsObject = {
       'תיקיות משנה יימחקו. מסמכים משנים יעברו לתיקיית ההורה הקרובה ביותר. האם אתה בטוח?',
     deleteFolder: 'מחק תיקייה',
     folderName: 'שם תיקייה',
+    folders: 'תיקיות',
     moveFolder: 'העבר תיקייה',
     newFolder: 'תיקייה חדשה',
     removeFromFolder: 'הסר מהתיקייה',

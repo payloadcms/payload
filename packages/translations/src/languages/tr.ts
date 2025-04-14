@@ -181,6 +181,7 @@ export const trTranslations: DefaultTranslationsObject = {
       'İç içe klasörler silinecektir. İç içe belgeler en yakın üst klasöre taşınacaktır. Emin misiniz?',
     deleteFolder: 'Klasörü Sil',
     folderName: 'Klasör Adı',
+    folders: 'Klasörler',
     moveFolder: 'Klasörü Taşı',
     newFolder: 'Yeni Klasör',
     removeFromFolder: 'Klasörden Çıkar',

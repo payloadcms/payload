@@ -28,6 +28,7 @@ export type Props = {
    * Components now import their own `Link` directly from `next/link`.
    */
   Link?: React.ElementType
+  margin?: boolean
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void

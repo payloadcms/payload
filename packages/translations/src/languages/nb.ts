@@ -179,6 +179,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Nestede mapper vil bli slettet. Nestede dokumenter vil bli flyttet til den nærmeste overordnede mappen. Er du sikker?',
     deleteFolder: 'Slett mappe',
     folderName: 'Mappenavn',
+    folders: 'Mapper',
     moveFolder: 'Flytt mappe',
     newFolder: 'Ny mappe',
     removeFromFolder: 'Fjern fra mappe',
