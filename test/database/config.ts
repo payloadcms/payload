@@ -45,6 +45,10 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'text',
+          type: 'text',
+        },
+        {
           name: 'number',
           type: 'number',
         },
