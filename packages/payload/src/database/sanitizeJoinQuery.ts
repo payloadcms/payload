@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
+import type { FlattenedField } from '../fields/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
@@ -67,6 +68,7 @@ const sanitizeJoinFieldQuery = async ({
       collectionConfig: joinCollectionConfig,
       errors,
       overrideAccess,
+      polymorphicJoin: Array.isArray(join.field.collection),
       req,
       // incoming where input, but we shouldn't validate generated from the access control.
       where: joinQuery.where,

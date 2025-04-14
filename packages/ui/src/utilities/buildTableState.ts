@@ -160,7 +160,7 @@ const buildTableState = async (
   if (!docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
-        throw new APIError('Unexpected array of collectionSlug, parent must be providen')
+        throw new APIError('Unexpected array of collectionSlug, parent must be provided')
       }
 
       const select = {}

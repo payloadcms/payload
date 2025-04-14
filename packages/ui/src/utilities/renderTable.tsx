@@ -20,14 +20,19 @@ import React from 'react'
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { SortHeader } from '../elements/SortHeader/index.js'
-import { SortRow } from '../elements/SortRow/index.js'
-import { OrderableTable } from '../elements/Table/OrderableTable.js'
+import {
+  OrderableTable,
+  Pill,
+  SelectAll,
+  SelectRow,
+  SortHeader,
+  SortRow,
+  Table,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir
+} from '../exports/client/index.js'
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
 export const renderFilters = (
   fields: Field[],

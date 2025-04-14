@@ -25,6 +25,9 @@ export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 export { FolderListTable } from '../../elements/FolderView/FolderListTable/index.js'
 
 export { MoveItemsToFolderRSC_ClientComponent } from '../../providers/ServerFunctions/MoveItemsToFolder/Component.js'
+export { SortHeader } from '../../elements/SortHeader/index.js'
+export { SortRow } from '../../elements/SortRow/index.js'
+export { OrderableTable } from '../../elements/Table/OrderableTable.js'
 
 // query preset elements
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'

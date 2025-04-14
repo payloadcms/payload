@@ -655,6 +655,7 @@ describe('Versions', () => {
   describe('Scheduled publish', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     test('should schedule publish', async () => {
@@ -690,6 +691,60 @@ describe('Versions', () => {
       await expect(
         page.locator('.payload-toast-item:has-text("Deleted successfully.")'),
       ).toBeVisible()
+    })
+
+    test('schedule publish config is respected', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      // schedule publish should not be available before document has been saved
+      await page.locator('#action-save-popup').click()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
+
+      // save draft then try to schedule publish
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      // drawer should open
+      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      // nothing in scheduled
+      await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
+
+      // set date and time
+      await page.locator('.date-time-picker input').click()
+
+      const listItem = page
+        .locator('.react-datepicker__time-list .react-datepicker__time-list-item')
+        .first()
+
+      // We customised it in config to not contain a 12 hour clock
+      await expect(async () => {
+        await expect(listItem).toHaveText('00:00')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    test('can still schedule publish once autosave is triggered', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      await saveDocAndAssert(page)
+
+      await page.locator('#field-title').fill('scheduled publish updated')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.locator('#action-save-popup').click()
+
+      await expect(async () => {
+        await expect(page.locator('#schedule-publish')).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 
