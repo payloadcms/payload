@@ -496,7 +496,7 @@ export const traverseFields = ({
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
         }
 
-        if (field.type === 'text' && typeof value !== 'string') {
+        if (field.type === 'text' && value && typeof value !== 'string') {
           formattedValue = JSON.stringify(value)
         }
 
