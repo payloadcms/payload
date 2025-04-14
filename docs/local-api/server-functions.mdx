@@ -312,7 +312,7 @@ export const PostForm: React.FC = () => {
 
 Managing authentication with the Local API can be tricky as you have to handle cookies and tokens yourself, and there aren't built-in logout or refresh functions since these only modify cookies. To make this easier, we provide `login`, `logout`, and `refresh` as ready-to-use server functions. They take care of the underlying complexity so you don't have to.
 
-### `login`
+### Login
 
 Logs in a user by verifying credentials and setting the authentication cookie. This function allows login via username or email, depending on the collection auth configuration.
 
@@ -357,6 +357,7 @@ export async function loginAction({
 
 ```tsx
 'use client'
+
 import { useState } from 'react'
 import { loginAction } from '../loginAction'
 
@@ -390,7 +391,7 @@ export default function LoginForm() {
 }
 ```
 
-### `logout`
+### Logout
 
 Logs out the current user by clearing the authentication cookie.
 
@@ -423,6 +424,7 @@ export async function logoutAction() {
 
 ```tsx
 'use client'
+
 import { logoutAction } from '../logoutAction'
 
 export default function LogoutButton() {
@@ -430,7 +432,7 @@ export default function LogoutButton() {
 }
 ```
 
-### `refresh`
+### Refresh
 
 Refreshes the authentication token for the logged-in user.
 
@@ -451,7 +453,7 @@ import config from '@payload-config'
 export async function refreshAction() {
   try {
     return await refresh({
-      collection: 'users', // update this to your collection slug
+      collection: 'users', // pass your collection slug
       config,
     })
   } catch (error) {
@@ -466,6 +468,7 @@ export async function refreshAction() {
 
 ```tsx
 'use client'
+
 import { refreshAction } from '../actions/refreshAction'
 
 export default function RefreshTokenButton() {
