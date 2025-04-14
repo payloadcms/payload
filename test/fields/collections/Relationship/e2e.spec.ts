@@ -693,7 +693,7 @@ describe('relationship', () => {
     await expect(page.locator('.list-drawer')).toBeHidden()
   })
 
-  test('should handle read-only relationship field with list drawer appearance', async () => {
+  test('should handle read-only relationship field when `appearance: "drawer"`', async () => {
     await page.goto(url.create)
     const readOnlyField = page.locator(
       '#field-relationshipWithDrawerAppearanceReadOnly .rs__control--is-disabled',
@@ -701,7 +701,7 @@ describe('relationship', () => {
     await expect(readOnlyField).toBeVisible()
   })
 
-  test('should handle polymorphic relationship with list drawer appearance', async () => {
+  test('should handle polymorphic relationship when `appearance: "drawer"`', async () => {
     await page.goto(url.create)
     const relationshipField = page.locator('#field-polymorphicRelationshipWithDrawerAppearance')
     await relationshipField.click()
@@ -729,7 +729,7 @@ describe('relationship', () => {
     await saveDocAndAssert(page)
   })
 
-  test('should not be allowed to create in list drawer when allowCreate is false', async () => {
+  test('should not be allowed to create in relationship list drawer when `allowCreate` is `false`', async () => {
     await page.goto(url.create)
     const relationshipField = page.locator(
       '#field-relationshipWithDrawerAppearanceAndAllowCreateFalse',
@@ -742,7 +742,7 @@ describe('relationship', () => {
     await expect(createNewButton).toBeHidden()
   })
 
-  test('should respect filterOptions in the list drawer for filtered relationship', async () => {
+  test('should respect `filterOptions` in the relationship list drawer for filtered relationship', async () => {
     // Create test documents
     await createTextFieldDoc({ text: 'list drawer test' })
     await createTextFieldDoc({ text: 'not test' })
@@ -757,6 +757,27 @@ describe('relationship', () => {
 
     const rows = page.locator('.list-drawer table tbody tr')
     await expect(rows).toHaveCount(1)
+  })
+
+  test('should filter out existing values from relationship list drawer', async () => {
+    await page.goto(url.create)
+
+    await page.locator('#field-relationshipWithDrawerAppearance').click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+    const rows = listDrawerContent.locator('table tbody tr')
+    await expect(rows).toHaveCount(2)
+    await listDrawerContent.getByText('Seeded text document', { exact: true }).click()
+
+    const selectedValue = page.locator(
+      '#field-relationshipWithDrawerAppearance .relationship--single-value__text',
+    )
+
+    await expect(selectedValue).toHaveText('Seeded text document')
+    await page.locator('#field-relationshipWithDrawerAppearance').click()
+    const newRows = listDrawerContent.locator('table tbody tr')
+    await expect(newRows).toHaveCount(1)
+    await expect(listDrawerContent.getByText('Seeded text document')).toHaveCount(0)
   })
 })
 

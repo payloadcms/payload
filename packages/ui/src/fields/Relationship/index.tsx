@@ -1,5 +1,10 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
+import type {
+  FilterOptionsResult,
+  PaginatedDocs,
+  RelationshipFieldClientComponent,
+  Where,
+} from 'payload'
 
 import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
@@ -114,6 +119,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     path,
     validate: memoizedValidate,
   })
+
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
@@ -124,13 +130,35 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
 
+  const listDrawerFilterOptions = useMemo<FilterOptionsResult>(() => {
+    let newFilterOptions = filterOptions
+
+    if (value) {
+      ;(Array.isArray(value) ? value : [value]).forEach((val) => {
+        ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relationTo) => {
+          newFilterOptions = {
+            ...(filterOptions || {}),
+            [relationTo]: {
+              ...(typeof filterOptions?.[relationTo] === 'object' ? filterOptions[relationTo] : {}),
+              id: {
+                not_in: [typeof val === 'object' ? val.value : val],
+              },
+            },
+          }
+        })
+      })
+    }
+
+    return newFilterOptions
+  }, [filterOptions, value, relationTo])
+
   const [
     ListDrawer,
     ,
     { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
   ] = useListDrawer({
     collectionSlugs: hasMultipleRelations ? relationTo : [relationTo],
-    filterOptions,
+    filterOptions: listDrawerFilterOptions,
   })
 
   const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
@@ -763,12 +791,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
-      {appearance === 'drawer' && (
-        <ListDrawer
-          allowCreate={!readOnly && allowCreate}
-          enableRowSelections={false}
-          onSelect={onListSelect}
-        />
+      {appearance === 'drawer' && !readOnly && (
+        <ListDrawer allowCreate={allowCreate} enableRowSelections={false} onSelect={onListSelect} />
       )}
     </div>
   )
