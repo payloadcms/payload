@@ -124,7 +124,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { allowCreate, description },
+      admin: { allowCreate, closeOnSave, description },
       collection,
       label,
       localized,
@@ -208,6 +208,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
         BeforeInput={BeforeInput}
+        closeOnSave={closeOnSave}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
         filterOptions={filterOptions}

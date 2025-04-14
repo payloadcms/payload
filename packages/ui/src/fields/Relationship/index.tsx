@@ -46,6 +46,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         allowCreate = true,
         allowEdit = true,
         className,
+        closeOnSave = false,
         description,
         isSortable = true,
         sortOptions,
@@ -692,6 +693,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
             />
             {!(readOnly || disabled) && allowCreate && (
               <AddNewRelation
+                closeOnSave={closeOnSave}
                 hasMany={hasMany}
                 path={path}
                 relationTo={relationTo}

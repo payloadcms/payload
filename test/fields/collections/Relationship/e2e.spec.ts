@@ -191,6 +191,14 @@ describe('relationship', () => {
     await expect(locator1).toHaveCount(0)
   })
 
+  test('should close drawer when saving relationship', async () => {
+    await page.goto(url.create)
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationWithCloseOnSaveToTrue' })
+    await page.locator('.drawer__content #field-text').fill('something')
+    await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
+    await expect(page.locator('.drawer')).toBeHidden()
+  })
+
   test('should hide edit button in main doc when relationship deleted', async () => {
     const createdRelatedDoc = await payload.create({
       collection: textFieldsSlug,

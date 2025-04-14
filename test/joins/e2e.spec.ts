@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -22,7 +23,13 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesJoinRestrictedSlug,
+  categoriesSlug,
+  postsSlug,
+  uploadsSlug,
+  usersSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,9 +45,11 @@ describe('Join Field', () => {
   let categoriesURL: AdminUrlUtil
   let foldersURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
+  let usersURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
   let categoryID: number | string
   let rootFolderID: number | string
+  let userID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -51,6 +60,7 @@ describe('Join Field', () => {
 
     categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
+    usersURL = new AdminUrlUtil(serverURL, usersSlug)
     categoriesJoinRestrictedURL = new AdminUrlUtil(serverURL, categoriesJoinRestrictedSlug)
     foldersURL = new AdminUrlUtil(serverURL, 'folders')
 
@@ -92,6 +102,9 @@ describe('Join Field', () => {
 
     const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
     rootFolderID = folder.docs[0]!.id
+
+    const user = await payload.find({ collection: usersSlug, sort: 'createdAt', depth: 0 })
+    userID = user.docs[0]!.id
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -510,6 +523,18 @@ describe('Join Field', () => {
     await expect(
       joinField.locator('.relationship-table tbody .row-1 .cell-title .drawer-link__cell'),
     ).toHaveText('Some new page')
+  })
+
+  test('should not close drawer when saving join field', async () => {
+    await page.goto(usersURL.edit(userID))
+    const joinField = page.locator('#field-postsWithCloseOnSaveFalse.field-type.join')
+    await expect(joinField).toBeVisible()
+    await joinField.locator('.relationship-table__add-new').click()
+    const closeButton = page.locator('.drawer__content .doc-drawer__header-close')
+    await page.locator('.drawer__content #action-save').click()
+    await wait(500)
+    await expect(closeButton).toBeVisible()
+    await closeButton.click()
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {

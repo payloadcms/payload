@@ -19,6 +19,7 @@ import {
   postsSlug,
   restrictedCategoriesSlug,
   restrictedPostsSlug,
+  usersSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -29,11 +30,11 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    user: 'users',
+    user: usersSlug,
   },
   collections: [
     {
-      slug: 'users',
+      slug: usersSlug,
       auth: true,
       fields: [
         {
@@ -41,6 +42,15 @@ export default buildConfigWithDefaults({
           collection: 'posts',
           on: 'author',
           name: 'posts',
+        },
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'postsWithCloseOnSaveFalse',
+          admin: {
+            closeOnSave: false,
+          },
         },
       ],
     },
@@ -275,7 +285,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-
     {
       slug: 'folders',
       fields: [

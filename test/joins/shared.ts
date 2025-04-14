@@ -8,6 +8,8 @@ export const hiddenPostsSlug = 'hidden-posts'
 
 export const uploadsSlug = 'uploads'
 
+export const usersSlug = 'users'
+
 export const localizedPostsSlug = 'localized-posts'
 
 export const localizedCategoriesSlug = 'localized-categories'
@@ -27,4 +29,5 @@ export const collectionSlugs = [
   localizedCategoriesSlug,
   restrictedPostsSlug,
   restrictedCategoriesSlug,
+  usersSlug,
 ]
