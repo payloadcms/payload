@@ -127,13 +127,13 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'relationshipWithDrawerAppearance',
+      name: 'relationshipDrawer',
       relationTo: 'text-fields',
       admin: { appearance: 'drawer' },
       type: 'relationship',
     },
     {
-      name: 'relationshipWithDrawerAppearanceReadOnly',
+      name: 'relationshipDrawerReadOnly',
       relationTo: 'text-fields',
       admin: {
         readOnly: true,
@@ -142,13 +142,31 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
-      name: 'polymorphicRelationshipWithDrawerAppearance',
+      name: 'polymorphicRelationshipDrawer',
       admin: { appearance: 'drawer' },
       type: 'relationship',
       relationTo: ['text-fields', 'array-fields'],
     },
     {
-      name: 'relationshipWithDrawerAppearanceAndAllowCreateFalse',
+      name: 'relationshipDrawerHasMany',
+      relationTo: 'text-fields',
+      admin: {
+        appearance: 'drawer',
+      },
+      hasMany: true,
+      type: 'relationship',
+    },
+    {
+      name: 'relationshipDrawerHasManyPolymorphic',
+      relationTo: ['text-fields'],
+      admin: {
+        appearance: 'drawer',
+      },
+      hasMany: true,
+      type: 'relationship',
+    },
+    {
+      name: 'relationshipDrawerWithAllowCreateFalse',
       admin: {
         allowCreate: false,
         appearance: 'drawer',
@@ -157,7 +175,7 @@ const RelationshipFields: CollectionConfig = {
       relationTo: 'text-fields',
     },
     {
-      name: 'relationshipWithDrawerAppearanceWithFilterOptions',
+      name: 'relationshipDrawerWithFilterOptions',
       admin: { appearance: 'drawer' },
       type: 'relationship',
       relationTo: ['text-fields'],
