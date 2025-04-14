@@ -96,6 +96,11 @@
       }
     }
 
+    &--drag-preview {
+      cursor: grabbing;
+      z-index: var(--z-popup);
+    }
+
     @include mid-break {
       th,
       td {

@@ -32,6 +32,7 @@ export const APIViewClient: React.FC = () => {
 
   const {
     config: {
+      defaultDepth,
       localization,
       routes: { api: apiRoute },
       serverURL,
@@ -62,7 +63,9 @@ export const APIViewClient: React.FC = () => {
   const [data, setData] = React.useState<any>(initialData)
   const [draft, setDraft] = React.useState<boolean>(searchParams.get('draft') === 'true')
   const [locale, setLocale] = React.useState<string>(searchParams?.get('locale') || code)
-  const [depth, setDepth] = React.useState<string>(searchParams.get('depth') || '1')
+  const [depth, setDepth] = React.useState<string>(
+    searchParams.get('depth') || defaultDepth.toString(),
+  )
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
 

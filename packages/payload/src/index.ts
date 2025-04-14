@@ -65,8 +65,11 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export type * from './admin/types.js'
+import type { SupportedLanguages } from '@payloadcms/translations'
+
 import { Cron } from 'croner'
 
+import type { ClientConfig } from './config/client.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -865,10 +868,12 @@ export const reload = async (
   }
 
   await payload.db.init()
+
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
-  global._payload_clientConfig = null
+
+  global._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
   global._payload_schemaMap = null
   global._payload_clientSchemaMap = null
   global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
@@ -1085,6 +1090,7 @@ export {
 } from './config/client.js'
 
 export { defaults } from './config/defaults.js'
+export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1160,6 +1166,8 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateJobs,
+  UpdateJobsArgs,
   UpdateMany,
   UpdateManyArgs,
   UpdateOne,
@@ -1500,5 +1508,5 @@ export { getLatestCollectionVersion } from './versions/getLatestCollectionVersio
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
-export type { TypeWithVersion } from './versions/types.js'
+export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

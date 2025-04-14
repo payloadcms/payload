@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -56,10 +57,6 @@ import { execute } from './execute.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
 import { requireDrizzleKit } from './requireDrizzleKit.js'
-
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
-export { sql } from 'drizzle-orm'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -127,6 +124,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       tables: {},
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -195,8 +193,32 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 
   return {
+    name: 'sqlite',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
+
+/**
+ * @todo deprecate /types subpath export in 4.0
+ */
+export type {
+  Args as SQLiteAdapterArgs,
+  CountDistinct,
+  DeleteWhere,
+  DropDatabase,
+  Execute,
+  GeneratedDatabaseSchema,
+  GenericColumns,
+  GenericRelation,
+  GenericTable,
+  IDType,
+  Insert,
+  MigrateDownArgs,
+  MigrateUpArgs,
+  SQLiteAdapter,
+  SQLiteSchemaHook,
+} from './types.js'
+
+export { sql } from 'drizzle-orm'

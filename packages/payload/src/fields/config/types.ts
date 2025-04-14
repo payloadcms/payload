@@ -57,7 +57,7 @@ import type {
   EmailFieldLabelServerComponent,
   FieldDescriptionClientProps,
   FieldDescriptionServerProps,
-  FieldDiffClientComponent,
+  FieldDiffClientProps,
   FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
@@ -326,7 +326,7 @@ type Admin = {
   components?: {
     Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
     Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
-    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>
     Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
@@ -1550,6 +1550,17 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
+  /**
+   * If true, enables custom ordering for the collection with the relationship, and joined documents can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   sanitizedMany?: JoinField[]
   type: 'join'
   validate?: never
@@ -1563,7 +1574,15 @@ export type JoinFieldClient = {
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
-    'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
+    | 'collection'
+    | 'defaultLimit'
+    | 'defaultSort'
+    | 'index'
+    | 'maxDepth'
+    | 'on'
+    | 'orderable'
+    | 'type'
+    | 'where'
   >
 
 export type FlattenedBlock = {

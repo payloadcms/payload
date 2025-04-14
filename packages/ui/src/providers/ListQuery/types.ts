@@ -29,6 +29,7 @@ export type ListQueryProps = {
   readonly listPreferences?: ListPreferences
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
+  readonly orderableFieldName?: string
   /**
    * @deprecated
    */
@@ -41,6 +42,7 @@ export type IListQueryContext = {
   defaultLimit?: number
   defaultSort?: Sort
   modified: boolean
+  orderableFieldName?: string
   query: ListQuery
   refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
   setModified: (modified: boolean) => void

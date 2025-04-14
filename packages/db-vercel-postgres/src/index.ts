@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -138,6 +139,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       tables: {},
       tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
@@ -203,12 +205,21 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   }
 
   return {
+    name: 'postgres',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
 
+/**
+ * @todo deprecate /types subpath export in 4.0
+ */
+export type {
+  Args as VercelPostgresAdapterArgs,
+  GeneratedDatabaseSchema,
+  VercelPostgresAdapter,
+} from './types.js'
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

@@ -65,9 +65,22 @@ export const useQueryPresets = ({
     collectionSlug: queryPresetsSlug,
   })
 
+  const filterOptions = useMemo(
+    () => ({
+      'payload-query-presets': {
+        relatedCollection: {
+          equals: collectionSlug,
+        },
+      },
+    }),
+    [collectionSlug],
+  )
+
   const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
     useListDrawer({
       collectionSlugs: [queryPresetsSlug],
+      filterOptions,
+      selectedCollection: queryPresetsSlug,
     })
 
   const handlePresetChange = useCallback(

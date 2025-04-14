@@ -205,6 +205,41 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
+      type: 'text',
+    },
   ],
   labels: {
     plural: slugPluralLabel,
