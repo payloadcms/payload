@@ -852,6 +852,11 @@ export type Config = {
        * @default '/create-first-user'
        */
       createFirstUser?: `/${string}`
+      /** The route for folder view.
+       *
+       * @default '/folders'
+       */
+      folders: `/${string}`
       /** The route for the forgot password page.
        *
        * @default '/forgot'
