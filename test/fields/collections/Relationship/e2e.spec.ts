@@ -651,7 +651,7 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
-  test('should be able to selectrelationship with drawer appearance', async () => {
+  test('should be able to select relationship with drawer appearance', async () => {
     await page.goto(url.create)
 
     const relationshipField = page.locator('#field-relationshipWithDrawerAppearance')
@@ -696,7 +696,7 @@ describe('relationship', () => {
   test('should handle read-only relationship field with list drawer appearance', async () => {
     await page.goto(url.create)
     const readOnlyField = page.locator(
-      '#field-readOnlyRelationshipWithDrawerAppearance .rs__control--is-disabled',
+      '#field-relationshipWithDrawerAppearanceReadOnly .rs__control--is-disabled',
     )
     await expect(readOnlyField).toBeVisible()
   })
@@ -748,7 +748,9 @@ describe('relationship', () => {
     await createTextFieldDoc({ text: 'not test' })
     await page.goto(url.create)
 
-    const relationshipField = page.locator('#field-filteredRelationshipWithDrawerAppearance')
+    const relationshipField = page.locator(
+      '#field-relationshipWithDrawerAppearanceWithFilterOptions',
+    )
     await relationshipField.click()
     const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
     await expect(listDrawerContent).toBeVisible()

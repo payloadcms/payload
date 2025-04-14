@@ -487,53 +487,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    {
-      slug: 'relationship-using-list-drawer',
-      fields: [
-        {
-          type: 'relationship',
-          name: 'relationship',
-          admin: { appearance: 'drawer' },
-          relationTo: 'movies',
-        },
-        {
-          type: 'relationship',
-          name: 'hasManyRelationship',
-          admin: { appearance: 'drawer' },
-          hasMany: true,
-          relationTo: 'movies',
-        },
-        {
-          name: 'polymorphicRelationship',
-          admin: { appearance: 'drawer' },
-          type: 'relationship',
-          relationTo: ['movies', 'directors'],
-        },
-        {
-          name: 'polymorphicHasManyRelationship',
-          admin: { appearance: 'drawer' },
-          type: 'relationship',
-          hasMany: true,
-          relationTo: ['movies', 'directors'],
-        },
-        {
-          name: 'polymorphicHasManyFiltered',
-          admin: { appearance: 'drawer' },
-          type: 'relationship',
-          hasMany: true,
-          relationTo: ['movies', 'directors'],
-          filterOptions: ({ relationTo }) => {
-            if (relationTo === 'movies') {
-              return {
-                name: { equals: 'Movie 1' },
-              }
-            } else {
-              return true
-            }
-          },
-        },
-      ],
-    },
   ],
   onInit: async (payload) => {
     await payload.create({

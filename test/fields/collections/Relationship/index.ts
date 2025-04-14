@@ -133,7 +133,7 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
-      name: 'readOnlyRelationshipWithDrawerAppearance',
+      name: 'relationshipWithDrawerAppearanceReadOnly',
       relationTo: 'text-fields',
       admin: {
         readOnly: true,
@@ -157,7 +157,7 @@ const RelationshipFields: CollectionConfig = {
       relationTo: 'text-fields',
     },
     {
-      name: 'filteredRelationshipWithDrawerAppearance',
+      name: 'relationshipWithDrawerAppearanceWithFilterOptions',
       admin: { appearance: 'drawer' },
       type: 'relationship',
       relationTo: ['text-fields'],

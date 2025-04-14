@@ -742,7 +742,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!(readOnly || disabled) && allowCreate && appearance === 'select' && (
+            {!(readOnly || disabled) && allowCreate && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}

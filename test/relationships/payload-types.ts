@@ -88,7 +88,6 @@ export interface Config {
     relations: Relation1;
     items: Item;
     blocks: Block;
-    'relationship-using-list-drawer': RelationshipUsingListDrawer;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -121,7 +120,6 @@ export interface Config {
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     blocks: BlocksSelect<false> | BlocksSelect<true>;
-    'relationship-using-list-drawer': RelationshipUsingListDrawerSelect<false> | RelationshipUsingListDrawerSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -491,50 +489,6 @@ export interface Block {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationship-using-list-drawer".
- */
-export interface RelationshipUsingListDrawer {
-  id: string;
-  relationship?: (string | null) | Movie;
-  hasManyRelationship?: (string | Movie)[] | null;
-  polymorphicRelationship?:
-    | ({
-        relationTo: 'movies';
-        value: string | Movie;
-      } | null)
-    | ({
-        relationTo: 'directors';
-        value: string | Director;
-      } | null);
-  polymorphicHasManyRelationship?:
-    | (
-        | {
-            relationTo: 'movies';
-            value: string | Movie;
-          }
-        | {
-            relationTo: 'directors';
-            value: string | Director;
-          }
-      )[]
-    | null;
-  polymorphicHasManyFiltered?:
-    | (
-        | {
-            relationTo: 'movies';
-            value: string | Movie;
-          }
-        | {
-            relationTo: 'directors';
-            value: string | Director;
-          }
-      )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -623,10 +577,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blocks';
         value: string | Block;
-      } | null)
-    | ({
-        relationTo: 'relationship-using-list-drawer';
-        value: string | RelationshipUsingListDrawer;
       } | null)
     | ({
         relationTo: 'users';
@@ -935,19 +885,6 @@ export interface BlocksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationship-using-list-drawer_select".
- */
-export interface RelationshipUsingListDrawerSelect<T extends boolean = true> {
-  relationship?: T;
-  hasManyRelationship?: T;
-  polymorphicRelationship?: T;
-  polymorphicHasManyRelationship?: T;
-  polymorphicHasManyFiltered?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1656,7 +1656,7 @@ export interface RelationshipField {
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
   relationshipWithDrawerAppearance?: (string | null) | TextField;
-  readOnlyRelationshipWithDrawerAppearance?: (string | null) | TextField;
+  relationshipWithDrawerAppearanceReadOnly?: (string | null) | TextField;
   polymorphicRelationshipWithDrawerAppearance?:
     | ({
         relationTo: 'text-fields';
@@ -1667,7 +1667,7 @@ export interface RelationshipField {
         value: string | ArrayField;
       } | null);
   relationshipWithDrawerAppearanceAndAllowCreateFalse?: (string | null) | TextField;
-  filteredRelationshipWithDrawerAppearance?: {
+  relationshipWithDrawerAppearanceWithFilterOptions?: {
     relationTo: 'text-fields';
     value: string | TextField;
   } | null;
@@ -3388,10 +3388,10 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationToRow?: T;
   relationToRowMany?: T;
   relationshipWithDrawerAppearance?: T;
-  readOnlyRelationshipWithDrawerAppearance?: T;
+  relationshipWithDrawerAppearanceReadOnly?: T;
   polymorphicRelationshipWithDrawerAppearance?: T;
   relationshipWithDrawerAppearanceAndAllowCreateFalse?: T;
-  filteredRelationshipWithDrawerAppearance?: T;
+  relationshipWithDrawerAppearanceWithFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
