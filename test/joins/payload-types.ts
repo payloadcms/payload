@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -112,6 +113,7 @@ export interface Config {
       localizedPolymorphic: 'posts';
       localizedPolymorphics: 'posts';
       filtered: 'posts';
+      inTab: 'posts';
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -315,6 +317,12 @@ export interface Post {
         blockType: 'block';
       }[]
     | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -428,6 +436,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  inTab?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   joinWithError?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
@@ -464,6 +477,7 @@ export interface Singular {
  */
 export interface Version {
   id: string;
+  title: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
   categoryVersions?: (string | CategoriesVersion)[] | null;
@@ -933,6 +947,16 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  first?:
+    | T
+    | {
+        tabText?: T;
+      };
+  tab?:
+    | T
+    | {
+        category?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -961,6 +985,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
+  inTab?: T;
   joinWithError?: T;
   enableErrorOnJoin?: T;
   updatedAt?: T;
@@ -999,6 +1024,7 @@ export interface UploadsSelect<T extends boolean = true> {
  * via the `definition` "versions_select".
  */
 export interface VersionsSelect<T extends boolean = true> {
+  title?: T;
   category?: T;
   categoryVersion?: T;
   categoryVersions?: T;
@@ -1232,7 +1258,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
-

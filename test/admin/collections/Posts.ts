@@ -236,6 +236,10 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'file',
+      type: 'text',
+    },
   ],
   labels: {
     plural: slugPluralLabel,

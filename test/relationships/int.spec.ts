@@ -336,6 +336,41 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should allow querying by relationships with an object where as AND', async () => {
+        const director = await payload.create({
+          collection: 'directors',
+          data: { name: 'Director1', localized: 'Director1_Localized' },
+        })
+
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { director: director.id },
+          depth: 0,
+        })
+
+        const { docs: trueRes } = await payload.find({
+          collection: 'movies',
+          depth: 0,
+          where: {
+            'director.name': { equals: 'Director1' },
+            'director.localized': { equals: 'Director1_Localized' },
+          },
+        })
+
+        expect(trueRes).toStrictEqual([movie])
+
+        const { docs: falseRes } = await payload.find({
+          collection: 'movies',
+          depth: 0,
+          where: {
+            'director.name': { equals: 'Director1_Fake' },
+            'director.localized': { equals: 'Director1_Localized' },
+          },
+        })
+
+        expect(falseRes).toStrictEqual([])
+      })
+
       it('should allow querying within blocks', async () => {
         const rel = await payload.create({
           collection: relationSlug,
