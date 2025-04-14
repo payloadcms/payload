@@ -22,7 +22,6 @@ export const renderPill = (data, latestVersion, currentLabel, previousLabel, pil
       ) : (
         <Pill>{previousLabel}</Pill>
       )}
-      &nbsp;&nbsp;
     </React.Fragment>
   )
 }
@@ -50,7 +49,7 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
       previousLabel: t('version:draft'),
     },
     published: {
-      currentLabel: t('version:currentPublishedVersion'),
+      currentLabel: t('version:currentlyPublished'),
       latestVersion: latestPublishedVersion,
       pillStyle: 'success',
       previousLabel: t('version:previouslyPublished'),

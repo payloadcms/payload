@@ -1,6 +1,11 @@
 'use client'
 import type { StepNavItem } from '@payloadcms/ui'
-import type { ClientCollectionConfig, ClientField, ClientGlobalConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  ClientGlobalConfig,
+  TypeWithVersion,
+} from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -12,7 +17,7 @@ import { useEffect } from 'react'
 export const SetStepNav: React.FC<{
   readonly collectionConfig?: ClientCollectionConfig
   readonly collectionSlug?: string
-  readonly doc: any
+  readonly doc: TypeWithVersion<any>
   readonly fields: ClientField[]
   readonly globalConfig?: ClientGlobalConfig
   readonly globalSlug?: string
@@ -36,20 +41,19 @@ export const SetStepNav: React.FC<{
 
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
       const pluralLabel = collectionConfig?.labels?.plural
-      const formattedDoc = doc.version ? doc.version : doc
 
-      if (formattedDoc) {
+      if (doc.version) {
         if (useAsTitle !== 'id') {
           const titleField = fields.find((f) => {
             const fieldName = 'name' in f ? f.name : undefined
             return Boolean(fieldAffectsData(f) && fieldName === useAsTitle)
           })
 
-          if (titleField && formattedDoc[useAsTitle]) {
+          if (titleField && doc.version[useAsTitle]) {
             if ('localized' in titleField && titleField.localized) {
-              docLabel = formattedDoc[useAsTitle]?.[locale.code]
+              docLabel = doc.version[useAsTitle]?.[locale.code]
             } else {
-              docLabel = formattedDoc[useAsTitle]
+              docLabel = doc.version[useAsTitle]
             }
           } else {
             docLabel = `[${t('general:untitled')}]`

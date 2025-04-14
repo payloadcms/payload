@@ -5,16 +5,5 @@
     &__tab-locale:not(:first-of-type) {
       margin-top: var(--base);
     }
-
-    &__locale-label {
-      background: var(--theme-elevation-100);
-      padding: calc(var(--base) * 0.25);
-      [dir='ltr'] & {
-        margin-right: calc(var(--base) * 0.25);
-      }
-      [dir='rtl'] & {
-        margin-left: calc(var(--base) * 0.25);
-      }
-    }
   }
 }

@@ -354,6 +354,15 @@ export interface Diff {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   radio?: ('option1' | 'option2') | null;
   relationship?: (string | null) | DraftPost;
   richtext?: {
@@ -397,6 +406,7 @@ export interface Diff {
   upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -840,6 +850,7 @@ export interface DiffSelect<T extends boolean = true> {
       };
   number?: T;
   point?: T;
+  json?: T;
   radio?: T;
   relationship?: T;
   richtext?: T;
@@ -857,6 +868,7 @@ export interface DiffSelect<T extends boolean = true> {
   upload?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1082,10 +1094,15 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'draft-posts';
-      value: string | DraftPost;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'autosave-posts';
+          value: string | AutosavePost;
+        } | null)
+      | ({
+          relationTo: 'draft-posts';
+          value: string | DraftPost;
+        } | null);
     global?: 'draft-global' | null;
     user?: (string | null) | User;
   };

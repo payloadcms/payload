@@ -2,7 +2,8 @@
   .iterable-diff {
     &__locale-label {
       background: var(--theme-elevation-100);
-      padding: calc(var(--base) * 0.25);
+      border-radius: var(--style-radius-s);
+      padding: calc(var(--base) * 0.2);
       // border-radius: $style-radius-m;
       [dir='ltr'] & {
         margin-right: calc(var(--base) * 0.25);
@@ -18,10 +19,7 @@
     }
 
     &__no-rows {
-      font-family: monospace;
-      background-color: var(--theme-elevation-50);
-      // padding: base(0.125) calc(var(--base) * 0.5);
-      // margin: base(0.125) 0;
+      color: var(--theme-elevation-400);
     }
   }
 }

@@ -1,6 +1,7 @@
 import type { FieldDiffClientProps, FieldTypes } from 'payload'
 
 import { Collapsible } from './Collapsible/index.js'
+import { DateDiffComponent } from './Date/index.js'
 import { Group } from './Group/index.js'
 import { Iterable } from './Iterable/index.js'
 import { Relationship } from './Relationship/index.js'
@@ -15,7 +16,7 @@ export const diffComponents: Record<FieldTypes, React.ComponentType<FieldDiffCli
   checkbox: Text,
   code: Text,
   collapsible: Collapsible,
-  date: Text,
+  date: DateDiffComponent,
   email: Text,
   group: Group,
   join: null,
