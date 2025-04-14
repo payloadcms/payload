@@ -37,6 +37,11 @@
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
     },
+    "./auth": {
+      "import": "./src/exports/auth.ts",
+      "types": "./src/exports/auth.ts",
+      "default": "./src/exports/auth.ts"
+    },
     "./templates": {
       "import": "./src/exports/templates.ts",
       "types": "./src/exports/templates.ts",
