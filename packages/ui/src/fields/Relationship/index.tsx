@@ -1,5 +1,10 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
+import type {
+  FilterOptionsResult,
+  PaginatedDocs,
+  RelationshipFieldClientComponent,
+  Where,
+} from 'payload'
 
 import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
@@ -7,11 +12,13 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -45,6 +52,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       admin: {
         allowCreate = true,
         allowEdit = true,
+        appearance = 'select',
         className,
         description,
         isSortable = true,
@@ -111,6 +119,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     path,
     validate: memoizedValidate,
   })
+
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
@@ -120,6 +129,60 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
+
+  // Filter selected values from displaying in the list drawer
+  const listDrawerFilterOptions = useMemo<FilterOptionsResult>(() => {
+    let newFilterOptions = filterOptions
+
+    if (value) {
+      ;(Array.isArray(value) ? value : [value]).forEach((val) => {
+        ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relationTo) => {
+          newFilterOptions = {
+            ...(filterOptions || {}),
+            [relationTo]: {
+              ...(typeof filterOptions?.[relationTo] === 'object' ? filterOptions[relationTo] : {}),
+              id: {
+                not_in: [typeof val === 'object' ? val.value : val],
+              },
+            },
+          }
+        })
+      })
+    }
+
+    return newFilterOptions
+  }, [filterOptions, value, relationTo])
+
+  const [
+    ListDrawer,
+    ,
+    { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
+  ] = useListDrawer({
+    collectionSlugs: hasMultipleRelations ? relationTo : [relationTo],
+    filterOptions: listDrawerFilterOptions,
+  })
+
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
+      const formattedSelection = hasMultipleRelations
+        ? {
+            relationTo: collectionSlug,
+            value: doc.id,
+          }
+        : doc.id
+
+      if (hasMany) {
+        const withSelection = Array.isArray(value) ? value : []
+        withSelection.push(formattedSelection)
+        setValue(withSelection)
+      } else {
+        setValue(formattedSelection)
+      }
+
+      closeListDrawer()
+    },
+    [hasMany, hasMultipleRelations, setValue, closeListDrawer, value],
+  )
 
   const openDrawerWhenRelationChanges = useRef(false)
 
@@ -601,18 +664,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!isDrawerOpen}
+              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
               components={{
                 MultiValueLabel,
                 SingleValue,
+                ...(appearance !== 'select' && { DropdownIndicator: null }),
               }}
               customProps={{
-                disableKeyDown: isDrawerOpen,
-                disableMouseDown: isDrawerOpen,
+                disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentDrawerOpen,
                 onSave,
               }}
-              disabled={readOnly || disabled || isDrawerOpen}
+              disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -622,9 +686,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                   ? `${option.relationTo}_${option.value}`
                   : (option.value as string)
               }}
-              isLoading={isLoading}
+              isLoading={appearance === 'select' && isLoading}
               isMulti={hasMany}
+              isSearchable={appearance === 'select'}
               isSortable={isSortable}
+              menuIsOpen={appearance === 'select' ? menuIsOpen : false}
               onChange={
                 !(readOnly || disabled)
                   ? (selected) => {
@@ -661,19 +727,22 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                setMenuIsOpen(true)
-
-                if (!hasLoadedFirstPageRef.current) {
-                  setIsLoading(true)
-                  void getResults({
-                    filterOptions,
-                    lastLoadedPage: {},
-                    onSuccess: () => {
-                      hasLoadedFirstPageRef.current = true
-                      setIsLoading(false)
-                    },
-                    value: initialValue,
-                  })
+                if (appearance === 'drawer') {
+                  openListDrawer()
+                } else if (appearance === 'select') {
+                  setMenuIsOpen(true)
+                  if (!hasLoadedFirstPageRef.current) {
+                    setIsLoading(true)
+                    void getResults({
+                      filterOptions,
+                      lastLoadedPage: {},
+                      onSuccess: () => {
+                        hasLoadedFirstPageRef.current = true
+                        setIsLoading(false)
+                      },
+                      value: initialValue,
+                    })
+                  }
                 }
               }}
               onMenuScrollToBottom={() => {
@@ -710,6 +779,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+      )}
+      {appearance === 'drawer' && !readOnly && (
+        <ListDrawer allowCreate={allowCreate} enableRowSelections={false} onSelect={onListSelect} />
       )}
     </div>
   )
