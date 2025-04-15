@@ -21,7 +21,7 @@ import {
 // Your richtext data here
 const data: SerializedEditorState = {}
 
-const html = convertLexicalToMarkdown({
+const markdown = convertLexicalToMarkdown({
   data,
   editorConfig: await editorConfigFactory.default({
     config, // <= make sure you have access to your Payload Config
@@ -101,7 +101,7 @@ import {
   editorConfigFactory,
 } from '@payloadcms/richtext-lexical'
 
-const html = convertMarkdownToLexical({
+const lexicalJSON = convertMarkdownToLexical({
   editorConfig: await editorConfigFactory.default({
     config, // <= make sure you have access to your Payload Config
   }),

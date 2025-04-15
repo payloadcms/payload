@@ -786,6 +786,20 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
     })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
+    })
   })
 
   describe('API Key', () => {

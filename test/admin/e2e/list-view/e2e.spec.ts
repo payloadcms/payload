@@ -1285,6 +1285,31 @@ describe('List View', () => {
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
+      await toggleColumn(page, {
+        columnLabel: 'Wavelengths',
+        targetState: 'on',
+        columnName: 'wavelengths',
+      })
+
+      await toggleColumn(page, {
+        columnLabel: 'Select Field',
+        targetState: 'on',
+        columnName: 'selectField',
+      })
+
+      // check that the cells have the classes added per value selected
+      await expect(
+        page.locator('.cell-_status').first().locator("[class*='selected--']"),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('.cell-wavelengths').first().locator("[class*='selected--']"),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('.cell-selectField').first().locator("[class*='selected--']"),
+      ).toBeVisible()
+
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()
       await page.waitForURL(/sort=-title/)

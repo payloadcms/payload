@@ -496,6 +496,10 @@ export const traverseFields = ({
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
         }
 
+        if (field.type === 'text' && value && typeof value !== 'string') {
+          formattedValue = JSON.stringify(value)
+        }
+
         if (field.type === 'date') {
           if (typeof value === 'number' && !Number.isNaN(value)) {
             formattedValue = new Date(value).toISOString()

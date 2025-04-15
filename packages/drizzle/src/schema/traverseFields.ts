@@ -2,6 +2,7 @@ import type { CompoundIndex, FlattenedField } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {
+  array,
   fieldAffectsData,
   fieldIsVirtual,
   fieldShouldBeLocalized,
@@ -287,7 +288,9 @@ export const traverseFields = ({
           }
         }
 
-        relationsToBuild.set(fieldName, {
+        const relationName = field.dbName ? `_${arrayTableName}` : fieldName
+
+        relationsToBuild.set(relationName, {
           type: 'many',
           // arrays have their own localized table, independent of the base table.
           localized: false,
@@ -304,7 +307,7 @@ export const traverseFields = ({
               },
             ],
             references: ['id'],
-            relationName: fieldName,
+            relationName,
             to: parentTableName,
           },
         }

@@ -193,6 +193,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
             defaultLimit={limitToUse}
             defaultSort={sort as string}
             modifySearchParams
+            orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
           >
             <VersionsViewClient
               baseClass={baseClass}

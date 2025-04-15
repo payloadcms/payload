@@ -142,5 +142,34 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'first',
+          fields: [
+            {
+              type: 'text',
+              name: 'tabText',
+            },
+          ],
+        },
+        {
+          name: 'tab',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'category',
+                  type: 'relationship',
+                  relationTo: categoriesSlug,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

@@ -23,6 +23,7 @@ type Args = {
   parentIsLocalized?: boolean
   path: string
   policies: EntityPolicies
+  polymorphicJoin?: boolean
   req: PayloadRequest
   val: unknown
   versionFields?: FlattenedField[]
@@ -42,6 +43,7 @@ export async function validateSearchParam({
   parentIsLocalized,
   path: incomingPath,
   policies,
+  polymorphicJoin,
   req,
   val,
   versionFields,
@@ -131,6 +133,10 @@ export async function validateSearchParam({
         }
       }
 
+      if (polymorphicJoin && path === 'relationTo') {
+        return
+      }
+
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections[collectionSlug]) {
@@ -169,8 +175,10 @@ export async function validateSearchParam({
         const segments = fieldPath.split('.')
 
         let fieldAccess
+
         if (versionFields) {
           fieldAccess = policies[entityType][entitySlug]
+
           if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
           }

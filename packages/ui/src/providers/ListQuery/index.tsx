@@ -25,6 +25,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
+  orderableFieldName,
 }) => {
   'use no memo'
   const router = useRouter()
@@ -207,6 +208,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        orderableFieldName,
         query: currentQuery,
         refineListData,
         setModified,

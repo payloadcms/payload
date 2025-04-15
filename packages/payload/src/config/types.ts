@@ -793,9 +793,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
-     * Each entry in this map generates an entry in the importMap,
-     * as well as an entry in the componentMap if the type of the
-     * dependency is 'component'
+     * Each entry in this map generates an entry in the importMap.
      */
     dependencies?: AdminDependencies
     /**

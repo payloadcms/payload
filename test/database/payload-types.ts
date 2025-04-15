@@ -81,6 +81,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
     'compound-indexes': CompoundIndex;
+    aliases: Alias;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
+    aliases: AliasesSelect<false> | AliasesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -437,6 +439,26 @@ export interface CompoundIndex {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "aliases".
+ */
+export interface Alias {
+  id: string;
+  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
+    | {
+        nestedArray?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -514,6 +536,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'compound-indexes';
         value: string | CompoundIndex;
+      } | null)
+    | ({
+        relationTo: 'aliases';
+        value: string | Alias;
       } | null)
     | ({
         relationTo: 'users';
@@ -824,6 +850,25 @@ export interface CompoundIndexesSelect<T extends boolean = true> {
     | T
     | {
         four?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "aliases_select".
+ */
+export interface AliasesSelect<T extends boolean = true> {
+  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
+    | T
+    | {
+        nestedArray?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
