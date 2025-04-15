@@ -7,7 +7,7 @@ import type {
 } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -607,16 +607,38 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
+  const onDocumentNewTabOpen = useCallback<
+    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+  >(
+    ({ id, collectionSlug, hasReadPermission }) => {
+      if (hasReadPermission && id && collectionSlug) {
+        const docUrl = formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${collectionSlug}/${id}`,
+        })
+        window.open(docUrl, '_blank')
+      }
+    },
+    [config.routes.admin],
+  )
+
   const onDocumentDrawerOpen = useCallback<
     ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
-  >(({ id, collectionSlug, hasReadPermission }) => {
-    openDrawerWhenRelationChanges.current = true
-    setCurrentlyOpenRelationship({
-      id,
-      collectionSlug,
-      hasReadPermission,
-    })
-  }, [])
+  >(
+    ({ id, collectionSlug, hasReadPermission, inNewTab }) => {
+      if (inNewTab) {
+        onDocumentNewTabOpen({ id, collectionSlug, hasReadPermission })
+      } else {
+        openDrawerWhenRelationChanges.current = true
+        setCurrentlyOpenRelationship({
+          id,
+          collectionSlug,
+          hasReadPermission,
+        })
+      }
+    },
+    [onDocumentNewTabOpen],
+  )
 
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {

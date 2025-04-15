@@ -49,12 +49,13 @@ export const MultiValueLabel: React.FC<
           <button
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
-            onClick={() => {
+            onClick={(event) => {
               setShowTooltip(false)
               onDocumentDrawerOpen({
                 id: value,
                 collectionSlug: relationTo,
                 hasReadPermission,
+                inNewTab: event.metaKey || event.ctrlKey,
               })
             }}
             onKeyDown={(e) => {
