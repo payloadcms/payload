@@ -77,8 +77,8 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   )
 
   const resetColumnsState = React.useCallback(async () => {
-    await setActiveColumns(defaultColumns)
-  }, [defaultColumns, setActiveColumns])
+    await refineListData({ columns: defaultColumns })
+  }, [defaultColumns, refineListData])
 
   return (
     <TableColumnContext
