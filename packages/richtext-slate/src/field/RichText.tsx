@@ -28,7 +28,6 @@ import type { LoadedSlateFieldProps } from './types.js'
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
-import './index.scss'
 import { hotkeys } from './hotkeys.js'
 import { toggleLeaf } from './leaves/toggle.js'
 import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
@@ -37,6 +36,7 @@ import { ElementButtonProvider } from './providers/ElementButtonProvider.js'
 import { ElementProvider } from './providers/ElementProvider.js'
 import { LeafButtonProvider } from './providers/LeafButtonProvider.js'
 import { LeafProvider } from './providers/LeafProvider.js'
+import './index.scss'
 
 const baseClass = 'rich-text'
 
@@ -59,6 +59,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
       required,
     },
     leaves,
+    path: pathFromProps,
     plugins,
     readOnly: readOnlyFromTopLevelProps,
     schemaPath: schemaPathFromProps,
@@ -100,6 +101,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     showError,
     value,
   } = useField({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 

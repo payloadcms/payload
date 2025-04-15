@@ -41,6 +41,7 @@ const RichTextComponent: React.FC<
       localized,
       required,
     },
+    path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
@@ -72,6 +73,7 @@ const RichTextComponent: React.FC<
     showError,
     value,
   } = useField<SerializedEditorState>({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 
