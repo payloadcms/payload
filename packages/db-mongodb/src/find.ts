@@ -10,7 +10,6 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { buildVirtualFieldsAggregation } from './utilities/buildVirtualFieldsAggregation.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
@@ -136,13 +135,7 @@ export const find: Find = async function find(
     query,
   })
 
-  const virtualFieldsAggregation = buildVirtualFieldsAggregation({
-    adapter: this,
-    fields: collectionConfig.flattenedFields,
-    locale,
-  })
-
-  if (aggregate || sortAggregation.length > 0 || virtualFieldsAggregation.length > 0) {
+  if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
@@ -157,7 +150,6 @@ export const find: Find = async function find(
       sort: paginationOptions.sort as object,
       sortAggregation,
       useEstimatedCount: paginationOptions.useEstimatedCount,
-      virtualFieldsAggregation,
     })
   } else {
     result = await Model.paginate(query, paginationOptions)

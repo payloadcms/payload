@@ -10,7 +10,6 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { buildVirtualFieldsAggregation } from './utilities/buildVirtualFieldsAggregation.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
@@ -138,15 +137,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  const virtualFieldsAggregation = buildVirtualFieldsAggregation({
-    adapter: this,
-    fields,
-    locale,
-    versions: true,
-  })
-
   // build join aggregation
-  if (aggregate || sortAggregation.length > 0 || virtualFieldsAggregation.length > 0) {
+  if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
@@ -160,7 +152,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
       useEstimatedCount: paginationOptions.useEstimatedCount,
-      virtualFieldsAggregation,
     })
   } else {
     result = await Model.paginate(versionQuery, paginationOptions)
