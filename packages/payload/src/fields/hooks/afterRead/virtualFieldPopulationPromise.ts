@@ -60,7 +60,7 @@ export const virtualFieldPopulationPromise = async ({
     }
   }
 
-  if (typeof relationshipValue !== 'number' || typeof relationshipValue !== 'string') {
+  if (typeof relationshipValue !== 'number' && typeof relationshipValue !== 'string') {
     return
   }
 
@@ -95,7 +95,7 @@ export const virtualFieldPopulationPromise = async ({
     return
   }
 
-  const fieldValue = getValueByPath({ object: relationshipValue, path: fieldPath })
+  const fieldValue = getValueByPath({ object: populatedDoc, path: fieldPath })
 
   if (typeof fieldValue !== 'undefined') {
     siblingDoc[name] = fieldValue
