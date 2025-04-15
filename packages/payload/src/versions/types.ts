@@ -1,12 +1,5 @@
 export type Autosave = {
   /**
-   * When set to `true`, the "Save as draft" button will be displayed even while autosave is enabled.
-   * By default, this button is hidden to avoid redundancy with autosave behavior.
-   *
-   * @default false
-   */
-  allowSaveDraftButton?: boolean
-  /**
    * Define an `interval` in milliseconds to automatically save progress while documents are edited.
    * Document updates are "debounced" at this interval.
    *

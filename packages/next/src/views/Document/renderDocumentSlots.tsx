@@ -1,4 +1,5 @@
 import type {
+  BeforeDocumentControlsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
   PayloadRequest,
@@ -82,6 +83,18 @@ export const renderDocumentSlots: (args: {
   }
 
   if (hasSavePermission) {
+    const BeforeDocumentControls =
+      collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+      globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+    if (BeforeDocumentControls) {
+      components.BeforeDocumentControls = RenderServerComponent({
+        Component: BeforeDocumentControls,
+        importMap: req.payload.importMap,
+        serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+      })
+    }
+
     if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
       const CustomPublishButton =
         collectionConfig?.admin?.components?.edit?.PublishButton ||

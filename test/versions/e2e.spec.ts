@@ -48,8 +48,6 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
-  autosaveWithDraftButtonGlobal,
-  autosaveWithDraftButtonSlug,
   autosaveWithValidateCollectionSlug,
   customIDSlug,
   diffCollectionSlug,
@@ -80,7 +78,6 @@ describe('Versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
-  let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -119,7 +116,6 @@ describe('Versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
-      autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
@@ -239,16 +235,6 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
-    })
-
-    test('collection - should show "save as draft" button when allowSaveDraftButton is true', async () => {
-      await page.goto(autosaveWithDraftButtonURL.create)
-      await expect(page.locator('#action-save-draft')).toBeVisible()
-    })
-
-    test('collection - should not show "save as draft" button when allowSaveDraftButton is false', async () => {
-      await page.goto(autosaveURL.create)
-      await expect(page.locator('#action-save-draft')).toBeHidden()
     })
 
     test('collection - autosave - should not create duplicates when clicking Create new', async () => {
@@ -646,18 +632,6 @@ describe('Versions', () => {
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
       }).toPass({ timeout: 10000, intervals: [100] })
-    })
-
-    test('global - should show "save as draft" button when allowSaveDraftButton is true', async () => {
-      const url = new AdminUrlUtil(serverURL, autosaveWithDraftButtonGlobal)
-      await page.goto(url.global(autosaveWithDraftButtonGlobal))
-      await expect(page.locator('#action-save-draft')).toBeVisible()
-    })
-
-    test('global - should not show "save as draft" button when allowSaveDraftButton is false', async () => {
-      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      await page.goto(url.global(autoSaveGlobalSlug))
-      await expect(page.locator('#action-save-draft')).toBeHidden()
     })
 
     test('global - should autosave', async () => {

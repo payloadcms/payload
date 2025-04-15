@@ -1,7 +1,5 @@
 export const autosaveCollectionSlug = 'autosave-posts'
 
-export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
-
 export const autosaveWithValidateCollectionSlug = 'autosave-with-validate-posts'
 
 export const customIDSlug = 'custom-ids'
@@ -36,7 +34,6 @@ export const collectionSlugs = [
 
 export const autoSaveGlobalSlug = 'autosave-global'
 
-export const autosaveWithDraftButtonGlobal = 'autosave-with-draft-button-global'
 export const draftGlobalSlug = 'draft-global'
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 

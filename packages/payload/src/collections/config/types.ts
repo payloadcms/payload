@@ -279,6 +279,7 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
+      beforeDocumentControls?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
