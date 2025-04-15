@@ -163,6 +163,12 @@ export const Categories: CollectionConfig = {
       },
     },
     {
+      name: 'inTab',
+      type: 'join',
+      collection: postsSlug,
+      on: 'tab.category',
+    },
+    {
       name: 'joinWithError',
       type: 'join',
       collection: postsSlug,

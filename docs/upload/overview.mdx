@@ -334,11 +334,27 @@ To upload a file, use your collection's [`create`](/docs/rest-api/overview#colle
 
 Send your request as a `multipart/form-data` request, using [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) if possible.
 
+<Banner type="info">
+  **Note:** To include any additional fields (like `title`, `alt`, etc.), append
+  a `_payload` field containing a JSON-stringified object of the required
+  values. These values must match the schema of your upload-enabled collection.
+</Banner>
+
 ```ts
 const fileInput = document.querySelector('#your-file-input')
 const formData = new FormData()
 
 formData.append('file', fileInput.files[0])
+
+// Replace with the fields defined in your upload-enabled collection.
+// The example below includes an optional field like 'title'.
+formData.append(
+  '_payload',
+  JSON.stringify({
+    title: 'Example Title',
+    description: 'An optional description for the file',
+  }),
+)
 
 fetch('api/:upload-slug', {
   method: 'POST',

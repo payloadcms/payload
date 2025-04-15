@@ -1,12 +1,22 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
-import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
+import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm'
+import {
+  appendVersionToQueryKey,
+  buildVersionCollectionFields,
+  combineQueries,
+  type FlattenedField,
+  getQueryDraftsSort,
+  type JoinQuery,
+  type SelectMode,
+  type SelectType,
+  type Where,
+} from 'payload'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
@@ -15,7 +25,6 @@ import { operatorMap } from '../queries/operatorMap.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
-import { chainMethods } from './chainMethods.js'
 
 const flattenAllWherePaths = (where: Where, paths: string[]) => {
   for (const k in where) {
@@ -61,6 +70,7 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
+  draftsEnabled?: boolean
   fields: FlattenedField[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
@@ -88,6 +98,7 @@ export const traverseFields = ({
   currentArgs,
   currentTableName,
   depth,
+  draftsEnabled,
   fields,
   joinQuery = {},
   joins,
@@ -185,7 +196,8 @@ export const traverseFields = ({
           }
         }
 
-        currentArgs.with[`${path}${field.name}`] = withArray
+        const relationName = field.dbName ? `_${arrayTableName}` : `${path}${field.name}`
+        currentArgs.with[relationName] = withArray
 
         traverseFields({
           _locales: withArray.with._locales,
@@ -193,6 +205,7 @@ export const traverseFields = ({
           currentArgs: withArray,
           currentTableName: arrayTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           locale,
@@ -304,6 +317,7 @@ export const traverseFields = ({
               currentArgs: withBlock,
               currentTableName: tableName,
               depth,
+              draftsEnabled,
               fields: block.flattenedFields,
               joinQuery,
               locale,
@@ -345,6 +359,7 @@ export const traverseFields = ({
           currentArgs,
           currentTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           joins,
@@ -511,9 +526,23 @@ export const traverseFields = ({
             .from(sql`${currentQuery.as(subQueryAlias)}`)
             .where(sqlWhere)}`.as(columnName)
         } else {
-          const fields = adapter.payload.collections[field.collection].config.flattenedFields
+          const useDrafts =
+            (versions || draftsEnabled) &&
+            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
 
-          const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+          const fields = useDrafts
+            ? buildVersionCollectionFields(
+                adapter.payload.config,
+                adapter.payload.collections[field.collection].config,
+                true,
+              )
+            : adapter.payload.collections[field.collection].config.flattenedFields
+
+          const joinCollectionTableName = adapter.tableNameMap.get(
+            useDrafts
+              ? `_${toSnakeCase(field.collection)}${adapter.versionsSuffix}`
+              : toSnakeCase(field.collection),
+          )
 
           const joins: BuildQueryJoinAliases = []
 
@@ -546,6 +575,12 @@ export const traverseFields = ({
             }
           }
 
+          if (useDrafts) {
+            joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
+              latest: { equals: true },
+            })
+          }
+
           const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
           const subQueryAlias = `${columnName}_alias`
@@ -567,38 +602,15 @@ export const traverseFields = ({
             locale,
             parentIsLocalized,
             selectLocale: true,
-            sort,
+            sort: useDrafts
+              ? getQueryDraftsSort({
+                  collectionConfig: adapter.payload.collections[field.collection].config,
+                  sort,
+                })
+              : sort,
             tableName: joinCollectionTableName,
             where: joinQueryWhere,
           })
-
-          const chainedMethods: ChainedMethods = []
-
-          joins.forEach(({ type, condition, table }) => {
-            chainedMethods.push({
-              args: [table, condition],
-              method: type ?? 'leftJoin',
-            })
-          })
-
-          if (page && limit !== 0) {
-            const offset = (page - 1) * limit - 1
-            if (offset > 0) {
-              chainedMethods.push({
-                args: [offset],
-                method: 'offset',
-              })
-            }
-          }
-
-          if (limit !== 0) {
-            chainedMethods.push({
-              args: [limit],
-              method: 'limit',
-            })
-          }
-
-          const db = adapter.drizzle as LibSQLDatabase
 
           for (let key in selectFields) {
             const val = selectFields[key]
@@ -610,14 +622,33 @@ export const traverseFields = ({
             }
           }
 
-          const subQuery = chainMethods({
-            methods: chainedMethods,
-            query: db
-              .select(selectFields as any)
-              .from(newAliasTable)
-              .where(subQueryWhere)
-              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-          }).as(subQueryAlias)
+          if (useDrafts) {
+            selectFields.parent = newAliasTable.parent
+          }
+
+          let query: SQLiteSelect = db
+            .select(selectFields as any)
+            .from(newAliasTable)
+            .where(subQueryWhere)
+            .orderBy(() => orderBy.map(({ column, order }) => order(column)))
+            .$dynamic()
+
+          joins.forEach(({ type, condition, table }) => {
+            query = query[type ?? 'leftJoin'](table, condition)
+          })
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit - 1
+            if (offset > 0) {
+              query = query.offset(offset)
+            }
+          }
+
+          if (limit !== 0) {
+            query = query.limit(limit)
+          }
+
+          const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
             currentArgs.extras[`${columnName}_count`] = sql`${db
@@ -636,7 +667,7 @@ export const traverseFields = ({
           currentArgs.extras[columnName] = sql`${db
             .select({
               result: jsonAggBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}".id`),
+                id: sql.raw(`"${subQueryAlias}".${useDrafts ? 'parent_id' : 'id'}`),
                 ...(selectFields._locale && {
                   locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
                 }),

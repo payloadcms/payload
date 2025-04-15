@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
@@ -176,18 +176,14 @@ test.describe('Bulk Edit', () => {
 
     await page.locator('input#select-all').check()
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await expect(titleOption).toBeVisible()
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await expect(titleInput).toBeVisible()
-    await titleInput.fill(updatedPostTitle)
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill(updatedPostTitle)
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 3 Posts successfully.',
@@ -222,14 +218,17 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToPublish1)
     await selectTableRow(page, titleOfPostToPublish2)
 
-    // Bulk edit the selected rows to `published` status
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
-    const options = page.locator('.rs__option')
-    const field = options.locator('text=Description')
-    await field.click()
-    await page.locator('#field-description').fill(description)
-    await page.locator('.form-submit .edit-many__publish').click()
+
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Description',
+      fieldID: 'description',
+    })
+
+    await field.fill(description)
+
+    // Bulk edit the selected rows to `published` status
+    await modal.locator('.form-submit .edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
@@ -258,12 +257,16 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToDraft2)
 
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
-    const options = page.locator('.rs__option')
-    const field = options.locator('text=Description')
-    await field.click()
-    await page.locator('#field-description').fill(description)
-    await page.locator('.form-submit .edit-many__draft').click()
+
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Description',
+      fieldID: 'description',
+    })
+
+    await field.fill(description)
+
+    // Bulk edit the selected rows to `draft` status
+    await modal.locator('.form-submit .edit-many__draft').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
@@ -336,18 +339,14 @@ test.describe('Bulk Edit', () => {
     await page.locator('button#select-all-across-pages').click()
 
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    const { field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await expect(titleOption).toBeVisible()
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await expect(titleInput).toBeVisible()
-    const updatedTitle = `Post (Updated)`
-    await titleInput.fill(updatedTitle)
+    const updatedTitle = 'Post (Updated)'
+    await field.fill(updatedTitle)
 
     await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
@@ -389,19 +388,18 @@ test.describe('Bulk Edit', () => {
     const updatedPostTitle = 'Post 1 (Updated)'
 
     const { id: postID } = await createPost(postData)
-    await page.goto(postsUrl.list)
-    await page.locator('input#select-all').check()
-    await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    await page.goto(postsUrl.list)
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    const { field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await titleInput.fill(updatedPostTitle)
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill(updatedPostTitle)
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 1 Post successfully.',
@@ -427,23 +425,19 @@ test.describe('Bulk Edit', () => {
   test('should bulk edit fields with subfields', async () => {
     await deleteAllPosts()
 
-    const { id: docID } = await createPost()
+    await createPost()
 
     await page.goto(postsUrl.list)
-    await page.locator('input#select-all').check()
-    await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const bulkEditModal = page.locator('#edit-posts')
+    await selectAllAndEditMany(page)
 
-    const titleOption = bulkEditModal.locator('.field-select .rs__option', {
-      hasText: exactText('Group > Title'),
+    const { modal, field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Group > Title',
+      fieldID: 'group__title',
     })
 
-    await titleOption.click()
-    const titleInput = bulkEditModal.locator('#field-group__title')
-    await titleInput.fill('New Group Title')
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill('New Group Title')
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 1 Post successfully.',
@@ -458,7 +452,80 @@ test.describe('Bulk Edit', () => {
 
     expect(updatedPost?.group?.title).toBe('New Group Title')
   })
+
+  test('should not display fields options lacking read and update permissions', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Read') }),
+    ).toBeHidden()
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Update') }),
+    ).toBeHidden()
+  })
+
+  test('should thread field permissions through subfields', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+
+    await selectAllAndEditMany(page)
+
+    const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
+
+    await field.locator('button.array-field__add-row').click()
+
+    await expect(field.locator('#field-array__0__optional')).toBeVisible()
+    await expect(field.locator('#field-array__0__noRead')).toBeHidden()
+    await expect(field.locator('#field-array__0__noUpdate')).toBeDisabled()
+  })
 })
+
+async function selectFieldToEdit(
+  page: Page,
+  {
+    fieldLabel,
+    fieldID,
+  }: {
+    fieldID: string
+    fieldLabel: string
+  },
+): Promise<{ field: Locator; modal: Locator }> {
+  // ensure modal is open, open if needed
+  const isModalOpen = await page.locator('#edit-posts').isVisible()
+
+  if (!isModalOpen) {
+    await page.locator('.edit-many__toggle').click()
+  }
+
+  const modal = page.locator('#edit-posts')
+  await expect(modal).toBeVisible()
+
+  await modal.locator('.field-select .rs__control').click()
+  await modal.locator('.field-select .rs__option', { hasText: exactText(fieldLabel) }).click()
+
+  const field = modal.locator(`#field-${fieldID}`)
+  await expect(field).toBeVisible()
+
+  return { modal, field }
+}
+
+async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
+  await page.locator('input#select-all').check()
+  await page.locator('.edit-many__toggle').click()
+  const modal = page.locator('#edit-posts')
+  await expect(modal).toBeVisible()
+  return { modal }
+}
 
 async function deleteAllPosts() {
   await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })

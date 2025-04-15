@@ -65,8 +65,11 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export type * from './admin/types.js'
+import type { SupportedLanguages } from '@payloadcms/translations'
+
 import { Cron } from 'croner'
 
+import type { ClientConfig } from './config/client.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -865,10 +868,12 @@ export const reload = async (
   }
 
   await payload.db.init()
+
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
-  global._payload_clientConfig = null
+
+  global._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
   global._payload_schemaMap = null
   global._payload_clientSchemaMap = null
   global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
@@ -1008,12 +1013,10 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
-
 export { generateImportMap } from './bin/generateImportMap/index.js'
 
 export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
-
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1060,6 +1063,7 @@ export type {
 } from './collections/config/types.js'
 
 export type { CompoundIndex } from './collections/config/types.js'
+
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
@@ -1084,7 +1088,9 @@ export {
   serverOnlyConfigProperties,
   type UnsanitizedClientConfig,
 } from './config/client.js'
+
 export { defaults } from './config/defaults.js'
+export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1160,6 +1166,8 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateJobs,
+  UpdateJobsArgs,
   UpdateMany,
   UpdateManyArgs,
   UpdateOne,
@@ -1313,6 +1321,7 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
@@ -1352,7 +1361,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1374,6 +1382,7 @@ export type {
 } from './globals/config/types.js'
 
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
+
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1390,6 +1399,7 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/index.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 
@@ -1423,6 +1433,7 @@ export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
 
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
@@ -1490,10 +1501,12 @@ export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
+export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
-export type { TypeWithVersion } from './versions/types.js'
+export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

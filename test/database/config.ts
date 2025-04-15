@@ -45,6 +45,10 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'text',
+          type: 'text',
+        },
+        {
           name: 'number',
           type: 'number',
         },
@@ -601,6 +605,29 @@ export default buildConfigWithDefaults({
         {
           fields: ['three', 'group.four'],
           unique: true,
+        },
+      ],
+    },
+    {
+      slug: 'aliases',
+      fields: [
+        {
+          name: 'thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName',
+          dbName: 'shortname',
+          type: 'array',
+          fields: [
+            {
+              name: 'nestedArray',
+              type: 'array',
+              dbName: 'short_nested_1',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
         },
       ],
     },

@@ -31,6 +31,7 @@ import {
   customUploadFieldSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
@@ -55,6 +56,7 @@ let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
+let listViewPreviewURL: AdminUrlUtil
 let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
@@ -66,6 +68,7 @@ let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
+let bestFitURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -88,6 +91,7 @@ describe('Uploads', () => {
       serverURL,
       adminThumbnailWithSearchQueries,
     )
+    listViewPreviewURL = new AdminUrlUtil(serverURL, listViewPreviewSlug)
     mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
@@ -99,6 +103,7 @@ describe('Uploads', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
+    bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1348,5 +1353,80 @@ describe('Uploads', () => {
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
+  })
+
+  describe('imageSizes best fit', () => {
+    test('should select adminThumbnail if one exists', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withAdminThumbnail button.upload__listToggler').click()
+      await page.locator('tr.row-1 td.cell-filename button.default-cell__first-cell').click()
+      const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute(
+        'src',
+        'https://payloadcms.com/images/universal-truth.jpg',
+      )
+    })
+
+    test('should select an image within target range', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-withinRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
+    })
+
+    test('should select next smallest image outside of range but smaller than original', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-nextSmallestOutOfRange button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
+    })
+
+    test('should select original if smaller than next available size', async () => {
+      await page.goto(bestFitURL.create)
+      await page.locator('#field-original button.upload__createNewToggler').click()
+      const fileChooserPromise = page.waitForEvent('filechooser')
+      await page.getByText('Select a file').click()
+      const fileChooser = await fileChooserPromise
+      await fileChooser.setFiles(path.join(dirname, 'small.png'))
+      await page.locator('dialog button#action-save').click()
+      const thumbnail = page.locator('#field-original div.thumbnail > img')
+      await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
+    })
+  })
+
+  test('should show correct image preview or placeholder after paginating', async () => {
+    await page.goto(listViewPreviewURL.list)
+    const firstRow = page.locator('.row-1')
+
+    const imageUploadCell = firstRow.locator('.cell-imageUpload .relationship-cell')
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+
+    const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+
+    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
+    await expect(pageTwoButton).toBeVisible()
+    await pageTwoButton.click()
+
+    const imageUploadImg = imageUploadCell.locator('.thumbnail')
+    await expect(imageUploadImg).toBeVisible()
+    await expect(imageRelationshipCell).toHaveText('image-1.png')
+
+    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
+    await expect(pageOneButton).toBeVisible()
+    await pageOneButton.click()
+
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
   })
 })

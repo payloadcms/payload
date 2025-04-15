@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FieldWithPathClient, SelectType } from 'payload'
+import type { ClientCollectionConfig, SelectType } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -9,11 +9,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
 import type { OnFieldSelect } from '../../FieldSelect/index.js'
+import type { FieldOption } from '../../FieldSelect/reduceFieldOptions.js'
 import type { State } from '../FormsManager/reducer.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { Form } from '../../../forms/Form/index.js'
-import { RenderFields } from '../../../forms/RenderFields/index.js'
+import { RenderField } from '../../../forms/RenderFields/RenderField.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
@@ -23,6 +24,7 @@ import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
 import './index.scss'
+import '../../../forms/RenderFields/index.scss'
 
 export const EditManyBulkUploadsDrawerContent: React.FC<
   {
@@ -46,13 +48,13 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   const { getFormState } = useServerFunctions()
   const abortFormStateRef = React.useRef<AbortController>(null)
 
-  const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
+  const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
   const collectionPermissions = permissions?.collections?.[collection.slug]
 
   const select = useMemo<SelectType>(() => {
     return unflatten(
-      selectedFields.reduce((acc, field) => {
-        acc[field.path] = true
+      selectedFields.reduce((acc, option) => {
+        acc[option.value.path] = true
         return acc
       }, {} as SelectType),
     )
@@ -91,10 +93,9 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 
   const handleSubmit: FormProps['onSubmit'] = useCallback(
     (formState) => {
-      const pairedData = selectedFields.reduce((acc, field) => {
-        const { path } = field
-        if (formState[path]) {
-          acc[path] = formState[path].value
+      const pairedData = selectedFields.reduce((acc, option) => {
+        if (formState[option.value.path]) {
+          acc[option.value.path] = formState[option.value.path].value
         }
         return acc
       }, {})
@@ -108,11 +109,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     async ({ dispatchFields, formState, selected }) => {
       setIsInitializing(true)
 
-      if (selected === null) {
-        setSelectedFields([])
-      } else {
-        setSelectedFields(selected.map(({ value }) => value))
-      }
+      setSelectedFields(selected || [])
 
       const { state } = await getFormState({
         collectionSlug: collection.slug,
@@ -165,16 +162,31 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         onChange={[onChange]}
         onSubmit={handleSubmit}
       >
-        <FieldSelect fields={fields} onChange={onFieldSelect} />
+        <FieldSelect
+          fields={fields}
+          onChange={onFieldSelect}
+          permissions={collectionPermissions.fields}
+        />
         {selectedFields.length === 0 ? null : (
-          <RenderFields
-            fields={selectedFields}
-            parentIndexPath=""
-            parentPath=""
-            parentSchemaPath={collection.slug}
-            permissions={collectionPermissions?.fields}
-            readOnly={false}
-          />
+          <div className="render-fields">
+            {selectedFields.map((option, i) => {
+              const {
+                value: { field, fieldPermissions, path },
+              } = option
+
+              return (
+                <RenderField
+                  clientFieldConfig={field}
+                  indexPath=""
+                  key={`${path}-${i}`}
+                  parentPath=""
+                  parentSchemaPath=""
+                  path={path}
+                  permissions={fieldPermissions}
+                />
+              )
+            })}
+          </div>
         )}
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
