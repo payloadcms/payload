@@ -3,6 +3,7 @@ import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } fr
 import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
 
 type CustomSelectProps = {
+  adminRoute: string
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]

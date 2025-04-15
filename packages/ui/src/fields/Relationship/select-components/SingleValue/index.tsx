@@ -1,12 +1,14 @@
 'use client'
 import type { SingleValueProps } from 'react-select'
 
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
 import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
 import type { Option } from '../../types.js'
 
+import { Link } from '../../../../elements/Link/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
@@ -26,13 +28,17 @@ export const SingleValue: React.FC<
   const {
     children,
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { onDocumentOpen } = {} } = {},
+    selectProps: { customProps: { adminRoute, onDocumentOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
+  const docUrl = formatAdminURL({
+    adminRoute,
+    path: `/collections/${relationTo}/${value}`,
+  })
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>
@@ -41,9 +47,10 @@ export const SingleValue: React.FC<
           <div className={`${baseClass}__text`}>{children}</div>
           {relationTo && hasReadPermission && allowEdit !== false && (
             <Fragment>
-              <button
+              <Link
                 aria-label={t('general:editLabel', { label })}
                 className={`${baseClass}__drawer-toggler`}
+                href={docUrl}
                 onClick={(event) => {
                   setShowTooltip(false)
                   onDocumentOpen({
@@ -62,13 +69,13 @@ export const SingleValue: React.FC<
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
                 onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from openingtype="button"
-                type="button"
+                skipRouteTransition
               >
                 <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
                   {t('general:edit')}
                 </Tooltip>
                 <EditIcon />
-              </button>
+              </Link>
             </Fragment>
           )}
         </div>

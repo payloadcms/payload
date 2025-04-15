@@ -1,12 +1,14 @@
 'use client'
 import type { MultiValueProps } from 'react-select'
 
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { components } from 'react-select'
 
 import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
 import type { Option } from '../../types.js'
 
+import { Link } from '../../../../elements/Link/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
@@ -25,13 +27,17 @@ export const MultiValueLabel: React.FC<
 > = (props) => {
   const {
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { draggableProps, onDocumentOpen } = {} } = {},
+    selectProps: { customProps: { adminRoute, draggableProps, onDocumentOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
+  const docUrl = formatAdminURL({
+    adminRoute,
+    path: `/collections/${relationTo}/${value}`,
+  })
 
   return (
     <div className={baseClass}>
@@ -46,9 +52,10 @@ export const MultiValueLabel: React.FC<
       </div>
       {relationTo && hasReadPermission && allowEdit !== false && (
         <Fragment>
-          <button
+          <Link
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
+            href={docUrl}
             onClick={(event) => {
               setShowTooltip(false)
               onDocumentOpen({
@@ -67,13 +74,13 @@ export const MultiValueLabel: React.FC<
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            type="button"
+            skipRouteTransition
           >
             <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
               {t('general:editLabel', { label: '' })}
             </Tooltip>
             <EditIcon className={`${baseClass}__icon`} />
-          </button>
+          </Link>
         </Fragment>
       )}
     </div>
