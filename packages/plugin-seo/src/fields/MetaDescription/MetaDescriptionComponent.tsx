@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
 import {
@@ -83,7 +83,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<

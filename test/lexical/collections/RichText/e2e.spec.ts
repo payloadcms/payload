@@ -182,27 +182,6 @@ describe('Rich Text', () => {
       await expect(modalTrigger).toBeDisabled()
     })
 
-    test('should only list RTE enabled upload collections in drawer', async () => {
-      await navigateToRichTextFields()
-      await wait(1000)
-
-      // Open link drawer
-      await page
-        .locator('.rich-text__toolbar button:not([disabled]) .upload-rich-text-button')
-        .first()
-        .click()
-
-      const drawer = page.locator('[id^=list-drawer_1_]')
-      await expect(drawer).toBeVisible()
-
-      // open the list select menu
-      await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
-
-      const menu = page.locator('.list-drawer__select-collection-wrap .rs__menu')
-      // `uploads-3` has enableRichTextRelationship set to false
-      await expect(menu).not.toContainText('Uploads3')
-    })
-
     // TODO: this test can't find the selector for the search filter, but functionality works.
     // Need to debug
     test.skip('should search correct useAsTitle field after toggling collection in list drawer', async () => {

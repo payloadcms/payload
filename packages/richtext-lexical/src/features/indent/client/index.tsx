@@ -68,12 +68,7 @@ const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] =>
         if (!nodes?.length) {
           return false
         }
-        if (nodes.some((node) => disabledNodes?.includes(node.getType()))) {
-          return false
-        }
-        return !$pointsAncestorMatch(selection, (node) =>
-          (disabledNodes ?? []).includes(node.getType()),
-        )
+        return !nodes.some((node) => disabledNodes?.includes(node.getType()))
       },
       key: 'indentIncrease',
       label: ({ i18n }) => {
