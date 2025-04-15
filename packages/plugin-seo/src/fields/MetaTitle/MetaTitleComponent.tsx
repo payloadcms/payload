@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextFieldClientProps } from 'payload'
 
 import {
@@ -33,7 +33,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
     hasGenerateTitleFn,
-    path: pathFromProps,
     readOnly,
   } = props
 
@@ -53,9 +52,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    potentiallyStalePath: pathFromProps,
-  })
+  }: FieldType<string> = useField()
 
   const locale = useLocale()
   const { getData } = useForm()

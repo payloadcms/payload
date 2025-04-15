@@ -131,6 +131,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       on,
       required,
     },
+    path: pathFromProps,
   } = props
 
   const { id: docID, docConfig } = useDocumentInfo()
@@ -142,7 +143,9 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     path,
     showError,
     value,
-  } = useField<PaginatedDocs>()
+  } = useField<PaginatedDocs>({
+    potentiallyStalePath: pathFromProps,
+  })
 
   const filterOptions: null | Where = useMemo(() => {
     if (!docID) {

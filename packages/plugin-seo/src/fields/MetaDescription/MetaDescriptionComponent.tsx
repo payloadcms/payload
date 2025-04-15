@@ -38,7 +38,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       required,
     },
     hasGenerateDescriptionFn,
-    path: pathFromProps,
     readOnly,
   } = props
 
@@ -65,9 +64,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    potentiallyStalePath: pathFromProps,
-  })
+  }: FieldType<string> = useField()
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {

@@ -20,12 +20,12 @@ const baseClass = 'sort-by-fields'
 
 export const SortBy: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { path } = props
-  const { setValue, value } = useField<string>({ path })
+  const { setValue, value } = useField<string>()
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { query } = useListQuery()
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
+
   const [displayedValue, setDisplayedValue] = useState<{
     id: string
     label: ReactNode

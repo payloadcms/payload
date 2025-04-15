@@ -30,7 +30,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
     field: { label, localized, relationTo, required },
     hasGenerateImageFn,
-    path: pathFromProps,
     readOnly,
   } = props
 
@@ -49,9 +48,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    potentiallyStalePath: pathFromProps,
-  })
+  }: FieldType<string> = useField()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
