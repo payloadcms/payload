@@ -117,7 +117,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

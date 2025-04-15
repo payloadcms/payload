@@ -120,7 +120,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

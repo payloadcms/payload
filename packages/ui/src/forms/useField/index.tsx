@@ -31,7 +31,13 @@ import { useFieldPath } from '../RenderFields/context.js'
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
-  const { disableFormData = false, hasRows, path: pathFromOptions, validate } = options || {}
+  const {
+    disableFormData = false,
+    hasRows,
+    path: pathFromOptions,
+    potentiallyStalePath,
+    validate,
+  } = options || {}
 
   const pathFromContext = useFieldPath()
 
@@ -42,7 +48,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   //   1. Custom server components that blindly spread their props (including static paths) into Payload fields still prefer the dynamic path from context
   //   2. Components that explicitly pass a `path` prop outside of the `FieldPathProvider` will still work, e.g. password field in account view
   //   3. Default client-side Payload fields that are wrapped with a `FieldPathProvider` will still work
-  const path = pathFromContext || pathFromOptions
+  const path = pathFromOptions || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

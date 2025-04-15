@@ -59,7 +59,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

@@ -57,7 +57,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

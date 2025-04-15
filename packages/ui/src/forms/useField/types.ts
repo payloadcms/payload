@@ -4,6 +4,7 @@ export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
   path?: string
+  potentiallyStalePath?: string
   validate?: Validate
 }
 

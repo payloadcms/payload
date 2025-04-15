@@ -70,7 +70,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

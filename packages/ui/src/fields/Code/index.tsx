@@ -53,7 +53,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

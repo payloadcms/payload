@@ -60,7 +60,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

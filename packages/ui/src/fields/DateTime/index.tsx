@@ -64,7 +64,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     showError,
     value,
   } = useField<string>({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

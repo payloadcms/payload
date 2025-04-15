@@ -55,7 +55,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
     showError,
     value,
   } = useField<string | string[]>({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

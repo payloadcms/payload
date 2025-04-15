@@ -33,8 +33,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
     hasGenerateTitleFn,
+    path: pathFromProps,
     readOnly,
-  } = props || {}
+  } = props
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -52,7 +53,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField()
+  }: FieldType<string> = useField({
+    potentiallyStalePath: pathFromProps,
+  })
 
   const locale = useLocale()
   const { getData } = useForm()

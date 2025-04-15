@@ -73,7 +73,7 @@ const RichTextComponent: React.FC<
     showError,
     value,
   } = useField<SerializedEditorState>({
-    path: pathFromProps,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
