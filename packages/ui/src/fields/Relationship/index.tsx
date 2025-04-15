@@ -82,7 +82,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const hasMultipleRelations = Array.isArray(relationTo)
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
-    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
   >({
     id: undefined,
     collectionSlug: undefined,
@@ -608,7 +608,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   }, [])
 
   const onDocumentNewTabOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+    ReactSelectAdapterProps['customProps']['onDocumentOpen']
   >(
     ({ id, collectionSlug, hasReadPermission }) => {
       if (hasReadPermission && id && collectionSlug) {
@@ -623,21 +623,25 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   )
 
   const onDocumentDrawerOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
-  >(
-    ({ id, collectionSlug, hasReadPermission, inNewTab }) => {
+    ReactSelectAdapterProps['customProps']['onDocumentOpen']
+  >(({ id, collectionSlug, hasReadPermission }) => {
+    openDrawerWhenRelationChanges.current = true
+    setCurrentlyOpenRelationship({
+      id,
+      collectionSlug,
+      hasReadPermission,
+    })
+  }, [])
+
+  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ inNewTab, ...args }) => {
       if (inNewTab) {
-        onDocumentNewTabOpen({ id, collectionSlug, hasReadPermission })
+        onDocumentNewTabOpen(args)
       } else {
-        openDrawerWhenRelationChanges.current = true
-        setCurrentlyOpenRelationship({
-          id,
-          collectionSlug,
-          hasReadPermission,
-        })
+        onDocumentDrawerOpen(args)
       }
     },
-    [onDocumentNewTabOpen],
+    [onDocumentNewTabOpen, onDocumentDrawerOpen],
   )
 
   useEffect(() => {
@@ -695,7 +699,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               customProps={{
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentDrawerOpen,
+                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}

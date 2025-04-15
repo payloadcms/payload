@@ -14,7 +14,7 @@ type CustomSelectProps = {
     selectProps: ReactSelectStateManagerProps,
   ) => any
   onDelete?: DocumentDrawerProps['onDelete']
-  onDocumentDrawerOpen?: (args: {
+  onDocumentOpen?: (args: {
     collectionSlug: string
     hasReadPermission: boolean
     id: number | string

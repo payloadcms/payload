@@ -25,7 +25,7 @@ export const MultiValueLabel: React.FC<
 > = (props) => {
   const {
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
+    selectProps: { customProps: { draggableProps, onDocumentOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
@@ -51,7 +51,7 @@ export const MultiValueLabel: React.FC<
             className={`${baseClass}__drawer-toggler`}
             onClick={(event) => {
               setShowTooltip(false)
-              onDocumentDrawerOpen({
+              onDocumentOpen({
                 id: value,
                 collectionSlug: relationTo,
                 hasReadPermission,

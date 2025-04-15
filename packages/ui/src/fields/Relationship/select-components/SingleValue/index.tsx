@@ -26,7 +26,7 @@ export const SingleValue: React.FC<
   const {
     children,
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
+    selectProps: { customProps: { onDocumentOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
@@ -46,7 +46,7 @@ export const SingleValue: React.FC<
                 className={`${baseClass}__drawer-toggler`}
                 onClick={(event) => {
                   setShowTooltip(false)
-                  onDocumentDrawerOpen({
+                  onDocumentOpen({
                     id: value,
                     collectionSlug: relationTo,
                     hasReadPermission,
