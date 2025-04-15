@@ -2,7 +2,6 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -13,6 +12,7 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
+import { getFieldByPath, type RequestContext } from '../../../index.js'
 import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
 import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
@@ -303,6 +303,27 @@ export const promise = async ({
             siblingDoc[field.name] = hookedValue
           }
         }
+      }
+    }
+
+    if ('virtual' in field && typeof field.virtual === 'object') {
+      const relationshipField = getFieldByPath({
+        fields: collection.flattenedFields,
+        path: field.virtual.relationship,
+      })
+
+      let relationshipValue = doc
+      for (const segment of field.virtual.relationship.split('.')) {
+        relationshipValue = doc?.[segment]
+      }
+
+      if (
+        (relationshipField.field.type === 'upload' ||
+          relationshipField.field.type === 'relationship') &&
+        typeof relationshipField.field.relationTo === 'string' &&
+        relationshipField.field.hasMany !== true
+      ) {
+        relationshipField.field.relationTo
       }
     }
 
