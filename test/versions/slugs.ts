@@ -33,7 +33,6 @@ export const collectionSlugs = [
 ]
 
 export const autoSaveGlobalSlug = 'autosave-global'
-
 export const draftGlobalSlug = 'draft-global'
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
