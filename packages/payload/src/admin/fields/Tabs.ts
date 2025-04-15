@@ -25,7 +25,7 @@ import type {
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[]; passesCondition?: boolean; readonly path?: string } & Omit<
+  | ({ fields: ClientField[]; passesCondition?: boolean; readonly path: string } & Omit<
       NamedTab,
       'fields'
     >)

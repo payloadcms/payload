@@ -75,74 +75,74 @@ export function RenderField({
   }
 
   if (clientFieldConfig.admin?.hidden) {
-    return <HiddenField {...baseFieldProps} />
+    return <HiddenField {...baseFieldProps} path={path} />
   }
 
   switch (clientFieldConfig.type) {
     case 'array':
-      return <ArrayField {...iterableFieldProps} field={clientFieldConfig} />
+      return <ArrayField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'blocks':
-      return <BlocksField {...iterableFieldProps} field={clientFieldConfig} />
+      return <BlocksField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'checkbox':
-      return <CheckboxField {...baseFieldProps} field={clientFieldConfig} />
+      return <CheckboxField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'code':
-      return <CodeField {...baseFieldProps} field={clientFieldConfig} />
+      return <CodeField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'collapsible':
-      return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} />
+      return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'date':
-      return <DateTimeField {...baseFieldProps} field={clientFieldConfig} />
+      return <DateTimeField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'email':
-      return <EmailField {...baseFieldProps} field={clientFieldConfig} />
+      return <EmailField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'group':
-      return <GroupField {...iterableFieldProps} field={clientFieldConfig} />
+      return <GroupField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'join':
-      return <JoinField {...baseFieldProps} field={clientFieldConfig} />
+      return <JoinField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'json':
-      return <JSONField {...baseFieldProps} field={clientFieldConfig} />
+      return <JSONField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'number':
-      return <NumberField {...baseFieldProps} field={clientFieldConfig} />
+      return <NumberField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'point':
-      return <PointField {...baseFieldProps} field={clientFieldConfig} />
+      return <PointField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'radio':
-      return <RadioGroupField {...baseFieldProps} field={clientFieldConfig} />
+      return <RadioGroupField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'relationship':
-      return <RelationshipField {...baseFieldProps} field={clientFieldConfig} />
+      return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'richText':
-      return <RichTextField {...baseFieldProps} field={clientFieldConfig} />
+      return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'row':
       return <RowField {...iterableFieldProps} field={clientFieldConfig} />
 
     case 'select':
-      return <SelectField {...baseFieldProps} field={clientFieldConfig} />
+      return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'tabs':
-      return <TabsField {...iterableFieldProps} field={clientFieldConfig} />
+      return <TabsField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'text':
-      return <TextField {...baseFieldProps} field={clientFieldConfig} />
+      return <TextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'textarea':
-      return <TextareaField {...baseFieldProps} field={clientFieldConfig} />
+      return <TextareaField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'ui':
       return <UIField />
 
     case 'upload':
-      return <UploadField {...baseFieldProps} field={clientFieldConfig} />
+      return <UploadField {...baseFieldProps} field={clientFieldConfig} path={path} />
   }
 }

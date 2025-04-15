@@ -22,7 +22,7 @@ import type {
 type RelationshipFieldClientWithoutType = MarkOptional<RelationshipFieldClient, 'type'>
 
 type RelationshipFieldBaseClientProps = {
-  readonly path?: string
+  readonly path: string
   readonly validate?: RelationshipFieldValidation
 }
 

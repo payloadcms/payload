@@ -14,7 +14,7 @@ import type {
 type UIFieldClientWithoutType = MarkOptional<UIFieldClient, 'type'>
 
 type UIFieldBaseClientProps = {
-  readonly path?: string
+  readonly path: string
 }
 
 type UIFieldBaseServerProps = Pick<FieldPaths, 'path'>

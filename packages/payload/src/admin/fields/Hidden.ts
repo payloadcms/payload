@@ -3,7 +3,7 @@ import type { ClientFieldBase } from '../types.js'
 type HiddenFieldBaseClientProps = {
   readonly disableModifyingForm?: false
   readonly field?: never
-  readonly path?: string
+  readonly path: string
   readonly value?: unknown
 }
 
