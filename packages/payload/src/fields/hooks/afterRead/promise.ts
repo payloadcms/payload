@@ -20,6 +20,7 @@ import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
+import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
 type Args = {
   /**
@@ -312,18 +313,28 @@ export const promise = async ({
         path: field.virtual.relationship,
       })
 
-      let relationshipValue = doc
-      for (const segment of field.virtual.relationship.split('.')) {
-        relationshipValue = doc?.[segment]
-      }
-
       if (
         (relationshipField.field.type === 'upload' ||
           relationshipField.field.type === 'relationship') &&
         typeof relationshipField.field.relationTo === 'string' &&
         relationshipField.field.hasMany !== true
       ) {
-        relationshipField.field.relationTo
+        populationPromises.push(
+          virtualFieldPopulationPromise({
+            name: field.name,
+            doc,
+            draft,
+            fallbackLocale,
+            fieldPath: field.virtual.path,
+            locale,
+            overrideAccess,
+            relationshipPath: field.virtual.relationship,
+            relationTo: relationshipField.field.relationTo,
+            req,
+            showHiddenFields,
+            siblingDoc,
+          }),
+        )
       }
     }
 

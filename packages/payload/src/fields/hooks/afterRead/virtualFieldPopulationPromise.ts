@@ -1,8 +1,6 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
-import { getFieldByPath } from '../../../utilities/getFieldByPath.js'
 
 const getValueByPath = ({ object, path }: { object: any; path: string }): any => {
   let currentValue = object
@@ -20,9 +18,8 @@ const getValueByPath = ({ object, path }: { object: any; path: string }): any =>
   return currentValue
 }
 
-export const virtualFieldPopulationPromise = ({
+export const virtualFieldPopulationPromise = async ({
   name,
-  collection,
   doc,
   draft,
   fallbackLocale,
@@ -35,7 +32,6 @@ export const virtualFieldPopulationPromise = ({
   showHiddenFields,
   siblingDoc,
 }: {
-  collection: SanitizedCollectionConfig
   doc: any
   draft: boolean
   fallbackLocale: string
@@ -49,11 +45,6 @@ export const virtualFieldPopulationPromise = ({
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }) => {
-  const relationshipField = getFieldByPath({
-    fields: collection.flattenedFields,
-    path: relationshipPath,
-  })
-
   const relationshipValue = getValueByPath({ object: doc, path: relationshipPath })
 
   if (!relationshipValue) {
@@ -73,19 +64,40 @@ export const virtualFieldPopulationPromise = ({
     return
   }
 
-  const populatedDoc: any = null
+  // Build select with only that field
+  const select = {}
+  let currentSelectRef: any = select
 
-  createDataloaderCacheKey({
-    collectionSlug: relationTo,
-    currentDepth: 0,
-    depth: 0,
-    docID: relationshipValue,
-    draft,
-    fallbackLocale,
-    locale,
-    overrideAccess,
-    select: {},
-    showHiddenFields,
-    transactionID: req.transactionID as number,
-  })
+  const segments = fieldPath.split('.')
+
+  for (let i = 0; i < segments.length; i++) {
+    currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
+    currentSelectRef = currentSelectRef[segments[i]]
+  }
+
+  const populatedDoc = await req.payloadDataLoader.load(
+    createDataloaderCacheKey({
+      collectionSlug: relationTo,
+      currentDepth: 0,
+      depth: 0,
+      docID: relationshipValue,
+      draft,
+      fallbackLocale,
+      locale,
+      overrideAccess,
+      select,
+      showHiddenFields,
+      transactionID: req.transactionID as number,
+    }),
+  )
+
+  if (!populatedDoc) {
+    return
+  }
+
+  const fieldValue = getValueByPath({ object: relationshipValue, path: fieldPath })
+
+  if (typeof fieldValue !== 'undefined') {
+    siblingDoc[name] = fieldValue
+  }
 }
