@@ -69,6 +69,18 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
                       ? await constraint.access(args)
                       : undefined
 
+                    if (constraintAccess === false) {
+                      return {
+                        [`access.${operation}.constraint`]: {
+                          not_equals: constraint.value,
+                        },
+                      }
+                    }
+
+                    if (constraintAccess === true) {
+                      return {}
+                    }
+
                     return {
                       and: [
                         ...(typeof constraintAccess === 'object' ? [constraintAccess] : []),
