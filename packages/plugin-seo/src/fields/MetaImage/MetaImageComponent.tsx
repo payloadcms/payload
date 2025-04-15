@@ -42,7 +42,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   } = useConfig()
 
   const {
-    customComponents: { Error, Label },
+    customComponents: { Error, Label } = {},
     filterOptions,
     path,
     setValue,

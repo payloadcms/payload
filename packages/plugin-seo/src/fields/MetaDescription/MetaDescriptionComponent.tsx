@@ -58,7 +58,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const minLength = minLengthFromProps || minLengthDefault
 
   const {
-    customComponents: { AfterInput, BeforeInput, Label },
+    customComponents: { AfterInput, BeforeInput, Label } = {},
     errorMessage,
     path,
     setValue,
