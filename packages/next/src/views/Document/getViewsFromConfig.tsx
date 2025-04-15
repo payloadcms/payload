@@ -130,11 +130,14 @@ export const getViewsFromConfig = ({
                 }
               } else {
                 CustomView = {
-                  ComponentConfig: getCustomViewByKey(views, 'default'),
+                  ComponentConfig: getCustomViewByKey(
+                    views,
+                    livePreviewEnabled ? 'live-preview' : 'default',
+                  ),
                 }
 
                 DefaultView = {
-                  Component: DefaultEditView,
+                  Component: livePreviewEnabled ? DefaultLivePreviewView : DefaultEditView,
                 }
               }
 
@@ -159,13 +162,14 @@ export const getViewsFromConfig = ({
               break
             }
 
-            case 'preview': {
+            case 'edit': {
               if (livePreviewEnabled) {
-                DefaultView = {
-                  Component: DefaultLivePreviewView,
-                }
                 CustomView = {
-                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
+                }
+
+                DefaultView = {
+                  Component: DefaultEditView,
                 }
               }
               break
@@ -283,10 +287,14 @@ export const getViewsFromConfig = ({
       switch (routeSegments.length) {
         case 2: {
           CustomView = {
-            ComponentConfig: getCustomViewByKey(views, 'default'),
+            ComponentConfig: getCustomViewByKey(
+              views,
+              livePreviewEnabled ? 'live-preview' : 'default',
+            ),
           }
+
           DefaultView = {
-            Component: DefaultEditView,
+            Component: livePreviewEnabled ? DefaultLivePreviewView : DefaultEditView,
           }
           break
         }
@@ -305,14 +313,14 @@ export const getViewsFromConfig = ({
               }
               break
             }
-
-            case 'preview': {
+            case 'edit': {
               if (livePreviewEnabled) {
-                DefaultView = {
-                  Component: DefaultLivePreviewView,
-                }
                 CustomView = {
-                  ComponentConfig: getCustomViewByKey(views, 'livePreview'),
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
+                }
+
+                DefaultView = {
+                  Component: DefaultEditView,
                 }
               }
               break

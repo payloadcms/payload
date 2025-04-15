@@ -44,7 +44,7 @@ export const DocumentTabLink: React.FC<{
     docPath += `/${segmentThree}`
   }
 
-  const href = `${docPath}${hrefFromProps}`
+  const href = `${docPath}${hrefFromProps}`.replace(/\/$/, '')
   // separated the two so it doesn't break checks against pathname
   const hrefWithLocale = `${href}${locale ? `?locale=${locale}` : ''}`
 
