@@ -11,11 +11,6 @@ const AutosavePosts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'description', 'createdAt', '_status'],
-    components: {
-      edit: {
-        beforeDocumentControls: ['/elements/CustomSaveDraftButton/index.js#CustomDraftButton'],
-      },
-    },
   },
   versions: {
     maxPerDoc: 35,

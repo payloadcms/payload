@@ -579,6 +579,7 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  BeforeDocumentControlsClientProps,
   BeforeDocumentControlsServerProps,
   BeforeDocumentControlsServerPropsOnly,
   DocumentSubViewTypes,
