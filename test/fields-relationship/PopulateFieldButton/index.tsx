@@ -4,12 +4,12 @@ import * as React from 'react'
 
 import { collection1Slug } from '../slugs.js'
 
-export const PrePopulateFieldUI: React.FC<{
+export const PopulateFieldButton: React.FC<{
   hasMany?: boolean
   hasMultipleRelations?: boolean
   path?: string
   targetFieldPath: string
-}> = ({ hasMany = true, hasMultipleRelations = false, path, targetFieldPath }) => {
+}> = ({ hasMany = true, hasMultipleRelations = false, targetFieldPath }) => {
   const { setValue } = useField({ path: targetFieldPath })
 
   const addDefaults = React.useCallback(() => {

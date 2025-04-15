@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
 import {
@@ -38,7 +38,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       required,
     },
     hasGenerateDescriptionFn,
-    path,
     readOnly,
   } = props
 
@@ -58,12 +57,14 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
 
-  const { customComponents, errorMessage, setValue, showError, value }: FieldType<string> =
-    useField({
-      path,
-    } as Options)
-
-  const { AfterInput, BeforeInput, Label } = customComponents ?? {}
+  const {
+    customComponents: { AfterInput, BeforeInput, Label } = {},
+    errorMessage,
+    path,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField()
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
