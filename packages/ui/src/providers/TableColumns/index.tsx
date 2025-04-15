@@ -18,7 +18,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   LinkedCellOverride,
 }) => {
   const { getEntityConfig } = useConfig()
-  const { query: currentQuery, refineListData } = useListQuery()
+  const { refineListData } = useListQuery()
 
   const { admin: { defaultColumns } = {} } = getEntityConfig({
     collectionSlug,
@@ -69,11 +69,21 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     [columnState, refineListData, setOptimisticColumnState],
   )
 
-  const setActiveColumns = useCallback(
+  const setColumns = useCallback(
     async (columns: string[]) => {
       await refineListData({ columns })
     },
     [refineListData],
+  )
+
+  /**
+   * @deprecated Use setColumns instead
+   */
+  const setActiveColumns = useCallback(
+    async (columns: string[]) => {
+      return setColumns(columns)
+    },
+    [setColumns],
   )
 
   const resetColumnsState = React.useCallback(async () => {
@@ -88,6 +98,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         moveColumn,
         resetColumnsState,
         setActiveColumns,
+        setColumns,
         toggleColumn,
         ...contextRef.current,
       }}
