@@ -33,6 +33,7 @@ export const tabs: Record<
   default: {
     condition: ({ collectionConfig, config, globalConfig }) => {
       let isLivePreview = false
+
       if (collectionConfig) {
         isLivePreview = Boolean(
           config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
@@ -47,7 +48,9 @@ export const tabs: Record<
         )
       }
 
-      return !isLivePreview
+      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
+
+      return !isLivePreviewEnabled
     },
     href: '',
     // isActive: ({ href, location }) =>
@@ -57,21 +60,25 @@ export const tabs: Record<
   },
   edit: {
     condition: ({ collectionConfig, config, globalConfig }) => {
+      let isLivePreview = false
+
       if (collectionConfig) {
-        return Boolean(
+        isLivePreview = Boolean(
           config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
             collectionConfig?.admin?.livePreview,
         )
       }
 
       if (globalConfig) {
-        return Boolean(
+        isLivePreview = Boolean(
           config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
             globalConfig?.admin?.livePreview,
         )
       }
 
-      return false
+      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
+
+      return isLivePreviewEnabled
     },
     href: '/edit',
     label: ({ t }) => t('general:edit'),
@@ -79,25 +86,55 @@ export const tabs: Record<
   },
   livePreview: {
     condition: ({ collectionConfig, config, globalConfig }) => {
+      let isLivePreview = false
+
       if (collectionConfig) {
-        return Boolean(
+        isLivePreview = Boolean(
           config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
             collectionConfig?.admin?.livePreview,
         )
       }
 
       if (globalConfig) {
-        return Boolean(
+        isLivePreview = Boolean(
           config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
             globalConfig?.admin?.livePreview,
         )
       }
 
-      return false
+      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
+
+      return !isLivePreviewEnabled
     },
-    href: '/',
+    href: '/preview',
     label: ({ t }) => t('general:livePreview'),
     order: 100,
+  },
+  livePreviewDefault: {
+    condition: ({ collectionConfig, config, globalConfig }) => {
+      let isLivePreview = false
+
+      if (collectionConfig) {
+        isLivePreview = Boolean(
+          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
+            collectionConfig?.admin?.livePreview,
+        )
+      }
+
+      if (globalConfig) {
+        isLivePreview = Boolean(
+          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
+            globalConfig?.admin?.livePreview,
+        )
+      }
+
+      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
+
+      return isLivePreviewEnabled
+    },
+    href: '',
+    label: ({ t }) => t('general:livePreview'),
+    order: 0,
   },
   references: {
     condition: () => false,

@@ -40,6 +40,7 @@ export default buildConfigWithDefaults({
       breakpoints: [mobileBreakpoint, desktopBreakpoint],
       collections: [pagesSlug, postsSlug, ssrPagesSlug, ssrAutosavePagesSlug],
       globals: ['header', 'footer'],
+      // defaultTab: true,
     },
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
