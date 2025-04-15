@@ -41,13 +41,8 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
 
   const pathFromContext = useFieldPath()
 
-  // Custom components receive path as a static prop, leading to stale paths after changing local state
-  // They only become valid again after form state is returned from the server
-  // To fix this, we pass path into context, and use that as priority over the static prop
-  // This ensures that:
-  //   1. Custom server components that blindly spread their props (including static paths) into Payload fields still prefer the dynamic path from context
-  //   2. Components that explicitly pass a `path` prop outside of the `FieldPathProvider` will still work, e.g. password field in account view
-  //   3. Default client-side Payload fields that are wrapped with a `FieldPathProvider` will still work
+  // This is a workaround for stale props given to server rendered components.
+  // See the notes in the `potentiallyStalePath` type definition for more details.
   const path = pathFromOptions || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
