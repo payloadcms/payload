@@ -34,11 +34,15 @@ export default buildConfigWithDefaults({
           label: 'Specific Roles',
           value: 'specificRoles',
           fields: [roles],
-          //   access: ({ req: { user } }) => ({
-          //     'access.read.roles': {
-          //       in: user?.roles || [],
-          //     },
-          //   }),
+          access: ({ req: { user } }) => ({
+            'access.read.roles': {
+              in: user?.roles || [],
+            },
+          }),
+        },
+        {
+          label: 'Noone',
+          value: 'noone',
           access: () => false,
         },
       ],
