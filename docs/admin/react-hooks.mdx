@@ -981,7 +981,15 @@ const MyComponent: React.FC = () => {
 
 ## useTableColumns
 
-Returns methods to manipulate table columns
+Returns methods to manipulate table columns:
+| Property | Description |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| **`columns`** | The current state of columns including their active status and configuration |
+| **`LinkedCellOverride`** | A component override for linked cells in the table |
+| **`moveColumn`** | A method to reorder columns. Accepts `{ fromIndex: number, toIndex: number }` as arguments |
+| **`resetColumnsState`** | A method to reset columns back to their default state |
+| **`setActiveColumns`** | A method to set which columns are active. Accepts an array of column names as strings |
+| **`toggleColumn`** | A method to toggle a single column's visibility. Accepts a column name as string |
 
 ```tsx
 'use client'
@@ -991,14 +999,14 @@ const MyComponent: React.FC = () => {
   // highlight-start
   const { setActiveColumns } = useTableColumns()
 
-  const resetColumns = () => {
+  const setColumns = () => {
     setActiveColumns(['id', 'createdAt', 'updatedAt'])
   }
   // highlight-end
 
   return (
-    <button type="button" onClick={resetColumns}>
-      Reset columns
+    <button type="button" onClick={setColumns}>
+      Set columns
     </button>
   )
 }
