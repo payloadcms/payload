@@ -4,17 +4,11 @@ import type { OptionGroup, Value } from './types.js'
 
 type Args = {
   allowEdit: boolean
-  allowOpenInNewTab: boolean
   options: OptionGroup[]
   value: Value | Value[]
 }
 
-export const findOptionsByValue = ({
-  allowEdit,
-  allowOpenInNewTab,
-  options,
-  value,
-}: Args): Option | Option[] => {
+export const findOptionsByValue = ({ allowEdit, options, value }: Args): Option | Option[] => {
   if (value || typeof value === 'number') {
     if (Array.isArray(value)) {
       return value.map((val) => {
@@ -32,7 +26,7 @@ export const findOptionsByValue = ({
           }
         })
 
-        return matchedOption ? { allowEdit, allowOpenInNewTab, ...matchedOption } : undefined
+        return matchedOption ? { allowEdit, ...matchedOption } : undefined
       })
     }
 
@@ -49,7 +43,7 @@ export const findOptionsByValue = ({
       }
     })
 
-    return matchedOption ? { allowEdit, allowOpenInNewTab, ...matchedOption } : undefined
+    return matchedOption ? { allowEdit, ...matchedOption } : undefined
   }
 
   return undefined

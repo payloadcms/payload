@@ -19,11 +19,6 @@ type CustomSelectProps = {
     hasReadPermission: boolean
     id: number | string
   }) => void
-  onDocumentOpen?: (args: {
-    collectionSlug: string
-    hasReadPermission: boolean
-    id: number | string
-  }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
 }
@@ -75,17 +70,10 @@ export type ReactSelectAdapterProps = {
     | ((
         {
           allowEdit,
-          allowOpenInNewTab,
           data,
           label,
           value,
-        }: {
-          allowEdit: boolean
-          allowOpenInNewTab: boolean
-          data: Option
-          label: string
-          value: string
-        },
+        }: { allowEdit: boolean; data: Option; label: string; value: string },
         search: string,
       ) => boolean)
     | undefined

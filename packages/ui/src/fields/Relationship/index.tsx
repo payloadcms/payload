@@ -7,7 +7,7 @@ import type {
 } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
+import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -618,19 +618,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     })
   }, [])
 
-  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
-    ({ id, collectionSlug, hasReadPermission }) => {
-      if (hasReadPermission && id && collectionSlug) {
-        const docUrl = formatAdminURL({
-          adminRoute: config.routes.admin,
-          path: `/collections/${collectionSlug}/${id}`,
-        })
-        window.open(docUrl, '_blank')
-      }
-    },
-    [config.routes.admin],
-  )
-
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
       openDrawer()
@@ -638,7 +625,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }
   }, [openDrawer, currentlyOpenRelationship])
 
-  const valueToRender = findOptionsByValue({ allowEdit, allowOpenInNewTab, options, value })
+  const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
@@ -687,7 +674,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentDrawerOpen,
-                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}

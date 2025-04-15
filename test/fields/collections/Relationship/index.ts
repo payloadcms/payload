@@ -60,15 +60,6 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
-      name: 'relationWithOpenInNewTab',
-      admin: {
-        allowOpenInNewTab: true,
-      },
-      defaultValue: ({ user }) => user?.id,
-      relationTo: 'users',
-      type: 'relationship',
-    },
-    {
       name: 'relationWithDynamicDefault',
       defaultValue: ({ user }) => user?.id,
       relationTo: 'users',

@@ -9,10 +9,9 @@ import type { Option } from '../../types.js'
 
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
-import { NewTabIcon } from '../../../../icons/NewTab/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
-import './index.scss'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import './index.scss'
 
 const baseClass = 'relationship--multi-value-label'
 
@@ -25,10 +24,8 @@ export const MultiValueLabel: React.FC<
   } & MultiValueProps<Option>
 > = (props) => {
   const {
-    data: { allowEdit, allowOpenInNewTab, label, relationTo, value },
-    selectProps: {
-      customProps: { draggableProps, onDocumentDrawerOpen, onDocumentOpen } = {},
-    } = {},
+    data: { allowEdit, label, relationTo, value },
+    selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
@@ -75,37 +72,6 @@ export const MultiValueLabel: React.FC<
               {t('general:editLabel', { label: '' })}
             </Tooltip>
             <EditIcon className={`${baseClass}__icon`} />
-          </button>
-        </Fragment>
-      )}
-      {relationTo && hasReadPermission && allowOpenInNewTab !== false && (
-        <Fragment>
-          <button
-            aria-label={`Open ${label}`}
-            className={`${baseClass}__open-in-new-tab`}
-            onClick={() => {
-              setShowTooltip(false)
-              onDocumentOpen({
-                id: value,
-                collectionSlug: relationTo,
-                hasReadPermission,
-              })
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.stopPropagation()
-              }
-            }}
-            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-            onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            type="button"
-          >
-            <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-              {t('fields:openInNewTab', { label: '' })}
-            </Tooltip>
-            <NewTabIcon className={`${baseClass}__icon`} />
           </button>
         </Fragment>
       )}

@@ -3,7 +3,6 @@ import type { ClientCollectionConfig, ClientConfig, FilterOptionsResult } from '
 
 export type Option = {
   allowEdit: boolean
-  allowOpenInNewTab: boolean
   label: string
   options?: Option[]
   relationTo?: string
