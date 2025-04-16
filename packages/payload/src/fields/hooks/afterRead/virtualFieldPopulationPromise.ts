@@ -77,7 +77,6 @@ export const virtualFieldPopulationPromise = async ({
     typeof currentField.relationTo === 'string' &&
     !currentField.hasMany
   ) {
-    debugger
     let docID: number | string
 
     if (typeof currentValue === 'object') {
