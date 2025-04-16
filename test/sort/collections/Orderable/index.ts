@@ -19,6 +19,16 @@ export const OrderableCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      type: 'group',
+      name: 'meta',
+      fields: [
+        {
+          name: 'tag',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'orderableField',
       type: 'relationship',
       relationTo: orderableJoinSlug,

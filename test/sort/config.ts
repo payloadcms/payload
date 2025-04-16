@@ -79,10 +79,10 @@ async function seedSortable(payload: Payload) {
   const joinA = await payload.create({ collection: 'orderable-join', data: { title: 'Join A' } })
 
   await createData(payload, 'orderable', [
-    { title: 'A', orderableField: joinA.id },
-    { title: 'B', orderableField: joinA.id },
-    { title: 'C', orderableField: joinA.id },
-    { title: 'D', orderableField: joinA.id },
+    { title: 'A', orderableField: joinA.id, meta: { tag: 'a' } },
+    { title: 'B', orderableField: joinA.id, meta: { tag: 'a' } },
+    { title: 'C', orderableField: joinA.id, meta: { tag: 'a' } },
+    { title: 'D', orderableField: joinA.id, meta: { tag: 'a' } },
   ])
 
   await payload.create({ collection: 'orderable-join', data: { title: 'Join B' } })
