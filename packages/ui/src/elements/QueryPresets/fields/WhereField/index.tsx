@@ -88,9 +88,8 @@ const transformWhereToNaturalLanguage = (
 
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },
-  path,
 }) => {
-  const { value } = useField({ path })
+  const { path, value } = useField()
   const { collectionSlug } = useListQuery()
   const { getEntityConfig } = useConfig()
 

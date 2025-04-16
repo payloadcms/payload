@@ -503,6 +503,42 @@ describe('Query Presets', () => {
         expect((error as Error).message).toBe('You are not allowed to perform this action.')
       }
     })
+
+    it('should respect boolean access control results', async () => {
+      // create a preset with the read constraint set to "noone"
+      const presetForNoone = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user,
+        data: {
+          relatedCollection: 'pages',
+          title: 'Noone',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          access: {
+            read: {
+              constraint: 'noone',
+            },
+          },
+        },
+      })
+
+      try {
+        const foundPresetWithUser1 = await payload.findByID({
+          collection: queryPresetsCollectionSlug,
+          depth: 0,
+          user,
+          overrideAccess: false,
+          id: presetForNoone.id,
+        })
+
+        expect(foundPresetWithUser1).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Not Found')
+      }
+    })
   })
 
   it.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async () => {
