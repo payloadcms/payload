@@ -2062,6 +2062,19 @@ describe('database', () => {
     })
 
     it.todo('should allow to sort by a virtual field with reference')
+
+    it('should allow virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '1-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '1-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      expect(doc.postCategoryTitle).toBe('1-category')
+    })
   })
 
   it('should convert numbers to text', async () => {

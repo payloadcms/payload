@@ -37,12 +37,27 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+          // access: { read: () => false },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          name: 'category',
         },
         {
           name: 'localized',
@@ -451,6 +466,14 @@ export default buildConfigWithDefaults({
           type: 'text',
           virtual: {
             path: 'title',
+            relationship: 'post',
+          },
+        },
+        {
+          name: 'postCategoryTitle',
+          type: 'text',
+          virtual: {
+            path: 'category.title',
             relationship: 'post',
           },
         },
