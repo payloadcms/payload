@@ -269,6 +269,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    operation,
     path,
     user,
   }: {
@@ -276,6 +277,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * A string relating to which operation the field type is currently executing within.
+     */
+    operation: Operation
     /**
      * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
      */

@@ -225,4 +225,12 @@ describe('Conditional Logic', () => {
 
     await expect(numberField).toBeVisible()
   })
+
+  test('should render field based on operation argument', async () => {
+    await page.goto(url.create)
+
+    const fieldWithOperationCondition = page.locator('#field-fieldWithOperationCondition')
+
+    await expect(fieldWithOperationCondition).toBeVisible()
+  })
 })
