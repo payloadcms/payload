@@ -464,23 +464,17 @@ export default buildConfigWithDefaults({
         {
           name: 'postTitle',
           type: 'text',
-          virtual: {
-            path: 'post.title',
-          },
+          virtual: 'post.title',
         },
         {
           name: 'postCategoryTitle',
           type: 'text',
-          virtual: {
-            path: 'post.category.title',
-          },
+          virtual: 'post.category.title',
         },
         {
           name: 'postLocalized',
           type: 'text',
-          virtual: {
-            path: 'post.localized',
-          },
+          virtual: 'post.localized',
         },
         {
           name: 'post',

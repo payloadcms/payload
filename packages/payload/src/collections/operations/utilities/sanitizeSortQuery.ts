@@ -21,8 +21,8 @@ const sanitizeSort = ({ fields, sort }: { fields: FlattenedField[]; sort: string
       continue
     }
 
-    if ('virtual' in field && typeof field.virtual === 'object') {
-      return `${desc ? '-' : ''}${field.virtual.path}`
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      return `${desc ? '-' : ''}${field.virtual}`
     }
   }
 

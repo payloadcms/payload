@@ -307,7 +307,7 @@ export const promise = async ({
       }
     }
 
-    if ('virtual' in field && typeof field.virtual === 'object') {
+    if ('virtual' in field && typeof field.virtual === 'string') {
       populationPromises.push(
         virtualFieldPopulationPromise({
           name: field.name,
@@ -318,7 +318,7 @@ export const promise = async ({
           overrideAccess,
           ref: doc,
           req,
-          segments: field.virtual.path.split('.'),
+          segments: field.virtual.split('.'),
           showHiddenFields,
           siblingDoc,
         }),

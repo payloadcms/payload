@@ -107,15 +107,8 @@ export async function validateSearchParam({
         if (field.virtual === true) {
           errors.push({ path })
         } else {
-          constraint[`${field.virtual.path}`] = constraint[path]
+          constraint[`${field.virtual}`] = constraint[path]
           delete constraint[path]
-
-          // field = getFieldByPath({
-          //   fields:
-          //     req.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
-          //   path: field.virtual.path,
-          // }).field
-          // collectionSlug = relationshipField.field.relationTo
         }
       }
 

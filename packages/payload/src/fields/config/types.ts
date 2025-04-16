@@ -511,11 +511,7 @@ export interface FieldBase {
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
    * A virtual field can be used in `admin.useAsTitle` only when linked to a relationship.
    */
-  virtual?:
-    | {
-        path: string
-      }
-    | boolean
+  virtual?: boolean | string
 }
 
 export interface FieldBaseClient {
