@@ -39,6 +39,12 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
+  /**
+   * Pass `true` to disable use of ON CONFLICT DO UPDATE.
+   * This will fallback to a legacy update-then-insert upsert strategy.
+   * @default false
+   */
+  disableOnConflictDoUpdate?: boolean
   extensions?: string[]
   /**
    * By default, we connect to a local database using the `pg` module instead of `@vercel/postgres`.
@@ -99,6 +105,7 @@ declare module 'payload' {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
+    disableOnConflictDoUpdate?: boolean
     drizzle: Drizzle
     enums: Record<string, GenericEnum>
     extensions: Record<string, boolean>

@@ -320,6 +320,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
+  disableOnConflictDoUpdate?: boolean
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
