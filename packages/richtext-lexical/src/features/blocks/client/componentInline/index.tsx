@@ -285,6 +285,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   // cleanup effect
   useEffect(() => {
     return () => {
+      // If the component is unmounted, either via removeInlineBlock or via lexical itself,
+      // we need to reset the cacheBuster to force a re-fetch of the initial state when it gets mounted again e.g. via lexical history undo.
+      // Otherwise it would use a potentially outdated initial state, if the inline block was edited before it got removed.
+      prevCacheBuster.current = -1
       abortAndIgnore(onChangeAbortControllerRef.current)
     }
   }, [])
