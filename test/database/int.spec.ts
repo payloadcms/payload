@@ -7,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
@@ -2074,6 +2075,24 @@ describe('database', () => {
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should allow to query by virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '2-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '2-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const found = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: '2-category' } },
+      })
+      expect(found.docs).toHaveLength(1)
+      expect(found.docs[0].id).toBe(doc.id)
     })
   })
 
