@@ -10,6 +10,7 @@ import type { Config } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
@@ -229,8 +230,15 @@ describe('Conditional Logic', () => {
   test('should render field based on operation argument', async () => {
     await page.goto(url.create)
 
+    const textField = page.locator('#field-text')
     const fieldWithOperationCondition = page.locator('#field-fieldWithOperationCondition')
 
+    await textField.fill('some text')
+
     await expect(fieldWithOperationCondition).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(fieldWithOperationCondition).toBeHidden()
   })
 })
