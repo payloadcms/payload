@@ -77,6 +77,7 @@ export const virtualFieldPopulationPromise = async ({
     typeof currentField.relationTo === 'string' &&
     !currentField.hasMany
   ) {
+    debugger
     let docID: number | string
 
     if (typeof currentValue === 'object') {
@@ -131,7 +132,7 @@ export const virtualFieldPopulationPromise = async ({
       name,
       draft,
       fallbackLocale,
-      fields,
+      fields: req.payload.collections[currentField.relationTo].config.flattenedFields,
       locale,
       overrideAccess,
       ref: populatedDoc,
