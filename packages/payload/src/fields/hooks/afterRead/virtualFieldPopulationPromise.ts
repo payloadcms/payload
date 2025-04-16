@@ -79,7 +79,7 @@ export const virtualFieldPopulationPromise = async ({
   ) {
     let docID: number | string
 
-    if (typeof currentValue === 'object') {
+    if (typeof currentValue === 'object' && currentValue) {
       docID = currentValue.id
     } else {
       docID = currentValue
