@@ -324,7 +324,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch])
+  }, [i18n, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
