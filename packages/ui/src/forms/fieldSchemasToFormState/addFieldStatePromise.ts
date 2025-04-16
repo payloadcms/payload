@@ -467,9 +467,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
                 state[blockNameKey] = {}
 
-                if (row.blockName) {
-                  state[blockNameKey].initialValue = row.blockName
-                  state[blockNameKey].value = row.blockName
+                let blockName: string | undefined = row.blockName
+
+                if (
+                  !blockName &&
+                  block.admin?.generateBlockName &&
+                  !block.admin?.disableBlockName
+                ) {
+                  blockName = block.admin.generateBlockName({
+                    id,
+                    blockData: blocksValue[i],
+                    data: fullData,
+                    operation,
+                    req,
+                    rowIndex: i,
+                  })
+                }
+
+                if (blockName) {
+                  state[blockNameKey].initialValue = blockName
+                  state[blockNameKey].value = blockName
                 }
 
                 if (includeSchema) {
