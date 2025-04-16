@@ -1,103 +1,144 @@
 import type { PayloadRequest } from '../../../types/index.js'
+import type { FlattenedField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 
-const getValueByPath = ({ object, path }: { object: any; path: string }): any => {
-  let currentValue = object
-
-  for (const segment of path.split('.')) {
-    const current = object[segment]
-
-    if (typeof current === 'undefined') {
-      return
-    }
-
-    currentValue = current
-  }
-
-  return currentValue
-}
-
 export const virtualFieldPopulationPromise = async ({
   name,
-  doc,
   draft,
   fallbackLocale,
-  fieldPath,
+  fields,
   locale,
   overrideAccess,
-  relationshipPath,
-  relationTo,
+  ref,
   req,
+  segments,
   showHiddenFields,
   siblingDoc,
 }: {
-  doc: any
   draft: boolean
   fallbackLocale: string
-  fieldPath: string
+  fields: FlattenedField[]
   locale: string
   name: string
   overrideAccess: boolean
-  relationshipPath: string
-  relationTo: string
+  ref: any
   req: PayloadRequest
+  segments: string[]
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
-}) => {
-  const relationshipValue = getValueByPath({ object: doc, path: relationshipPath })
+}): Promise<void> => {
+  const currentSegment = segments.shift()
 
-  if (!relationshipValue) {
+  if (!currentSegment) {
     return
   }
 
-  if (typeof relationshipValue === 'object') {
-    const fieldValue = getValueByPath({ object: relationshipValue, path: fieldPath })
+  const currentValue = ref[currentSegment]
 
-    if (typeof fieldValue !== 'undefined') {
-      siblingDoc[name] = fieldValue
+  if (typeof currentValue === 'undefined') {
+    return
+  }
+
+  // Final step
+  if (segments.length === 0) {
+    siblingDoc[name] = currentValue
+    return
+  }
+
+  const currentField = fields.find((each) => each.name === currentSegment)
+
+  if (!currentField) {
+    return
+  }
+
+  if (currentField.type === 'group' || currentField.type === 'tab') {
+    if (!currentValue || typeof currentValue !== 'object') {
       return
     }
-  }
 
-  if (typeof relationshipValue !== 'number' && typeof relationshipValue !== 'string') {
-    return
-  }
-
-  // Build select with only that field
-  const select = {}
-  let currentSelectRef: any = select
-
-  const segments = fieldPath.split('.')
-
-  for (let i = 0; i < segments.length; i++) {
-    currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
-    currentSelectRef = currentSelectRef[segments[i]]
-  }
-
-  const populatedDoc = await req.payloadDataLoader.load(
-    createDataloaderCacheKey({
-      collectionSlug: relationTo,
-      currentDepth: 0,
-      depth: 0,
-      docID: relationshipValue,
+    return virtualFieldPopulationPromise({
+      name,
       draft,
       fallbackLocale,
+      fields: currentField.flattenedFields,
       locale,
       overrideAccess,
-      select,
+      ref: currentValue,
+      req,
+      segments,
       showHiddenFields,
-      transactionID: req.transactionID as number,
-    }),
-  )
-
-  if (!populatedDoc) {
-    return
+      siblingDoc,
+    })
   }
 
-  const fieldValue = getValueByPath({ object: populatedDoc, path: fieldPath })
+  if (
+    (currentField.type === 'relationship' || currentField.type === 'upload') &&
+    typeof currentField.relationTo === 'string' &&
+    !currentField.hasMany
+  ) {
+    let docID: number | string
 
-  if (typeof fieldValue !== 'undefined') {
-    siblingDoc[name] = fieldValue
+    if (typeof currentValue === 'object') {
+      docID = currentValue.id
+    } else {
+      docID = currentValue
+    }
+
+    if (typeof docID !== 'string' && typeof docID !== 'number') {
+      return
+    }
+
+    const select = {}
+    let currentSelectRef: any = select
+    const currentFields = req.payload.collections[currentField.relationTo].config.flattenedFields
+
+    for (let i = 0; i < segments.length; i++) {
+      const field = currentFields.find((each) => each.name === segments[i])
+
+      const shouldBreak =
+        i === segments.length - 1 || field?.type === 'relationship' || field?.type === 'upload'
+
+      currentSelectRef[segments[i]] = shouldBreak ? true : {}
+      currentSelectRef = currentSelectRef[segments[i]]
+
+      if (shouldBreak) {
+        break
+      }
+    }
+
+    const populatedDoc = await req.payloadDataLoader.load(
+      createDataloaderCacheKey({
+        collectionSlug: currentField.relationTo,
+        currentDepth: 0,
+        depth: 0,
+        docID,
+        draft,
+        fallbackLocale,
+        locale,
+        overrideAccess,
+        select,
+        showHiddenFields,
+        transactionID: req.transactionID as number,
+      }),
+    )
+
+    if (!populatedDoc) {
+      return
+    }
+
+    return virtualFieldPopulationPromise({
+      name,
+      draft,
+      fallbackLocale,
+      fields,
+      locale,
+      overrideAccess,
+      ref: populatedDoc,
+      req,
+      segments,
+      showHiddenFields,
+      siblingDoc,
+    })
   }
 }

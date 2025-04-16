@@ -22,7 +22,7 @@ const sanitizeSort = ({ fields, sort }: { fields: FlattenedField[]; sort: string
     }
 
     if ('virtual' in field && typeof field.virtual === 'object') {
-      return `${desc ? '-' : ''}${field.virtual.relationship}.${field.virtual.path}`
+      return `${desc ? '-' : ''}${field.virtual.path}`
     }
   }
 

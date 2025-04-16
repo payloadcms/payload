@@ -107,29 +107,15 @@ export async function validateSearchParam({
         if (field.virtual === true) {
           errors.push({ path })
         } else {
-          const relationshipField = getFieldByPath({
-            fields: req.payload.collections[collectionSlug].config.flattenedFields,
-            path: field.virtual.relationship,
-          })
+          constraint[`${field.virtual.path}`] = constraint[path]
+          delete constraint[path]
 
-          if (
-            relationshipField &&
-            relationshipField.field.type === 'relationship' &&
-            !relationshipField.field.hasMany &&
-            typeof relationshipField.field.relationTo === 'string'
-          ) {
-            constraint[`${field.virtual.relationship}.${field.virtual.path}`] = constraint[path]
-            delete constraint[path]
-
-            field = getFieldByPath({
-              fields:
-                req.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
-              path: field.virtual.path,
-            }).field
-            collectionSlug = relationshipField.field.relationTo
-          } else {
-            errors.push({ path })
-          }
+          // field = getFieldByPath({
+          //   fields:
+          //     req.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
+          //   path: field.virtual.path,
+          // }).field
+          // collectionSlug = relationshipField.field.relationTo
         }
       }
 

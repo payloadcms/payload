@@ -308,34 +308,21 @@ export const promise = async ({
     }
 
     if ('virtual' in field && typeof field.virtual === 'object') {
-      const relationshipField = getFieldByPath({
-        fields: collection.flattenedFields,
-        path: field.virtual.relationship,
-      })
-
-      if (
-        (relationshipField.field.type === 'upload' ||
-          relationshipField.field.type === 'relationship') &&
-        typeof relationshipField.field.relationTo === 'string' &&
-        relationshipField.field.hasMany !== true
-      ) {
-        populationPromises.push(
-          virtualFieldPopulationPromise({
-            name: field.name,
-            doc,
-            draft,
-            fallbackLocale,
-            fieldPath: field.virtual.path,
-            locale,
-            overrideAccess,
-            relationshipPath: field.virtual.relationship,
-            relationTo: relationshipField.field.relationTo,
-            req,
-            showHiddenFields,
-            siblingDoc,
-          }),
-        )
-      }
+      populationPromises.push(
+        virtualFieldPopulationPromise({
+          name: field.name,
+          draft,
+          fallbackLocale,
+          fields: collection.flattenedFields,
+          locale,
+          overrideAccess,
+          ref: doc,
+          req,
+          segments: field.virtual.path.split('.'),
+          showHiddenFields,
+          siblingDoc,
+        }),
+      )
     }
 
     // Execute access control

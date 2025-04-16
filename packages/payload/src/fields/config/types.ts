@@ -514,7 +514,6 @@ export interface FieldBase {
   virtual?:
     | {
         path: string
-        relationship: string
       }
     | boolean
 }
