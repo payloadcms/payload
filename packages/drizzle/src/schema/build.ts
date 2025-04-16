@@ -611,16 +611,18 @@ export const buildTable = ({
           type: colType,
         }
 
-        relationshipForeignKeys[`${relationTo}IdFk`] = {
-          name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
-          columns: [colName],
-          foreignColumns: [
-            {
-              name: 'id',
-              table: formattedRelationTo,
-            },
-          ],
-          onDelete: 'cascade',
+        if (relationshipConfig.lockDocuments !== false) {
+          relationshipForeignKeys[`${relationTo}IdFk`] = {
+            name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
+            columns: [colName],
+            foreignColumns: [
+              {
+                name: 'id',
+                table: formattedRelationTo,
+              },
+            ],
+            onDelete: 'cascade',
+          }
         }
 
         const indexColumns = [colName]
