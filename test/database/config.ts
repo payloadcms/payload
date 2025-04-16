@@ -710,7 +710,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'virtual-relation',
+      slug: 'virtual-relation-global',
       fields: [
         {
           type: 'text',

@@ -2098,7 +2098,7 @@ describe('database', () => {
     it('should allow referenced virtual field in globals', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
       const globalData = await payload.updateGlobal({
-        slug: 'virtual-relation',
+        slug: 'virtual-relation-global',
         data: { post: post.id },
         depth: 0,
       })
