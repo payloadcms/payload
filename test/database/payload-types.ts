@@ -118,11 +118,13 @@ export interface Config {
     global: Global;
     'global-2': Global2;
     'global-3': Global3;
+    'virtual-relation': VirtualRelation1;
   };
   globalsSelect: {
     global: GlobalSelect<false> | GlobalSelect<true>;
     'global-2': Global2Select<false> | Global2Select<true>;
     'global-3': Global3Select<false> | Global3Select<true>;
+    'virtual-relation': VirtualRelationSelect<false> | VirtualRelationSelect<true>;
   };
   locale: 'en' | 'es';
   user: User & {
@@ -983,6 +985,17 @@ export interface Global3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relation".
+ */
+export interface VirtualRelation1 {
+  id: string;
+  postTitle?: string | null;
+  post?: (string | null) | Post;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global_select".
  */
 export interface GlobalSelect<T extends boolean = true> {
@@ -1007,6 +1020,17 @@ export interface Global2Select<T extends boolean = true> {
  */
 export interface Global3Select<T extends boolean = true> {
   text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relation_select".
+ */
+export interface VirtualRelationSelect<T extends boolean = true> {
+  postTitle?: T;
+  post?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

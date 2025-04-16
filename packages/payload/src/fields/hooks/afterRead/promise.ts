@@ -313,7 +313,7 @@ export const promise = async ({
           name: field.name,
           draft,
           fallbackLocale,
-          fields: collection.flattenedFields,
+          fields: (collection || global).flattenedFields,
           locale,
           overrideAccess,
           ref: doc,

@@ -2094,6 +2094,16 @@ describe('database', () => {
       expect(found.docs).toHaveLength(1)
       expect(found.docs[0].id).toBe(doc.id)
     })
+
+    it('should allow referenced virtual field in globals', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const globalData = await payload.updateGlobal({
+        slug: 'virtual-relation',
+        data: { post: post.id },
+        depth: 0,
+      })
+      expect(globalData.postTitle).toBe('post')
+    })
   })
 
   it('should convert numbers to text', async () => {

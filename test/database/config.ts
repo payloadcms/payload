@@ -709,6 +709,21 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'virtual-relation',
+      fields: [
+        {
+          type: 'text',
+          name: 'postTitle',
+          virtual: 'post.title',
+        },
+        {
+          type: 'relationship',
+          name: 'post',
+          relationTo: 'posts',
+        },
+      ],
+    },
   ],
   localization: {
     defaultLocale: 'en',
