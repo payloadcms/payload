@@ -2,7 +2,14 @@
 
 import type { PaginatedDocs, Where } from 'payload'
 
-import { fieldBaseClass, Pill, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
+import {
+  fieldBaseClass,
+  Pill,
+  ReactSelect,
+  useConfig,
+  useDocumentInfo,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { stringify } from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -36,6 +43,8 @@ export const SelectComparison: React.FC<Props> = (props) => {
       localization,
     },
   } = useConfig()
+
+  const { hasPublishedDoc } = useDocumentInfo()
 
   const [options, setOptions] = useState<
     {
@@ -109,7 +118,10 @@ export const SelectComparison: React.FC<Props> = (props) => {
             },
             published: {
               currentLabel: t('version:currentPublishedVersion'),
-              latestVersion: latestPublishedVersion,
+              // The latest published version does not necessarily equal the current published version,
+              // because the latest published version might have been unpublished in the meantime.
+              // Hence, we should only use the latest published version if there is a published document.
+              latestVersion: hasPublishedDoc ? latestPublishedVersion : undefined,
               pillStyle: 'success',
               previousLabel: t('version:previouslyPublished'),
             },
