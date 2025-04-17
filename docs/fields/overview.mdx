@@ -541,6 +541,7 @@ The `ctx` object:
 | Property        | Description                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`blockData`** | The nearest parent block's data. If the field is not inside a block, this will be `undefined`.                                                               |
+| **`operation`** | A string relating to which operation the field type is currently executing within.                                                                           |
 | **`path`**      | The full path to the field in the schema, represented as an array of string segments, including array indexes. I.e `['group', 'myArray', '1', 'textField']`. |
 | **`user`**      | The currently authenticated user object.                                                                                                                     |
 
