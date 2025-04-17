@@ -232,7 +232,9 @@ export const DocumentControls: React.FC<{
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
-                    {(unsavedDraftWithValidations || !autosaveEnabled || showSaveDraftButton) && (
+                    {(unsavedDraftWithValidations ||
+                      !autosaveEnabled ||
+                      (autosaveEnabled && showSaveDraftButton)) && (
                       <RenderCustomComponent
                         CustomComponent={CustomSaveDraftButton}
                         Fallback={<SaveDraftButton />}
