@@ -413,6 +413,7 @@ You can link virtual fields to fields in other collections through a relationshi
 
 Here, `categoryTitle` will _always_ be populated with the corresponding value, even if the current `depth` is `0`, You can also query and sort by this field.
 The relationship must not be `hasMany: true` or polymorphic.
+The path can be deeply nested into 2 or more relationship fields, for example `post.category.title` as long as all the relationship fields meet the above requirement.
 
 ## Custom Components
 
