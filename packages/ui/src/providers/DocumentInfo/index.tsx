@@ -141,11 +141,16 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
+        })
 
         const { docs } = await request.json()
 
@@ -171,12 +176,17 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
-
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
+        })
 
         const { docs } = await request.json()
 
