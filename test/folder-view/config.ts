@@ -19,7 +19,7 @@ export default buildConfigWithDefaults({
       posts: {},
       media: {},
     },
-    debug: true,
+    // debug: true,
   },
   collections: [Posts, Media],
   globals: [
