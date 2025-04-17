@@ -300,8 +300,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })
