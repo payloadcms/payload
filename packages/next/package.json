@@ -156,6 +156,11 @@
         "types": "./dist/exports/templates.d.ts",
         "default": "./dist/exports/templates.js"
       },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
+      },
       "./utilities": {
         "import": "./dist/exports/utilities.js",
         "types": "./dist/exports/utilities.d.ts",
