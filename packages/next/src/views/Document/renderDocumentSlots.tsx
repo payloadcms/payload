@@ -43,6 +43,18 @@ export const renderDocumentSlots: (args: {
     // TODO: Add remaining serverProps
   }
 
+  const BeforeDocumentControls =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+    globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+  if (BeforeDocumentControls) {
+    components.BeforeDocumentControls = RenderServerComponent({
+      Component: BeforeDocumentControls,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
+  }
+
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
@@ -83,18 +95,6 @@ export const renderDocumentSlots: (args: {
   }
 
   if (hasSavePermission) {
-    const BeforeDocumentControls =
-      collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
-      globalConfig?.admin?.components?.elements?.beforeDocumentControls
-
-    if (BeforeDocumentControls) {
-      components.BeforeDocumentControls = RenderServerComponent({
-        Component: BeforeDocumentControls,
-        importMap: req.payload.importMap,
-        serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
-      })
-    }
-
     if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
       const CustomPublishButton =
         collectionConfig?.admin?.components?.edit?.PublishButton ||
