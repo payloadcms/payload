@@ -87,6 +87,7 @@ export interface Config {
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
+    'collection-with-live-preview': CollectionWithLivePreview;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -113,6 +114,7 @@ export interface Config {
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
+    'collection-with-live-preview': CollectionWithLivePreviewSelect<false> | CollectionWithLivePreviewSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -130,6 +132,7 @@ export interface Config {
     'group-globals-one': GroupGlobalsOne;
     'group-globals-two': GroupGlobalsTwo;
     settings: Setting;
+    'global-with-live-preview': GlobalWithLivePreview;
   };
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
@@ -141,6 +144,7 @@ export interface Config {
     'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
     'group-globals-two': GroupGlobalsTwoSelect<false> | GroupGlobalsTwoSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'global-with-live-preview': GlobalWithLivePreviewSelect<false> | GlobalWithLivePreviewSelect<true>;
   };
   locale: 'es' | 'en';
   user: User & {
@@ -469,6 +473,16 @@ export interface WithListDrawer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-with-live-preview".
+ */
+export interface CollectionWithLivePreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -553,6 +567,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'with-list-drawer';
         value: string | WithListDrawer;
+      } | null)
+    | ({
+        relationTo: 'collection-with-live-preview';
+        value: string | CollectionWithLivePreview;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -868,6 +886,15 @@ export interface WithListDrawerSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-with-live-preview_select".
+ */
+export interface CollectionWithLivePreviewSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -991,6 +1018,16 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-live-preview".
+ */
+export interface GlobalWithLivePreview {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-global_select".
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
@@ -1076,6 +1113,16 @@ export interface GroupGlobalsTwoSelect<T extends boolean = true> {
  */
 export interface SettingsSelect<T extends boolean = true> {
   canAccessProtected?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-live-preview_select".
+ */
+export interface GlobalWithLivePreviewSelect<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

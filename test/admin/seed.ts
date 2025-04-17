@@ -5,6 +5,7 @@ import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
+  collectionWithLivePreviewSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -112,6 +113,15 @@ export const seed = async (_payload) => {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: collectionWithLivePreviewSlug,
+          data: {
+            title: 'Live Preview Default Tab',
+          },
           depth: 0,
           overrideAccess: true,
         }),

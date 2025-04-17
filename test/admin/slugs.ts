@@ -18,6 +18,8 @@ export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
+
+export const collectionWithLivePreviewSlug = 'collection-with-live-preview'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -33,6 +35,7 @@ export const collectionSlugs = [
   customFieldsSlug,
   disableDuplicateSlug,
   listDrawerSlug,
+  collectionWithLivePreviewSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
@@ -45,6 +48,8 @@ export const hiddenGlobalSlug = 'hidden-global'
 export const notInViewGlobalSlug = 'not-in-view-global'
 export const settingsGlobalSlug = 'settings'
 export const noApiViewGlobalSlug = 'global-no-api-view'
+
+export const globalWithLivePreviewSlug = 'global-with-live-preview'
 export const globalSlugs = [
   customGlobalViews1GlobalSlug,
   customGlobalViews2GlobalSlug,
@@ -53,5 +58,6 @@ export const globalSlugs = [
   group2GlobalSlug,
   hiddenGlobalSlug,
   noApiViewGlobalSlug,
+  globalWithLivePreviewSlug,
 ]
 export const with300DocumentsSlug = 'with300documents'
