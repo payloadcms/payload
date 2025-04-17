@@ -13,7 +13,7 @@ interface Args {
 }
 
 export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params: { clientUploadContext, filename } }) => {
+  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
@@ -29,14 +29,36 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
 
       const response = blob._response
 
+      const rawHeaders = { ...response.headers.rawHeaders() }
+
+      let initHeaders: HeadersInit = {
+        ...rawHeaders,
+      }
+
+      // Typescript is difficult here with merging these types from Azure
+      if (incomingHeaders) {
+        initHeaders = {
+          ...initHeaders,
+          ...incomingHeaders,
+        }
+      }
+
+      let headers = new Headers(initHeaders)
+
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = response.headers.get('etag')
 
+      if (
+        collection.upload &&
+        typeof collection.upload === 'object' &&
+        typeof collection.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+      }
+
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
         return new Response(null, {
-          headers: new Headers({
-            ...response.headers.rawHeaders(),
-          }),
+          headers,
           status: 304,
         })
       }
@@ -62,7 +84,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       })
 
       return new Response(readableStream, {
-        headers: response.headers.rawHeaders(),
+        headers,
         status: response.status,
       })
     } catch (err: unknown) {

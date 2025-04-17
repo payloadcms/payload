@@ -39,9 +39,12 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   if (collection.config.upload.handlers?.length) {
     let customResponse = null
+    const headers = new Headers()
+
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
         doc: accessResult,
+        headers,
         params: {
           collection: collection.config.slug,
           filename,
@@ -96,7 +99,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   headers.set('Content-Type', fileTypeResult.mime)
   headers.set('Content-Length', stats.size + '')
   headers = collection.config.upload?.modifyResponseHeaders
-    ? collection.config.upload.modifyResponseHeaders({ headers })
+    ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
     : headers
 
   return new Response(data, {

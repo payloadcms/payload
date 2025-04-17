@@ -41,7 +41,7 @@ const streamToBuffer = async (readableStream: any) => {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params: { clientUploadContext, filename } }) => {
+  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     let object: AWS.GetObjectOutput | undefined = undefined
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
@@ -57,17 +57,27 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
+      let headers = new Headers(incomingHeaders)
+
+      headers.append('Content-Length', String(object.ContentLength))
+      headers.append('Content-Type', String(object.ContentType))
+      headers.append('Accept-Ranges', String(object.AcceptRanges))
+      headers.append('ETag', String(object.ETag))
+
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
 
+      if (
+        collection.upload &&
+        typeof collection.upload === 'object' &&
+        typeof collection.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+      }
+
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
         return new Response(null, {
-          headers: new Headers({
-            'Accept-Ranges': String(object.AcceptRanges),
-            'Content-Length': String(object.ContentLength),
-            'Content-Type': String(object.ContentType),
-            ETag: String(object.ETag),
-          }),
+          headers,
           status: 304,
         })
       }
@@ -88,12 +98,7 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const bodyBuffer = await streamToBuffer(object.Body)
 
       return new Response(bodyBuffer, {
-        headers: new Headers({
-          'Accept-Ranges': String(object.AcceptRanges),
-          'Content-Length': String(object.ContentLength),
-          'Content-Type': String(object.ContentType),
-          ETag: String(object.ETag),
-        }),
+        headers,
         status: 200,
       })
     } catch (err) {
