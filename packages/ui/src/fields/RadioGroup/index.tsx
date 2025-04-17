@@ -34,7 +34,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       required,
     } = {} as RadioFieldClientProps['field'],
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
     value: valueFromProps,
@@ -54,11 +54,12 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

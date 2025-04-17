@@ -7,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
@@ -1976,6 +1977,132 @@ describe('database', () => {
       expect(res.textWithinCollapsible).toBeUndefined()
       expect(res.textWithinRow).toBeUndefined()
       expect(res.textWithinTabs).toBeUndefined()
+    })
+
+    it('should allow virtual field with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitle).toBe('my-title')
+      const draft = await payload.find({
+        collection: 'virtual-relations',
+        depth: 0,
+        where: { id: { equals: id } },
+        draft: true,
+      })
+      expect(draft.docs[0]?.postTitle).toBe('my-title')
+    })
+
+    it('should allow virtual field with reference localized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title', localized: 'localized en' },
+      })
+
+      await payload.update({
+        collection: 'posts',
+        id: post.id,
+        locale: 'es',
+        data: { localized: 'localized es' },
+      })
+
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      let doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postLocalized).toBe('localized en')
+
+      doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id, locale: 'es' })
+      expect(doc.postLocalized).toBe('localized es')
+    })
+
+    it('should allow to query by a virtual field with reference', async () => {
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_1.id },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_2.id },
+      })
+
+      const { docs: ascDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        depth: 0,
+      })
+
+      expect(ascDocs[0]?.id).toBe(doc_1.id)
+
+      expect(ascDocs[1]?.id).toBe(doc_2.id)
+
+      const { docs: descDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        depth: 0,
+      })
+
+      expect(descDocs[1]?.id).toBe(doc_1.id)
+
+      expect(descDocs[0]?.id).toBe(doc_2.id)
+    })
+
+    it.todo('should allow to sort by a virtual field with reference')
+
+    it('should allow virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '1-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '1-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should allow to query by virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '2-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '2-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const found = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: '2-category' } },
+      })
+      expect(found.docs).toHaveLength(1)
+      expect(found.docs[0].id).toBe(doc.id)
+    })
+
+    it('should allow referenced virtual field in globals', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const globalData = await payload.updateGlobal({
+        slug: 'virtual-relation-global',
+        data: { post: post.id },
+        depth: 0,
+      })
+      expect(globalData.postTitle).toBe('post')
     })
   })
 

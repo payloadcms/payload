@@ -37,12 +37,32 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+          // access: { read: () => false },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          name: 'category',
+        },
+        {
+          name: 'localized',
+          type: 'text',
+          localized: true,
         },
         {
           name: 'text',
@@ -438,6 +458,33 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'virtual-relations',
+      admin: { useAsTitle: 'postTitle' },
+      fields: [
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: 'post.title',
+        },
+        {
+          name: 'postCategoryTitle',
+          type: 'text',
+          virtual: 'post.category.title',
+        },
+        {
+          name: 'postLocalized',
+          type: 'text',
+          virtual: 'post.localized',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
       slug: fieldsPersistanceSlug,
       fields: [
         {
@@ -659,6 +706,21 @@ export default buildConfigWithDefaults({
         {
           name: 'text',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-relation-global',
+      fields: [
+        {
+          type: 'text',
+          name: 'postTitle',
+          virtual: 'post.title',
+        },
+        {
+          type: 'relationship',
+          name: 'post',
+          relationTo: 'posts',
         },
       ],
     },

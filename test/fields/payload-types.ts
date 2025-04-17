@@ -790,6 +790,7 @@ export interface ConditionalLogic {
   text: string;
   toggleField?: boolean | null;
   fieldWithCondition?: string | null;
+  fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
@@ -2364,6 +2365,7 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
   fieldWithCondition?: T;
+  fieldWithOperationCondition?: T;
   customFieldWithField?: T;
   customFieldWithHOC?: T;
   customClientFieldWithCondition?: T;

@@ -78,7 +78,7 @@ export const getConstraints = (config: Config): Field => ({
           },
           ...(config?.queryPresets?.constraints?.[operation]?.reduce(
             (acc: Field[], option: QueryPresetConstraint) => {
-              option.fields.forEach((field, index) => {
+              option.fields?.forEach((field, index) => {
                 acc.push({ ...field })
 
                 if (fieldAffectsData(field)) {
