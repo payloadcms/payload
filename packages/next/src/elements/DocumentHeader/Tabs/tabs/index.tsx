@@ -1,6 +1,7 @@
 import type { DocumentTabConfig } from 'payload'
 import type React from 'react'
 
+import { isLivePreviewEnabled } from './isLivePreviewEnabled.js'
 import { VersionsPill } from './VersionsPill/index.js'
 
 export const documentViewKeys = [
@@ -32,25 +33,7 @@ export const tabs: Record<
   },
   default: {
     condition: ({ collectionConfig, config, globalConfig }) => {
-      let isLivePreview = false
-
-      if (collectionConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
-
-      if (globalConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
-
-      return !isLivePreviewEnabled
+      return !isLivePreviewEnabled({ collectionConfig, config, globalConfig })
     },
     href: '',
     // isActive: ({ href, location }) =>
@@ -60,25 +43,7 @@ export const tabs: Record<
   },
   edit: {
     condition: ({ collectionConfig, config, globalConfig }) => {
-      let isLivePreview = false
-
-      if (collectionConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
-
-      if (globalConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
-
-      return isLivePreviewEnabled
+      return isLivePreviewEnabled({ collectionConfig, config, globalConfig })
     },
     href: '/edit',
     label: ({ t }) => t('general:edit'),
@@ -86,25 +51,7 @@ export const tabs: Record<
   },
   livePreview: {
     condition: ({ collectionConfig, config, globalConfig }) => {
-      let isLivePreview = false
-
-      if (collectionConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
-
-      if (globalConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
-
-      return !isLivePreviewEnabled
+      return !isLivePreviewEnabled({ collectionConfig, config, globalConfig })
     },
     href: '/preview',
     label: ({ t }) => t('general:livePreview'),
@@ -112,25 +59,7 @@ export const tabs: Record<
   },
   livePreviewDefault: {
     condition: ({ collectionConfig, config, globalConfig }) => {
-      let isLivePreview = false
-
-      if (collectionConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
-
-      if (globalConfig) {
-        isLivePreview = Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      const isLivePreviewEnabled = config?.admin?.livePreview?.defaultTab && isLivePreview
-
-      return isLivePreviewEnabled
+      return isLivePreviewEnabled({ collectionConfig, config, globalConfig })
     },
     href: '',
     label: ({ t }) => t('general:livePreview'),
