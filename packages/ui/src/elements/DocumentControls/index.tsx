@@ -37,6 +37,7 @@ const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
+  readonly BeforeDocumentControls?: React.ReactNode
   readonly customComponents?: {
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
@@ -67,6 +68,7 @@ export const DocumentControls: React.FC<{
   const {
     id,
     slug,
+    BeforeDocumentControls,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -222,6 +224,7 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
+            {BeforeDocumentControls}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
