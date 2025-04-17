@@ -4,6 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CollectionWithLivePreview } from './collections/CollectionWithLivePreview.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
@@ -26,6 +27,7 @@ import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
+import { GlobalWithLivePreview } from './globals/GlobalWithLivePreview.js'
 import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
@@ -42,6 +44,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+import { collectionWithLivePreviewSlug, globalWithLivePreviewSlug } from './slugs.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -110,6 +113,12 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    livePreview: {
+      collections: [collectionWithLivePreviewSlug],
+      globals: [globalWithLivePreviewSlug],
+      url: 'http://localhost:3000',
+      defaultTab: true,
+    },
     meta: {
       description: 'This is a custom meta description',
       icons: [
@@ -163,6 +172,7 @@ export default buildConfigWithDefaults({
     BaseListFilter,
     with300Documents,
     ListDrawer,
+    CollectionWithLivePreview,
   ],
   globals: [
     GlobalHidden,
@@ -174,6 +184,7 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
     Settings,
+    GlobalWithLivePreview,
   ],
   i18n: {
     translations: {

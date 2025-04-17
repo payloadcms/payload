@@ -26,10 +26,12 @@ import {
   customTabViewTitle,
 } from '../../shared.js'
 import {
+  collectionWithLivePreviewSlug,
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   globalSlug,
+  globalWithLivePreviewSlug,
   group1Collection1Slug,
   group1GlobalSlug,
   noApiViewCollectionSlug,
@@ -64,6 +66,9 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
+  let collectionWithLivePreviewURL: AdminUrlUtil
+  let globalWithLivePreviewURL: AdminUrlUtil
+  let collectionWithLivePreviewDocId: string
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -79,6 +84,8 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
+    collectionWithLivePreviewURL = new AdminUrlUtil(serverURL, collectionWithLivePreviewSlug)
+    globalWithLivePreviewURL = new AdminUrlUtil(serverURL, globalWithLivePreviewSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -186,7 +193,7 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
-      await wait(500)
+      await expect(page.locator('.doc-tabs__tabs-container .doc-tab')).toHaveCount(2)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
     })
@@ -521,6 +528,92 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
 
       await expect(fileField).toHaveValue('some file text')
+    })
+  })
+
+  describe('tabs when livePreview.default tab is set to true', () => {
+    beforeAll(async () => {
+      await page.goto(collectionWithLivePreviewURL.list)
+      const firstDoc = await page.locator('.collection-list .table a').first().getAttribute('href')
+      const id = firstDoc?.split('/').pop()
+      if (id) {
+        collectionWithLivePreviewDocId = id
+      }
+    })
+
+    test('collection — should show live preview as first tab and default view', async () => {
+      await page.goto(collectionWithLivePreviewURL.edit(collectionWithLivePreviewDocId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const firstTab = tabs.first()
+      await expect(firstTab).toContainText('Live Preview')
+
+      const iframe = page.locator('.live-preview-iframe')
+      await expect(iframe).toBeVisible()
+    })
+
+    test('collection — should show edit as second tab', async () => {
+      await page.goto(collectionWithLivePreviewURL.edit(collectionWithLivePreviewDocId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(1)
+      await expect(secondTab).toContainText('Edit')
+    })
+
+    test('collection — should have `/edit` path', async () => {
+      await page.goto(collectionWithLivePreviewURL.edit(collectionWithLivePreviewDocId))
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(1)
+      await secondTab.click()
+      await expect(page).toHaveURL(/\/edit/)
+    })
+
+    test('collection — should not have `/preview` path', async () => {
+      await page.goto(collectionWithLivePreviewURL.edit(collectionWithLivePreviewDocId))
+      await expect(page).not.toHaveURL(/\/preview/)
+
+      const previewURL = `${collectionWithLivePreviewURL.edit(collectionWithLivePreviewDocId)}/preview`
+      await page.goto(previewURL)
+
+      const notFound = page.locator('text=Not Found')
+      await expect(notFound).toBeVisible()
+    })
+    test('globals — should show live preview as first tab', async () => {
+      await page.goto(globalWithLivePreviewURL.global(globalWithLivePreviewSlug))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const firstTab = tabs.first()
+      await expect(firstTab).toContainText('Live Preview')
+
+      const iframe = page.locator('.live-preview-iframe')
+      await expect(iframe).toBeVisible()
+    })
+
+    test('globals — should show edit as second tab', async () => {
+      await page.goto(globalWithLivePreviewURL.global(globalWithLivePreviewSlug))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(1)
+      await expect(secondTab).toContainText('Edit')
+    })
+
+    test('globals — should have `/edit` path', async () => {
+      await page.goto(globalWithLivePreviewURL.global(globalWithLivePreviewSlug))
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(1)
+      await secondTab.click()
+      await expect(page).toHaveURL(/\/edit/)
+    })
+
+    test('globals — should not have `/preview` path', async () => {
+      await page.goto(globalWithLivePreviewURL.global(globalWithLivePreviewSlug))
+      await expect(page).not.toHaveURL(/\/preview/)
+
+      const previewURL = `${globalWithLivePreviewURL.global(globalWithLivePreviewSlug)}/preview`
+      await page.goto(previewURL)
+
+      const notFound = page.locator('text=Not Found')
+      await expect(notFound).toBeVisible()
     })
   })
 })
