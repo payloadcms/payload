@@ -1,9 +1,7 @@
-@layer payload-default {
-  .display-items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--base);
+@import '../../../scss/styles.scss';
 
+@layer payload-default {
+  .folder-file-table {
     &__cell-with-icon {
       display: grid;
       grid-template-columns: auto 1fr;

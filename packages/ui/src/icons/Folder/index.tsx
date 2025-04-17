@@ -2,10 +2,10 @@ import React from 'react'
 
 import './index.scss'
 
-export function FolderIcon() {
+export function FolderIcon({ className }: { className?: string }) {
   return (
     <svg
-      className="icon icon--folder"
+      className={[className, 'icon icon--folder'].filter(Boolean).join(' ')}
       fill="none"
       height="16"
       viewBox="0 0 16 16"

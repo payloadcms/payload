@@ -33,8 +33,9 @@ export function MoveDocToFolder({ className = '' }) {
         folderID={currentParentFolder?.value as string}
         itemsToMove={[
           {
+            itemKey: `${collectionSlug}-${id}`,
             relationTo: collectionSlug,
-            value: { ...initialData, id },
+            value: { ...initialData, id } as any,
           },
         ]}
         onConfirm={(destinationFolderID) => {

@@ -1,20 +1,22 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from 'payload'
+import type { CollectionSlug, FolderListViewClientProps } from 'payload'
+import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 
-import { Button } from '../../elements/Button/index.js'
-import { CheckboxPopup } from '../../elements/CheckboxPopup/index.js'
 import { CloseModalButton } from '../../elements/CloseModalButton/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
+import { CollectionType } from '../../elements/FolderView/CollectionType/index.js'
+import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
+import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
+import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
+import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
@@ -23,20 +25,14 @@ import { NoListResults } from '../../elements/NoListResults/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
-import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
-import { FolderIcon } from '../../icons/Folder/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useFolder } from '../../providers/Folders/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useRouteTransition } from '../../providers/RouteTransition/index.js'
-
-// import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../CollectionFolder/ListSelection/index.js'
+import './index.scss'
 
 const baseClass = 'folder-list'
 const drawerBaseClass = 'collection-folder-list-drawer'
@@ -55,19 +51,14 @@ export function DefaultFolderView(
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission: hasCreatePermissionFromProps,
-    selectedCollectionSlugs: selectedCollectionSlugsFromProps,
-    Table: InitialTable,
   } = props
 
-  const [Table, setTable] = useState(InitialTable)
+  const [activeView, setActiveView] = React.useState<'grid' | 'list'>('list')
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
-  const { handleSearchChange, mergeQuery, query } = useListQuery()
-  const { startRouteTransition } = useRouteTransition()
-  const router = useRouter()
   const { clearRouteCache } = useRouteCache()
   const {
     allowCreate,
@@ -77,18 +68,25 @@ export function DefaultFolderView(
     selectedOption,
   } = useListDrawerContext()
   const {
+    addItems,
     breadcrumbs,
-    collectionUseAsTitles,
     documents,
+    filterItems,
+    focusedRowIndex,
     folderCollectionConfig,
     folderCollectionSlug,
     getSelectedItems,
+    isDragging,
     lastSelectedIndex,
     moveToFolder,
+    onItemClick,
+    onItemKeyPress,
+    search,
     selectedIndexes,
     setFolderID,
     setIsDragging,
     subfolders,
+    visibleCollectionSlugs,
   } = useFolder()
 
   const hasCreatePermission =
@@ -117,11 +115,65 @@ export function DefaultFolderView(
     [moveToFolder, getSelectedItems, clearRouteCache],
   )
 
-  const onCreateSuccess = React.useCallback(() => {
-    if (!isInDrawer) {
-      clearRouteCache()
+  const totalDocsAndSubfolders = documents.length + subfolders.length
+  const listHeaderTitle = !breadcrumbs.length
+    ? 'Browse By Folder'
+    : breadcrumbs[breadcrumbs.length - 1].name
+  const allFolderCollectionSlugs = [
+    folderCollectionSlug,
+    ...Object.keys(config.folders.collections),
+  ]
+  const noResultsLabel = visibleCollectionSlugs.reduce((acc, slug, index, array) => {
+    const collectionConfig = getEntityConfig({ collectionSlug: slug })
+    if (index === 0) {
+      return getTranslation(collectionConfig.labels?.plural, i18n)
     }
-  }, [isInDrawer, clearRouteCache])
+    if (index === array.length - 1) {
+      return `${acc} ${t('general:or').toLowerCase()} ${getTranslation(collectionConfig.labels?.plural, i18n)}`
+    }
+    return `${acc}, ${getTranslation(collectionConfig.labels?.plural, i18n)}`
+  }, '')
+
+  const onCreateSuccess = React.useCallback(
+    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Record<string, any> }) => {
+      const collectionConfig = getEntityConfig({ collectionSlug })
+      const itemValue: FolderOrDocument['value'] = {
+        id: doc?.id,
+        _folderOrDocumentTitle: doc?.[collectionConfig.admin.useAsTitle ?? 'id'],
+        _parentFolder: doc?._parentFolder,
+        createdAt: doc?.createdAt,
+        updatedAt: doc?.updatedAt,
+      }
+
+      if (collectionConfig.upload) {
+        itemValue.filename = doc?.filename
+        itemValue.mimeType = doc?.mimeType
+        itemValue.url = doc?.url
+      }
+
+      void addItems([
+        {
+          itemKey: `${collectionSlug}-${doc.id}`,
+          relationTo: collectionSlug,
+          value: itemValue,
+        },
+      ])
+    },
+    [getEntityConfig, addItems],
+  )
+
+  const selectedItemKeys = React.useMemo(() => {
+    return new Set(
+      getSelectedItems().reduce<FolderDocumentItemKey[]>((acc, item) => {
+        if (item) {
+          if (item.relationTo && item.value) {
+            acc.push(`${item.relationTo}-${item.value.id}`)
+          }
+        }
+        return acc
+      }, []),
+    )
+  }, [getSelectedItems])
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -130,7 +182,7 @@ export function DefaultFolderView(
           ? {
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
-                  <FolderIcon />
+                  <ColoredFolderIcon />
                   {/* @todo: translate */}
                   Browse By Folder
                 </div>
@@ -151,7 +203,7 @@ export function DefaultFolderView(
                     void setFolderID({ folderID: null })
                   }}
                 >
-                  <FolderIcon />
+                  <ColoredFolderIcon />
                   {/* @todo: translate */}
                   Browse By Folder
                 </DroppableBreadcrumb>
@@ -184,53 +236,14 @@ export function DefaultFolderView(
     i18n,
     breadcrumbs,
     setFolderID,
-    mergeQuery,
     config.routes.admin,
     config.admin.routes.folders,
     config.serverURL,
-    selectedCollectionSlugsFromProps,
   ])
-
-  React.useEffect(() => {
-    if (InitialTable) {
-      setTable(InitialTable)
-    }
-  }, [InitialTable])
-
-  const totalDocsAndSubfolders = documents.length + subfolders.length
-  const listHeaderTitle = !breadcrumbs.length
-    ? 'Browse By Folder'
-    : breadcrumbs[breadcrumbs.length - 1].name
-  const allFolderCollectionSlugs = [
-    folderCollectionSlug,
-    ...Object.keys(config.folders.collections),
-  ]
-  const selectedCollectionSlugs = selectedCollectionSlugsFromProps?.length
-    ? selectedCollectionSlugsFromProps
-    : allFolderCollectionSlugs
-  const noResultsLabel = selectedCollectionSlugs.reduce((acc, slug, index, array) => {
-    const collectionConfig = getEntityConfig({ collectionSlug: slug })
-    if (index === 0) {
-      return getTranslation(collectionConfig.labels?.plural, i18n)
-    }
-    if (index === array.length - 1) {
-      return `${acc} ${t('general:or').toLowerCase()} ${getTranslation(collectionConfig.labels?.plural, i18n)}`
-    }
-    return `${acc}, ${getTranslation(collectionConfig.labels?.plural, i18n)}`
-  }, '')
-
-  const collectionOptions = allFolderCollectionSlugs.map((collectionSlug) => {
-    const collectionConfig = getEntityConfig({ collectionSlug })
-    return {
-      label: getTranslation(collectionConfig.labels?.plural, i18n),
-      value: collectionSlug,
-    }
-  })
 
   return (
     <Fragment>
       <DndEventListener onDragEnd={onDragEnd} setIsDragging={setIsDragging} />
-      {/* <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}> */}
       <div className={`${baseClass} ${baseClass}--folders`}>
         {BeforeFolderList}
         <Gutter className={`${baseClass}__wrap`}>
@@ -281,56 +294,73 @@ export function DefaultFolderView(
           )}
           <SearchBar
             Actions={[
-              <CheckboxPopup
-                Button={
-                  <Button
-                    buttonStyle="pill"
-                    className={`${baseClass}__popup-button`}
-                    el="div"
-                    icon="chevron"
-                    margin={false}
-                    size="small"
-                  >
-                    Type
-                  </Button>
-                }
-                key="relation-to-selection-popup"
-                onChange={({ selectedValues }) => {
-                  startRouteTransition(() =>
-                    router.replace(
-                      `${qs.stringify(
-                        mergeQuery({
-                          relationTo: selectedValues,
-                        }),
-                        { addQueryPrefix: true },
-                      )}`,
-                    ),
-                  )
-                }}
-                options={collectionOptions}
-                selectedValues={selectedCollectionSlugs}
+              <CollectionType key="collection-type" />,
+              <ToggleViewButtons
+                activeView={activeView}
+                key="toggle-view-buttons"
+                setActiveView={setActiveView}
               />,
-              <div key="folder-view-as-grid">grid</div>,
-              <div key="folder-view-as-list">list</div>,
+              <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}
             label="Test"
-            onSearchChange={handleSearchChange}
-            searchQueryParam={query?.search}
+            onSearchChange={(search) => filterItems({ search })}
+            searchQueryParam={search}
           />
           {BeforeFolderListTable}
-          {totalDocsAndSubfolders > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
+          {totalDocsAndSubfolders > 0 && (
+            <>
+              {activeView === 'grid' ? (
+                <div>
+                  {subfolders.length ? (
+                    <>
+                      <ItemCardGrid
+                        items={subfolders}
+                        selectedItemKeys={selectedItemKeys}
+                        title={'Folders'}
+                        type="folder"
+                      />
+                    </>
+                  ) : null}
+
+                  {documents.length ? (
+                    <>
+                      <ItemCardGrid
+                        items={documents}
+                        selectedItemKeys={selectedItemKeys}
+                        subfolderCount={subfolders.length}
+                        title={'Documents'}
+                        type="file"
+                      />
+                    </>
+                  ) : null}
+                </div>
+              ) : (
+                <FolderFileTable
+                  dateFormat={config.admin.dateFormat}
+                  documents={documents}
+                  focusedRowIndex={focusedRowIndex}
+                  i18n={i18n}
+                  isMovingItems={isDragging}
+                  onRowClick={onItemClick}
+                  onRowPress={onItemKeyPress}
+                  selectedItems={selectedItemKeys}
+                  subfolders={subfolders}
+                />
+              )}
+            </>
+          )}
           {totalDocsAndSubfolders === 0 && (
             <NoListResults
               Actions={[
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                  collectionSlugs={allFolderCollectionSlugs}
+                  collectionSlugs={[]}
                   key="create-folder"
                   onCreateSuccess={onCreateSuccess}
                 />,
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                  collectionSlugs={[]}
+                  collectionSlugs={allFolderCollectionSlugs}
                   disableFolderCollection
                   key="create-document"
                 />,
@@ -348,10 +378,8 @@ export function DefaultFolderView(
         </Gutter>
         {AfterFolderList}
       </div>
-      {/* </TableColumnsProvider> */}
       <DragOverlaySelection
         allItems={[...subfolders, ...documents]}
-        collectionUseAsTitles={collectionUseAsTitles}
         lastSelected={lastSelectedIndex}
         selectedCount={selectedIndexes.size}
       />

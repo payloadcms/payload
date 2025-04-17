@@ -39,13 +39,17 @@ export {
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 
 export * from '../fields/validations.js'
+
 export type {
   FolderBreadcrumb,
+  FolderDocumentItemKey,
   FolderEnabledColection,
   FolderInterface,
+  FolderOrDocument,
   GetFolderDataResult,
   Subfolder,
 } from '../folders/types.js'
+export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 
 export { validOperators, validOperatorSet } from '../types/constants.js'
 

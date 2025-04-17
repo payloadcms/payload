@@ -283,7 +283,7 @@
       --btn-padding-block-end: calc(var(--base) * 0.4);
 
       &.btn--icon-position-left {
-        --btn-padding-inline-start: calc(var(--base * 0.6));
+        --btn-padding-inline-start: calc(var(--base) * 0.6);
       }
 
       &.btn--icon-position-right {

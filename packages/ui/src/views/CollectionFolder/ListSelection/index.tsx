@@ -1,25 +1,24 @@
 'use client'
 
-import type { Where } from 'payload'
+import type { FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
-import { useSearchParams } from 'next/navigation.js'
 import { extractID } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
 import { MoveItemsToFolderDrawer } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
+import { RenameFolderDrawer } from '../../../elements/FolderView/Drawers/RenameFolder/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
-import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { parseSearchParams } from '../../../utilities/parseSearchParams.js'
 
-const moveToFolderDrawerSlug = 'move-to-folder'
+const moveToFolderDrawerSlug = 'move-to-folder--list'
+const renameFolderDrawerSlug = 'rename-folder--list'
 
 type GroupedSelections = {
   [relationTo: string]: {
@@ -38,14 +37,13 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
 }) => {
-  const { clearSelections, getSelectedItems, moveToFolder } = useFolder()
+  const { clearSelections, folderID, getSelectedItems, moveToFolder, removeItems, renameFolder } =
+    useFolder()
   const { config } = useConfig()
   const { t } = useTranslation()
-  const { openModal } = useModal()
+  const { closeModal, openModal } = useModal()
   const items = getSelectedItems()
 
-  const { clearRouteCache } = useRouteCache()
-  const searchParams = useSearchParams()
   const groupedSelections: GroupedSelections = items.reduce((acc, item) => {
     if (item) {
       if (acc[item.relationTo]) {
@@ -110,21 +108,35 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         ),
         !disableBulkDelete && (
           <DeleteMany_v4
-            afterDelete={() => {
-              clearSelections()
-              clearRouteCache()
+            afterDelete={(groupedCollections) => {
+              const itemsToRemove = Object.entries(groupedCollections).reduce<FolderOrDocument[]>(
+                (acc, [slug, res]) => {
+                  if (res.ids.length) {
+                    res.ids.forEach((id) => {
+                      acc.push({
+                        itemKey: `${slug}-${id}`,
+                        relationTo: slug,
+                        value: {
+                          id,
+                        } as any,
+                      })
+                    })
+                  }
+                  return acc
+                },
+                [],
+              )
+              void removeItems(itemsToRemove)
             }}
             key="bulk-delete"
-            search={searchParams?.get('search')}
             selections={groupedSelections}
-            where={parseSearchParams(searchParams)?.where as Where}
           />
         ),
         count > 0 ? (
           <React.Fragment key={moveToFolderDrawerSlug}>
             <MoveItemsToFolderDrawer
               drawerSlug={moveToFolderDrawerSlug}
-              folderID={null}
+              folderID={folderID}
               itemsToMove={getSelectedItems()}
               onConfirm={async (folderID) => {
                 await moveToFolder({
@@ -138,7 +150,24 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             </ListSelectionButton>
           </React.Fragment>
         ) : null,
-        // @todo implement RENAME action
+        count === 1 && !singleNonFolderCollectionSelected && (
+          <React.Fragment key="rename-folder">
+            <ListSelectionButton onClick={() => openModal(renameFolderDrawerSlug)} type="button">
+              {t('general:rename')}
+            </ListSelectionButton>
+            <RenameFolderDrawer
+              drawerSlug={renameFolderDrawerSlug}
+              folderToRename={items[0]}
+              onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
+                renameFolder({
+                  folderID: updatedFolderID,
+                  newName: updatedName,
+                })
+                closeModal(renameFolderDrawerSlug)
+              }}
+            />
+          </React.Fragment>
+        ),
       ].filter(Boolean)}
     />
   )

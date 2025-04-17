@@ -1,9 +1,8 @@
 import type { Modifier } from '@dnd-kit/core'
+import type { FolderOrDocument } from 'payload/shared'
 
 import { DragOverlay } from '@dnd-kit/core'
 import { getEventCoordinates } from '@dnd-kit/utilities'
-
-import type { PolymorphicRelationshipValue } from '../types.js'
 
 import { FolderFileCard } from '../FolderFileCard/index.js'
 import './index.scss'
@@ -11,27 +10,15 @@ import './index.scss'
 const baseClass = 'drag-overlay-selection'
 
 type DragCardsProps = {
-  readonly allItems: Array<PolymorphicRelationshipValue>
-  readonly collectionUseAsTitles: Map<string, string>
+  readonly allItems: FolderOrDocument[]
   readonly lastSelected?: number
   readonly selectedCount: number
 }
-export function DragOverlaySelection({
-  allItems,
-  collectionUseAsTitles = new Map(),
-  lastSelected,
-  selectedCount,
-}: DragCardsProps) {
+export function DragOverlaySelection({ allItems, lastSelected, selectedCount }: DragCardsProps) {
   const visibleItem = allItems?.[lastSelected || 0]
   if (!selectedCount || !visibleItem) {
     return null
   }
-
-  const { relationTo, value } = visibleItem
-  const useAsTitle = collectionUseAsTitles.has(relationTo)
-    ? collectionUseAsTitles.get(relationTo)
-    : 'id'
-  const title = typeof value === 'object' ? value?.[useAsTitle] : value
 
   return (
     <DragOverlay
@@ -56,7 +43,7 @@ export function DragOverlaySelection({
               id={null}
               isSelected
               itemKey="overlay-card"
-              title={title}
+              title={visibleItem.value._folderOrDocumentTitle}
               type="folder"
             />
           </div>

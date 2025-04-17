@@ -1,5 +1,5 @@
 'use client'
-import type { FolderInterface } from 'payload/shared'
+import type { FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
@@ -15,30 +15,31 @@ import { DrawerHeader } from '../DrawerHeader/index.js'
 
 type Props = {
   readonly drawerSlug: string
-  readonly folderToRename: FolderInterface
+  readonly folderToRename: FolderOrDocument
   readonly onRenameConfirm: ({
-    name,
     folderID,
+    updatedName,
   }: {
     folderID: number | string
-    name: string
+    updatedName: string
   }) => void
 }
 export function RenameFolderDrawer(props: Props) {
   const { drawerSlug, folderToRename, onRenameConfirm } = props
   const { t } = useTranslation()
-  const { folderCollectionSlug } = useFolder()
+  const { folderCollectionConfig, folderCollectionSlug } = useFolder()
   const { config } = useConfig()
   const { closeModal } = useModal()
   const { routes, serverURL } = config
 
-  const folderName = folderToRename?.name
-  const folderID = folderToRename?.id
+  const folderName = folderToRename.value._folderOrDocumentTitle
+  const folderID = folderToRename.value.id
+  const folderUseAsTitle = folderCollectionConfig.admin.useAsTitle
 
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <Form
-        action={`${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}`}
+        action={`${serverURL}${routes.api}/${folderCollectionSlug}/${folderToRename.value.id}`}
         initialState={{
           name: {
             initialValue: folderName,
@@ -53,10 +54,10 @@ export function RenameFolderDrawer(props: Props) {
           },
         }}
         method="PATCH"
-        onSuccess={(data: { doc: FolderInterface }) => {
+        onSuccess={(data: { doc: FolderOrDocument['value'] }) => {
           return onRenameConfirm({
-            name: data?.doc?.name,
             folderID,
+            updatedName: data?.doc?.[folderUseAsTitle],
           })
         }}
       >

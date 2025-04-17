@@ -9,22 +9,13 @@ import type {
   Where,
 } from 'payload'
 
-import {
-  DefaultCollectionFolderView,
-  FolderProvider,
-  HydrateAuthProvider,
-  ListQueryProvider,
-} from '@payloadcms/ui'
+import { DefaultCollectionFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import {
-  buildCollectionFolderListState,
-  renderFilters,
-  upsertPreferences,
-} from '@payloadcms/ui/rsc'
+import { renderFilters, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import { getFolderData, parseDocumentID } from 'payload'
-import { combineWhereConstraints, isNumber, transformColumnsToPreferences } from 'payload/shared'
+import { isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React from 'react'
 
 import { renderFolderViewSlots } from './renderFolderViewSlots.js'
@@ -156,14 +147,9 @@ export const buildCollectionFolderView = async (
     }
 
     const { breadcrumbs, documents, subfolders } = await getFolderData({
-      type: 'monomorphic',
-      collectionSlugs: [collectionSlug],
-      docSort: initPageResult?.req.query?.sort as string,
-      docWhere: combineWhereConstraints(whereConstraints),
+      collectionSlug,
       folderID,
-      locale,
       payload: initPageResult.req.payload,
-      search: query?.search as string,
       user: initPageResult.req.user,
     })
 
@@ -182,22 +168,6 @@ export const buildCollectionFolderView = async (
         }),
       )
     }
-
-    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const { columnState, Table } = buildCollectionFolderListState({
-      clientCollectionConfig,
-      collectionConfig,
-      columnPreferences: listPreferences?.columns,
-      columns,
-      customCellProps,
-      docs: documents,
-      enableRowSelections,
-      i18n: req.i18n,
-      payload,
-      subfolders,
-      useAsTitle: collectionConfig.admin.useAsTitle,
-    })
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
@@ -246,38 +216,37 @@ export const buildCollectionFolderView = async (
       serverProps,
     })
 
+    const search = query?.search as string
+
     return {
       View: (
         <FolderProvider
           breadcrumbs={breadcrumbs}
-          collectionSlugs={[collectionSlug]}
+          collectionSlug={collectionSlug}
           documents={documents}
           folderID={folderID}
+          search={search}
           subfolders={subfolders}
         >
           <HydrateAuthProvider permissions={permissions} />
-          <ListQueryProvider data={null} defaultLimit={0} modifySearchParams={!isInDrawer}>
-            {RenderServerComponent({
-              clientProps: {
-                ...folderViewSlots,
-                collectionSlug,
-                columnState,
-                disableBulkDelete,
-                disableBulkEdit,
-                enableRowSelections,
-                hasCreatePermission,
-                listPreferences,
-                newDocumentURL,
-                renderedFilters,
-                resolvedFilterOptions,
-                Table,
-              } satisfies ListViewClientProps,
-              Component: collectionConfig?.admin?.components?.views?.list?.Component,
-              Fallback: DefaultCollectionFolderView,
-              importMap: payload.importMap,
-              serverProps,
-            })}
-          </ListQueryProvider>
+          {RenderServerComponent({
+            clientProps: {
+              ...folderViewSlots,
+              collectionSlug,
+              disableBulkDelete,
+              disableBulkEdit,
+              enableRowSelections,
+              hasCreatePermission,
+              listPreferences,
+              newDocumentURL,
+              renderedFilters,
+              resolvedFilterOptions,
+            } satisfies ListViewClientProps,
+            Component: collectionConfig?.admin?.components?.views?.list?.Component,
+            Fallback: DefaultCollectionFolderView,
+            importMap: payload.importMap,
+            serverProps,
+          })}
         </FolderProvider>
       ),
     }

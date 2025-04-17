@@ -22,9 +22,6 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
-export { FolderListTable } from '../../elements/FolderView/FolderListTable/index.js'
-
-export { MoveItemsToFolderRSC_ClientComponent } from '../../providers/ServerFunctions/MoveItemsToFolder/Component.js'
 export { SortHeader } from '../../elements/SortHeader/index.js'
 export { SortRow } from '../../elements/SortRow/index.js'
 export { OrderableTable } from '../../elements/Table/OrderableTable.js'
@@ -123,9 +120,7 @@ export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 
 // folder elements
-export { FolderBreadcrumbs } from '../../elements/FolderView/Breadcrumbs/index.js'
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { MoveDocToFolder } from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'

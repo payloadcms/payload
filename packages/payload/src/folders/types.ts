@@ -34,14 +34,36 @@ export type FolderEnabledColection = {
   slug: CollectionSlug
 } & SanitizedCollectionConfig
 
-export type GetFolderDataResult<FolderDocType = FolderInterface, DocType = TypeWithID> = {
+/**
+ * `${relationTo}-${id}` is used as a key for the item
+ */
+export type FolderDocumentItemKey = `${string}-${number | string}`
+
+/**
+ * Needed for document card view for upload enabled collections
+ */
+type DocumentMediaData = {
+  filename?: string
+  mimeType?: string
+  url?: string
+}
+/**
+ * A generic structure for a folder or document item.
+ */
+export type FolderOrDocument = {
+  itemKey: FolderDocumentItemKey
+  relationTo: CollectionSlug
+  value: {
+    _folderOrDocumentTitle: string
+    _parentFolder?: number | string
+    createdAt?: string
+    id: number | string
+    updatedAt?: string
+  } & DocumentMediaData
+}
+
+export type GetFolderDataResult = {
   breadcrumbs: FolderBreadcrumb[] | null
-  documents: {
-    relationTo: string
-    value: DocType | number | string
-  }[]
-  subfolders: {
-    relationTo: string
-    value: FolderDocType | number | string
-  }[]
+  documents: FolderOrDocument[]
+  subfolders: FolderOrDocument[]
 }

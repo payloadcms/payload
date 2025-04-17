@@ -4,6 +4,18 @@
   .folder-list {
     width: 100%;
 
+    &__toggle-view-button {
+      padding: 0;
+      background-color: transparent &--active {
+        background-color: var(--theme-elevation-150);
+      }
+
+      .btn__icon {
+        border: none;
+        padding: 0;
+      }
+    }
+
     &__step-nav-icon-label,
     &__step-nav-icon-label .btn__label {
       margin: 0;

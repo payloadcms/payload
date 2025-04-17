@@ -39,7 +39,6 @@ export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 export type ListViewClientProps = {
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
-  columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean

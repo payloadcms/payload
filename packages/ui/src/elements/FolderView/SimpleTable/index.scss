@@ -29,6 +29,13 @@
       padding: calc(var(--base) * 0.6);
       min-width: 150px;
       position: relative;
+
+      &:first-child {
+        padding-inline-start: calc(var(--base) * (0.8));
+      }
+      &:last-child {
+        padding-inline-end: calc(var(--base) * (0.8));
+      }
     }
 
     .simple-table__thead .simple-table__tr {

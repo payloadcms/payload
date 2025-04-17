@@ -1361,7 +1361,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-export { buildFolderBreadcrumbs } from './folders/utils/buildFolderBreadcrumbs.js'
 export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,

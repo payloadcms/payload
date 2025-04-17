@@ -5,17 +5,11 @@ import type {
   ListQuery,
 } from 'payload'
 
-import {
-  DefaultFolderView,
-  FolderProvider,
-  HydrateAuthProvider,
-  ListQueryProvider,
-} from '@payloadcms/ui'
+import { DefaultFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { buildCollectionFolderListState } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData, parseDocumentID } from 'payload'
+import { getFolderData } from 'payload'
 import React from 'react'
 
 export type BuildFolderViewArgs = {
@@ -63,7 +57,7 @@ export const buildFolderView = async (
     visibleEntities,
   } = initPageResult
 
-  const allFolderCollectionSlugs = Object.keys(config.folders.collections)
+  const allFolderCollectionSlugs = Object.keys(config?.folders?.collections || {})
 
   const collections = allFolderCollectionSlugs.filter(
     (collectionSlug) =>
@@ -80,7 +74,7 @@ export const buildFolderView = async (
   const selectedCollectionSlugs: string[] =
     Array.isArray(query?.relationTo) && query.relationTo.length
       ? query.relationTo
-      : allFolderCollectionSlugs
+      : [...allFolderCollectionSlugs, config.folders.slug]
 
   const {
     routes: { admin: adminRoute },
@@ -89,13 +83,8 @@ export const buildFolderView = async (
   const limit = 0
 
   const { breadcrumbs, documents, subfolders } = await getFolderData({
-    type: 'polymorphic',
-    collectionSlugs: folderID ? selectedCollectionSlugs : [],
-    docSort: initPageResult?.req.query?.sort as string,
     folderID,
-    locale,
     payload: initPageResult.req.payload,
-    search: query?.search as string,
     user: initPageResult.req.user,
   })
 
@@ -115,24 +104,11 @@ export const buildFolderView = async (
     )
   }
 
-  const { columnState, Table } = buildCollectionFolderListState({
-    clientConfig,
-    collections,
-    columnPreferences: [],
-    customCellProps,
-    docs: documents,
-    enableRowSelections,
-    i18n: req.i18n,
-    payload,
-    subfolders,
-    useAsTitle: '_folderSearch',
-  })
-
   const serverProps: Omit<FolderListViewServerPropsOnly, 'collectionConfig' | 'listPreferences'> = {
     documents,
     i18n,
     limit,
-    listSearchableFields: ['_folderSearch'],
+    listSearchableFields: [],
     locale: fullLocale,
     params,
     payload,
@@ -154,29 +130,25 @@ export const buildFolderView = async (
     View: (
       <FolderProvider
         breadcrumbs={breadcrumbs}
-        collectionSlugs={selectedCollectionSlugs}
         documents={documents}
+        filteredCollectionSlugs={selectedCollectionSlugs}
         folderID={folderID}
         subfolders={subfolders}
       >
         <HydrateAuthProvider permissions={permissions} />
-        <ListQueryProvider data={null} defaultLimit={0} modifySearchParams={!isInDrawer}>
-          {RenderServerComponent({
-            clientProps: {
-              // ...folderViewSlots,
-              columnState,
-              disableBulkDelete,
-              disableBulkEdit,
-              enableRowSelections,
-              selectedCollectionSlugs,
-              Table,
-            },
-            // Component:config.folders?.components?.views?.list?.Component,
-            Fallback: DefaultFolderView,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-        </ListQueryProvider>
+        {RenderServerComponent({
+          clientProps: {
+            // ...folderViewSlots,
+            disableBulkDelete,
+            disableBulkEdit,
+            enableRowSelections,
+            selectedCollectionSlugs,
+          },
+          // Component:config.folders?.components?.views?.list?.Component,
+          Fallback: DefaultFolderView,
+          importMap: payload.importMap,
+          serverProps,
+        })}
       </FolderProvider>
     ),
   }

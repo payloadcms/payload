@@ -23,7 +23,7 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
     <div className={`${baseClass} ${className || ''}`.trim()}>
       {breadcrumbs?.map((crumb, index) => (
         <div className={`${baseClass}__crumb`} key={index}>
-          {
+          {crumb.onClick ? (
             <DroppableBreadcrumb
               className={`${baseClass}__crumb-item`}
               id={crumb.id}
@@ -31,7 +31,9 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
             >
               {crumb.name}
             </DroppableBreadcrumb>
-          }
+          ) : (
+            crumb.name
+          )}
           {breadcrumbs.length > 0 && index !== breadcrumbs.length - 1 && (
             <ChevronIcon className={`${baseClass}__crumb-chevron`} direction="right" />
           )}

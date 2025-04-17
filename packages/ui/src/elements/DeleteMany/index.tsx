@@ -19,6 +19,9 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
+
+const confirmManyDeleteDrawerSlug = `confirm-delete-many-docs`
+
 export type Props = {
   collection: ClientCollectionConfig
   title?: string
@@ -79,6 +82,7 @@ type AfterDeleteResult = {
   [relationTo: string]: {
     deletedCount: number
     errors: unknown[]
+    ids: (number | string)[]
     totalCount: number
   }
 }
@@ -135,8 +139,6 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
   const { i18n } = useTranslation()
   const { openModal } = useModal()
 
-  const modalSlug = `confirm-delete-many-docs`
-
   const handleDelete = React.useCallback(async () => {
     const deletingOneCollection = Object.keys(selections).length === 1
     const result: AfterDeleteResult = {}
@@ -166,6 +168,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
         const deleteManyResponse = await requests.delete(
           `${serverURL}${api}/${relationTo}${qs.stringify(
             {
+              limit: 0,
               locale,
               where: mergeListSearchAndWhere({
                 collectionConfig,
@@ -208,6 +211,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
           result[relationTo] = {
             deletedCount: deletedDocs,
             errors: json?.errors || null,
+            ids: json?.docs.map((doc) => doc.id) || [],
             totalCount: json.totalDocs,
           }
 
@@ -221,6 +225,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
           result[relationTo] = {
             deletedCount: 0,
             errors: [_err],
+            ids: [],
             totalCount: 0,
           }
           continue
@@ -269,7 +274,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
       <ListSelectionButton
         aria-label={t('general:delete')}
         onClick={() => {
-          openModal(modalSlug)
+          openModal(confirmManyDeleteDrawerSlug)
         }}
       >
         {t('general:delete')}
@@ -281,7 +286,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
         })}
         confirmingLabel={t('general:deleting')}
         heading={t('general:confirmDeletion')}
-        modalSlug={modalSlug}
+        modalSlug={confirmManyDeleteDrawerSlug}
         onConfirm={handleDelete}
       />
     </React.Fragment>

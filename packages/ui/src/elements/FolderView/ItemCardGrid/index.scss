@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 @layer payload-default {
-  .nav--nav-open + div .folder-file-grid {    
+  .nav--nav-open + div .item-card-grid {
     @include large-break {
       --cols: 4;
     }
@@ -15,12 +15,13 @@
     }
   }
 
-  .folder-file-grid {
+  .item-card-grid {
     --cols: 5;
     --gap: var(--base);
     gap: var(--gap);
     display: grid;
     grid-template-columns: repeat(var(--cols), 1fr);
+    margin-bottom: var(--base);
 
     @include mid-break {
       --cols: 3;
@@ -28,6 +29,11 @@
 
     @include small-break {
       --cols: 2;
+    }
+
+    &__title {
+      color: var(--theme-elevation-400);
+      margin-bottom: calc(var(--base) / 2);
     }
   }
 }

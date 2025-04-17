@@ -4,7 +4,6 @@ import type { ClientCollectionConfig, CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
@@ -28,12 +27,14 @@ export function ListCreateNewDocInFolderButton({
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
   disableFolderCollection?: boolean
-  onCreateSuccess?: (doc: any) => Promise<void> | void
+  onCreateSuccess?: (args: {
+    collectionSlug: CollectionSlug
+    doc: Record<string, unknown>
+  }) => Promise<void> | void
 }) {
   const { i18n } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { config } = useConfig()
-  const router = useRouter()
   const { folderCollectionConfig, folderID } = useFolder()
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
@@ -56,12 +57,7 @@ export function ListCreateNewDocInFolderButton({
           className={`${baseClass}__button`}
           el="div"
           onClick={() => {
-            if (!disableFolderCollection) {
-              openModal(newFolderDrawerSlug)
-            } else {
-              setCreateCollectionSlug(enabledCollections[0].slug)
-              openModal(newDocInFolderDrawerSlug)
-            }
+            openModal(newFolderDrawerSlug)
           }}
           size="small"
         >
@@ -75,6 +71,7 @@ export function ListCreateNewDocInFolderButton({
               className={`${baseClass}__popup-button`}
               el="div"
               icon="chevron"
+              // icon="plus"
               size="small"
             >
               {buttonLabel}
@@ -119,11 +116,13 @@ export function ListCreateNewDocInFolderButton({
           initialData={{
             _parentFolder: folderID,
           }}
-          onSave={({ operation }) => {
+          onSave={({ doc, operation }) => {
             if (operation === 'create') {
               closeModal(newDocInFolderDrawerSlug)
-              setCreateCollectionSlug(undefined)
-              router.refresh()
+              void onCreateSuccess({
+                collectionSlug: createCollectionSlug,
+                doc,
+              })
             }
           }}
           redirectAfterCreate={false}
@@ -136,7 +135,10 @@ export function ListCreateNewDocInFolderButton({
           onNewFolderSuccess={(doc) => {
             closeModal(newFolderDrawerSlug)
             if (typeof onCreateSuccess === 'function') {
-              void onCreateSuccess(doc)
+              void onCreateSuccess({
+                collectionSlug: folderCollectionConfig.slug,
+                doc,
+              })
             }
           }}
         />

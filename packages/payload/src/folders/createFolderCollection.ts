@@ -2,9 +2,9 @@ import type { CollectionConfig } from '../collections/config/types.js'
 
 import { parentFolderFieldName } from './constants.js'
 import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
-import { createBaseFolderSearchField } from './fields/folderSearch.js'
 import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
+import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
 type CreateFolderCollectionArgs = {
   collectionSlugs: string[]
@@ -48,9 +48,13 @@ export const createFolderCollection = ({
       hasMany: true,
       on: parentFolderFieldName,
     },
-    createBaseFolderSearchField({ debug, useAsTitle: 'name' }),
   ],
   hooks: {
+    afterChange: [
+      reparentChildFolder({
+        parentFolderFieldName,
+      }),
+    ],
     afterDelete: [
       dissasociateAfterDelete({
         collectionSlugs,
