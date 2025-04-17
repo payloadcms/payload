@@ -31,6 +31,19 @@ export const sanitizeClientFeatures = (
     },
   }
 
+  // Find custom group orders if they exist in any feature
+  let customGroupOrders: Record<string, number> = {}
+
+  // First pass to collect custom orders from features
+  features.forEach((feature) => {
+    if (feature.key === 'toolbarFixed' && feature.sanitizedClientFeatureProps?.customGroupOrders) {
+      customGroupOrders = {
+        ...customGroupOrders,
+        ...feature.sanitizedClientFeatureProps.customGroupOrders,
+      }
+    }
+  })
+
   if (!features?.size) {
     return sanitized
   }
@@ -170,13 +183,21 @@ export const sanitizeClientFeatures = (
       return 0
     }
   })
+
   // Sort sanitized.toolbarFixed.groups by order property
   sanitized.toolbarFixed.groups.sort((a, b) => {
-    if (a.order && b.order) {
-      return a.order - b.order
-    } else if (a.order) {
+    const aCustomOrder = customGroupOrders[a.key]
+    const bCustomOrder = customGroupOrders[b.key]
+
+    // Use custom orders if available, otherwise fall back to default logic
+    const aOrder = aCustomOrder !== undefined ? aCustomOrder : a.order
+    const bOrder = bCustomOrder !== undefined ? bCustomOrder : b.order
+
+    if (aOrder && bOrder) {
+      return aOrder - bOrder
+    } else if (aOrder) {
       return -1
-    } else if (b.order) {
+    } else if (bOrder) {
       return 1
     } else {
       return 0
