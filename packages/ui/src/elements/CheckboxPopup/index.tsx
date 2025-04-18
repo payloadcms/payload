@@ -14,7 +14,7 @@ type CheckboxPopupProps = {
     value: string
   }[]
   selectedValues: string[]
-} & Omit<PopupProps, 'button' | 'horizontalAlign' | 'render' | 'verticalAlign'>
+} & Omit<PopupProps, 'button' | 'render'>
 export function CheckboxPopup({
   Button,
   className,

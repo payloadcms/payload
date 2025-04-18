@@ -1,12 +1,7 @@
 'use client'
 
 import type { ClientCollectionConfig, CollectionSlug } from 'payload'
-import type {
-  FolderBreadcrumb,
-  FolderInterface,
-  FolderOrDocument,
-  GetFolderDataResult,
-} from 'payload/shared'
+import type { FolderBreadcrumb, FolderOrDocument, GetFolderDataResult } from 'payload/shared'
 
 import { useRouter } from 'next/navigation.js'
 import { extractID, formatAdminURL, formatFolderOrDocumentItem } from 'payload/shared'
@@ -19,6 +14,11 @@ import { useConfig } from '../Config/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { getMetaSelection, getShiftSelection, groupItemIDsByRelation } from './selection.js'
+type SortKeys = keyof Pick<
+  FolderOrDocument['value'],
+  '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
+>
+type SortDirection = 'asc' | 'desc'
 export type FileCardData = {
   filename: string
   id: number | string
@@ -63,6 +63,14 @@ export type FolderContextValue = {
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setFolderID: (args: { folderID: number | string }) => Promise<void> | void
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
+  sortAndUpdateState: (args: {
+    documentsToSort?: FolderOrDocument[]
+    sortDirection?: 'asc' | 'desc'
+    sortOn?: SortKeys
+    subfoldersToSort?: FolderOrDocument[]
+  }) => void
+  sortDirection: SortDirection
+  sortOn: SortKeys
   subfolders?: FolderOrDocument[]
   visibleCollectionSlugs: CollectionSlug[]
 }
@@ -92,6 +100,9 @@ const Context = React.createContext<FolderContextValue>({
   setFocusedRowIndex: () => -1,
   setFolderID: () => null,
   setIsDragging: () => false,
+  sortAndUpdateState: () => undefined,
+  sortDirection: 'asc',
+  sortOn: '_folderOrDocumentTitle',
   subfolders: [],
   visibleCollectionSlugs: [],
 })
@@ -153,6 +164,14 @@ export type FolderProviderProps = {
    */
   readonly search?: string
   /**
+   * The sort order of the documents
+   *
+   * @example
+   * `name` for descending
+   * `-name` for ascending
+   */
+  readonly sort?: `-${SortKeys}` | SortKeys
+  /**
    * All subfolders in the current folder
    */
   readonly subfolders: FolderOrDocument[]
@@ -166,6 +185,7 @@ export function FolderProvider({
   filteredCollectionSlugs,
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
+  sort,
   subfolders: allSubfolders = [],
 }: FolderProviderProps) {
   const { config, getEntityConfig } = useConfig()
@@ -213,9 +233,61 @@ export function FolderProvider({
       return config.admin.routes.folders
     }
   })
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(() => {
+    if (sort) {
+      return sort.startsWith('-') ? 'desc' : 'asc'
+    }
+    return 'asc'
+  })
+  const [sortOn, setSortOn] = React.useState<SortKeys>(() => {
+    if (sort) {
+      return sort.replace(/^-/, '') as SortKeys
+    }
+    return '_folderOrDocumentTitle'
+  })
 
   const lastClickTime = React.useRef<null | number>(null)
   const totalCount = subfolders.length + documents.length
+
+  const formatFolderURL = React.useCallback(
+    (args: {
+      folderID?: number | string
+      relationTo?: string[]
+      search?: string
+      sortBy?: SortKeys
+      sortDirection?: SortDirection
+    }) => {
+      const newFolderID = 'folderID' in args ? args.folderID : activeFolderID
+      const params = {
+        relationTo:
+          'relationTo' in args
+            ? args.relationTo
+            : collectionSlug
+              ? undefined
+              : visibleCollectionSlugs,
+        search: 'search' in args ? args.search : search,
+        sortBy: 'sortBy' in args ? args.sortBy : sortOn,
+        sortDirection: 'sortDirection' in args ? args.sortDirection : sortDirection,
+      }
+
+      return formatAdminURL({
+        adminRoute: config.routes.admin,
+        path: `${baseFolderPath}${newFolderID ? `/${newFolderID}` : ''}${qs.stringify(params, {
+          addQueryPrefix: true,
+        })}`,
+      })
+    },
+    [
+      activeFolderID,
+      baseFolderPath,
+      collectionSlug,
+      config.routes.admin,
+      search,
+      sortDirection,
+      sortOn,
+      visibleCollectionSlugs,
+    ],
+  )
 
   const clearSelections = React.useCallback(() => {
     setFocusedRowIndex(-1)
@@ -263,9 +335,8 @@ export function FolderProvider({
         // not in a drawer (default is 1)
         startRouteTransition(() =>
           router.push(
-            formatAdminURL({
-              adminRoute: config.routes.admin,
-              path: `${baseFolderPath}${toFolderID ? `/${toFolderID}` : ''}`,
+            formatFolderURL({
+              folderID: toFolderID,
             }),
           ),
         )
@@ -278,9 +349,8 @@ export function FolderProvider({
       drawerDepth,
       startRouteTransition,
       router,
-      config.routes.admin,
+      formatFolderURL,
       populateFolderData,
-      baseFolderPath,
     ],
   )
 
@@ -493,15 +563,9 @@ export function FolderProvider({
 
       if (drawerDepth === 1) {
         router.replace(
-          formatAdminURL({
-            adminRoute: config.routes.admin,
-            path: `${baseFolderPath}${activeFolderID ? `/${activeFolderID}` : ''}${qs.stringify(
-              {
-                relationTo,
-                search: searchFilter || undefined,
-              },
-              { addQueryPrefix: true },
-            )}`,
+          formatFolderURL({
+            relationTo,
+            search: searchFilter || undefined,
           }),
         )
       }
@@ -515,15 +579,123 @@ export function FolderProvider({
       folderCollectionSlug,
       drawerDepth,
       router,
-      config.routes.admin,
-      baseFolderPath,
-      activeFolderID,
+      formatFolderURL,
     ],
   )
 
-  const sortItems = React.useCallback((items: FolderOrDocument[]) => {
-    return items
-  }, [])
+  const sortItems = React.useCallback(
+    ({
+      documentsToSort,
+      sortDirection: sortDirectionArg,
+      sortOn: sortOnArg,
+      subfoldersToSort,
+    }: Parameters<FolderContextValue['sortAndUpdateState']>[0]): {
+      newURL?: string
+      sortedDocuments?: FolderOrDocument[]
+      sortedSubfolders?: FolderOrDocument[]
+    } => {
+      let sortedDocuments: FolderOrDocument[] | undefined
+      let sortedSubfolders: FolderOrDocument[] | undefined
+      const sortDirectionToUse = sortDirectionArg || sortDirection
+      const sortOnToUse = sortOnArg || sortOn
+
+      if (sortOnArg) {
+        setSortOn(sortOnArg)
+      }
+
+      if (sortDirectionArg) {
+        setSortDirection(sortDirectionArg)
+      }
+
+      const newURL = formatFolderURL({
+        sortBy: sortOnArg || sortOn,
+        sortDirection: sortDirectionArg || sortDirection,
+      })
+
+      if (documentsToSort) {
+        sortedDocuments = [...documentsToSort].sort((a, b) => {
+          const aValue = a.value[sortOnToUse]
+          const bValue = b.value[sortOnToUse]
+
+          if (aValue == null && bValue == null) {
+            return 0
+          }
+          if (aValue == null) {
+            return sortDirectionToUse === 'asc' ? 1 : -1
+          }
+          if (bValue == null) {
+            return sortDirectionToUse === 'asc' ? -1 : 1
+          }
+
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return sortDirectionToUse === 'asc'
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue)
+          }
+
+          return 0
+        })
+      }
+
+      if (subfoldersToSort) {
+        sortedSubfolders = [...subfoldersToSort].sort((a, b) => {
+          const aValue = a.value[sortOnToUse]
+          const bValue = b.value[sortOnToUse]
+
+          if (aValue == null && bValue == null) {
+            return 0
+          }
+          if (aValue == null) {
+            return sortDirectionToUse === 'asc' ? 1 : -1
+          }
+          if (bValue == null) {
+            return sortDirectionToUse === 'asc' ? -1 : 1
+          }
+
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return sortDirectionToUse === 'asc'
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue)
+          }
+
+          return 0
+        })
+      }
+
+      return {
+        newURL,
+        sortedDocuments,
+        sortedSubfolders,
+      }
+    },
+    [formatFolderURL, sortDirection, sortOn],
+  )
+
+  const sortAndUpdateState: FolderContextValue['sortAndUpdateState'] = React.useCallback(
+    ({ documentsToSort, sortDirection: sortDirectionArg, sortOn: sortOnArg, subfoldersToSort }) => {
+      const { newURL, sortedDocuments, sortedSubfolders } = sortItems({
+        documentsToSort,
+        sortDirection: sortDirectionArg,
+        sortOn: sortOnArg,
+        subfoldersToSort,
+      })
+
+      if (sortedDocuments) {
+        setDocuments(sortedDocuments)
+      }
+      if (sortedSubfolders) {
+        setSubfolders(sortedSubfolders)
+      }
+
+      if (drawerDepth === 1) {
+        // not in a drawer (default is 1)
+        startRouteTransition(() => {
+          router.replace(newURL)
+        })
+      }
+    },
+    [drawerDepth, router, sortItems, startRouteTransition],
+  )
 
   const separateItems = React.useCallback(
     (
@@ -597,19 +769,30 @@ export function FolderProvider({
 
       const separatedItems = separateItems(items)
 
+      let documentsToSort = undefined
+      let subfoldersToSort = undefined
+
       if (separatedItems.documents.length) {
-        setDocuments((prevDocs) => {
-          return sortItems([...prevDocs, ...separatedItems.documents])
-        })
+        documentsToSort = [...documents, ...separatedItems.documents]
       }
 
       if (separatedItems.folders.length) {
-        setSubfolders((prevFolders) => {
-          return sortItems([...prevFolders, ...separatedItems.folders])
-        })
+        subfoldersToSort = [...subfolders, ...separatedItems.folders]
+      }
+
+      const { sortedDocuments, sortedSubfolders } = sortItems({
+        documentsToSort,
+        subfoldersToSort,
+      })
+
+      if (sortedDocuments) {
+        setDocuments(sortedDocuments)
+      }
+      if (sortedSubfolders) {
+        setSubfolders(sortedSubfolders)
       }
     },
-    [separateItems, sortItems],
+    [documents, separateItems, sortItems, subfolders],
   )
 
   /**
@@ -712,29 +895,49 @@ export function FolderProvider({
           }
         }
 
-        if (successfullyMovedDocumentItems.length) {
-          setDocuments((prevDocs) => {
-            if (movingToCurrentFolder) {
-              return sortItems([...prevDocs, ...successfullyMovedDocumentItems])
-            } else {
-              return prevDocs.filter(
+        if (movingToCurrentFolder) {
+          // need to sort if we are moving (adding) items to the current folder
+          const { newURL, sortedDocuments, sortedSubfolders } = sortItems({
+            documentsToSort: successfullyMovedDocumentItems.length
+              ? [...documents, ...successfullyMovedDocumentItems]
+              : undefined,
+            subfoldersToSort: successfullyMovedFolderItems.length
+              ? [...subfolders, ...successfullyMovedFolderItems]
+              : undefined,
+          })
+
+          if (sortedDocuments) {
+            setDocuments(sortedDocuments)
+          }
+          if (sortedSubfolders) {
+            setSubfolders(sortedSubfolders)
+          }
+
+          if (drawerDepth === 1 && newURL) {
+            // not in a drawer (default is 1)
+            router.replace(newURL)
+          }
+        } else {
+          // no need to sort, just remove the items from the current state
+          const filteredDocuments = successfullyMovedDocumentItems.length
+            ? documents.filter(
                 ({ itemKey }) =>
                   !successfullyMovedDocumentItems.some((item) => item.itemKey === itemKey),
               )
-            }
-          })
-        }
+            : undefined
+          const filteredSubfolders = successfullyMovedFolderItems.length
+            ? subfolders.filter(
+                ({ itemKey }) =>
+                  !successfullyMovedFolderItems.some((item) => item.itemKey === itemKey),
+              )
+            : undefined
 
-        if (successfullyMovedFolderItems.length) {
-          setSubfolders((prevFolders) => {
-            if (movingToCurrentFolder) {
-              return sortItems([...prevFolders, ...successfullyMovedFolderItems])
-            }
-            return prevFolders.filter(
-              ({ itemKey }) =>
-                !successfullyMovedFolderItems.some((item) => item.itemKey === itemKey),
-            )
-          })
+          if (filteredDocuments) {
+            setDocuments(filteredDocuments)
+          }
+          if (filteredSubfolders) {
+            setSubfolders(filteredSubfolders)
+          }
         }
       }
 
@@ -750,6 +953,10 @@ export function FolderProvider({
       populateFolderData,
       getEntityConfig,
       sortItems,
+      documents,
+      subfolders,
+      drawerDepth,
+      router,
     ],
   )
 
@@ -832,6 +1039,9 @@ export function FolderProvider({
         setFocusedRowIndex,
         setFolderID: setNewActiveFolderID,
         setIsDragging,
+        sortAndUpdateState,
+        sortDirection,
+        sortOn,
         subfolders,
         visibleCollectionSlugs,
       }}

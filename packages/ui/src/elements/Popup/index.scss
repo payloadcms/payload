@@ -33,6 +33,13 @@
       min-width: var(--popup-width, auto);
     }
 
+    &__content,
+    &__scroll-content {
+      > .popup-list-group-label:first-child {
+        margin-top: calc(var(--base) * 0.25);
+      }
+    }
+
     &__hide-scrollbar {
       overflow: hidden;
     }

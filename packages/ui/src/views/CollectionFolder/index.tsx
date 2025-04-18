@@ -14,6 +14,7 @@ import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderAct
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
 import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListFolderPills } from '../../elements/ListFolderPills/index.js'
@@ -238,6 +239,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
           />
           <SearchBar
             Actions={[
+              <SortByPill key="sort-by-pill" />,
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"

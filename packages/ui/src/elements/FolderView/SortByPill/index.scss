@@ -1,0 +1,8 @@
+@layer payload-default {
+  .sort-by-pill {
+    &__order-option {
+      display: flex;
+      gap: calc(var(--base) * 0.25);
+    }
+  }
+}

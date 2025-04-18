@@ -15,6 +15,7 @@ import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderAct
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
 import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
@@ -86,8 +87,8 @@ export function DefaultFolderView(
       breadcrumbs.length === 0
         ? getTranslation(folderCollectionConfig.labels?.plural, i18n)
         : breadcrumbs[breadcrumbs.length - 1].name
-    return t('folder:searchByTitleIn', {
-      location: locationLabel,
+    return t('folder:searchByNameInFolder', {
+      folderName: locationLabel,
     })
   })
 
@@ -262,6 +263,7 @@ export function DefaultFolderView(
           />
           <SearchBar
             Actions={[
+              <SortByPill key="sort-by-pill" />,
               <CollectionTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
