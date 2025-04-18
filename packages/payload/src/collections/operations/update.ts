@@ -27,6 +27,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -103,7 +104,7 @@ export const updateOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
-      sort,
+      sort: incomingSort,
       where,
     } = args
 
@@ -135,6 +136,11 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const fullWhere = combineQueries(where, accessResult)
+
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
 
     let docs
 

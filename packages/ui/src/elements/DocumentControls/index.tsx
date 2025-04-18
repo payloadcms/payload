@@ -38,6 +38,7 @@ const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
+  readonly BeforeDocumentControls?: React.ReactNode
   readonly customComponents?: {
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
@@ -68,6 +69,7 @@ export const DocumentControls: React.FC<{
   const {
     id,
     slug,
+    BeforeDocumentControls,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -134,9 +136,23 @@ export const DocumentControls: React.FC<{
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
+  const collectionConfigDrafts = collectionConfig?.versions?.drafts
+  const globalConfigDrafts = globalConfig?.versions?.drafts
+
   const autosaveEnabled =
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-    (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
+    (collectionConfigDrafts && collectionConfigDrafts?.autosave) ||
+    (globalConfigDrafts && globalConfigDrafts?.autosave)
+
+  const collectionAutosaveEnabled = collectionConfigDrafts && collectionConfigDrafts?.autosave
+  const globalAutosaveEnabled = globalConfigDrafts && globalConfigDrafts?.autosave
+
+  const showSaveDraftButton =
+    (collectionAutosaveEnabled &&
+      collectionConfigDrafts.autosave !== false &&
+      collectionConfigDrafts.autosave.showSaveDraftButton === true) ||
+    (globalAutosaveEnabled &&
+      globalConfigDrafts.autosave !== false &&
+      globalConfigDrafts.autosave.showSaveDraftButton === true)
 
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
@@ -214,6 +230,7 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
+            {BeforeDocumentControls}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
@@ -224,7 +241,9 @@ export const DocumentControls: React.FC<{
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
-                    {(unsavedDraftWithValidations || !autosaveEnabled) && (
+                    {(unsavedDraftWithValidations ||
+                      !autosaveEnabled ||
+                      (autosaveEnabled && showSaveDraftButton)) && (
                       <RenderCustomComponent
                         CustomComponent={CustomSaveDraftButton}
                         Fallback={<SaveDraftButton />}

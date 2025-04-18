@@ -55,8 +55,9 @@
     }
 
     &--has-icon {
+      gap: 0;
       padding-inline-start: base(0.4);
-      padding-inline-end: base(0.3);
+      padding-inline-end: base(0.1);
 
       svg {
         display: block;

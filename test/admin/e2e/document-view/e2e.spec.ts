@@ -110,7 +110,7 @@ describe('Document View', () => {
       })
       expect(collectionItems.docs.length).toBe(1)
       await page.goto(
-        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems.docs[0].id}/api`,
+        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems?.docs[0]?.id}/api`,
       )
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
@@ -333,20 +333,32 @@ describe('Document View', () => {
       await navigateToDoc(page, postsUrl)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
+
       await page
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
+
       await wait(500)
+
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
-      const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
+
+      const drawer1Box = await drawer1Content.boundingBox()
+      await expect.poll(() => drawer1Box).not.toBeNull()
+      const drawerLeft = drawer1Box!.x
+
       await drawer1Content
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
+
       const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
       await expect(drawer2Content).toBeVisible()
-      const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
-      expect(drawer2Left > drawerLeft).toBe(true)
+
+      const drawer2Box = await drawer2Content.boundingBox()
+      await expect.poll(() => drawer2Box).not.toBeNull()
+      const drawer2Left = drawer2Box!.x
+
+      await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
     })
   })
 
@@ -521,6 +533,24 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
 
       await expect(fileField).toHaveValue('some file text')
+    })
+  })
+
+  describe('custom document controls', () => {
+    test('should show custom elements in document controls in collection', async () => {
+      await page.goto(postsUrl.create)
+      const customDraftButton = page.locator('#custom-draft-button')
+      const customSaveButton = page.locator('#custom-save-button')
+
+      await expect(customDraftButton).toBeVisible()
+      await expect(customSaveButton).toBeVisible()
+    })
+
+    test('should show custom elements in document controls in global', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      const customDraftButton = page.locator('#custom-draft-button')
+
+      await expect(customDraftButton).toBeVisible()
     })
   })
 })

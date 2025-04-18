@@ -48,6 +48,8 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithDraftButtonGlobal,
+  autosaveWithDraftButtonSlug,
   autosaveWithValidateCollectionSlug,
   customIDSlug,
   diffCollectionSlug,
@@ -78,6 +80,7 @@ describe('Versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
+  let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -116,6 +119,7 @@ describe('Versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
@@ -201,78 +205,6 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
-    test('should show global versions view level action in globals versions view', async () => {
-      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
-      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
-      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
-    })
-
-    // TODO: Check versions/:version-id view for collections / globals
-
-    test('global — has versions tab', async () => {
-      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
-      await page.goto(global.global(draftGlobalSlug))
-
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
-      await versionsTab.waitFor({ state: 'visible' })
-
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
-    })
-
-    test('global — respects max number of versions', async () => {
-      await payload.updateGlobal({
-        slug: draftWithMaxGlobalSlug,
-        data: {
-          title: 'initial title',
-        },
-      })
-
-      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
-      await page.goto(global.global(draftWithMaxGlobalSlug))
-
-      const titleFieldInitial = page.locator('#field-title')
-      await titleFieldInitial.fill('updated title')
-      await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldInitial).toHaveValue('updated title')
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: '1',
-      })
-
-      await versionsTab.waitFor({ state: 'visible' })
-
-      expect(versionsTab).toBeTruthy()
-
-      const titleFieldUpdated = page.locator('#field-title')
-      await titleFieldUpdated.fill('latest title')
-      await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldUpdated).toHaveValue('latest title')
-
-      const versionsTabUpdated = page.locator('.doc-tab', {
-        hasText: '1',
-      })
-
-      await versionsTabUpdated.waitFor({ state: 'visible' })
-
-      expect(versionsTabUpdated).toBeTruthy()
-    })
-
-    test('global — has versions route', async () => {
-      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
-      await page.goto(versionsURL)
-      await expect(() => {
-        expect(page.url()).toMatch(/\/versions/)
-      }).toPass({ timeout: 10000, intervals: [100] })
-    })
-
     test('collection - should autosave', async () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill('autosave title')
@@ -307,6 +239,16 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
+    test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
+      await page.goto(autosaveWithDraftButtonURL.create)
+      await expect(page.locator('#action-save-draft')).toBeVisible()
+    })
+
+    test('collection - should not show "save as draft" button when showSaveDraftButton is false', async () => {
+      await page.goto(autosaveURL.create)
+      await expect(page.locator('#action-save-draft')).toBeHidden()
     })
 
     test('collection - autosave - should not create duplicates when clicking Create new', async () => {
@@ -400,17 +342,6 @@ describe('Versions', () => {
       const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
       await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
-    })
-
-    test('global - should autosave', async () => {
-      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      await page.goto(url.global(autoSaveGlobalSlug))
-      const titleField = page.locator('#field-title')
-      await titleField.fill('global title')
-      await waitForAutoSaveToRunAndComplete(page)
-      await expect(titleField).toHaveValue('global title')
-      await page.goto(url.global(autoSaveGlobalSlug))
-      await expect(page.locator('#field-title')).toHaveValue('global title')
     })
 
     test('should retain localized data during autosave', async () => {
@@ -517,12 +448,6 @@ describe('Versions', () => {
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
       await expect(page.locator('#field-title')).toHaveValue('title')
-    })
-
-    test('globals — should hide publish button when access control prevents update', async () => {
-      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
-      await page.goto(url.global(disablePublishGlobalSlug))
-      await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
     test('collections — should hide publish button when access control prevents create', async () => {
@@ -649,6 +574,107 @@ describe('Versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+  })
+
+  describe('draft globals', () => {
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    test('global — has versions tab', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+      const href = versionsTab.locator('a').first()
+      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+    })
+
+    test('global — respects max number of versions', async () => {
+      await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    test('global — has versions route', async () => {
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
+      await page.goto(versionsURL)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
+    test('global - should show "save as draft" button when showSaveDraftButton is true', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveWithDraftButtonGlobal)
+      await page.goto(url.global(autosaveWithDraftButtonGlobal))
+      await expect(page.locator('#action-save-draft')).toBeVisible()
+    })
+
+    test('global - should not show "save as draft" button when showSaveDraftButton is false', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+    })
+
+    test('global - should autosave', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      await page.goto(url.global(autoSaveGlobalSlug))
+      const titleField = page.locator('#field-title')
+      await titleField.fill('global title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleField).toHaveValue('global title')
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#field-title')).toHaveValue('global title')
+    })
+
+    test('globals — should hide publish button when access control prevents update', async () => {
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+      await expect(page.locator('#action-save')).not.toBeAttached()
     })
   })
 
