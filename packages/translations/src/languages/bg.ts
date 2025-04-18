@@ -185,7 +185,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     newFolder: 'Нова папка',
     removeFromFolder: 'Премахване от папката',
     renameFolder: 'Преименувай папка',
-    searchByTitleIn: 'Търсене по заглавие в {{location}}',
+    searchByNameInFolder: 'Търсене по име в {{folderName}}',
     selectFolder: 'Изберете папка',
   },
   general: {

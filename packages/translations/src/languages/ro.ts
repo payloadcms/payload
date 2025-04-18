@@ -189,7 +189,7 @@ export const roTranslations: DefaultTranslationsObject = {
     newFolder: 'Dosar nou',
     removeFromFolder: 'Eliminați din dosar',
     renameFolder: 'Redenumiți dosarul',
-    searchByTitleIn: 'Căutare după titlu în {{location}}',
+    searchByNameInFolder: 'Căutați după nume în {{folderName}}',
     selectFolder: 'Selectează dosarul',
   },
   general: {

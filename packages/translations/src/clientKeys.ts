@@ -136,7 +136,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'folder:removeFromFolder',
   'folder:renameFolder',
   'folder:selectFolder',
-  'folder:searchByTitleIn',
+  'folder:searchByNameInFolder',
 
   'general:all',
   'general:aboutToDeleteCount',

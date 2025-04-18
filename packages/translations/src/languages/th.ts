@@ -182,7 +182,7 @@ export const thTranslations: DefaultTranslationsObject = {
     newFolder: 'โฟลเดอร์ใหม่',
     removeFromFolder: 'นำออกจากโฟลเดอร์',
     renameFolder: 'เปลี่ยนชื่อโฟลเดอร์',
-    searchByTitleIn: 'ค้นหาตามชื่อใน {{location}}',
+    searchByNameInFolder: 'ค้นหาด้วยชื่อใน {{folderName}}',
     selectFolder: 'เลือกโฟลเดอร์',
   },
   general: {

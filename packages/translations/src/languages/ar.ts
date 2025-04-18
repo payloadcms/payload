@@ -183,7 +183,7 @@ export const arTranslations: DefaultTranslationsObject = {
     newFolder: 'مجلد جديد',
     removeFromFolder: 'أزل من المجلد',
     renameFolder: 'إعادة تسمية المجلد',
-    searchByTitleIn: 'البحث عن طريق العنوان في {{location}}',
+    searchByNameInFolder: 'البحث عن طريق الاسم في {{folderName}}',
     selectFolder: 'حدد المجلد',
   },
   general: {

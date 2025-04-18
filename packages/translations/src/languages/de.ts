@@ -189,7 +189,7 @@ export const deTranslations: DefaultTranslationsObject = {
     newFolder: 'Neuer Ordner',
     removeFromFolder: 'Aus dem Ordner entfernen',
     renameFolder: 'Ordner umbenennen',
-    searchByTitleIn: 'Suche nach Titel in {{location}}',
+    searchByNameInFolder: 'Suche nach Name in {{folderName}}',
     selectFolder: 'Ordner auswählen',
   },
   general: {

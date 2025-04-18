@@ -185,7 +185,7 @@ export const csTranslations: DefaultTranslationsObject = {
     newFolder: 'Nová složka',
     removeFromFolder: 'Odebrat ze složky',
     renameFolder: 'Přejmenovat složku',
-    searchByTitleIn: 'Hledat podle názvu v {{location}}',
+    searchByNameInFolder: 'Vyhledat podle jména v {{folderName}}',
     selectFolder: 'Vyberte složku',
   },
   general: {

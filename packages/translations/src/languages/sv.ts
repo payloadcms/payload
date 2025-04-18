@@ -185,7 +185,7 @@ export const svTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny mapp',
     removeFromFolder: 'Ta bort från mapp',
     renameFolder: 'Byt namn på mapp',
-    searchByTitleIn: 'Sök med titel i {{location}}',
+    searchByNameInFolder: 'Sök efter namn i {{folderName}}',
     selectFolder: 'Välj mapp',
   },
   general: {

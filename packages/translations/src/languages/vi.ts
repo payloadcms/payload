@@ -185,7 +185,7 @@ export const viTranslations: DefaultTranslationsObject = {
     newFolder: 'Thư mục mới',
     removeFromFolder: 'Xóa khỏi Thư mục',
     renameFolder: 'Đổi tên thư mục',
-    searchByTitleIn: 'Tìm kiếm theo Tiêu đề tại {{location}}',
+    searchByNameInFolder: 'Tìm kiếm theo Tên trong {{folderName}}',
     selectFolder: 'Chọn Thư mục',
   },
   general: {

@@ -186,7 +186,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     newFolder: 'Novi Folder',
     removeFromFolder: 'Ukloni iz fascikle',
     renameFolder: 'Preimenuj folder',
-    searchByTitleIn: 'Pretraga po Naslovu u {{location}}',
+    searchByNameInFolder: 'Pretraga po imenu u {{folderName}}',
     selectFolder: 'Izaberite fasciklu',
   },
   general: {

@@ -186,7 +186,7 @@ export const caTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova carpeta',
     removeFromFolder: 'Elimina de la carpeta',
     renameFolder: 'Anomena carpeta',
-    searchByTitleIn: 'Cerca per títol a {{location}}',
+    searchByNameInFolder: 'Cerca per Nom en {{folderName}}',
     selectFolder: 'Selecciona la carpeta',
   },
   general: {

@@ -6,7 +6,6 @@ import { extractID } from 'payload/shared'
 import type { FormatDateArgs } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
-import { FolderIcon } from '../../../icons/Folder/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
@@ -16,8 +15,8 @@ import './index.scss'
 const baseClass = 'folder-file-table'
 const columns = [
   {
-    name: 'title',
-    label: 'Title',
+    name: 'name',
+    label: 'Name',
   },
   {
     name: 'createdAt',
@@ -76,7 +75,7 @@ export function FolderFileTable({
             <DraggableTableRow
               columns={columns.map(({ name }, index) => {
                 let cellValue = '—'
-                if (name === 'title' && value._folderOrDocumentTitle !== undefined) {
+                if (name === 'name' && value._folderOrDocumentTitle !== undefined) {
                   cellValue = value._folderOrDocumentTitle
                 }
 
@@ -137,7 +136,7 @@ export function FolderFileTable({
             <DraggableTableRow
               columns={columns.map(({ name }, index) => {
                 let cellValue = '—'
-                if (name === 'title' && value._folderOrDocumentTitle !== undefined) {
+                if (name === 'name' && value._folderOrDocumentTitle !== undefined) {
                   cellValue = value._folderOrDocumentTitle
                 }
 

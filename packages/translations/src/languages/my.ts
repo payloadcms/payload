@@ -186,7 +186,7 @@ export const myTranslations: DefaultTranslationsObject = {
     newFolder: 'Folder Baru',
     removeFromFolder: 'Dari Folder Buang',
     renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
-    searchByTitleIn: 'Cari mengikut Tajuk di {{location}}',
+    searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
     selectFolder: 'Pilih Folder',
   },
   general: {

@@ -186,7 +186,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova mapa',
     removeFromFolder: 'Ukloni iz mape',
     renameFolder: 'Preimenuj mapu',
-    searchByTitleIn: 'Pretraga prema naslovu u {{location}}',
+    searchByNameInFolder: 'Pretraživanje po imenu u {{folderName}}',
     selectFolder: 'Odaberite mapu',
   },
   general: {

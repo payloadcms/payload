@@ -181,7 +181,7 @@ export const heTranslations: DefaultTranslationsObject = {
     newFolder: 'תיקייה חדשה',
     removeFromFolder: 'הסר מהתיקייה',
     renameFolder: 'שנה שם לתיקיה',
-    searchByTitleIn: 'חפש לפי כותרת ב{{location}}',
+    searchByNameInFolder: 'חיפוש לפי שם ב{{folderName}}',
     selectFolder: 'בחר תיקייה',
   },
   general: {

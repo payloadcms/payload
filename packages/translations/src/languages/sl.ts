@@ -185,7 +185,7 @@ export const slTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova mapa',
     removeFromFolder: 'Odstrani iz mape',
     renameFolder: 'Preimenuj Mapo',
-    searchByTitleIn: 'Iskanje po naslovu v {{location}}',
+    searchByNameInFolder: 'Iskanje po imenu v {{folderName}}',
     selectFolder: 'Izberite mapo',
   },
   general: {

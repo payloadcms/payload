@@ -96,7 +96,15 @@ const Context = React.createContext<FolderContextValue>({
   visibleCollectionSlugs: [],
 })
 
-function filterOutItems({ items, relationTo, search }) {
+function filterOutItems({
+  items,
+  relationTo,
+  search,
+}: {
+  items: FolderOrDocument[]
+  relationTo?: CollectionSlug[]
+  search?: string
+}) {
   if (typeof search !== 'string' && relationTo === undefined) {
     return items
   }

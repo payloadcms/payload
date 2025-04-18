@@ -185,7 +185,7 @@ export const enTranslations = {
     newFolder: 'New Folder',
     removeFromFolder: 'Remove from Folder',
     renameFolder: 'Rename Folder',
-    searchByTitleIn: 'Search by Title in {{location}}',
+    searchByNameInFolder: 'Search by Name in {{folderName}}',
     selectFolder: 'Select Folder',
   },
   general: {

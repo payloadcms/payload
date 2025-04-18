@@ -187,7 +187,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     newFolder: 'Naujas aplankas',
     removeFromFolder: 'Pašalinti iš aplanko',
     renameFolder: 'Pervadinti aplanką',
-    searchByTitleIn: 'Paieška pagal pavadinimą {{location}}',
+    searchByNameInFolder: 'Ieškoti pagal vardą {{folderName}}',
     selectFolder: 'Pasirinkti aplanką',
   },
   general: {

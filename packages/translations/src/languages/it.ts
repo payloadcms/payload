@@ -189,7 +189,7 @@ export const itTranslations: DefaultTranslationsObject = {
     newFolder: 'Nuova Cartella',
     removeFromFolder: 'Rimuovi dalla cartella',
     renameFolder: 'Rinomina Cartella',
-    searchByTitleIn: 'Cerca per Titolo in {{location}}',
+    searchByNameInFolder: 'Cerca per Nome in {{folderName}}',
     selectFolder: 'Seleziona Cartella',
   },
   general: {

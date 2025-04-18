@@ -189,7 +189,7 @@ export const esTranslations: DefaultTranslationsObject = {
     newFolder: 'Nueva Carpeta',
     removeFromFolder: 'Eliminar de la carpeta',
     renameFolder: 'Renombrar carpeta',
-    searchByTitleIn: 'Buscar por Título en {{location}}',
+    searchByNameInFolder: 'Buscar por nombre en {{folderName}}',
     selectFolder: 'Seleccionar Carpeta',
   },
   general: {

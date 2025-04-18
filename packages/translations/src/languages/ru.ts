@@ -187,7 +187,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     newFolder: 'Новая папка',
     removeFromFolder: 'Удалить из папки',
     renameFolder: 'Переименовать папку',
-    searchByTitleIn: 'Поиск по названию в {{location}}',
+    searchByNameInFolder: 'Поиск по имени в {{folderName}}',
     selectFolder: 'Выбрать папку',
   },
   general: {

@@ -187,7 +187,7 @@ export const huTranslations: DefaultTranslationsObject = {
     newFolder: 'Új Mappa',
     removeFromFolder: 'Távolítsa el a mappából',
     renameFolder: 'Mappa átnevezése',
-    searchByTitleIn: 'Keresés címszóval a következő helyen: {{location}}',
+    searchByNameInFolder: 'Keresés név alapján a(z) {{folderName}} mappában',
     selectFolder: 'Mappa kiválasztása',
   },
   general: {

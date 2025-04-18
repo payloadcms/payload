@@ -188,7 +188,7 @@ export const skTranslations: DefaultTranslationsObject = {
     newFolder: 'Nový priečinok',
     removeFromFolder: 'Odstrániť z priečinka',
     renameFolder: 'Premenovať priečinok',
-    searchByTitleIn: 'Hľadať podľa názvu v {{location}}',
+    searchByNameInFolder: 'Hľadaj podľa mena v {{folderName}}',
     selectFolder: 'Vybrať priečinok',
   },
   general: {

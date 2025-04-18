@@ -9,7 +9,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
-import { CollectionType } from '../../elements/FolderView/CollectionType/index.js'
+import { CollectionTypePill } from '../../elements/FolderView/CollectionTypePill/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
@@ -262,7 +262,7 @@ export function DefaultFolderView(
           />
           <SearchBar
             Actions={[
-              <CollectionType key="collection-type" />,
+              <CollectionTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"

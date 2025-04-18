@@ -184,7 +184,7 @@ export const etTranslations: DefaultTranslationsObject = {
     newFolder: 'Uus kaust',
     removeFromFolder: 'Eemalda kaustast',
     renameFolder: 'Nimeta kaust ümber',
-    searchByTitleIn: 'Otsi pealkirja järgi {{location}}',
+    searchByNameInFolder: 'Otsi nime järgi kaustas {{folderName}}',
     selectFolder: 'Vali kaust',
   },
   general: {

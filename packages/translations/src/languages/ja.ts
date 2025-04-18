@@ -186,7 +186,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     newFolder: '新しいフォルダ',
     removeFromFolder: 'フォルダから削除します',
     renameFolder: 'フォルダの名前を変更する',
-    searchByTitleIn: '{{location}}でタイトルで検索する',
+    searchByNameInFolder: '{{folderName}}で名前を検索する',
     selectFolder: 'フォルダを選択してください',
   },
   general: {

@@ -178,7 +178,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     newFolder: '新文件夹',
     removeFromFolder: '从文件夹中移除',
     renameFolder: '重命名文件夹',
-    searchByTitleIn: '在{{location}}中按标题搜索',
+    searchByNameInFolder: '在{{folderName}}中按名称搜索',
     selectFolder: '选择文件夹',
   },
   general: {

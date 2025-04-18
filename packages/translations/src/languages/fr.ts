@@ -191,7 +191,7 @@ export const frTranslations: DefaultTranslationsObject = {
     newFolder: 'Nouveau Dossier',
     removeFromFolder: 'Retirer du dossier',
     renameFolder: 'Renommer le dossier',
-    searchByTitleIn: 'Recherche par titre à {{location}}',
+    searchByNameInFolder: 'Recherche par nom dans {{folderName}}',
     selectFolder: 'Sélectionnez le dossier',
   },
   general: {

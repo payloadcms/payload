@@ -185,7 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     newFolder: 'Yeni Qovluq',
     removeFromFolder: 'Qovluqdan çıxarın',
     renameFolder: 'Qovluğun adını dəyişdirin',
-    searchByTitleIn: '{{location}} yerində Başlığa görə axtarış',
+    searchByNameInFolder: '{{folderName}} qovluğunda adla axtarış',
     selectFolder: 'Qovluğu seçin',
   },
   general: {

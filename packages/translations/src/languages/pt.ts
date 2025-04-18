@@ -185,7 +185,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova Pasta',
     removeFromFolder: 'Remover da Pasta',
     renameFolder: 'Renomear Pasta',
-    searchByTitleIn: 'Pesquisa por Título em {{location}}',
+    searchByNameInFolder: 'Pesquisar por Nome em {{folderName}}',
     selectFolder: 'Selecionar Pasta',
   },
   general: {

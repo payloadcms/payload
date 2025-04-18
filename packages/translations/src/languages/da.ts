@@ -184,7 +184,7 @@ export const daTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny Mappe',
     removeFromFolder: 'Fjern fra mappe',
     renameFolder: 'Omdøb mappe',
-    searchByTitleIn: 'Søg efter titel i {{location}}',
+    searchByNameInFolder: 'Søg efter Navn i {{folderName}}',
     selectFolder: 'Vælg mappe',
   },
   general: {

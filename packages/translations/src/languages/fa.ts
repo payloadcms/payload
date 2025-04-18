@@ -183,7 +183,7 @@ export const faTranslations: DefaultTranslationsObject = {
     newFolder: 'پوشه جدید',
     removeFromFolder: 'از پوشه بردارید',
     renameFolder: 'تغییر نام پوشه',
-    searchByTitleIn: 'جستجو بر اساس عنوان در {{location}}',
+    searchByNameInFolder: 'جستجو بر اساس نام در {{folderName}}',
     selectFolder: 'انتخاب پوشه',
   },
   general: {

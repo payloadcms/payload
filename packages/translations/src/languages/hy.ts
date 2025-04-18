@@ -185,7 +185,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     newFolder: 'Նոր թղթապանակ',
     removeFromFolder: 'Հեռացնել թղթապանակից',
     renameFolder: 'Վերանվանել թղթապանակը',
-    searchByTitleIn: 'Որոնել կոչումով {{location}} վայրում',
+    searchByNameInFolder: 'Փնտրել ըստ անվանումի {{folderName}} թղթապանակում',
     selectFolder: 'Ընտրել թղթապանակ',
   },
   general: {

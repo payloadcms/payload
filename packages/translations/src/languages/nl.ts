@@ -187,7 +187,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     newFolder: 'Nieuwe Map',
     removeFromFolder: 'Verwijderen uit map',
     renameFolder: 'Hernoem Map',
-    searchByTitleIn: 'Zoek op titel in {{location}}',
+    searchByNameInFolder: 'Zoeken op naam in {{folderName}}',
     selectFolder: 'Selecteer Map',
   },
   general: {

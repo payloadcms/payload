@@ -11,7 +11,7 @@ import './index.scss'
 
 const baseClass = 'collection-type'
 
-export function CollectionType() {
+export function CollectionTypePill() {
   const { filterItems, folderCollectionSlug, visibleCollectionSlugs } = useFolder()
   const { i18n } = useTranslation()
   const { config, getEntityConfig } = useConfig()

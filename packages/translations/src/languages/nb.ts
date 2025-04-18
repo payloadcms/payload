@@ -185,7 +185,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny mappe',
     removeFromFolder: 'Fjern fra mappe',
     renameFolder: 'Endre mappenavn',
-    searchByTitleIn: 'Søk etter tittel på {{location}}',
+    searchByNameInFolder: 'Søk etter navn i {{folderName}}',
     selectFolder: 'Velg Mappe',
   },
   general: {

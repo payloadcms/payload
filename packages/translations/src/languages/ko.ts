@@ -185,7 +185,7 @@ export const koTranslations: DefaultTranslationsObject = {
     newFolder: '새 폴더',
     removeFromFolder: '폴더에서 제거하십시오',
     renameFolder: '폴더 이름 변경',
-    searchByTitleIn: '{{location}}에서 제목으로 검색하세요.',
+    searchByNameInFolder: '{{folderName}}에서 이름으로 검색하세요.',
     selectFolder: '폴더 선택',
   },
   general: {

@@ -186,7 +186,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     newFolder: 'Нова папка',
     removeFromFolder: 'Видалити з папки',
     renameFolder: 'Перейменувати папку',
-    searchByTitleIn: 'Пошук за назвою в {{location}}',
+    searchByNameInFolder: 'Пошук за назвою у {{folderName}}',
     selectFolder: 'Вибрати папку',
   },
   general: {

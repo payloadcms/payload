@@ -187,7 +187,7 @@ export const trTranslations: DefaultTranslationsObject = {
     newFolder: 'Yeni Klasör',
     removeFromFolder: 'Klasörden Çıkar',
     renameFolder: 'Klasörü Yeniden Adlandır',
-    searchByTitleIn: "{{location}}'da Başlığa Göre Ara",
+    searchByNameInFolder: "{{folderName}}'da İsme Göre Ara",
     selectFolder: 'Klasör Seçin',
   },
   general: {
