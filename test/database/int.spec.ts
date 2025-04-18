@@ -2403,4 +2403,15 @@ describe('database', () => {
 
     payload.db.allowAdditionalKeys = false
   })
+
+  it('should not crash when the version field is not selected', async () => {
+    const customID = await payload.create({ collection: 'custom-ids', data: {} })
+    const res = await payload.db.queryDrafts({
+      collection: 'custom-ids',
+      where: { parent: { equals: customID.id } },
+      select: { parent: true },
+    })
+
+    expect(res.docs[0].id).toBe(customID.id)
+  })
 })
