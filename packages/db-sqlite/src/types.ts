@@ -51,6 +51,7 @@ export type Args = {
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
+  disableOnConflictDoUpdate?: boolean
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
   idType?: 'number' | 'uuid'
@@ -144,6 +145,7 @@ export type SQLiteAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
+  disableOnConflictDoUpdate?: boolean
   drizzle: Drizzle
   dropDatabase: DropDatabase
   execute: Execute<unknown>
