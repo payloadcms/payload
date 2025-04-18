@@ -80,12 +80,10 @@ export const MyBlocksField: Field = {
 
 The Blocks Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option                 | Description                                                                |
-| ---------------------- | -------------------------------------------------------------------------- |
-| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
-| **`initCollapsed`**    | Set the initial collapsed state                                            |
-| **`isSortable`**       | Disable order sorting by setting this value to `false`                     |
-| **`disableBlockName`** | Hide the blockName field by setting this value to `true`                   |
+| Option              | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| **`initCollapsed`** | Set the initial collapsed state                        |
+| **`isSortable`**    | Disable order sorting by setting this value to `false` |
 
 #### Customizing the way your block is rendered in Lexical
 
@@ -156,6 +154,19 @@ Blocks are defined as separate configs of their own.
 | **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
 | **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
 | **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
+
+## Block Admin Configs
+
+In addition to top-level configuration options, each Block in a Blocks field also has configurable admin options.
+
+| Option                  | Description                                                                |
+| ----------------------- | -------------------------------------------------------------------------- |
+| **`components.Block`**  | Custom component for replacing the Block, including the header.            |
+| **`components.Label`**  | Custom component for replacing the Row Label.                              |
+| **`disableBlockName`**  | Hide the blockName field by setting this value to `true`.                  |
+| **`generateBlockName`** | Function to generate a `blockName` to label the block row.                 |
+| **`group`**             | Text or localization object used to group this Block in the Blocks Drawer. |
+| **`custom`**            | Extension point for adding custom data (e.g. for plugins)                  |
 
 ### Auto-generated data per block
 
@@ -301,6 +312,8 @@ export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
 
 ### Row Label
 
+To use a Row Label for your block, first define your Row Label component:
+
 ```tsx
 'use client'
 
@@ -313,6 +326,33 @@ export const BlockRowLabel = () => {
 
   return <div>Custom Label: {customLabel}</div>
 }
+```
+
+Then add this component to your config Blocks field config to `admin.components.Label` via the [Component Path](/docs/custom-components/overview#component-paths):
+
+```ts
+// ...
+{
+  type: 'blocks',
+  name: 'myBlocks',
+  blocks: [
+    {
+      slug: 'blockWithRowLabel',
+      admin: {
+        components: {
+          Label: '/path/to/my/RowLabel#RowLabel'
+        }
+      },
+      fields: [
+        {
+          name: 'myText',
+          type: 'text',
+        },
+      ],
+    },
+  ]
+}
+// ...
 ```
 
 ## Block References

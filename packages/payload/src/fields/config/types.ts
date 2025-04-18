@@ -42,6 +42,7 @@ import type {
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
+  Data,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
@@ -1406,6 +1407,14 @@ export type Block = {
      * @default false
      */
     disableBlockName?: boolean
+    generateBlockName?: (args: {
+      blockData: Data
+      data: Data
+      id?: number | string
+      operation: 'create' | 'update'
+      req: PayloadRequest
+      rowIndex: number
+    }) => string | undefined
     group?: Record<string, string> | string
     jsx?: PayloadComponent
   }

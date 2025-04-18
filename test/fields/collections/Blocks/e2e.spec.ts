@@ -406,6 +406,55 @@ describe('Block fields', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
     })
+
+    test('should generated on save when generateBlockName is defined', async () => {
+      await page.goto(url.create)
+      await addBlock({
+        page,
+        blockLabel: 'Block With Generated Name',
+        fieldName: 'blocksWithGeneratedName',
+      })
+
+      const fieldInput = page.locator(
+        '#field-blocksWithGeneratedName .blocks-field__rows #blocksWithGeneratedName-row-0 input[name="blocksWithGeneratedName.0.text"]',
+      )
+      await expect(fieldInput).toBeVisible()
+      const textToGenerate = 'This is text from my text field'
+      await fieldInput.fill(textToGenerate)
+
+      await saveDocAndAssert(page)
+
+      const blockNameInput = page.locator(
+        '#field-blocksWithGeneratedName .section-title input[name="blocksWithGeneratedName.0.blockName"]',
+      )
+      await expect(blockNameInput).toHaveValue(textToGenerate)
+    })
+
+    test('should not overwrite existing blockName if present', async () => {
+      await page.goto(url.create)
+      await addBlock({
+        page,
+        blockLabel: 'Block With Generated Name',
+        fieldName: 'blocksWithGeneratedName',
+      })
+
+      const fieldInput = page.locator(
+        '#field-blocksWithGeneratedName .blocks-field__rows #blocksWithGeneratedName-row-0 input[name="blocksWithGeneratedName.0.text"]',
+      )
+      await expect(fieldInput).toBeVisible()
+      const textToGenerate = 'This is text from my text field'
+      await fieldInput.fill(textToGenerate)
+
+      const blockNameInput = page.locator(
+        '#field-blocksWithGeneratedName .section-title input[name="blocksWithGeneratedName.0.blockName"]',
+      )
+      const prefilledBlockNameText = 'This should not be overriden'
+      await blockNameInput.fill(prefilledBlockNameText)
+
+      await saveDocAndAssert(page)
+
+      await expect(blockNameInput).toHaveValue(prefilledBlockNameText)
+    })
   })
 
   describe('block groups', () => {
