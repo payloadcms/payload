@@ -1993,9 +1993,61 @@ describe('database', () => {
         collection: 'virtual-relations',
         depth: 0,
         where: { id: { equals: id } },
-        draft: true,
       })
       expect(draft.docs[0]?.postTitle).toBe('my-title')
+    })
+
+    it('should allow virtual field as reference to ID', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postID).toBe(post.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postID).toBe(post.id)
+    })
+
+    it('should allow virtual field as reference to custom ID', async () => {
+      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { customID: customID.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.customIDValue).toBe(customID.id)
+      const docDepth0 = await payload.findByID({
+        collection: 'virtual-relations',
+        id,
+        depth: 0,
+      })
+      expect(docDepth0.customIDValue).toBe(customID.id)
+    })
+
+    it('should allow deep virtual field as reference to ID', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-3' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'my-title-3' },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postCategoryID).toBe(category.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
     it('should allow virtual field with reference localized', async () => {
