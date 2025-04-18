@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
