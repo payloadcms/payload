@@ -175,6 +175,7 @@ export const slTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Naloži nov {{label}}',
   },
   folder: {
+    browseByFolder: 'Brskaj po mapi',
     deleteConfirmation:
       'Vgnešene mape bodo izbrisane. Vgnešeni dokumenti se bodo premaknili v najbližjo starševsko mapo. Ste prepričani?',
     deleteFolder: 'Izbriši mapo',
@@ -184,6 +185,7 @@ export const slTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova mapa',
     removeFromFolder: 'Odstrani iz mape',
     renameFolder: 'Preimenuj Mapo',
+    searchByTitleIn: 'Iskanje po naslovu v {{location}}',
     selectFolder: 'Izberite mapo',
   },
   general: {

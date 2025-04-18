@@ -173,6 +173,7 @@ export const faTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'بارگذاری تازه {{label}}',
   },
   folder: {
+    browseByFolder: 'مرور بر اساس پوشه',
     deleteConfirmation:
       'پوشه های تو در تو حذف خواهند شد. اسناد تو در تو به نزدیک ترین پوشه اصلی منتقل خواهند شد. آیا مطمئن هستید؟',
     deleteFolder: 'حذف پوشه',
@@ -182,6 +183,7 @@ export const faTranslations: DefaultTranslationsObject = {
     newFolder: 'پوشه جدید',
     removeFromFolder: 'از پوشه بردارید',
     renameFolder: 'تغییر نام پوشه',
+    searchByTitleIn: 'جستجو بر اساس عنوان در {{location}}',
     selectFolder: 'انتخاب پوشه',
   },
   general: {

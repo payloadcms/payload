@@ -176,6 +176,7 @@ export const caTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Puja un nou {{label}}',
   },
   folder: {
+    browseByFolder: 'Navega per carpeta',
     deleteConfirmation:
       "Les carpetes imbricades seran eliminades. Els documents imbricats es mouran a la carpeta principal més propera. N'estàs segur?",
     deleteFolder: 'Esborra la carpeta',
@@ -185,6 +186,7 @@ export const caTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova carpeta',
     removeFromFolder: 'Elimina de la carpeta',
     renameFolder: 'Anomena carpeta',
+    searchByTitleIn: 'Cerca per títol a {{location}}',
     selectFolder: 'Selecciona la carpeta',
   },
   general: {

@@ -179,6 +179,7 @@ export const esTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Subir nuevo {{label}}',
   },
   folder: {
+    browseByFolder: 'Explorar por Carpeta',
     deleteConfirmation:
       'Las carpetas anidadas serán eliminadas. Los documentos anidados se moverán a la carpeta principal más cercana. ¿Está seguro?',
     deleteFolder: 'Eliminar Carpeta',
@@ -188,6 +189,7 @@ export const esTranslations: DefaultTranslationsObject = {
     newFolder: 'Nueva Carpeta',
     removeFromFolder: 'Eliminar de la carpeta',
     renameFolder: 'Renombrar carpeta',
+    searchByTitleIn: 'Buscar por Título en {{location}}',
     selectFolder: 'Seleccionar Carpeta',
   },
   general: {

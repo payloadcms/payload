@@ -169,6 +169,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '上傳新的{{label}}',
   },
   folder: {
+    browseByFolder: '按資料夾瀏覽',
     deleteConfirmation: '嵌套文件夾將被刪除。嵌套文件將移至最近的父文件夾。你確定嗎？',
     deleteFolder: '刪除資料夾',
     folderName: '資料夾名稱',
@@ -177,6 +178,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     newFolder: '新資料夾',
     removeFromFolder: '從資料夾中移除',
     renameFolder: '重命名資料夾',
+    searchByTitleIn: '在{{location}}中按標題搜索',
     selectFolder: '選擇資料夾',
   },
   general: {

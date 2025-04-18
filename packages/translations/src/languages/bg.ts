@@ -175,6 +175,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Качи нов {{label}}',
   },
   folder: {
+    browseByFolder: 'Прегледай по папки',
     deleteConfirmation:
       'Вложените папки ще бъдат изтрити. Вложените документи ще се преместят в най-близката родителска папка. Сигурни ли сте?',
     deleteFolder: 'Изтрий папка',
@@ -184,6 +185,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     newFolder: 'Нова папка',
     removeFromFolder: 'Премахване от папката',
     renameFolder: 'Преименувай папка',
+    searchByTitleIn: 'Търсене по заглавие в {{location}}',
     selectFolder: 'Изберете папка',
   },
   general: {

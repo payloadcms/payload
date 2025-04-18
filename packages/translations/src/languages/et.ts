@@ -174,6 +174,7 @@ export const etTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Lae üles uus {{label}}',
   },
   folder: {
+    browseByFolder: 'Sirvi kausta järgi',
     deleteConfirmation:
       'Pesastatud kaustad kustutatakse. Pesastatud dokumendid liiguvad lähimasse ülemkausta. Kas olete kindel?',
     deleteFolder: 'Kustuta kaust',
@@ -183,6 +184,7 @@ export const etTranslations: DefaultTranslationsObject = {
     newFolder: 'Uus kaust',
     removeFromFolder: 'Eemalda kaustast',
     renameFolder: 'Nimeta kaust ümber',
+    searchByTitleIn: 'Otsi pealkirja järgi {{location}}',
     selectFolder: 'Vali kaust',
   },
   general: {

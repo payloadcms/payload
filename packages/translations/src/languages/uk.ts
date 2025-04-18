@@ -176,6 +176,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Завантажити новий {{label}}',
   },
   folder: {
+    browseByFolder: 'Переглянути за папкою',
     deleteConfirmation:
       'Вкладені папки будуть видалені. Вкладені документи будуть переміщені до найближчої батьківської папки. Ви впевнені?',
     deleteFolder: 'Видалити папку',
@@ -185,6 +186,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     newFolder: 'Нова папка',
     removeFromFolder: 'Видалити з папки',
     renameFolder: 'Перейменувати папку',
+    searchByTitleIn: 'Пошук за назвою в {{location}}',
     selectFolder: 'Вибрати папку',
   },
   general: {

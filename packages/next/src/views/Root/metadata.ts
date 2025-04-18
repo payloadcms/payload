@@ -7,6 +7,7 @@ import { generateCollectionFolderMetadata } from '../CollectionFolders/metadata.
 import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
 import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
+import { generateBrowseByFolderMetadata } from '../Folders/metadata.js'
 import { generateForgotPasswordViewMetadata } from '../ForgotPassword/metadata.js'
 import { generateListViewMetadata } from '../List/metadata.js'
 import { generateLoginViewMetadata } from '../Login/metadata.js'
@@ -19,6 +20,7 @@ import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserViewMetadata,
+  folders: generateBrowseByFolderMetadata,
   forgot: generateForgotPasswordViewMetadata,
   login: generateLoginViewMetadata,
   logout: generateUnauthorizedViewMetadata,
@@ -76,6 +78,7 @@ export const generatePageMetadata = async ({
       if (oneSegmentMeta[segmentOne] && segmentOne !== 'account') {
         // --> /create-first-user
         // --> /forgot
+        // --> /folders
         // --> /login
         // --> /logout
         // --> /logout-inactivity
@@ -93,8 +96,10 @@ export const generatePageMetadata = async ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordViewMetadata({ config, i18n })
-      }
-      if (isCollection) {
+      } else if (`/${segmentOne}` === config.admin.routes.folders) {
+        // --> /folders/:folderID
+        meta = await generateBrowseByFolderMetadata({ config, i18n })
+      } else if (isCollection) {
         // --> /collections/:collectionSlug
         meta = await generateListViewMetadata({ collectionConfig, config, i18n })
       } else if (isGlobal) {

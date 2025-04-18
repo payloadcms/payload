@@ -179,6 +179,7 @@ export const roTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Încărcați un nou {{label}}',
   },
   folder: {
+    browseByFolder: 'Răsfoiește după Folder',
     deleteConfirmation:
       'Folderele înglobate vor fi șterse. Documentele înglobate se vor muta în folderul părinte cel mai apropiat. Sunteți sigur(a)?',
     deleteFolder: 'Ștergeți dosarul',
@@ -188,6 +189,7 @@ export const roTranslations: DefaultTranslationsObject = {
     newFolder: 'Dosar nou',
     removeFromFolder: 'Eliminați din dosar',
     renameFolder: 'Redenumiți dosarul',
+    searchByTitleIn: 'Căutare după titlu în {{location}}',
     selectFolder: 'Selectează dosarul',
   },
   general: {

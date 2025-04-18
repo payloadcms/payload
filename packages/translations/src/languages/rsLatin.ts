@@ -176,6 +176,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
   folder: {
+    browseByFolder: 'Pregledaj po Folderu',
     deleteConfirmation:
       'Ugnježđene fascikle će biti obrisane. Ugnježđeni dokumenti će biti premješteni u najbližu roditeljsku fasciklu. Da li ste sigurni?',
     deleteFolder: 'Obriši mapu',
@@ -185,6 +186,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     newFolder: 'Novi Folder',
     removeFromFolder: 'Ukloni iz fascikle',
     renameFolder: 'Preimenuj folder',
+    searchByTitleIn: 'Pretraga po Naslovu u {{location}}',
     selectFolder: 'Izaberite fasciklu',
   },
   general: {

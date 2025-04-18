@@ -179,6 +179,7 @@ export const deTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '{{label}} neu hochladen',
   },
   folder: {
+    browseByFolder: 'Durchsuchen nach Ordner',
     deleteConfirmation:
       'Verschachtelte Ordner werden gelöscht. Verschachtelte Dokumente werden in den nächstgelegenen übergeordneten Ordner verschoben. Sind Sie sicher?',
     deleteFolder: 'Ordner löschen',
@@ -188,6 +189,7 @@ export const deTranslations: DefaultTranslationsObject = {
     newFolder: 'Neuer Ordner',
     removeFromFolder: 'Aus dem Ordner entfernen',
     renameFolder: 'Ordner umbenennen',
+    searchByTitleIn: 'Suche nach Titel in {{location}}',
     selectFolder: 'Ordner auswählen',
   },
   general: {

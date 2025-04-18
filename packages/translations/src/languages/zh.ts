@@ -169,6 +169,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '上传新的{{label}}',
   },
   folder: {
+    browseByFolder: '按文件夹浏览',
     deleteConfirmation: '嵌套文件夹将被删除。嵌套文件将移至最近的父文件夹。你确定吗？',
     deleteFolder: '删除文件夹',
     folderName: '文件夹名称',
@@ -177,6 +178,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     newFolder: '新文件夹',
     removeFromFolder: '从文件夹中移除',
     renameFolder: '重命名文件夹',
+    searchByTitleIn: '在{{location}}中按标题搜索',
     selectFolder: '选择文件夹',
   },
   general: {

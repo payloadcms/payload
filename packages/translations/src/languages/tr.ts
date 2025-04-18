@@ -177,6 +177,7 @@ export const trTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
   folder: {
+    browseByFolder: 'Klasöre Göre Gözat',
     deleteConfirmation:
       'İç içe klasörler silinecektir. İç içe belgeler en yakın üst klasöre taşınacaktır. Emin misiniz?',
     deleteFolder: 'Klasörü Sil',
@@ -186,6 +187,7 @@ export const trTranslations: DefaultTranslationsObject = {
     newFolder: 'Yeni Klasör',
     removeFromFolder: 'Klasörden Çıkar',
     renameFolder: 'Klasörü Yeniden Adlandır',
+    searchByTitleIn: "{{location}}'da Başlığa Göre Ara",
     selectFolder: 'Klasör Seçin',
   },
   general: {

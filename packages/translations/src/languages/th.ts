@@ -172,6 +172,7 @@ export const thTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'อัปโหลด {{label}} ใหม่',
   },
   folder: {
+    browseByFolder: 'เรียกดูตามโฟลเดอร์',
     deleteConfirmation:
       'โฟลเดอร์ที่ซ้อนกันจะถูกลบ ส่วนเอกสารที่ซ้อนกันจะถูกย้ายไปยังโฟลเดอร์แม่ที่ใกล้ที่สุด คุณแน่ใจหรือไม่?',
     deleteFolder: 'ลบโฟลเดอร์',
@@ -181,6 +182,7 @@ export const thTranslations: DefaultTranslationsObject = {
     newFolder: 'โฟลเดอร์ใหม่',
     removeFromFolder: 'นำออกจากโฟลเดอร์',
     renameFolder: 'เปลี่ยนชื่อโฟลเดอร์',
+    searchByTitleIn: 'ค้นหาตามชื่อใน {{location}}',
     selectFolder: 'เลือกโฟลเดอร์',
   },
   general: {

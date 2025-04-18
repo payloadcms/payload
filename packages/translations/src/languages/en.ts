@@ -175,6 +175,7 @@ export const enTranslations = {
     uploadNewLabel: 'Upload new {{label}}',
   },
   folder: {
+    browseByFolder: 'Browse by Folder',
     deleteConfirmation:
       'Nested folders will be deleted. Nested documents will move to the nearest parent folder. Are you sure?',
     deleteFolder: 'Delete Folder',
@@ -184,6 +185,7 @@ export const enTranslations = {
     newFolder: 'New Folder',
     removeFromFolder: 'Remove from Folder',
     renameFolder: 'Rename Folder',
+    searchByTitleIn: 'Search by Title in {{location}}',
     selectFolder: 'Select Folder',
   },
   general: {

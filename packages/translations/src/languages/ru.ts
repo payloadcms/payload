@@ -177,6 +177,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Загрузить новый {{label}}',
   },
   folder: {
+    browseByFolder: 'Просмотр по папкам',
     deleteConfirmation:
       'Вложенные папки будут удалены. Вложенные документы будут перемещены в ближайшую родительскую папку. Вы уверены?',
     deleteFolder: 'Удалить папку',
@@ -186,6 +187,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     newFolder: 'Новая папка',
     removeFromFolder: 'Удалить из папки',
     renameFolder: 'Переименовать папку',
+    searchByTitleIn: 'Поиск по названию в {{location}}',
     selectFolder: 'Выбрать папку',
   },
   general: {

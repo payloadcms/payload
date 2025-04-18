@@ -175,6 +175,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Last opp ny {{label}}',
   },
   folder: {
+    browseByFolder: 'Bla gjennom etter mappe',
     deleteConfirmation:
       'Nestede mapper vil bli slettet. Nestede dokumenter vil bli flyttet til den nærmeste overordnede mappen. Er du sikker?',
     deleteFolder: 'Slett mappe',
@@ -184,6 +185,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny mappe',
     removeFromFolder: 'Fjern fra mappe',
     renameFolder: 'Endre mappenavn',
+    searchByTitleIn: 'Søk etter tittel på {{location}}',
     selectFolder: 'Velg Mappe',
   },
   general: {

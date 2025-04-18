@@ -174,6 +174,7 @@ export const daTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Upload ny {{label}}',
   },
   folder: {
+    browseByFolder: 'Gennemse efter Mappe',
     deleteConfirmation:
       'Indlejrede mapper vil blive slettet. Indlejrede dokumenter vil blive flyttet til den nærmeste forældremappe. Er du sikker?',
     deleteFolder: 'Slet mappe',
@@ -183,6 +184,7 @@ export const daTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny Mappe',
     removeFromFolder: 'Fjern fra mappe',
     renameFolder: 'Omdøb mappe',
+    searchByTitleIn: 'Søg efter titel i {{location}}',
     selectFolder: 'Vælg mappe',
   },
   general: {

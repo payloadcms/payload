@@ -177,6 +177,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
   folder: {
+    browseByFolder: 'Bladeren op Map',
     deleteConfirmation:
       'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
     deleteFolder: 'Verwijder map',
@@ -186,6 +187,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     newFolder: 'Nieuwe Map',
     removeFromFolder: 'Verwijderen uit map',
     renameFolder: 'Hernoem Map',
+    searchByTitleIn: 'Zoek op titel in {{location}}',
     selectFolder: 'Selecteer Map',
   },
   general: {

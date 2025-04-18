@@ -175,6 +175,7 @@ export const koTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '새로운 {{label}} 업로드',
   },
   folder: {
+    browseByFolder: '폴더별 브라우징',
     deleteConfirmation:
       '중첩 폴더는 삭제됩니다. 중첩 문서는 가장 가까운 부모 폴더로 이동하게 됩니다. 확실합니까?',
     deleteFolder: '폴더 삭제',
@@ -184,6 +185,7 @@ export const koTranslations: DefaultTranslationsObject = {
     newFolder: '새 폴더',
     removeFromFolder: '폴더에서 제거하십시오',
     renameFolder: '폴더 이름 변경',
+    searchByTitleIn: '{{location}}에서 제목으로 검색하세요.',
     selectFolder: '폴더 선택',
   },
   general: {

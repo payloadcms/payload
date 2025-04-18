@@ -177,6 +177,7 @@ export const huTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Új {{label}} feltöltése',
   },
   folder: {
+    browseByFolder: 'Mappa szerint böngészés',
     deleteConfirmation:
       'Beágyazott mappák törlődnek. Beágyazott dokumentumok átkerülnek a legközelebbi szülő mappába. Biztos benne?',
     deleteFolder: 'Mappa törlése',
@@ -186,6 +187,7 @@ export const huTranslations: DefaultTranslationsObject = {
     newFolder: 'Új Mappa',
     removeFromFolder: 'Távolítsa el a mappából',
     renameFolder: 'Mappa átnevezése',
+    searchByTitleIn: 'Keresés címszóval a következő helyen: {{location}}',
     selectFolder: 'Mappa kiválasztása',
   },
   general: {

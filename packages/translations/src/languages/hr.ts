@@ -176,6 +176,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
   folder: {
+    browseByFolder: 'Pregledajte po mapi',
     deleteConfirmation:
       'Ugniježđene mape bit će izbrisane. Ugniježđeni dokumenti premjestit će se u najbližu nadređenu mapu. Jeste li sigurni?',
     deleteFolder: 'Izbriši mapu',
@@ -185,6 +186,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova mapa',
     removeFromFolder: 'Ukloni iz mape',
     renameFolder: 'Preimenuj mapu',
+    searchByTitleIn: 'Pretraga prema naslovu u {{location}}',
     selectFolder: 'Odaberite mapu',
   },
   general: {

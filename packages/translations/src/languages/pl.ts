@@ -175,6 +175,7 @@ export const plTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Wrzuć nowy {{label}}',
   },
   folder: {
+    browseByFolder: 'Przeglądaj według folderu',
     deleteConfirmation:
       'Zagnieżdżone foldery zostaną usunięte. Zagnieżdżone dokumenty zostaną przeniesione do najbliższego folderu nadrzędnego. Czy jesteś pewien?',
     deleteFolder: 'Usuń folder',
@@ -184,6 +185,7 @@ export const plTranslations: DefaultTranslationsObject = {
     newFolder: 'Nowy folder',
     removeFromFolder: 'Usuń z folderu',
     renameFolder: 'Zmień nazwę folderu',
+    searchByTitleIn: 'Wyszukaj według tytułu w {{location}}',
     selectFolder: 'Wybierz folder',
   },
   general: {

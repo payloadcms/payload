@@ -175,6 +175,7 @@ export const azTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Yeni {{label}} yüklə',
   },
   folder: {
+    browseByFolder: 'Qovluqlara görə gözdən keçirin',
     deleteConfirmation:
       'İç içə qovşaqlar silinəcək. İç içə sənədlər ən yaxın ana qovşağa köçəriləcək. Eminsiniz?',
     deleteFolder: 'Qovluğu Sil',
@@ -184,6 +185,7 @@ export const azTranslations: DefaultTranslationsObject = {
     newFolder: 'Yeni Qovluq',
     removeFromFolder: 'Qovluqdan çıxarın',
     renameFolder: 'Qovluğun adını dəyişdirin',
+    searchByTitleIn: '{{location}} yerində Başlığa görə axtarış',
     selectFolder: 'Qovluğu seçin',
   },
   general: {

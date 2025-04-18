@@ -175,6 +175,7 @@ export const svTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Ladda upp ny {{label}}',
   },
   folder: {
+    browseByFolder: 'Bläddra efter mapp',
     deleteConfirmation:
       'Eventuella underliggande mappar kommer också tas bort. Filerna i de mapparna flyttas upp till samma plats som mappen du tar bort. Är du säker?',
     deleteFolder: 'Ta bort mapp',
@@ -184,6 +185,7 @@ export const svTranslations: DefaultTranslationsObject = {
     newFolder: 'Ny mapp',
     removeFromFolder: 'Ta bort från mapp',
     renameFolder: 'Byt namn på mapp',
+    searchByTitleIn: 'Sök med titel i {{location}}',
     selectFolder: 'Välj mapp',
   },
   general: {

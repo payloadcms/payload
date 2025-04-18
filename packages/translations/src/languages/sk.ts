@@ -178,6 +178,7 @@ export const skTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Nahrať nový {{label}}',
   },
   folder: {
+    browseByFolder: 'Prehliadať podľa priečinka',
     deleteConfirmation:
       'Vnorené priečinky budú vymazané. Vnorené dokumenty sa presunú do najbližšej nadradenej zložky. Ste si istý?',
     deleteFolder: 'Odstrániť priečinok',
@@ -187,6 +188,7 @@ export const skTranslations: DefaultTranslationsObject = {
     newFolder: 'Nový priečinok',
     removeFromFolder: 'Odstrániť z priečinka',
     renameFolder: 'Premenovať priečinok',
+    searchByTitleIn: 'Hľadať podľa názvu v {{location}}',
     selectFolder: 'Vybrať priečinok',
   },
   general: {

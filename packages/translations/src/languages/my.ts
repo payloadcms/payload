@@ -176,6 +176,7 @@ export const myTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
   folder: {
+    browseByFolder: 'Layari mengikut Folder',
     deleteConfirmation:
       'နဂိုဖိုလ်ဒါများကို ဖျက်သွားပါမည်။ ဂုဏ်ယူပါတယ်ဖိုင်များကို အနီးဆုံးမှတ်တမ်းဖိ',
     deleteFolder: 'Padam Folder',
@@ -185,6 +186,7 @@ export const myTranslations: DefaultTranslationsObject = {
     newFolder: 'Folder Baru',
     removeFromFolder: 'Dari Folder Buang',
     renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
+    searchByTitleIn: 'Cari mengikut Tajuk di {{location}}',
     selectFolder: 'Pilih Folder',
   },
   general: {

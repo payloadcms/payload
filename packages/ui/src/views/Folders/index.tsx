@@ -8,7 +8,6 @@ import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
-import { CloseModalButton } from '../../elements/CloseModalButton/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { CollectionType } from '../../elements/FolderView/CollectionType/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
@@ -18,11 +17,9 @@ import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
-import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import { ListCreateNewDocInFolderButton } from '../../elements/ListHeader/TitleActions/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
-import { Pill } from '../../elements/Pill/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -35,7 +32,6 @@ import { ListSelection } from '../CollectionFolder/ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'folder-list'
-const drawerBaseClass = 'collection-folder-list-drawer'
 
 export function DefaultFolderView(
   props: {
@@ -50,10 +46,9 @@ export function DefaultFolderView(
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    hasCreatePermission: hasCreatePermissionFromProps,
   } = props
 
-  const [activeView, setActiveView] = React.useState<'grid' | 'list'>('list')
+  // @todo: get "create" permissions to filter create buttons?
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
@@ -61,12 +56,8 @@ export function DefaultFolderView(
   const { setStepNav } = useStepNav()
   const { clearRouteCache } = useRouteCache()
   const {
-    allowCreate,
-    DocumentDrawerToggler,
-    drawerSlug: listDrawerSlug,
-    isInDrawer,
-    selectedOption,
-  } = useListDrawerContext()
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
   const {
     addItems,
     breadcrumbs,
@@ -89,14 +80,16 @@ export function DefaultFolderView(
     visibleCollectionSlugs,
   } = useFolder()
 
-  const hasCreatePermission =
-    allowCreate !== undefined
-      ? allowCreate && hasCreatePermissionFromProps
-      : hasCreatePermissionFromProps
-
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  const [activeView, setActiveView] = React.useState<'grid' | 'list'>('list')
+  const [searchPlaceholder] = React.useState(() => {
+    const locationLabel =
+      breadcrumbs.length === 0
+        ? getTranslation(folderCollectionConfig.labels?.plural, i18n)
+        : breadcrumbs[breadcrumbs.length - 1].name
+    return t('folder:searchByTitleIn', {
+      location: locationLabel,
+    })
+  })
 
   const onDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
@@ -117,7 +110,7 @@ export function DefaultFolderView(
 
   const totalDocsAndSubfolders = documents.length + subfolders.length
   const listHeaderTitle = !breadcrumbs.length
-    ? 'Browse By Folder'
+    ? t('folder:browseByFolder')
     : breadcrumbs[breadcrumbs.length - 1].name
   const allFolderCollectionSlugs = [
     folderCollectionSlug,
@@ -183,8 +176,7 @@ export function DefaultFolderView(
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
                   <ColoredFolderIcon />
-                  {/* @todo: translate */}
-                  Browse By Folder
+                  {t('folder:browseByFolder')}
                 </div>
               ),
             }
@@ -204,8 +196,7 @@ export function DefaultFolderView(
                   }}
                 >
                   <ColoredFolderIcon />
-                  {/* @todo: translate */}
-                  Browse By Folder
+                  {t('folder:browseByFolder')}
                 </DroppableBreadcrumb>
               ),
             },
@@ -239,6 +230,7 @@ export function DefaultFolderView(
     config.routes.admin,
     config.admin.routes.folders,
     config.serverURL,
+    t,
   ])
 
   return (
@@ -247,51 +239,27 @@ export function DefaultFolderView(
       <div className={`${baseClass} ${baseClass}--folders`}>
         {BeforeFolderList}
         <Gutter className={`${baseClass}__wrap`}>
-          {isInDrawer ? (
-            // The header within a drawer
-            <ListHeader
-              Actions={[<CloseModalButton key="close-button" slug={listDrawerSlug} />]}
-              AfterListHeaderContent={Description}
-              className={`${drawerBaseClass}__header`}
-              title={getTranslation(
-                getEntityConfig({ collectionSlug: selectedOption.value })?.labels?.plural,
-                i18n,
-              )}
-              TitleActions={[
-                hasCreatePermission && (
-                  <DocumentDrawerToggler
-                    className={`${drawerBaseClass}__create-new-button`}
-                    key="create-new-button-toggler"
-                  >
-                    <Pill>{t('general:createNew')}</Pill>
-                  </DocumentDrawerToggler>
-                ),
-              ].filter(Boolean)}
-            />
-          ) : (
-            // The header not within a drawer
-            <ListHeader
-              Actions={[
-                !smallBreak && (
-                  <ListSelection
-                    disableBulkDelete={disableBulkDelete}
-                    disableBulkEdit={disableBulkEdit}
-                    key="list-selection"
-                  />
-                ),
-              ].filter(Boolean)}
-              AfterListHeaderContent={Description}
-              title={listHeaderTitle}
-              TitleActions={[
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
-                  collectionSlugs={allFolderCollectionSlugs}
-                  key="create-new-button"
-                  onCreateSuccess={onCreateSuccess}
-                />,
-              ].filter(Boolean)}
-            />
-          )}
+          <ListHeader
+            Actions={[
+              !smallBreak && (
+                <ListSelection
+                  disableBulkDelete={disableBulkDelete}
+                  disableBulkEdit={disableBulkEdit}
+                  key="list-selection"
+                />
+              ),
+            ].filter(Boolean)}
+            AfterListHeaderContent={Description}
+            title={listHeaderTitle}
+            TitleActions={[
+              <ListCreateNewDocInFolderButton
+                buttonLabel={t('general:createNew')}
+                collectionSlugs={allFolderCollectionSlugs}
+                key="create-new-button"
+                onCreateSuccess={onCreateSuccess}
+              />,
+            ].filter(Boolean)}
+          />
           <SearchBar
             Actions={[
               <CollectionType key="collection-type" />,
@@ -302,7 +270,7 @@ export function DefaultFolderView(
               />,
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}
-            label="Test"
+            label={searchPlaceholder}
             onSearchChange={(search) => filterItems({ search })}
             searchQueryParam={search}
           />

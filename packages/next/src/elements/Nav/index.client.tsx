@@ -28,7 +28,7 @@ export const DefaultNavClient: React.FC<{
     },
   } = useConfig()
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const folderURL = formatAdminURL({
     adminRoute,
@@ -52,8 +52,7 @@ export const DefaultNavClient: React.FC<{
           prefetch={false}
         >
           <FolderIcon />
-          {/* @todo: translate */}
-          Browse By Folder
+          {t('folder:browseByFolder')}
         </Link>
       )}
       {groups.map(({ entities, label }, key) => {

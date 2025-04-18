@@ -177,6 +177,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Įkelti naują {{label}}',
   },
   folder: {
+    browseByFolder: 'Naršyti pagal aplanką',
     deleteConfirmation:
       'Įdėti aplankai bus ištrinti. Įdėti dokumentai bus perkelti į artimiausią tėvinį aplanką. Ar esate įsitikinęs?',
     deleteFolder: 'Ištrinti aplanką',
@@ -186,6 +187,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     newFolder: 'Naujas aplankas',
     removeFromFolder: 'Pašalinti iš aplanko',
     renameFolder: 'Pervadinti aplanką',
+    searchByTitleIn: 'Paieška pagal pavadinimą {{location}}',
     selectFolder: 'Pasirinkti aplanką',
   },
   general: {

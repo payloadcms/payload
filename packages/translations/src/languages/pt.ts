@@ -175,6 +175,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Carregar novo(a) {{label}}',
   },
   folder: {
+    browseByFolder: 'Navegar por Pasta',
     deleteConfirmation:
       'As pastas aninhadas serão excluídas. Os documentos aninhados serão movidos para a pasta pai mais próxima. Você tem certeza?',
     deleteFolder: 'Apagar Pasta',
@@ -184,6 +185,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     newFolder: 'Nova Pasta',
     removeFromFolder: 'Remover da Pasta',
     renameFolder: 'Renomear Pasta',
+    searchByTitleIn: 'Pesquisa por Título em {{location}}',
     selectFolder: 'Selecionar Pasta',
   },
   general: {

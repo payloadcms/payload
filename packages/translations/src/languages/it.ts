@@ -179,6 +179,7 @@ export const itTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Carica nuovo {{label}}',
   },
   folder: {
+    browseByFolder: 'Sfoglia per Cartella',
     deleteConfirmation:
       'Le cartelle annidate verranno eliminate. I documenti annidati si sposteranno nella cartella genitore più vicina. Sei sicuro?',
     deleteFolder: 'Elimina cartella',
@@ -188,6 +189,7 @@ export const itTranslations: DefaultTranslationsObject = {
     newFolder: 'Nuova Cartella',
     removeFromFolder: 'Rimuovi dalla cartella',
     renameFolder: 'Rinomina Cartella',
+    searchByTitleIn: 'Cerca per Titolo in {{location}}',
     selectFolder: 'Seleziona Cartella',
   },
   general: {

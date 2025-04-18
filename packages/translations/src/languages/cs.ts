@@ -175,6 +175,7 @@ export const csTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Nahrát nový {{label}}',
   },
   folder: {
+    browseByFolder: 'Procházet podle složek',
     deleteConfirmation:
       'Vnořené složky budou smazány. Vnořené dokumenty se přesunou do nejbližší nadřazené složky. Jste si jistý?',
     deleteFolder: 'Smazat složku',
@@ -184,6 +185,7 @@ export const csTranslations: DefaultTranslationsObject = {
     newFolder: 'Nová složka',
     removeFromFolder: 'Odebrat ze složky',
     renameFolder: 'Přejmenovat složku',
+    searchByTitleIn: 'Hledat podle názvu v {{location}}',
     selectFolder: 'Vyberte složku',
   },
   general: {

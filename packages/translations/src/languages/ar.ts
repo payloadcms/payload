@@ -173,6 +173,7 @@ export const arTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'رفع {{label}} جديد',
   },
   folder: {
+    browseByFolder: 'تصفح حسب المجلد',
     deleteConfirmation:
       'سيتم حذف المجلدات المتداخلة. ستنتقل المستندات المتداخلة إلى المجلد الأصل الأقرب. هل أنت متأكد؟',
     deleteFolder: 'حذف المجلد',
@@ -182,6 +183,7 @@ export const arTranslations: DefaultTranslationsObject = {
     newFolder: 'مجلد جديد',
     removeFromFolder: 'أزل من المجلد',
     renameFolder: 'إعادة تسمية المجلد',
+    searchByTitleIn: 'البحث عن طريق العنوان في {{location}}',
     selectFolder: 'حدد المجلد',
   },
   general: {

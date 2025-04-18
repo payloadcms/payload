@@ -175,6 +175,7 @@ export const viTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Tải lên bản mới: {{label}}',
   },
   folder: {
+    browseByFolder: 'Duyệt theo Thư mục',
     deleteConfirmation:
       'Các thư mục lồng nhau sẽ bị xóa. Các tài liệu lồng nhau sẽ chuyển đến thư mục cha gần nhất. Bạn có chắc chắn không?',
     deleteFolder: 'Xóa Thư mục',
@@ -184,6 +185,7 @@ export const viTranslations: DefaultTranslationsObject = {
     newFolder: 'Thư mục mới',
     removeFromFolder: 'Xóa khỏi Thư mục',
     renameFolder: 'Đổi tên thư mục',
+    searchByTitleIn: 'Tìm kiếm theo Tiêu đề tại {{location}}',
     selectFolder: 'Chọn Thư mục',
   },
   general: {

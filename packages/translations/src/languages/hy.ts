@@ -175,6 +175,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Վերբեռնել նոր {{label}}',
   },
   folder: {
+    browseByFolder: 'Թվարկել թղթապանակներով',
     deleteConfirmation:
       'Տեղադրված թղթապանակները կջնջվեն։ Գործառույթ թղթապանակներում փաստաթուղթերը կտեղափոխվեն դեպի հարակից ծնող թղթապանակը։ Համոզված եք։',
     deleteFolder: 'Ջնջել թղթապանակը',
@@ -184,6 +185,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     newFolder: 'Նոր թղթապանակ',
     removeFromFolder: 'Հեռացնել թղթապանակից',
     renameFolder: 'Վերանվանել թղթապանակը',
+    searchByTitleIn: 'Որոնել կոչումով {{location}} վայրում',
     selectFolder: 'Ընտրել թղթապանակ',
   },
   general: {

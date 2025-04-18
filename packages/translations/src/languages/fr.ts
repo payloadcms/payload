@@ -181,6 +181,7 @@ export const frTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
   folder: {
+    browseByFolder: 'Parcourir par Dossier',
     deleteConfirmation:
       'Les dossiers imbriqués seront supprimés. Les documents imbriqués seront déplacés vers le dossier parent le plus proche. Êtes-vous sûr ?',
     deleteFolder: 'Supprimer le dossier',
@@ -190,6 +191,7 @@ export const frTranslations: DefaultTranslationsObject = {
     newFolder: 'Nouveau Dossier',
     removeFromFolder: 'Retirer du dossier',
     renameFolder: 'Renommer le dossier',
+    searchByTitleIn: 'Recherche par titre à {{location}}',
     selectFolder: 'Sélectionnez le dossier',
   },
   general: {

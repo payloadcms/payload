@@ -171,6 +171,7 @@ export const heTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'העלאת {{label}} חדשה',
   },
   folder: {
+    browseByFolder: 'עיין לפי תיקייה',
     deleteConfirmation:
       'תיקיות משנה יימחקו. מסמכים משנים יעברו לתיקיית ההורה הקרובה ביותר. האם אתה בטוח?',
     deleteFolder: 'מחק תיקייה',
@@ -180,6 +181,7 @@ export const heTranslations: DefaultTranslationsObject = {
     newFolder: 'תיקייה חדשה',
     removeFromFolder: 'הסר מהתיקייה',
     renameFolder: 'שנה שם לתיקיה',
+    searchByTitleIn: 'חפש לפי כותרת ב{{location}}',
     selectFolder: 'בחר תיקייה',
   },
   general: {
