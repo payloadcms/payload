@@ -472,6 +472,16 @@ export default buildConfigWithDefaults({
           virtual: 'post.category.title',
         },
         {
+          name: 'postCategoryID',
+          type: 'json',
+          virtual: 'post.category.id',
+        },
+        {
+          name: 'postID',
+          type: 'json',
+          virtual: 'post.id',
+        },
+        {
           name: 'postLocalized',
           type: 'text',
           virtual: 'post.localized',

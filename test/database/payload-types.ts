@@ -373,6 +373,24 @@ export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
   postCategoryTitle?: string | null;
+  postCategoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  postID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
   updatedAt: string;
@@ -807,6 +825,8 @@ export interface PlacesSelect<T extends boolean = true> {
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
   postCategoryTitle?: T;
+  postCategoryID?: T;
+  postID?: T;
   postLocalized?: T;
   post?: T;
   updatedAt?: T;
