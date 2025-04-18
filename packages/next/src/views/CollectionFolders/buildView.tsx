@@ -1,28 +1,21 @@
 import type {
   AdminViewServerProps,
-  BuildCollectionFolderViewStateResult,
-  ColumnPreference,
+  BuildCollectionFolderViewResult,
   FolderListViewServerPropsOnly,
-  ListPreferences,
   ListQuery,
-  ListViewClientProps,
   Where,
 } from 'payload'
 
 import { DefaultCollectionFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import { getFolderData, parseDocumentID } from 'payload'
-import { isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React from 'react'
 
-import { renderFolderViewSlots } from './renderFolderViewSlots.js'
-import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+// import { renderFolderViewSlots } from './renderFolderViewSlots.js'
 
 export type BuildCollectionFolderViewStateArgs = {
-  customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
@@ -37,10 +30,8 @@ export type BuildCollectionFolderViewStateArgs = {
  */
 export const buildCollectionFolderView = async (
   args: BuildCollectionFolderViewStateArgs,
-): Promise<BuildCollectionFolderViewStateResult> => {
+): Promise<BuildCollectionFolderViewResult> => {
   const {
-    clientConfig,
-    customCellProps,
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
@@ -51,7 +42,6 @@ export const buildCollectionFolderView = async (
     params,
     query: queryFromArgs,
     searchParams,
-    viewType,
   } = args
 
   const {
@@ -59,10 +49,8 @@ export const buildCollectionFolderView = async (
     collectionConfig: { slug: collectionSlug },
     locale: fullLocale,
     permissions,
-    req,
     req: {
       i18n,
-      locale,
       payload,
       payload: { config },
       query: queryFromReq,
@@ -78,19 +66,12 @@ export const buildCollectionFolderView = async (
   if (collectionConfig) {
     const query = queryFromArgs || queryFromReq
 
-    const columns: ColumnPreference[] = transformColumnsToPreferences(
-      query?.columns as ColumnPreference[] | string,
-    )
-
-    const listPreferences = await upsertPreferences<ListPreferences>({
-      key: `${collectionSlug}-list`,
-      req,
-      value: {
-        columns,
-        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-        sort: query?.sort as string,
-      },
-    })
+    // const collectionFolderPreferences = await upsertPreferences<ListPreferences>({
+    //   key: `${collectionSlug}-collection-folder`,
+    //   req,
+    //   value: {
+    //   },
+    // })
 
     const {
       routes: { admin: adminRoute },
@@ -103,13 +84,6 @@ export const buildCollectionFolderView = async (
       throw new Error('not-found')
     }
 
-    const page = isNumber(query?.page) ? Number(query.page) : 0
-    const limit = 0
-
-    const sort =
-      listPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
-
     const whereConstraints = [
       mergeListSearchAndWhere({
         collectionConfig,
@@ -117,20 +91,6 @@ export const buildCollectionFolderView = async (
         where: (query?.where as Where) || undefined,
       }),
     ]
-
-    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-      const baseListFilter = await collectionConfig.admin.baseListFilter({
-        limit,
-        locale,
-        page,
-        req,
-        sort,
-      })
-
-      if (baseListFilter) {
-        whereConstraints.push(baseListFilter)
-      }
-    }
 
     if (folderID) {
       whereConstraints.push({
@@ -169,18 +129,6 @@ export const buildCollectionFolderView = async (
       )
     }
 
-    const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
-
-    const resolvedFilterOptions = await resolveAllFilterOptions({
-      fields: collectionConfig.fields,
-      req,
-    })
-
-    const staticDescription =
-      typeof collectionConfig.admin.description === 'function'
-        ? collectionConfig.admin.description({ t: i18n.t })
-        : collectionConfig.admin.description
-
     const newDocumentURL = formatAdminURL({
       adminRoute,
       path: `/collections/${collectionSlug}/create`,
@@ -192,9 +140,6 @@ export const buildCollectionFolderView = async (
       collectionConfig,
       documents,
       i18n,
-      limit,
-      listPreferences,
-      listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
       params,
       payload,
@@ -204,17 +149,20 @@ export const buildCollectionFolderView = async (
       user,
     }
 
-    const folderViewSlots = renderFolderViewSlots({
-      clientProps: {
-        collectionSlug,
-        hasCreatePermission,
-        newDocumentURL,
-      },
-      collectionConfig,
-      description: staticDescription,
-      payload,
-      serverProps,
-    })
+    // We could support slots in the folder view in the future
+    // const folderViewSlots = renderFolderViewSlots({
+    //   clientProps: {
+    //     collectionSlug,
+    //     hasCreatePermission,
+    //     newDocumentURL,
+    //   },
+    //   collectionConfig,
+    //   description: typeof collectionConfig.admin.description === 'function'
+    //   ? collectionConfig.admin.description({ t: i18n.t })
+    //   : collectionConfig.admin.description,
+    //   payload,
+    //   serverProps,
+    // })
 
     const search = query?.search as string
 
@@ -231,17 +179,14 @@ export const buildCollectionFolderView = async (
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
             clientProps: {
-              ...folderViewSlots,
+              // ...folderViewSlots,
               collectionSlug,
               disableBulkDelete,
               disableBulkEdit,
               enableRowSelections,
               hasCreatePermission,
-              listPreferences,
               newDocumentURL,
-              renderedFilters,
-              resolvedFilterOptions,
-            } satisfies ListViewClientProps,
+            },
             Component: collectionConfig?.admin?.components?.views?.list?.Component,
             Fallback: DefaultCollectionFolderView,
             importMap: payload.importMap,

@@ -200,7 +200,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
-        mergeQuery,
         orderableFieldName,
         query: currentQuery,
         refineListData,

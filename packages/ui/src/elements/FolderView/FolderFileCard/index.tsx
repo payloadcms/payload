@@ -4,10 +4,10 @@ import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
-import { FolderIcon } from '../../../icons/Folder/index.js'
 import { ThreeDotsIcon } from '../../../icons/ThreeDots/index.js'
 import { Popup } from '../../Popup/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
+import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableWithClick } from '../DraggableWithClick/index.js'
 import './index.scss'
 
@@ -105,7 +105,7 @@ export function FolderFileCard({
 
       <div className={`${baseClass}__titlebar-area`}>
         <div className={`${baseClass}__icon-wrap`}>
-          {type === 'file' ? <DocumentIcon /> : <FolderIcon />}
+          {type === 'file' ? <DocumentIcon /> : <ColoredFolderIcon />}
         </div>
         <p className={`${baseClass}__name`} title={title}>
           <span>{title}</span>

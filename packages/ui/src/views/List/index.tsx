@@ -177,7 +177,6 @@ export function DefaultListView(props: ListViewClientProps) {
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                t={t}
                 viewType="list"
               />
               <ListControls

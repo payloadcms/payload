@@ -40,7 +40,8 @@ export type ListHeaderProps = {
    */
   openBulkUpload: () => void
   smallBreak: boolean
-  t: TFunction
+  /** @deprecated This prop will be removed in the next major version. */
+  t?: TFunction
   TitleActions?: React.ReactNode[]
   viewType?: 'folders' | 'list'
 }
@@ -58,7 +59,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   onBulkUploadSuccess,
   openBulkUpload,
   smallBreak,
-  t,
   viewType,
 }) => {
   const { config, getEntityConfig } = useConfig()

@@ -8,6 +8,7 @@ import type { FormatDateArgs } from '../../../utilities/formatDocTitle/formatDat
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
 import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
 import './index.scss'
@@ -86,7 +87,7 @@ export function FolderFileTable({
                 if (index === 0) {
                   return (
                     <span className={`${baseClass}__cell-with-icon`} key={`${itemKey}-${name}`}>
-                      <FolderIcon />
+                      <ColoredFolderIcon />
                       {cellValue}
                     </span>
                   )

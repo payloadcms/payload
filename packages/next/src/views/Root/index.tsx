@@ -13,9 +13,10 @@ import { notFound, redirect } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { DefaultTemplate } from '../../templates/Default/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getRouteData } from './getRouteData.js'
-import { RootViewComponent } from './RootViewComponent.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -156,16 +157,34 @@ export const RootPage = async ({
   })
 
   return (
-    <RootViewComponent
-      documentSubViewType={documentSubViewType}
-      initPageResult={initPageResult}
-      params={params}
-      RenderedView={RenderedView}
-      searchParams={searchParams}
-      serverProps={serverProps}
-      templateClassName={templateClassName}
-      templateType={templateType}
-      viewType={viewType}
-    />
+    <React.Fragment>
+      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
+      {templateType === 'minimal' && (
+        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+      )}
+      {templateType === 'default' && (
+        <DefaultTemplate
+          collectionSlug={initPageResult?.collectionConfig?.slug}
+          docID={initPageResult?.docID}
+          documentSubViewType={documentSubViewType}
+          globalSlug={initPageResult?.globalConfig?.slug}
+          i18n={initPageResult?.req.i18n}
+          locale={initPageResult?.locale}
+          params={params}
+          payload={initPageResult?.req.payload}
+          permissions={initPageResult?.permissions}
+          searchParams={searchParams}
+          user={initPageResult?.req.user}
+          viewActions={serverProps.viewActions}
+          viewType={viewType}
+          visibleEntities={{
+            collections: initPageResult?.visibleEntities?.collections,
+            globals: initPageResult?.visibleEntities?.globals,
+          }}
+        >
+          {RenderedView}
+        </DefaultTemplate>
+      )}
+    </React.Fragment>
   )
 }

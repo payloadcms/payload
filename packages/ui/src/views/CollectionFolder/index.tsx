@@ -8,7 +8,6 @@ import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment } from 'react'
 
-import { CloseModalButton } from '../../elements/CloseModalButton/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -17,7 +16,6 @@ import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
-import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListFolderPills } from '../../elements/ListFolderPills/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import {
@@ -25,7 +23,6 @@ import {
   ListCreateNewDocInFolderButton,
 } from '../../elements/ListHeader/TitleActions/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
-import { Pill } from '../../elements/Pill/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -37,7 +34,6 @@ import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-folder-list'
-const drawerBaseClass = 'collection-folder-list-drawer'
 
 export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
   const {
@@ -49,20 +45,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    hasCreatePermission: hasCreatePermissionFromProps,
+    hasCreatePermission,
   } = props
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
-  const {
-    allowCreate,
-    DocumentDrawerToggler,
-    drawerSlug: listDrawerSlug,
-    isInDrawer,
-    selectedOption,
-  } = useListDrawerContext()
   const {
     addItems,
     breadcrumbs,
@@ -87,10 +76,6 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const hasCreatePermission =
-    allowCreate !== undefined
-      ? allowCreate && hasCreatePermissionFromProps
-      : hasCreatePermissionFromProps
   const { labels, upload } = collectionConfig
   const isUploadCollection = Boolean(upload)
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
@@ -219,62 +204,38 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeFolderList}
         <Gutter className={`${baseClass}__wrap`}>
-          {isInDrawer ? (
-            // The header within a drawer
-            <ListHeader
-              Actions={[<CloseModalButton key="close-button" slug={listDrawerSlug} />]}
-              AfterListHeaderContent={Description}
-              className={`${drawerBaseClass}__header`}
-              title={getTranslation(
-                getEntityConfig({ collectionSlug: selectedOption.value })?.labels?.plural,
-                i18n,
-              )}
-              TitleActions={[
-                hasCreatePermission && (
-                  <DocumentDrawerToggler
-                    className={`${drawerBaseClass}__create-new-button`}
-                    key="create-new-button-toggler"
-                  >
-                    <Pill>{t('general:createNew')}</Pill>
-                  </DocumentDrawerToggler>
-                ),
-              ].filter(Boolean)}
-            />
-          ) : (
-            // The header not within a drawer
-            <ListHeader
-              Actions={[
-                !smallBreak && (
-                  <ListSelection
-                    disableBulkDelete={disableBulkDelete}
-                    disableBulkEdit={disableBulkEdit}
-                    key="list-selection"
-                  />
-                ),
-                <ListFolderPills
-                  collectionConfig={collectionConfig}
-                  key="list-header-buttons"
-                  viewType="folders"
-                />,
-              ].filter(Boolean)}
-              AfterListHeaderContent={Description}
-              title={getTranslation(labels?.plural, i18n)}
-              TitleActions={[
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
-                  collectionSlugs={[collectionSlug]}
-                  key="create-new-button"
-                  onCreateSuccess={onCreateSuccess}
-                />,
-                <ListBulkUploadButton
-                  collectionSlug={collectionSlug}
-                  hasCreatePermission={hasCreatePermission}
-                  isBulkUploadEnabled={isBulkUploadEnabled}
-                  key="bulk-upload-button"
-                />,
-              ].filter(Boolean)}
-            />
-          )}
+          <ListHeader
+            Actions={[
+              !smallBreak && (
+                <ListSelection
+                  disableBulkDelete={disableBulkDelete}
+                  disableBulkEdit={disableBulkEdit}
+                  key="list-selection"
+                />
+              ),
+              <ListFolderPills
+                collectionConfig={collectionConfig}
+                key="list-header-buttons"
+                viewType="folders"
+              />,
+            ].filter(Boolean)}
+            AfterListHeaderContent={Description}
+            title={getTranslation(labels?.plural, i18n)}
+            TitleActions={[
+              <ListCreateNewDocInFolderButton
+                buttonLabel={t('general:createNew')}
+                collectionSlugs={[collectionSlug]}
+                key="create-new-button"
+                onCreateSuccess={onCreateSuccess}
+              />,
+              <ListBulkUploadButton
+                collectionSlug={collectionSlug}
+                hasCreatePermission={hasCreatePermission}
+                isBulkUploadEnabled={isBulkUploadEnabled}
+                key="bulk-upload-button"
+              />,
+            ].filter(Boolean)}
+          />
           <SearchBar
             Actions={[
               <ToggleViewButtons

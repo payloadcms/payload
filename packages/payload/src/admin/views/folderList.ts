@@ -1,12 +1,6 @@
 import type { ServerProps } from '../../config/types.js'
-import type {
-  CollectionAdminOptions,
-  CollectionSlug,
-  ListPreferences,
-  SanitizedCollectionConfig,
-} from '../../index.js'
-import type { ResolvedFilterOptions } from '../../types/index.js'
-import type { Column } from '../elements/Table.js'
+import type { FolderOrDocument } from '../../folders/types.js'
+import type { SanitizedCollectionConfig } from '../../index.js'
 export type FolderListViewSlots = {
   AfterFolderList?: React.ReactNode
   AfterFolderListTable?: React.ReactNode
@@ -19,17 +13,8 @@ export type FolderListViewSlots = {
 
 export type FolderListViewServerPropsOnly = {
   collectionConfig: SanitizedCollectionConfig
-  documents: {
-    relationTo: CollectionSlug
-    value: any
-  }[]
-  limit: number
-  listPreferences: ListPreferences
-  listSearchableFields: CollectionAdminOptions['listSearchableFields']
-  subfolders: {
-    relationTo: CollectionSlug
-    value: any
-  }[]
+  documents: FolderOrDocument[]
+  subfolders: FolderOrDocument[]
 } & ServerProps
 
 export type FolderListViewServerProps = FolderListViewClientProps & FolderListViewServerPropsOnly
@@ -37,22 +22,11 @@ export type FolderListViewServerProps = FolderListViewClientProps & FolderListVi
 export type FolderListViewClientProps = {
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
-  columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
-  /**
-   * @deprecated
-   */
-  listPreferences?: ListPreferences
   newDocumentURL: string
-  /**
-   * @deprecated
-   */
-  preferenceKey?: string
-  renderedFilters?: Map<string, React.ReactNode>
-  resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 } & FolderListViewSlots
 
 export type FolderListViewSlotSharedClientProps = {

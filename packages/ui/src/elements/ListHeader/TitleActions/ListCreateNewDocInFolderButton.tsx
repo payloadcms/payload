@@ -71,7 +71,6 @@ export function ListCreateNewDocInFolderButton({
               className={`${baseClass}__popup-button`}
               el="div"
               icon="chevron"
-              // icon="plus"
               size="small"
             >
               {buttonLabel}

@@ -1,6 +1,5 @@
 import type {
   AdminViewServerProps,
-  CollectionSlug,
   ColumnPreference,
   DefaultDocumentIDType,
   ListPreferences,

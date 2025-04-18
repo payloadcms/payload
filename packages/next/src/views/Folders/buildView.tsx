@@ -1,6 +1,6 @@
 import type {
   AdminViewServerProps,
-  BuildCollectionFolderViewStateResult,
+  BuildCollectionFolderViewResult,
   FolderListViewServerPropsOnly,
   ListQuery,
 } from 'payload'
@@ -25,30 +25,24 @@ export type BuildFolderViewArgs = {
 
 export const buildFolderView = async (
   args: BuildFolderViewArgs,
-): Promise<BuildCollectionFolderViewStateResult> => {
+): Promise<BuildCollectionFolderViewResult> => {
   const {
-    clientConfig,
-    customCellProps,
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
     folderID,
     initPageResult,
     isInDrawer,
-    overrideEntityVisibility,
     params,
     query: queryFromArgs,
     searchParams,
-    viewType,
   } = args
 
   const {
     locale: fullLocale,
     permissions,
-    req,
     req: {
       i18n,
-      locale,
       payload,
       payload: { config },
       query: queryFromReq,
@@ -80,8 +74,6 @@ export const buildFolderView = async (
     routes: { admin: adminRoute },
   } = config
 
-  const limit = 0
-
   const { breadcrumbs, documents, subfolders } = await getFolderData({
     folderID,
     payload: initPageResult.req.payload,
@@ -107,8 +99,6 @@ export const buildFolderView = async (
   const serverProps: Omit<FolderListViewServerPropsOnly, 'collectionConfig' | 'listPreferences'> = {
     documents,
     i18n,
-    limit,
-    listSearchableFields: [],
     locale: fullLocale,
     params,
     payload,

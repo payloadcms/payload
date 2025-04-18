@@ -4,7 +4,7 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FolderIcon, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
+import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
 import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -28,7 +28,7 @@ export const DefaultNavClient: React.FC<{
     },
   } = useConfig()
 
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const folderURL = formatAdminURL({
     adminRoute,
@@ -40,20 +40,7 @@ export const DefaultNavClient: React.FC<{
   return (
     <Fragment>
       {Object.keys(folderCollections).length > 0 && (
-        <Link
-          className={[`${baseClass}__browse-by-folder-link`, viewingRootFolderView && 'active']
-            .filter(Boolean)
-            .join(' ')}
-          href={formatAdminURL({
-            adminRoute,
-            path: foldersRoute,
-          })}
-          id="browse-by-folder"
-          prefetch={false}
-        >
-          <FolderIcon />
-          {t('folder:browseByFolder')}
-        </Link>
+        <BrowseByFolderButton active={viewingRootFolderView} />
       )}
       {groups.map(({ entities, label }, key) => {
         return (
