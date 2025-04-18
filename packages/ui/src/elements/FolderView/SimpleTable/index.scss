@@ -1,0 +1,59 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .simple-table {
+    margin-bottom: var(--base);
+    overflow: auto;
+    max-width: 100%;
+
+    &__table {
+      min-width: 100%;
+      border-collapse: collapse;
+    }
+
+    &__thead {
+      color: var(--theme-elevation-400);
+    }
+
+    &__th {
+      font-weight: normal;
+      text-align: left;
+      [dir='rtl'] & {
+        text-align: right;
+      }
+    }
+
+    &__th,
+    &__td {
+      vertical-align: top;
+      padding: calc(var(--base) * 0.6);
+      min-width: 150px;
+      position: relative;
+
+      &:first-child {
+        padding-inline-start: calc(var(--base) * (0.8));
+      }
+      &:last-child {
+        padding-inline-end: calc(var(--base) * (0.8));
+      }
+    }
+
+    .simple-table__thead .simple-table__tr {
+      &:after {
+        background-color: transparent;
+      }
+    }
+
+    &__hidden-cell {
+      position: absolute;
+      padding: 0;
+    }
+
+    @include mid-break {
+      &__th,
+      &__td {
+        max-width: 70vw;
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ import type { I18n } from '@payloadcms/translations'
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { format, formatDistanceToNow, transpose } from 'date-fns'
 
-type FormatDateArgs = {
+export type FormatDateArgs = {
   date: Date | number | string | undefined
   i18n: I18n<any, any>
   pattern: string

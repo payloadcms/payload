@@ -15,12 +15,17 @@ export type ServerFunctionArgs = {
   name: string
 }
 
-export type ServerFunctionClientArgs = {
-  args: Record<string, unknown>
+export type ServerFunctionClientArgs<Args = Record<string, unknown>> = {
+  args: Args
   name: string
 }
 
-export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
+export type ServerFunctionClient = <
+  Args = Record<string, unknown>,
+  Result = Promise<unknown> | unknown,
+>(
+  args: ServerFunctionClientArgs<Args>,
+) => Result
 
 export type ServerFunction = (
   args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
@@ -53,7 +58,7 @@ export type ListQuery = {
   search?: string
   sort?: Sort
   where?: Where
-}
+} & Record<string, unknown>
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
@@ -70,4 +75,8 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
 }

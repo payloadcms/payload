@@ -36,8 +36,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableQueryPresets,
+    disableQueryPresets = true,
     enableColumns = true,
+    enableFilters = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
     queryPreset: activePreset,
@@ -156,14 +157,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <div className={`${baseClass}__wrap`}>
           <SearchIcon />
           <SearchFilter
-            fieldName={titleField && 'name' in titleField ? titleField?.name : null}
-            handleChange={(search) => {
-              return void handleSearchChange(search)
-            }}
-            // @ts-expect-error @todo: fix types
-            initialParams={query}
+            handleChange={handleSearchChange}
             key={collectionSlug}
             label={searchLabelTranslated.current}
+            searchQueryParam={query?.search}
           />
           {activePreset && hasModifiedPreset ? (
             <div className={`${baseClass}__modified`}>Modified</div>
@@ -185,16 +182,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   {t('general:columns')}
                 </Pill>
               )}
-              <Pill
-                aria-controls={`${baseClass}-where`}
-                aria-expanded={visibleDrawer === 'where'}
-                className={`${baseClass}__toggle-where`}
-                icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:filters')}
-              </Pill>
+              {enableFilters && (
+                <Pill
+                  aria-controls={`${baseClass}-where`}
+                  aria-expanded={visibleDrawer === 'where'}
+                  className={`${baseClass}__toggle-where`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+                  pillStyle="light"
+                >
+                  {t('general:filters')}
+                </Pill>
+              )}
               {enableSort && (
                 <Pill
                   aria-controls={`${baseClass}-sort`}

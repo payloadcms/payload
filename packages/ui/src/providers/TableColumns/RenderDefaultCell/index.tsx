@@ -5,7 +5,7 @@ import React from 'react'
 
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
-import { useTableColumns } from '../index.js'
+import { useTableColumns } from '../../../providers/TableColumns/index.js'
 import './index.scss'
 
 const baseClass = 'default-cell'

@@ -24,6 +24,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     routes: {
       account: '/account',
       createFirstUser: '/create-first-user',
+      folders: '/folders',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
       login: '/login',
@@ -45,6 +46,11 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
+  folders: {
+    collections: {},
+    debug: false,
+    enabled: false,
+  },
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,
@@ -99,6 +105,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     routes: {
       account: '/account',
       createFirstUser: '/create-first-user',
+      folders: '/folders',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
       login: '/login',

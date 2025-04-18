@@ -42,9 +42,14 @@ export type AdminViewServerPropsOnly = {
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
+  readonly folderID?: string
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly redirectAfterCreate?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
@@ -78,8 +83,10 @@ export type InitPageResult = {
  */
 export type ViewTypes =
   | 'account'
+  | 'collection-folders'
   | 'dashboard'
   | 'document'
+  | 'folders'
   | 'list'
   | 'reset'
   | 'verify'
