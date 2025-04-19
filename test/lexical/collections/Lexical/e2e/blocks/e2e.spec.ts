@@ -1666,5 +1666,58 @@ describe('lexicalBlocks', () => {
         },
       })
     })
+
+    test('ensure inline blocks restore their state after undoing a removal', async () => {
+      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+
+      await page.locator('.cell-id a').first().click()
+      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+      // Wait for the page to be fully loaded and elements to be stable
+      await page.waitForLoadState('domcontentloaded')
+
+      // Wait for the specific row to be visible and have its content loaded
+      const row2 = page.locator('#blocks-row-2')
+      await expect(row2).toBeVisible()
+
+      // Get initial count and ensure it's stable
+      let initialCount = 0
+      await expect(async () => {
+        const count = await page.locator('#blocks-row-2 .inline-block-container').count()
+        expect(count).toBeGreaterThan(0)
+        initialCount = count
+      }).toPass()
+
+      const inlineBlockElement = page.locator('#blocks-row-2 .inline-block-container').first()
+      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+
+      await page.locator('.drawer--is-open #field-text').fill('value1')
+      await page.locator('.drawer--is-open button[type="submit"]').first().click()
+
+      // remove inline block
+      await inlineBlockElement.click()
+      await page.keyboard.press('Backspace')
+
+      // Check both that this specific element is removed and the total count decreased
+      await expect(page.locator('#blocks-row-2 .inline-block-container')).toHaveCount(
+        initialCount - 1,
+      )
+
+      await page.keyboard.press('Escape')
+
+      await inlineBlockElement.click()
+
+      // Undo the removal using keyboard shortcut
+      await page.keyboard.press('ControlOrMeta+Z')
+
+      // Wait for the block to be restored
+      await expect(page.locator('#blocks-row-2 .inline-block-container')).toHaveCount(initialCount)
+
+      // Open the drawer again
+      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+
+      // Check if the text field still contains 'value1'
+      await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
+    })
   })
 })
