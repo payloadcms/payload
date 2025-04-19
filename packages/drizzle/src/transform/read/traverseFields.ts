@@ -666,8 +666,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
             withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
           })
 
-          if ('_order' in ref) {
-            delete ref._order
+          if ('_order' in ref[refKey]) {
+            delete ref[refKey]._order
           }
 
           return
