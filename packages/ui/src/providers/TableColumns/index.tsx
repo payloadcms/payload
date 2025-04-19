@@ -18,7 +18,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   LinkedCellOverride,
 }) => {
   const { getEntityConfig } = useConfig()
-  const { query: currentQuery, refineListData } = useListQuery()
+  const { refineListData } = useListQuery()
 
   const { admin: { defaultColumns } = {} } = getEntityConfig({
     collectionSlug,
@@ -69,27 +69,26 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     [columnState, refineListData, setOptimisticColumnState],
   )
 
+  const setColumns = useCallback(
+    async (columns: string[]) => {
+      await refineListData({ columns })
+    },
+    [refineListData],
+  )
+
+  /**
+   * @deprecated Use setColumns instead
+   */
   const setActiveColumns = useCallback(
     async (columns: string[]) => {
-      const newColumnState = currentQuery.columns
-
-      columns.forEach((colName) => {
-        const colIndex = newColumnState.findIndex((c) => colName === c)
-
-        // ensure the name does not begin with a `-` which denotes an inactive column
-        if (colIndex !== undefined && newColumnState[colIndex][0] === '-') {
-          newColumnState[colIndex] = colName.slice(1)
-        }
-      })
-
-      await refineListData({ columns: newColumnState })
+      return setColumns(columns)
     },
-    [currentQuery, refineListData],
+    [setColumns],
   )
 
   const resetColumnsState = React.useCallback(async () => {
-    await setActiveColumns(defaultColumns)
-  }, [defaultColumns, setActiveColumns])
+    await refineListData({ columns: defaultColumns })
+  }, [defaultColumns, refineListData])
 
   return (
     <TableColumnContext
@@ -99,6 +98,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         moveColumn,
         resetColumnsState,
         setActiveColumns,
+        setColumns,
         toggleColumn,
         ...contextRef.current,
       }}
