@@ -14,6 +14,7 @@ export const ToastContainer: React.FC = () => {
       closeButton
       // @ts-expect-error
       dir="undefined"
+      expand={true}
       gap={8}
       icons={{
         error: <Error />,
