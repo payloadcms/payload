@@ -4,13 +4,7 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import {
-  $createParagraphNode,
-  $getRoot,
-  BLUR_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  FOCUS_COMMAND,
-} from 'lexical'
+import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -24,6 +18,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
@@ -112,6 +107,7 @@ export const LexicalEditor: React.FC<
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <NormalizeSelectionPlugin />
         <InsertParagraphAtEndPlugin />
         <DecoratorPlugin />
         <TextPlugin features={editorConfig.features} />
