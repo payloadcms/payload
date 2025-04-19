@@ -1,0 +1,31 @@
+[phases.install]
+dependsOn = ["setup"]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = ["pnpm run build"]
+
+[phases.prepare-output]
+dependsOn = ["build"]
+cmds = [
+    "mkdir -p .next/static",
+    "mkdir -p public",
+    "cp -r .next/standalone/* ./",
+    "cp -r .next/static ./.next/static || true",
+    "cp -r public ./public || true",
+]
+
+[start]
+cmd = "node server.js"
+
+[start.env]
+NODE_ENV = "production"
+PORT = "3000"
+HOSTNAME = "0.0.0.0"
+
+[variables]
+PORT = "3000"
+
+[cachedPaths]
+paths = ["node_modules", "~/.pnpm-store"]
