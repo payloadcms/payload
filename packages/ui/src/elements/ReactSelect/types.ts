@@ -3,6 +3,7 @@ import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } fr
 import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
 
 type CustomSelectProps = {
+  adminRoute: string
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
@@ -14,10 +15,11 @@ type CustomSelectProps = {
     selectProps: ReactSelectStateManagerProps,
   ) => any
   onDelete?: DocumentDrawerProps['onDelete']
-  onDocumentDrawerOpen?: (args: {
+  onDocumentOpen?: (args: {
     collectionSlug: string
     hasReadPermission: boolean
     id: number | string
+    inNewTab?: boolean
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']

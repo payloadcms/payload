@@ -7,7 +7,7 @@ import type {
 } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -82,7 +82,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const hasMultipleRelations = Array.isArray(relationTo)
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
-    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
   >({
     id: undefined,
     collectionSlug: undefined,
@@ -608,8 +608,23 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
+  const onDocumentNewTabOpen = useCallback<
+    ReactSelectAdapterProps['customProps']['onDocumentOpen']
+  >(
+    ({ id, collectionSlug, hasReadPermission }) => {
+      if (hasReadPermission && id && collectionSlug) {
+        const docUrl = formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${collectionSlug}/${id}`,
+        })
+        window.open(docUrl, '_blank')
+      }
+    },
+    [config.routes.admin],
+  )
+
   const onDocumentDrawerOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+    ReactSelectAdapterProps['customProps']['onDocumentOpen']
   >(({ id, collectionSlug, hasReadPermission }) => {
     openDrawerWhenRelationChanges.current = true
     setCurrentlyOpenRelationship({
@@ -618,6 +633,17 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       hasReadPermission,
     })
   }, [])
+
+  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ inNewTab, ...args }) => {
+      if (inNewTab) {
+        onDocumentNewTabOpen(args)
+      } else {
+        onDocumentDrawerOpen(args)
+      }
+    },
+    [onDocumentNewTabOpen, onDocumentDrawerOpen],
+  )
 
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
@@ -672,9 +698,10 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 ...(appearance !== 'select' && { DropdownIndicator: null }),
               }}
               customProps={{
+                adminRoute: config.routes.admin,
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentDrawerOpen,
+                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}
