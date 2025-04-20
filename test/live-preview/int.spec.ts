@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { FieldSchemaJSON, Payload } from 'payload'
 
 import {
   handleMessage,
@@ -7,21 +7,21 @@ import {
   traverseRichText,
 } from '@payloadcms/live-preview'
 import path from 'path'
-import { getFileByPath } from 'payload'
+import { createClientConfig, getFileByPath, getLocalI18n } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
-import config from './config.js'
 
-import { Pages } from './collections/Pages.js'
+import { importMap } from './app/(payload)/admin/importMap.js'
+import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
+let schemaJSON: FieldSchemaJSON
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -83,6 +83,23 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
+
+    // get schemaJSON from client config
+    const resolvedConfig = await config
+    const i18n = await getLocalI18n({
+      config: resolvedConfig,
+      language: 'en',
+    })
+    const clientConfig = createClientConfig({
+      config: resolvedConfig,
+      i18n,
+      importMap,
+    })
+    const clientFields = clientConfig.collections.find((c) => c.slug === 'pages')?.fields
+    if (!clientFields) {
+      throw new Error("Couldn't find client fields for 'pages' collection")
+    }
+    schemaJSON = fieldSchemaToJSON(clientFields, clientConfig)
   })
 
   afterAll(async () => {
