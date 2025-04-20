@@ -14,7 +14,6 @@ import { fileURLToPath } from 'url'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { importMap } from './app/(payload)/admin/importMap.js'
 import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
@@ -93,7 +92,7 @@ describe('Collections - Live Preview', () => {
     const clientConfig = createClientConfig({
       config: resolvedConfig,
       i18n,
-      importMap,
+      importMap: {},
     })
     const clientFields = clientConfig.collections.find((c) => c.slug === 'pages')?.fields
     if (!clientFields) {
