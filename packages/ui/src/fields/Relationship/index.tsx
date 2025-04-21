@@ -174,8 +174,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
       if (hasMany) {
         const withSelection = Array.isArray(value) ? value : []
-        withSelection.push(formattedSelection)
-        setValue(withSelection)
+        setValue([...withSelection, formattedSelection])
       } else {
         setValue(formattedSelection)
       }
