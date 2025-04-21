@@ -176,6 +176,7 @@ export const csTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Procházet podle složek',
+    byFolder: 'Podle složky',
     deleteConfirmation:
       'Vnořené složky budou smazány. Vnořené dokumenty se přesunou do nejbližší nadřazené složky. Jste si jistý?',
     deleteFolder: 'Smazat složku',
@@ -189,6 +190,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectFolder: 'Vyberte složku',
   },
   general: {
+    name: 'Jméno',
     aboutToDelete: 'Chystáte se odstranit {{label}} <1>{{title}}</1>. Jste si jisti?',
     aboutToDeleteCount_many: 'Chystáte se smazat {{count}} {{label}}',
     aboutToDeleteCount_one: 'Chystáte se smazat {{count}} {{label}}',

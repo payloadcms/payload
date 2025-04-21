@@ -176,6 +176,7 @@ export const plTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Przeglądaj według folderu',
+    byFolder: 'Według Folderu',
     deleteConfirmation:
       'Zagnieżdżone foldery zostaną usunięte. Zagnieżdżone dokumenty zostaną przeniesione do najbliższego folderu nadrzędnego. Czy jesteś pewien?',
     deleteFolder: 'Usuń folder',
@@ -189,6 +190,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectFolder: 'Wybierz folder',
   },
   general: {
+    name: 'Nazwa',
     aboutToDelete: 'Zamierzasz usunąć {{label}} <1>{{title}}</1>. Jesteś pewien?',
     aboutToDeleteCount_many: 'Zamierzasz usunąć {{count}} {{label}}',
     aboutToDeleteCount_one: 'Zamierzasz usunąć {{count}} {{label}}',

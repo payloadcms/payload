@@ -178,6 +178,7 @@ export const nlTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Bladeren op Map',
+    byFolder: 'Op Map',
     deleteConfirmation:
       'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
     deleteFolder: 'Verwijder map',
@@ -191,6 +192,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     selectFolder: 'Selecteer Map',
   },
   general: {
+    name: 'Naam',
     aboutToDelete:
       'U staat op het punt om {{label}} <1>{{title}}</1> te verwijderen. Weet u het zeker?',
     aboutToDeleteCount_many: 'Je staat op het punt {{count}} {{label}} te verwijderen',

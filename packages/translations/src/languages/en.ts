@@ -176,6 +176,7 @@ export const enTranslations = {
   },
   folder: {
     browseByFolder: 'Browse by Folder',
+    byFolder: 'By Folder',
     deleteConfirmation:
       'Nested folders will be deleted. Nested documents will move to the nearest parent folder. Are you sure?',
     deleteFolder: 'Delete Folder',
@@ -189,6 +190,7 @@ export const enTranslations = {
     selectFolder: 'Select Folder',
   },
   general: {
+    name: 'Name',
     aboutToDelete: 'You are about to delete the {{label}} <1>{{title}}</1>. Are you sure?',
     aboutToDeleteCount_many: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',

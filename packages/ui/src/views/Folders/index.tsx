@@ -36,6 +36,7 @@ const baseClass = 'folder-list'
 
 export function DefaultFolderView(
   props: {
+    hasCreatePermissionCollectionSlugs?: string[]
     selectedCollectionSlugs?: string[]
   } & FolderListViewClientProps,
 ) {
@@ -47,9 +48,8 @@ export function DefaultFolderView(
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    hasCreatePermissionCollectionSlugs,
   } = props
-
-  // @todo: get "create" permissions to filter create buttons?
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
@@ -66,7 +66,7 @@ export function DefaultFolderView(
     filterItems,
     focusedRowIndex,
     folderCollectionConfig,
-    folderCollectionSlug,
+    folderID,
     getSelectedItems,
     isDragging,
     lastSelectedIndex,
@@ -113,10 +113,6 @@ export function DefaultFolderView(
   const listHeaderTitle = !breadcrumbs.length
     ? t('folder:browseByFolder')
     : breadcrumbs[breadcrumbs.length - 1].name
-  const allFolderCollectionSlugs = [
-    folderCollectionSlug,
-    ...Object.keys(config.folders.collections),
-  ]
   const noResultsLabel = visibleCollectionSlugs.reduce((acc, slug, index, array) => {
     const collectionConfig = getEntityConfig({ collectionSlug: slug })
     if (index === 0) {
@@ -255,7 +251,7 @@ export function DefaultFolderView(
             TitleActions={[
               <ListCreateNewDocInFolderButton
                 buttonLabel={t('general:createNew')}
-                collectionSlugs={allFolderCollectionSlugs}
+                collectionSlugs={hasCreatePermissionCollectionSlugs}
                 key="create-new-button"
                 onCreateSuccess={onCreateSuccess}
               />,
@@ -324,16 +320,19 @@ export function DefaultFolderView(
               Actions={[
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                  collectionSlugs={[]}
+                  collectionSlugs={[folderCollectionConfig.slug]}
                   key="create-folder"
                   onCreateSuccess={onCreateSuccess}
                 />,
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                  collectionSlugs={allFolderCollectionSlugs}
-                  disableFolderCollection
-                  key="create-document"
-                />,
+                folderID && (
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    collectionSlugs={hasCreatePermissionCollectionSlugs.filter(
+                      (slug) => slug !== folderCollectionConfig.slug,
+                    )}
+                    key="create-document"
+                  />
+                ),
               ].filter(Boolean)}
               Message={
                 <p>

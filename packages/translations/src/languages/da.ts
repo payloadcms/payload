@@ -175,6 +175,7 @@ export const daTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Gennemse efter Mappe',
+    byFolder: 'Ved Mappe',
     deleteConfirmation:
       'Indlejrede mapper vil blive slettet. Indlejrede dokumenter vil blive flyttet til den nærmeste forældremappe. Er du sikker?',
     deleteFolder: 'Slet mappe',
@@ -188,6 +189,7 @@ export const daTranslations: DefaultTranslationsObject = {
     selectFolder: 'Vælg mappe',
   },
   general: {
+    name: 'Navn',
     aboutToDelete: 'Du er ved at slette {{label}} <1>{{title}}</1>. Er du sikker?',
     aboutToDeleteCount_many: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er ved at slette {{count}} {{label}}',

@@ -178,6 +178,7 @@ export const ruTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Просмотр по папкам',
+    byFolder: 'По папке',
     deleteConfirmation:
       'Вложенные папки будут удалены. Вложенные документы будут перемещены в ближайшую родительскую папку. Вы уверены?',
     deleteFolder: 'Удалить папку',
@@ -191,6 +192,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectFolder: 'Выбрать папку',
   },
   general: {
+    name: 'Имя',
     aboutToDelete: 'Вы собираетесь удалить {{label}} <1>{{title}}</1>. Вы уверены?',
     aboutToDeleteCount_many: 'Вы собираетесь удалить {{count}} {{label}}',
     aboutToDeleteCount_one: 'Вы собираетесь удалить {{count}} {{label}}',

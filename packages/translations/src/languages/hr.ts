@@ -177,6 +177,7 @@ export const hrTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Pregledajte po mapi',
+    byFolder: 'Po mapi',
     deleteConfirmation:
       'Ugniježđene mape bit će izbrisane. Ugniježđeni dokumenti premjestit će se u najbližu nadređenu mapu. Jeste li sigurni?',
     deleteFolder: 'Izbriši mapu',
@@ -190,6 +191,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     selectFolder: 'Odaberite mapu',
   },
   general: {
+    name: 'Ime',
     aboutToDelete: 'Izbrisat ćete {{label}} <1>{{title}}</1>. Jeste li sigurni?',
     aboutToDeleteCount_many: 'Upravo ćete izbrisati {{count}} {{label}}',
     aboutToDeleteCount_one: 'Upravo ćete izbrisati {{count}} {{label}}',

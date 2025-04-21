@@ -177,6 +177,7 @@ export const jaTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'フォルダーで閲覧する',
+    byFolder: 'フォルダー別に',
     deleteConfirmation:
       'ネストされたフォルダは削除されます。ネストされたドキュメントは最も近い親フォルダに移動します。よろしいですか？',
     deleteFolder: 'フォルダを削除する',
@@ -190,6 +191,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectFolder: 'フォルダを選択してください',
   },
   general: {
+    name: '名前',
     aboutToDelete: '{{label}} <1>{{title}}</1> を削除します。よろしいですか？',
     aboutToDeleteCount_many: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_one: '{{label}}を{{count}}つ削除しようとしています',

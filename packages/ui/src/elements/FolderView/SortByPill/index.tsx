@@ -1,7 +1,9 @@
+import type { TFunction } from '@payloadcms/translations'
 import type { FolderOrDocument } from 'payload/shared'
 
 import React from 'react'
 
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { SortDownIcon, SortUpIcon } from '../../../icons/Sort/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -12,37 +14,34 @@ import './index.scss'
 const baseClass = 'sort-by-pill'
 
 const sortOnOptions: {
-  label: (t) => React.ReactNode
+  label: (t: TFunction) => React.ReactNode
   value: keyof FolderOrDocument['value']
 }[] = [
-  // @todo: translate Name
-  { label: (t) => t('Name'), value: '_folderOrDocumentTitle' },
+  { label: (t) => t('general:name'), value: '_folderOrDocumentTitle' },
   { label: (t) => t('general:createdAt'), value: 'createdAt' },
   { label: (t) => t('general:updatedAt'), value: 'updatedAt' },
 ]
 const orderOnOptions: {
-  label: (t) => React.ReactNode
+  label: (t: TFunction) => React.ReactNode
   value: 'asc' | 'desc'
 }[] = [
   {
     label: (t) => (
       <>
         <SortUpIcon />
-        {/* @todo: translate */}
-        Descending
+        {t('general:ascending')}
       </>
     ),
-    value: 'desc',
+    value: 'asc',
   },
   {
     label: (t) => (
       <>
         <SortDownIcon />
-        {/* @todo: translate */}
-        Ascending
+        {t('general:descending')}
       </>
     ),
-    value: 'asc',
+    value: 'desc',
   },
 ]
 export function SortByPill() {
@@ -53,7 +52,16 @@ export function SortByPill() {
 
   return (
     <Popup
-      button={<Pill>{selectedSortOption.label(t)}</Pill>}
+      button={
+        <Pill className={`${baseClass}__trigger`} icon={<ChevronIcon />}>
+          {sortDirection === 'asc' ? (
+            <SortUpIcon className={`${baseClass}__sort-icon`} />
+          ) : (
+            <SortDownIcon className={`${baseClass}__sort-icon`} />
+          )}
+          {selectedSortOption.label(t)}
+        </Pill>
+      }
       className={baseClass}
       horizontalAlign="right"
       render={({ close }) => (

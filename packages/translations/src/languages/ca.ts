@@ -177,6 +177,7 @@ export const caTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Navega per carpeta',
+    byFolder: 'Per Carpeta',
     deleteConfirmation:
       "Les carpetes imbricades seran eliminades. Els documents imbricats es mouran a la carpeta principal més propera. N'estàs segur?",
     deleteFolder: 'Esborra la carpeta',
@@ -190,6 +191,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectFolder: 'Selecciona la carpeta',
   },
   general: {
+    name: 'Nom',
     aboutToDelete: 'Estas apunt de eliminar {{label}} <1>{{title}}</1>. Estas segur?',
     aboutToDeleteCount_many: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estas apunt de eliminar {{count}} {{label}}',

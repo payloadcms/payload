@@ -177,6 +177,7 @@ export const rsTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Pregledajte po folderu',
+    byFolder: 'Po folderu',
     deleteConfirmation:
       'Ugnežđene fascikle će biti obrisane. Ugnežđeni dokumenti će se premestiti u najbližu matičnu fasciklu. Da li ste sigurni?',
     deleteFolder: 'Obriši fasciklu',
@@ -190,6 +191,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     selectFolder: 'Izaberite fasciklu',
   },
   general: {
+    name: 'Ime',
     aboutToDelete: 'Избрисаћете {{label}} <1>{{title}}</1>. Да ли сте сигурни?',
     aboutToDeleteCount_many: 'Избрисаћете {{count}} {{label}}',
     aboutToDeleteCount_one: 'Избрисаћете {{count}} {{label}}',

@@ -13,7 +13,7 @@ const baseClass = 'collection-type'
 
 export function CollectionTypePill() {
   const { filterItems, folderCollectionSlug, visibleCollectionSlugs } = useFolder()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
 
   const allFolderCollectionSlugs = [
@@ -36,8 +36,7 @@ export function CollectionTypePill() {
           {visibleCollectionSlugs.length ? (
             <span className={`${baseClass}__count`}>{visibleCollectionSlugs.length}</span>
           ) : null}
-          {/* @todo: translate */}
-          Type
+          {t('version:type')}
         </Button>
       }
       key="relation-to-selection-popup"

@@ -18,7 +18,7 @@ type ListFolderPillsProps = {
 }
 
 export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsProps) {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { config } = useConfig()
   return (
     <div className={baseClass}>
@@ -39,8 +39,7 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
           serverURL: config.serverURL,
         })}
       >
-        {/* @todo: translate */}
-        By Folder
+        {t('folder:byFolder')}
       </Button>
       <Button
         buttonStyle="pill"
@@ -56,8 +55,7 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
           serverURL: config.serverURL,
         })}
       >
-        {/* @todo: translate */}
-        All {getTranslation(collectionConfig?.labels?.plural, i18n)}
+        {t('general:all')} {getTranslation(collectionConfig?.labels?.plural, i18n)}
       </Button>
     </div>
   )

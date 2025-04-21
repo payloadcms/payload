@@ -174,6 +174,7 @@ export const arTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'تصفح حسب المجلد',
+    byFolder: 'حسب المجلد',
     deleteConfirmation:
       'سيتم حذف المجلدات المتداخلة. ستنتقل المستندات المتداخلة إلى المجلد الأصل الأقرب. هل أنت متأكد؟',
     deleteFolder: 'حذف المجلد',
@@ -187,6 +188,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectFolder: 'حدد المجلد',
   },
   general: {
+    name: 'اسم',
     aboutToDelete: 'أنت على وشك حذف {{label}} <1>{{title}}</1>. هل أنت متأكّد؟',
     aboutToDeleteCount_many: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_one: 'أنت على وشك حذف {{count}} {{label}}',

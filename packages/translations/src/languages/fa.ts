@@ -174,6 +174,7 @@ export const faTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'مرور بر اساس پوشه',
+    byFolder: 'بر اساس پوشه',
     deleteConfirmation:
       'پوشه های تو در تو حذف خواهند شد. اسناد تو در تو به نزدیک ترین پوشه اصلی منتقل خواهند شد. آیا مطمئن هستید؟',
     deleteFolder: 'حذف پوشه',
@@ -187,6 +188,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectFolder: 'انتخاب پوشه',
   },
   general: {
+    name: 'نام',
     aboutToDelete: 'شما در حال پاک کردن {{label}} <1>{{title}}</1> هستید. اطمینان دارید؟',
     aboutToDeleteCount_many: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_one: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',

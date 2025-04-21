@@ -176,6 +176,7 @@ export const viTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Duyệt theo Thư mục',
+    byFolder: 'Theo Thư mục',
     deleteConfirmation:
       'Các thư mục lồng nhau sẽ bị xóa. Các tài liệu lồng nhau sẽ chuyển đến thư mục cha gần nhất. Bạn có chắc chắn không?',
     deleteFolder: 'Xóa Thư mục',
@@ -189,6 +190,7 @@ export const viTranslations: DefaultTranslationsObject = {
     selectFolder: 'Chọn Thư mục',
   },
   general: {
+    name: 'Tên',
     aboutToDelete: 'Chuẩn bị xóa {{label}} <1>{{title}}</1>. Bạn có muốn tiếp tục không?',
     aboutToDeleteCount_many: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_one: 'Bạn sắp xóa {{count}} {{label}}',

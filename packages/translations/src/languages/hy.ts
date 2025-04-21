@@ -176,6 +176,7 @@ export const hyTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Թվարկել թղթապանակներով',
+    byFolder: 'ըստ թղթապանակի',
     deleteConfirmation:
       'Տեղադրված թղթապանակները կջնջվեն։ Գործառույթ թղթապանակներում փաստաթուղթերը կտեղափոխվեն դեպի հարակից ծնող թղթապանակը։ Համոզված եք։',
     deleteFolder: 'Ջնջել թղթապանակը',
@@ -189,6 +190,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectFolder: 'Ընտրել թղթապանակ',
   },
   general: {
+    name: 'Անուն',
     aboutToDelete: 'Դուք պատրաստվում եք ջնջել {{label}} <1>{{title}}</1>-ը։ Համոզվա՞ծ եք։',
     aboutToDeleteCount_many: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_one: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',

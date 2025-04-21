@@ -176,6 +176,7 @@ export const slTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Brskaj po mapi',
+    byFolder: 'Po mapi',
     deleteConfirmation:
       'Vgnešene mape bodo izbrisane. Vgnešeni dokumenti se bodo premaknili v najbližjo starševsko mapo. Ste prepričani?',
     deleteFolder: 'Izbriši mapo',
@@ -189,6 +190,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectFolder: 'Izberite mapo',
   },
   general: {
+    name: 'Ime',
     aboutToDelete: 'Izbrisali boste {{label}} <1>{{title}}</1>. Ste prepričani?',
     aboutToDeleteCount_many: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisali boste {{count}} {{label}}',

@@ -177,6 +177,7 @@ export const myTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Layari mengikut Folder',
+    byFolder: 'Dengan Folder',
     deleteConfirmation:
       'နဂိုဖိုလ်ဒါများကို ဖျက်သွားပါမည်။ ဂုဏ်ယူပါတယ်ဖိုင်များကို အနီးဆုံးမှတ်တမ်းဖိ',
     deleteFolder: 'Padam Folder',
@@ -190,6 +191,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectFolder: 'Pilih Folder',
   },
   general: {
+    name: 'နာမည်',
     aboutToDelete:
       '{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။',
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',

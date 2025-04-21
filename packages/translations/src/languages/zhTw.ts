@@ -170,6 +170,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: '按資料夾瀏覽',
+    byFolder: '按資料夾',
     deleteConfirmation: '嵌套文件夾將被刪除。嵌套文件將移至最近的父文件夾。你確定嗎？',
     deleteFolder: '刪除資料夾',
     folderName: '資料夾名稱',
@@ -182,6 +183,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     selectFolder: '選擇資料夾',
   },
   general: {
+    name: '名稱',
     aboutToDelete: '您即將刪除{{label}} <1>{{title}}</1>。您確定要繼續嗎？',
     aboutToDeleteCount_many: '您即將刪除 {{count}} 個 {{label}}',
     aboutToDeleteCount_one: '您即將刪除 {{count}} 個 {{label}}',

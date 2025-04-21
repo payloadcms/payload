@@ -179,6 +179,7 @@ export const skTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Prehliadať podľa priečinka',
+    byFolder: 'Podľa priečinka',
     deleteConfirmation:
       'Vnorené priečinky budú vymazané. Vnorené dokumenty sa presunú do najbližšej nadradenej zložky. Ste si istý?',
     deleteFolder: 'Odstrániť priečinok',
@@ -192,6 +193,7 @@ export const skTranslations: DefaultTranslationsObject = {
     selectFolder: 'Vybrať priečinok',
   },
   general: {
+    name: 'Meno',
     aboutToDelete: 'Chystáte sa odstrániť {{label}} <1>{{title}}</1>. Ste si istí?',
     aboutToDeleteCount_many: 'Chystáte sa zmazať {{count}} {{label}}',
     aboutToDeleteCount_one: 'Chystáte sa zmazať {{count}} {{label}}',

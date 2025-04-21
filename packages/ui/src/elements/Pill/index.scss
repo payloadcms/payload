@@ -13,7 +13,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     border: 0;
-    padding: 0 base(0.4);
+    padding: 2px base(0.4);
     align-items: center;
     flex-shrink: 0;
     gap: base(0.2);
@@ -36,13 +36,13 @@
 
     .icon {
       flex-shrink: 0;
-      margin: base(0.1);
     }
 
     &__label {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1;
     }
 
     &--has-action {
@@ -142,7 +142,7 @@
     }
 
     &--size-small {
-      padding: 0 base(0.2);
+      padding: 2px base(0.2);
       line-height: 18px;
     }
   }

@@ -105,7 +105,6 @@ export function FolderFileTable({
               isDroppable
               isFocused={focusedRowIndex === rowIndex}
               isSelected={selectedItems.has(itemKey)}
-              // @todo: might need to revert this to look at selectedIndexes.
               isSelecting={selectedItems.size > 0}
               itemKey={itemKey}
               key={`${rowIndex}-${itemKey}`}

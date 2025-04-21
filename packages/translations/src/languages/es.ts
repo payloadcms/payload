@@ -180,6 +180,7 @@ export const esTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Explorar por Carpeta',
+    byFolder: 'Por Carpeta',
     deleteConfirmation:
       'Las carpetas anidadas serán eliminadas. Los documentos anidados se moverán a la carpeta principal más cercana. ¿Está seguro?',
     deleteFolder: 'Eliminar Carpeta',
@@ -193,6 +194,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectFolder: 'Seleccionar Carpeta',
   },
   general: {
+    name: 'Nombre',
     aboutToDelete: 'Estás por eliminar el {{label}} <1>{{title}}</1>. ¿Estás seguro?',
     aboutToDeleteCount_many: 'Está a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Está a punto de eliminar {{count}} {{label}}',

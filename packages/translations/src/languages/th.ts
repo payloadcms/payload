@@ -173,6 +173,7 @@ export const thTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'เรียกดูตามโฟลเดอร์',
+    byFolder: 'ตามโฟลเดอร์',
     deleteConfirmation:
       'โฟลเดอร์ที่ซ้อนกันจะถูกลบ ส่วนเอกสารที่ซ้อนกันจะถูกย้ายไปยังโฟลเดอร์แม่ที่ใกล้ที่สุด คุณแน่ใจหรือไม่?',
     deleteFolder: 'ลบโฟลเดอร์',
@@ -186,6 +187,7 @@ export const thTranslations: DefaultTranslationsObject = {
     selectFolder: 'เลือกโฟลเดอร์',
   },
   general: {
+    name: 'ชื่อ',
     aboutToDelete: 'คุณกำลังจะลบ {{label}} <1>{{title}}</1> ต้องการดำเนินการต่อหรือไม่?',
     aboutToDeleteCount_many: 'คุณกำลังจะลบ {{count}} {{label}}',
     aboutToDeleteCount_one: 'คุณกำลังจะลบ {{count}} {{label}}',

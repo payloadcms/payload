@@ -178,6 +178,7 @@ export const huTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Mappa szerint böngészés',
+    byFolder: 'Mappánként',
     deleteConfirmation:
       'Beágyazott mappák törlődnek. Beágyazott dokumentumok átkerülnek a legközelebbi szülő mappába. Biztos benne?',
     deleteFolder: 'Mappa törlése',
@@ -191,6 +192,7 @@ export const huTranslations: DefaultTranslationsObject = {
     selectFolder: 'Mappa kiválasztása',
   },
   general: {
+    name: 'Név',
     aboutToDelete: 'A {{label}} <1>{{title}}</1> törlésére készül. Biztos benne?',
     aboutToDeleteCount_many: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_one: 'Törölni készül {{count}} {{label}}',

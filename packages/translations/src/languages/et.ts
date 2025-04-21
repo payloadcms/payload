@@ -175,6 +175,7 @@ export const etTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Sirvi kausta järgi',
+    byFolder: 'Kausta järgi',
     deleteConfirmation:
       'Pesastatud kaustad kustutatakse. Pesastatud dokumendid liiguvad lähimasse ülemkausta. Kas olete kindel?',
     deleteFolder: 'Kustuta kaust',
@@ -188,6 +189,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectFolder: 'Vali kaust',
   },
   general: {
+    name: 'Nimi',
     aboutToDelete: 'Olete kustutamas {{label}} <1>{{title}}</1>. Olete kindel?',
     aboutToDeleteCount_many: 'Olete kustutamas {{count}} {{label}}',
     aboutToDeleteCount_one: 'Olete kustutamas {{count}} {{label}}',

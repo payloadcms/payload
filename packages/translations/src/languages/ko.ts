@@ -176,6 +176,7 @@ export const koTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: '폴더별 브라우징',
+    byFolder: '폴더별로',
     deleteConfirmation:
       '중첩 폴더는 삭제됩니다. 중첩 문서는 가장 가까운 부모 폴더로 이동하게 됩니다. 확실합니까?',
     deleteFolder: '폴더 삭제',
@@ -189,6 +190,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectFolder: '폴더 선택',
   },
   general: {
+    name: '이름',
     aboutToDelete: '{{label}} <1>{{title}}</1>를 삭제하려고 합니다. 계속하시겠습니까?',
     aboutToDeleteCount_many: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_one: '{{label}}를 {{count}}개 삭제하려고 합니다.',

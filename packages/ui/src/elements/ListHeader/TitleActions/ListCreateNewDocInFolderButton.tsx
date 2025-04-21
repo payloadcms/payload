@@ -21,12 +21,10 @@ const baseClass = 'create-new-doc-in-folder'
 export function ListCreateNewDocInFolderButton({
   buttonLabel,
   collectionSlugs,
-  disableFolderCollection = false,
   onCreateSuccess,
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
-  disableFolderCollection?: boolean
   onCreateSuccess?: (args: {
     collectionSlug: CollectionSlug
     doc: Record<string, unknown>
@@ -38,26 +36,34 @@ export function ListCreateNewDocInFolderButton({
   const { folderCollectionConfig, folderID } = useFolder()
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
-    config.collections.filter(({ slug }) => {
-      return collectionSlugs.includes(slug) && config.folders.collections[slug]
-    }),
+    collectionSlugs.reduce((acc, collectionSlug) => {
+      const collectionConfig = config.collections.find(({ slug }) => slug === collectionSlug)
+      if (collectionConfig) {
+        acc.push(collectionConfig)
+      }
+      return acc
+    }, []),
   )
 
-  if (disableFolderCollection && enabledCollections.length === 0) {
+  if (enabledCollections.length === 0) {
     return null
   }
 
   return (
     <React.Fragment>
-      {(disableFolderCollection && enabledCollections.length === 1) ||
-      (!disableFolderCollection && enabledCollections.length === 0) ? (
+      {enabledCollections.length === 1 ? (
         // If there is only 1 option, do not render a popup
         <Button
           buttonStyle="pill"
           className={`${baseClass}__button`}
           el="div"
           onClick={() => {
-            openModal(newFolderDrawerSlug)
+            if (enabledCollections[0].slug === folderCollectionConfig.slug) {
+              openModal(newFolderDrawerSlug)
+            } else {
+              setCreateCollectionSlug(enabledCollections[0].slug)
+              openModal(newDocInFolderDrawerSlug)
+            }
           }}
           size="small"
         >
@@ -80,27 +86,20 @@ export function ListCreateNewDocInFolderButton({
           className={`${baseClass}__action-popup`}
         >
           <PopupList.ButtonGroup>
-            <PopupList.Button
-              onClick={() => {
-                openModal(newFolderDrawerSlug)
-              }}
-            >
-              {getTranslation(folderCollectionConfig.labels.singular, i18n)}
-            </PopupList.Button>
             {enabledCollections.map((collection, index) => {
-              const label =
-                typeof collection.labels.singular === 'string'
-                  ? collection.labels.singular
-                  : collection.slug
               return (
                 <PopupList.Button
                   key={index}
                   onClick={() => {
-                    setCreateCollectionSlug(collection.slug)
-                    openModal(newDocInFolderDrawerSlug)
+                    if (collection.slug === folderCollectionConfig.slug) {
+                      openModal(newFolderDrawerSlug)
+                    } else {
+                      setCreateCollectionSlug(collection.slug)
+                      openModal(newDocInFolderDrawerSlug)
+                    }
                   }}
                 >
-                  {label}
+                  {getTranslation(collection.labels.singular, i18n)}
                 </PopupList.Button>
               )
             })}
@@ -128,7 +127,7 @@ export function ListCreateNewDocInFolderButton({
         />
       )}
 
-      {!disableFolderCollection && (
+      {collectionSlugs.includes(folderCollectionConfig.slug) && (
         <NewFolderDrawer
           drawerSlug={newFolderDrawerSlug}
           onNewFolderSuccess={(doc) => {

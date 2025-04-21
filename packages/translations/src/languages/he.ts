@@ -172,6 +172,7 @@ export const heTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'עיין לפי תיקייה',
+    byFolder: 'לפי תיקייה',
     deleteConfirmation:
       'תיקיות משנה יימחקו. מסמכים משנים יעברו לתיקיית ההורה הקרובה ביותר. האם אתה בטוח?',
     deleteFolder: 'מחק תיקייה',
@@ -185,6 +186,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectFolder: 'בחר תיקייה',
   },
   general: {
+    name: 'שם',
     aboutToDelete: 'אתה עומד למחוק את {{label}} <1>{{title}}</1>. האם אתה בטוח?',
     aboutToDeleteCount_many: 'אתה עומד למחוק {{count}} {{label}}',
     aboutToDeleteCount_one: 'אתה עומד למחוק {{label}} אחד',

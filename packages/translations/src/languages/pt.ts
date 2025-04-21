@@ -176,6 +176,7 @@ export const ptTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Navegar por Pasta',
+    byFolder: 'Por Pasta',
     deleteConfirmation:
       'As pastas aninhadas serão excluídas. Os documentos aninhados serão movidos para a pasta pai mais próxima. Você tem certeza?',
     deleteFolder: 'Apagar Pasta',
@@ -189,6 +190,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     selectFolder: 'Selecionar Pasta',
   },
   general: {
+    name: 'Nome',
     aboutToDelete: 'Você está prestes a excluir o/a {{label}} <1>{{title}}</1>. Tem certeza?',
     aboutToDeleteCount_many: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Você está prestes a deletar {{count}} {{label}}',

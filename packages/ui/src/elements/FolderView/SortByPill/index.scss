@@ -4,5 +4,13 @@
       display: flex;
       gap: calc(var(--base) * 0.25);
     }
+
+    &__trigger {
+      .pill__label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
   }
 }

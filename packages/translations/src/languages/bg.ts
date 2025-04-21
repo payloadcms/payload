@@ -176,6 +176,7 @@ export const bgTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Прегледай по папки',
+    byFolder: 'По папка',
     deleteConfirmation:
       'Вложените папки ще бъдат изтрити. Вложените документи ще се преместят в най-близката родителска папка. Сигурни ли сте?',
     deleteFolder: 'Изтрий папка',
@@ -189,6 +190,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectFolder: 'Изберете папка',
   },
   general: {
+    name: 'Име',
     aboutToDelete: 'На път си да изтриеш {{label}} <1>{{title}}</1>. Сигурен ли си?',
     aboutToDeleteCount_many: 'На път си да изтриеш {{count}} {{label}}',
     aboutToDeleteCount_one: 'На път си да изтриеш {{count}} {{label}}',

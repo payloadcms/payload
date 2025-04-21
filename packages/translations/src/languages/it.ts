@@ -180,6 +180,7 @@ export const itTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Sfoglia per Cartella',
+    byFolder: 'Per Cartella',
     deleteConfirmation:
       'Le cartelle annidate verranno eliminate. I documenti annidati si sposteranno nella cartella genitore più vicina. Sei sicuro?',
     deleteFolder: 'Elimina cartella',
@@ -193,6 +194,7 @@ export const itTranslations: DefaultTranslationsObject = {
     selectFolder: 'Seleziona Cartella',
   },
   general: {
+    name: 'Nome',
     aboutToDelete: 'Stai per eliminare {{label}} <1>{{title}}</1>. Sei sicuro?',
     aboutToDeleteCount_many: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_one: 'Stai per eliminare {{count}} {{label}}',

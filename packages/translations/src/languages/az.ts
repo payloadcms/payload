@@ -176,6 +176,7 @@ export const azTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Qovluqlara görə gözdən keçirin',
+    byFolder: 'Qovluğa görə',
     deleteConfirmation:
       'İç içə qovşaqlar silinəcək. İç içə sənədlər ən yaxın ana qovşağa köçəriləcək. Eminsiniz?',
     deleteFolder: 'Qovluğu Sil',
@@ -189,6 +190,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectFolder: 'Qovluğu seçin',
   },
   general: {
+    name: 'Ad',
     aboutToDelete: 'Siz {{label}} <1>{{title}}</1> silməyə hazırsınız. Eminsiniz?',
     aboutToDeleteCount_many: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_one: 'Siz {{count}} {{label}} silməyə hazırsınız.',

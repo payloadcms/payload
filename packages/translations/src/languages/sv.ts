@@ -176,6 +176,7 @@ export const svTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Bläddra efter mapp',
+    byFolder: 'Efter mapp',
     deleteConfirmation:
       'Eventuella underliggande mappar kommer också tas bort. Filerna i de mapparna flyttas upp till samma plats som mappen du tar bort. Är du säker?',
     deleteFolder: 'Ta bort mapp',
@@ -189,6 +190,7 @@ export const svTranslations: DefaultTranslationsObject = {
     selectFolder: 'Välj mapp',
   },
   general: {
+    name: 'Namn',
     aboutToDelete: 'Du är på väg att ta bort {{label}} <1>{{title}}</1>. Är du säker?',
     aboutToDeleteCount_many: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du är på väg att ta bort {{count}} {{label}}',

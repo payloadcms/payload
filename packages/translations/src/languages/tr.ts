@@ -178,6 +178,7 @@ export const trTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Klasöre Göre Gözat',
+    byFolder: 'Klasör Bazında',
     deleteConfirmation:
       'İç içe klasörler silinecektir. İç içe belgeler en yakın üst klasöre taşınacaktır. Emin misiniz?',
     deleteFolder: 'Klasörü Sil',
@@ -191,6 +192,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectFolder: 'Klasör Seçin',
   },
   general: {
+    name: 'İsim',
     aboutToDelete:
       '<1>{{title}}</1> {{label}} silinmek üzere. Silme işlemine devam etmek istiyor musunuz?',
     aboutToDeleteCount_many: '{{count}} {{label}} silmek üzeresiniz',

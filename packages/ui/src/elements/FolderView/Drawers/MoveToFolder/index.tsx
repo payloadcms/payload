@@ -229,7 +229,7 @@ function Content({ drawerSlug, itemsToMove, onConfirm }: Props) {
             Actions={[
               <ListCreateNewDocInFolderButton
                 buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                collectionSlugs={[]}
+                collectionSlugs={[folderCollectionSlug]}
                 key="create-folder"
                 onCreateSuccess={onCreateSuccess}
               />,

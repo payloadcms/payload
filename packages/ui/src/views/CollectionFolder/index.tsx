@@ -223,12 +223,14 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
             AfterListHeaderContent={Description}
             title={getTranslation(labels?.plural, i18n)}
             TitleActions={[
-              <ListCreateNewDocInFolderButton
-                buttonLabel={t('general:createNew')}
-                collectionSlugs={[collectionSlug]}
-                key="create-new-button"
-                onCreateSuccess={onCreateSuccess}
-              />,
+              hasCreatePermission && (
+                <ListCreateNewDocInFolderButton
+                  buttonLabel={t('general:createNew')}
+                  collectionSlugs={[folderCollectionConfig.slug, collectionSlug]}
+                  key="create-new-button"
+                  onCreateSuccess={onCreateSuccess}
+                />
+              ),
               <ListBulkUploadButton
                 collectionSlug={collectionSlug}
                 hasCreatePermission={hasCreatePermission}
@@ -301,14 +303,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
               Actions={[
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                  collectionSlugs={[]}
+                  collectionSlugs={[folderCollectionConfig.slug]}
                   key="create-folder"
                   onCreateSuccess={onCreateSuccess}
                 />,
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                   collectionSlugs={[collectionSlug]}
-                  disableFolderCollection
                   key="create-document"
                 />,
               ].filter(Boolean)}

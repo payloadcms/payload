@@ -126,6 +126,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:toggleBlock',
   'fields:uploadNewLabel',
 
+  'folder:byFolder',
   'folder:browseByFolder',
   'folder:deleteConfirmation',
   'folder:deleteFolder',
@@ -233,6 +234,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:moveUp',
   'general:moving',
   'general:movingCount',
+  'general:name',
   'general:next',
   'general:noDateSelected',
   'general:noFiltersSet',

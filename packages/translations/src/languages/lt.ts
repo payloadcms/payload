@@ -178,6 +178,7 @@ export const ltTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Naršyti pagal aplanką',
+    byFolder: 'Pagal aplanką',
     deleteConfirmation:
       'Įdėti aplankai bus ištrinti. Įdėti dokumentai bus perkelti į artimiausią tėvinį aplanką. Ar esate įsitikinęs?',
     deleteFolder: 'Ištrinti aplanką',
@@ -191,6 +192,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectFolder: 'Pasirinkti aplanką',
   },
   general: {
+    name: 'Vardas',
     aboutToDelete: 'Jūs ketinate ištrinti {{label}} <1>{{title}}</1>. Ar esate tikri?',
     aboutToDeleteCount_many: 'Jūs ketinate ištrinti {{count}} {{label}}',
     aboutToDeleteCount_one: 'Jūs ketinate ištrinti {{count}} {{label}}',

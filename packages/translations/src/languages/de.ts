@@ -180,6 +180,7 @@ export const deTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Durchsuchen nach Ordner',
+    byFolder: 'Nach Ordner',
     deleteConfirmation:
       'Verschachtelte Ordner werden gelöscht. Verschachtelte Dokumente werden in den nächstgelegenen übergeordneten Ordner verschoben. Sind Sie sicher?',
     deleteFolder: 'Ordner löschen',
@@ -193,6 +194,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectFolder: 'Ordner auswählen',
   },
   general: {
+    name: 'Name',
     aboutToDelete: 'Du bist dabei {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?',
     aboutToDeleteCount_many: 'Sie sind dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_one: 'Sie sind dabei, {{count}} {{label}} zu löschen',

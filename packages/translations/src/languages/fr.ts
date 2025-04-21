@@ -182,6 +182,7 @@ export const frTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Parcourir par Dossier',
+    byFolder: 'Par Dossier',
     deleteConfirmation:
       'Les dossiers imbriqués seront supprimés. Les documents imbriqués seront déplacés vers le dossier parent le plus proche. Êtes-vous sûr ?',
     deleteFolder: 'Supprimer le dossier',
@@ -195,6 +196,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectFolder: 'Sélectionnez le dossier',
   },
   general: {
+    name: 'Nom',
     aboutToDelete:
       'Vous êtes sur le point de supprimer ce ou cette {{label}} <1>{{title}}</1>. Êtes-vous sûr ?',
     aboutToDeleteCount_many: 'Vous êtes sur le point de supprimer {{count}} {{label}}',

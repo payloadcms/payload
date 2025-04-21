@@ -176,6 +176,7 @@ export const nbTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Bla gjennom etter mappe',
+    byFolder: 'Etter mappe',
     deleteConfirmation:
       'Nestede mapper vil bli slettet. Nestede dokumenter vil bli flyttet til den nærmeste overordnede mappen. Er du sikker?',
     deleteFolder: 'Slett mappe',
@@ -189,6 +190,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectFolder: 'Velg Mappe',
   },
   general: {
+    name: 'Navn',
     aboutToDelete: 'Du er i ferd med å slette {{label}} <1>{{title}}</1>. Er du sikker?',
     aboutToDeleteCount_many: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er i ferd med å slette {{count}} {{label}}',

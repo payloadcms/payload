@@ -180,6 +180,7 @@ export const roTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Răsfoiește după Folder',
+    byFolder: 'După dosar',
     deleteConfirmation:
       'Folderele înglobate vor fi șterse. Documentele înglobate se vor muta în folderul părinte cel mai apropiat. Sunteți sigur(a)?',
     deleteFolder: 'Ștergeți dosarul',
@@ -193,6 +194,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectFolder: 'Selectează dosarul',
   },
   general: {
+    name: 'Nume',
     aboutToDelete: 'Sunteți pe cale să ștergeți {{label}} <1>{{title}}</1>. Sunteți sigur?',
     aboutToDeleteCount_many: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_one: 'Sunteți pe cale să ștergeți {{count}} {{label}}',

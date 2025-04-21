@@ -177,6 +177,7 @@ export const ukTranslations: DefaultTranslationsObject = {
   },
   folder: {
     browseByFolder: 'Переглянути за папкою',
+    byFolder: 'За папкою',
     deleteConfirmation:
       'Вкладені папки будуть видалені. Вкладені документи будуть переміщені до найближчої батьківської папки. Ви впевнені?',
     deleteFolder: 'Видалити папку',
@@ -190,6 +191,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectFolder: 'Вибрати папку',
   },
   general: {
+    name: "Ім'я",
     aboutToDelete: 'Ви бажаєте видалити {{label}} <1>{{title}}</1>. Ви впевнені?',
     aboutToDeleteCount_many: 'Ви бажаєте видалити {{count}} {{label}}',
     aboutToDeleteCount_one: 'Ви бажаєте видалити {{count}} {{label}}',

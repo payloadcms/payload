@@ -116,6 +116,11 @@ export const buildFolderView = async (
   //   serverProps,
   // })
 
+  // documents cannot be created without a parent folder in this view
+  const hasCreatePermissionCollectionSlugs = folderID
+    ? [config.folders.slug, ...allFolderCollectionSlugs]
+    : [config.folders.slug]
+
   return {
     View: (
       <FolderProvider
@@ -132,6 +137,7 @@ export const buildFolderView = async (
             disableBulkDelete,
             disableBulkEdit,
             enableRowSelections,
+            hasCreatePermissionCollectionSlugs,
             selectedCollectionSlugs,
           },
           // Component:config.folders?.components?.views?.list?.Component,
