@@ -1,12 +1,24 @@
-import type { CollectionAfterChangeHook } from '../../index.js'
+import type { CollectionAfterChangeHook, Payload } from '../../index.js'
 
 import { extractID } from '../../utilities/extractID.js'
+
+type Args = {
+  folderID: number | string
+  parentFolderFieldName: string
+  parentIDToFind: number | string
+  payload: Payload
+}
 
 /**
  * Determines if a child folder belongs to a parent folder by
  * recursively checking upwards through the folder hierarchy.
  */
-async function isChildOfFolder({ folderID, parentFolderFieldName, parentIDToFind, payload }) {
+async function isChildOfFolder({
+  folderID,
+  parentFolderFieldName,
+  parentIDToFind,
+  payload,
+}: Args): Promise<boolean> {
   const parentFolder = await payload.findByID({
     id: folderID,
     collection: payload.config.folders.slug,
@@ -14,7 +26,7 @@ async function isChildOfFolder({ folderID, parentFolderFieldName, parentIDToFind
 
   const parentFolderID = parentFolder[parentFolderFieldName]
     ? extractID(parentFolder[parentFolderFieldName])
-    : null
+    : undefined
 
   if (!parentFolderID) {
     // made it to the root
@@ -64,12 +76,14 @@ export const reparentChildFolder = ({
       doc[parentFolderFieldName]
     ) {
       const newParentFolderID = extractID(doc[parentFolderFieldName])
-      const isMovingToChild = await isChildOfFolder({
-        folderID: newParentFolderID,
-        parentFolderFieldName,
-        parentIDToFind: doc.id,
-        payload: req.payload,
-      })
+      const isMovingToChild = newParentFolderID
+        ? await isChildOfFolder({
+            folderID: newParentFolderID,
+            parentFolderFieldName,
+            parentIDToFind: doc.id,
+            payload: req.payload,
+          })
+        : false
 
       if (isMovingToChild) {
         // if the folder was moved into a child folder, the child folder needs

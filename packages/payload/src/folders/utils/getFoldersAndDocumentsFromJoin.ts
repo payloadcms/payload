@@ -58,7 +58,7 @@ export async function queryDocumentsAndFoldersFromJoin({
       const item = formatFolderOrDocumentItem({
         isUpload: Boolean(payload.collections[relationTo].config.upload),
         relationTo,
-        useAsTitle: payload.collections[relationTo].config.admin.useAsTitle,
+        useAsTitle: payload.collections[relationTo].config.admin?.useAsTitle,
         value,
       })
 

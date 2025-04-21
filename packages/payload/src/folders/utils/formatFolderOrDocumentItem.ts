@@ -4,7 +4,7 @@ import type { FolderOrDocument } from '../types.js'
 type Args = {
   isUpload: boolean
   relationTo: CollectionSlug
-  useAsTitle: string
+  useAsTitle?: string
   value: any
 }
 export function formatFolderOrDocumentItem({
@@ -15,7 +15,7 @@ export function formatFolderOrDocumentItem({
 }: Args): FolderOrDocument {
   const itemValue: FolderOrDocument['value'] = {
     id: value?.id,
-    _folderOrDocumentTitle: value[useAsTitle],
+    _folderOrDocumentTitle: value[useAsTitle || 'id'],
     _parentFolder: value?._parentFolder,
     createdAt: value?.createdAt,
     updatedAt: value?.updatedAt,

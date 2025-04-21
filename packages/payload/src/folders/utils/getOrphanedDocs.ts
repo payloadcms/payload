@@ -6,7 +6,7 @@ import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 type Args = {
   collectionSlug: CollectionSlug
   payload: Payload
-  user: User
+  user?: User
 }
 export async function getOrphanedDocs({
   collectionSlug,
