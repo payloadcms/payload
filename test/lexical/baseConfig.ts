@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type Config } from 'payload'
 
+import { LexicalFullyFeatured } from './collections/_LexicalFullyFeatured/index.js'
 import ArrayFields from './collections/Array/index.js'
 import {
   getLexicalFieldsCollection,
@@ -9,7 +10,6 @@ import {
   lexicalInlineBlocks,
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
-import { LexicalFullyFeatured } from './collections/LexicalFullyFeatured/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
