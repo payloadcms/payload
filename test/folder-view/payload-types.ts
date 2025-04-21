@@ -134,7 +134,6 @@ export interface Post {
   title?: string | null;
   heroImage?: (string | null) | Media;
   _parentFolder?: (string | null) | FolderInterface;
-  _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -145,7 +144,6 @@ export interface Post {
 export interface Media {
   id: string;
   _parentFolder?: (string | null) | FolderInterface;
-  _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -184,7 +182,6 @@ export interface FolderInterface {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -278,7 +275,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   _parentFolder?: T;
-  _folderSearch?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -288,7 +284,6 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   _parentFolder?: T;
-  _folderSearch?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -324,7 +319,6 @@ export interface _FoldersSelect<T extends boolean = true> {
   name?: T;
   _parentFolder?: T;
   documentsAndFolders?: T;
-  _folderSearch?: T;
   updatedAt?: T;
   createdAt?: T;
 }
