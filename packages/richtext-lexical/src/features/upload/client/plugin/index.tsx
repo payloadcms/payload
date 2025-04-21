@@ -56,16 +56,13 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
 
               const { focus } = selection
               const focusNode = focus.getNode()
+              // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
+              $insertNodeToNearestRoot(uploadNode)
 
-              // Delete the node it it's an empty paragraph and it has at least one sibling, so that we don't "trap" the user
-              if (
-                $isParagraphNode(focusNode) &&
-                !focusNode.__first &&
-                (focusNode.__prev || focusNode.__next)
-              ) {
+              // Delete the node it it's an empty paragraph
+              if ($isParagraphNode(focusNode) && !focusNode.__first) {
                 focusNode.remove()
               }
-              $insertNodeToNearestRoot(uploadNode)
             }
           })
 
