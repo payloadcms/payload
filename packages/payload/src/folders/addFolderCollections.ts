@@ -21,7 +21,10 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
           collection.fields.push({
             name: parentFolderFieldName,
             type: 'relationship',
-            hidden: !debug,
+            admin: {
+              disableBulkEdit: true,
+              hidden: !debug,
+            },
             index: true,
             label: 'Folder',
             relationTo: config.folders.slug,
