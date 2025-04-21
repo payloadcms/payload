@@ -742,7 +742,19 @@ describe('relationship', () => {
     await expect(listDrawerContent).toBeHidden()
 
     const selectedValue = relationshipField.locator('.relationship--multi-value-label__text')
-    await expect(selectedValue).toBeVisible()
+    await expect(selectedValue).toHaveCount(1)
+
+    await relationshipField.click()
+    const listDrawerContentSecond = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContentSecond).toBeVisible()
+
+    const firstRowSecond = listDrawerContentSecond.locator('table tbody tr').first()
+    const buttonSecond = firstRowSecond.locator('button')
+    await buttonSecond.click()
+    await expect(listDrawerContentSecond).toBeHidden()
+
+    const selectedValues = relationshipField.locator('.relationship--multi-value-label__text')
+    await expect(selectedValues).toHaveCount(2)
   })
 
   test('should handle `hasMany` polymorphic relationship when `appearance: "drawer"`', async () => {
