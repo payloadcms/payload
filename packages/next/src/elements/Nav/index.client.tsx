@@ -23,7 +23,7 @@ export const DefaultNavClient: React.FC<{
       admin: {
         routes: { folders: foldersRoute },
       },
-      folders: { collections: folderCollections },
+      folders: { collections: folderCollections } = {},
       routes: { admin: adminRoute },
     },
   } = useConfig()

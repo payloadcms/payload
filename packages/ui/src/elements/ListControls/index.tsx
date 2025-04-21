@@ -178,6 +178,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                     setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                   }
                   pillStyle="light"
+                  size="small"
                 >
                   {t('general:columns')}
                 </Pill>
@@ -190,6 +191,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
                   onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
                   pillStyle="light"
+                  size="small"
                 >
                   {t('general:filters')}
                 </Pill>
@@ -202,6 +204,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   icon={<ChevronIcon />}
                   onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                   pillStyle="light"
+                  size="small"
                 >
                   {t('general:sort')}
                 </Pill>
@@ -219,7 +222,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   className={`${baseClass}__popup`}
                   horizontalAlign="right"
                   id="list-menu"
-                  size="large"
+                  size="small"
                   verticalAlign="bottom"
                 >
                   <PopupList.ButtonGroup>

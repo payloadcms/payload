@@ -39,6 +39,7 @@ type Props = {
   readonly folderID: number | string
   readonly itemsToMove: FolderOrDocument[]
   readonly onConfirm: (folderID: number | string) => Promise<void> | void
+  readonly skipConfirmModal?: boolean
 }
 export function MoveItemsToFolderDrawer(props: Props) {
   return (
@@ -115,7 +116,7 @@ function LoadFolderData(props: Props) {
   )
 }
 
-function Content({ drawerSlug, itemsToMove, onConfirm }: Props) {
+function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props) {
   const { closeModal, openModal } = useModal()
   const [count] = React.useState(() => itemsToMove.length)
   const { i18n, t } = useTranslation()
@@ -181,7 +182,11 @@ function Content({ drawerSlug, itemsToMove, onConfirm }: Props) {
           closeModal(drawerSlug)
         }}
         onSave={() => {
-          openModal(confirmModalSlug)
+          if (skipConfirmModal) {
+            void onConfirm(getSelectedFolder({ key: 'id' }))
+          } else {
+            openModal(confirmModalSlug)
+          }
         }}
         saveLabel={t('folder:selectFolder')}
         title={t('general:movingCount', {
@@ -276,31 +281,33 @@ function Content({ drawerSlug, itemsToMove, onConfirm }: Props) {
         )}
       </DrawerContentContainer>
 
-      <ConfirmationModal
-        body={
-          <Translation
-            elements={{
-              1: ({ children }) => <strong>{children}</strong>,
-            }}
-            i18nKey="general:moveConfirm"
-            t={t}
-            variables={{
-              count,
-              destination: getSelectedFolder({ key: 'name' }) || 'Root',
-              label: count > 1 ? t('general:items') : t('general:item'),
-            }}
-          />
-        }
-        confirmingLabel={t('general:moving')}
-        heading={t('general:moveCount', {
-          count,
-          label: count > 1 ? t('general:items') : t('general:item'),
-        })}
-        modalSlug={confirmModalSlug}
-        onConfirm={async () => {
-          await onConfirm(getSelectedFolder({ key: 'id' }))
-        }}
-      />
+      {!skipConfirmModal && (
+        <ConfirmationModal
+          body={
+            <Translation
+              elements={{
+                1: ({ children }) => <strong>{children}</strong>,
+              }}
+              i18nKey="general:moveConfirm"
+              t={t}
+              variables={{
+                count,
+                destination: getSelectedFolder({ key: 'name' }) || 'Root',
+                label: count > 1 ? t('general:items') : t('general:item'),
+              }}
+            />
+          }
+          confirmingLabel={t('general:moving')}
+          heading={t('general:moveCount', {
+            count,
+            label: count > 1 ? t('general:items') : t('general:item'),
+          })}
+          modalSlug={confirmModalSlug}
+          onConfirm={async () => {
+            await onConfirm(getSelectedFolder({ key: 'id' }))
+          }}
+        />
+      )}
     </>
   )
 }

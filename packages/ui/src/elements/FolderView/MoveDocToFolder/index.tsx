@@ -6,6 +6,7 @@ import React from 'react'
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { MoveFolderIcon } from '../../../icons/MoveFolder/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useOperation } from '../../../providers/Operation/index.js'
 import { Button } from '../../Button/index.js'
 import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
@@ -19,6 +20,7 @@ export function MoveDocToFolder({ className = '' }) {
   const { setModified } = useForm()
   const { closeModal, openModal } = useModal()
   const { id, collectionSlug, initialData } = useDocumentInfo()
+  const operation = useOperation()
 
   return (
     <>
@@ -49,6 +51,7 @@ export function MoveDocToFolder({ className = '' }) {
           }
           closeModal(moveDocToFolderDrawerSlug)
         }}
+        skipConfirmModal={operation === 'create'}
       />
     </>
   )
