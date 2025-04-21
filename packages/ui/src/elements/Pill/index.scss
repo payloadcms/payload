@@ -17,6 +17,7 @@
     align-items: center;
     flex-shrink: 0;
     gap: base(0.2);
+    --pill-icon-size: calc(var(--base) * 1.2);
 
     &--rounded {
       border-radius: var(--style-radius-l);
@@ -36,13 +37,14 @@
 
     .icon {
       flex-shrink: 0;
+      width: var(--pill-icon-size);
+      height: var(--pill-icon-size);
     }
 
     &__label {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1;
     }
 
     &--has-action {
@@ -142,8 +144,9 @@
     }
 
     &--size-small {
-      padding: 2px base(0.2);
-      line-height: 18px;
+      --pill-icon-size: calc(var(--base) * 0.9);
+      padding: 0px base(0.2);
+      line-height: calc(var(--base) * 1.1);
     }
   }
 

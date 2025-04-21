@@ -53,7 +53,7 @@ export function SortByPill() {
   return (
     <Popup
       button={
-        <Pill className={`${baseClass}__trigger`} icon={<ChevronIcon />}>
+        <Pill className={`${baseClass}__trigger`} icon={<ChevronIcon />} size="small">
           {sortDirection === 'asc' ? (
             <SortUpIcon className={`${baseClass}__sort-icon`} />
           ) : (

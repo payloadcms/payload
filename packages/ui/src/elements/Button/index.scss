@@ -145,11 +145,12 @@
     --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
     --btn-icon-content-gap: calc(var(--base) * 0.4);
     --margin-block: base(1.2);
+    --btn-line-height: calc(var(--base) * 1.2);
 
     border-radius: var(--style-radius-s);
     font-size: var(--base-body-size);
     margin-block: var(--margin-block);
-    line-height: base(1.2);
+    line-height: var(--btn-line-height);
     border: 0;
     cursor: pointer;
     font-weight: normal;
@@ -237,6 +238,7 @@
       --btn-padding-inline-end: calc(var(--base) * 0.4);
       --btn-padding-inline-start: calc(var(--base) * 0.4);
       --btn-padding-block-end: 0;
+      --btn-line-height: calc(var(--base) * 1.1);
 
       &.btn--icon-position-left {
         --btn-padding-inline-start: calc(var(--base) * 0.3);
