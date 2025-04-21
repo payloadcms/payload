@@ -9,6 +9,12 @@
     &__breadcrumbs-section {
       padding: calc(var(--base) * 0.75) var(--gutter-h);
       border-bottom: 1px solid var(--theme-border-color);
+      display: flex;
+      justify-content: space-between;
+
+      .move-folder-drawer__add-folder-button {
+        margin-left: var(--base);
+      }
     }
   }
 }

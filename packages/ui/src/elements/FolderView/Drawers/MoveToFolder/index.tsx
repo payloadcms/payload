@@ -15,6 +15,7 @@ import React from 'react'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { FolderProvider, useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
@@ -26,10 +27,13 @@ import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../ColoredFolderIcon/index.js'
 import { ItemCardGrid } from '../../ItemCardGrid/index.js'
+import { NewFolderDrawer } from '../NewFolder/index.js'
 import './index.scss'
 
 const baseClass = 'move-folder-drawer'
-const confirmModalSlug = 'move-folder-drawer-confirm'
+const baseModalSlug = 'move-folder-drawer'
+const confirmModalSlug = `${baseModalSlug}-confirm-move`
+const newFolderDrawerSlug = `${baseModalSlug}-new-folder`
 type Props = {
   readonly drawerSlug: string
   readonly folderID: number | string
@@ -210,6 +214,33 @@ function Content({ drawerSlug, itemsToMove, onConfirm }: Props) {
             })),
           ]}
         />
+        {subfolders.length > 0 && (
+          <>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__add-folder-button`}
+              onClick={() => {
+                openModal(newFolderDrawerSlug)
+              }}
+            >
+              {t('fields:addLabel', {
+                label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+              })}
+            </Button>
+            <NewFolderDrawer
+              drawerSlug={newFolderDrawerSlug}
+              onNewFolderSuccess={(doc) => {
+                closeModal(newFolderDrawerSlug)
+                if (typeof onCreateSuccess === 'function') {
+                  void onCreateSuccess({
+                    collectionSlug: folderCollectionConfig.slug,
+                    doc,
+                  })
+                }
+              }}
+            />
+          </>
+        )}
       </div>
 
       <DrawerContentContainer className={`${baseClass}__body-section`}>
