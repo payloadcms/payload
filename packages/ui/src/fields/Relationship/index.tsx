@@ -136,18 +136,30 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     let newFilterOptions = filterOptions
 
     if (value) {
-      ;(Array.isArray(value) ? value : [value]).forEach((val) => {
-        ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relationTo) => {
-          newFilterOptions = {
-            ...(filterOptions || {}),
-            [relationTo]: {
-              ...(typeof filterOptions?.[relationTo] === 'object' ? filterOptions[relationTo] : {}),
-              id: {
-                not_in: [typeof val === 'object' ? val.value : val],
-              },
-            },
+      const valuesByRelation = (Array.isArray(value) ? value : [value]).reduce((acc, val) => {
+        if (typeof val === 'object' && val.relationTo) {
+          if (!acc[val.relationTo]) {
+            acc[val.relationTo] = []
           }
-        })
+          acc[val.relationTo].push(val.value)
+        }
+        return acc
+      }, {})
+
+      ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relation) => {
+        newFilterOptions = {
+          ...(newFilterOptions || {}),
+          [relation]: {
+            ...(typeof filterOptions?.[relation] === 'object' ? filterOptions[relation] : {}),
+            ...(valuesByRelation[relation]
+              ? {
+                  id: {
+                    not_in: valuesByRelation[relation],
+                  },
+                }
+              : {}),
+          },
+        }
       })
     }
 
