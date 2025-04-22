@@ -728,7 +728,8 @@ describe('lexicalMain', () => {
     await expect(relationshipListDrawer).toBeVisible()
     await wait(500)
 
-    await expect(relationshipListDrawer.locator('.rs__single-value')).toHaveText('Lexical Field')
+    await relationshipListDrawer.locator('.rs__input').first().click()
+    await relationshipListDrawer.locator('.rs__menu').getByText('Lexical Field').click()
 
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()
@@ -1258,10 +1259,10 @@ describe('lexicalMain', () => {
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
       const secondParagraph: SerializedParagraphNode = lexicalField.root
-        .children[1] as SerializedParagraphNode
-      const thirdParagraph: SerializedParagraphNode = lexicalField.root
         .children[2] as SerializedParagraphNode
-      const uploadNode: SerializedUploadNode = lexicalField.root.children[3] as SerializedUploadNode
+      const thirdParagraph: SerializedParagraphNode = lexicalField.root
+        .children[3] as SerializedParagraphNode
+      const uploadNode: SerializedUploadNode = lexicalField.root.children[1] as SerializedUploadNode
 
       expect(firstParagraph.children).toHaveLength(2)
       expect((firstParagraph.children[0] as SerializedTextNode).text).toBe('Some ')
@@ -1391,7 +1392,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
 
       // @ts-expect-error no need to type this
-      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+      expect(lexicalField?.root?.children[0].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
