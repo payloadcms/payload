@@ -790,6 +790,7 @@ export interface ConditionalLogic {
   text: string;
   toggleField?: boolean | null;
   fieldWithCondition?: string | null;
+  fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
@@ -1312,6 +1313,29 @@ export interface RelationshipField {
     | null;
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
+  relationshipDrawer?: (string | null) | TextField;
+  relationshipDrawerReadOnly?: (string | null) | TextField;
+  polymorphicRelationshipDrawer?:
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      } | null);
+  relationshipDrawerHasMany?: (string | TextField)[] | null;
+  relationshipDrawerHasManyPolymorphic?:
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }[]
+    | null;
+  relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
+  relationshipDrawerWithFilterOptions?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2341,6 +2365,7 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
   fieldWithCondition?: T;
+  fieldWithOperationCondition?: T;
   customFieldWithField?: T;
   customFieldWithHOC?: T;
   customClientFieldWithCondition?: T;
@@ -2786,6 +2811,13 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipWithMinRows?: T;
   relationToRow?: T;
   relationToRowMany?: T;
+  relationshipDrawer?: T;
+  relationshipDrawerReadOnly?: T;
+  polymorphicRelationshipDrawer?: T;
+  relationshipDrawerHasMany?: T;
+  relationshipDrawerHasManyPolymorphic?: T;
+  relationshipDrawerWithAllowCreateFalse?: T;
+  relationshipDrawerWithFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }

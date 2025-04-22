@@ -18,6 +18,7 @@ const AutosavePosts: CollectionConfig = {
       autosave: {
         interval: 2000,
       },
+      schedulePublish: true,
     },
   },
   access: {

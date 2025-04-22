@@ -57,7 +57,10 @@ describe('Field Error States', () => {
 
     // add third child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
+
+    // remove the row
     await page.locator('#parentArray-0-childArray-row-2 .array-actions__button').click()
+
     await page
       .locator('#parentArray-0-childArray-row-2 .array-actions__action.array-actions__remove')
       .click()
@@ -68,6 +71,7 @@ describe('Field Error States', () => {
       '#parentArray-row-0 > .collapsible > .collapsible__toggle-wrap .array-field__row-error-pill',
       { state: 'hidden', timeout: 500 },
     )
+
     expect(errorPill).toBeNull()
   })
 
@@ -77,13 +81,11 @@ describe('Field Error States', () => {
       await saveDocAndAssert(page, '#action-save-draft')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
     test('should validate drafts when enabled', async () => {
       await page.goto(validateDraftsOn.create)
       await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
     test('should show validation errors when validate and autosave are enabled', async () => {
       await page.goto(validateDraftsOnAutosave.create)
       await page.locator('#field-title').fill('valid')

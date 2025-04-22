@@ -74,11 +74,16 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const scheduledPublishEnabled = Boolean(schedulePublish)
 
+  // If autosave is enabled the modified will always be true so only conditionally check on modified state
+  const hasAutosave = Boolean(
+    typeof entityConfig?.versions?.drafts === 'object' && entityConfig?.versions?.drafts.autosave,
+  )
+
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
       hasPublishPermission &&
       (globalSlug || (collectionSlug && id)) &&
-      !modified,
+      (hasAutosave || !modified),
   )
 
   const operation = useOperation()

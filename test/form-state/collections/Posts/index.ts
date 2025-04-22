@@ -83,6 +83,10 @@ export const PostsCollection: CollectionConfig = {
             },
           },
         },
+        {
+          name: 'defaultTextField',
+          type: 'text',
+        },
       ],
     },
   ],
