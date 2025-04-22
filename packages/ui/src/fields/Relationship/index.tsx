@@ -142,6 +142,14 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
             acc[val.relationTo] = []
           }
           acc[val.relationTo].push(val.value)
+        } else if (val) {
+          const relation = Array.isArray(relationTo) ? undefined : relationTo
+          if (relation) {
+            if (!acc[relation]) {
+              acc[relation] = []
+            }
+            acc[relation].push(val)
+          }
         }
         return acc
       }, {})
