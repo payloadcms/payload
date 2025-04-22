@@ -1204,10 +1204,11 @@ describe('lexicalMain', () => {
     await expect(newUploadNode.locator('.lexical-upload__bottomRow')).toContainText('payload.png')
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
+    await page.keyboard.press('Enter')
     await page.keyboard.press('ArrowLeft')
     await page.keyboard.press('ArrowLeft')
     // Select "there" by pressing shift + arrow left
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Shift+ArrowLeft')
     }
 
