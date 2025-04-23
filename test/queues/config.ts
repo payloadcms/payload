@@ -96,6 +96,16 @@ export default buildConfigWithDefaults({
     },
   },
   jobs: {
+    autoRun: [
+      {
+        // Every second
+        cron: '* * * * * *',
+        limit: 100,
+        queue: 'autorunSecond', // name of the queue
+      },
+      // add as many cron jobs as you want
+    ],
+    shouldAutoRun: () => true,
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       return {
         ...defaultJobsCollection,
