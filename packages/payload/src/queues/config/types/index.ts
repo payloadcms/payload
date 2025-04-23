@@ -60,7 +60,10 @@ export type JobsConfig = {
    */
   addParentToTaskLog?: boolean
   /**
-   * Queue cron jobs automatically on payload initialization.
+   * Allows you to configure cron jobs that automatically run queued jobs
+   * at specified intervals. Note that this does not _queue_ new jobs - only
+   * _runs_ jobs that are already in the specified queue.
+   *
    * @remark this property should not be used on serverless platforms like Vercel
    */
   autoRun?: ((payload: Payload) => CronConfig[] | Promise<CronConfig[]>) | CronConfig[]
