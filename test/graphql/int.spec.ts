@@ -104,5 +104,30 @@ describe('graphql', () => {
 
       expect(res.hyphenated_name).toStrictEqual('example-hyphenated-name')
     })
+
+    it('should not error because of non nullable fields', async () => {
+      await payload.delete({ collection: 'posts', where: {} })
+
+      //no posts
+      const errorsOrDataNext = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `
+query {
+  Posts {
+    docs {
+      title
+    }
+  }
+}
+        `,
+          }),
+        })
+        .then((res) => res.json())
+      // array if any errors
+      expect(Array.isArray(errorsOrDataNext)).toBeFalsy()
+      expect(Array.isArray(errorsOrDataNext.data.Posts.docs)).toBeTruthy()
+      expect(errorsOrDataNext.data.Posts.docs).toHaveLength(0)
+    })
   })
 })
