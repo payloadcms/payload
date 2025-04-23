@@ -96,7 +96,7 @@ const Tab: React.FC<TabProps> = ({
   return (
     <DiffCollapser
       fields={fieldTab.fields}
-      label={
+      Label={
         'label' in tab &&
         tab.label &&
         typeof tab.label !== 'function' && (

@@ -2,5 +2,8 @@
   .field-diff-label {
     margin-bottom: calc(var(--base) * 0.25);
     font-weight: 600;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
   }
 }

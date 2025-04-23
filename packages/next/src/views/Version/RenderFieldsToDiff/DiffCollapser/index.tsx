@@ -1,7 +1,7 @@
 'use client'
 import type { ClientField } from 'payload'
 
-import { ChevronIcon, FieldDiffLabel, Pill, useConfig, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
@@ -10,41 +10,40 @@ import { countChangedFields, countChangedFieldsInRows } from '../utilities/count
 
 const baseClass = 'diff-collapser'
 
-type Props =
+type Props = {
+  hideGutter?: boolean
+  initCollapsed?: boolean
+  Label: React.ReactNode
+  locales: string[] | undefined
+  parentIsLocalized: boolean
+  valueTo: unknown
+} & (
   | {
       // fields collapser
       children: React.ReactNode
       field?: never
       fields: ClientField[]
-      initCollapsed?: boolean
       isIterable?: false
-      label: React.ReactNode
-      locales: string[] | undefined
-      parentIsLocalized: boolean
       valueFrom: unknown
-      valueTo: unknown
     }
   | {
       // iterable collapser
       children: React.ReactNode
       field: ClientField
       fields?: never
-      initCollapsed?: boolean
       isIterable: true
-      label: React.ReactNode
-      locales: string[] | undefined
-      parentIsLocalized: boolean
       valueFrom?: unknown
-      valueTo: unknown
     }
+)
 
 export const DiffCollapser: React.FC<Props> = ({
   children,
   field,
   fields,
+  hideGutter = false,
   initCollapsed = false,
   isIterable = false,
-  label,
+  Label,
   locales,
   parentIsLocalized,
   valueFrom,
@@ -93,6 +92,7 @@ export const DiffCollapser: React.FC<Props> = ({
   const contentClassNames = [
     `${baseClass}__content`,
     isCollapsed && `${baseClass}__content--is-collapsed`,
+    hideGutter && `${baseClass}__content--hide-gutter`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -106,7 +106,7 @@ export const DiffCollapser: React.FC<Props> = ({
           onClick={() => setIsCollapsed(!isCollapsed)}
           type="button"
         >
-          <span className={`${baseClass}__label`}>{label}</span>
+          <div className={`${baseClass}__label`}>{Label}</div>
 
           <ChevronIcon direction={isCollapsed ? 'right' : 'down'} size={'small'} />
         </button>

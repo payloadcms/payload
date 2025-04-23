@@ -1,5 +1,38 @@
 @layer payload-default {
   .iterable-diff {
+    &-label-container {
+      position: relative;
+      height: 20px;
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+    }
+
+    &-label-prefix {
+      background-color: var(--theme-bg);
+      position: relative;
+      width: calc(var(--base) * 0.5);
+      height: 100%;
+      margin-left: calc((var(--base) * -0.5) - 5px);
+      margin-right: calc(var(--base) * 0.5);
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        background-color: var(--theme-elevation-200);
+        border-radius: 50%;
+        margin-right: 5px;
+      }
+    }
+    &__label {
+      color: var(--theme-elevation-300);
+    }
+
     &__locale-label {
       background: var(--theme-elevation-100);
       border-radius: var(--style-radius-s);

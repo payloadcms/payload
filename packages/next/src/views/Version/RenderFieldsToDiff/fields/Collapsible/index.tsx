@@ -29,7 +29,7 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
     <div className={baseClass}>
       <DiffCollapser
         fields={field.fields}
-        label={
+        Label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && <span>{getTranslation(field.label, i18n)}</span>

@@ -29,7 +29,7 @@ export const Group: GroupFieldDiffClientComponent = ({
     <div className={baseClass}>
       <DiffCollapser
         fields={field.fields}
-        label={
+        Label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && (

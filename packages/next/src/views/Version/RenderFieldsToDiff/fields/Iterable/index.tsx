@@ -42,7 +42,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
       <DiffCollapser
         field={field}
         isIterable
-        label={
+        Label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && (
@@ -79,7 +79,13 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                 <div className={`${baseClass}__row`} key={i}>
                   <DiffCollapser
                     fields={fields}
-                    label={rowLabel}
+                    hideGutter={true}
+                    Label={
+                      <div className={`${baseClass}-label-container`}>
+                        <div className={`${baseClass}-label-prefix`}></div>
+                        <span className={`${baseClass}__label`}>{rowLabel}</span>
+                      </div>
+                    }
                     locales={selectedLocales}
                     parentIsLocalized={parentIsLocalized || field.localized}
                     valueFrom={comparisonRow}
