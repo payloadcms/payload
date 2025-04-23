@@ -110,6 +110,7 @@ export const getRouteData = ({
   const isCollection = segmentOne === 'collections'
   let matchedCollection: SanitizedConfig['collections'][number] = undefined
   let matchedGlobal: SanitizedConfig['globals'][number] = undefined
+  const isFolderViewEnabled = config.folders?.enabled
 
   const serverProps: ServerPropsFromView = {
     viewActions: config?.admin?.components?.actions || [],
@@ -173,7 +174,7 @@ export const getRouteData = ({
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
-        if (viewKey === 'folders') {
+        if (isFolderViewEnabled && viewKey === 'folders') {
           templateType = 'default'
           viewType = 'folders'
         }
@@ -195,14 +196,16 @@ export const getRouteData = ({
         templateType = 'minimal'
         viewType = 'reset'
       } else if (`/${segmentOne}` === config.admin.routes.folders) {
-        // --> /folders/:folderID
-        ViewToRender = {
-          Component: oneSegmentViews.folders,
+        if (isFolderViewEnabled) {
+          // --> /folders/:folderID
+          ViewToRender = {
+            Component: oneSegmentViews.folders,
+          }
+          templateClassName = baseClasses.folders
+          templateType = 'default'
+          viewType = 'folders'
+          folderID = segmentTwo
         }
-        templateClassName = baseClasses.folders
-        templateType = 'default'
-        viewType = 'folders'
-        folderID = segmentTwo
       } else if (isCollection && matchedCollection) {
         // --> /collections/:collectionSlug
 
@@ -249,7 +252,10 @@ export const getRouteData = ({
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
         if (segmentThree === 'folders') {
-          if (Object.keys(config.folders.collections).includes(matchedCollection.slug)) {
+          if (
+            isFolderViewEnabled &&
+            Object.keys(config.folders.collections).includes(matchedCollection.slug)
+          ) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/folders
             // --> /collections/:collectionSlug/folders/:folderID

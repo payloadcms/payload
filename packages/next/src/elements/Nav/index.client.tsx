@@ -23,7 +23,7 @@ export const DefaultNavClient: React.FC<{
       admin: {
         routes: { folders: foldersRoute },
       },
-      folders: { collections: folderCollections } = {},
+      folders: { collections: folderCollections = {}, enabled } = {},
       routes: { admin: adminRoute },
     },
   } = useConfig()
@@ -39,7 +39,7 @@ export const DefaultNavClient: React.FC<{
 
   return (
     <Fragment>
-      {Object.keys(folderCollections).length > 0 && (
+      {enabled && Object.keys(folderCollections).length > 0 && (
         <BrowseByFolderButton active={viewingRootFolderView} />
       )}
       {groups.map(({ entities, label }, key) => {
