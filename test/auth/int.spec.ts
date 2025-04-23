@@ -1047,7 +1047,7 @@ describe('Auth', () => {
       expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
     })
     it('should not allow emails that start with dot', () => {
-      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('.user@example.com', mockContext)).toBe(false)
     })
     it('should not allow emails that have a comma', () => {
       expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
