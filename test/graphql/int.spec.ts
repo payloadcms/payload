@@ -108,13 +108,36 @@ describe('graphql', () => {
     it('should not error because of non nullable fields', async () => {
       await payload.delete({ collection: 'posts', where: {} })
 
-      //no posts
-      const errorsOrDataNext = await restClient
+      // this is an array if any errors
+      const res_1 = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
             query: `
 query {
   Posts {
+    docs {
+      title
+    }
+    prevPage
+  }
+}
+        `,
+          }),
+        })
+        .then((res) => res.json())
+      expect(res_1.errors).toBeFalsy()
+
+      await payload.create({
+        collection: 'posts',
+        data: { title: 'any-title' },
+      })
+
+      const res_2 = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `
+query {
+  Posts(limit: 1) {
     docs {
       title
     }
@@ -124,10 +147,7 @@ query {
           }),
         })
         .then((res) => res.json())
-      // array if any errors
-      expect(Array.isArray(errorsOrDataNext)).toBeFalsy()
-      expect(Array.isArray(errorsOrDataNext.data.Posts.docs)).toBeTruthy()
-      expect(errorsOrDataNext.data.Posts.docs).toHaveLength(0)
+      expect(res_2.errors).toBeFalsy()
     })
   })
 })
