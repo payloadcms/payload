@@ -671,7 +671,7 @@ describe('Queues', () => {
 
     // Do not call payload.jobs.run()
 
-    // Autorun runs every second - so should definitley be done if we wait 2 seconds
+    // Autorun runs every second - so should definitely be done if we wait 2 seconds
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
     const allSimples = await payload.find({
