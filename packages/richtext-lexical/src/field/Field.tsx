@@ -36,7 +36,6 @@ const RichTextComponent: React.FC<
     editorConfig,
     field,
     field: {
-      name,
       admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
@@ -48,7 +47,6 @@ const RichTextComponent: React.FC<
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-  const path = pathFromProps ?? name
 
   const editDepth = useEditDepth()
 
@@ -70,11 +68,12 @@ const RichTextComponent: React.FC<
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField<SerializedEditorState>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

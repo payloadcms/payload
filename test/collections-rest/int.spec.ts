@@ -1218,7 +1218,6 @@ describe('collections-rest', () => {
             .GET(`/${pointSlug}`, {
               query: {
                 limit: 5,
-                sort: 'point',
                 where: {
                   point: {
                     // querying large enough range to include all docs

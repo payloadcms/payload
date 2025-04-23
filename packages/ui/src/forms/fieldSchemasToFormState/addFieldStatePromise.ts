@@ -827,6 +827,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       if (passesCondition && typeof tab.admin?.condition === 'function') {
         tabPassesCondition = tab.admin.condition(fullData, data, {
           blockData,
+          operation,
           path: pathSegments,
           user: req.user,
         })

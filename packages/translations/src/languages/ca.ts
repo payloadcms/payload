@@ -197,7 +197,7 @@ export const caTranslations: DefaultTranslationsObject = {
     clearAll: 'Esborra-ho tot',
     close: 'Tanca',
     collapse: 'Replegar',
-    collections: 'Collections',
+    collections: 'Col·leccions',
     columns: 'Columnes',
     columnToSort: 'Columna per ordenar',
     confirm: 'Confirma',
@@ -205,7 +205,7 @@ export const caTranslations: DefaultTranslationsObject = {
     confirmDeletion: "Confirma l'eliminació",
     confirmDuplication: 'Confirma duplicacat',
     confirmReindex: 'Reindexa {{collections}}?',
-    confirmReindexAll: 'Reindexa totes les collections?',
+    confirmReindexAll: 'Reindexa totes les col·leccions?',
     confirmReindexDescription:
       'Aixo eliminarà els índexs existents i reindexarà els documents de les col·leccions {{collections}}.',
     confirmReindexDescriptionAll:
