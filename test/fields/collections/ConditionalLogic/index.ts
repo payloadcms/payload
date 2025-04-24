@@ -25,6 +25,19 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
+      name: 'fieldWithOperationCondition',
+      type: 'text',
+      admin: {
+        condition: (data, siblingData, { operation }) => {
+          if (operation === 'create') {
+            return true
+          }
+
+          return false
+        },
+      },
+    },
+    {
       name: 'customFieldWithField',
       type: 'text',
       admin: {
@@ -217,7 +230,7 @@ const ConditionalLogic: CollectionConfig = {
                   name: 'numberField',
                   type: 'number',
                   admin: {
-                    condition: (data, siblingData, { path, user }) => {
+                    condition: (data, siblingData, { path }) => {
                       // Ensure path has enough depth
                       if (path.length < 5) {
                         return false
