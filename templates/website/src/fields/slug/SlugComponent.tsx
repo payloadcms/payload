@@ -2,7 +2,15 @@
 import React, { useCallback, useEffect } from 'react'
 import { TextFieldClientProps } from 'payload'
 
-import { useField, Button, TextInput, FieldLabel, useFormFields, useForm } from '@payloadcms/ui'
+import {
+  useField,
+  Button,
+  TextInput,
+  FieldLabel,
+  useFormFields,
+  useForm,
+  useDocumentInfo,
+} from '@payloadcms/ui'
 
 import { formatSlug } from './formatSlug'
 import './index.scss'
@@ -29,6 +37,9 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
 
   const { dispatchFields } = useForm()
 
+  // Check if the document is already published
+  const { hasPublishedDoc } = useDocumentInfo()
+
   // The value of the checkbox
   // We're using separate useFormFields to minimise re-renders
   const checkboxValue = useFormFields(([fields]) => {
@@ -41,7 +52,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   })
 
   useEffect(() => {
-    if (checkboxValue) {
+    if (checkboxValue && !hasPublishedDoc) {
       if (targetFieldValue) {
         const formattedSlug = formatSlug(targetFieldValue)
 
@@ -50,7 +61,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
         if (value !== '') setValue('')
       }
     }
-  }, [targetFieldValue, checkboxValue, setValue, value])
+  }, [targetFieldValue, checkboxValue, setValue, value, hasPublishedDoc])
 
   const handleLock = useCallback(
     (e: React.MouseEvent<Element>) => {
