@@ -9,6 +9,7 @@ const { rules } = reactCompiler
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['bundle.js'],
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,

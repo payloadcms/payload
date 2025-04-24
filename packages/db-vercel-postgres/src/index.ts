@@ -205,6 +205,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   }
 
   return {
+    name: 'postgres',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,

@@ -101,6 +101,13 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
           sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
+      DiffComponent: {
+        path: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
+        serverProps: {
+          admin: args?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
+        },
+      },
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
@@ -896,9 +903,10 @@ export {
 } from './features/converters/lexicalToHtml_deprecated/index.js'
 export { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
 export { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
-
 export { getPayloadPopulateFn } from './features/converters/utilities/payloadPopulateFn.js'
+
 export { getRestPopulateFn } from './features/converters/utilities/restPopulateFn.js'
+export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'

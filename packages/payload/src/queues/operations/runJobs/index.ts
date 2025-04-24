@@ -1,6 +1,5 @@
 // @ts-strict-ignore
-import type { PaginatedDocs } from '../../../database/types.js'
-import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
   BaseJob,
@@ -26,8 +25,21 @@ export type RunJobsArgs = {
   id?: number | string
   limit?: number
   overrideAccess?: boolean
+  /**
+   * Adjust the job processing order
+   *
+   * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+   *
+   * @default all jobs for all queues will be executed in FIFO order.
+   */
+  processingOrder?: Sort
   queue?: string
   req: PayloadRequest
+  /**
+   * By default, jobs are run in parallel.
+   * If you want to run them in sequence, set this to true.
+   */
+  sequential?: boolean
   where?: Where
 }
 
@@ -43,14 +55,18 @@ export type RunJobsResult = {
   remainingJobsFromQueried: number
 }
 
-export const runJobs = async ({
-  id,
-  limit = 10,
-  overrideAccess,
-  queue,
-  req,
-  where: whereFromProps,
-}: RunJobsArgs): Promise<RunJobsResult> => {
+export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
+  const {
+    id,
+    limit = 10,
+    overrideAccess,
+    processingOrder,
+    queue,
+    req,
+    sequential,
+    where: whereFromProps,
+  } = args
+
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
     if (!hasAccess) {
@@ -124,6 +140,21 @@ export const runJobs = async ({
       }),
     ]
   } else {
+    let defaultProcessingOrder: Sort =
+      req.payload.collections[jobsCollectionSlug].config.defaultSort ?? 'createdAt'
+
+    const processingOrderConfig = req.payload.config.jobs?.processingOrder
+    if (typeof processingOrderConfig === 'function') {
+      defaultProcessingOrder = await processingOrderConfig(args)
+    } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
+      if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
+        defaultProcessingOrder = processingOrderConfig.queues[queue]
+      } else if (processingOrderConfig.default) {
+        defaultProcessingOrder = processingOrderConfig.default
+      }
+    } else if (typeof processingOrderConfig === 'string') {
+      defaultProcessingOrder = processingOrderConfig
+    }
     const updatedDocs = await updateJobs({
       data: {
         processing: true,
@@ -133,6 +164,7 @@ export const runJobs = async ({
       limit,
       req,
       returning: true,
+      sort: processingOrder ?? defaultProcessingOrder,
       where,
     })
 
@@ -175,7 +207,7 @@ export const runJobs = async ({
     ? []
     : undefined
 
-  const jobPromises = jobsQuery.docs.map(async (job) => {
+  const runSingleJob = async (job) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -257,9 +289,20 @@ export const runJobs = async ({
 
       return { id: job.id, result }
     }
-  })
+  }
 
-  const resultsArray = await Promise.all(jobPromises)
+  let resultsArray: { id: number | string; result: RunJobResult }[] = []
+  if (sequential) {
+    for (const job of jobsQuery.docs) {
+      const result = await runSingleJob(job)
+      if (result !== null) {
+        resultsArray.push(result)
+      }
+    }
+  } else {
+    const jobPromises = jobsQuery.docs.map(runSingleJob)
+    resultsArray = await Promise.all(jobPromises)
+  }
 
   if (jobsToDelete && jobsToDelete.length > 0) {
     try {
