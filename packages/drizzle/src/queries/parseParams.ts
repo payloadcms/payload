@@ -1,5 +1,5 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Sort, Where } from 'payload'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -14,12 +14,9 @@ import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
-export type QueryContext = { sort: Sort }
-
 type Args = {
   adapter: DrizzleAdapter
   aliasTable?: Table
-  context: QueryContext
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
@@ -33,7 +30,6 @@ type Args = {
 export function parseParams({
   adapter,
   aliasTable,
-  context,
   fields,
   joins,
   locale,
@@ -61,7 +57,6 @@ export function parseParams({
           const builtConditions = buildAndOrConditions({
             adapter,
             aliasTable,
-            context,
             fields,
             joins,
             locale,
@@ -347,7 +342,6 @@ export function parseParams({
                         )
                       }
                       if (geoConstraints.length) {
-                        context.sort = relationOrPath
                         constraints.push(and(...geoConstraints))
                       }
                       break
