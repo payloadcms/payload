@@ -467,6 +467,12 @@ export default buildConfigWithDefaults({
           virtual: 'post.title',
         },
         {
+          name: 'postTitleHidden',
+          type: 'text',
+          virtual: 'post.title',
+          hidden: true,
+        },
+        {
           name: 'postCategoryTitle',
           type: 'text',
           virtual: 'post.category.title',
