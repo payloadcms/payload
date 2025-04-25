@@ -167,6 +167,12 @@ export const Diff: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
     {
+      type: 'relationship',
+      name: 'relationshipHasMany',
+      hasMany: true,
+      relationTo: draftCollectionSlug,
+    },
+    {
       name: 'richtext',
       type: 'richText',
     },
@@ -235,6 +241,12 @@ export const Diff: CollectionConfig = {
     },
     {
       name: 'upload',
+      relationTo: 'media',
+      type: 'upload',
+    },
+    {
+      name: 'uploadHasMany',
+      hasMany: true,
       relationTo: 'media',
       type: 'upload',
     },

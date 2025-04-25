@@ -190,6 +190,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       radio: 'option1',
       relationship: manyDraftsID,
+      relationshipHasMany: [manyDraftsID],
       richtext: generateLexicalData({
         mediaID: uploadedImage,
         textID: doc1ID,
@@ -203,6 +204,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
       upload: uploadedImage,
+      uploadHasMany: [uploadedImage],
     },
     depth: 0,
   })
@@ -297,6 +299,8 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,
+      relationshipHasMany: [manyDraftsID, draft2.id],
+
       richtext: generateLexicalData({
         mediaID: uploadedImage2,
         textID: doc2ID,
@@ -310,6 +314,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textInUnnamedTab2: 'textInUnnamedTab22',
       upload: uploadedImage2,
+      uploadHasMany: [uploadedImage, uploadedImage2],
     },
     depth: 0,
   })

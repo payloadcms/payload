@@ -380,6 +380,7 @@ export interface Diff {
     | null;
   radio?: ('option1' | 'option2') | null;
   relationship?: (string | null) | DraftPost;
+  relationshipHasMany?: (string | DraftPost)[] | null;
   richtext?: {
     root: {
       type: string;
@@ -419,6 +420,7 @@ export interface Diff {
   text?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
+  uploadHasMany?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -882,6 +884,7 @@ export interface DiffSelect<T extends boolean = true> {
   json?: T;
   radio?: T;
   relationship?: T;
+  relationshipHasMany?: T;
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
@@ -895,6 +898,7 @@ export interface DiffSelect<T extends boolean = true> {
   text?: T;
   textArea?: T;
   upload?: T;
+  uploadHasMany?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
