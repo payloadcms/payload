@@ -33,6 +33,21 @@ export default buildConfigWithDefaults({
       admin: {
         useAsTitle: 'custom',
       },
+      hooks: {
+        afterChange: [
+          async ({ req }) => {
+            // This afterChange hook is required to reproduce the "should update user with afterChange hook while logged in with same user" test
+            await req.payload.create({
+              collection: 'relationsCollection',
+              depth: 0,
+              overrideAccess: true,
+              data: {
+                rel: req?.user?.id,
+              },
+            })
+          },
+        ],
+      },
       auth: {
         cookies: {
           domain: undefined,

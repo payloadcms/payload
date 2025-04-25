@@ -1045,5 +1045,32 @@ describe('Auth', () => {
       expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
     })
+
+    it('should update user with afterChange hook while logged in with same user', async () => {
+      // Reproduces a bug where updating the user causes payload to hang on postgres.
+      const { user } = await payload.login({
+        collection: slug,
+        data: {
+          email: 'dev@payloadcms.com',
+          password: 'test',
+        },
+      })
+      const updatedUser = await payload.update({
+        collection: slug,
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+        user,
+        overrideAccess: false,
+        data: {
+          email: user.email,
+        },
+      })
+
+      expect(updatedUser.docs).toHaveLength(1)
+      expect(updatedUser?.docs?.[0]?.email).toStrictEqual(user.email)
+    })
   })
 })
