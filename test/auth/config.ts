@@ -35,16 +35,18 @@ export default buildConfigWithDefaults({
       },
       hooks: {
         afterChange: [
-          async ({ req }) => {
-            // This afterChange hook is required to reproduce the "should update user with afterChange hook while logged in with same user" test
-            await req.payload.create({
-              collection: 'relationsCollection',
-              depth: 0,
-              overrideAccess: true,
-              data: {
-                rel: req?.user?.id,
-              },
-            })
+          async ({ req, doc, operation }) => {
+            if (operation === 'update') {
+              // This afterChange hook is required to reproduce the "should update user with afterChange hook while logged in with same user" test
+              await req.payload.create({
+                collection: 'relationsCollection',
+                depth: 0,
+                overrideAccess: true,
+                data: {
+                  rel: doc?.id,
+                },
+              })
+            }
           },
         ],
       },

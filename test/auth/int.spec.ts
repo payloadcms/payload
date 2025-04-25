@@ -1062,8 +1062,6 @@ describe('Auth', () => {
             equals: user.id,
           },
         },
-        user,
-        overrideAccess: false,
         data: {
           email: user.email,
         },
