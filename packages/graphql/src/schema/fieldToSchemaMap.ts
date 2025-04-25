@@ -393,19 +393,31 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
         }
 
-        return await req.payload.find({
+        const { docs } = await req.payload.find({
           collection,
           depth: 0,
           draft,
           fallbackLocale: req.fallbackLocale,
-          limit,
+          limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
           locale: req.locale,
           overrideAccess: false,
           page,
+          pagination: false,
           req,
           sort,
           where: fullWhere,
         })
+
+        let shouldSlice = false
+
+        if (typeof limit === 'number' && limit !== 0 && limit < docs.length) {
+          shouldSlice = true
+        }
+
+        return {
+          docs: shouldSlice ? docs.slice(0, -1) : docs,
+          hasNextPage: limit === 0 ? false : limit < docs.length,
+        }
       },
     }
 
