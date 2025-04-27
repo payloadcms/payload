@@ -11,6 +11,7 @@ export const WhereField: React.FC = () => {
   const { setValue: setSelectionToUseValue, value: selectionToUseValue } = useField({
     path: 'selectionToUse',
   })
+
   const { setValue } = useField({ path: 'where' })
   const { selectAll, selected } = useSelection()
   const { query } = useListQuery()

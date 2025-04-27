@@ -200,7 +200,7 @@ export const renderField: RenderFieldMethod = ({
   }
 
   /**
-   * Set the lastRenderedPath equal to the new path of the field
+   * Set the `lastRenderedPath` equal to the new path of the field, this will prevent it from being rendered again
    */
   fieldState.lastRenderedPath = path
 
