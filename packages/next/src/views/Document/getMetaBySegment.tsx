@@ -3,6 +3,7 @@ import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } fro
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
+import { isLivePreviewEnabled } from '../../elements/DocumentHeader/Tabs/tabs/isLivePreviewEnabled.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAPIViewMetadata } from '../API/metadata.js'
 import { generateEditViewMetadata } from '../Edit/metadata.js'
@@ -37,10 +38,16 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   const isEditing =
     isGlobal || Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
 
+  const isLivePreview = isLivePreviewEnabled({
+    collectionConfig,
+    config,
+    globalConfig,
+  })
+
   if (isCollection) {
     // `/:collection/:id`
     if (params.segments.length === 3) {
-      fn = generateEditViewMetadata
+      fn = isLivePreview ? generateLivePreviewViewMetadata : generateEditViewMetadata
     }
 
     // `/:collection/:id/:view`
@@ -49,6 +56,10 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         case 'api':
           // `/:collection/:id/api`
           fn = generateAPIViewMetadata
+          break
+        case 'edit':
+          // `/:collection/:id/edit`
+          fn = generateEditViewMetadata
           break
         case 'preview':
           // `/:collection/:id/preview`
@@ -79,7 +90,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   if (isGlobal) {
     // `/:global`
     if (params.segments?.length === 2) {
-      fn = generateEditViewMetadata
+      fn = isLivePreview ? generateLivePreviewViewMetadata : generateEditViewMetadata
     }
 
     // `/:global/:view`
@@ -88,6 +99,10 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         case 'api':
           // `/:global/api`
           fn = generateAPIViewMetadata
+          break
+        case 'edit':
+          // `/:collection/:id/edit`
+          fn = generateEditViewMetadata
           break
         case 'preview':
           // `/:global/preview`
