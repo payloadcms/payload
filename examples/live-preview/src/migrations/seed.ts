@@ -36,7 +36,7 @@ export const home: Partial<Page> = {
           type: 'link',
           children: [{ text: 'Live Preview' }],
           newTab: true,
-          url: 'https://payloadcms.com/docs/live-preview',
+          url: 'https://payloadcms.com/docs/live-preview/overview',
         },
         {
           text: ' you can edit this page in the admin panel and see the changes reflected here in real time.',
