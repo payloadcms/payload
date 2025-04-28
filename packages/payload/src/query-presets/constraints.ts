@@ -74,7 +74,7 @@ export const getConstraints = (config: Config): Field => ({
                 },
               ],
             },
-            relationTo: config.admin?.user
+            relationTo: config.admin?.user ?? 'users'
           },
           ...(config?.queryPresets?.constraints?.[operation]?.reduce(
             (acc: Field[], option: QueryPresetConstraint) => {
