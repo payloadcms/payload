@@ -188,7 +188,7 @@ function removeIds(data: Data): Data {
     return data.map(removeIds)
   }
   if (typeof data === 'object' && data !== null) {
-    const { id, ...rest } = data
+    const { id: _id, ...rest } = data
     return Object.fromEntries(Object.entries(rest).map(([key, value]) => [key, removeIds(value)]))
   }
   return data
