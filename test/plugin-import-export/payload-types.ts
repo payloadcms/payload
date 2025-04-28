@@ -217,7 +217,7 @@ export interface Export {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -253,7 +253,7 @@ export interface ExportsTask {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -635,7 +635,7 @@ export interface TaskCreateCollectionExport {
     limit?: number | null;
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('true' | 'false') | null;
+    drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
     collectionSlug: string;

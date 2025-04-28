@@ -4,9 +4,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Orderable, OrderableJoin } from './payload-types.js'
+import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { draftsSlug } from './collections/Drafts/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
@@ -327,6 +328,121 @@ describe('Sort', () => {
           'Post 2 norsk', // 5
           'Post 1 norsk', // 25
         ])
+      })
+    })
+
+    describe('Orderable', () => {
+      let orderable1: Orderable
+      let orderable2: Orderable
+      let orderableDraft1: Draft
+      let orderableDraft2: Draft
+      beforeAll(async () => {
+        orderable1 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'Orderable 1',
+          },
+        })
+        orderable2 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'Orderable 2',
+          },
+        })
+        orderableDraft1 = await payload.create({
+          collection: draftsSlug,
+          data: {
+            text: 'Orderable 1',
+            _status: 'draft',
+          },
+        })
+        orderableDraft2 = await payload.create({
+          collection: draftsSlug,
+          data: {
+            text: 'Orderable 2',
+            _status: 'draft',
+          },
+        })
+      })
+
+      it('should set order by default', async () => {
+        const ordered = await payload.find({
+          collection: orderableSlug,
+          where: {
+            title: {
+              contains: 'Orderable ',
+            },
+          },
+        })
+
+        expect(orderable1._order).toBeDefined()
+        expect(orderable2._order).toBeDefined()
+        expect(parseInt(orderable1._order, 16)).toBeLessThan(parseInt(orderable2._order, 16))
+        expect(ordered.docs[0].id).toStrictEqual(orderable1.id)
+        expect(ordered.docs[1].id).toStrictEqual(orderable2.id)
+      })
+
+      it('should allow reordering with REST API', async () => {
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [orderable1.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: orderable2.id,
+              key: orderable2._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const ordered = await payload.find({
+          collection: 'orderable',
+          where: {
+            title: {
+              contains: 'Orderable ',
+            },
+          },
+        })
+
+        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 16),
+        )
+      })
+
+      it('should allow reordering with REST API with drafts enabled', async () => {
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: draftsSlug,
+            docsToMove: [orderableDraft1.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: orderableDraft2.id,
+              key: orderableDraft2._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const ordered = await payload.find({
+          collection: draftsSlug,
+          draft: true,
+          where: {
+            text: {
+              contains: 'Orderable ',
+            },
+          },
+        })
+
+        expect(ordered.docs).toHaveLength(2)
+
+        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 16),
+        )
       })
     })
 

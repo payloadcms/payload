@@ -1459,6 +1459,51 @@ describe('Joins Field', () => {
       expect(parent.children?.totalDocs).toBe(1)
     })
   })
+
+  it('should support where querying by a top level join field', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category.id, title: 'my-title' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'relatedPosts.title': { equals: 'my-title' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with hasMany relationship', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { categories: [category.id], title: 'my-title' },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'hasManyPosts.title': { equals: 'my-title' } },
+    })
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with relationship nested to a group', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { group: { category: category.id }, title: 'my-category-title' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
 })
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {

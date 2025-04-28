@@ -2,7 +2,7 @@ import type { Option, SelectFieldClient } from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 
-export type Props = {
+export type SelectFilterProps = {
   readonly field: SelectFieldClient
   readonly isClearable?: boolean
   readonly onChange: (val: string) => void

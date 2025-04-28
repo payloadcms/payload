@@ -3,7 +3,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { SelectFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'

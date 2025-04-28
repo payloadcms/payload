@@ -28,6 +28,7 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -96,7 +97,7 @@ export const findOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
-      sort,
+      sort: incomingSort,
       where,
     } = args
 
@@ -143,6 +144,11 @@ export const findOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
+
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
@@ -170,7 +176,10 @@ export const findOperation = async <
         pagination: usePagination,
         req,
         select: getQueryDraftsSelect({ select }),
-        sort: getQueryDraftsSort({ collectionConfig, sort }),
+        sort: getQueryDraftsSort({
+          collectionConfig,
+          sort,
+        }),
         where: fullWhere,
       })
     } else {
