@@ -85,6 +85,11 @@ export const virtualFieldPopulationPromise = async ({
       docID = currentValue
     }
 
+    if (segments[0] === 'id' && segments.length === 0) {
+      siblingDoc[name] = docID
+      return
+    }
+
     if (typeof docID !== 'string' && typeof docID !== 'number') {
       return
     }

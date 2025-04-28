@@ -1,4 +1,5 @@
 import type {
+  BeforeDocumentControlsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
   PayloadRequest,
@@ -40,6 +41,18 @@ export const renderDocumentSlots: (args: {
     payload: req.payload,
     user: req.user,
     // TODO: Add remaining serverProps
+  }
+
+  const BeforeDocumentControls =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+    globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+  if (BeforeDocumentControls) {
+    components.BeforeDocumentControls = RenderServerComponent({
+      Component: BeforeDocumentControls,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
   }
 
   const CustomPreviewButton =

@@ -472,6 +472,16 @@ export default buildConfigWithDefaults({
           virtual: 'post.category.title',
         },
         {
+          name: 'postCategoryID',
+          type: 'json',
+          virtual: 'post.category.id',
+        },
+        {
+          name: 'postID',
+          type: 'json',
+          virtual: 'post.id',
+        },
+        {
           name: 'postLocalized',
           type: 'text',
           virtual: 'post.localized',
@@ -480,6 +490,16 @@ export default buildConfigWithDefaults({
           name: 'post',
           type: 'relationship',
           relationTo: 'posts',
+        },
+        {
+          name: 'customID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
+        {
+          name: 'customIDValue',
+          type: 'text',
+          virtual: 'customID.id',
         },
       ],
       versions: { drafts: true },

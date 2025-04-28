@@ -373,8 +373,39 @@ export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
   postCategoryTitle?: string | null;
+  postCategoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  postID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  customID?: (string | null) | CustomId;
+  customIDValue?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids".
+ */
+export interface CustomId {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -397,17 +428,6 @@ export interface FieldsPersistance {
   textWithinTabs?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ids".
- */
-export interface CustomId {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -807,8 +827,12 @@ export interface PlacesSelect<T extends boolean = true> {
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
   postCategoryTitle?: T;
+  postCategoryID?: T;
+  postID?: T;
   postLocalized?: T;
   post?: T;
+  customID?: T;
+  customIDValue?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
