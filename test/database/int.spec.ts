@@ -2414,4 +2414,15 @@ describe('database', () => {
 
     expect(res.docs[0].id).toBe(customID.id)
   })
+
+  it('test header', async () => {
+    await payload.updateGlobal({
+      slug: 'header',
+      data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
+    })
+
+    const header = await payload.findGlobal({ slug: 'header' })
+
+    expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
+  })
 })
