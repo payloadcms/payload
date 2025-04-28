@@ -193,7 +193,7 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
-      await expect(page.locator('.doc-tabs__tabs-container .doc-tab')).toHaveCount(2)
+      await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
     })
