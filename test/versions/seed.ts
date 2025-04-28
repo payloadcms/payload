@@ -6,6 +6,7 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
+import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
@@ -119,6 +120,20 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   })
 
+  const { id: doc1ID } = await _payload.create({
+    collection: 'text',
+    data: {
+      text: 'Document 1',
+    },
+  })
+
+  const { id: doc2ID } = await _payload.create({
+    collection: 'text',
+    data: {
+      text: 'Document 2',
+    },
+  })
+
   const diffDoc = await _payload.create({
     collection: diffCollectionSlug,
     locale: 'en',
@@ -165,7 +180,11 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       point: [1, 2],
       radio: 'option1',
       relationship: manyDraftsID,
-      richtext: textToLexicalJSON({ text: 'richtext' }),
+      richtext: generateLexicalData({
+        mediaID: uploadedImage,
+        textID: doc1ID,
+        updated: false,
+      }) as any,
       richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff' }),
       select: 'option1',
       text: 'text',
@@ -225,7 +244,11 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,
-      richtext: textToLexicalJSON({ text: 'richtext2' }),
+      richtext: generateLexicalData({
+        mediaID: uploadedImage2,
+        textID: doc2ID,
+        updated: true,
+      }) as any,
       richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff2' }),
       select: 'option2',
       text: 'text2',

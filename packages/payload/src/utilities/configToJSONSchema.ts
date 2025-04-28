@@ -258,9 +258,6 @@ export function fieldsToJSONSchema(
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field, index) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
-        if (isRequired) {
-          requiredFieldNames.add(field.name)
-        }
 
         const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
@@ -706,6 +703,9 @@ export function fieldsToJSONSchema(
         }
 
         if (fieldSchema && fieldAffectsData(field)) {
+          if (isRequired && fieldSchema.required !== false) {
+            requiredFieldNames.add(field.name)
+          }
           fieldSchemas.set(field.name, fieldSchema)
         }
 

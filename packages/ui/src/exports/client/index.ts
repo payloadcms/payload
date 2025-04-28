@@ -22,6 +22,10 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+export { SortHeader } from '../../elements/SortHeader/index.js'
+export { SortRow } from '../../elements/SortRow/index.js'
+export { OrderableTable } from '../../elements/Table/OrderableTable.js'
+
 // query preset elements
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
 export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
@@ -367,3 +371,4 @@ export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'

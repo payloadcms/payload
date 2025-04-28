@@ -33,7 +33,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       required,
       timezone,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -59,11 +59,12 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

@@ -63,20 +63,27 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const hasNewerVersions = unpublishedVersionCount > 0
 
+  const schedulePublish =
+    typeof entityConfig?.versions?.drafts === 'object' &&
+    entityConfig?.versions?.drafts.schedulePublish
+
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const scheduledPublishEnabled =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
+  const scheduledPublishEnabled = Boolean(schedulePublish)
+
+  // If autosave is enabled the modified will always be true so only conditionally check on modified state
+  const hasAutosave = Boolean(
+    typeof entityConfig?.versions?.drafts === 'object' && entityConfig?.versions?.drafts.autosave,
+  )
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
       hasPublishPermission &&
       (globalSlug || (collectionSlug && id)) &&
-      !modified,
+      (hasAutosave || !modified),
   )
 
   const operation = useOperation()
@@ -239,6 +246,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
+          schedulePublishConfig={typeof schedulePublish === 'object' && schedulePublish}
           slug={drawerSlug}
         />
       )}
