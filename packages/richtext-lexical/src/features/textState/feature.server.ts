@@ -73,5 +73,5 @@ export const TextStateFeature = createServerFeature<
       },
     }
   },
-  key: 'textStates',
+  key: 'textState',
 })

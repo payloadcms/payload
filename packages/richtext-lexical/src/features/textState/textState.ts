@@ -58,8 +58,11 @@ export function StatePlugin() {
             // stateValue could be bg-red for example
             const stateValue = $getState(node, stateEntry.stateConfig)
             if (!stateValue) {
+              delete dom.dataset[_stateKey]
+              dom.style.cssText = ''
               return
             }
+            dom.dataset[_stateKey] = stateValue
             const css = stateEntry.stateValues[stateValue]?.css
             if (!css) {
               return

@@ -44,7 +44,7 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
       type: 'dropdown',
       ChildComponent: () => <TextStateIcon css={{ color: 'var(--theme-elevation-600)' }} />,
       items: [...clearStyle, ...items],
-      key: 'textStates',
+      key: 'textState',
       order: 30,
     },
   ]
