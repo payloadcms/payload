@@ -2,8 +2,15 @@
 import type { TextFieldClientComponent } from 'payload'
 
 import { TextField } from '@payloadcms/ui'
-import React from 'react'
+import React, { Fragment } from 'react'
 
-export const CustomClientField: TextFieldClientComponent = (props) => {
-  return <TextField {...props} />
+import type { CustomProps } from './types.js'
+
+export const CustomClientField: TextFieldClientComponent<CustomProps> = (props) => {
+  return (
+    <Fragment>
+      <div id="custom-prop">{props.customProp}</div>
+      <TextField {...props} />
+    </Fragment>
+  )
 }

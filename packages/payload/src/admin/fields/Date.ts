@@ -34,15 +34,15 @@ export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
 export type DateFieldServerProps = DateFieldBaseServerProps &
   ServerFieldBase<DateField, DateFieldClientWithoutType>
 
-export type DateFieldServerComponent = FieldServerComponent<
+export type DateFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
   DateField,
   DateFieldClientWithoutType,
-  DateFieldBaseServerProps
+  DateFieldBaseServerProps & T
 >
 
-export type DateFieldClientComponent = FieldClientComponent<
+export type DateFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   DateFieldClientWithoutType,
-  DateFieldBaseClientProps
+  DateFieldBaseClientProps & T
 >
 
 export type DateFieldLabelServerComponent = FieldLabelServerComponent<

@@ -37,15 +37,15 @@ export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
 export type CodeFieldServerProps = CodeFieldBaseServerProps &
   ServerFieldBase<CodeField, CodeFieldClientWithoutType>
 
-export type CodeFieldServerComponent = FieldServerComponent<
+export type CodeFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
   CodeField,
   CodeFieldClientWithoutType,
-  CodeFieldBaseServerProps
+  CodeFieldBaseServerProps & T
 >
 
-export type CodeFieldClientComponent = FieldClientComponent<
+export type CodeFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   CodeFieldClientWithoutType,
-  CodeFieldBaseClientProps
+  CodeFieldBaseClientProps & T
 >
 
 export type CodeFieldLabelServerComponent = FieldLabelServerComponent<

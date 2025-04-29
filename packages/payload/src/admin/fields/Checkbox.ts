@@ -39,16 +39,15 @@ export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
 export type CheckboxFieldServerProps = CheckboxFieldBaseServerProps &
   ServerFieldBase<CheckboxField, CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldServerComponent = FieldServerComponent<
-  CheckboxField,
-  CheckboxFieldClientWithoutType,
-  CheckboxFieldBaseServerProps
->
+export type CheckboxFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<
+    CheckboxField,
+    CheckboxFieldClientWithoutType,
+    CheckboxFieldBaseServerProps & T
+  >
 
-export type CheckboxFieldClientComponent = FieldClientComponent<
-  CheckboxFieldClientWithoutType,
-  CheckboxFieldBaseClientProps
->
+export type CheckboxFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<CheckboxFieldClientWithoutType, CheckboxFieldBaseClientProps & T>
 
 export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<
   CheckboxField,

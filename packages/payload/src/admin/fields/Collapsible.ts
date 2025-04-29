@@ -30,15 +30,11 @@ export type CollapsibleFieldServerProps = ServerFieldBase<
   CollapsibleFieldClientWithoutType
 >
 
-export type CollapsibleFieldServerComponent = FieldServerComponent<
-  CollapsibleField,
-  CollapsibleFieldClientWithoutType
->
+export type CollapsibleFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<CollapsibleField, CollapsibleFieldClientWithoutType & T>
 
-export type CollapsibleFieldClientComponent = FieldClientComponent<
-  CollapsibleFieldClientWithoutType,
-  CollapsibleFieldBaseClientProps
->
+export type CollapsibleFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<CollapsibleFieldClientWithoutType, CollapsibleFieldBaseClientProps & T>
 
 export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
   CollapsibleField,

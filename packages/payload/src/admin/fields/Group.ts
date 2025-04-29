@@ -30,16 +30,11 @@ export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
 export type GroupFieldServerProps = GroupFieldBaseServerProps &
   ServerFieldBase<GroupField, GroupFieldClientWithoutType>
 
-export type GroupFieldServerComponent = FieldServerComponent<
-  GroupField,
-  GroupFieldClientWithoutType,
-  GroupFieldBaseServerProps
->
+export type GroupFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<GroupField, GroupFieldClientWithoutType, GroupFieldBaseServerProps & T>
 
-export type GroupFieldClientComponent = FieldClientComponent<
-  GroupFieldClientWithoutType,
-  GroupFieldBaseClientProps
->
+export type GroupFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<GroupFieldClientWithoutType, GroupFieldBaseClientProps & T>
 
 export type GroupFieldLabelServerComponent = FieldLabelServerComponent<
   GroupField,

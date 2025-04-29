@@ -34,16 +34,11 @@ export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType>
 export type EmailFieldServerProps = EmailFieldBaseServerProps &
   ServerFieldBase<EmailField, EmailFieldClientWithoutType>
 
-export type EmailFieldServerComponent = FieldServerComponent<
-  EmailField,
-  EmailFieldClientWithoutType,
-  EmailFieldBaseServerProps
->
+export type EmailFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<EmailField, EmailFieldClientWithoutType, EmailFieldBaseServerProps & T>
 
-export type EmailFieldClientComponent = FieldClientComponent<
-  EmailFieldClientWithoutType,
-  EmailFieldBaseClientProps
->
+export type EmailFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<EmailFieldClientWithoutType, EmailFieldBaseClientProps & T>
 
 export type EmailFieldLabelServerComponent = FieldLabelServerComponent<
   EmailField,

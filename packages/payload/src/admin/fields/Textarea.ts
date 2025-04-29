@@ -40,16 +40,15 @@ export type TextareaFieldServerProps = ServerFieldBase<
 > &
   TextareaFieldBaseServerProps
 
-export type TextareaFieldServerComponent = FieldServerComponent<
-  TextareaField,
-  TextareaFieldClientWithoutType,
-  TextareaFieldBaseServerProps
->
+export type TextareaFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<
+    TextareaField,
+    TextareaFieldClientWithoutType,
+    T & TextareaFieldBaseServerProps
+  >
 
-export type TextareaFieldClientComponent = FieldClientComponent<
-  TextareaFieldClientWithoutType,
-  TextareaFieldBaseClientProps
->
+export type TextareaFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<TextareaFieldClientWithoutType, T & TextareaFieldBaseClientProps>
 
 export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<
   TextareaField,

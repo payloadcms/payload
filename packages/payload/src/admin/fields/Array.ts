@@ -39,15 +39,11 @@ export type ArrayFieldServerComponent = FieldServerComponent<
   ArrayFieldBaseServerProps
 >
 
-export type ArrayFieldClientComponent = FieldClientComponent<
-  ArrayFieldClientWithoutType,
-  ArrayFieldBaseClientProps
->
+export type ArrayFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<ArrayFieldClientWithoutType, ArrayFieldBaseClientProps>
 
-export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<
-  ArrayField,
-  ArrayFieldClientWithoutType
->
+export type ArrayFieldLabelServerComponent<T extends Record<string, unknown> = {}> =
+  FieldLabelServerComponent<ArrayField, ArrayFieldClientWithoutType>
 
 export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
 

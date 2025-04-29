@@ -34,16 +34,11 @@ export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutTyp
 export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType> &
   UploadFieldBaseServerProps
 
-export type UploadFieldServerComponent = FieldServerComponent<
-  UploadField,
-  UploadFieldClientWithoutType,
-  UploadFieldBaseServerProps
->
+export type UploadFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<UploadField, UploadFieldClientWithoutType, T & UploadFieldBaseServerProps>
 
-export type UploadFieldClientComponent = FieldClientComponent<
-  UploadFieldClientWithoutType,
-  UploadFieldBaseClientProps
->
+export type UploadFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<UploadFieldClientWithoutType, T & UploadFieldBaseClientProps>
 
 export type UploadFieldLabelServerComponent = FieldLabelServerComponent<
   UploadField,
