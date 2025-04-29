@@ -11,6 +11,7 @@ import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
   draftCollectionSlug,
+  media2CollectionSlug,
   mediaCollectionSlug,
 } from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
@@ -36,11 +37,23 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
+  const { id: uploadedImageMedia2 } = await _payload.create({
+    collection: media2CollectionSlug,
+    data: {},
+    file: imageFile,
+  })
+
   const imageFilePath2 = path.resolve(dirname, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
     collection: mediaCollectionSlug,
+    data: {},
+    file: imageFile2,
+  })
+
+  const { id: uploadedImage2Media2 } = await _payload.create({
+    collection: media2CollectionSlug,
     data: {},
     file: imageFile2,
   })

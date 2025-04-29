@@ -63,7 +63,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionTo = await payload.findVersionByID({
         id: versionToID,
         collection: slug,
-        depth: 0,
+        depth: 1,
         locale: 'all',
         overrideAccess: false,
         req,
@@ -74,7 +74,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         versionFrom = await payload.findVersionByID({
           id: versionFromIDFromParams,
           collection: collectionSlug,
-          depth: 0,
+          depth: 1,
           locale: 'all',
           overrideAccess: false,
           req,
@@ -84,7 +84,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         versionFrom = (
           await payload.findVersions({
             collection: collectionSlug,
-            depth: 0,
+            depth: 1,
             draft: true,
             limit: 1,
             overrideAccess: false,
@@ -142,7 +142,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionTo = await payload.findGlobalVersionByID({
         id: versionToID,
         slug,
-        depth: 0,
+        depth: 1,
         locale: 'all',
         overrideAccess: false,
         req,
@@ -153,7 +153,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         versionFrom = await payload.findGlobalVersionByID({
           id: versionFromIDFromParams,
           slug: globalSlug,
-          depth: 0,
+          depth: 1,
           locale: 'all',
           overrideAccess: false,
           req,
@@ -163,7 +163,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         versionFrom = (
           await payload.findGlobalVersions({
             slug: globalSlug,
-            depth: 0,
+            depth: 1,
             limit: 1,
             overrideAccess: false,
             req,

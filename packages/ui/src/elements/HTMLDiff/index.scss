@@ -25,73 +25,77 @@
     blockquote,
     pre,
     h6 {
-      &:has([data-match-type='create']) {
-        position: relative;
-        z-index: 1;
-        &::before {
-          content: '';
-          position: absolute;
-          top: -(base(0.5));
-          bottom: -(base(0.5));
-          left: -10px;
-          right: -(base(0.5));
-          display: block;
-          background-color: var(--diff-create-parent-bg);
-          color: var(--diff-create-parent-color);
-          z-index: -1; /* Place behind the text */
+      &:not([data-enable-match='false']) {
+        &:has([data-match-type='create']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: -(base(0.5));
+            bottom: -(base(0.5));
+            left: -10px;
+            right: -(base(0.5));
+            display: block;
+            background-color: var(--diff-create-parent-bg);
+            color: var(--diff-create-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
         }
-      }
 
-      &:has([data-match-type='delete']) {
-        position: relative;
-        z-index: 1;
-        &::before {
-          content: '';
-          position: absolute;
-          top: -(base(0.5));
-          bottom: -(base(0.5));
-          left: -(base(0.5));
-          right: -10px;
-          display: block;
-          background-color: var(--diff-delete-parent-bg);
-          color: var(--diff-delete-parent-color);
-          z-index: -1; /* Place behind the text */
+        &:has([data-match-type='delete']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: -(base(0.5));
+            bottom: -(base(0.5));
+            left: -(base(0.5));
+            right: -10px;
+            display: block;
+            background-color: var(--diff-delete-parent-bg);
+            color: var(--diff-delete-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
         }
       }
     }
 
     li {
-      &:has([data-match-type='create']) {
-        position: relative;
-        z-index: 1;
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -10px;
-          right: -(base(0.5));
-          display: block;
-          background-color: var(--diff-create-parent-bg);
-          color: var(--diff-create-parent-color);
-          z-index: -1; /* Place behind the text */
+      &:not([data-enable-match='false']) {
+        &:has([data-match-type='create']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -10px;
+            right: -(base(0.5));
+            display: block;
+            background-color: var(--diff-create-parent-bg);
+            color: var(--diff-create-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
         }
-      }
 
-      &:has([data-match-type='delete']) {
-        position: relative;
-        z-index: 1;
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -(base(0.5));
-          right: -10px;
-          display: block;
-          background-color: var(--diff-delete-parent-bg);
-          color: var(--diff-delete-parent-color);
-          z-index: -1; /* Place behind the text */
+        &:has([data-match-type='delete']) {
+          position: relative;
+          z-index: 1;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -(base(0.5));
+            right: -10px;
+            display: block;
+            background-color: var(--diff-delete-parent-bg);
+            color: var(--diff-delete-parent-color);
+            z-index: -1; /* Place behind the text */
+          }
         }
       }
     }
@@ -100,7 +104,9 @@
       color: var(--theme-text);
     }
 
-    [data-match-type='delete'] {
+    [data-match-type='delete']:not([data-enable-match='false']):not(
+        :is([data-enable-match='false'] *)
+      ) {
       color: var(--diff-delete-pill-color);
       text-decoration-color: var(--diff-delete-pill-color);
       text-decoration-line: line-through;
@@ -109,16 +115,22 @@
       text-decoration-thickness: 1px;
     }
 
-    a[data-match-type='delete'] {
+    a[data-match-type='delete']
+      :not([data-enable-match='false'])
+      :not(:is([data-enable-match='false'] *)) {
       color: var(--diff-delete-link-color);
     }
 
-    a[data-match-type='create']:not(img) {
-      // :not(img) required to increase specificity
+    // :not(img) required to increase specificity
+    a[data-match-type='create']:not(img)
+      :not([data-enable-match='false'])
+      :not(:is([data-enable-match='false'] *)) {
       color: var(--diff-create-link-color);
     }
 
-    [data-match-type='create']:not(img) {
+    [data-match-type='create']:not(img):not([data-enable-match='false']):not(
+        :is([data-enable-match='false'] *)
+      ) {
       background-color: var(--diff-create-pill-bg);
       color: var(--diff-create-pill-color);
       border-radius: 4px;

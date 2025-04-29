@@ -122,8 +122,10 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
   let renderedValueTo: string | undefined = placeholder
   let renderedValueFrom: string | undefined = placeholder
 
+  const hasMany = 'hasMany' in field && field.hasMany
+
   if (valueTo) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(valueTo)) {
+    if (hasMany && Array.isArray(valueTo)) {
       renderedValueTo =
         valueTo
           .map((val) =>
@@ -138,7 +140,7 @@ export const Relationship: RelationshipFieldDiffClientComponent = ({
   }
 
   if (valueFrom) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(valueFrom)) {
+    if (hasMany && Array.isArray(valueFrom)) {
       renderedValueFrom =
         valueFrom
           .map((val) =>
