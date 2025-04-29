@@ -32,7 +32,7 @@ export const BlocksPlugin: PluginComponent = () => {
 
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
 
-  const { setCreatedInlineBlock, uuid } = useEditorConfigContext()
+  const { setCreatedInlineBlock, setCreatedBlock, uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
 
   const drawerSlug = formatDrawerSlug({
@@ -56,6 +56,7 @@ export const BlocksPlugin: PluginComponent = () => {
 
             if ($isRangeSelection(selection)) {
               const blockNode = $createBlockNode(payload)
+              setCreatedBlock(blockNode)
               // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
               $insertNodeToNearestRoot(blockNode)
 
@@ -109,7 +110,7 @@ export const BlocksPlugin: PluginComponent = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [editor, setCreatedInlineBlock, targetNodeKey, toggleDrawer])
+  }, [editor, setCreatedInlineBlock, setCreatedBlock, targetNodeKey, toggleDrawer])
 
   return null
 }
