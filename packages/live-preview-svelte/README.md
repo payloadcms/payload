@@ -12,15 +12,14 @@ In many cases you will want to use a $derived rune to alter the data, such as co
 ```svelte
 <script lang="ts">
   import type { PageProps } from './$types';
-	import { useLivePreview } from '$lib/live-preview-store';
+	import { useLivePreview } from '@payloadcms/live-preview-svelte';
   import { readable } from 'svelte/store';
   import { PUBLIC_PAYLOAD_URL } from '$env/static/public';
 
 	let { data }: PageProps = $props();
-
-  let article = seLivePreview(data, {
-      serverURL: PUBLIC_PAYLOAD_URL,
-    });
+  let article = useLivePreview(data, {
+    serverURL: PUBLIC_PAYLOAD_URL,
+  });
 </script>
 
 <article>
@@ -40,7 +39,7 @@ We also use $derived to alter the content field.
 <script lang="ts">
   import type { PageProps } from './$types';
   import { page } from '$app/state';
-	import { useLivePreview } from '$lib/live-preview-store';
+	import { useLivePreview } from '@payloadcms/live-preview-svelte';
 	import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html';
   import { readable } from 'svelte/store';
   import { PUBLIC_PAYLOAD_URL } from '$env/static/public';
@@ -83,7 +82,7 @@ however, in my tests, it's not really needed, as the data loads instantly.
 <script lang="ts">
   import type { PageProps } from './$types';
   import { page } from '$app/state';
-	import { useLivePreview } from '$lib/live-preview-store';
+	import { useLivePreview } from '@payloadcms/live-preview-svelte';
 	import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html';
   import { readable } from 'svelte/store';
   import { PUBLIC_PAYLOAD_URL } from '$env/static/public';
