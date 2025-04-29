@@ -302,7 +302,7 @@ describe('lexicalBlocks', () => {
     await assertLexicalDoc({
       fn: ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
-          .children[14] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
           .children[12] as SerializedParagraphNode
 
@@ -1133,9 +1133,9 @@ describe('lexicalBlocks', () => {
           ).docs[0] as never
 
           const richTextBlock: SerializedBlockNode = lexicalWithBlocks.root
-            .children[13] as SerializedBlockNode
+            .children[12] as SerializedBlockNode
           const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
-            .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+            .children[0] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
           const subSubRichTextField = subRichTextBlock.fields.subRichTextField
           const subSubUploadField = subRichTextBlock.fields.subUploadField
@@ -1163,9 +1163,9 @@ describe('lexicalBlocks', () => {
           ).docs[0] as never
 
           const richTextBlock2: SerializedBlockNode = lexicalWithBlocks.root
-            .children[13] as SerializedBlockNode
+            .children[12] as SerializedBlockNode
           const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
-            .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+            .children[0] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
           const subSubRichTextField2 = subRichTextBlock2.fields.subRichTextField
           const subSubUploadField2 = subRichTextBlock2.fields.subUploadField
