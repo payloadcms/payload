@@ -786,6 +786,20 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
     })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
+    })
   })
 
   describe('API Key', () => {
@@ -1002,6 +1016,7 @@ describe('Auth', () => {
       expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
       expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
       expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
     })
 
     it('should not allow emails with double quotes', () => {
@@ -1030,6 +1045,12 @@ describe('Auth', () => {
     it('should not allow domains starting or ending with a hyphen', () => {
       expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 })

@@ -1,9 +1,12 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, CDPSession, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { FormState } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
+import { assertElementStaysVisible } from 'helpers/e2e/assertElementStaysVisible.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
+import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,6 +21,9 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { postsSlug } from './collections/Posts/index.js'
+
+const { describe, beforeEach, afterEach } = test
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,13 +40,14 @@ test.describe('Form State', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    postsUrl = new AdminUrlUtil(serverURL, 'posts')
+    postsUrl = new AdminUrlUtil(serverURL, postsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
   })
@@ -144,84 +151,265 @@ test.describe('Form State', () => {
     )
   })
 
-  test('should queue onChange functions', async () => {
+  test('should send `lastRenderedPath` only when necessary', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
 
-    // only throttle test after initial load to avoid timeouts
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
+    // The `array` itself SHOULD have a `lastRenderedPath` because it was rendered on initial load
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath === 'array',
+        ),
     })
 
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await field.fill('')
-        // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 275 })
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000, // watch network for 10 seconds to allow requests to build up
-      },
+    await page.waitForResponse(
+      (response) =>
+        response.url() === postsUrl.create &&
+        response.status() === 200 &&
+        response.headers()['content-type'] === 'text/x-component',
     )
 
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
+    // The `array` itself SHOULD still have a `lastRenderedPath`
+    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath === 'array' &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField',
+        ),
     })
 
-    await cdpSession.detach()
+    await page.waitForResponse(
+      (response) =>
+        response.url() === postsUrl.create &&
+        response.status() === 200 &&
+        response.headers()['content-type'] === 'text/x-component',
+    )
+
+    // The `array` itself SHOULD still have a `lastRenderedPath`
+    // The custom text field in the first row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the first request
+    // The custom text field in the second row SHOULD ALSO have a `lastRenderedPath` bc it was rendered in the second request
+    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+      action: async () => await page.locator('#field-array .array-field__add-row').click(),
+      url: postsUrl.create,
+      expect: (body) =>
+        Boolean(
+          body?.[0]?.args?.formState?.['array'] &&
+            body[0].args.formState['array'].lastRenderedPath &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField' &&
+            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+              'array.1.customTextField',
+        ),
+    })
   })
 
-  test('sequentially queued tasks not cause nested custom components to disappear', async () => {
+  test('should not render stale values for server components while form state is in flight', async () => {
     await page.goto(postsUrl.create)
-    const field = page.locator('#field-title')
-    await field.fill('Test')
 
-    const cdpSession = await throttleTest({
-      page,
-      context,
-      delay: 'Slow 3G',
+    await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-0 #field-array__0__customTextField').fill('1')
+
+    await page.locator('#field-array .array-field__add-row').click()
+    await page.locator('#field-array #array-row-1 #field-array__1__customTextField').fill('2')
+
+    // block the next form state request from firing to ensure the field remains in stale state
+    await page.route(postsUrl.create, async (route) => {
+      if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+        await route.abort()
+      }
+
+      await route.continue()
     })
 
-    await assertNetworkRequests(
-      page,
-      postsUrl.create,
-      async () => {
-        await page.locator('#field-array .array-field__add-row').click()
+    // remove the first row
+    await page.locator('#field-array #array-row-0 .array-actions__button').click()
 
-        await page.locator('#field-title').fill('Title 2')
+    await page
+      .locator('#field-array #array-row-0 .array-actions__action.array-actions__remove')
+      .click()
 
-        // eslint-disable-next-line playwright/no-wait-for-selector
-        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
-          timeout: TEST_TIMEOUT,
-        })
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+    ).toHaveValue('2')
+  })
 
-        await expect(
-          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
-        ).toBeVisible()
-      },
-      {
-        allowedNumberOfRequests: 2,
-        timeout: 10000,
-      },
-    )
+  test('should queue onChange functions', async () => {
+    await page.goto(postsUrl.create)
+    await page.locator('#field-array .array-field__add-row').click()
+    await expect(
+      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+    ).toHaveValue('This is a default value')
+  })
 
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      latency: 0,
-      downloadThroughput: -1,
-      uploadThroughput: -1,
+  describe('Throttled tests', () => {
+    let cdpSession: CDPSession
+
+    beforeEach(async () => {
+      await page.goto(postsUrl.create)
+      const field = page.locator('#field-title')
+      await field.fill('Test')
+
+      cdpSession = await throttleTest({
+        page,
+        context,
+        delay: 'Slow 3G',
+      })
     })
 
-    await cdpSession.detach()
+    afterEach(async () => {
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        latency: 0,
+        downloadThroughput: -1,
+        uploadThroughput: -1,
+      })
+
+      await cdpSession.detach()
+    })
+
+    test('optimistic rows should not disappear between pending network requests', async () => {
+      let requestCount = 0
+
+      // increment the response count for form state requests
+      page.on('request', (request) => {
+        if (request.url() === postsUrl.create && request.method() === 'POST') {
+          requestCount++
+        }
+      })
+
+      // Add the first row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-0')).toBeVisible()
+
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // Wait for the first request to be sent
+      await page.waitForRequest((request) => request.url() === postsUrl.create)
+
+      // Before the first request comes back, add the second row and expect an optimistic loading state
+      await page.locator('#field-array .array-field__add-row').click()
+      await expect(page.locator('#field-array #array-row-1')).toBeVisible()
+
+      // use waitForSelector because the shimmer effect is not always visible
+      // eslint-disable-next-line playwright/no-wait-for-selector
+      await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
+
+      // At this point there should have been a single request sent for the first row
+      expect(requestCount).toBe(1)
+
+      // Wait for the first request to finish
+      await page.waitForResponse(
+        (response) =>
+          response.url() === postsUrl.create &&
+          response.status() === 200 &&
+          response.headers()['content-type'] === 'text/x-component',
+      )
+
+      // block the second request from executing to ensure the form remains in stale state
+      await page.route(postsUrl.create, async (route) => {
+        if (route.request().method() === 'POST' && route.request().url() === postsUrl.create) {
+          await route.abort()
+          return
+        }
+        await route.continue()
+      })
+
+      await assertElementStaysVisible(page, '#field-array #array-row-1')
+    })
+
+    test('should queue onChange functions', async () => {
+      const field = page.locator('#field-title')
+
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await field.fill('')
+          // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
+          await field.pressSequentially('Some text to type', { delay: 275 })
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000, // watch network for 10 seconds to allow requests to build up
+        },
+      )
+    })
+
+    test('should not cause nested custom components to disappear when adding a row then editing a field', async () => {
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await page.locator('#field-array .array-field__add-row').click()
+          await page.locator('#field-title').fill('Test 2')
+
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
+
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
+
+          await expect(page.locator('#field-title')).toHaveValue('Test 2')
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    })
+
+    test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
+      // Add two rows quickly
+      // Test that the custom text field within the rows do not disappear
+      await assertNetworkRequests(
+        page,
+        postsUrl.create,
+        async () => {
+          await page.locator('#field-array .array-field__add-row').click()
+          await page.locator('#field-array .array-field__add-row').click()
+
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
+
+          // use `waitForSelector` to ensure the element doesn't appear and then disappear
+          // eslint-disable-next-line playwright/no-wait-for-selector
+          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
+            timeout: TEST_TIMEOUT,
+          })
+
+          await expect(
+            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+          ).toBeVisible()
+
+          await expect(
+            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+          ).toBeVisible()
+        },
+        {
+          allowedNumberOfRequests: 2,
+          timeout: 10000,
+        },
+      )
+    })
   })
 })
 

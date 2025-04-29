@@ -5,7 +5,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
-import type { Props, ValueWithRelation } from './types.js'
+import type { RelationshipFilterProps as Props, ValueWithRelation } from './types.js'
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'

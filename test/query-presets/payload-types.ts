@@ -229,7 +229,7 @@ export interface PayloadQueryPreset {
   isShared?: boolean | null;
   access?: {
     read?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'user' | 'anonymous')[] | null;
     };

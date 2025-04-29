@@ -167,6 +167,21 @@ export const seed = async (_payload: Payload) => {
           overrideAccess: false,
           data: seedData.onlyMe,
         }),
+      () =>
+        _payload.create({
+          collection: 'payload-query-presets',
+          user: devUser,
+          overrideAccess: false,
+          data: {
+            relatedCollection: 'pages',
+            title: 'Noone',
+            access: {
+              read: {
+                constraint: 'noone',
+              },
+            },
+          },
+        }),
     ],
     false,
   )

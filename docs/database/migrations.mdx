@@ -298,3 +298,15 @@ Passing your migrations as shown above will tell Payload, in production only, to
   may slow down serverless cold starts on platforms such as Vercel. Generally,
   this option should only be used for long-running servers / containers.
 </Banner>
+
+## Environment-Specific Configurations and Migrations
+
+Your configuration may include environment-specific settings (e.g., enabling a plugin only in production). If you generate migrations without considering the environment, it can lead to discrepancies and issues. When running migrations locally, Payload uses the development environment, which might miss production-specific configurations. Similarly, running migrations in production could miss development-specific entities.
+
+This is an easy oversight, so be mindful of any environment-specific logic in your config when handling migrations.
+
+**Ways to address this:**
+
+- Manually update your migration file after it is generated to include any environment-specific configurations.
+- Temporarily enable any required production environment variables in your local setup when generating the migration to capture the necessary updates.
+- Use separate migration files for each environment to ensure the correct migration is executed in the corresponding environment.
