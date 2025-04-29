@@ -1681,14 +1681,13 @@ describe('lexicalBlocks', () => {
       await expect(row2).toBeVisible()
 
       // Get initial count and ensure it's stable
-      let initialCount = 0
-      await expect(async () => {
-        const count = await page.locator('#blocks-row-2 .inline-block-container').count()
-        expect(count).toBeGreaterThan(0)
-        initialCount = count
+      const inlineBlocks = page.locator('#blocks-row-2 .inline-block-container')
+      const inlineBlockCount = await inlineBlocks.count()
+      await expect(() => {
+        expect(inlineBlockCount).toBeGreaterThan(0)
       }).toPass()
 
-      const inlineBlockElement = page.locator('#blocks-row-2 .inline-block-container').first()
+      const inlineBlockElement = inlineBlocks.first()
       await inlineBlockElement.locator('.inline-block__editButton').first().click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
@@ -1699,9 +1698,7 @@ describe('lexicalBlocks', () => {
       await page.keyboard.press('Backspace')
 
       // Check both that this specific element is removed and the total count decreased
-      await expect(page.locator('#blocks-row-2 .inline-block-container')).toHaveCount(
-        initialCount - 1,
-      )
+      await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
       await page.keyboard.press('Escape')
 
@@ -1711,7 +1708,7 @@ describe('lexicalBlocks', () => {
       await page.keyboard.press('ControlOrMeta+Z')
 
       // Wait for the block to be restored
-      await expect(page.locator('#blocks-row-2 .inline-block-container')).toHaveCount(initialCount)
+      await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
       await inlineBlockElement.locator('.inline-block__editButton').first().click()
