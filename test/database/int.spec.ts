@@ -2067,6 +2067,31 @@ describe('database', () => {
       expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
+    it('should allow to query by a deep virtual field', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-31' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'my-title-3' },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: 'category-31' } },
+        overrideAccess: false,
+      })
+
+      expect(doc.docs).toHaveLength(1)
+      expect(doc.docs[0].id).toBe(id)
+    })
+
     it('should allow virtual field with reference localized', async () => {
       const post = await payload.create({
         collection: 'posts',
