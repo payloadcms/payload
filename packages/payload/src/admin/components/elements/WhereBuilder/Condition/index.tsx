@@ -122,7 +122,7 @@ const Condition: React.FC<Props> = (props) => {
                 onChange: setInternalValue,
                 operator: operatorValue,
                 options: valueOptions,
-                value: internalValue,
+                value: internalValue ?? '',
               }}
             />
           </div>
