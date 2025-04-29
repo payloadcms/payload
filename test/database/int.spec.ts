@@ -1997,6 +1997,26 @@ describe('database', () => {
       expect(draft.docs[0]?.postTitle).toBe('my-title')
     })
 
+    it('should respect hidden: true for virtual fields with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitleHidden).toBeUndefined()
+
+      const doc_show = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        showHiddenFields: true,
+      })
+      expect(doc_show.postTitleHidden).toBe('my-title-3')
+    })
+
     it('should allow virtual field as reference to ID', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({

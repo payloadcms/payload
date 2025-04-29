@@ -372,6 +372,7 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
     | {
@@ -826,6 +827,7 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
   postID?: T;
