@@ -279,7 +279,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
       const data = await readCSV(expectedPath)
 
-      // Assert that the header row matches the fields array
+      // Assert that the csv file contains the expected virtual fields
       expect(data[0].virtual).toStrictEqual('virtual value')
       expect(data[0].virtualRelationship).toStrictEqual('name value')
     })
