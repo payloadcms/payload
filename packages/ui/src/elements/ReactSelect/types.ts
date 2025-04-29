@@ -1,3 +1,4 @@
+import type { LabelFunction } from 'payload'
 import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
 import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
@@ -101,7 +102,7 @@ export type ReactSelectAdapterProps = {
   onMenuOpen?: () => void
   onMenuScrollToBottom?: () => void
   options: Option[] | OptionGroup[]
-  placeholder?: string
+  placeholder?: LabelFunction | string
   showError?: boolean
   value?: Option | Option[]
 }

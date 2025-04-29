@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
@@ -18,6 +17,7 @@ import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
+import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
@@ -42,7 +42,8 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -163,6 +164,7 @@ export default buildConfigWithDefaults({
     BaseListFilter,
     with300Documents,
     ListDrawer,
+    Placeholder,
   ],
   globals: [
     GlobalHidden,
