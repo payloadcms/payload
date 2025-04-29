@@ -742,7 +742,15 @@ describe('relationship', () => {
     await expect(listDrawerContent).toBeHidden()
 
     const selectedValue = relationshipField.locator('.relationship--multi-value-label__text')
-    await expect(selectedValue).toBeVisible()
+    await expect(selectedValue).toHaveCount(1)
+
+    await relationshipField.click()
+    await expect(listDrawerContent).toBeVisible()
+    await button.click()
+    await expect(listDrawerContent).toBeHidden()
+
+    const selectedValues = relationshipField.locator('.relationship--multi-value-label__text')
+    await expect(selectedValues).toHaveCount(2)
   })
 
   test('should handle `hasMany` polymorphic relationship when `appearance: "drawer"`', async () => {
@@ -806,6 +814,42 @@ describe('relationship', () => {
     const newRows = listDrawerContent.locator('table tbody tr')
     await expect(newRows).toHaveCount(1)
     await expect(listDrawerContent.getByText('Seeded text document')).toHaveCount(0)
+  })
+
+  test('should filter out existing values from polymorphic relationship list drawer', async () => {
+    await page.goto(url.create)
+    const relationshipField = page.locator('#field-polymorphicRelationshipDrawer')
+    await relationshipField.click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+
+    const relationToSelector = page.locator('.list-header__select-collection')
+    await expect(relationToSelector).toBeVisible()
+
+    await relationToSelector.locator('.rs__control').click()
+    const option = relationToSelector.locator('.rs__option').nth(1)
+    await option.click()
+    const rows = listDrawerContent.locator('table tbody tr')
+    await expect(rows).toHaveCount(2)
+    const firstRow = rows.first()
+    const button = firstRow.locator('button')
+    await button.click()
+    await expect(listDrawerContent).toBeHidden()
+
+    const selectedValue = relationshipField.locator('.relationship--single-value__text')
+    await expect(selectedValue).toBeVisible()
+
+    await relationshipField.click()
+    await expect(listDrawerContent).toBeVisible()
+    await expect(relationToSelector).toBeVisible()
+    await relationToSelector.locator('.rs__control').click()
+    await option.click()
+    const newRows = listDrawerContent.locator('table tbody tr')
+    await expect(newRows).toHaveCount(1)
+    const newFirstRow = newRows.first()
+    const newButton = newFirstRow.locator('button')
+    await newButton.click()
+    await expect(listDrawerContent).toBeHidden()
   })
 })
 
