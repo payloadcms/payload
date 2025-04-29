@@ -56,6 +56,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        select,
         sortOptions,
       } = {},
       hasMany,
@@ -271,6 +272,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
+              select,
               sort: fieldToSort,
               where: {
                 and: [
@@ -367,6 +369,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       i18n,
       config,
       t,
+      select,
     ],
   )
 

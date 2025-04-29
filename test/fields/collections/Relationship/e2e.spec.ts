@@ -1,7 +1,10 @@
 import type { Page } from '@playwright/test'
+import type { SelectType } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { assertResponseBody } from 'helpers/e2e/assertResponseBody.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
@@ -651,6 +654,20 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should populate only selected fields', async () => {
+    await page.goto(url.create)
+
+    await assertRequestBody<{ select: SelectType }>(page, {
+      action: async () => {
+        await page.locator('#field-relationshipWithSelect').click()
+      },
+      url: `/api/${textFieldsSlug}`,
+      expect: (body) => {
+        return Boolean(body.select.title === true && body.select.id === true)
+      },
+    })
+  })
+
   test('should be able to select relationship with drawer appearance', async () => {
     await page.goto(url.create)
 
@@ -703,7 +720,7 @@ describe('relationship', () => {
 
   test('should handle polymorphic relationship when `appearance: "drawer"`', async () => {
     await page.goto(url.create)
-    const relationshipField = page.locator('#field-polymorphicRelationshipDrawer')
+    const relationshipField = page.locator('#field-relationshipDrawerPolymorphic')
     await relationshipField.click()
     const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
     await expect(listDrawerContent).toBeVisible()
@@ -818,7 +835,7 @@ describe('relationship', () => {
 
   test('should filter out existing values from polymorphic relationship list drawer', async () => {
     await page.goto(url.create)
-    const relationshipField = page.locator('#field-polymorphicRelationshipDrawer')
+    const relationshipField = page.locator('#field-relationshipDrawerPolymorphic')
     await relationshipField.click()
     const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
     await expect(listDrawerContent).toBeVisible()

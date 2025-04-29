@@ -127,6 +127,16 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'relationshipWithSelect',
+      relationTo: 'text-fields',
+      type: 'relationship',
+      admin: {
+        select: {
+          text: true,
+        },
+      },
+    },
+    {
       name: 'relationshipDrawer',
       relationTo: 'text-fields',
       admin: { appearance: 'drawer' },
@@ -142,7 +152,7 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
-      name: 'polymorphicRelationshipDrawer',
+      name: 'relationshipDrawerPolymorphic',
       admin: { appearance: 'drawer' },
       type: 'relationship',
       relationTo: ['text-fields', 'array-fields'],

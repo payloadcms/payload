@@ -141,6 +141,7 @@ import type {
   JsonObject,
   Operation,
   PayloadRequest,
+  SelectType,
   Where,
 } from '../../types/index.js'
 import type {
@@ -969,6 +970,14 @@ type UploadAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  /**
+   * Specify the fields to be queried when populating the relationship.
+   * If not provided, all fields will be selected.
+   * This is useful for performance optimization, especially in large collections.
+   * The `id` field will be automatically included in the selection.
+   * @example { select: { title: true, slug: true } }
+   */
+  select?: SelectType
 } & Admin
 
 type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSortable'>
@@ -1160,10 +1169,18 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  /**
+   * Specify the fields to be queried when populating the relationship.
+   * If not provided, all fields will be selected.
+   * This is useful for performance optimization, especially in large collections.
+   * The `id` field will be automatically included in the selection.
+   * @example { select: { title: true, slug: true } }
+   */
+  select?: SelectType
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'select'>
 
 export type PolymorphicRelationshipField = {
   admin?: {

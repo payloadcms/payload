@@ -129,6 +129,11 @@ export const sanitizeFields = async ({
         })
       }
 
+      // If `admin.select` is present, ensure that it includes `id`
+      if (field.admin?.select && !field.admin.select.id) {
+        field.admin.select.id = true
+      }
+
       if (field.min && !field.minRows) {
         console.warn(
           `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
