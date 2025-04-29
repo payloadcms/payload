@@ -6,11 +6,12 @@ import { richTextData } from './richTextData.js'
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
   try {
-    await payload.create({
+    const user = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
+        name: 'name value',
       },
     })
     // create pages
@@ -76,6 +77,16 @@ export const seed = async (payload: Payload): Promise<boolean> => {
               field2: 'baz',
             },
           ],
+        },
+      })
+    }
+
+    for (let i = 0; i < 5; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          author: user.id,
+          title: `Virtual ${i}`,
         },
       })
     }
