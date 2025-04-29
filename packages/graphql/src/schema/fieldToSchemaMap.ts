@@ -398,6 +398,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           depth: 0,
           draft,
           fallbackLocale: req.fallbackLocale,
+          // Fetch one extra document to determine if there are more documents beyond the requested limit (used for hasNextPage calculation).
           limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
           locale: req.locale,
           overrideAccess: false,
