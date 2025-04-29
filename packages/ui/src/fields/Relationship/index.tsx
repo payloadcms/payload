@@ -271,6 +271,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
+              select: {
+                [fieldToSearch]: true,
+              },
               sort: fieldToSort,
               where: {
                 and: [
