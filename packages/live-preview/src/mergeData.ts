@@ -29,6 +29,9 @@ let prevLocale: string | undefined
 
 export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
+  /**
+   * @deprecated Use `requestHandler` instead
+   */
   collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   externallyUpdatedRelationship?: DocumentEvent
@@ -36,6 +39,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   incomingData: Partial<T>
   initialData: T
   locale?: string
+  requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -73,7 +77,8 @@ export const mergeData = async <T extends Record<string, any>>(args: {
       let res: PaginatedDocs
 
       const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
+      const requestHandler =
+        args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
       try {
         res = await requestHandler({

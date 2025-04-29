@@ -26,14 +26,13 @@ const _payloadLivePreview: {
 
 export const handleMessage = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   event: LivePreviewMessageEvent<T>
   initialData: T
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const { apiRoute, collectionPopulationRequestHandler, depth, event, initialData, serverURL } =
-    args
+  const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
     const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
@@ -53,13 +52,13 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
 
     const mergedData = await mergeData<T>({
       apiRoute,
-      collectionPopulationRequestHandler,
       depth,
       externallyUpdatedRelationship,
       fieldSchema: _payloadLivePreview.fieldSchema,
       incomingData: data,
       initialData: _payloadLivePreview?.previousData || initialData,
       locale,
+      requestHandler,
       serverURL,
     })
 

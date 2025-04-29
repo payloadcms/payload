@@ -5,21 +5,20 @@ import { handleMessage } from './handleMessage.js'
 export const subscribe = <T extends Record<string, any>>(args: {
   apiRoute?: string
   callback: (data: T) => void
-  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   initialData: T
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): ((event: MessageEvent) => Promise<void> | void) => {
-  const { apiRoute, callback, collectionPopulationRequestHandler, depth, initialData, serverURL } =
-    args
+  const { apiRoute, callback, depth, initialData, requestHandler, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
     const mergedData = await handleMessage<T>({
       apiRoute,
-      collectionPopulationRequestHandler,
       depth,
       event,
       initialData,
+      requestHandler,
       serverURL,
     })
 
