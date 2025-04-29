@@ -27,6 +27,7 @@
     "build:graphql": "turbo build --filter \"@payloadcms/graphql\"",
     "build:live-preview": "turbo build --filter \"@payloadcms/live-preview\"",
     "build:live-preview-react": "turbo build --filter \"@payloadcms/live-preview-react\"",
+    "build:live-preview-svelte": "turbo build --filter \"@payloadcms/live-preview-svelte\"",
     "build:live-preview-vue": "turbo build --filter \"@payloadcms/live-preview-vue\"",
     "build:next": "turbo build --filter \"@payloadcms/next\"",
     "build:packages": "turbo build --filter=./packages/*",

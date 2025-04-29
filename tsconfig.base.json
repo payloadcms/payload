@@ -31,10 +31,11 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/query-presets/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
+      "@payloadcms/live-preview-svelte": ["./packages/live-preview-svelte/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
