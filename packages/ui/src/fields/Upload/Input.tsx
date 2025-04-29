@@ -5,6 +5,7 @@ import type {
   FieldLabelClientProps,
   FilterOptionsResult,
   JsonObject,
+  SelectType,
   StaticDescription,
   StaticLabel,
   UploadFieldClient,
@@ -71,6 +72,7 @@ export type UploadInputProps = {
   readonly readOnly?: boolean
   readonly relationTo: UploadFieldType['relationTo']
   readonly required?: boolean
+  readonly select?: SelectType
   readonly serverURL?: string
   readonly showError?: boolean
   readonly style?: React.CSSProperties
@@ -100,6 +102,7 @@ export function UploadInput(props: UploadInputProps) {
     readOnly,
     relationTo,
     required,
+    select,
     serverURL,
     showError,
     style,
@@ -201,6 +204,7 @@ export function UploadInput(props: UploadInputProps) {
         draft: true,
         limit: ids.length,
         locale: code,
+        select,
         where: {
           and: [
             {
@@ -308,6 +312,7 @@ export function UploadInput(props: UploadInputProps) {
       setMaxFiles,
       path,
       setCurrentActivePath,
+      select,
     ],
   )
 

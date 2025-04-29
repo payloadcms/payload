@@ -980,7 +980,7 @@ type UploadAdmin = {
   select?: SelectType
 } & Admin
 
-type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSortable'>
+type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSortable' | 'select'>
 
 export type PolymorphicUploadField = {
   admin?: {

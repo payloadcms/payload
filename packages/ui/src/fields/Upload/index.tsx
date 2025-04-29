@@ -20,7 +20,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
   const {
     field,
     field: {
-      admin: { allowCreate, className, description, isSortable } = {},
+      admin: { allowCreate, className, description, isSortable, select } = {},
       hasMany,
       label,
       localized,
@@ -84,6 +84,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       readOnly={readOnly || disabled}
       relationTo={relationTo}
       required={required}
+      select={select}
       serverURL={config.serverURL}
       showError={showError}
       style={styles}
