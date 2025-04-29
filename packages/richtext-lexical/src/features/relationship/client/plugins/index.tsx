@@ -53,7 +53,7 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
 
         if ($isRangeSelection(selection)) {
           const relationshipNode = $createRelationshipNode(payload)
-
+          // we need to get the focus node before inserting the block node, as $insertNodeToNearestRoot can change the focus node
           const { focus } = selection
           const focusNode = focus.getNode()
           // Insert relationship node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
