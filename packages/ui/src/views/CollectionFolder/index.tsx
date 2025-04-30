@@ -293,6 +293,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   onRowClick={onItemClick}
                   onRowPress={onItemKeyPress}
                   selectedItems={selectedItemKeys}
+                  showRelationCell={false}
                   subfolders={subfolders}
                 />
               )}

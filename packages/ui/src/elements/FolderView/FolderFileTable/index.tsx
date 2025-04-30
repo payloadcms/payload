@@ -1,11 +1,14 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
+import { getTranslation } from '@payloadcms/translations'
 import { extractID } from 'payload/shared'
+import React from 'react'
 
 import type { FormatDateArgs } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
@@ -13,20 +16,6 @@ import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
 import './index.scss'
 
 const baseClass = 'folder-file-table'
-const columns = [
-  {
-    name: 'name',
-    label: 'Name',
-  },
-  {
-    name: 'createdAt',
-    label: 'Created At',
-  },
-  {
-    name: 'updatedAt',
-    label: 'Updated At',
-  },
-]
 
 type Props = {
   dateFormat: FormatDateArgs['pattern']
@@ -46,6 +35,7 @@ type Props = {
     item: FolderOrDocument
   }) => void
   selectedItems: Set<FolderDocumentItemKey>
+  showRelationCell?: boolean
   subfolders: FolderOrDocument[]
 }
 
@@ -59,8 +49,45 @@ export function FolderFileTable({
   onRowClick,
   onRowPress,
   selectedItems,
+  showRelationCell = true,
   subfolders,
 }: Props) {
+  const { config } = useConfig()
+
+  const [relationToMap] = React.useState(() => {
+    const map: Record<string, string> = {}
+    config.collections.forEach((collection) => {
+      map[collection.slug] = getTranslation(collection.labels?.singular, i18n)
+    })
+    return map
+  })
+
+  const [columns] = React.useState(() => {
+    const columnsToShow = [
+      {
+        name: 'name',
+        label: 'Name',
+      },
+      {
+        name: 'createdAt',
+        label: 'Created At',
+      },
+      {
+        name: 'updatedAt',
+        label: 'Updated At',
+      },
+    ]
+
+    if (showRelationCell) {
+      columnsToShow.push({
+        name: 'relationTo',
+        label: 'Relation To',
+      })
+    }
+
+    return columnsToShow
+  })
+
   return (
     <SimpleTable
       headerCells={columns.map(({ name, label }) => (
@@ -68,19 +95,23 @@ export function FolderFileTable({
       ))}
       tableRows={[
         ...subfolders.map((subfolder, rowIndex) => {
-          const { itemKey, value } = subfolder
+          const { itemKey, relationTo, value } = subfolder
           const subfolderID = extractID(value)
 
           return (
             <DraggableTableRow
               columns={columns.map(({ name }, index) => {
-                let cellValue = '—'
+                let cellValue: React.ReactNode = '—'
                 if (name === 'name' && value._folderOrDocumentTitle !== undefined) {
                   cellValue = value._folderOrDocumentTitle
                 }
 
                 if ((name === 'createdAt' || name === 'updatedAt') && value[name]) {
                   cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
+                }
+
+                if (name === 'relationTo') {
+                  cellValue = relationToMap[relationTo] || relationTo
                 }
 
                 if (index === 0) {
@@ -127,20 +158,24 @@ export function FolderFileTable({
         }),
 
         ...documents.map((document, unadjustedIndex) => {
-          const { itemKey, value } = document
+          const { itemKey, relationTo, value } = document
           const documentID = extractID(value)
           const rowIndex = unadjustedIndex + subfolders.length
 
           return (
             <DraggableTableRow
               columns={columns.map(({ name }, index) => {
-                let cellValue = '—'
+                let cellValue: React.ReactNode = '—'
                 if (name === 'name' && value._folderOrDocumentTitle !== undefined) {
                   cellValue = value._folderOrDocumentTitle
                 }
 
                 if ((name === 'createdAt' || name === 'updatedAt') && value[name]) {
                   cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
+                }
+
+                if (name === 'relationTo') {
+                  cellValue = relationToMap[relationTo] || relationTo
                 }
 
                 if (index === 0) {
