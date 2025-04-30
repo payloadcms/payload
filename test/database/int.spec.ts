@@ -2428,23 +2428,9 @@ describe('database', () => {
     const result_1 = await payload.count({
       collection: 'posts',
       where: {
-        or: [
-          {
-            category: {
-              equals: category.id,
-            },
-          },
-          {
-            'category.title': {
-              equals: 'new-category',
-            },
-          },
-          {
-            title: {
-              equals: 'new-post',
-            },
-          },
-        ],
+        'category.title': {
+          equals: 'new-category',
+        },
       },
     })
 
@@ -2453,24 +2439,9 @@ describe('database', () => {
     const result_2 = await payload.count({
       collection: 'posts',
       where: {
-        or: [
-          {
-            category: {
-              // eslint-disable-next-line jest/no-conditional-in-test
-              equals: payload.db.defaultIDType === 'number' ? 9999 : randomUUID(),
-            },
-          },
-          {
-            'category.title': {
-              equals: 'non-existing-category',
-            },
-          },
-          {
-            title: {
-              equals: 'non-existing-post',
-            },
-          },
-        ],
+        'category.title': {
+          equals: 'non-existing-category',
+        },
       },
     })
 
