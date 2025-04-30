@@ -147,6 +147,7 @@ const ListDrawerHeader: React.FC<ListHeaderProps> = ({
           <FieldLabel label={t('upload:selectCollectionToBrowse')} />
           <ReactSelect
             className={`${baseClass}__select-collection`}
+            isClearable={false}
             onChange={setSelectedOption}
             options={enabledCollectionConfigs.map((coll) => ({
               label: getTranslation(coll.labels.singular, i18n),
