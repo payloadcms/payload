@@ -1,7 +1,10 @@
 import type { CollectionSlug, Payload } from 'payload'
 
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -9,6 +12,7 @@ import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 
 let payload: Payload
+let restClient: NextRESTClient
 let user: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,7 +20,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
-    ;({ payload } = (await initPayloadInt(dirname)) as { payload: Payload })
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     user = await payload.login({
       collection: 'users',
       data: {
@@ -30,6 +34,25 @@ describe('@payloadcms/plugin-import-export', () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  describe('graphql', () => {
+    it('should not break graphql', async () => {
+      const query = `query {
+        __schema {
+          queryType {
+            name
+          }
+        }
+      }`
+      const response = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      expect(response.error).toBeUndefined()
+    })
   })
 
   describe('exports', () => {
@@ -64,6 +87,53 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].group_array_0_field1).toStrictEqual('test')
       expect(data[0].createdAt).toBeDefined()
       expect(data[0].updatedAt).toBeDefined()
+    })
+
+    it('should create a file for collection csv with draft data', async () => {
+      const draftPage = await payload.create({
+        collection: 'pages',
+        user,
+        data: {
+          title: 'Draft Page',
+          _status: 'published',
+        },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: draftPage.id,
+        data: {
+          title: 'Draft Page Updated',
+          _status: 'draft',
+        },
+      })
+
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'title', '_status'],
+          locale: 'en',
+          format: 'csv',
+          where: {
+            title: { contains: 'Draft ' },
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Draft Page Updated')
+      expect(data[0]._status).toStrictEqual('draft')
     })
 
     it('should create a file for collection csv from one locale', async () => {
@@ -150,6 +220,68 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].array_0_field2).toStrictEqual('bar')
       expect(data[0].array_1_field1).toStrictEqual('foo')
       expect(data[0].array_1_field2).toStrictEqual('baz')
+    })
+
+    it('should create a CSV file with columns matching the order of the fields array', async () => {
+      const fields = ['id', 'group.value', 'group.array.field1', 'title', 'createdAt', 'updatedAt']
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Title ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const buffer = fs.readFileSync(expectedPath)
+      const str = buffer.toString()
+
+      // Assert that the header row matches the fields array
+      expect(str.indexOf('id')).toBeLessThan(str.indexOf('title'))
+      expect(str.indexOf('group_value')).toBeLessThan(str.indexOf('title'))
+      expect(str.indexOf('group_value')).toBeLessThan(str.indexOf('group_array'))
+      expect(str.indexOf('title')).toBeLessThan(str.indexOf('createdAt'))
+      expect(str.indexOf('createdAt')).toBeLessThan(str.indexOf('updatedAt'))
+    })
+
+    it('should create a CSV file with virtual fields', async () => {
+      const fields = ['id', 'virtual', 'virtualRelationship']
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Virtual ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains the expected virtual fields
+      expect(data[0].virtual).toStrictEqual('virtual value')
+      expect(data[0].virtualRelationship).toStrictEqual('name value')
     })
 
     it('should create a file for collection csv from array.subfield', async () => {

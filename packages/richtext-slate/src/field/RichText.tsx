@@ -28,7 +28,6 @@ import type { LoadedSlateFieldProps } from './types.js'
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
-import './index.scss'
 import { hotkeys } from './hotkeys.js'
 import { toggleLeaf } from './leaves/toggle.js'
 import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
@@ -37,6 +36,7 @@ import { ElementButtonProvider } from './providers/ElementButtonProvider.js'
 import { ElementProvider } from './providers/ElementProvider.js'
 import { LeafButtonProvider } from './providers/LeafButtonProvider.js'
 import { LeafProvider } from './providers/LeafProvider.js'
+import './index.scss'
 
 const baseClass = 'rich-text'
 
@@ -66,7 +66,6 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     validate = richTextValidate,
   } = props
 
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -95,17 +94,18 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   const {
     customComponents: { Description, Error, Label } = {},
-    formInitializing,
+    disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formInitializing
+  const disabled = readOnlyFromProps || disabledFromField
 
   const editor = useMemo(() => {
     let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))

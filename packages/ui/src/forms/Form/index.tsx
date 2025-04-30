@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -52,12 +52,12 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
-import { mergeServerFormState } from './mergeServerFormState.js'
 
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
+    useDocumentInfo()
 
   const {
     action,
@@ -121,11 +121,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
-  const [fields, dispatchFields] = fieldsReducer
+  const [formState, dispatchFields] = fieldsReducer
 
-  contextRef.current.fields = fields
+  contextRef.current.fields = formState
 
-  const prevFields = useRef(fields)
+  const prevFormState = useRef(formState)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -368,17 +368,13 @@ export const Form: React.FC<FormProps> = (props) => {
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json)
-            if (newFormState) {
-              const { newState: mergedFormState } = mergeServerFormState({
-                acceptValues: true,
-                existingState: contextRef.current.fields || {},
-                incomingState: newFormState,
-              })
 
+            if (newFormState) {
               dispatchFields({
-                type: 'REPLACE_STATE',
-                optimize: false,
-                state: mergedFormState,
+                type: 'MERGE_SERVER_STATE',
+                acceptValues: true,
+                prevStateRef: prevFormState,
+                serverState: newFormState,
               })
             }
           }
@@ -496,8 +492,28 @@ export const Form: React.FC<FormProps> = (props) => {
 
       let file = data?.file
 
-      if (file) {
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
         delete data.file
+
+        const handler = getUploadHandler({ collectionSlug })
+
+        if (typeof handler === 'function') {
+          let filename = file.name
+          const clientUploadContext = await handler({
+            file,
+            updateFilename: (value) => {
+              filename = value
+            },
+          })
+
+          file = JSON.stringify({
+            clientUploadContext,
+            collectionSlug,
+            filename,
+            mimeType: file.type,
+            size: file.size,
+          })
+        }
       }
 
       if (mergeOverrideData) {
@@ -509,37 +525,23 @@ export const Form: React.FC<FormProps> = (props) => {
         data = overrides
       }
 
-      const handler = getUploadHandler({ collectionSlug })
-
-      if (file && typeof handler === 'function') {
-        let filename = file.name
-        const clientUploadContext = await handler({
-          file,
-          updateFilename: (value) => {
-            filename = value
-          },
-        })
-
-        file = JSON.stringify({
-          clientUploadContext,
-          collectionSlug,
-          filename,
-          mimeType: file.type,
-          size: file.size,
-        })
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify(data),
       }
 
-      const dataToSerialize = {
-        _payload: JSON.stringify(data),
-        file,
+      if (docConfig && 'upload' in docConfig && docConfig.upload && file) {
+        dataToSerialize.file = file
       }
 
       // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-      const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+      const formData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
 
       return formData
     },
-    [collectionSlug, getUploadHandler],
+    [collectionSlug, docConfig, getUploadHandler],
   )
 
   const reset = useCallback(
@@ -596,7 +598,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
-      // dispatch ADD_ROW that sets requiresRender: true and adds a blank row to local form state.
+      // dispatch ADD_ROW adds a blank row to local form state.
       // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
         type: 'ADD_ROW',
@@ -611,9 +613,25 @@ export const Form: React.FC<FormProps> = (props) => {
     [dispatchFields, getDataByPath],
   )
 
+  const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
+    ({ moveFromIndex, moveToIndex, path }) => {
+      dispatchFields({
+        type: 'MOVE_ROW',
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
+
+      setModified(true)
+    },
+    [dispatchFields],
+  )
+
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
     ({ path, rowIndex }) => {
       dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
+
+      setModified(true)
     },
     [dispatchFields],
   )
@@ -672,6 +690,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.dispatchFields = dispatchFields
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
+  contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
@@ -710,7 +729,7 @@ export const Form: React.FC<FormProps> = (props) => {
       refreshCookie()
     },
     15000,
-    [fields],
+    [formState],
   )
 
   useEffect(() => {
@@ -720,58 +739,43 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent(async (submitted: boolean, signal: AbortSignal) => {
-    if (Array.isArray(onChange)) {
-      let revalidatedFormState: FormState = contextRef.current.fields
+  const executeOnChange = useEffectEvent((submitted: boolean) => {
+    queueTask(async () => {
+      if (Array.isArray(onChange)) {
+        let serverState: FormState
 
-      for (const onChangeFn of onChange) {
-        if (signal.aborted) {
-          return
+        for (const onChangeFn of onChange) {
+          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+          serverState = await onChangeFn({
+            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
+            submitted,
+          })
         }
 
-        // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-        revalidatedFormState = await onChangeFn({
-          formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
-          submitted,
-        })
-      }
-
-      if (!revalidatedFormState) {
-        return
-      }
-
-      const { changed, newState } = mergeServerFormState({
-        existingState: contextRef.current.fields || {},
-        incomingState: revalidatedFormState,
-      })
-
-      if (changed && !signal.aborted) {
-        prevFields.current = newState
-
         dispatchFields({
-          type: 'REPLACE_STATE',
-          optimize: false,
-          state: newState,
+          type: 'MERGE_SERVER_STATE',
+          prevStateRef: prevFormState,
+          serverState,
         })
       }
-    }
+    })
   })
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
-        queueTask(async (signal) => executeOnChange(submitted, signal))
+      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+        executeOnChange(submitted)
       }
 
-      prevFields.current = fields
+      prevFormState.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, fields, queueTask],
+    [modified, submitted, formState],
     250,
   )
 
   const DocumentFormContextComponent: React.FC<any> = isDocumentForm
-    ? DocumentFormContext.Provider
+    ? DocumentFormContext
     : React.Fragment
 
   const documentFormContextProps = isDocumentForm
@@ -792,28 +796,29 @@ export const Form: React.FC<FormProps> = (props) => {
       ref={formRef}
     >
       <DocumentFormContextComponent {...documentFormContextProps}>
-        <FormContext.Provider value={contextRef.current}>
-          <FormWatchContext.Provider
+        <FormContext value={contextRef.current}>
+          <FormWatchContext
             value={{
-              fields,
+              fields: formState,
               ...contextRef.current,
             }}
           >
-            <SubmittedContext.Provider value={submitted}>
-              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-                <ProcessingContext.Provider value={processing}>
-                  <BackgroundProcessingContext.Provider value={backgroundProcessing}>
-                    <ModifiedContext.Provider value={modified}>
+            <SubmittedContext value={submitted}>
+              <InitializingContext value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext value={processing}>
+                  <BackgroundProcessingContext value={backgroundProcessing}>
+                    <ModifiedContext value={modified}>
+                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
                         {children}
                       </FormFieldsContext.Provider>
-                    </ModifiedContext.Provider>
-                  </BackgroundProcessingContext.Provider>
-                </ProcessingContext.Provider>
-              </InitializingContext.Provider>
-            </SubmittedContext.Provider>
-          </FormWatchContext.Provider>
-        </FormContext.Provider>
+                    </ModifiedContext>
+                  </BackgroundProcessingContext>
+                </ProcessingContext>
+              </InitializingContext>
+            </SubmittedContext>
+          </FormWatchContext>
+        </FormContext>
       </DocumentFormContextComponent>
     </El>
   )

@@ -12,6 +12,8 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 import type { Pool, PoolConfig } from 'pg'
 
+type PgDependency = typeof import('pg')
+
 export type Args = {
   /**
    * Transform the schema after it's built.
@@ -19,6 +21,14 @@ export type Args = {
    * Examples may include: composite indices, generated columns, vectors
    */
   afterSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
   /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
@@ -37,6 +47,7 @@ export type Args = {
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  pg?: PgDependency
   pool: PoolConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -66,6 +77,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 export type PostgresAdapter = {
   drizzle: Drizzle
+  pg: PgDependency
   pool: Pool
   poolOptions: PoolConfig
 } & BasePostgresAdapter
@@ -90,6 +102,8 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @payloadcms/plugin-sentry. */
+    pg?: PgDependency
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
     poolOptions: Args['pool']

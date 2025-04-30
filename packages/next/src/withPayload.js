@@ -56,16 +56,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ...(nextConfig?.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
-    experimental: {
-      ...(nextConfig?.experimental || {}),
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          'payload-mock-package': 'payload-mock-package',
-        },
-      },
-    },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
@@ -102,7 +92,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       'pino-pretty',
       'graphql',
       // Do not bundle server-only packages during dev to improve compile speed
-      ...(process.env.npm_lifecycle_event === 'dev' && options.devBundleServerPackages === false
+      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
         ? [
             'payload',
             '@payloadcms/db-mongodb',
@@ -114,11 +104,11 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/email-resend',
             '@payloadcms/graphql',
             '@payloadcms/payload-cloud',
-            '@payloadcms/plugin-cloud-storage',
             '@payloadcms/plugin-redirects',
-            '@payloadcms/plugin-sentry',
-            '@payloadcms/plugin-stripe',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
+            //'@payloadcms/plugin-cloud-storage',
+            //'@payloadcms/plugin-sentry',
+            //'@payloadcms/plugin-stripe',
             // @payloadcms/richtext-lexical
             //'@payloadcms/storage-azure',
             //'@payloadcms/storage-gcs',
@@ -149,6 +139,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           { file: /node_modules\/mongodb\/lib\/utils\.js/ },
           { module: /node_modules\/mongodb\/lib\/bson\.js/ },
           { file: /node_modules\/mongodb\/lib\/bson\.js/ },
+        ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),

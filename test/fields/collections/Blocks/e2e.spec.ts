@@ -4,7 +4,9 @@ import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
+import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
@@ -311,6 +313,8 @@ describe('Block fields', () => {
         'Second block',
       )
 
+      await wait(1000)
+
       await reorderBlocks({
         page,
         fieldName: 'blocks',
@@ -329,20 +333,16 @@ describe('Block fields', () => {
       test('should add 2 new block rows', async () => {
         await page.goto(url.create)
 
+        await scrollEntirePage(page)
+
         await page
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 1' })
           .click()
 
-        const customBlocks = page.locator(
-          '#field-customBlocks input[name="customBlocks.0.block1Title"]',
-        )
-
-        await page.mouse.wheel(0, 1750)
-
-        await customBlocks.scrollIntoViewIfNeeded()
-
-        await expect(customBlocks).toHaveValue('Block 1: Prefilled Title')
+        await expect(
+          page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
+        ).toHaveValue('Block 1: Prefilled Title')
 
         await page
           .locator('.custom-blocks-field-management')

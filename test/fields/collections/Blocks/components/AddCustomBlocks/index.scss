@@ -1,43 +1,4 @@
-@mixin btn-reset {
-  border: 0;
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
-  color: currentColor;
-  cursor: pointer;
-}
-
-#field-customBlocks {
-  margin-bottom: var(--base);
-
-  .blocks-field__drawer-toggler {
-    display: none;
-  }
-}
-
 .custom-blocks-field-management {
-  &__blocks-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: calc(var(--base) * 2);
-  }
-
-  &__block-button {
-    @include btn-reset;
-
-    border: 1px solid var(--theme-border-color);
-    width: 100%;
-    padding: 25px 10px;
-
-    &:hover {
-      border-color: var(--theme-elevation-400);
-    }
-  }
-
-  &__replace-block-button {
-    margin-top: calc(var(--base) * 1.5);
-    color: var(--theme-bg);
-    background: var(--theme-text);
-  }
+  display: flex;
+  gap: var(--base);
 }

@@ -22,6 +22,7 @@ Collections and Globals both support the same options for configuring autosave. 
 | Drafts Autosave Options | Description                                                                                                                                                           |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `interval`              | Define an `interval` in milliseconds to automatically save progress while documents are edited. Document updates are "debounced" at this interval. Defaults to `800`. |
+| `showSaveDraftButton`   | Set this to `true` to show the "Save as draft" button even while autosave is enabled. Defaults to `false`.                                                            |
 
 **Example config with versions, drafts, and autosave enabled:**
 
@@ -50,9 +51,13 @@ export const Pages: CollectionConfig = {
     drafts: {
       autosave: true,
 
-      // Alternatively, you can specify an `interval`:
+      // Alternatively, you can specify an object to customize autosave:
       // autosave: {
+      // Define how often the document should be autosaved (in milliseconds)
       //   interval: 1500,
+      //
+      // Show the "Save as draft" button even while autosave is enabled
+      //   showSaveDraftButton: true,
       // },
     },
   },
@@ -69,7 +74,8 @@ When `autosave` is enabled, all `update` operations within Payload expose a new 
 If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document at ~800ms intervals.
 
 <Banner type="success">
-  Instead of creating a new version each time a document is autosaved, Payload smartly only creates 
-  **one** autosave version, and then updates that specific version with each autosave
-  performed. This makes sure that your versions remain nice and tidy.
+  Instead of creating a new version each time a document is autosaved, Payload
+  smartly only creates **one** autosave version, and then updates that specific
+  version with each autosave performed. This makes sure that your versions
+  remain nice and tidy.
 </Banner>

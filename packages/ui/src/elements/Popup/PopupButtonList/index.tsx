@@ -8,6 +8,9 @@ import './index.scss'
 
 const baseClass = 'popup-button-list'
 
+export { PopupListDivider as Divider } from '../PopupDivider/index.js'
+export { PopupListGroupLabel as GroupLabel } from '../PopupGroupLabel/index.js'
+
 export const ButtonGroup: React.FC<{
   buttonSize?: 'default' | 'small'
   children: React.ReactNode

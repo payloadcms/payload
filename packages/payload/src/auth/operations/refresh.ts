@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import url from 'url'
 
-import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
+import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -16,6 +16,12 @@ export type Result = {
   exp: number
   refreshedToken: string
   setCookie?: boolean
+  /** @deprecated
+   * use:
+   * ```ts
+   * user._strategy
+   * ```
+   */
   strategy?: string
   user: Document
 }
@@ -76,6 +82,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     if (user) {
       user.collection = args.req.user.collection
+      user._strategy = args.req.user._strategy
     }
 
     let result: Result
@@ -110,6 +117,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         exp,
         refreshedToken,
         setCookie: true,
+        /** @deprecated
+         * use:
+         * ```ts
+         * user._strategy
+         * ```
+         */
         strategy: args.req.user._strategy,
         user,
       }
