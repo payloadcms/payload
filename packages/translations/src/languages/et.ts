@@ -176,17 +176,28 @@ export const etTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Sirvi kausta järgi',
     byFolder: 'Kausta järgi',
-    deleteConfirmation:
-      'Pesastatud kaustad kustutatakse. Pesastatud dokumendid liiguvad lähimasse ülemkausta. Kas olete kindel?',
     deleteFolder: 'Kustuta kaust',
     folderName: 'Kausta nimi',
     folders: 'Kaustad',
+    itemHasBeenMoved: '{{title}} on teisaldatud kausta {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} on teisaldatud juurkausta',
+    itemsMovedToFolder: '{{title}} viidi üle kausta {{folderName}}',
+    itemsMovedToRoot: '{{title}} on teisaldatud juurkausta.',
     moveFolder: 'Liiguta kausta',
+    moveItemsToFolderConfirmation:
+      'Te olete umbes kolimas <1>{{count}} {{label}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
+    moveItemsToRootConfirmation:
+      'Te olete peaaegu teisaldamas <1>{{count}} {{label}}</1> juurkausta. Kas olete kindel?',
+    moveItemToFolderConfirmation:
+      'Te olete umbes liigutamas <1>{{title}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
+    moveItemToRootConfirmation:
+      'Te olete peaaegu liigutanud <1>{{title}}</1> juurkausta. Kas olete kindel?',
+    movingFromFolder: 'Liigutan {{title}} kaustast {{folderName}}',
     newFolder: 'Uus kaust',
-    removeFromFolder: 'Eemalda kaustast',
+    noFolder: 'Pole kausta',
     renameFolder: 'Nimeta kaust ümber',
     searchByNameInFolder: 'Otsi nime järgi kaustas {{folderName}}',
-    selectFolder: 'Vali kaust',
+    selectFolderForItem: 'Valige kaust {{title}} jaoks',
   },
   general: {
     name: 'Nimi',
@@ -218,6 +229,7 @@ export const etTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Kinnita kopeerimine',
     confirmDeletion: 'Kinnita kustutamine',
     confirmDuplication: 'Kinnita dubleerimine',
+    confirmMove: 'Kinnita liikumine',
     confirmReindex: 'Indekseeri uuesti kõik {{collections}}?',
     confirmReindexAll: 'Indekseeri uuesti kõik kollektsioonid?',
     confirmReindexDescription:
@@ -332,6 +344,7 @@ export const etTranslations: DefaultTranslationsObject = {
     saving: 'Salvestamine...',
     schedulePublishFor: 'Planeeri avaldamine {{title}} jaoks',
     searchBy: 'Otsi {{label}} järgi',
+    select: 'Vali',
     selectAll: 'Vali kõik {{count}} {{label}}',
     selectAllRows: 'Vali kõik read',
     selectedCount: '{{count}} {{label}} valitud',

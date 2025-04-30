@@ -174,17 +174,27 @@ export const thTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'เรียกดูตามโฟลเดอร์',
     byFolder: 'ตามโฟลเดอร์',
-    deleteConfirmation:
-      'โฟลเดอร์ที่ซ้อนกันจะถูกลบ ส่วนเอกสารที่ซ้อนกันจะถูกย้ายไปยังโฟลเดอร์แม่ที่ใกล้ที่สุด คุณแน่ใจหรือไม่?',
     deleteFolder: 'ลบโฟลเดอร์',
     folderName: 'ชื่อโฟลเดอร์',
     folders: 'โฟลเดอร์',
+    itemHasBeenMoved: '{{title}} ได้ถูกย้ายไปที่ {{folderName}}',
+    itemHasBeenMovedToRoot: '"{{title}}" ได้ถูกย้ายไปยังโฟลเดอร์ราก',
+    itemsMovedToFolder: '{{title}} ถูกย้ายไปยัง {{folderName}}',
+    itemsMovedToRoot: '{{title}} ถูกย้ายไปยังโฟลเดอร์ราก',
     moveFolder: 'ย้ายโฟลเดอร์',
+    moveItemsToFolderConfirmation:
+      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยัง <2>{{toFolder}}</2> แน่ใจไหม?',
+    moveItemsToRootConfirmation:
+      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังโฟลเดอร์ราก คุณแน่ใจหรือไม่?',
+    moveItemToFolderConfirmation:
+      'คุณกำลังจะย้าย <1>{{title}}</1> ไปยัง <2>{{toFolder}}</2> คุณแน่ใจหรือไม่?',
+    moveItemToRootConfirmation: 'คุณกำลังจะย้าย <1>{{title}}</1> ไปยังโฟลเดอร์ราก คุณแน่ใจหรือไม่?',
+    movingFromFolder: 'ย้าย {{title}} จาก {{folderName}}',
     newFolder: 'โฟลเดอร์ใหม่',
-    removeFromFolder: 'นำออกจากโฟลเดอร์',
+    noFolder: 'ไม่มีโฟลเดอร์',
     renameFolder: 'เปลี่ยนชื่อโฟลเดอร์',
     searchByNameInFolder: 'ค้นหาด้วยชื่อใน {{folderName}}',
-    selectFolder: 'เลือกโฟลเดอร์',
+    selectFolderForItem: 'เลือกโฟลเดอร์สำหรับ {{title}}',
   },
   general: {
     name: 'ชื่อ',
@@ -216,6 +226,7 @@ export const thTranslations: DefaultTranslationsObject = {
     confirmCopy: 'ยืนยันสำเนา',
     confirmDeletion: 'ยืนยันการลบ',
     confirmDuplication: 'ยืนยันการสำเนา',
+    confirmMove: 'ยืนยันการย้าย',
     confirmReindex: 'ทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}?',
     confirmReindexAll: 'ทำการจัดทำดัชนีใหม่ทั้งหมดในทุกคอลเลกชัน?',
     confirmReindexDescription:
@@ -331,6 +342,7 @@ export const thTranslations: DefaultTranslationsObject = {
     saving: 'กำลังบันทึก...',
     schedulePublishFor: 'ตั้งเวลาเผยแพร่สำหรับ {{title}}',
     searchBy: 'ค้นหาด้วย {{label}}',
+    select: 'เลือก',
     selectAll: 'เลือกทั้งหมด {{count}} {{label}}',
     selectAllRows: 'เลือกทุกแถว',
     selectedCount: 'เลือก {{count}} {{label}} แล้ว',

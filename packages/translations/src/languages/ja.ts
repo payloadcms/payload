@@ -178,17 +178,28 @@ export const jaTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'フォルダーで閲覧する',
     byFolder: 'フォルダー別に',
-    deleteConfirmation:
-      'ネストされたフォルダは削除されます。ネストされたドキュメントは最も近い親フォルダに移動します。よろしいですか？',
     deleteFolder: 'フォルダを削除する',
     folderName: 'フォルダ名',
     folders: 'フォルダー',
+    itemHasBeenMoved: '{{title}}は{{folderName}}に移動されました',
+    itemHasBeenMovedToRoot: '{{title}}はルートフォルダに移動されました',
+    itemsMovedToFolder: '{{title}}は{{folderName}}に移動されました',
+    itemsMovedToRoot: '{{title}}はルートフォルダに移動しました。',
     moveFolder: 'フォルダを移動する',
+    moveItemsToFolderConfirmation:
+      'あなたは<1>{{count}} {{label}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
+    moveItemsToRootConfirmation:
+      'あなたはまもなく<1>{{count}} {{label}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
+    moveItemToFolderConfirmation:
+      '<1>{{title}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
+    moveItemToRootConfirmation:
+      'あなたは<1>{{title}}</1>をルートフォルダに移動しようとしています。よろしいですか？',
+    movingFromFolder: '{{title}}を{{folderName}}から移動します',
     newFolder: '新しいフォルダ',
-    removeFromFolder: 'フォルダから削除します',
+    noFolder: 'フォルダーなし',
     renameFolder: 'フォルダの名前を変更する',
     searchByNameInFolder: '{{folderName}}で名前を検索する',
-    selectFolder: 'フォルダを選択してください',
+    selectFolderForItem: '{{title}}のためのフォルダを選択してください。',
   },
   general: {
     name: '名前',
@@ -220,6 +231,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     confirmCopy: 'コピーを確認します',
     confirmDeletion: '削除の確認',
     confirmDuplication: '複製の確認',
+    confirmMove: '移動を確認してください',
     confirmReindex: 'すべての{{collections}}を再インデックスしますか？',
     confirmReindexAll: 'すべてのコレクションを再インデックスしますか？',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     saving: '保存しています...',
     schedulePublishFor: '{{title}}の公開を予定する',
     searchBy: '{{label}} で検索',
+    select: '選択してください。',
     selectAll: 'すべての{{count}}つの{{label}}を選択',
     selectAllRows: 'すべての行を選択します',
     selectedCount: '{{count}}つの{{label}}を選択中',

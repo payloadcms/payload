@@ -177,17 +177,28 @@ export const slTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Brskaj po mapi',
     byFolder: 'Po mapi',
-    deleteConfirmation:
-      'Vgnešene mape bodo izbrisane. Vgnešeni dokumenti se bodo premaknili v najbližjo starševsko mapo. Ste prepričani?',
     deleteFolder: 'Izbriši mapo',
     folderName: 'Ime mape',
     folders: 'Mape',
+    itemHasBeenMoved: '{{title}} je bil premaknjen v {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} je bil premaknjen v korensko mapo.',
+    itemsMovedToFolder: '{{title}} premaknjeno v {{folderName}}',
+    itemsMovedToRoot: '{{title}} premaknjeno v korensko mapo',
     moveFolder: 'Premakni mapo',
+    moveItemsToFolderConfirmation:
+      'Ravno se pripravljate na premik <1>{{count}} {{label}}</1> v mapo <2>{{toFolder}}</2>. Ste prepričani?',
+    moveItemsToRootConfirmation:
+      'Ravno boste premaknili <1>{{count}} {{label}}</1> v korensko mapo. Ste prepričani?',
+    moveItemToFolderConfirmation:
+      'Pravkar boste premaknili <1>{{title}}</1> v <2>{{toFolder}}</2>. Ste prepričani?',
+    moveItemToRootConfirmation:
+      'Pravkar boste premaknili <1>{{title}}</1> v korensko mapo. Ali ste prepričani?',
+    movingFromFolder: 'Premik {{title}} iz {{folderName}}',
     newFolder: 'Nova mapa',
-    removeFromFolder: 'Odstrani iz mape',
+    noFolder: 'Brez mape',
     renameFolder: 'Preimenuj Mapo',
     searchByNameInFolder: 'Iskanje po imenu v {{folderName}}',
-    selectFolder: 'Izberite mapo',
+    selectFolderForItem: 'Izberite mapo za {{title}}',
   },
   general: {
     name: 'Ime',
@@ -220,6 +231,7 @@ export const slTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potrdi kopiranje',
     confirmDeletion: 'Potrdi brisanje',
     confirmDuplication: 'Potrdi podvajanje',
+    confirmMove: 'Potrdi premik',
     confirmReindex: 'Ponovno indeksirati vse {{collections}}?',
     confirmReindexAll: 'Ponovno indeksirati vse zbirke?',
     confirmReindexDescription:
@@ -335,6 +347,7 @@ export const slTranslations: DefaultTranslationsObject = {
     saving: 'Shranjevanje...',
     schedulePublishFor: 'Načrtujte objavo za {{naslov}}',
     searchBy: 'Išči po {{label}}',
+    select: 'Izberi',
     selectAll: 'Izberi vse {{count}} {{label}}',
     selectAllRows: 'Izberi vse vrstice',
     selectedCount: '{{count}} {{label}} izbranih',

@@ -179,17 +179,28 @@ export const ruTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Просмотр по папкам',
     byFolder: 'По папке',
-    deleteConfirmation:
-      'Вложенные папки будут удалены. Вложенные документы будут перемещены в ближайшую родительскую папку. Вы уверены?',
     deleteFolder: 'Удалить папку',
     folderName: 'Название папки',
     folders: 'Папки',
+    itemHasBeenMoved: '{{title}} был перемещен в {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} был перемещен в корневую папку',
+    itemsMovedToFolder: '{{title}} перемещен в {{folderName}}',
+    itemsMovedToRoot: '{{title}} перемещен в корневую папку',
     moveFolder: 'Переместить папку',
+    moveItemsToFolderConfirmation:
+      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
+    moveItemsToRootConfirmation:
+      'Вы собираетесь перенести <1>{{count}} {{label}}</1> в корневую папку. Вы уверены?',
+    moveItemToFolderConfirmation:
+      'Вы собираетесь переместить <1>{{title}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
+    moveItemToRootConfirmation:
+      'Вы собираетесь переместить <1>{{title}}</1> в корневую папку. Вы уверены?',
+    movingFromFolder: 'Перемещение {{title}} из {{folderName}}',
     newFolder: 'Новая папка',
-    removeFromFolder: 'Удалить из папки',
+    noFolder: 'Нет папки',
     renameFolder: 'Переименовать папку',
     searchByNameInFolder: 'Поиск по имени в {{folderName}}',
-    selectFolder: 'Выбрать папку',
+    selectFolderForItem: 'Выберите папку для {{title}}',
   },
   general: {
     name: 'Имя',
@@ -222,6 +233,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Подтвердить копирование',
     confirmDeletion: 'Подтвердить удаление',
     confirmDuplication: 'Подтвердить копирование',
+    confirmMove: 'Подтвердите перемещение',
     confirmReindex: 'Переиндексировать все {{collections}}?',
     confirmReindexAll: 'Переиндексировать все коллекции?',
     confirmReindexDescription:
@@ -338,6 +350,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
     searchBy: 'Искать по',
+    select: 'Выбрать',
     selectAll: 'Выбрать все {{count}} {{label}}',
     selectAllRows: 'Выбрать все строки',
     selectedCount: '{{count}} {{label}} выбрано',

@@ -16,5 +16,11 @@
         margin-left: var(--base);
       }
     }
+
+    &__folder-breadcrumbs-root {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 2);
+    }
   }
 }

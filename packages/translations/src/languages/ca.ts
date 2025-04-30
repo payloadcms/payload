@@ -178,17 +178,28 @@ export const caTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Navega per carpeta',
     byFolder: 'Per Carpeta',
-    deleteConfirmation:
-      "Les carpetes imbricades seran eliminades. Els documents imbricats es mouran a la carpeta principal més propera. N'estàs segur?",
     deleteFolder: 'Esborra la carpeta',
     folderName: 'Nom de la Carpeta',
     folders: 'Carpetes',
+    itemHasBeenMoved: "{{title}} s'ha traslladat a {{folderName}}",
+    itemHasBeenMovedToRoot: "{{title}} s'ha mogut a la carpeta arrel",
+    itemsMovedToFolder: "{{title}} s'ha traslladat a {{folderName}}",
+    itemsMovedToRoot: "{{title}} s'ha traslladat a la carpeta arrel",
     moveFolder: 'Mou la carpeta',
+    moveItemsToFolderConfirmation:
+      "Estàs a punt de moure <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. N'estàs segur?",
+    moveItemsToRootConfirmation:
+      'Estàs a punt de moure <1>{{count}} {{label}}</1> a la carpeta arrel. Estàs segur?',
+    moveItemToFolderConfirmation:
+      "Estàs a punt de moure <1>{{title}}</1> a <2>{{toFolder}}</2>. N'estàs segur?",
+    moveItemToRootConfirmation:
+      "Estàs a punt de moure <1>{{title}}</1> a la carpeta arrel. N'estàs segur?",
+    movingFromFolder: 'Movent {{title}} de {{folderName}}',
     newFolder: 'Nova carpeta',
-    removeFromFolder: 'Elimina de la carpeta',
+    noFolder: 'No hi ha carpeta',
     renameFolder: 'Anomena carpeta',
     searchByNameInFolder: 'Cerca per Nom en {{folderName}}',
-    selectFolder: 'Selecciona la carpeta',
+    selectFolderForItem: 'Selecciona la carpeta per a {{title}}',
   },
   general: {
     name: 'Nom',
@@ -220,6 +231,7 @@ export const caTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmar còpia',
     confirmDeletion: "Confirma l'eliminació",
     confirmDuplication: 'Confirma duplicacat',
+    confirmMove: 'Confirmar moviment',
     confirmReindex: 'Reindexa {{collections}}?',
     confirmReindexAll: 'Reindexa totes les col·leccions?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const caTranslations: DefaultTranslationsObject = {
     saving: 'Desant...',
     schedulePublishFor: 'Programa la publicacio {{title}}',
     searchBy: 'Cerca per {{label}}',
+    select: 'Selecciona',
     selectAll: 'Selecciona totes les {{count}} {{label}}',
     selectAllRows: 'Selecciona totes les files',
     selectedCount: '{{count}} {{label}} seleccionats',

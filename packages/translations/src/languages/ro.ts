@@ -181,17 +181,28 @@ export const roTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Răsfoiește după Folder',
     byFolder: 'După dosar',
-    deleteConfirmation:
-      'Folderele înglobate vor fi șterse. Documentele înglobate se vor muta în folderul părinte cel mai apropiat. Sunteți sigur(a)?',
     deleteFolder: 'Ștergeți dosarul',
     folderName: 'Nume dosar',
     folders: 'Dosare',
+    itemHasBeenMoved: '{{title}} a fost mutat în {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} a fost mutat în dosarul rădăcină',
+    itemsMovedToFolder: '{{title}} a fost mutat în {{folderName}}',
+    itemsMovedToRoot: '{{title}} a fost mutat în dosarul rădăcină',
     moveFolder: 'Mutare Dosar',
+    moveItemsToFolderConfirmation:
+      'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> în <2>{{toFolder}}</2>. Sunteți sigur?',
+    moveItemsToRootConfirmation:
+      'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> în dosarul principal. Sunteți sigur?',
+    moveItemToFolderConfirmation:
+      'Sunteți pe cale să mutați <1>{{title}}</1> în <2>{{toFolder}}</2>. Sunteți sigur?',
+    moveItemToRootConfirmation:
+      'Sunteți pe cale să mutați <1>{{title}}</1> în dosarul rădăcină. Sigur?',
+    movingFromFolder: 'Mutarea {{title}} din {{folderName}}',
     newFolder: 'Dosar nou',
-    removeFromFolder: 'Eliminați din dosar',
+    noFolder: 'Niciun dosar',
     renameFolder: 'Redenumiți dosarul',
     searchByNameInFolder: 'Căutați după nume în {{folderName}}',
-    selectFolder: 'Selectează dosarul',
+    selectFolderForItem: 'Selectați dosarul pentru {{title}}',
   },
   general: {
     name: 'Nume',
@@ -224,6 +235,7 @@ export const roTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmă copierea',
     confirmDeletion: 'Confirmați ștergerea',
     confirmDuplication: 'Confirmați duplicarea',
+    confirmMove: 'Confirmați mutarea',
     confirmReindex: 'Reindexați toate {{collections}}?',
     confirmReindexAll: 'Reindexați toate colecțiile?',
     confirmReindexDescription:
@@ -340,6 +352,7 @@ export const roTranslations: DefaultTranslationsObject = {
     saving: 'Salvare...',
     schedulePublishFor: 'Planificați publicarea pentru {{title}}',
     searchBy: 'Căutați după {{label}}',
+    select: 'Selectați',
     selectAll: 'Selectați toate {{count}} {{label}}',
     selectAllRows: 'Selectează toate rândurile',
     selectedCount: '{{count}} {{label}} selectate',

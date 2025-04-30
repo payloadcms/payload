@@ -183,17 +183,28 @@ export const frTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Parcourir par Dossier',
     byFolder: 'Par Dossier',
-    deleteConfirmation:
-      'Les dossiers imbriqués seront supprimés. Les documents imbriqués seront déplacés vers le dossier parent le plus proche. Êtes-vous sûr ?',
     deleteFolder: 'Supprimer le dossier',
     folderName: 'Nom du dossier',
     folders: 'Dossiers',
+    itemHasBeenMoved: '{{title}} a été déplacé vers {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} a été déplacé dans le dossier racine',
+    itemsMovedToFolder: '{{title}} déplacé vers {{folderName}}',
+    itemsMovedToRoot: '{{title}} déplacé vers le dossier racine',
     moveFolder: 'Déplacer le dossier',
+    moveItemsToFolderConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers <2>{{toFolder}}</2>. Êtes-vous sûr ?',
+    moveItemsToRootConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers le dossier racine. Êtes-vous sûr ?',
+    moveItemToFolderConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{title}}</1> dans <2>{{toFolder}}</2>. Êtes-vous sûr ?',
+    moveItemToRootConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{title}}</1> vers le dossier racine. Êtes-vous sûr ?',
+    movingFromFolder: 'Déplacement de {{title}} de {{folderName}}',
     newFolder: 'Nouveau Dossier',
-    removeFromFolder: 'Retirer du dossier',
+    noFolder: 'Pas de dossier',
     renameFolder: 'Renommer le dossier',
     searchByNameInFolder: 'Recherche par nom dans {{folderName}}',
-    selectFolder: 'Sélectionnez le dossier',
+    selectFolderForItem: 'Sélectionnez le dossier pour {{title}}',
   },
   general: {
     name: 'Nom',
@@ -227,6 +238,7 @@ export const frTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmer la copie',
     confirmDeletion: 'Confirmer la suppression',
     confirmDuplication: 'Confirmer la duplication',
+    confirmMove: 'Confirmez le déplacement',
     confirmReindex: 'Réindexer toutes les {{collections}} ?',
     confirmReindexAll: 'Réindexer toutes les collections ?',
     confirmReindexDescription:
@@ -344,6 +356,7 @@ export const frTranslations: DefaultTranslationsObject = {
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',
+    select: 'Sélectionner',
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',

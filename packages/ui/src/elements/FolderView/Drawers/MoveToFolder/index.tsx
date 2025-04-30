@@ -34,13 +34,37 @@ const baseClass = 'move-folder-drawer'
 const baseModalSlug = 'move-folder-drawer'
 const confirmModalSlug = `${baseModalSlug}-confirm-move`
 const newFolderDrawerSlug = `${baseModalSlug}-new-folder`
+
+type ActionProps =
+  | {
+      readonly action: 'moveDocumentsToFolder'
+      readonly fromFolderName: string
+    }
+  | {
+      readonly action: 'moveItemToFolder'
+      readonly fromFolderName: string
+      readonly title: string
+    }
 type Props = {
   readonly drawerSlug: string
   readonly folderID: number | string
   readonly itemsToMove: FolderOrDocument[]
-  readonly onConfirm: (folderID: number | string) => Promise<void> | void
+  /**
+   * Callback function to be called when the user confirms the move
+   *
+   * @param folderID - The ID of the folder to move the items to
+   */
+  readonly onConfirm: (args: {
+    id: null | number | string
+    name: null | string
+  }) => Promise<void> | void
+  /**
+   * Set to `true` to skip the confirmation modal
+   * @default false
+   */
   readonly skipConfirmModal?: boolean
-}
+} & ActionProps
+
 export function MoveItemsToFolderDrawer(props: Props) {
   return (
     <Drawer gutter={false} Header={null} slug={props.drawerSlug}>
@@ -116,7 +140,14 @@ function LoadFolderData(props: Props) {
   )
 }
 
-function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props) {
+function Content({
+  drawerSlug,
+  folderID: fromFolderID,
+  itemsToMove,
+  onConfirm,
+  skipConfirmModal,
+  ...props
+}: Props) {
   const { closeModal, openModal } = useModal()
   const [count] = React.useState(() => itemsToMove.length)
   const { i18n, t } = useTranslation()
@@ -130,29 +161,27 @@ function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props
     subfolders,
   } = useFolder()
 
-  const getSelectedFolder = React.useCallback(
-    ({ key }: { key: 'id' | 'name' }) => {
-      const selected = getSelectedItems()
+  const getSelectedFolder = React.useCallback((): {
+    id: null | number | string
+    name: null | string
+  } => {
+    const selected = getSelectedItems()
 
-      if (selected.length === 0) {
-        const lastCrumb = breadcrumbs?.[breadcrumbs.length - 1]
-        // use the breadcrumb
-        if (key === 'id') {
-          return lastCrumb?.id || null
-        } else {
-          return lastCrumb?.name || 'Root'
-        }
-      } else {
-        // use the selected item
-        if (key === 'id') {
-          return selected[0].value.id
-        } else {
-          return selected[0].value._folderOrDocumentTitle
-        }
+    if (selected.length === 0) {
+      const lastCrumb = breadcrumbs?.[breadcrumbs.length - 1]
+      // use the breadcrumb
+      return {
+        id: lastCrumb?.id || null,
+        name: lastCrumb?.name || null,
       }
-    },
-    [breadcrumbs, getSelectedItems],
-  )
+    } else {
+      // use the selected item
+      return {
+        id: selected[0].value.id,
+        name: selected[0].value._folderOrDocumentTitle,
+      }
+    }
+  }, [breadcrumbs, getSelectedItems])
 
   const onCreateSuccess = React.useCallback(
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Record<string, any> }) => {
@@ -183,16 +212,22 @@ function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props
         }}
         onSave={() => {
           if (skipConfirmModal) {
-            void onConfirm(getSelectedFolder({ key: 'id' }))
+            void onConfirm(getSelectedFolder())
           } else {
             openModal(confirmModalSlug)
           }
         }}
-        saveLabel={t('folder:selectFolder')}
-        title={t('general:movingCount', {
-          count,
-          label: count > 1 ? t('general:items') : t('general:item'),
-        })}
+        saveLabel={t('general:select')}
+        title={
+          <DrawerHeading
+            action={props.action}
+            count={count}
+            fromFolderName={
+              props.action !== 'moveDocumentsToFolder' ? props.fromFolderName : undefined
+            }
+            title={props.action === 'moveItemToFolder' ? props.title : undefined}
+          />
+        }
       />
 
       <div className={`${baseClass}__breadcrumbs-section`}>
@@ -200,7 +235,12 @@ function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props
           breadcrumbs={[
             {
               id: null,
-              name: <ColoredFolderIcon />,
+              name: (
+                <span className={`${baseClass}__folder-breadcrumbs-root`}>
+                  <ColoredFolderIcon />
+                  {t('folder:folders')}
+                </span>
+              ),
               onClick: breadcrumbs.length
                 ? () => {
                     void setFolderID({ folderID: null })
@@ -254,9 +294,7 @@ function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props
             disabledItemKeys={new Set(itemsToMove.map(({ itemKey }) => itemKey))}
             items={subfolders}
             selectedItemKeys={
-              new Set<FolderDocumentItemKey>([
-                `${folderCollectionSlug}-${getSelectedFolder({ key: 'id' })}`,
-              ])
+              new Set<FolderDocumentItemKey>([`${folderCollectionSlug}-${getSelectedFolder().id}`])
             }
             type="folder"
           />
@@ -284,30 +322,142 @@ function Content({ drawerSlug, itemsToMove, onConfirm, skipConfirmModal }: Props
       {!skipConfirmModal && (
         <ConfirmationModal
           body={
-            <Translation
-              elements={{
-                1: ({ children }) => <strong>{children}</strong>,
-              }}
-              i18nKey="general:moveConfirm"
-              t={t}
-              variables={{
-                count,
-                destination: getSelectedFolder({ key: 'name' }) || 'Root',
-                label: count > 1 ? t('general:items') : t('general:item'),
-              }}
+            <ConfirmationMessage
+              action={props.action}
+              count={count}
+              fromFolderName={
+                props.action !== 'moveDocumentsToFolder' ? props.fromFolderName : undefined
+              }
+              title={props.action === 'moveItemToFolder' ? props.title : undefined}
+              toFolderName={getSelectedFolder().name}
             />
           }
           confirmingLabel={t('general:moving')}
-          heading={t('general:moveCount', {
-            count,
-            label: count > 1 ? t('general:items') : t('general:item'),
-          })}
+          confirmLabel={t('general:move')}
+          heading={t('general:confirmMove')}
           modalSlug={confirmModalSlug}
           onConfirm={async () => {
-            await onConfirm(getSelectedFolder({ key: 'id' }))
+            await onConfirm(getSelectedFolder())
           }}
         />
       )}
     </>
   )
+}
+
+function DrawerHeading(props: { count?: number } & ActionProps): string {
+  const { t } = useTranslation()
+
+  switch (props.action) {
+    case 'moveItemToFolder':
+      // moving current folder from list view actions menu
+      // or moving item from edit view
+      if (props.fromFolderName) {
+        // move from folder
+        return t('folder:movingFromFolder', {
+          fromFolder: props.fromFolderName,
+          title: props.title,
+        })
+      } else {
+        // move from root
+        return t('folder:selectFolderForItem', {
+          title: props.title,
+        })
+      }
+
+    case 'moveDocumentsToFolder':
+      if (props.fromFolderName) {
+        // move from folder
+        return t('folder:movingFromFolder', {
+          fromFolder: props.fromFolderName,
+          title: `${props.count} ${props.count > 1 ? t('general:items') : t('general:item')}`,
+        })
+      } else {
+        // move from root
+        return t('folder:selectFolderForItem', {
+          title: `${props.count} ${props.count > 1 ? t('general:items') : t('general:item')}`,
+        })
+      }
+  }
+}
+
+function ConfirmationMessage(props: { count?: number; toFolderName?: string } & ActionProps) {
+  const { t } = useTranslation()
+
+  switch (props.action) {
+    case 'moveItemToFolder':
+      // moving current folder from list view actions menu
+      // or moving item from edit view
+      if (props.toFolderName) {
+        // move to destination
+        // You are about to move {{title}} to {{toFolder}}. Are you sure?
+        return (
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+              2: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="folder:moveItemToFolderConfirmation"
+            t={t}
+            variables={{
+              title: props.title,
+              toFolder: props.toFolderName,
+            }}
+          />
+        )
+      } else {
+        // move to root
+        // You are about to move {{title}} to the root folder. Are you sure?
+        return (
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="folder:moveItemToRootConfirmation"
+            t={t}
+            variables={{
+              title: props.title,
+            }}
+          />
+        )
+      }
+
+    case 'moveDocumentsToFolder':
+      // moving many (documents/folders) from list view
+      if (props.toFolderName) {
+        // move to destination
+        // You are about to move {{count}} {{label}} to {{toFolder}}. Are you sure?
+        return (
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+              2: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="folder:moveItemsToFolderConfirmation"
+            t={t}
+            variables={{
+              count: props.count,
+              label: props.count > 1 ? t('general:items') : t('general:item'),
+              toFolder: props.toFolderName,
+            }}
+          />
+        )
+      } else {
+        // move to root
+        // You are about to move {{count}} {{label}} to the root folder. Are you sure?
+        return (
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="folder:moveItemsToRootConfirmation"
+            t={t}
+            variables={{
+              count: props.count,
+              label: props.count > 1 ? t('general:items') : t('general:item'),
+            }}
+          />
+        )
+      }
+  }
 }

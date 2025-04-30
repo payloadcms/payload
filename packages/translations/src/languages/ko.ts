@@ -177,17 +177,27 @@ export const koTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: '폴더별 브라우징',
     byFolder: '폴더별로',
-    deleteConfirmation:
-      '중첩 폴더는 삭제됩니다. 중첩 문서는 가장 가까운 부모 폴더로 이동하게 됩니다. 확실합니까?',
     deleteFolder: '폴더 삭제',
     folderName: '폴더 이름',
     folders: '폴더들',
+    itemHasBeenMoved: '{{title}}는 {{folderName}}로 이동되었습니다.',
+    itemHasBeenMovedToRoot: '{{title}}이(가) 루트 폴더로 이동되었습니다.',
+    itemsMovedToFolder: '{{title}}이(가) {{folderName}}로 이동되었습니다.',
+    itemsMovedToRoot: '{{title}}이(가) 루트 폴더로 이동되었습니다.',
     moveFolder: '폴더 이동',
+    moveItemsToFolderConfirmation:
+      '<1>{{count}} {{label}}</1>을(를) <2>{{toFolder}}</2>(으)로 이동하려 합니다. 확실합니까?',
+    moveItemsToRootConfirmation:
+      '당신은 <1>{{count}} {{label}}</1>을 최상위 폴더로 이동하려고 합니다. 확실합니까?',
+    moveItemToFolderConfirmation:
+      '<1>{{title}}</1>을(를) <2>{{toFolder}}</2>(으)로 이동하려고 합니다. 확실하신가요?',
+    moveItemToRootConfirmation: '<1>{{title}}</1>을 루트 폴더로 이동하려고 합니다. 확실합니까?',
+    movingFromFolder: '{{title}}를 {{folderName}}에서 이동합니다',
     newFolder: '새 폴더',
-    removeFromFolder: '폴더에서 제거하십시오',
+    noFolder: '폴더 없음',
     renameFolder: '폴더 이름 변경',
     searchByNameInFolder: '{{folderName}}에서 이름으로 검색하세요.',
-    selectFolder: '폴더 선택',
+    selectFolderForItem: '{{title}}에 대한 폴더 선택',
   },
   general: {
     name: '이름',
@@ -219,6 +229,7 @@ export const koTranslations: DefaultTranslationsObject = {
     confirmCopy: '복사 확인',
     confirmDeletion: '삭제하시겠습니까?',
     confirmDuplication: '복제하시겠습니까?',
+    confirmMove: '이동 확인',
     confirmReindex: '모든 {{collections}}를 다시 인덱싱하시겠습니까?',
     confirmReindexAll: '모든 컬렉션을 다시 인덱싱하시겠습니까?',
     confirmReindexDescription:
@@ -334,6 +345,7 @@ export const koTranslations: DefaultTranslationsObject = {
     saving: '저장 중...',
     schedulePublishFor: '{{title}}에 대한 게시 일정 설정',
     searchBy: '{{label}}로 검색',
+    select: '선택하십시오',
     selectAll: '{{count}}개 {{label}} 모두 선택',
     selectAllRows: '모든 행 선택',
     selectedCount: '{{count}}개의 {{label}} 선택됨',

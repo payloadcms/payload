@@ -181,17 +181,28 @@ export const itTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Sfoglia per Cartella',
     byFolder: 'Per Cartella',
-    deleteConfirmation:
-      'Le cartelle annidate verranno eliminate. I documenti annidati si sposteranno nella cartella genitore più vicina. Sei sicuro?',
     deleteFolder: 'Elimina cartella',
     folderName: 'Nome Cartella',
     folders: 'Cartelle',
+    itemHasBeenMoved: '{{title}} è stato spostato in {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} è stato spostato nella cartella principale',
+    itemsMovedToFolder: '{{title}} spostato in {{folderName}}',
+    itemsMovedToRoot: '{{title}} è stato spostato nella cartella principale',
     moveFolder: 'Sposta Cartella',
+    moveItemsToFolderConfirmation:
+      'Stai per spostare <1>{{count}} {{label}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
+    moveItemsToRootConfirmation:
+      'Stai per spostare <1>{{count}} {{label}}</1> nella cartella principale. Sei sicuro?',
+    moveItemToFolderConfirmation:
+      'Stai per spostare <1>{{title}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
+    moveItemToRootConfirmation:
+      'Stai per spostare <1>{{title}}</1> nella cartella principale. Sei sicuro?',
+    movingFromFolder: 'Spostando {{title}} da {{folderName}}',
     newFolder: 'Nuova Cartella',
-    removeFromFolder: 'Rimuovi dalla cartella',
+    noFolder: 'Nessuna cartella',
     renameFolder: 'Rinomina Cartella',
     searchByNameInFolder: 'Cerca per Nome in {{folderName}}',
-    selectFolder: 'Seleziona Cartella',
+    selectFolderForItem: 'Seleziona la cartella per {{title}}',
   },
   general: {
     name: 'Nome',
@@ -224,6 +235,7 @@ export const itTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Conferma copia',
     confirmDeletion: "Conferma l'eliminazione",
     confirmDuplication: 'Conferma la duplicazione',
+    confirmMove: 'Conferma spostamento',
     confirmReindex: "Rifare l'indice di tutte le {{collections}}?",
     confirmReindexAll: "Rifare l'indice di tutte le collezioni?",
     confirmReindexDescription:
@@ -339,6 +351,7 @@ export const itTranslations: DefaultTranslationsObject = {
     saving: 'Salvo...',
     schedulePublishFor: 'Pianifica la pubblicazione per {{title}}',
     searchBy: 'Cerca per {{label}}',
+    select: 'Seleziona',
     selectAll: 'Seleziona tutto {{count}} {{label}}',
     selectAllRows: 'Seleziona tutte le righe',
     selectedCount: '{{count}} {{label}} selezionato',

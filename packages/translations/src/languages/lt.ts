@@ -179,17 +179,28 @@ export const ltTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Naršyti pagal aplanką',
     byFolder: 'Pagal aplanką',
-    deleteConfirmation:
-      'Įdėti aplankai bus ištrinti. Įdėti dokumentai bus perkelti į artimiausią tėvinį aplanką. Ar esate įsitikinęs?',
     deleteFolder: 'Ištrinti aplanką',
     folderName: 'Aplanko pavadinimas',
     folders: 'Aplankai',
+    itemHasBeenMoved: '{{title}} buvo perkeltas į {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} buvo perkeltas į pagrindinį katalogą',
+    itemsMovedToFolder: '{{title}} perkeltas į {{folderName}}',
+    itemsMovedToRoot: '{{title}} perkeltas į šakninį aplanką',
     moveFolder: 'Perkelti aplanką',
+    moveItemsToFolderConfirmation:
+      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į <2>{{toFolder}}</2>. Ar esate tikri?',
+    moveItemsToRootConfirmation:
+      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į šakninį aplanką. Ar esate tikri?',
+    moveItemToFolderConfirmation:
+      'Jūs ketinate perkelti <1>{{title}}</1> į <2>{{toFolder}}</2>. Ar esate įsitikinęs?',
+    moveItemToRootConfirmation:
+      'Jūs ketinate perkelti <1>{{title}}</1> į pagrindinį aplanką. Ar esate tikras?',
+    movingFromFolder: 'Perkeliamas {{title}} iš {{folderName}}',
     newFolder: 'Naujas aplankas',
-    removeFromFolder: 'Pašalinti iš aplanko',
+    noFolder: 'Nėra aplanko',
     renameFolder: 'Pervadinti aplanką',
     searchByNameInFolder: 'Ieškoti pagal vardą {{folderName}}',
-    selectFolder: 'Pasirinkti aplanką',
+    selectFolderForItem: 'Pasirinkite aplanką skirtą {{title}}',
   },
   general: {
     name: 'Vardas',
@@ -222,6 +233,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Patvirtinkite kopiją',
     confirmDeletion: 'Patvirtinkite šalinimą',
     confirmDuplication: 'Patvirtinkite dubliavimą',
+    confirmMove: 'Patvirtinkite perkėlimą',
     confirmReindex: 'Perindeksuoti visas {{collections}}?',
     confirmReindexAll: 'Perindeksuoti visas kolekcijas?',
     confirmReindexDescription:
@@ -338,6 +350,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     saving: 'Išsaugoti...',
     schedulePublishFor: 'Suplanuokite publikaciją „{{title}}“',
     searchBy: 'Ieškokite pagal {{label}}',
+    select: 'Pasirinkite',
     selectAll: 'Pasirinkite visus {{count}} {{label}}',
     selectAllRows: 'Pasirinkite visas eilutes',
     selectedCount: '{{count}} {{label}} pasirinkta',

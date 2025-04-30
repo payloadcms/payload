@@ -173,17 +173,27 @@ export const heTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'עיין לפי תיקייה',
     byFolder: 'לפי תיקייה',
-    deleteConfirmation:
-      'תיקיות משנה יימחקו. מסמכים משנים יעברו לתיקיית ההורה הקרובה ביותר. האם אתה בטוח?',
     deleteFolder: 'מחק תיקייה',
     folderName: 'שם תיקייה',
     folders: 'תיקיות',
+    itemHasBeenMoved: '"{{title}}" הועבר ל- "{{folderName}}"',
+    itemHasBeenMovedToRoot: '"{{title}}" הועבר לתיקיית השורש',
+    itemsMovedToFolder: '{{title}} הועבר אל {{folderName}}',
+    itemsMovedToRoot: '"{{title}}" הועבר לתיקייה הראשית',
     moveFolder: 'העבר תיקייה',
+    moveItemsToFolderConfirmation:
+      'אתה עומד להעביר <1>{{count}} {{label}}</1> אל <2>{{toFolder}}</2>. האם אתה בטוח?',
+    moveItemsToRootConfirmation:
+      'אתה עומד להעביר <1>{{count}} {{label}}</1> לתיקייה הראשית. האם אתה בטוח?',
+    moveItemToFolderConfirmation:
+      'אתה עומד להעביר <1>{{title}}</1> ל-<2>{{toFolder}}</2>. האם אתה בטוח?',
+    moveItemToRootConfirmation: 'אתה עומד להעביר <1>{{title}}</1> לתיקייה הראשית. האם אתה בטוח?',
+    movingFromFolder: 'מזיז {{title}} מ-{{folderName}}',
     newFolder: 'תיקייה חדשה',
-    removeFromFolder: 'הסר מהתיקייה',
+    noFolder: 'אין תיקייה',
     renameFolder: 'שנה שם לתיקיה',
     searchByNameInFolder: 'חיפוש לפי שם ב{{folderName}}',
-    selectFolder: 'בחר תיקייה',
+    selectFolderForItem: 'בחר תיקייה עבור {{title}}',
   },
   general: {
     name: 'שם',
@@ -215,6 +225,7 @@ export const heTranslations: DefaultTranslationsObject = {
     confirmCopy: 'אשר עותק',
     confirmDeletion: 'אישור מחיקה',
     confirmDuplication: 'אישור שכפול',
+    confirmMove: 'אשר העברה',
     confirmReindex: 'האם להחזיר אינדקס לכל {{collections}}?',
     confirmReindexAll: 'האם להחזיר אינדקס לכל האוספים?',
     confirmReindexDescription:
@@ -328,6 +339,7 @@ export const heTranslations: DefaultTranslationsObject = {
     saving: 'שומר...',
     schedulePublishFor: 'לתזמן פרסום עבור {{כותרת}}',
     searchBy: 'חיפוש לפי {{label}}',
+    select: 'בחר',
     selectAll: 'בחר את כל {{count}} ה{{label}}',
     selectAllRows: 'בחר את כל השורות',
     selectedCount: '{{count}} {{label}} נבחרו',

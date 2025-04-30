@@ -9,7 +9,15 @@ type secondaryAction = {
 export type Props = {
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?: 'error' | 'icon-label' | 'none' | 'pill' | 'primary' | 'secondary' | 'transparent'
+  buttonStyle?:
+    | 'error'
+    | 'icon-label'
+    | 'none'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
+    | 'subtle'
+    | 'transparent'
   children?: React.ReactNode
   className?: string
   disabled?: boolean

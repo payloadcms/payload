@@ -175,17 +175,28 @@ export const faTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'مرور بر اساس پوشه',
     byFolder: 'بر اساس پوشه',
-    deleteConfirmation:
-      'پوشه های تو در تو حذف خواهند شد. اسناد تو در تو به نزدیک ترین پوشه اصلی منتقل خواهند شد. آیا مطمئن هستید؟',
     deleteFolder: 'حذف پوشه',
     folderName: 'نام پوشه',
     folders: 'پوشه‌ها',
+    itemHasBeenMoved: '{{title}} به {{folderName}} منتقل شده است.',
+    itemHasBeenMovedToRoot: '{{title}} به پوشه اصلی انتقال یافته است.',
+    itemsMovedToFolder: '{{title}} به {{folderName}} منتقل شد.',
+    itemsMovedToRoot: '{{title}} به پوشه‌ی ریشه انتقال یافت',
     moveFolder: 'انتقال پوشه',
+    moveItemsToFolderConfirmation:
+      'شما در حال جابجایی <1>{{count}} {{label}}</1> به <2>{{toFolder}}</2> هستید. آیا مطمئن هستید؟',
+    moveItemsToRootConfirmation:
+      'شما در حال حاضر در صدد انتقال <1>{{count}} {{label}}</1> به پوشه‌ی اصلی هستید. آیا مطمئنید؟',
+    moveItemToFolderConfirmation:
+      'شما در حال حاضر در صدد هستید <1>{{title}}</1> را به <2>{{toFolder}}</2> منتقل کنید. آیا مطمئن هستید؟',
+    moveItemToRootConfirmation:
+      'شما در حال حاضر در مورد انتقال <1>{{title}}</1> به پوشه ریشه هستید. آیا مطمئن هستید؟',
+    movingFromFolder: 'انتقال {{title}} از {{folderName}}',
     newFolder: 'پوشه جدید',
-    removeFromFolder: 'از پوشه بردارید',
+    noFolder: 'بدون پوشه',
     renameFolder: 'تغییر نام پوشه',
     searchByNameInFolder: 'جستجو بر اساس نام در {{folderName}}',
-    selectFolder: 'انتخاب پوشه',
+    selectFolderForItem: 'انتخاب پوشه برای {{title}}',
   },
   general: {
     name: 'نام',
@@ -218,6 +229,7 @@ export const faTranslations: DefaultTranslationsObject = {
     confirmCopy: 'تأیید کپی',
     confirmDeletion: 'تأئید عملیات حذف',
     confirmDuplication: 'تأئید رونوشت',
+    confirmMove: 'تأیید حرکت',
     confirmReindex: 'آیا همه {{collections}} بازایندکس شوند؟',
     confirmReindexAll: 'آیا همه مجموعه‌ها بازایندکس شوند؟',
     confirmReindexDescription:
@@ -334,6 +346,7 @@ export const faTranslations: DefaultTranslationsObject = {
     saving: 'در حال ذخیره...',
     schedulePublishFor: 'برنامه‌ریزی انتشار برای {{عنوان}}',
     searchBy: 'جستجو بر اساس {{label}}',
+    select: 'انتخاب کنید',
     selectAll: 'انتخاب همه {{count}} {{label}}',
     selectAllRows: 'انتخاب تمام سطرها',
     selectedCount: '{{count}} {{label}} انتخاب شد',

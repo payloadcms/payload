@@ -179,17 +179,28 @@ export const trTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Klasöre Göre Gözat',
     byFolder: 'Klasör Bazında',
-    deleteConfirmation:
-      'İç içe klasörler silinecektir. İç içe belgeler en yakın üst klasöre taşınacaktır. Emin misiniz?',
     deleteFolder: 'Klasörü Sil',
     folderName: 'Klasör Adı',
     folders: 'Klasörler',
+    itemHasBeenMoved: '{{title}} {{folderName}} klasörüne taşındı.',
+    itemHasBeenMovedToRoot: '{{title}} kök klasöre taşındı.',
+    itemsMovedToFolder: "{{title}} {{folderName}}'ye taşındı.",
+    itemsMovedToRoot: '{{title}} kök klasörüne taşındı',
     moveFolder: 'Klasörü Taşı',
+    moveItemsToFolderConfirmation:
+      "<1>{{count}} {{label}}</1>'yi <2>{{toFolder}}</2>'ye taşımayı planlıyorsunuz. Emin misiniz?",
+    moveItemsToRootConfirmation:
+      '<1>{{count}} {{label}}</1> kök klasöre taşımayı planlıyorsunuz. Emin misiniz?',
+    moveItemToFolderConfirmation:
+      '<1>{{title}}</1> ögesini <2>{{toFolder}}</2> konumuna taşımak üzeresiniz. Emin misiniz?',
+    moveItemToRootConfirmation:
+      '<1>{{title}}</1> öğesini ana klasöre taşımak üzeresiniz. Emin misiniz?',
+    movingFromFolder: '{{title}} öğesinin {{folderName}} klasöründen taşınması',
     newFolder: 'Yeni Klasör',
-    removeFromFolder: 'Klasörden Çıkar',
+    noFolder: 'Klasör Yok',
     renameFolder: 'Klasörü Yeniden Adlandır',
     searchByNameInFolder: "{{folderName}}'da İsme Göre Ara",
-    selectFolder: 'Klasör Seçin',
+    selectFolderForItem: '{{title}} için klasör seçin',
   },
   general: {
     name: 'İsim',
@@ -223,6 +234,7 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Kopyayı onayla',
     confirmDeletion: 'Silmeyi onayla',
     confirmDuplication: 'Çoğaltmayı onayla',
+    confirmMove: 'Hareketi onayla',
     confirmReindex: 'Tüm {{collections}} yeniden dizine alınsın mı?',
     confirmReindexAll: 'Tüm koleksiyonlar yeniden dizine alinsın mı?',
     confirmReindexDescription:
@@ -340,6 +352,7 @@ export const trTranslations: DefaultTranslationsObject = {
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',
+    select: 'Seçiniz',
     selectAll: "Tüm {{count}} {{label}}'ı seçin",
     selectAllRows: 'Tüm satırları seçin',
     selectedCount: '{{count}} {{label}} seçildi',

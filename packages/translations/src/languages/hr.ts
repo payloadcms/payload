@@ -178,17 +178,28 @@ export const hrTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Pregledajte po mapi',
     byFolder: 'Po mapi',
-    deleteConfirmation:
-      'Ugniježđene mape bit će izbrisane. Ugniježđeni dokumenti premjestit će se u najbližu nadređenu mapu. Jeste li sigurni?',
     deleteFolder: 'Izbriši mapu',
     folderName: 'Naziv mape',
     folders: 'Mape',
+    itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} je premješten u korijensku mapu.',
+    itemsMovedToFolder: '{{title}} premješteno u {{folderName}}',
+    itemsMovedToRoot: '{{title}} premješten u korijensku mapu',
     moveFolder: 'Premjesti mapu',
+    moveItemsToFolderConfirmation:
+      'Upravo se spremate premjestiti <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
+    moveItemsToRootConfirmation:
+      'Na korak ste da premjestite <1>{{count}} {{label}}</1> u korijensku mapu. Jeste li sigurni?',
+    moveItemToFolderConfirmation:
+      'Upravo ćete premjestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
+    moveItemToRootConfirmation:
+      'Upravo ćete premjestiti <1>{{title}}</1> u osnovnu mapu. Jeste li sigurni?',
+    movingFromFolder: 'Premještanje {{title}} iz {{folderName}}',
     newFolder: 'Nova mapa',
-    removeFromFolder: 'Ukloni iz mape',
+    noFolder: 'Nema mape',
     renameFolder: 'Preimenuj mapu',
     searchByNameInFolder: 'Pretraživanje po imenu u {{folderName}}',
-    selectFolder: 'Odaberite mapu',
+    selectFolderForItem: 'Odaberite mapu za {{title}}',
   },
   general: {
     name: 'Ime',
@@ -220,6 +231,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potvrdi kopiju',
     confirmDeletion: 'Potvrdi brisanje',
     confirmDuplication: 'Potvrdi duplikaciju',
+    confirmMove: 'Potvrdi premještanje',
     confirmReindex: 'Ponovno indeksirati sve {{collections}}?',
     confirmReindexAll: 'Ponovno indeksirati sve kolekcije?',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     saving: 'Spremanje...',
     schedulePublishFor: 'Zakazano objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',
+    select: 'Odaberite',
     selectAll: 'Odaberite sve {{count}} {{label}}',
     selectAllRows: 'Odaberite sve redove',
     selectedCount: '{{count}} {{label}} odabrano',

@@ -177,17 +177,28 @@ export const plTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Przeglądaj według folderu',
     byFolder: 'Według Folderu',
-    deleteConfirmation:
-      'Zagnieżdżone foldery zostaną usunięte. Zagnieżdżone dokumenty zostaną przeniesione do najbliższego folderu nadrzędnego. Czy jesteś pewien?',
     deleteFolder: 'Usuń folder',
     folderName: 'Nazwa folderu',
     folders: 'Foldery',
+    itemHasBeenMoved: '{{title}} został przeniesiony do {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} został przeniesiony do folderu głównego',
+    itemsMovedToFolder: '{{title}} przeniesiono do {{folderName}}',
+    itemsMovedToRoot: '{{title}} został przeniesiony do folderu głównego',
     moveFolder: 'Przenieś folder',
+    moveItemsToFolderConfirmation:
+      'Zamierzasz przenieść <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Czy jesteś pewien?',
+    moveItemsToRootConfirmation:
+      'Zamierzasz przenieść <1>{{count}} {{label}}</1> do folderu głównego. Czy jesteś pewien?',
+    moveItemToFolderConfirmation:
+      'Zamierzasz przenieść <1>{{title}}</1> do <2>{{toFolder}}</2>. Czy jesteś pewien?',
+    moveItemToRootConfirmation:
+      'Zamierzasz przenieść <1>{{title}}</1> do folderu głównego. Jesteś pewien?',
+    movingFromFolder: 'Przenoszenie {{title}} z {{folderName}}',
     newFolder: 'Nowy folder',
-    removeFromFolder: 'Usuń z folderu',
+    noFolder: 'Brak folderu',
     renameFolder: 'Zmień nazwę folderu',
     searchByNameInFolder: 'Szukaj według nazwy w {{folderName}}',
-    selectFolder: 'Wybierz folder',
+    selectFolderForItem: 'Wybierz folder dla {{title}}',
   },
   general: {
     name: 'Nazwa',
@@ -220,6 +231,7 @@ export const plTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potwierdź kopię',
     confirmDeletion: 'Potwierdź usunięcie',
     confirmDuplication: 'Potwierdź duplikację',
+    confirmMove: 'Potwierdź przeniesienie',
     confirmReindex: 'Ponownie zaindeksować wszystkie {{collections}}?',
     confirmReindexAll: 'Ponownie zaindeksować wszystkie kolekcje?',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const plTranslations: DefaultTranslationsObject = {
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
     searchBy: 'Szukaj według',
+    select: 'Wybierz',
     selectAll: 'Wybierz wszystkie {{count}} {{label}}',
     selectAllRows: 'Wybierz wszystkie wiersze',
     selectedCount: 'Wybrano {{count}} {{label}}',

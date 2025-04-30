@@ -178,17 +178,28 @@ export const myTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Layari mengikut Folder',
     byFolder: 'Dengan Folder',
-    deleteConfirmation:
-      'နဂိုဖိုလ်ဒါများကို ဖျက်သွားပါမည်။ ဂုဏ်ယူပါတယ်ဖိုင်များကို အနီးဆုံးမှတ်တမ်းဖိ',
     deleteFolder: 'Padam Folder',
     folderName: 'ဖိုင်နာမည်',
     folders: 'Fail',
+    itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
+    itemHasBeenMovedToRoot: '"{{title}}" က ဗဟိုဖိုလ်ဒါသို့ရွှေ့ပြီးပါပြီ။',
+    itemsMovedToFolder: '{{title}} သို့ {{folderName}} သို့ ရွှေ့လိုက်သွားပါပယ်',
+    itemsMovedToRoot: '{{title}} telah dipindahkan ke folder akar',
     moveFolder: 'Pindah Folder',
+    moveItemsToFolderConfirmation:
+      'သင့်တွင် <1>{{count}} {{label}}</1> <2>{{toFolder}}</2>သို့ ရွှေ့နေသည့်အခါဖြစ်ပါသည်။ သေချာပါသလား?',
+    moveItemsToRootConfirmation:
+      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke folder akar. Adakah anda pasti?',
+    moveItemToFolderConfirmation:
+      'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
+    moveItemToRootConfirmation:
+      'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
+    movingFromFolder: 'Memindahkan {{title}} dari {{folderName}}',
     newFolder: 'Folder Baru',
-    removeFromFolder: 'Dari Folder Buang',
+    noFolder: 'ဖိုလ်ဒါမရှိပါ',
     renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
     searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
-    selectFolder: 'Pilih Folder',
+    selectFolderForItem: 'Pilih folder untuk {{title}}',
   },
   general: {
     name: 'နာမည်',
@@ -222,6 +233,7 @@ export const myTranslations: DefaultTranslationsObject = {
     confirmCopy: 'အောင်မြင်စေသည့်ကူးထားပြီးအတည်ပြုပါ',
     confirmDeletion: 'ဖျက်တော့မယ်နော်။',
     confirmDuplication: 'ပုံတူပွားခြင်းကို အတည်ပြုပါ။',
+    confirmMove: 'Sahkan pergerakan',
     confirmReindex: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်ပါသလား?',
     confirmReindexAll: 'အပေါ် ကော်လက်ရှင်းများအားလုံးကို ထပ်လိပ်ပါသလား?',
     confirmReindexDescription:
@@ -339,6 +351,7 @@ export const myTranslations: DefaultTranslationsObject = {
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: 'Jadualkan penerbitan untuk {{title}}',
     searchBy: 'ရှာဖွေပါ။',
+    select: 'Pilih',
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',

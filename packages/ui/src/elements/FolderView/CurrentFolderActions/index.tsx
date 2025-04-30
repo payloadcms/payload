@@ -1,6 +1,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
+import { toast } from 'sonner'
 
 import { Dots } from '../../../icons/Dots/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -101,16 +102,35 @@ export function CurrentFolderActions({ className }: Props) {
       />
 
       <MoveItemsToFolderDrawer
+        action="moveItemToFolder"
         drawerSlug={moveToFolderDrawerSlug}
         folderID={currentFolder.value.id}
+        fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
         itemsToMove={[currentFolder]}
-        onConfirm={async (folderID) => {
+        onConfirm={async ({ id, name }) => {
           await moveToFolder({
             itemsToMove: [currentFolder],
-            toFolderID: folderID,
+            toFolderID: id,
           })
+          if (id) {
+            // moved to folder
+            toast.success(
+              t('folder:itemHasBeenMoved', {
+                folderName: `"${name}"`,
+                title: currentFolder.value._folderOrDocumentTitle,
+              }),
+            )
+          } else {
+            // moved to root
+            toast.success(
+              t('folder:itemHasBeenMovedToRoot', {
+                title: currentFolder.value._folderOrDocumentTitle,
+              }),
+            )
+          }
           closeModal(moveToFolderDrawerSlug)
         }}
+        title={currentFolder.value._folderOrDocumentTitle}
       />
       <RenameFolderDrawer
         drawerSlug={renameFolderDrawerSlug}

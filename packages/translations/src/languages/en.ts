@@ -177,17 +177,28 @@ export const enTranslations = {
   folder: {
     browseByFolder: 'Browse by Folder',
     byFolder: 'By Folder',
-    deleteConfirmation:
-      'Nested folders will be deleted. Nested documents will move to the nearest parent folder. Are you sure?',
     deleteFolder: 'Delete Folder',
     folderName: 'Folder Name',
     folders: 'Folders',
+    itemHasBeenMoved: '{{title}} has been moved to {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} has been moved to the root folder',
+    itemsMovedToFolder: '{{title}} moved to {{folderName}}',
+    itemsMovedToRoot: '{{title}} moved to the root folder',
     moveFolder: 'Move Folder',
+    moveItemsToFolderConfirmation:
+      'You are about to move <1>{{count}} {{label}}</1> to <2>{{toFolder}}</2>. Are you sure?',
+    moveItemsToRootConfirmation:
+      'You are about to move <1>{{count}} {{label}}</1> to the root folder. Are you sure?',
+    moveItemToFolderConfirmation:
+      'You are about to move <1>{{title}}</1> to <2>{{toFolder}}</2>. Are you sure?',
+    moveItemToRootConfirmation:
+      'You are about to move <1>{{title}}</1> to the root folder. Are you sure?',
+    movingFromFolder: 'Moving {{title}} from {{fromFolder}}',
     newFolder: 'New Folder',
-    removeFromFolder: 'Remove from Folder',
+    noFolder: 'No Folder',
     renameFolder: 'Rename Folder',
     searchByNameInFolder: 'Search by Name in {{folderName}}',
-    selectFolder: 'Select Folder',
+    selectFolderForItem: 'Select folder for {{title}}',
   },
   general: {
     name: 'Name',
@@ -220,6 +231,7 @@ export const enTranslations = {
     confirmCopy: 'Confirm copy',
     confirmDeletion: 'Confirm deletion',
     confirmDuplication: 'Confirm duplication',
+    confirmMove: 'Confirm move',
     confirmReindex: 'Reindex all {{collections}}?',
     confirmReindexAll: 'Reindex all collections?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const enTranslations = {
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
     searchBy: 'Search by {{label}}',
+    select: 'Select',
     selectAll: 'Select all {{count}} {{label}}',
     selectAllRows: 'Select all rows',
     selectedCount: '{{count}} {{label}} selected',

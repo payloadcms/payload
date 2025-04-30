@@ -178,17 +178,28 @@ export const ukTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Переглянути за папкою',
     byFolder: 'За папкою',
-    deleteConfirmation:
-      'Вкладені папки будуть видалені. Вкладені документи будуть переміщені до найближчої батьківської папки. Ви впевнені?',
     deleteFolder: 'Видалити папку',
     folderName: 'Назва папки',
     folders: 'Папки',
+    itemHasBeenMoved: '{{title}} було переміщено до {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} був переміщений до кореневої папки',
+    itemsMovedToFolder: '{{title}} перенесено до {{folderName}}',
+    itemsMovedToRoot: '{{title}} переміщено до кореневої папки',
     moveFolder: 'Перемістити папку',
+    moveItemsToFolderConfirmation:
+      'Ви збираєтесь перемістити <1>{{count}} {{label}}</1> до <2>{{toFolder}}</2>. Ви впевнені?',
+    moveItemsToRootConfirmation:
+      'Ви збираєтеся перемістити <1>{{count}} {{label}}</1> до кореневої папки. Ви впевнені?',
+    moveItemToFolderConfirmation:
+      'Ви збираєтеся перемістити <1>{{title}}</1> до <2>{{toFolder}}</2>. Ви впевнені?',
+    moveItemToRootConfirmation:
+      'Ви збираєтеся перемістити <1>{{title}}</1> до кореневої папки. Ви впевнені?',
+    movingFromFolder: 'Переміщення {{title}} з {{folderName}}',
     newFolder: 'Нова папка',
-    removeFromFolder: 'Видалити з папки',
+    noFolder: 'Немає папки',
     renameFolder: 'Перейменувати папку',
     searchByNameInFolder: 'Пошук за назвою у {{folderName}}',
-    selectFolder: 'Вибрати папку',
+    selectFolderForItem: 'Виберіть папку для {{title}}',
   },
   general: {
     name: "Ім'я",
@@ -220,6 +231,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Підтвердіть копію',
     confirmDeletion: 'Підтвердити видалення',
     confirmDuplication: 'Підтвердити копіювання',
+    confirmMove: 'Підтвердити переїзд',
     confirmReindex: 'Перебудувати індекс для всіх {{collections}}?',
     confirmReindexAll: 'Перебудувати індекс для всіх колекцій?',
     confirmReindexDescription:
@@ -335,6 +347,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     saving: 'Збереження...',
     schedulePublishFor: 'Запланувати публікацію для {{title}}',
     searchBy: 'Шукати по {{label}}',
+    select: 'Вибрати',
     selectAll: 'Вибрати всі {{count}} {{label}}',
     selectAllRows: 'Обрати всі рядки',
     selectedCount: 'Обрано {{count}} {{label}}',

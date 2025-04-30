@@ -179,17 +179,28 @@ export const huTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Mappa szerint böngészés',
     byFolder: 'Mappánként',
-    deleteConfirmation:
-      'Beágyazott mappák törlődnek. Beágyazott dokumentumok átkerülnek a legközelebbi szülő mappába. Biztos benne?',
     deleteFolder: 'Mappa törlése',
     folderName: 'Mappa neve',
     folders: 'Mappák',
+    itemHasBeenMoved: '{{title}} át lett helyezve a {{folderName}} nevű mappába.',
+    itemHasBeenMovedToRoot: 'A(z) {{title}} át lett helyezve a gyökérmappába.',
+    itemsMovedToFolder: '{{title}} áthelyezve a(z) {{folderName}} mappába',
+    itemsMovedToRoot: 'A {{title}} átkerült a gyökérmappába',
     moveFolder: 'Mappa áthelyezése',
+    moveItemsToFolderConfirmation:
+      'Ön <1>{{count}} {{label}}</1>-t készül áthelyezni a <2>{{toFolder}}</2> mappába. Biztos benne?',
+    moveItemsToRootConfirmation:
+      'Ön éppen azért készül, hogy <1>{{count}} {{label}}</1>-t a gyökérmappába helyezzen át. Biztos benne?',
+    moveItemToFolderConfirmation:
+      'Ön készül áthelyezni <1>{{title}}</1>-t <2>{{toFolder}}</2>-be. Biztos benne?',
+    moveItemToRootConfirmation:
+      'Arra készül, hogy a <1>{{title}}</1> elemet a gyökérmappába helyezi. Biztos benne?',
+    movingFromFolder: '{{title}} áthelyezése a(z) {{folderName}} mappából',
     newFolder: 'Új Mappa',
-    removeFromFolder: 'Távolítsa el a mappából',
+    noFolder: 'Nincs mappa',
     renameFolder: 'Mappa átnevezése',
     searchByNameInFolder: 'Keresés név alapján a(z) {{folderName}} mappában',
-    selectFolder: 'Mappa kiválasztása',
+    selectFolderForItem: 'Válassz mappát a {{title}} számára',
   },
   general: {
     name: 'Név',
@@ -222,6 +233,7 @@ export const huTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Jóváhagyott másolat',
     confirmDeletion: 'Törlés megerősítése',
     confirmDuplication: 'Duplikáció megerősítése',
+    confirmMove: 'Megerősíti a költözést',
     confirmReindex: 'Újraindexálja az összes {{collections}}-t?',
     confirmReindexAll: 'Újraindexálja az összes gyűjteményt?',
     confirmReindexDescription:
@@ -338,6 +350,7 @@ export const huTranslations: DefaultTranslationsObject = {
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',
+    select: 'Válasszon',
     selectAll: 'Az összes kijelölése: {{count}} {{label}}',
     selectAllRows: 'Válassza ki az összes sort',
     selectedCount: '{{count}} {{label}} kiválasztva',

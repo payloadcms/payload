@@ -177,17 +177,28 @@ export const bgTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Прегледай по папки',
     byFolder: 'По папка',
-    deleteConfirmation:
-      'Вложените папки ще бъдат изтрити. Вложените документи ще се преместят в най-близката родителска папка. Сигурни ли сте?',
     deleteFolder: 'Изтрий папка',
     folderName: 'Име на папка',
     folders: 'Папки',
+    itemHasBeenMoved: '{{title}} е преместен в {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} беше преместено в основната папка',
+    itemsMovedToFolder: '{{title}} беше преместен в {{folderName}}',
+    itemsMovedToRoot: '{{title}} е преместен в основната папка.',
     moveFolder: 'Премести папка',
+    moveItemsToFolderConfirmation:
+      'Предстои да преместите <1>{{count}} {{label}}</1> в <2>{{toFolder}}</2>. Сигурни ли сте?',
+    moveItemsToRootConfirmation:
+      'Предстои да преместите <1>{{count}} {{label}}</1> в основната папка. Сигурни ли сте?',
+    moveItemToFolderConfirmation:
+      'Предстои да преместите <1>{{title}}</1> в <2>{{toFolder}}</2>. Сигурни ли сте?',
+    moveItemToRootConfirmation:
+      'Предстои да преместите <1>{{title}}</1> в основната папка. Сигурни ли сте?',
+    movingFromFolder: 'Преместване на {{title}} от {{folderName}}',
     newFolder: 'Нова папка',
-    removeFromFolder: 'Премахване от папката',
+    noFolder: 'Няма папка',
     renameFolder: 'Преименувай папка',
     searchByNameInFolder: 'Търсене по име в {{folderName}}',
-    selectFolder: 'Изберете папка',
+    selectFolderForItem: 'Изберете папка за {{title}}',
   },
   general: {
     name: 'Име',
@@ -219,6 +230,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Потвърди копирането',
     confirmDeletion: 'Потвърди изтриване',
     confirmDuplication: 'Потвърди дупликация',
+    confirmMove: 'Потвърждаване на преместване',
     confirmReindex: 'Да се преиндексират всички {{collections}}?',
     confirmReindexAll: 'Да се преиндексират всички колекции?',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     saving: 'Запазване...',
     schedulePublishFor: 'Планирано публикуване за {{title}}',
     searchBy: 'Търси по {{label}}',
+    select: 'Изберете',
     selectAll: 'Избери всички {{count}} {{label}}',
     selectAllRows: 'Избери всички редове',
     selectedCount: '{{count}} {{label}} избрани',

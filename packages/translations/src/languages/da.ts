@@ -176,17 +176,27 @@ export const daTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Gennemse efter Mappe',
     byFolder: 'Ved Mappe',
-    deleteConfirmation:
-      'Indlejrede mapper vil blive slettet. Indlejrede dokumenter vil blive flyttet til den nærmeste forældremappe. Er du sikker?',
     deleteFolder: 'Slet mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
+    itemHasBeenMoved: '{{title}} er blevet flyttet til {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} er blevet flyttet til rodmappen',
+    itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
+    itemsMovedToRoot: '{{title}} flyttet til rod-mappen',
     moveFolder: 'Flyt Mappe',
+    moveItemsToFolderConfirmation:
+      'Du er ved at flytte <1>{{count}} {{label}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
+    moveItemsToRootConfirmation:
+      'Du er ved at flytte <1>{{count}} {{label}}</1> til rodmappen. Er du sikker?',
+    moveItemToFolderConfirmation:
+      'Du er ved at flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
+    moveItemToRootConfirmation: 'Du er ved at flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
+    movingFromFolder: 'Flytter {{title}} fra {{folderName}}',
     newFolder: 'Ny Mappe',
-    removeFromFolder: 'Fjern fra mappe',
+    noFolder: 'Ingen Mappe',
     renameFolder: 'Omdøb mappe',
     searchByNameInFolder: 'Søg efter Navn i {{folderName}}',
-    selectFolder: 'Vælg mappe',
+    selectFolderForItem: 'Vælg mappe til {{title}}',
   },
   general: {
     name: 'Navn',
@@ -219,6 +229,7 @@ export const daTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Bekræft kopi',
     confirmDeletion: 'Bekræft sletning',
     confirmDuplication: 'Bekræft duplikering',
+    confirmMove: 'Bekræft flytning',
     confirmReindex: 'Genindeksér alle {{collections}}?',
     confirmReindexAll: 'Genindeksér alle samlinger?',
     confirmReindexDescription:
@@ -335,6 +346,7 @@ export const daTranslations: DefaultTranslationsObject = {
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',
+    select: 'Vælg',
     selectAll: 'Vælg alle {{count}} {{label}}',
     selectAllRows: 'Vælg alle rækker',
     selectedCount: '{{count}} {{label}} valgt',

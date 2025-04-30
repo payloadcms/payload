@@ -177,17 +177,28 @@ export const nbTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Bla gjennom etter mappe',
     byFolder: 'Etter mappe',
-    deleteConfirmation:
-      'Nestede mapper vil bli slettet. Nestede dokumenter vil bli flyttet til den nærmeste overordnede mappen. Er du sikker?',
     deleteFolder: 'Slett mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
+    itemHasBeenMoved: '{{title}} er flyttet til {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} er flyttet til rotmappen',
+    itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
+    itemsMovedToRoot: '{{title}} flyttet til rodmappen',
     moveFolder: 'Flytt mappe',
+    moveItemsToFolderConfirmation:
+      'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
+    moveItemsToRootConfirmation:
+      'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til rotmappen. Er du sikker?',
+    moveItemToFolderConfirmation:
+      'Du er i ferd med å flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
+    moveItemToRootConfirmation:
+      'Du er i ferd med å flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
+    movingFromFolder: 'Flytte {{title}} fra {{folderName}}',
     newFolder: 'Ny mappe',
-    removeFromFolder: 'Fjern fra mappe',
+    noFolder: 'Ingen mappe',
     renameFolder: 'Endre mappenavn',
     searchByNameInFolder: 'Søk etter navn i {{folderName}}',
-    selectFolder: 'Velg Mappe',
+    selectFolderForItem: 'Velg mappe for {{title}}',
   },
   general: {
     name: 'Navn',
@@ -220,6 +231,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Bekreft kopi',
     confirmDeletion: 'Bekreft sletting',
     confirmDuplication: 'Bekreft duplisering',
+    confirmMove: 'Bekreft flytting',
     confirmReindex: 'Reindekser alle {{collections}}?',
     confirmReindexAll: 'Reindekser alle samlinger?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',
+    select: 'Velg',
     selectAll: 'Velg alle {{count}} {{label}}',
     selectAllRows: 'Velg alle rader',
     selectedCount: '{{count}} {{label}} valgt',

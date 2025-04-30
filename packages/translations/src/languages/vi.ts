@@ -177,17 +177,28 @@ export const viTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Duyệt theo Thư mục',
     byFolder: 'Theo Thư mục',
-    deleteConfirmation:
-      'Các thư mục lồng nhau sẽ bị xóa. Các tài liệu lồng nhau sẽ chuyển đến thư mục cha gần nhất. Bạn có chắc chắn không?',
     deleteFolder: 'Xóa Thư mục',
     folderName: 'Tên thư mục',
     folders: 'Thư mục',
+    itemHasBeenMoved: '{{title}} đã được chuyển đến {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} đã được chuyển đến thư mục gốc',
+    itemsMovedToFolder: '{{title}} đã được di chuyển vào {{folderName}}',
+    itemsMovedToRoot: '{{title}} đã được di chuyển vào thư mục gốc',
     moveFolder: 'Di chuyển thư mục',
+    moveItemsToFolderConfirmation:
+      'Bạn sắp chuyển <1>{{count}} {{label}}</1> tới <2>{{toFolder}}</2>. Bạn có chắc chắn không?',
+    moveItemsToRootConfirmation:
+      'Bạn đang chuẩn bị di chuyển <1>{{count}} {{label}}</1> đến thư mục gốc. Bạn có chắc không?',
+    moveItemToFolderConfirmation:
+      'Bạn sắp chuyển <1>{{title}}</1> đến <2>{{toFolder}}</2>. Bạn có chắc không?',
+    moveItemToRootConfirmation:
+      'Bạn đang chuẩn bị di chuyển <1>{{title}}</1> đến thư mục gốc. Bạn có chắc chắn không?',
+    movingFromFolder: 'Di chuyển {{title}} từ {{folderName}}',
     newFolder: 'Thư mục mới',
-    removeFromFolder: 'Xóa khỏi Thư mục',
+    noFolder: 'Không có Thư mục',
     renameFolder: 'Đổi tên thư mục',
     searchByNameInFolder: 'Tìm kiếm theo Tên trong {{folderName}}',
-    selectFolder: 'Chọn Thư mục',
+    selectFolderForItem: 'Chọn thư mục cho {{title}}',
   },
   general: {
     name: 'Tên',
@@ -219,6 +230,7 @@ export const viTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Xác nhận bản sao',
     confirmDeletion: 'Xác nhận xóa',
     confirmDuplication: 'Xác nhận tạo bản sao',
+    confirmMove: 'Xác nhận di chuyển',
     confirmReindex: 'Tái lập chỉ mục tất cả {{collections}}?',
     confirmReindexAll: 'Tái lập chỉ mục tất cả các bộ sưu tập?',
     confirmReindexDescription:
@@ -335,6 +347,7 @@ export const viTranslations: DefaultTranslationsObject = {
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
     searchBy: 'Tìm với {{label}}',
+    select: 'Chọn',
     selectAll: 'Chọn tất cả {{count}} {{label}}',
     selectAllRows: 'Chọn tất cả các hàng',
     selectedCount: 'Đã chọn {{count}} {{label}}',

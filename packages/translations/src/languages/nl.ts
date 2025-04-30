@@ -179,17 +179,28 @@ export const nlTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Bladeren op Map',
     byFolder: 'Op Map',
-    deleteConfirmation:
-      'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
     deleteFolder: 'Verwijder map',
     folderName: 'Mapnaam',
     folders: 'Mappen',
+    itemHasBeenMoved: '{{title}} is verplaatst naar {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} is verplaatst naar de hoofdmap',
+    itemsMovedToFolder: '{{title}} verplaatst naar {{folderName}}',
+    itemsMovedToRoot: '{{title}} verplaatst naar de hoofdmap',
     moveFolder: 'Verplaats Map',
+    moveItemsToFolderConfirmation:
+      'U staat op het punt om <1>{{count}} {{label}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
+    moveItemsToRootConfirmation:
+      'U staat op het punt om <1>{{count}} {{label}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
+    moveItemToFolderConfirmation:
+      'U staat op het punt om <1>{{title}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
+    moveItemToRootConfirmation:
+      'U staat op het punt om <1>{{title}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
+    movingFromFolder: 'Verplaatsen van {{title}} uit {{folderName}}',
     newFolder: 'Nieuwe Map',
-    removeFromFolder: 'Verwijderen uit map',
+    noFolder: 'Geen Map',
     renameFolder: 'Hernoem Map',
     searchByNameInFolder: 'Zoeken op naam in {{folderName}}',
-    selectFolder: 'Selecteer Map',
+    selectFolderForItem: 'Selecteer map voor {{title}}',
   },
   general: {
     name: 'Naam',
@@ -223,6 +234,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Bevestig kopie',
     confirmDeletion: 'Bevestig verwijdering',
     confirmDuplication: 'Bevestig duplicatie',
+    confirmMove: 'Bevestig verplaatsing',
     confirmReindex: 'Alle {{collections}} opnieuw indexeren?',
     confirmReindexAll: 'Alle collecties opnieuw indexeren?',
     confirmReindexDescription:
@@ -340,6 +352,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',
+    select: 'Selecteer',
     selectAll: 'Alles selecteren {{count}} {{label}}',
     selectAllRows: 'Selecteer alle rijen',
     selectedCount: '{{count}} {{label}} geselecteerd',

@@ -5,6 +5,7 @@ import type { FolderOrDocument } from 'payload/shared'
 import { useModal } from '@faceless-ui/modal'
 import { extractID } from 'payload/shared'
 import React, { Fragment } from 'react'
+import { toast } from 'sonner'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
@@ -37,8 +38,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
 }) => {
-  const { clearSelections, folderID, getSelectedItems, moveToFolder, removeItems, renameFolder } =
-    useFolder()
+  const {
+    clearSelections,
+    currentFolder,
+    folderID,
+    getSelectedItems,
+    moveToFolder,
+    removeItems,
+    renameFolder,
+  } = useFolder()
   const { config } = useConfig()
   const { t } = useTranslation()
   const { closeModal, openModal } = useModal()
@@ -135,14 +143,33 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         count > 0 ? (
           <React.Fragment key={moveToFolderDrawerSlug}>
             <MoveItemsToFolderDrawer
+              action="moveDocumentsToFolder"
               drawerSlug={moveToFolderDrawerSlug}
               folderID={folderID}
+              fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
               itemsToMove={getSelectedItems()}
-              onConfirm={async (folderID) => {
+              onConfirm={async ({ id, name }) => {
                 await moveToFolder({
                   itemsToMove: getSelectedItems(),
-                  toFolderID: folderID,
+                  toFolderID: id,
                 })
+
+                if (id) {
+                  // moved to folder
+                  toast.success(
+                    t('folder:itemsMovedToFolder', {
+                      folderName: `"${name}"`,
+                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
+                    }),
+                  )
+                } else {
+                  // moved to root
+                  toast.success(
+                    t('folder:itemsMovedToRoot', {
+                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
+                    }),
+                  )
+                }
               }}
             />
             <ListSelectionButton onClick={() => openModal(moveToFolderDrawerSlug)} type="button">

@@ -181,17 +181,28 @@ export const esTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Explorar por Carpeta',
     byFolder: 'Por Carpeta',
-    deleteConfirmation:
-      'Las carpetas anidadas serán eliminadas. Los documentos anidados se moverán a la carpeta principal más cercana. ¿Está seguro?',
     deleteFolder: 'Eliminar Carpeta',
     folderName: 'Nombre de la Carpeta',
     folders: 'Carpetas',
+    itemHasBeenMoved: '{{title}} ha sido trasladado a {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} ha sido movido a la carpeta raíz.',
+    itemsMovedToFolder: '{{title}} movido a {{folderName}}',
+    itemsMovedToRoot: '{{title}} se movió a la carpeta raíz',
     moveFolder: 'Mover Carpeta',
+    moveItemsToFolderConfirmation:
+      'Estás a punto de mover <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
+    moveItemsToRootConfirmation:
+      'Está a punto de mover <1>{{count}} {{label}}</1> a la carpeta raíz. ¿Está seguro?',
+    moveItemToFolderConfirmation:
+      'Está a punto de mover <1>{{title}}</1> a <2>{{toFolder}}</2>. ¿Está seguro?',
+    moveItemToRootConfirmation:
+      'Está a punto de mover <1>{{title}}</1> a la carpeta raíz. ¿Está seguro?',
+    movingFromFolder: 'Moviendo {{title}} de {{folderName}}',
     newFolder: 'Nueva Carpeta',
-    removeFromFolder: 'Eliminar de la carpeta',
+    noFolder: 'Sin Carpeta',
     renameFolder: 'Renombrar carpeta',
     searchByNameInFolder: 'Buscar por nombre en {{folderName}}',
-    selectFolder: 'Seleccionar Carpeta',
+    selectFolderForItem: 'Seleccione la carpeta para {{title}}',
   },
   general: {
     name: 'Nombre',
@@ -224,6 +235,7 @@ export const esTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmar copia',
     confirmDeletion: 'Confirmar eliminación',
     confirmDuplication: 'Confirmar duplicado',
+    confirmMove: 'Confirmar movimiento',
     confirmReindex: '¿Reindexar todas las {{collections}}?',
     confirmReindexAll: '¿Reindexar todas las colecciones?',
     confirmReindexDescription:
@@ -341,6 +353,7 @@ export const esTranslations: DefaultTranslationsObject = {
     saving: 'Guardando...',
     schedulePublishFor: 'Programar publicación para {{title}}',
     searchBy: 'Buscar por {{label}}',
+    select: 'Seleccionar',
     selectAll: 'Seleccionar todo {{count}} {{label}}',
     selectAllRows: 'Selecciona todas las filas',
     selectedCount: '{{count}} {{label}} seleccionado',

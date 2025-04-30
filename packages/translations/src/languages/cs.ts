@@ -177,17 +177,28 @@ export const csTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Procházet podle složek',
     byFolder: 'Podle složky',
-    deleteConfirmation:
-      'Vnořené složky budou smazány. Vnořené dokumenty se přesunou do nejbližší nadřazené složky. Jste si jistý?',
     deleteFolder: 'Smazat složku',
     folderName: 'Název složky',
     folders: 'Složky',
+    itemHasBeenMoved: '{{title}} bylo přesunuto do {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} byl přesunut do kořenové složky',
+    itemsMovedToFolder: '{{title}} přesunuto do {{folderName}}',
+    itemsMovedToRoot: '{{title}} byl přesunut do kořenové složky',
     moveFolder: 'Přesunout složku',
+    moveItemsToFolderConfirmation:
+      'Chystáte se přesunout <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
+    moveItemsToRootConfirmation:
+      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořenové složky. Jste si jisti?',
+    moveItemToFolderConfirmation:
+      'Chystáte se přesunout <1>{{title}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
+    moveItemToRootConfirmation:
+      'Chystáte se přesunout <1>{{title}}</1> do kořenové složky. Jste si jistý?',
+    movingFromFolder: 'Přesunutí {{title}} z {{folderName}}',
     newFolder: 'Nová složka',
-    removeFromFolder: 'Odebrat ze složky',
+    noFolder: 'Žádná složka',
     renameFolder: 'Přejmenovat složku',
     searchByNameInFolder: 'Vyhledat podle jména v {{folderName}}',
-    selectFolder: 'Vyberte složku',
+    selectFolderForItem: 'Vyberte složku pro {{title}}',
   },
   general: {
     name: 'Jméno',
@@ -219,6 +230,7 @@ export const csTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potvrzení kopie',
     confirmDeletion: 'Potvrdit odstranění',
     confirmDuplication: 'Potvrdit duplikaci',
+    confirmMove: 'Potvrdit přesun',
     confirmReindex: 'Přeindexovat všechny {{collections}}?',
     confirmReindexAll: 'Přeindexovat všechny kolekce?',
     confirmReindexDescription:
@@ -334,6 +346,7 @@ export const csTranslations: DefaultTranslationsObject = {
     saving: 'Ukládání...',
     schedulePublishFor: 'Naplánovat publikaci pro {{title}}',
     searchBy: 'Vyhledat podle {{label}}',
+    select: 'Vyberte',
     selectAll: 'Vybrat vše {{count}} {{label}}',
     selectAllRows: 'Vyberte všechny řádky',
     selectedCount: 'Vybráno {{count}} {{label}}',

@@ -14,7 +14,7 @@ type DrawerActionHeaderArgs = {
   readonly onCancel?: () => void
   readonly onSave?: () => void
   readonly saveLabel?: string
-  readonly title: string
+  readonly title: React.ReactNode | string
 }
 export const DrawerActionHeader = ({
   cancelLabel,

@@ -182,17 +182,28 @@ export const deTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Durchsuchen nach Ordner',
     byFolder: 'Nach Ordner',
-    deleteConfirmation:
-      'Verschachtelte Ordner werden gelöscht. Verschachtelte Dokumente werden in den nächstgelegenen übergeordneten Ordner verschoben. Sind Sie sicher?',
     deleteFolder: 'Ordner löschen',
     folderName: 'Ordnername',
     folders: 'Ordner',
+    itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
+    itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben',
+    itemsMovedToFolder: '{{title}} wurde in {{folderName}} verschoben.',
+    itemsMovedToRoot: '{{title}} wurde in den Stammordner verschoben',
     moveFolder: 'Ordner verschieben',
+    moveItemsToFolderConfirmation:
+      'Sie sind dabei, <1>{{count}} {{label}}</1> nach <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
+    moveItemsToRootConfirmation:
+      'Sie sind dabei, <1>{{count}} {{label}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
+    moveItemToFolderConfirmation:
+      'Sie sind dabei, <1>{{title}}</1> zu <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
+    moveItemToRootConfirmation:
+      'Sie sind dabei, <1>{{title}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
+    movingFromFolder: 'Verschieben von {{title}} aus {{folderName}}',
     newFolder: 'Neuer Ordner',
-    removeFromFolder: 'Aus dem Ordner entfernen',
+    noFolder: 'Kein Ordner',
     renameFolder: 'Ordner umbenennen',
     searchByNameInFolder: 'Suche nach Name in {{folderName}}',
-    selectFolder: 'Ordner auswählen',
+    selectFolderForItem: 'Wählen Sie den Ordner für {{title}}',
   },
   general: {
     name: 'Name',
@@ -225,6 +236,7 @@ export const deTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Kopie bestätigen',
     confirmDeletion: 'Löschen bestätigen',
     confirmDuplication: 'Duplizieren bestätigen',
+    confirmMove: 'Bestätigen Sie den Umzug.',
     confirmReindex: 'Alle {{collections}} neu indizieren?',
     confirmReindexAll: 'Alle Sammlungen neu indizieren?',
     confirmReindexDescription:
@@ -341,6 +353,7 @@ export const deTranslations: DefaultTranslationsObject = {
     saving: 'Speichern...',
     schedulePublishFor: 'Plane die Veröffentlichung für {{title}}',
     searchBy: 'Suche nach {{label}}',
+    select: 'Auswählen',
     selectAll: 'Alle {{count}} {{label}} auswählen',
     selectAllRows: 'Alle Zeilen auswählen',
     selectedCount: '{{count}} {{label}} ausgewählt',

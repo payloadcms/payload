@@ -177,17 +177,28 @@ export const hyTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Թվարկել թղթապանակներով',
     byFolder: 'ըստ թղթապանակի',
-    deleteConfirmation:
-      'Տեղադրված թղթապանակները կջնջվեն։ Գործառույթ թղթապանակներում փաստաթուղթերը կտեղափոխվեն դեպի հարակից ծնող թղթապանակը։ Համոզված եք։',
     deleteFolder: 'Ջնջել թղթապանակը',
     folderName: 'Տեսակավորման անվանում',
     folders: 'Պատուհաններ',
+    itemHasBeenMoved: '{{title}}-ը տեղափոխվել է {{folderName}}-ում',
+    itemHasBeenMovedToRoot: '«{{title}}» տեղափոխվել է արմատային պանակ։',
+    itemsMovedToFolder: '{{title}} տեղափոխվեց {{folderName}}',
+    itemsMovedToRoot: '{{title}} տեղափոխվել է արմատ թղթապանակին',
     moveFolder: 'Տեղափոխել թղթապանակը',
+    moveItemsToFolderConfirmation:
+      'Դուք պատրաստ եք <1>{{count}} {{label}}</1> տեղափոխել <2>{{toFolder}}</2>։ Ամբողջականում համոզված եք:',
+    moveItemsToRootConfirmation:
+      'Դուք պատրաստված եք տեղափոխել <1>{{count}} {{label}}</1> արմատ թղթապանակի. Համոզվա՞ծ եք:',
+    moveItemToFolderConfirmation:
+      'Դուք պատրաստ եք տեղափոխել <1>{{title}}</1> <2>{{toFolder}}</2>։ Վստահ եք:',
+    moveItemToRootConfirmation:
+      'Դուք պատրաստ եք <1>{{title}}</1> տեղափոխել արմատային պանակի մեջ։ Վստահ եք։',
+    movingFromFolder: '{{title}}-ի տեղափոխում {{folderName}}-ից',
     newFolder: 'Նոր թղթապանակ',
-    removeFromFolder: 'Հեռացնել թղթապանակից',
+    noFolder: 'Ոչ մի թղթապանակ',
     renameFolder: 'Վերանվանել թղթապանակը',
     searchByNameInFolder: 'Փնտրել ըստ անվանումի {{folderName}} թղթապանակում',
-    selectFolder: 'Ընտրել թղթապանակ',
+    selectFolderForItem: 'Ընտրեք թղթապանակ {{title}}-ի համար',
   },
   general: {
     name: 'Անուն',
@@ -220,6 +231,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Հաստատել պատճենումը',
     confirmDeletion: 'Հաստատել ջնջելը',
     confirmDuplication: 'Հաստատել կրկնօրինակումը',
+    confirmMove: 'Հաստատեք տեղափոխումը',
     confirmReindex: 'Վերաինդեքսավորե՞լ բոլոր {{collections}}-ը։',
     confirmReindexAll: 'Վերաինդեքսավորե՞լ բոլոր հավաքածուները։',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',
+    select: 'Ընտրել',
     selectAll: 'Ընտրել բոլոր {{count}} {{label}}',
     selectAllRows: 'Ընտրել բոլոր տողերը',
     selectedCount: '{{count}} {{label}} ընտրված է',

@@ -180,17 +180,28 @@ export const skTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Prehliadať podľa priečinka',
     byFolder: 'Podľa priečinka',
-    deleteConfirmation:
-      'Vnorené priečinky budú vymazané. Vnorené dokumenty sa presunú do najbližšej nadradenej zložky. Ste si istý?',
     deleteFolder: 'Odstrániť priečinok',
     folderName: 'Názov priečinka',
     folders: 'Priečinky',
+    itemHasBeenMoved: '{{title}} bol presunutý do {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
+    itemsMovedToFolder: '{{title}} presunuté do {{folderName}}',
+    itemsMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
     moveFolder: 'Presunúť priečinok',
+    moveItemsToFolderConfirmation:
+      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
+    moveItemsToRootConfirmation:
+      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňového priečinka. Ste si istý?',
+    moveItemToFolderConfirmation:
+      'Chystáte sa presunúť <1>{{title}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
+    moveItemToRootConfirmation:
+      'Chystáte sa presunúť <1>{{title}}</1> do koreňového priečinka. Ste si istý?',
+    movingFromFolder: 'Presun {{title}} z {{folderName}}',
     newFolder: 'Nový priečinok',
-    removeFromFolder: 'Odstrániť z priečinka',
+    noFolder: 'Žiadna zložka',
     renameFolder: 'Premenovať priečinok',
     searchByNameInFolder: 'Hľadaj podľa mena v {{folderName}}',
-    selectFolder: 'Vybrať priečinok',
+    selectFolderForItem: 'Vyberte priečinok pre {{title}}',
   },
   general: {
     name: 'Meno',
@@ -222,6 +233,7 @@ export const skTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potvrdiť kópiu',
     confirmDeletion: 'Potvrdiť odstránenie',
     confirmDuplication: 'Potvrdiť duplikáciu',
+    confirmMove: 'Potvrdiť presun',
     confirmReindex: 'Znova zaindexovať všetky {{collections}}?',
     confirmReindexAll: 'Znova zaindexovať všetky kolekcie?',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const skTranslations: DefaultTranslationsObject = {
     saving: 'Ukladanie...',
     schedulePublishFor: 'Naplánovať publikovanie pre {{title}}',
     searchBy: 'Vyhľadať podľa {{label}}',
+    select: 'Vyberte',
     selectAll: 'Vybrať všetko {{count}} {{label}}',
     selectAllRows: 'Vybrať všetky riadky',
     selectedCount: 'Vybrané {{count}} {{label}}',

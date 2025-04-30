@@ -178,17 +178,28 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Pregledaj po Folderu',
     byFolder: 'Po fascikli',
-    deleteConfirmation:
-      'Ugnježđene fascikle će biti obrisane. Ugnježđeni dokumenti će biti premješteni u najbližu roditeljsku fasciklu. Da li ste sigurni?',
     deleteFolder: 'Obriši mapu',
     folderName: 'Naziv fascikle',
     folders: 'Fascikle',
+    itemHasBeenMoved: '{{title}} je premesten u {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} je premešten u osnovnu fasciklu',
+    itemsMovedToFolder: '{{title}} premešteno u {{folderName}}',
+    itemsMovedToRoot: '{{title}} je premješten u glavnu fasciklu',
     moveFolder: 'Premesti folder',
+    moveItemsToFolderConfirmation:
+      'Na korak ste da premestite <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
+    moveItemsToRootConfirmation:
+      'Uskoro ćete premestiti <1>{{count}} {{label}}</1> u koreni direktorijum. Da li ste sigurni?',
+    moveItemToFolderConfirmation:
+      'Upravo ćete premestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
+    moveItemToRootConfirmation:
+      'Upravo ćete premestiti <1>{{title}}</1> u glavnu fasciklu. Da li ste sigurni?',
+    movingFromFolder: 'Premestanje {{title}} iz {{folderName}}',
     newFolder: 'Novi Folder',
-    removeFromFolder: 'Ukloni iz fascikle',
+    noFolder: 'Nema foldera',
     renameFolder: 'Preimenuj folder',
     searchByNameInFolder: 'Pretraga po imenu u {{folderName}}',
-    selectFolder: 'Izaberite fasciklu',
+    selectFolderForItem: 'Izaberite fasciklu za {{title}}',
   },
   general: {
     name: 'Ime',
@@ -220,6 +231,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Potvrdi kopiju',
     confirmDeletion: 'Potvrdi brisanje',
     confirmDuplication: 'Potvrdi duplikaciju',
+    confirmMove: 'Potvrdi pomeranje',
     confirmReindex: 'Ponovo indeksirati sve {{collections}}?',
     confirmReindexAll: 'Ponovo indeksirati sve kolekcije?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     saving: 'Čuvanje u toku...',
     schedulePublishFor: 'Zakaži objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',
+    select: 'Izaberite',
     selectAll: 'Odaberite sve {{count}} {{label}}',
     selectAllRows: 'Odaberite sve redove',
     selectedCount: '{{count}} {{label}} odabrano',

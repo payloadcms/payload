@@ -177,17 +177,28 @@ export const ptTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Navegar por Pasta',
     byFolder: 'Por Pasta',
-    deleteConfirmation:
-      'As pastas aninhadas serão excluídas. Os documentos aninhados serão movidos para a pasta pai mais próxima. Você tem certeza?',
     deleteFolder: 'Apagar Pasta',
     folderName: 'Nome da Pasta',
     folders: 'Pastas',
+    itemHasBeenMoved: '{{title}} foi movido para {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} foi movido para a pasta raiz',
+    itemsMovedToFolder: '{{title}} movido para {{folderName}}',
+    itemsMovedToRoot: '{{title}} foi movido para a pasta raiz',
     moveFolder: 'Mover Pasta',
+    moveItemsToFolderConfirmation:
+      'Você está prestes a mover <1>{{count}} {{label}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
+    moveItemsToRootConfirmation:
+      'Você está prestes a mover <1>{{count}} {{label}}</1> para a pasta raiz. Tem certeza?',
+    moveItemToFolderConfirmation:
+      'Você está prestes a mover <1>{{title}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
+    moveItemToRootConfirmation:
+      'Você está prestes a mover <1>{{title}}</1> para a pasta raiz. Tem certeza disso?',
+    movingFromFolder: 'Movendo {{title}} de {{folderName}}',
     newFolder: 'Nova Pasta',
-    removeFromFolder: 'Remover da Pasta',
+    noFolder: 'Sem Pasta',
     renameFolder: 'Renomear Pasta',
     searchByNameInFolder: 'Pesquisar por Nome em {{folderName}}',
-    selectFolder: 'Selecionar Pasta',
+    selectFolderForItem: 'Selecione a pasta para {{title}}',
   },
   general: {
     name: 'Nome',
@@ -220,6 +231,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirme cópia',
     confirmDeletion: 'Confirmar exclusão',
     confirmDuplication: 'Confirmar duplicação',
+    confirmMove: 'Confirme a movimentação',
     confirmReindex: 'Reindexar todas as {{collections}}?',
     confirmReindexAll: 'Reindexar todas as coleções?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
     searchBy: 'Buscar por {{label}}',
+    select: 'Selecionar',
     selectAll: 'Selecione tudo {{count}} {{label}}',
     selectAllRows: 'Selecione todas as linhas',
     selectedCount: '{{count}} {{label}} selecionado',

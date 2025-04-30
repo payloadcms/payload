@@ -177,17 +177,28 @@ export const azTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Qovluqlara görə gözdən keçirin',
     byFolder: 'Qovluğa görə',
-    deleteConfirmation:
-      'İç içə qovşaqlar silinəcək. İç içə sənədlər ən yaxın ana qovşağa köçəriləcək. Eminsiniz?',
     deleteFolder: 'Qovluğu Sil',
     folderName: 'Qovluq Adı',
     folders: 'Qovluqlar',
+    itemHasBeenMoved: '{{title}} {{folderName}} qovluğuna köçürüldü.',
+    itemHasBeenMovedToRoot: '{{title}} kök qovluğa köçürüldü.',
+    itemsMovedToFolder: '{{title}} {{folderName}} qovluğuna köçürüldü',
+    itemsMovedToRoot: '{{title}} kök qovluğa köçürdü',
     moveFolder: 'Qovluğu Köçür',
+    moveItemsToFolderConfirmation:
+      'Siz <1>{{count}} {{label}}</1> -i <2>{{toFolder}}</2> -ə köçürmək üzərəsiniz. Eminsiniz?',
+    moveItemsToRootConfirmation:
+      'Siz <1>{{count}} {{label}}</1> əsas qovluğa köçürmək üzərəsiniz. Eminsiniz?',
+    moveItemToFolderConfirmation:
+      'Siz <1>{{title}}</1>-i <2>{{toFolder}}</2>ə köçürmək barədəsiniz. Eminsinizmi?',
+    moveItemToRootConfirmation:
+      "Siz <1>{{title}}</1>'i kök qovluğa köçürmək barədəsindəsiniz. Əminsiniz?",
+    movingFromFolder: '{{title}}-i {{folderName}}-dən köçürmək',
     newFolder: 'Yeni Qovluq',
-    removeFromFolder: 'Qovluqdan çıxarın',
+    noFolder: 'Qovluq Yoxdur',
     renameFolder: 'Qovluğun adını dəyişdirin',
     searchByNameInFolder: '{{folderName}} qovluğunda adla axtarış',
-    selectFolder: 'Qovluğu seçin',
+    selectFolderForItem: '{{title}} üçün qovluğu seçin',
   },
   general: {
     name: 'Ad',
@@ -220,6 +231,7 @@ export const azTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Kopyanı təsdiqləyin',
     confirmDeletion: 'Silməni təsdiqlə',
     confirmDuplication: 'Dublikasiyanı təsdiqlə',
+    confirmMove: 'Hərəkəti təsdiqləyin',
     confirmReindex: 'Bütün {{collections}} yenidən indekslənsin?',
     confirmReindexAll: 'Bütün kolleksiyalar yenidən indekslənsin?',
     confirmReindexDescription:
@@ -336,6 +348,7 @@ export const azTranslations: DefaultTranslationsObject = {
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',
+    select: 'Seçin',
     selectAll: 'Bütün {{count}} {{label}} seç',
     selectAllRows: 'Bütün sıraları seçin',
     selectedCount: '{{count}} {{label}} seçildi',

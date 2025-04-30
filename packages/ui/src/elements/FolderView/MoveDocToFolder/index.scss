@@ -3,5 +3,15 @@
     .btn {
       margin: 0;
     }
+
+    &__move-to-folder-btn {
+      .btn__icon {
+        color: var(--theme-elevation-300);
+      }
+
+      .btn__label {
+        font-weight: 600;
+      }
+    }
   }
 }

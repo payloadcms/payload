@@ -175,17 +175,27 @@ export const arTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'تصفح حسب المجلد',
     byFolder: 'حسب المجلد',
-    deleteConfirmation:
-      'سيتم حذف المجلدات المتداخلة. ستنتقل المستندات المتداخلة إلى المجلد الأصل الأقرب. هل أنت متأكد؟',
     deleteFolder: 'حذف المجلد',
     folderName: 'اسم المجلد',
     folders: 'مجلدات',
+    itemHasBeenMoved: 'تم نقل {{title}} إلى {{folderName}}',
+    itemHasBeenMovedToRoot: 'تم نقل {{title}} إلى المجلد الجذر',
+    itemsMovedToFolder: '{{title}} تم نقله إلى {{folderName}}',
+    itemsMovedToRoot: '{{title}} تم نقله إلى المجلد الجذر',
     moveFolder: 'نقل المجلد',
+    moveItemsToFolderConfirmation:
+      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
+    moveItemsToRootConfirmation:
+      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
+    moveItemToFolderConfirmation:
+      'أنت على وشك نقل <1>{{title}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
+    moveItemToRootConfirmation: 'أنت على وشك نقل <1>{{title}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
+    movingFromFolder: 'نقل {{title}} من {{folderName}}',
     newFolder: 'مجلد جديد',
-    removeFromFolder: 'أزل من المجلد',
+    noFolder: 'لا يوجد مجلد',
     renameFolder: 'إعادة تسمية المجلد',
     searchByNameInFolder: 'البحث عن طريق الاسم في {{folderName}}',
-    selectFolder: 'حدد المجلد',
+    selectFolderForItem: 'اختر المجلد لـ {{title}}',
   },
   general: {
     name: 'اسم',
@@ -217,6 +227,7 @@ export const arTranslations: DefaultTranslationsObject = {
     confirmCopy: 'تأكيد النسخ',
     confirmDeletion: 'تأكيد الحذف',
     confirmDuplication: 'تأكيد التّكرار',
+    confirmMove: 'تأكيد النقل',
     confirmReindex: 'إعادة فهرسة جميع {{collections}}؟',
     confirmReindexAll: 'إعادة فهرسة جميع المجموعات؟',
     confirmReindexDescription:
@@ -332,6 +343,7 @@ export const arTranslations: DefaultTranslationsObject = {
     saving: 'جاري الحفظ...',
     schedulePublishFor: 'جدولة النشر لـ {{العنوان}}',
     searchBy: 'البحث عن طريق {{label}}',
+    select: 'اختر',
     selectAll: 'تحديد كل {{count}} {{label}}',
     selectAllRows: 'حدد جميع الصفوف',
     selectedCount: 'تم تحديد {{count}} {{label}}',

@@ -68,6 +68,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
           onCancel={() => {
             closeModal(drawerSlug)
           }}
+          saveLabel={t('general:create')}
           title={t('folder:newFolder')}
         />
 

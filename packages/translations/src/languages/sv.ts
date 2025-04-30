@@ -177,17 +177,28 @@ export const svTranslations: DefaultTranslationsObject = {
   folder: {
     browseByFolder: 'Bläddra efter mapp',
     byFolder: 'Efter mapp',
-    deleteConfirmation:
-      'Eventuella underliggande mappar kommer också tas bort. Filerna i de mapparna flyttas upp till samma plats som mappen du tar bort. Är du säker?',
     deleteFolder: 'Ta bort mapp',
     folderName: 'Mappnamn',
     folders: 'Mappar',
+    itemHasBeenMoved: '{{title}} har flyttats till {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} har flyttats till rotmappen',
+    itemsMovedToFolder: '{{title}} flyttad till {{folderName}}',
+    itemsMovedToRoot: '{{titel}} flyttades till rotmappen',
     moveFolder: 'Flytta mapp',
+    moveItemsToFolderConfirmation:
+      'Du är på väg att flytta <1>{{count}} {{label}}</1> till <2>{{toFolder}}</2>. Är du säker?',
+    moveItemsToRootConfirmation:
+      'Du är på väg att flytta <1>{{count}} {{label}}</1> till root-mappen. Är du säker?',
+    moveItemToFolderConfirmation:
+      'Du håller på att flytta <1>{{title}}</1> till <2>{{toFolder}}</2>. Är du säker?',
+    moveItemToRootConfirmation:
+      'Du är på väg att flytta <1>{{title}}</1> till rotmappen. Är du säker?',
+    movingFromFolder: 'Flyttar {{title}} från {{folderName}}',
     newFolder: 'Ny mapp',
-    removeFromFolder: 'Ta bort från mapp',
+    noFolder: 'Ingen mapp',
     renameFolder: 'Byt namn på mapp',
     searchByNameInFolder: 'Sök efter namn i {{folderName}}',
-    selectFolder: 'Välj mapp',
+    selectFolderForItem: 'Välj mapp för {{title}}',
   },
   general: {
     name: 'Namn',
@@ -220,6 +231,7 @@ export const svTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Bekräfta kopia',
     confirmDeletion: 'Bekräfta radering',
     confirmDuplication: 'Bekräfta dubblering',
+    confirmMove: 'Bekräfta flytt',
     confirmReindex: 'Omindexera alla {{collections}}?',
     confirmReindexAll: 'Omindexera alla samlingar?',
     confirmReindexDescription:
@@ -337,6 +349,7 @@ export const svTranslations: DefaultTranslationsObject = {
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',
+    select: 'Välj',
     selectAll: 'Välj alla {{count}} {{label}}',
     selectAllRows: 'Välj alla rader',
     selectedCount: '{{count}} {{label}} har valts',

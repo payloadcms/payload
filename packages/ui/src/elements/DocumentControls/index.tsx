@@ -164,7 +164,10 @@ export const DocumentControls: React.FC<{
             {user && readOnlyForIncomingUser && (
               <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
-            {config.folders.enabled && <MoveDocToFolder />}
+            {config.folders.enabled &&
+              Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
+                <MoveDocToFolder />
+              )}
           </div>
 
           <ul className={`${baseClass}__meta`}>
