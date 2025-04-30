@@ -15,8 +15,8 @@ export function formatFolderOrDocumentItem({
 }: Args): FolderOrDocument {
   const itemValue: FolderOrDocument['value'] = {
     id: value?.id,
+    _folder: value?._folder,
     _folderOrDocumentTitle: value[useAsTitle || 'id'],
-    _parentFolder: value?._parentFolder,
     createdAt: value?.createdAt,
     updatedAt: value?.updatedAt,
   }

@@ -106,8 +106,8 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
       const collectionConfig = getEntityConfig({ collectionSlug })
       const itemValue: FolderOrDocument['value'] = {
         id: doc?.id,
+        _folder: doc?._folder,
         _folderOrDocumentTitle: doc?.[collectionConfig.admin.useAsTitle ?? 'id'],
-        _parentFolder: doc?._parentFolder,
         createdAt: doc?.createdAt,
         updatedAt: doc?.updatedAt,
       }

@@ -2,7 +2,7 @@ import type { TypeWithID } from '../collections/config/types.js'
 import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 
 export type FolderInterface = {
-  _parentFolder?: FolderInterface | (number | string | undefined)
+  _folder?: FolderInterface | (number | string | undefined)
   documentsAndFolders?: {
     docs: {
       relationTo: CollectionSlug
@@ -54,8 +54,8 @@ export type FolderOrDocument = {
   itemKey: FolderDocumentItemKey
   relationTo: CollectionSlug
   value: {
+    _folder?: number | string
     _folderOrDocumentTitle: string
-    _parentFolder?: number | string
     createdAt?: string
     id: number | string
     updatedAt?: string

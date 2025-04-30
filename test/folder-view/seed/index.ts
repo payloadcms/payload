@@ -5,30 +5,26 @@ import { devUser } from '../../credentials.js'
 
 async function createPost(
   payload: Payload,
-  { title, _parentFolder }: Pick<Post, '_parentFolder' | 'title'>,
+  { title, _folder }: Pick<Post, '_folder' | 'title'>,
 ): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data: {
       title,
-      _parentFolder,
+      _folder,
     },
   })
 }
 
 async function createFolder(
   payload: Payload,
-  {
-    name,
-    _parentFolder,
-    isRoot = false,
-  }: Pick<FolderInterface, '_parentFolder' | 'isRoot' | 'name'>,
+  { name, _folder, isRoot = false }: Pick<FolderInterface, '_folder' | 'isRoot' | 'name'>,
 ): Promise<FolderInterface> {
   return payload.create({
     collection: '_folders',
     data: {
       name,
-      _parentFolder,
+      _folder,
       isRoot,
     },
   })
@@ -53,7 +49,7 @@ export const seed: Config['onInit'] = async (payload) => {
     ['Designers', 'Engineers', 'Marketing', 'Sales'].map((name) =>
       createFolder(payload, {
         name,
-        _parentFolder: teamFolder.id,
+        _folder: teamFolder.id,
       }),
     ),
   )
@@ -80,25 +76,25 @@ export const seed: Config['onInit'] = async (payload) => {
     ...sales.map((title) =>
       createPost(payload, {
         title,
-        _parentFolder: salesFolder?.id,
+        _folder: salesFolder?.id,
       }),
     ),
     ...marketers.map((title) =>
       createPost(payload, {
         title,
-        _parentFolder: marketingFolder?.id,
+        _folder: marketingFolder?.id,
       }),
     ),
     ...engineers.map((title) =>
       createPost(payload, {
         title,
-        _parentFolder: engineersFolder?.id,
+        _folder: engineersFolder?.id,
       }),
     ),
     ...designers.map((title) =>
       createPost(payload, {
         title,
-        _parentFolder: designersFolder?.id,
+        _folder: designersFolder?.id,
       }),
     ),
   ])

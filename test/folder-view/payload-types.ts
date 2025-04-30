@@ -133,7 +133,7 @@ export interface Post {
   id: string;
   title?: string | null;
   heroImage?: (string | null) | Media;
-  _parentFolder?: (string | null) | FolderInterface;
+  _folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -143,7 +143,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
-  _parentFolder?: (string | null) | FolderInterface;
+  _folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -163,7 +163,7 @@ export interface Media {
 export interface FolderInterface {
   id: string;
   name: string;
-  _parentFolder?: (string | null) | FolderInterface;
+  _folder?: (string | null) | FolderInterface;
   documentsAndFolders?: {
     docs?: (
       | {
@@ -274,7 +274,7 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
-  _parentFolder?: T;
+  _folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -283,7 +283,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  _parentFolder?: T;
+  _folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -317,7 +317,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface _FoldersSelect<T extends boolean = true> {
   name?: T;
-  _parentFolder?: T;
+  _folder?: T;
   documentsAndFolders?: T;
   updatedAt?: T;
   createdAt?: T;

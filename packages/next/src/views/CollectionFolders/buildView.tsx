@@ -94,13 +94,13 @@ export const buildCollectionFolderView = async (
 
     if (folderID) {
       whereConstraints.push({
-        _parentFolder: {
+        _folder: {
           equals: parseDocumentID({ id: folderID, collectionSlug, payload }),
         },
       })
     } else {
       whereConstraints.push({
-        _parentFolder: {
+        _folder: {
           exists: false,
         },
       })

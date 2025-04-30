@@ -816,7 +816,7 @@ export function FolderProvider({
         const req = await fetch(
           `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}`,
           {
-            body: JSON.stringify({ _parentFolder: toFolderID || null }),
+            body: JSON.stringify({ _folder: toFolderID || null }),
             credentials: 'include',
             headers: {
               'content-type': 'application/json',
@@ -865,7 +865,7 @@ export function FolderProvider({
           )
           try {
             const res = await fetch(`${serverURL}${routes.api}/${collectionSlug}${query}`, {
-              body: JSON.stringify({ _parentFolder: toFolderID || null }),
+              body: JSON.stringify({ _folder: toFolderID || null }),
               credentials: 'include',
               headers: {
                 'content-type': 'application/json',
@@ -1014,8 +1014,8 @@ export function FolderProvider({
               relationTo: folderCollectionSlug,
               value: {
                 id: activeFolderID,
+                _folder: breadcrumbs[breadcrumbs.length - 2]?.id || null,
                 _folderOrDocumentTitle: breadcrumbs[breadcrumbs.length - 1]?.name,
-                _parentFolder: breadcrumbs[breadcrumbs.length - 2]?.id || null,
               },
             }
           : null,

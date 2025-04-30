@@ -1,2 +1,2 @@
 export const foldersSlug = '_folders'
-export const parentFolderFieldName = '_parentFolder'
+export const parentFolderFieldName = '_folder'

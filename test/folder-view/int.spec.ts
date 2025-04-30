@@ -70,7 +70,7 @@ describe('folders', () => {
       })
 
       expect(rootSubfoldersQuery.docs).toHaveLength(1)
-      expect(rootSubfoldersQuery.docs[0]._parentFolder).toBe(undefined)
+      expect(rootSubfoldersQuery.docs[0]._folder).toBe(undefined)
     })
 
     it('should populate subfolders for root', async () => {
@@ -148,7 +148,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 1',
-          _parentFolder: folderIDFromParams,
+          _folder: folderIDFromParams,
         },
       })
 
@@ -156,7 +156,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 2',
-          _parentFolder: folderIDFromParams,
+          _folder: folderIDFromParams,
         },
       })
 
@@ -181,7 +181,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 1',
-          _parentFolder: folderIDFromParams,
+          _folder: folderIDFromParams,
         },
       })
 
@@ -189,14 +189,14 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 2',
-          _parentFolder: folderIDFromParams,
+          _folder: folderIDFromParams,
         },
       })
 
       const postsByParentQuery = await payload.find({
         collection: 'posts',
         where: {
-          _parentFolder: {
+          _folder: {
             equals: folderIDFromParams,
           },
         },

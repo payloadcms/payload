@@ -56,7 +56,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
             },
             value: '',
           },
-          _parentFolder: {
+          _folder: {
             initialValue: '',
             valid: true,
             value: '',
@@ -87,7 +87,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
               return true
             }}
           />
-          <HiddenField key={folderID} path="_parentFolder" value={folderID} />
+          <HiddenField key={folderID} path="_folder" value={folderID} />
         </DrawerContentContainer>
       </Form>
     </Drawer>

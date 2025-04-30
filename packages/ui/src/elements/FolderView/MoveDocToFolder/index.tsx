@@ -20,7 +20,7 @@ const moveDocToFolderDrawerSlug = 'move-doc-to-folder'
 export function MoveDocToFolder({ className = '' }) {
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const { i18n, t } = useTranslation()
-  const currentParentFolder = useFormFields(([fields]) => (fields && fields?._parentFolder) || null)
+  const currentParentFolder = useFormFields(([fields]) => (fields && fields?._folder) || null)
   const { setModified } = useForm()
   const { closeModal, openModal } = useModal()
   const { id, collectionSlug, initialData, title } = useDocumentInfo()
@@ -73,7 +73,7 @@ export function MoveDocToFolder({ className = '' }) {
           if (currentParentFolder !== id) {
             dispatchField({
               type: 'UPDATE',
-              path: '_parentFolder',
+              path: '_folder',
               value: id,
             })
             setModified(true)

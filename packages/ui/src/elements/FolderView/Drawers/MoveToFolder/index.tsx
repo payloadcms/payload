@@ -187,8 +187,8 @@ function Content({
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Record<string, any> }) => {
       const itemValue: FolderOrDocument['value'] = {
         id: doc?.id,
+        _folder: doc?._folder,
         _folderOrDocumentTitle: doc?.[folderCollectionConfig.admin.useAsTitle ?? 'id'],
-        _parentFolder: doc?._parentFolder,
         createdAt: doc?.createdAt,
         updatedAt: doc?.updatedAt,
       }

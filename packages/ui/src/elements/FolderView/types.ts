@@ -41,7 +41,7 @@ export type FolderOrDocument = {
   itemKey: ItemKey
   relationTo: CollectionSlug
   value: {
-    _parentFolder?: number | string
+    _folder?: number | string
     createdAt: string
     id: string
     title: string
