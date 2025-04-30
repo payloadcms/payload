@@ -2156,6 +2156,40 @@ describe('database', () => {
       expect(descDocs[0]?.id).toBe(doc_2.id)
     })
 
+    it('graphQL - should allow to query by a deep virtual field', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-41' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'my-title-5' },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const query = `query {
+        VirtualRelations(where: { postCategoryTitle: { equals: "category-41" }}) {
+          docs {
+            id
+            postTitle
+          }
+          totalDocs
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs, totalDocs } = data.VirtualRelations
+
+      expect(totalDocs).toStrictEqual(1)
+      expect(docs[0].id).toBe(id)
+    })
+
     it.todo('should allow to sort by a virtual field with reference')
 
     it('should allow virtual field 2x deep', async () => {
