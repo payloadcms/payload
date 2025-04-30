@@ -1,6 +1,7 @@
 import type { DocumentTabConfig } from 'payload'
 import type React from 'react'
 
+import { isLivePreviewEnabled } from './isLivePreviewEnabled.js'
 import { VersionsPill } from './VersionsPill/index.js'
 
 export const documentViewKeys = [
@@ -31,33 +32,38 @@ export const tabs: Record<
     order: 1000,
   },
   default: {
+    condition: ({ collectionConfig, config, globalConfig }) => {
+      return !isLivePreviewEnabled({ collectionConfig, config, globalConfig })
+    },
     href: '',
     // isActive: ({ href, location }) =>
     // location.pathname === href || location.pathname === `${href}/create`,
     label: ({ t }) => t('general:edit'),
     order: 0,
   },
+  edit: {
+    condition: ({ collectionConfig, config, globalConfig }) => {
+      return isLivePreviewEnabled({ collectionConfig, config, globalConfig })
+    },
+    href: '/edit',
+    label: ({ t }) => t('general:edit'),
+    order: 200,
+  },
   livePreview: {
     condition: ({ collectionConfig, config, globalConfig }) => {
-      if (collectionConfig) {
-        return Boolean(
-          config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-            collectionConfig?.admin?.livePreview,
-        )
-      }
-
-      if (globalConfig) {
-        return Boolean(
-          config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-            globalConfig?.admin?.livePreview,
-        )
-      }
-
-      return false
+      return !isLivePreviewEnabled({ collectionConfig, config, globalConfig })
     },
     href: '/preview',
     label: ({ t }) => t('general:livePreview'),
     order: 100,
+  },
+  livePreviewDefault: {
+    condition: ({ collectionConfig, config, globalConfig }) => {
+      return isLivePreviewEnabled({ collectionConfig, config, globalConfig })
+    },
+    href: '',
+    label: ({ t }) => t('general:livePreview'),
+    order: 0,
   },
   references: {
     condition: () => false,
@@ -77,7 +83,7 @@ export const tabs: Record<
       ),
     href: '/versions',
     label: ({ t }) => t('version:versions'),
-    order: 200,
+    order: 300,
     Pill_Component: VersionsPill,
   },
 }

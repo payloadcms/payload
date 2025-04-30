@@ -149,6 +149,13 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
+   * Set Live Preview as the default tab when editing documents.
+   * If enabled, the Live Preview tab will be shown first instead of the Edit tab.
+   * This applies to all collections or globals where Live Preview is enabled.
+   * False by default.
+   */
+  defaultTab?: boolean
+  /**
    The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    Payload will send a `window.postMessage()` to this URL with the document data in real-time.
    The frontend application is responsible for receiving the message and updating the UI accordingly.

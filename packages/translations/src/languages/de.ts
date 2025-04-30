@@ -120,7 +120,8 @@ export const deTranslations: DefaultTranslationsObject = {
     unauthorized: 'Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.',
     unauthorizedAdmin: 'Nicht autorisiert, dieser Benutzer hat keinen Zugriff auf das Admin-Panel.',
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
-    unPublishingDocument: 'Bei der Aufhebung der Veröffentlichung dieses Dokuments ist ein Fehler aufgetreten.',
+    unPublishingDocument:
+      'Bei der Aufhebung der Veröffentlichung dieses Dokuments ist ein Fehler aufgetreten.',
     unspecific: 'Ein Fehler ist aufgetreten.',
     unverifiedEmail: 'Bitte verifiziere deine E-Mail, bevor du dich anmeldest.',
     userEmailAlreadyRegistered: 'Ein Benutzer mit der angegebenen E-Mail ist bereits registriert.',
@@ -321,7 +322,8 @@ export const deTranslations: DefaultTranslationsObject = {
     selectLabel: 'Wähle {{label}}',
     selectValue: 'Wert auswählen',
     showAllLabel: 'Zeige alle {{label}}',
-    sorryNotFound: 'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
+    sorryNotFound:
+      'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
     sortByLabelDirection: 'Sortieren nach {{label}} {{direction}}',
     stayOnThisPage: 'Auf dieser Seite bleiben',
