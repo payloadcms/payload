@@ -797,27 +797,20 @@ export const Form: React.FC<FormProps> = (props) => {
     >
       <DocumentFormContextComponent {...documentFormContextProps}>
         <FormContext value={contextRef.current}>
-          <FormWatchContext
-            value={{
-              fields: formState,
-              ...contextRef.current,
-            }}
-          >
-            <SubmittedContext value={submitted}>
-              <InitializingContext value={!isMounted || (isMounted && initializing)}>
-                <ProcessingContext value={processing}>
-                  <BackgroundProcessingContext value={backgroundProcessing}>
-                    <ModifiedContext value={modified}>
-                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
-                        {children}
-                      </FormFieldsContext.Provider>
-                    </ModifiedContext>
-                  </BackgroundProcessingContext>
-                </ProcessingContext>
-              </InitializingContext>
-            </SubmittedContext>
-          </FormWatchContext>
+          <SubmittedContext value={submitted}>
+            <InitializingContext value={!isMounted || (isMounted && initializing)}>
+              <ProcessingContext value={processing}>
+                <BackgroundProcessingContext value={backgroundProcessing}>
+                  <ModifiedContext value={modified}>
+                    {/* eslint-disable-next-line @eslint-react/no-context-provider */}
+                    <FormFieldsContext.Provider value={fieldsReducer}>
+                      {children}
+                    </FormFieldsContext.Provider>
+                  </ModifiedContext>
+                </BackgroundProcessingContext>
+              </ProcessingContext>
+            </InitializingContext>
+          </SubmittedContext>
         </FormContext>
       </DocumentFormContextComponent>
     </El>

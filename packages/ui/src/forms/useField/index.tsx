@@ -1,7 +1,7 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
@@ -17,12 +17,12 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import {
   useDocumentForm,
   useForm,
-  useFormFields,
   useFormInitializing,
   useFormModified,
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
+import { formStateStore } from '../Form/store.js'
 import { useFieldPath } from '../RenderFields/context.js'
 
 /**
@@ -52,8 +52,19 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch)
-  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
+  const field = useSyncExternalStore(
+    (callback) => formStateStore.subscribe(path, callback),
+    () => formStateStore.getSnapshot(path),
+  )
+
+  const value = field.value
+
+  const dispatchField = useMemo(
+    () => (value: unknown) => {
+      formStateStore.setField(path, value)
+    },
+    [path],
+  )
 
   const { t } = useTranslation()
   const { config } = useConfig()
@@ -63,7 +74,6 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
-  const value = field?.value as TValue
   const initialValue = field?.initialValue as TValue
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
