@@ -2451,4 +2451,37 @@ describe('database', () => {
 
     expect(res.docs[0].id).toBe(customID.id)
   })
+
+  it('should count with a query that contains subqueries', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'new-category' },
+    })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { title: 'new-post', category: category.id },
+    })
+
+    const result_1 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'new-category',
+        },
+      },
+    })
+
+    expect(result_1.totalDocs).toBe(1)
+
+    const result_2 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'non-existing-category',
+        },
+      },
+    })
+
+    expect(result_2.totalDocs).toBe(0)
+  })
 })
