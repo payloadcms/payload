@@ -85,7 +85,7 @@ export const generateFileData = async <T>({
   if (!file && uploadEdits && incomingFileData) {
     const { filename, url } = incomingFileData as FileData
 
-    if (filename.includes('../') || filename.includes('..\\')) {
+    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
 
