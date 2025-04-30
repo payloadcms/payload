@@ -53,6 +53,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     }
 
     const select = sanitizeSelect({
+      fields: globalConfig.flattenedFields,
       forceSelect: globalConfig.forceSelect,
       select: incomingSelect,
     })
