@@ -911,6 +911,94 @@ describe('Joins Field', () => {
       )
     })
 
+    it('should have simple paginate with page for joins polymorphic', async () => {
+      let queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 2
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      let pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[0].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[1].id,
+      )
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                polymorphic(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 2,
+                ) {
+                  docs {
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[2].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[3].id,
+      )
+    })
+
     it('should have simple paginate for joins inside groups', async () => {
       const queryWithLimit = `query {
     Categories(where: {
