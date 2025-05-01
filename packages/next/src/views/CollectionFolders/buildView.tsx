@@ -110,6 +110,7 @@ export const buildCollectionFolderView = async (
       collectionSlug,
       folderID,
       payload: initPageResult.req.payload,
+      search: query?.search as string,
       user: initPageResult.req.user,
     })
 

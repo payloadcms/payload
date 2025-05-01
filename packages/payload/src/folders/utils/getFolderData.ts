@@ -25,6 +25,10 @@ type Args = {
    */
   payload: Payload
   /**
+   * Search term to filter documents by - only applicable IF `collectionSlug` exists and NO `folderID` is provided
+   */
+  search?: string
+  /**
    * The user making the request
    * @default undefined
    */
@@ -37,6 +41,7 @@ export const getFolderData = async ({
   collectionSlug,
   folderID: _folderID,
   payload,
+  search,
   user,
 }: Args): Promise<GetFolderDataResult> => {
   const parentFolderID = parseDocumentID({
@@ -74,12 +79,14 @@ export const getFolderData = async ({
     const subfoldersPromise = getOrphanedDocs({
       collectionSlug: payload.config.folders.slug,
       payload,
+      search,
       user,
     })
     const documentsPromise = collectionSlug
       ? getOrphanedDocs({
           collectionSlug,
           payload,
+          search,
           user,
         })
       : Promise.resolve([])
@@ -88,7 +95,6 @@ export const getFolderData = async ({
       subfoldersPromise,
       documentsPromise,
     ])
-
     return {
       breadcrumbs,
       documents,

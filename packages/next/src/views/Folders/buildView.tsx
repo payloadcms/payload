@@ -77,6 +77,7 @@ export const buildFolderView = async (
   const { breadcrumbs, documents, subfolders } = await getFolderData({
     folderID,
     payload: initPageResult.req.payload,
+    search: query?.search as string,
     user: initPageResult.req.user,
   })
 

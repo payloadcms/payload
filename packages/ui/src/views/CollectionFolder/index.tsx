@@ -250,7 +250,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}
             label={t('general:searchBy', {
-              label: 'Title',
+              label: t('general:name'),
             })}
             onSearchChange={(search) => filterItems({ search })}
             searchQueryParam={search}

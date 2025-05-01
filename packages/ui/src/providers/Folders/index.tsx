@@ -33,7 +33,7 @@ export type FolderContextValue = {
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
-  filterItems: (args: { relationTo?: CollectionSlug[]; search?: string }) => void
+  filterItems: (args: { relationTo?: CollectionSlug[]; search?: string }) => Promise<void>
   focusedRowIndex: number
   folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
@@ -181,12 +181,12 @@ export function FolderProvider({
   breadcrumbs: _breadcrumbsFromProps = [],
   children,
   collectionSlug,
-  documents: allDocuments = [],
+  documents: allDocumentsFromProps = [],
   filteredCollectionSlugs,
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
   sort,
-  subfolders: allSubfolders = [],
+  subfolders: subfoldersFromProps = [],
 }: FolderProviderProps) {
   const { config, getEntityConfig } = useConfig()
   const { routes, serverURL } = config
@@ -211,6 +211,7 @@ export function FolderProvider({
     React.useState<FolderContextValue['folderID']>(_folderIDFromProps)
   const [breadcrumbs, setBreadcrumbs] =
     React.useState<FolderContextValue['breadcrumbs']>(_breadcrumbsFromProps)
+  const [allSubfolders, setAllSubfolders] = React.useState<FolderOrDocument[]>(subfoldersFromProps)
   const [subfolders, setSubfolders] = React.useState<FolderContextValue['subfolders']>(() => {
     return filterOutItems({
       items: allSubfolders,
@@ -218,6 +219,7 @@ export function FolderProvider({
       search: _searchFromProps,
     })
   })
+  const [allDocuments, setAllDocuments] = React.useState<FolderOrDocument[]>(allDocumentsFromProps)
   const [documents, setDocuments] = React.useState<FolderContextValue['documents']>(() =>
     filterOutItems({
       items: allDocuments,
@@ -300,10 +302,23 @@ export function FolderProvider({
    *
    * This is used when the user navigates to a folder.
    */
-  const populateFolderData = React.useCallback(
-    async ({ folderID }) => {
+  const getFolderData = React.useCallback(
+    async ({ folderID, search: _search = undefined }): Promise<GetFolderDataResult> => {
+      // if folderID is not set, we want to search all documents
+      const searchFilter = !folderID
+        ? ((typeof _search === 'string' ? _search : search) || '').trim()
+        : undefined
+      const query = qs.stringify(
+        {
+          collectionSlug,
+          folderID,
+          search: searchFilter,
+        },
+        { addQueryPrefix: true },
+      )
+
       const folderDataReq = await fetch(
-        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${folderID ? `?folderID=${folderID}` : ''}`,
+        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${query}`,
         {
           credentials: 'include',
           headers: {
@@ -314,18 +329,18 @@ export function FolderProvider({
 
       if (folderDataReq.status === 200) {
         const folderDataRes: GetFolderDataResult = await folderDataReq.json()
-        setBreadcrumbs(folderDataRes?.breadcrumbs || [])
-        setSubfolders(folderDataRes?.subfolders || [])
-        setDocuments(folderDataRes?.documents || [])
+        setAllSubfolders(folderDataRes.subfolders || [])
+        setAllDocuments(folderDataRes.documents || [])
+        return folderDataRes
       } else {
-        setBreadcrumbs([])
-        setSubfolders([])
-        setDocuments([])
+        return {
+          breadcrumbs: [],
+          documents: [],
+          subfolders: [],
+        }
       }
-
-      setActiveFolderID(folderID)
     },
-    [folderCollectionSlug, routes.api, serverURL],
+    [folderCollectionSlug, search, routes.api, serverURL, collectionSlug],
   )
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
@@ -341,17 +356,14 @@ export function FolderProvider({
           ),
         )
       } else {
-        await populateFolderData({ folderID: toFolderID })
+        const folderDataRes = await getFolderData({ folderID: toFolderID })
+        setBreadcrumbs(folderDataRes?.breadcrumbs || [])
+        setSubfolders(folderDataRes?.subfolders || [])
+        setDocuments(folderDataRes?.documents || [])
+        setActiveFolderID(toFolderID)
       }
     },
-    [
-      clearSelections,
-      drawerDepth,
-      startRouteTransition,
-      router,
-      formatFolderURL,
-      populateFolderData,
-    ],
+    [clearSelections, drawerDepth, startRouteTransition, router, formatFolderURL, getFolderData],
   )
 
   const getSelectedItems = React.useCallback(() => {
@@ -541,20 +553,41 @@ export function FolderProvider({
   )
 
   const filterItems: FolderContextValue['filterItems'] = React.useCallback(
-    ({ relationTo: _relationTo, search: _search }) => {
+    async ({ relationTo: _relationTo, search: _search }) => {
       const relationTo = collectionSlug ? undefined : _relationTo || visibleCollectionSlugs
       const searchFilter = ((typeof _search === 'string' ? _search : search) || '').trim()
 
-      const filteredDocuments = filterOutItems({
-        items: allDocuments,
-        relationTo,
-        search: searchFilter,
-      })
-      const filteredSubfolders = filterOutItems({
-        items: allSubfolders,
-        relationTo: [folderCollectionSlug],
-        search: searchFilter,
-      })
+      let filteredDocuments: FolderOrDocument[] = allDocuments
+      let filteredSubfolders: FolderOrDocument[] = allSubfolders
+
+      if (collectionSlug && !activeFolderID && _search !== search) {
+        // this allows us to search all documents in the collection when we are not in a folder and in the folder-collection view
+        const res = await getFolderData({
+          folderID: activeFolderID,
+          search: searchFilter,
+        })
+        filteredDocuments = filterOutItems({
+          items: res.documents,
+          relationTo,
+          search: searchFilter,
+        })
+        filteredSubfolders = filterOutItems({
+          items: res.subfolders,
+          relationTo: [folderCollectionSlug],
+          search: searchFilter,
+        })
+      } else {
+        filteredDocuments = filterOutItems({
+          items: allDocuments,
+          relationTo,
+          search: searchFilter,
+        })
+        filteredSubfolders = filterOutItems({
+          items: allSubfolders,
+          relationTo: [folderCollectionSlug],
+          search: searchFilter,
+        })
+      }
 
       setDocuments(filteredDocuments)
       setSubfolders(filteredSubfolders)
@@ -574,10 +607,12 @@ export function FolderProvider({
       collectionSlug,
       visibleCollectionSlugs,
       search,
+      activeFolderID,
       allDocuments,
       allSubfolders,
       folderCollectionSlug,
       drawerDepth,
+      getFolderData,
       router,
       formatFolderURL,
     ],
@@ -828,9 +863,13 @@ export function FolderProvider({
           toast.error(t('general:error'))
         } else {
           const updatedDoc = await req.json()
-          await populateFolderData({
+          const folderRes = await getFolderData({
             folderID: updatedDoc.id,
           })
+          setBreadcrumbs(folderRes?.breadcrumbs || [])
+          setSubfolders(folderRes?.subfolders || [])
+          setDocuments(folderRes?.documents || [])
+          setActiveFolderID(updatedDoc.id)
         }
         setBreadcrumbs((prevBreadcrumbs) => {
           return prevBreadcrumbs.map((breadcrumb) => {
@@ -950,7 +989,7 @@ export function FolderProvider({
       serverURL,
       routes.api,
       t,
-      populateFolderData,
+      getFolderData,
       getEntityConfig,
       sortItems,
       documents,

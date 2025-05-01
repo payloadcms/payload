@@ -41,7 +41,7 @@ export function CollectionTypePill() {
       }
       key="relation-to-selection-popup"
       onChange={({ selectedValues }) => {
-        filterItems({ relationTo: selectedValues })
+        void filterItems({ relationTo: selectedValues })
       }}
       options={collectionOptions}
       selectedValues={visibleCollectionSlugs}
