@@ -33,6 +33,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     },
     inputRef,
     path: pathFromProps,
+    potentiallyStalePath,
     readOnly,
     validate,
   } = props
@@ -60,7 +61,8 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     showError,
     value,
   } = useField({
-    potentiallyStalePath: pathFromProps,
+    path: pathFromProps,
+    potentiallyStalePath,
     validate: memoizedValidate,
   })
 

@@ -50,6 +50,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     },
     path: pathFromProps,
     permissions,
+    potentiallyStalePath,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
@@ -108,7 +109,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    potentiallyStalePath: pathFromProps,
+    path: pathFromProps,
+    potentiallyStalePath,
     validate: memoizedValidate,
   })
 

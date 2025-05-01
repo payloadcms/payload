@@ -65,6 +65,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       required,
     },
     path: pathFromProps,
+    potentiallyStalePath,
     readOnly,
     validate,
   } = props
@@ -117,7 +118,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     showError,
     value,
   } = useField<Value | Value[]>({
-    potentiallyStalePath: pathFromProps,
+    path: pathFromProps,
+    potentiallyStalePath,
     validate: memoizedValidate,
   })
 
