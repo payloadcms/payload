@@ -14,6 +14,7 @@ import React from 'react'
 
 import { useConfig } from '../../../../providers/Config/index.js'
 import { FolderProvider, useFolder } from '../../../../providers/Folders/index.js'
+import { useMoveToFolderDrawer } from '../../../../providers/MoveToFolderProvider/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
@@ -37,17 +38,16 @@ const newFolderDrawerSlug = `${baseModalSlug}-new-folder`
 
 type ActionProps =
   | {
-      readonly action: 'moveDocumentsToFolder'
-      readonly fromFolderName: string
+      readonly action: 'moveItemsToFolder'
     }
   | {
       readonly action: 'moveItemToFolder'
-      readonly fromFolderName: string
       readonly title: string
     }
-type Props = {
+export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
-  readonly folderID: number | string
+  readonly fromFolderID?: number | string
+  readonly fromFolderName?: string
   readonly itemsToMove: FolderOrDocument[]
   /**
    * Callback function to be called when the user confirms the move
@@ -65,7 +65,7 @@ type Props = {
   readonly skipConfirmModal?: boolean
 } & ActionProps
 
-export function MoveItemsToFolderDrawer(props: Props) {
+export function MoveItemsToFolderDrawer(props: MoveToFolderDrawerProps) {
   return (
     <Drawer gutter={false} Header={null} slug={props.drawerSlug}>
       <LoadFolderData {...props} />
@@ -73,7 +73,7 @@ export function MoveItemsToFolderDrawer(props: Props) {
   )
 }
 
-function LoadFolderData(props: Props) {
+function LoadFolderData(props: MoveToFolderDrawerProps) {
   const {
     config: {
       folders: { slug: folderCollectionSlug },
@@ -92,7 +92,7 @@ function LoadFolderData(props: Props) {
 
       try {
         const folderDataReq = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${props.folderID ? `?folderID=${props.folderID}` : ''}`,
+          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
           {
             credentials: 'include',
             headers: {
@@ -121,7 +121,7 @@ function LoadFolderData(props: Props) {
     if (!hasLoaded) {
       void onLoad()
     }
-  }, [folderCollectionSlug, routes.api, serverURL, hasLoaded, props.folderID])
+  }, [folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
 
   if (!hasLoaded) {
     return <LoadingOverlay />
@@ -132,7 +132,7 @@ function LoadFolderData(props: Props) {
       allowMultiSelection={false}
       breadcrumbs={breadcrumbs}
       documents={documents}
-      folderID={props.folderID}
+      folderID={props.fromFolderID}
       subfolders={subfolders}
     >
       <Content {...props} />
@@ -142,13 +142,14 @@ function LoadFolderData(props: Props) {
 
 function Content({
   drawerSlug,
-  folderID: fromFolderID,
+  fromFolderName,
   itemsToMove,
   onConfirm,
   skipConfirmModal,
   ...props
-}: Props) {
-  const { closeModal, openModal } = useModal()
+}: MoveToFolderDrawerProps) {
+  const { closeModal, isModalOpen, openModal } = useModal()
+  const { dispatch } = useMoveToFolderDrawer()
   const [count] = React.useState(() => itemsToMove.length)
   const { i18n, t } = useTranslation()
   const {
@@ -204,6 +205,16 @@ function Content({
     [addItems, folderCollectionConfig.admin.useAsTitle],
   )
 
+  const isOpen = isModalOpen(drawerSlug)
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      dispatch({
+        type: 'CLEAR',
+      })
+    }
+  }, [dispatch, drawerSlug, isOpen])
+
   return (
     <>
       <DrawerActionHeader
@@ -222,9 +233,7 @@ function Content({
           <DrawerHeading
             action={props.action}
             count={count}
-            fromFolderName={
-              props.action !== 'moveDocumentsToFolder' ? props.fromFolderName : undefined
-            }
+            fromFolderName={fromFolderName}
             title={props.action === 'moveItemToFolder' ? props.title : undefined}
           />
         }
@@ -325,9 +334,7 @@ function Content({
             <ConfirmationMessage
               action={props.action}
               count={count}
-              fromFolderName={
-                props.action !== 'moveDocumentsToFolder' ? props.fromFolderName : undefined
-              }
+              fromFolderName={fromFolderName}
               title={props.action === 'moveItemToFolder' ? props.title : undefined}
               toFolderName={getSelectedFolder().name}
             />
@@ -345,7 +352,9 @@ function Content({
   )
 }
 
-function DrawerHeading(props: { count?: number } & ActionProps): string {
+function DrawerHeading(
+  props: { count?: number } & ActionProps & Pick<MoveToFolderDrawerProps, 'fromFolderName'>,
+): string {
   const { t } = useTranslation()
 
   switch (props.action) {
@@ -365,7 +374,7 @@ function DrawerHeading(props: { count?: number } & ActionProps): string {
         })
       }
 
-    case 'moveDocumentsToFolder':
+    case 'moveItemsToFolder':
       if (props.fromFolderName) {
         // move from folder
         return t('folder:movingFromFolder', {
@@ -381,7 +390,10 @@ function DrawerHeading(props: { count?: number } & ActionProps): string {
   }
 }
 
-function ConfirmationMessage(props: { count?: number; toFolderName?: string } & ActionProps) {
+function ConfirmationMessage(
+  props: { count?: number; toFolderName?: string } & ActionProps &
+    Pick<MoveToFolderDrawerProps, 'fromFolderName'>,
+) {
   const { t } = useTranslation()
 
   switch (props.action) {
@@ -422,7 +434,7 @@ function ConfirmationMessage(props: { count?: number; toFolderName?: string } & 
         )
       }
 
-    case 'moveDocumentsToFolder':
+    case 'moveItemsToFolder':
       // moving many (documents/folders) from list view
       if (props.toFolderName) {
         // move to destination

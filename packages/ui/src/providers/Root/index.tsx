@@ -27,6 +27,7 @@ import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
+import { MoveToFolderDrawerProvider } from '../MoveToFolderProvider/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
@@ -115,7 +116,9 @@ export const RootProvider: React.FC<Props> = ({
                                                 collisionDetection={pointerWithin}
                                                 id={dndContextID}
                                               >
-                                                {children}
+                                                <MoveToFolderDrawerProvider>
+                                                  {children}
+                                                </MoveToFolderDrawerProvider>
                                               </DndContext>
                                             </UploadHandlersProvider>
                                           </NavProvider>

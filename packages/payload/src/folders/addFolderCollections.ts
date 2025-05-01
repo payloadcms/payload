@@ -22,6 +22,10 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
             name: parentFolderFieldName,
             type: 'relationship',
             admin: {
+              components: {
+                Cell: false,
+                Field: false,
+              },
               disableBulkEdit: true,
               hidden: !debug,
             },

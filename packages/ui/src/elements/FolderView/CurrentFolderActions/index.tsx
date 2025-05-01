@@ -6,11 +6,11 @@ import { toast } from 'sonner'
 import { Dots } from '../../../icons/Dots/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useMoveToFolderDrawer } from '../../../providers/MoveToFolderProvider/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { Translation } from '../../Translation/index.js'
-import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 
 const renameFolderDrawerSlug = 'rename-folder--current-folder'
@@ -33,6 +33,7 @@ export function CurrentFolderActions({ className }: Props) {
     renameFolder,
     setFolderID,
   } = useFolder()
+  const { dispatch } = useMoveToFolderDrawer()
   const { config } = useConfig()
   const { routes, serverURL } = config
   const { closeModal, openModal } = useModal()
@@ -66,6 +67,40 @@ export function CurrentFolderActions({ className }: Props) {
             </PopupList.Button>
             <PopupList.Button
               onClick={() => {
+                dispatch({
+                  type: 'INITIALIZE',
+                  payload: {
+                    action: 'moveItemToFolder',
+                    drawerSlug: moveToFolderDrawerSlug,
+                    fromFolderID: currentFolder?.value.id,
+                    fromFolderName: currentFolder?.value._folderOrDocumentTitle,
+                    itemsToMove: [currentFolder],
+                    onConfirm: async ({ id, name }) => {
+                      await moveToFolder({
+                        itemsToMove: [currentFolder],
+                        toFolderID: id,
+                      })
+                      if (id) {
+                        // moved to folder
+                        toast.success(
+                          t('folder:itemHasBeenMoved', {
+                            folderName: `"${name}"`,
+                            title: currentFolder.value._folderOrDocumentTitle,
+                          }),
+                        )
+                      } else {
+                        // moved to root
+                        toast.success(
+                          t('folder:itemHasBeenMovedToRoot', {
+                            title: currentFolder.value._folderOrDocumentTitle,
+                          }),
+                        )
+                      }
+                      closeModal(moveToFolderDrawerSlug)
+                    },
+                    title: currentFolder.value._folderOrDocumentTitle,
+                  },
+                })
                 openModal(moveToFolderDrawerSlug)
               }}
             >
@@ -101,37 +136,6 @@ export function CurrentFolderActions({ className }: Props) {
         onConfirm={deleteCurrentFolder}
       />
 
-      <MoveItemsToFolderDrawer
-        action="moveItemToFolder"
-        drawerSlug={moveToFolderDrawerSlug}
-        folderID={currentFolder.value.id}
-        fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
-        itemsToMove={[currentFolder]}
-        onConfirm={async ({ id, name }) => {
-          await moveToFolder({
-            itemsToMove: [currentFolder],
-            toFolderID: id,
-          })
-          if (id) {
-            // moved to folder
-            toast.success(
-              t('folder:itemHasBeenMoved', {
-                folderName: `"${name}"`,
-                title: currentFolder.value._folderOrDocumentTitle,
-              }),
-            )
-          } else {
-            // moved to root
-            toast.success(
-              t('folder:itemHasBeenMovedToRoot', {
-                title: currentFolder.value._folderOrDocumentTitle,
-              }),
-            )
-          }
-          closeModal(moveToFolderDrawerSlug)
-        }}
-        title={currentFolder.value._folderOrDocumentTitle}
-      />
       <RenameFolderDrawer
         drawerSlug={renameFolderDrawerSlug}
         folderToRename={currentFolder}
