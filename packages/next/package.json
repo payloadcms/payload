@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.33.0",
+  "version": "3.36.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -36,6 +36,11 @@
       "import": "./src/exports/routes.ts",
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
+    },
+    "./auth": {
+      "import": "./src/exports/auth.ts",
+      "types": "./src/exports/auth.ts",
+      "default": "./src/exports/auth.ts"
     },
     "./templates": {
       "import": "./src/exports/templates.ts",
@@ -104,16 +109,16 @@
     "@babel/preset-env": "7.26.7",
     "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.2.3",
+    "@next/eslint-plugin-next": "15.3.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.0.12",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.2",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
+    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
+    "eslint-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "3.1.0"
   },
@@ -150,6 +155,11 @@
         "import": "./dist/exports/templates.js",
         "types": "./dist/exports/templates.d.ts",
         "default": "./dist/exports/templates.js"
+      },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
       },
       "./utilities": {
         "import": "./dist/exports/utilities.js",

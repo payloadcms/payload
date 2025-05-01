@@ -78,6 +78,7 @@ async function main() {
       },
       sharp: false,
       skipDockerCompose: true,
+      skipReadme: true,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -131,6 +132,7 @@ async function main() {
       },
       sharp: false,
       storage: 'vercelBlobStorage',
+      skipReadme: true,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +

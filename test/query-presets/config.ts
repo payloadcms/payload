@@ -24,9 +24,9 @@ export default buildConfigWithDefaults({
     // },
     access: {
       read: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
+        user ? user && !user?.roles?.some((role) => role === 'anonymous') : false,
       update: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
+        user ? user && !user?.roles?.some((role) => role === 'anonymous') : false,
     },
     constraints: {
       read: [
@@ -39,6 +39,11 @@ export default buildConfigWithDefaults({
               in: user?.roles || [],
             },
           }),
+        },
+        {
+          label: 'Noone',
+          value: 'noone',
+          access: () => false,
         },
       ],
       update: [

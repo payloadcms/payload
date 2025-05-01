@@ -72,6 +72,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
           data: docToDelete,
           fields: collection.flattenedFields,
           joinQuery: false,
+          tableName,
         })
 
   await this.deleteWhere({

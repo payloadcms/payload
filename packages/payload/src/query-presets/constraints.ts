@@ -74,11 +74,11 @@ export const getConstraints = (config: Config): Field => ({
                 },
               ],
             },
-            relationTo: 'users',
+            relationTo: config.admin?.user ?? 'users', // TODO: remove this fallback when the args are properly typed as `SanitizedConfig`
           },
           ...(config?.queryPresets?.constraints?.[operation]?.reduce(
             (acc: Field[], option: QueryPresetConstraint) => {
-              option.fields.forEach((field, index) => {
+              option.fields?.forEach((field, index) => {
                 acc.push({ ...field })
 
                 if (fieldAffectsData(field)) {

@@ -20,8 +20,7 @@ const baseClass = 'fields-to-export'
 
 export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { path } = props
-  const { setValue, value } = useField<string[]>({ path })
+  const { setValue, value } = useField<string[]>()
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()

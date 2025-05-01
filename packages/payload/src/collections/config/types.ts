@@ -280,6 +280,10 @@ export type CollectionAdminOptions = {
      */
     edit?: {
       /**
+       * Inject custom components before the document controls
+       */
+      beforeDocumentControls?: CustomComponent[]
+      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomComponent
