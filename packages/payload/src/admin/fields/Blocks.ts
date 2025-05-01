@@ -23,6 +23,7 @@ import type {
 type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
 
 type BlocksFieldBaseClientProps = {
+  readonly potentiallyStalePath?: string
   readonly validate?: BlocksFieldValidation
 } & FieldPaths
 

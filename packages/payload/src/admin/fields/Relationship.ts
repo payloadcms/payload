@@ -23,6 +23,7 @@ type RelationshipFieldClientWithoutType = MarkOptional<RelationshipFieldClient, 
 
 type RelationshipFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: RelationshipFieldValidation
 }
 

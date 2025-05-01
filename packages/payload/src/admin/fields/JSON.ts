@@ -23,6 +23,7 @@ type JSONFieldClientWithoutType = MarkOptional<JSONFieldClient, 'type'>
 
 type JSONFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: JSONFieldValidation
 }
 

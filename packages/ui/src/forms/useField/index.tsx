@@ -34,7 +34,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const {
     disableFormData = false,
     hasRows,
-    path: pathFromOptions,
+    path: pathFromArgs,
     potentiallyStalePath,
     validate,
   } = options || {}
@@ -43,7 +43,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
 
   // This is a workaround for stale props given to server rendered components.
   // See the notes in the `potentiallyStalePath` type definition for more details.
-  const path = pathFromOptions || pathFromContext || potentiallyStalePath
+  const path = pathFromArgs || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

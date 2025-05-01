@@ -31,6 +31,7 @@ type RichTextFieldBaseClientProps<
   TExtraProperties = object,
 > = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: RichTextFieldValidation
 }
 

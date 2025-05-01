@@ -28,6 +28,7 @@ type RadioFieldBaseClientProps = {
   readonly disableModifyingForm?: boolean
   readonly onChange?: OnChange
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: RadioFieldValidation
   readonly value?: string
 }

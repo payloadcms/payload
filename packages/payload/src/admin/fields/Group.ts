@@ -22,7 +22,9 @@ type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
 type GroupFieldBaseServerProps = Pick<FieldPaths, 'path'>
 
-export type GroupFieldBaseClientProps = FieldPaths
+export type GroupFieldBaseClientProps = {
+  readonly potentiallyStalePath?: string
+} & FieldPaths
 
 export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType> &
   GroupFieldBaseClientProps

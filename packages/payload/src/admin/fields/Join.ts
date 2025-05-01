@@ -22,6 +22,7 @@ type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
 
 type JoinFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
 }
 
 type JoinFieldBaseServerProps = Pick<FieldPaths, 'path'>

@@ -23,6 +23,7 @@ type PointFieldClientWithoutType = MarkOptional<PointFieldClient, 'type'>
 
 type PointFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: PointFieldValidation
 }
 

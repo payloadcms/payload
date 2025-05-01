@@ -24,6 +24,7 @@ type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 type SelectFieldBaseClientProps = {
   readonly onChange?: (e: string | string[]) => void
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: SelectFieldValidation
   readonly value?: string
 }

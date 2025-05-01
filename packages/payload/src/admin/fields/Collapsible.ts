@@ -18,7 +18,9 @@ import type {
   FieldLabelServerComponent,
 } from '../types.js'
 
-type CollapsibleFieldBaseClientProps = FieldPaths
+type CollapsibleFieldBaseClientProps = {
+  readonly potentiallyStalePath?: string
+} & FieldPaths
 
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 
