@@ -76,6 +76,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'custom-views-tabs': CustomViewsTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
@@ -102,6 +103,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'custom-views-tabs': CustomViewsTabsSelect<false> | CustomViewsTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
@@ -322,6 +324,16 @@ export interface CustomViewsTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-tabs".
+ */
+export interface CustomViewsTab {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
@@ -509,6 +521,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-views-two';
         value: string | CustomViewsTwo;
+      } | null)
+    | ({
+        relationTo: 'custom-views-tabs';
+        value: string | CustomViewsTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
@@ -728,6 +744,15 @@ export interface CustomViewsOneSelect<T extends boolean = true> {
  * via the `definition` "custom-views-two_select".
  */
 export interface CustomViewsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views-tabs_select".
+ */
+export interface CustomViewsTabsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

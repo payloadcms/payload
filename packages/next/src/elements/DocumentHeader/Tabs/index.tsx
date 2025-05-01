@@ -1,6 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
   DocumentTabClientProps,
+  DocumentTabConfig,
   DocumentTabServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
@@ -16,7 +17,7 @@ import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
-import { tabs as defaultTabs } from './tabs/index.js'
+import { tabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
 
@@ -32,26 +33,40 @@ export const DocumentTabs: React.FC<{
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
+  const defaultTabs = tabs(collectionConfig, globalConfig)
+
+  const combinedTabs = [
+    ...Object.entries(defaultTabs).map(([name, tab]) => {
+      return {
+        type: 'default',
+        config: { name, tab },
+        order: tab.order ?? Infinity,
+      }
+    }),
+
+    ...customViews.map((CustomView) => {
+      if ('tab' in CustomView) {
+        return {
+          type: 'custom',
+          config: CustomView,
+          order: (CustomView.tab.order && CustomView.tab.order) ?? Infinity,
+        }
+      }
+      return null
+    }),
+  ].sort((a, b) => a.order - b.order)
+
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultTabs)
-              // sort `defaultViews` based on `order` property from smallest to largest
-              // if no `order`, append the view to the end
-              // TODO: open `order` to the config and merge `defaultViews` with `customViews`
-              ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) {
-                  return 0
-                } else if (a.order === undefined) {
-                  return 1
-                } else if (b.order === undefined) {
-                  return -1
+            {combinedTabs.map((tab, index) => {
+              if (tab.type === 'default') {
+                const { name, tab: tabConfig } = tab.config as {
+                  name: string
+                  tab: DocumentTabConfig
                 }
-                return a.order - b.order
-              })
-              ?.map(([name, tab], index) => {
                 const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
                 const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
 
@@ -61,7 +76,6 @@ export const DocumentTabs: React.FC<{
                   !condition ||
                   (condition &&
                     Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
-
                 if (meetsCondition) {
                   return (
                     <DocumentTab
@@ -69,7 +83,7 @@ export const DocumentTabs: React.FC<{
                       path={viewConfig && 'path' in viewConfig ? viewConfig.path : ''}
                       {...{
                         ...props,
-                        ...(tab || {}),
+                        ...(tabConfig || {}),
                         ...(tabFromConfig || {}),
                       }}
                     />
@@ -77,17 +91,20 @@ export const DocumentTabs: React.FC<{
                 }
 
                 return null
-              })}
-            {customViews?.map((CustomView, index) => {
-              if ('tab' in CustomView) {
-                const { path, tab } = CustomView
+              }
 
-                if (tab.Component) {
+              if (tab.type === 'custom') {
+                const { path, tab: tabConfig } = tab.config as {
+                  path: string
+                  tab: DocumentTabConfig
+                }
+
+                if (tabConfig.Component) {
                   return RenderServerComponent({
                     clientProps: {
                       path,
                     } satisfies DocumentTabClientProps,
-                    Component: tab.Component,
+                    Component: tabConfig.Component,
                     importMap: payload.importMap,
                     key: `tab-custom-${index}`,
                     serverProps: {
@@ -106,12 +123,11 @@ export const DocumentTabs: React.FC<{
                     path={path}
                     {...{
                       ...props,
-                      ...tab,
+                      ...tabConfig,
                     }}
                   />
                 )
               }
-
               return null
             })}
           </ul>
