@@ -135,47 +135,6 @@ const { data } = useLivePreview<PageData>({
 </template>
 ```
 
-React
-
-If your front-end application is built with client-side [React](https://react.dev) like [Next.js Pages Router](https://nextjs.org/docs/pages), you can use the `useLivePreview` hook that Payload provides.
-
-First, install the `@payloadcms/live-preview-react` package:
-
-```bash
-npm install @payloadcms/live-preview-react
-```
-
-Then, use the `useLivePreview` hook in your React component:
-
-```tsx
-'use client'
-import { useLivePreview } from '@payloadcms/live-preview-react'
-import { Page as PageType } from '@/payload-types'
-
-// Fetch the page in a server component, pass it to the client component, then thread it through the hook
-// The hook will take over from there and keep the preview in sync with the changes you make
-// The `data` property will contain the live data of the document
-export const PageClient: React.FC<{
-  page: {
-    title: string
-  }
-}> = ({ page: initialPage }) => {
-  const { data } = useLivePreview<PageType>({
-    initialData: initialPage,
-    serverURL: PAYLOAD_SERVER_URL,
-    depth: 2,
-  })
-
-  return <h1>{data.title}</h1>
-}
-```
-
-<Banner type="warning">
-  **Reminder:** If you are using [React Server
-  Components](https://react.dev/reference/rsc/server-components), we strongly
-  suggest setting up [server-side Live Preview](./server) instead.
-</Banner>
-
 ### Svelte
 
 If your front-end application is built with [Svelte 5](https://svelte.dev/) or [SvelteKit 2](https://svelte.dev/docs/kit/introduction), you can use the `useLivePreview` writeable rune that Payload provides.
@@ -186,7 +145,7 @@ First, install the `@payloadcms/live-preview-svelte` package:
 npm install @payloadcms/live-preview-svelte
 ```
 
-Then, use the `useLivePreview` hook in your Vue component:
+Then, use the `useLivePreview` hook in your Svelte component:
 
 ```ts
 <script lang="ts">
