@@ -89,7 +89,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     // If value is not present then render nothing, allowing select fields to reset to their initial 'Select an option' state
     valueToRender = null
   }
-// Removed the console.log statement to avoid unintended output in production code.
+  console.log('placeholder', placeholder, typeof placeholder)
 
   return (
     <div
