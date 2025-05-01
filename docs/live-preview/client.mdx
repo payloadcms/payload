@@ -135,6 +135,47 @@ const { data } = useLivePreview<PageData>({
 </template>
 ```
 
+### Svelte
+
+If your front-end application is built with [Svelte 5](https://svelte.dev/) or [SvelteKit 2](https://svelte.dev/docs/kit/introduction), you can use the `useLivePreview` writeable rune that Payload provides.
+
+First, install the `@payloadcms/live-preview-svelte` package:
+
+```bash
+npm install @payloadcms/live-preview-svelte
+```
+
+Then, use the `useLivePreview` hook in your Svelte component:
+
+```ts
+<script lang="ts">
+  import type { PageProps } from './$types';
+	import { useLivePreview } from '@payloadcms/live-preview-svelte';
+	import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html';
+  import { readable } from 'svelte/store';
+  import { PUBLIC_PAYLOAD_URL } from '$env/static/public';
+
+	let { data }: PageProps = $props();
+
+  let payloadDocStore = useLivePreview(data, {
+    serverURL: PUBLIC_PAYLOAD_URL,
+  });
+
+	const article: typeof data = $derived.by<typeof data>(() => {
+		const doc = $payloadDocStore;
+		return {
+      ...doc,
+			content: convertLexicalToHTML({ data: doc.content }),
+		};
+	});
+</script>
+
+<article>
+	<h1>{article.title}</h1>
+	<div>{@html article.content}</div>
+</article>
+```
+
 ## Building your own hook
 
 No matter what front-end framework you are using, you can build your own hook using the same underlying tooling that Payload provides.

@@ -12,6 +12,7 @@ export const packagePublishList = [
   'admin-bar',
   'live-preview',
   'live-preview-react',
+  'live-preview-svelte',
   'live-preview-vue',
   'richtext-slate',
   'richtext-lexical',

@@ -48,6 +48,8 @@ jobs:
             graphql
             live-preview
             live-preview-react
+            live-preview-svelte
+            live-preview-vue
             next
             payload-cloud
             plugin-cloud
