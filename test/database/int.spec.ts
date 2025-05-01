@@ -2190,6 +2190,36 @@ describe('database', () => {
       expect(docs[0].id).toBe(id)
     })
 
+    it('should query with and/or', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-411' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title-6', category: category.id },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const res_1 = await payload.find({
+        collection: 'virtual-relations',
+        where: { or: [{ and: [{ postTitle: { equals: 'my-title-6' } }] }] },
+      })
+      expect(res_1.docs).toHaveLength(1)
+      expect(res_1.docs[0]?.id).toBe(id)
+
+      const res_2 = await payload.find({
+        collection: 'virtual-relations',
+        where: { or: [{ and: [{ postCategoryTitle: { equals: 'category-411' } }] }] },
+      })
+      expect(res_2.docs).toHaveLength(1)
+      expect(res_2.docs[0]?.id).toBe(id)
+    })
+
     it.todo('should allow to sort by a virtual field with reference')
 
     it('should allow virtual field 2x deep', async () => {
