@@ -273,19 +273,26 @@ const WhereBuilder: React.FC<Props> = (props) => {
                 {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('or')}</div>}
                 <ul className={`${baseClass}__and-filters`}>
                   {Array.isArray(or?.and) &&
-                    or.and.map((_, andIndex) => (
-                      <li key={andIndex}>
-                        {andIndex !== 0 && <div className={`${baseClass}__label`}>{t('and')}</div>}
-                        <Condition
-                          andIndex={andIndex}
-                          dispatch={dispatchConditions}
-                          fields={reducedFields}
-                          key={andIndex}
-                          orIndex={orIndex}
-                          value={conditions[orIndex].and[andIndex]}
-                        />
-                      </li>
-                    ))}
+                    or.and.map((_, andIndex) => {
+                      const condition = conditions[orIndex].and[andIndex]
+                      const fieldName = Object.keys(condition)[0]
+                      const operator = Object.keys(condition?.[fieldName] || {})?.[0]
+                      return (
+                        <li key={andIndex}>
+                          {andIndex !== 0 && (
+                            <div className={`${baseClass}__label`}>{t('and')}</div>
+                          )}
+                          <Condition
+                            andIndex={andIndex}
+                            dispatch={dispatchConditions}
+                            fields={reducedFields}
+                            key={`${fieldName}-${operator}-${andIndex}-${orIndex}`}
+                            orIndex={orIndex}
+                            value={condition}
+                          />
+                        </li>
+                      )
+                    })}
                 </ul>
               </li>
             ))}
