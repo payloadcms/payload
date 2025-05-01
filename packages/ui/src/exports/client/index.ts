@@ -121,6 +121,7 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
+export { FolderTableCell } from '../../elements/FolderView/MoveDocToFolder/TableCell.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'

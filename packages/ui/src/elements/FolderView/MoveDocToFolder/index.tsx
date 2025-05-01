@@ -5,6 +5,8 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import { toast } from 'sonner'
 
+import type { Props as ButtonProps } from '../../Button/types.js'
+
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -19,95 +21,141 @@ const moveDocToFolderDrawerSlug = 'move-doc-to-folder'
 
 export function MoveDocToFolder({ className = '' }) {
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
-  const { i18n, t } = useTranslation()
   const currentParentFolder = useFormFields(([fields]) => (fields && fields?._folder) || null)
   const { id, collectionSlug, initialData, title } = useDocumentInfo()
   const { setModified } = useForm()
-  const { closeModal, openModal } = useModal()
-  const { config, getEntityConfig } = useConfig()
-  const [folderName, setFolderName] = React.useState(() => `${t('general:loading')}...`)
+
+  return (
+    <MoveDocToFolderButton
+      className={className}
+      collectionSlug={collectionSlug}
+      docData={initialData}
+      docID={id}
+      docTitle={title}
+      fromFolderID={currentParentFolder?.value as number | string}
+      onConfirm={({ id }) => {
+        if (currentParentFolder !== id) {
+          dispatchField({
+            type: 'UPDATE',
+            path: '_folder',
+            value: id,
+          })
+          setModified(true)
+        }
+      }}
+      skipConfirmModal={!currentParentFolder?.value}
+    />
+  )
+}
+
+type MoveDocToFolderButtonProps = {
+  buttonProps?: Partial<ButtonProps>
+  className?: string
+  collectionSlug: string
+  docData: any
+  docID: number | string
+  docTitle?: string
+  fromFolderID?: number | string
+  onConfirm?: (args: { id: number | string; name: string }) => Promise<void> | void
+  skipConfirmModal?: boolean
+}
+
+export const MoveDocToFolderButton = ({
+  buttonProps,
+  className = '',
+  collectionSlug,
+  docData,
+  docID,
+  docTitle,
+  fromFolderID,
+  onConfirm,
+  skipConfirmModal,
+}: MoveDocToFolderButtonProps) => {
   const { dispatch } = useMoveToFolderDrawer()
+  const { config, getEntityConfig } = useConfig()
+  const { i18n, t } = useTranslation()
+  const { closeModal, openModal } = useModal()
+
+  const [fromFolderName, setFromFolderName] = React.useState(() => `${t('general:loading')}...`)
+  const loadedFolderName = React.useRef(false)
 
   React.useEffect(() => {
     async function fetchFolderLabel() {
-      if (
-        currentParentFolder?.value &&
-        (typeof currentParentFolder.value === 'string' ||
-          typeof currentParentFolder.value === 'number')
-      ) {
-        const response = await fetch(`/api/${config.folders.slug}/${currentParentFolder.value}`)
+      if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
+        const response = await fetch(`${config.routes.api}/${config.folders.slug}/${fromFolderID}`)
         const folderData = await response.json()
-        setFolderName(folderData?.name || t('folder:noFolder'))
+        setFromFolderName(folderData?.name || t('folder:noFolder'))
+        loadedFolderName.current = true
+      } else {
+        setFromFolderName(t('folder:noFolder'))
+        loadedFolderName.current = true
       }
     }
 
-    void fetchFolderLabel()
-  }, [config.folders.slug, currentParentFolder, t])
+    if (!loadedFolderName.current) {
+      void fetchFolderLabel()
+    }
+  }, [config.folders.slug, config.routes.api, fromFolderID, t])
 
   return (
-    <>
-      <div className={`${baseClass} ${className}`.trim()}>
-        <Button
-          buttonStyle="subtle"
-          className={`${baseClass}__move-to-folder-btn`}
-          icon={<FolderIcon />}
-          iconPosition="left"
-          onClick={() => {
-            dispatch({
-              type: 'INITIALIZE',
-              payload: {
-                action: 'moveItemToFolder',
-                drawerSlug: moveDocToFolderDrawerSlug,
-                fromFolderID: currentParentFolder?.value as string,
-                fromFolderName: folderName,
-                itemsToMove: [
-                  {
-                    itemKey: `${collectionSlug}-${id}`,
-                    relationTo: collectionSlug,
-                    value: { ...initialData, id } as any,
-                  },
-                ],
-                onConfirm: ({ id, name }) => {
-                  if (currentParentFolder !== id) {
-                    dispatchField({
-                      type: 'UPDATE',
-                      path: '_folder',
-                      value: id,
-                    })
-                    setModified(true)
-
-                    if (id) {
-                      // moved to folder
-                      toast.success(
-                        t('folder:itemHasBeenMoved', {
-                          folderName: `"${name}"`,
-                          title,
-                        }),
-                      )
-                    } else {
-                      // moved to root
-                      toast.success(
-                        t('folder:itemHasBeenMovedToRoot', {
-                          title,
-                        }),
-                      )
-                    }
-                  }
-                  closeModal(moveDocToFolderDrawerSlug)
-                },
-                skipConfirmModal: !currentParentFolder?.value,
-                title:
-                  title === `[${t('general:untitled')}]`
-                    ? getTranslation(getEntityConfig({ collectionSlug }).labels.singular, i18n)
-                    : title,
+    <Button
+      buttonStyle="subtle"
+      className={[baseClass, className].filter(Boolean).join(' ')}
+      icon={<FolderIcon />}
+      iconPosition="left"
+      onClick={() => {
+        dispatch({
+          type: 'INITIALIZE',
+          payload: {
+            action: 'moveItemToFolder',
+            drawerSlug: moveDocToFolderDrawerSlug,
+            fromFolderID,
+            fromFolderName,
+            itemsToMove: [
+              {
+                itemKey: `${collectionSlug}-${docID}`,
+                relationTo: collectionSlug,
+                value: { ...docData, id: docID },
               },
-            })
-            openModal(moveDocToFolderDrawerSlug)
-          }}
-        >
-          {currentParentFolder?.value ? folderName : t('folder:noFolder')}
-        </Button>
-      </div>
-    </>
+            ],
+            onConfirm: async (args) => {
+              if (fromFolderID !== args.id && typeof onConfirm === 'function') {
+                try {
+                  await onConfirm(args)
+
+                  if (args.id) {
+                    // moved to folder
+                    toast.success(
+                      t('folder:itemHasBeenMoved', {
+                        folderName: `"${args.name}"`,
+                        title: docTitle,
+                      }),
+                    )
+                  } else {
+                    // moved to root
+                    toast.success(
+                      t('folder:itemHasBeenMovedToRoot', {
+                        title: docTitle,
+                      }),
+                    )
+                  }
+                } catch (_) {
+                  // todo: add error toast?
+                }
+              }
+
+              closeModal(moveDocToFolderDrawerSlug)
+            },
+            skipConfirmModal,
+            title:
+              docTitle || getTranslation(getEntityConfig({ collectionSlug }).labels.singular, i18n),
+          },
+        })
+        openModal(moveDocToFolderDrawerSlug)
+      }}
+      {...buttonProps}
+    >
+      {fromFolderName}
+    </Button>
   )
 }

@@ -23,7 +23,7 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
             type: 'relationship',
             admin: {
               components: {
-                Cell: false,
+                Cell: '@payloadcms/ui#FolderTableCell',
                 Field: false,
               },
               disableBulkEdit: true,
