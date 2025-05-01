@@ -115,31 +115,23 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             />
           </Fragment>
         ),
-        !disableBulkDelete && (
-          <DeleteMany_v4
-            afterDelete={(groupedCollections) => {
-              const itemsToRemove = Object.entries(groupedCollections).reduce<FolderOrDocument[]>(
-                (acc, [slug, res]) => {
-                  if (res.ids.length) {
-                    res.ids.forEach((id) => {
-                      acc.push({
-                        itemKey: `${slug}-${id}`,
-                        relationTo: slug,
-                        value: {
-                          id,
-                        } as any,
-                      })
-                    })
-                  }
-                  return acc
-                },
-                [],
-              )
-              void removeItems(itemsToRemove)
-            }}
-            key="bulk-delete"
-            selections={groupedSelections}
-          />
+        count === 1 && !singleNonFolderCollectionSelected && (
+          <React.Fragment key="rename-folder">
+            <ListSelectionButton onClick={() => openModal(renameFolderDrawerSlug)} type="button">
+              {t('general:rename')}
+            </ListSelectionButton>
+            <RenameFolderDrawer
+              drawerSlug={renameFolderDrawerSlug}
+              folderToRename={items[0]}
+              onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
+                renameFolder({
+                  folderID: updatedFolderID,
+                  newName: updatedName,
+                })
+                closeModal(renameFolderDrawerSlug)
+              }}
+            />
+          </React.Fragment>
         ),
         count > 0 ? (
           <React.Fragment key={moveToFolderDrawerSlug}>
@@ -188,23 +180,31 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             </ListSelectionButton>
           </React.Fragment>
         ) : null,
-        count === 1 && !singleNonFolderCollectionSelected && (
-          <React.Fragment key="rename-folder">
-            <ListSelectionButton onClick={() => openModal(renameFolderDrawerSlug)} type="button">
-              {t('general:rename')}
-            </ListSelectionButton>
-            <RenameFolderDrawer
-              drawerSlug={renameFolderDrawerSlug}
-              folderToRename={items[0]}
-              onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
-                renameFolder({
-                  folderID: updatedFolderID,
-                  newName: updatedName,
-                })
-                closeModal(renameFolderDrawerSlug)
-              }}
-            />
-          </React.Fragment>
+        !disableBulkDelete && (
+          <DeleteMany_v4
+            afterDelete={(groupedCollections) => {
+              const itemsToRemove = Object.entries(groupedCollections).reduce<FolderOrDocument[]>(
+                (acc, [slug, res]) => {
+                  if (res.ids.length) {
+                    res.ids.forEach((id) => {
+                      acc.push({
+                        itemKey: `${slug}-${id}`,
+                        relationTo: slug,
+                        value: {
+                          id,
+                        } as any,
+                      })
+                    })
+                  }
+                  return acc
+                },
+                [],
+              )
+              void removeItems(itemsToRemove)
+            }}
+            key="bulk-delete"
+            selections={groupedSelections}
+          />
         ),
       ].filter(Boolean)}
     />
