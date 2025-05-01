@@ -17,6 +17,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
 import {
+  arrayCollectionSlug,
   customViews1CollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
@@ -57,6 +58,7 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('List View', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
+  let arrayUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
   let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
@@ -79,6 +81,7 @@ describe('List View', () => {
     }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
+    arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     with300DocumentsUrl = new AdminUrlUtil(serverURL, with300DocumentsSlug)
     baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
@@ -387,6 +390,32 @@ describe('List View', () => {
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should allow to filter in array field', async () => {
+      await createArray()
+
+      await page.goto(arrayUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Array > Text',
+        operatorLabel: 'equals',
+        value: 'test',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+      await addListFilter({
+        page,
+        fieldLabel: 'Array > Text',
+        operatorLabel: 'equals',
+        value: 'not-matching',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(0)
     })
 
     test('should reset filter value when a different field is selected', async () => {
@@ -1404,4 +1433,13 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
   }) as unknown as Promise<Geo>
+}
+
+async function createArray() {
+  return payload.create({
+    collection: arrayCollectionSlug,
+    data: {
+      array: [{ text: 'test' }],
+    },
+  })
 }
