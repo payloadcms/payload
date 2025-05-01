@@ -9,7 +9,7 @@ import type {
 import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
@@ -56,6 +56,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        placeholder,
         sortOptions,
       } = {},
       hasMany,
@@ -779,6 +780,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 })
               }}
               options={options}
+              placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
             />

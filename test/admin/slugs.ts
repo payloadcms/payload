@@ -14,6 +14,7 @@ export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
 export const disableCopyToLocale = 'disable-copy-to-locale'
 export const uploadCollectionSlug = 'uploads'
+export const placeholderCollectionSlug = 'placeholder'
 
 export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
