@@ -10,6 +10,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   collection: Collection
@@ -37,7 +40,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -66,6 +69,13 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
+
+    const select = sanitizeSelect({
+      fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
+      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      select: incomingSelect,
+      versions: true,
+    })
 
     const versionsQuery = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,

@@ -42,6 +42,7 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
+  BeforeDocumentControls,
   Description,
   PreviewButton,
   PublishButton,
@@ -73,6 +74,7 @@ export function DefaultEditView({
     isEditing,
     isInitializing,
     lastUpdateTime,
+    redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
     savedDocumentData,
@@ -254,7 +256,7 @@ export function DefaultEditView({
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -323,6 +325,8 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
+      startRouteTransition,
+      redirectAfterCreate,
     ],
   )
 
@@ -508,6 +512,7 @@ export function DefaultEditView({
           />
           <DocumentControls
             apiURL={apiURL}
+            BeforeDocumentControls={BeforeDocumentControls}
             customComponents={{
               PreviewButton,
               PublishButton,

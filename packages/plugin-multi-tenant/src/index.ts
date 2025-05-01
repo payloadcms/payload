@@ -37,7 +37,8 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    let tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
+    const tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
+    const basePath = pluginConfig.basePath || defaults.basePath
 
     /**
      * Add defaults for admin properties
@@ -68,11 +69,11 @@ export const multiTenantPlugin =
     /**
      * Add tenant selector localized labels
      */
-    if (pluginConfig.tenantSelectorLabel && typeof pluginConfig.tenantSelectorLabel === 'object') {
+    if (typeof tenantSelectorLabel === 'object') {
       if (!incomingConfig.i18n) {
         incomingConfig.i18n = {}
       }
-      Object.entries(pluginConfig.tenantSelectorLabel).forEach(([_locale, label]) => {
+      Object.entries(tenantSelectorLabel).forEach(([_locale, label]) => {
         const locale = _locale as AcceptedLanguages
         if (!incomingConfig.i18n) {
           incomingConfig.i18n = {}
@@ -93,7 +94,6 @@ export const multiTenantPlugin =
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         incomingConfig.i18n.translations[locale].multiTenant.selectorLabel = label
-        tenantSelectorLabel = 'multiTenant:selectorLabel'
       })
     }
 
@@ -321,6 +321,7 @@ export const multiTenantPlugin =
       incomingConfig.admin.components.actions.push({
         path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
         serverProps: {
+          basePath,
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
           tenantsCollectionSlug,

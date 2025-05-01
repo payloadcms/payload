@@ -66,7 +66,11 @@ export const importExportPlugin =
       collection.admin.components = components
     })
 
-    config.i18n = deepMergeSimple(translations, config.i18n?.translations ?? {})
+    if (!config.i18n) {
+      config.i18n = {}
+    }
+
+    config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
 
     return config
   }

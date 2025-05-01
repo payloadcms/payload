@@ -2,7 +2,6 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -13,11 +12,15 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
+import { type RequestContext } from '../../../index.js'
+import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
+import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
+import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
 type Args = {
   /**
@@ -122,20 +125,16 @@ export const promise = async ({
     delete siblingDoc[field.name]
   }
 
-  // Strip unselected fields
-  if (fieldAffectsData(field) && select && selectMode && path !== 'id') {
-    if (selectMode === 'include') {
-      if (!select[field.name]) {
-        delete siblingDoc[field.name]
-        return
-      }
-    }
+  if (path !== 'id') {
+    const shouldContinue = stripUnselectedFields({
+      field,
+      select,
+      selectMode,
+      siblingDoc,
+    })
 
-    if (selectMode === 'exclude') {
-      if (select[field.name] === false) {
-        delete siblingDoc[field.name]
-        return
-      }
+    if (!shouldContinue) {
+      return
     }
   }
 
@@ -308,6 +307,24 @@ export const promise = async ({
       }
     }
 
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      populationPromises.push(
+        virtualFieldPopulationPromise({
+          name: field.name,
+          draft,
+          fallbackLocale,
+          fields: (collection || global).flattenedFields,
+          locale,
+          overrideAccess,
+          ref: doc,
+          req,
+          segments: field.virtual.split('.'),
+          showHiddenFields,
+          siblingDoc,
+        }),
+      )
+    }
+
     // Execute access control
     let allowDefaultValue = true
     if (triggerAccessControl && field.access && field.access.read) {
@@ -454,8 +471,6 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
-      let blocksSelect = select?.[field.name]
-
       if (Array.isArray(rows)) {
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
@@ -466,37 +481,11 @@ export const promise = async ({
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
-          let blockSelectMode = selectMode
-
-          if (typeof blocksSelect === 'object') {
-            blocksSelect = {
-              ...blocksSelect,
-            }
-
-            // sanitize blocks: {cta: false} to blocks: {cta: {id: true, blockType: true}}
-            if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
-              blockSelectMode = 'include'
-              blocksSelect[block.slug] = {
-                id: true,
-                blockType: true,
-              }
-            } else if (selectMode === 'include') {
-              if (!blocksSelect[block.slug]) {
-                blocksSelect[block.slug] = {}
-              }
-
-              if (typeof blocksSelect[block.slug] === 'object') {
-                blocksSelect[block.slug] = {
-                  ...(blocksSelect[block.slug] as object),
-                }
-
-                blocksSelect[block.slug]['id'] = true
-                blocksSelect[block.slug]['blockType'] = true
-              }
-            }
-          }
-
-          const blockSelect = blocksSelect?.[block.slug]
+          const { blockSelect, blockSelectMode } = getBlockSelect({
+            block,
+            select: select?.[field.name],
+            selectMode,
+          })
 
           if (block) {
             traverseFields({

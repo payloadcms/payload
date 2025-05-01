@@ -109,7 +109,12 @@ export const promise = async ({
 
   const passesCondition = field.admin?.condition
     ? Boolean(
-        field.admin.condition(data, siblingData, { blockData, path: pathSegments, user: req.user }),
+        field.admin.condition(data, siblingData, {
+          blockData,
+          operation,
+          path: pathSegments,
+          user: req.user,
+        }),
       )
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
@@ -181,6 +186,7 @@ export const promise = async ({
         // @ts-expect-error
         jsonError,
         operation,
+        path: pathSegments,
         preferences: { fields: {} },
         previousValue: siblingDoc[field.name],
         req,

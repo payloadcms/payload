@@ -1,15 +1,20 @@
 import type {
+  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field as FieldSchema,
   FieldSchemaMap,
+  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
 } from 'payload'
 
+import { stripUnselectedFields } from 'payload'
 import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -43,6 +48,7 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -61,6 +67,8 @@ type Args = {
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -89,6 +97,7 @@ export const iterateFields = async ({
   forceFullValue = false,
   fullData,
   includeSchema = false,
+  mockRSCs,
   omitParents = false,
   operation,
   parentIndexPath,
@@ -101,6 +110,8 @@ export const iterateFields = async ({
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
+  select,
+  selectMode,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -118,6 +129,19 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
+    if (path !== 'id') {
+      const shouldContinue = stripUnselectedFields({
+        field,
+        select,
+        selectMode,
+        siblingDoc: data,
+      })
+
+      if (!shouldContinue) {
+        return
+      }
+    }
+
     const pathSegments = path ? path.split('.') : []
 
     if (!skipConditionChecks) {
@@ -127,6 +151,7 @@ export const iterateFields = async ({
             ? Boolean(
                 field.admin.condition(fullData || {}, data || {}, {
                   blockData,
+                  operation,
                   path: pathSegments,
                   user: req.user,
                 }),
@@ -160,6 +185,7 @@ export const iterateFields = async ({
         fullData,
         includeSchema,
         indexPath,
+        mockRSCs,
         omitParents,
         operation,
         parentIndexPath,
@@ -174,6 +200,8 @@ export const iterateFields = async ({
         renderFieldFn,
         req,
         schemaPath,
+        select,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,

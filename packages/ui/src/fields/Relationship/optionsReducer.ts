@@ -3,7 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { Action, Option, OptionGroup } from './types.js'
 
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {

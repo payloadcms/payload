@@ -69,6 +69,12 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
+      },
     },
     pagination: {
       defaultLimit: 5,
@@ -136,64 +142,6 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
-    },
-    {
-      name: 'arrayOfFields',
-      type: 'array',
-      admin: {
-        initCollapsed: true,
-      },
-      fields: [
-        {
-          name: 'optional',
-          type: 'text',
-        },
-        {
-          name: 'innerArrayOfFields',
-          type: 'array',
-          fields: [
-            {
-              name: 'innerOptional',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'group',
-      type: 'group',
-      fields: [
-        {
-          name: 'defaultValueField',
-          type: 'text',
-          defaultValue: 'testing',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      name: 'someBlock',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'textBlock',
-          fields: [
-            {
-              name: 'textFieldForBlock',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'defaultValueField',
-      type: 'text',
-      defaultValue: 'testing',
     },
     {
       name: 'relationship',
@@ -264,23 +212,39 @@ export const Posts: CollectionConfig = {
       },
     },
     {
-      name: 'validateUsingEvent',
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
       type: 'text',
-      admin: {
-        description:
-          'This field should only validate on submit. Try typing "Not allowed" and submitting the form.',
-      },
-      validate: (value, { event }) => {
-        if (event === 'onChange') {
-          return true
-        }
-
-        if (value === 'Not allowed') {
-          return 'This field has been validated only on submit'
-        }
-
-        return true
-      },
     },
   ],
   labels: {

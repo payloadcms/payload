@@ -23,14 +23,27 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
+import { useFieldPath } from '../RenderFields/context.js'
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
-export const useField = <TValue,>(options: Options): FieldType<TValue> => {
-  const { disableFormData = false, hasRows, path, validate } = options
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const {
+    disableFormData = false,
+    hasRows,
+    path: pathFromOptions,
+    potentiallyStalePath,
+    validate,
+  } = options || {}
+
+  const pathFromContext = useFieldPath()
+
+  // This is a workaround for stale props given to server rendered components.
+  // See the notes in the `potentiallyStalePath` type definition for more details.
+  const path = pathFromOptions || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -57,6 +70,8 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
 
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
+
+  const pathSegments = path ? path.split('.') : []
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -103,6 +118,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -154,6 +170,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                 data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {

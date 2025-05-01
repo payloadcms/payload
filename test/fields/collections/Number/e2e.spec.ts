@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -88,6 +87,66 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
 
+  test('should filter Number field hasMany: false in the collection view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Number',
+      operatorLabel: 'is in',
+      value: '2',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Number field hasMany: false in the collection view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Number',
+      operatorLabel: 'is not in',
+      value: '2',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+  })
+
+  test('should filter Number field hasMany: true in the collection view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is in',
+      value: '5',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Number field hasMany: true in the collection view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is not in',
+      value: '6',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
+  })
+
   test('should create', async () => {
     const input = 5
     await page.goto(url.create)
@@ -111,7 +170,6 @@ describe('Number', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    expect(true).toBe(true) // the above fn contains the assertion
   })
 
   test('should fail min rows validation when rows are present', async () => {

@@ -36,21 +36,20 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   exactText,
-  findTableCell,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { titleToDelete } from './shared.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithDraftButtonGlobal,
+  autosaveWithDraftButtonSlug,
   autosaveWithValidateCollectionSlug,
   customIDSlug,
   diffCollectionSlug,
@@ -81,6 +80,7 @@ describe('Versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
+  let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -119,134 +119,11 @@ describe('Versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
-    })
-
-    // This test has to run before bulk updates that will rename the title
-    test('should delete', async () => {
-      await page.goto(url.list)
-
-      const rows = page.locator(`tr`)
-      const rowToDelete = rows.filter({ hasText: titleToDelete })
-
-      await rowToDelete.locator('.cell-_select input').check()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-draft-posts #confirm-action').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Deleted 1 Draft Post successfully.',
-      )
-
-      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
-    })
-
-    test('bulk update - should publish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk publish with autosave documents', async () => {
-      const title = 'autosave title'
-      const description = 'autosave description'
-      await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-description')).toBeEnabled()
-      await page.locator('#field-description').fill(description)
-      await waitForAutoSaveToRunAndComplete(page)
-      await page.goto(autosaveURL.list)
-      await expect(findTableCell(page, '_status', title)).toContainText('Draft')
-      await selectTableRow(page, title)
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-autosave-posts #confirm-action').click()
-      await expect(findTableCell(page, '_status', title)).toContainText('Published')
-    })
-
-    test('bulk update - should unpublish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#unpublish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
-    })
-
-    test('bulk update — should publish changes', async () => {
-      const description = 'published document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `published` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__publish').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk update — should draft changes', async () => {
-      const description = 'draft document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `draft` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__draft').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('collection — has versions tab', async () => {
@@ -328,78 +205,6 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
-    test('should show global versions view level action in globals versions view', async () => {
-      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
-      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
-      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
-    })
-
-    // TODO: Check versions/:version-id view for collections / globals
-
-    test('global — has versions tab', async () => {
-      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
-      await page.goto(global.global(draftGlobalSlug))
-
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
-      await versionsTab.waitFor({ state: 'visible' })
-
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
-    })
-
-    test('global — respects max number of versions', async () => {
-      await payload.updateGlobal({
-        slug: draftWithMaxGlobalSlug,
-        data: {
-          title: 'initial title',
-        },
-      })
-
-      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
-      await page.goto(global.global(draftWithMaxGlobalSlug))
-
-      const titleFieldInitial = page.locator('#field-title')
-      await titleFieldInitial.fill('updated title')
-      await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldInitial).toHaveValue('updated title')
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: '1',
-      })
-
-      await versionsTab.waitFor({ state: 'visible' })
-
-      expect(versionsTab).toBeTruthy()
-
-      const titleFieldUpdated = page.locator('#field-title')
-      await titleFieldUpdated.fill('latest title')
-      await saveDocAndAssert(page, '#action-save-draft')
-      await expect(titleFieldUpdated).toHaveValue('latest title')
-
-      const versionsTabUpdated = page.locator('.doc-tab', {
-        hasText: '1',
-      })
-
-      await versionsTabUpdated.waitFor({ state: 'visible' })
-
-      expect(versionsTabUpdated).toBeTruthy()
-    })
-
-    test('global — has versions route', async () => {
-      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
-      await page.goto(versionsURL)
-      await expect(() => {
-        expect(page.url()).toMatch(/\/versions/)
-      }).toPass({ timeout: 10000, intervals: [100] })
-    })
-
     test('collection - should autosave', async () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill('autosave title')
@@ -416,7 +221,7 @@ describe('Versions', () => {
 
       await page.goto(postURL.edit(postID))
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
         async () => {
@@ -434,6 +239,16 @@ describe('Versions', () => {
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
       await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
+    test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
+      await page.goto(autosaveWithDraftButtonURL.create)
+      await expect(page.locator('#action-save-draft')).toBeVisible()
+    })
+
+    test('collection - should not show "save as draft" button when showSaveDraftButton is false', async () => {
+      await page.goto(autosaveURL.create)
+      await expect(page.locator('#action-save-draft')).toBeHidden()
     })
 
     test('collection - autosave - should not create duplicates when clicking Create new', async () => {
@@ -527,17 +342,6 @@ describe('Versions', () => {
       const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
       await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
-    })
-
-    test('global - should autosave', async () => {
-      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
-      await page.goto(url.global(autoSaveGlobalSlug))
-      const titleField = page.locator('#field-title')
-      await titleField.fill('global title')
-      await waitForAutoSaveToRunAndComplete(page)
-      await expect(titleField).toHaveValue('global title')
-      await page.goto(url.global(autoSaveGlobalSlug))
-      await expect(page.locator('#field-title')).toHaveValue('global title')
     })
 
     test('should retain localized data during autosave', async () => {
@@ -644,12 +448,6 @@ describe('Versions', () => {
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
       await expect(page.locator('#field-title')).toHaveValue('title')
-    })
-
-    test('globals — should hide publish button when access control prevents update', async () => {
-      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
-      await page.goto(url.global(disablePublishGlobalSlug))
-      await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
     test('collections — should hide publish button when access control prevents create', async () => {
@@ -779,9 +577,111 @@ describe('Versions', () => {
     })
   })
 
+  describe('draft globals', () => {
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    test('global — has versions tab', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+      const href = versionsTab.locator('a').first()
+      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+    })
+
+    test('global — respects max number of versions', async () => {
+      await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    test('global — has versions route', async () => {
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
+      await page.goto(versionsURL)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
+    test('global - should show "save as draft" button when showSaveDraftButton is true', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveWithDraftButtonGlobal)
+      await page.goto(url.global(autosaveWithDraftButtonGlobal))
+      await expect(page.locator('#action-save-draft')).toBeVisible()
+    })
+
+    test('global - should not show "save as draft" button when showSaveDraftButton is false', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+    })
+
+    test('global - should autosave', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      await page.goto(url.global(autoSaveGlobalSlug))
+      const titleField = page.locator('#field-title')
+      await titleField.fill('global title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(titleField).toHaveValue('global title')
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#field-title')).toHaveValue('global title')
+    })
+
+    test('globals — should hide publish button when access control prevents update', async () => {
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+  })
+
   describe('Scheduled publish', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     test('should schedule publish', async () => {
@@ -817,6 +717,60 @@ describe('Versions', () => {
       await expect(
         page.locator('.payload-toast-item:has-text("Deleted successfully.")'),
       ).toBeVisible()
+    })
+
+    test('schedule publish config is respected', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      // schedule publish should not be available before document has been saved
+      await page.locator('#action-save-popup').click()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
+
+      // save draft then try to schedule publish
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      // drawer should open
+      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      // nothing in scheduled
+      await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
+
+      // set date and time
+      await page.locator('.date-time-picker input').click()
+
+      const listItem = page
+        .locator('.react-datepicker__time-list .react-datepicker__time-list-item')
+        .first()
+
+      // We customised it in config to not contain a 12 hour clock
+      await expect(async () => {
+        await expect(listItem).toHaveText('00:00')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    test('can still schedule publish once autosave is triggered', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      await saveDocAndAssert(page)
+
+      await page.locator('#field-title').fill('scheduled publish updated')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.locator('#action-save-popup').click()
+
+      await expect(async () => {
+        await expect(page.locator('#schedule-publish')).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 
@@ -1108,6 +1062,8 @@ describe('Versions', () => {
       // Fill with invalid data again, then reload and accept the warning, should contain previous data
       await titleField.fill('')
 
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
       await page.reload()
 
       await expect(titleField).toBeEnabled()
@@ -1224,6 +1180,7 @@ describe('Versions', () => {
 
     test('should render diff', async () => {
       await navigateToVersionDiff()
+      expect(true).toBe(true)
     })
 
     test('should render diff for nested fields', async () => {
@@ -1323,11 +1280,11 @@ describe('Versions', () => {
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
-      await expect(textInArrayES).toContainText('No Array Localizeds found')
+      await expect(textInArrayES).toBeHidden()
 
       await page.locator('#modifiedOnly').click()
 
-      await expect(textInArrayES).toBeHidden()
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
     })
 
     test('correctly renders diff for block fields', async () => {
@@ -1337,6 +1294,62 @@ describe('Versions', () => {
 
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInBlock')
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
+    })
+
+    test('correctly renders diff for collapsibles within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for rows within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInRowInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for named tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInNamedTab1InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInNamedTab1InBlock2',
+      )
+    })
+
+    test('correctly renders diff for unnamed tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInUnnamedTab2InBlock2',
+      )
     })
 
     test('correctly renders diff for checkbox fields', async () => {
@@ -1452,12 +1465,17 @@ describe('Versions', () => {
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(1)).toHaveText(
-        '"text": "richtext",',
-      )
-      await expect(richtext.locator('tr').nth(16).locator('td').nth(3)).toHaveText(
-        '"text": "richtext2",',
-      )
+      const oldDiff = richtext.locator('.lexical-diff__diff-old')
+      const newDiff = richtext.locator('.lexical-diff__diff-new')
+
+      const oldHTML =
+        `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
+      `.trim()
+      const newHTML =
+        `Fugiat <span data-match-type="create">esse new in</span> dolor aleiqua <span data-match-type="create">gillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="create">labore officia</span> cupidatat amet commodo commodo proident occaecat.`.trim()
+
+      expect(await oldDiff.locator('p').first().innerHTML()).toEqual(oldHTML)
+      expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {

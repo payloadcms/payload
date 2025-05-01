@@ -2,17 +2,16 @@
 import type { ReactSelectOption } from '@payloadcms/ui'
 import type { ViewTypes } from 'payload'
 
-import './index.scss'
-
+import { getTranslation } from '@payloadcms/translations'
 import { SelectInput, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
+import './index.scss'
 
 export const TenantSelector = ({ label, viewType }: { label: string; viewType?: ViewTypes }) => {
   const { options, selectedTenantID, setTenant } = useTenantSelection()
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const handleChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
@@ -33,18 +32,12 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
     <div className="tenant-selector">
       <SelectInput
         isClearable={viewType === 'list'}
-        label={t(label as any)}
+        label={getTranslation(label, i18n)}
         name="setTenant"
         onChange={handleChange}
         options={options}
         path="setTenant"
-        value={
-          selectedTenantID
-            ? selectedTenantID === SELECT_ALL
-              ? undefined
-              : (selectedTenantID as string)
-            : undefined
-        }
+        value={selectedTenantID as string | undefined}
       />
     </div>
   )

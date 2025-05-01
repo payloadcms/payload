@@ -1,8 +1,8 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 
 const fileExists = async (filename: string): Promise<boolean> => {
   try {
-    await fs.promises.stat(filename)
+    await fs.stat(filename)
 
     return true
   } catch (err) {

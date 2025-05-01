@@ -28,7 +28,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       relationTo,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -48,12 +48,14 @@ export function UploadComponent(props: UploadFieldClientProps) {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     filterOptions,
+    path,
     setValue,
     showError,
     value,
   } = useField<string | string[]>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -79,7 +81,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       maxRows={maxRows}
       onChange={setValue}
       path={path}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       relationTo={relationTo}
       required={required}
       serverURL={config.serverURL}

@@ -36,6 +36,7 @@ export type DocumentInfoProps = {
   readonly isLocked: boolean
   readonly lastUpdateTime: number
   readonly mostRecentVersionIsAutosaved: boolean
+  readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly unpublishedVersionCount: number

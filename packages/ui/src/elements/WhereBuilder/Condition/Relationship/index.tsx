@@ -5,11 +5,12 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
-import type { Props, ValueWithRelation } from './types.js'
+import type { RelationshipFilterProps as Props, ValueWithRelation } from './types.js'
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../../providers/Config/index.js'
+import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
 import optionsReducer from './optionsReducer.js'
@@ -43,6 +44,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('')
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const { i18n, t } = useTranslation()
+  const locale = useLocale()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
 
@@ -98,6 +100,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
+          locale: locale.code,
           page: loadedRelationship.nextPage,
           select: {
             [fieldToSearch]: true,

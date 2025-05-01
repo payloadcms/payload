@@ -145,10 +145,25 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       })
     }
 
+    let mutationCreateInputFields = mutationInputFields
+
+    if (
+      config.db.allowIDOnCreate &&
+      !collectionConfig.flattenedFields.some((field) => field.name === 'id')
+    ) {
+      mutationCreateInputFields = [
+        ...mutationCreateInputFields,
+        {
+          name: 'id',
+          type: config.db.defaultIDType,
+        } as Field,
+      ]
+    }
+
     const createMutationInputType = buildMutationInputType({
       name: singularName,
       config,
-      fields: mutationInputFields,
+      fields: mutationCreateInputFields,
       graphqlResult,
       parentIsLocalized: false,
       parentName: singularName,
