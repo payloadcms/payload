@@ -214,7 +214,9 @@ describe('relationship', () => {
 
     await page.goto(url.edit(doc.id))
 
-    const editBtn = page.locator('#field-relationship .relationship--single-value__drawer-toggler')
+    const editBtn = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
     await expect(editBtn).toHaveCount(0)
   })
 
@@ -532,7 +534,7 @@ describe('relationship', () => {
       await wait(500)
 
       const originalValue = await page
-        .locator('#field-relationship .relationship--single-value__text')
+        .locator('#field-relationship button.relationship--single-value__text')
         .textContent()
 
       await page.locator('#field-relationship .rs__control').click()

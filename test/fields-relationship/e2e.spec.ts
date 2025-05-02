@@ -495,7 +495,7 @@ describe('Relationship Field', () => {
     await openDocDrawer({
       page,
       selector:
-        '#field-relationshipReadOnly .relationship--single-value__drawer-toggler.doc-drawer__toggler',
+        '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
     })
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
@@ -532,7 +532,7 @@ describe('Relationship Field', () => {
 
     await openDocDrawer({
       page,
-      selector: '#field-relationship .relationship--single-value__drawer-toggler',
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
     })
 
     const field = page.locator('#field-name')

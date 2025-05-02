@@ -30,12 +30,6 @@ type Props = {
    * @default true
    */
   preventDefault?: boolean
-  /**
-   * Skip the route transition if true
-   *
-   * @default false
-   */
-  skipRouteTransition?: boolean
 } & Parameters<typeof NextLink>[0]
 
 export const Link: React.FC<Props> = ({
@@ -46,7 +40,6 @@ export const Link: React.FC<Props> = ({
   ref,
   replace,
   scroll,
-  skipRouteTransition = false,
   ...rest
 }) => {
   const router = useRouter()
@@ -68,10 +61,6 @@ export const Link: React.FC<Props> = ({
         // once for default browser navigation and once for startRouteTransition
         if (preventDefault) {
           e.preventDefault()
-        }
-
-        if (skipRouteTransition) {
-          return
         }
 
         startRouteTransition(() => {
