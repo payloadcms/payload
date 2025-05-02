@@ -302,7 +302,7 @@ describe('lexicalBlocks', () => {
     await assertLexicalDoc({
       fn: ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
-          .children[14] as SerializedBlockNode
+          .children[13] as SerializedBlockNode
         const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
           .children[12] as SerializedParagraphNode
 
@@ -1133,9 +1133,9 @@ describe('lexicalBlocks', () => {
           ).docs[0] as never
 
           const richTextBlock: SerializedBlockNode = lexicalWithBlocks.root
-            .children[13] as SerializedBlockNode
+            .children[12] as SerializedBlockNode
           const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
-            .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+            .children[0] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
           const subSubRichTextField = subRichTextBlock.fields.subRichTextField
           const subSubUploadField = subRichTextBlock.fields.subUploadField
@@ -1163,9 +1163,9 @@ describe('lexicalBlocks', () => {
           ).docs[0] as never
 
           const richTextBlock2: SerializedBlockNode = lexicalWithBlocks.root
-            .children[13] as SerializedBlockNode
+            .children[12] as SerializedBlockNode
           const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
-            .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+            .children[0] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
 
           const subSubRichTextField2 = subRichTextBlock2.fields.subRichTextField
           const subSubUploadField2 = subRichTextBlock2.fields.subUploadField
@@ -1665,6 +1665,56 @@ describe('lexicalBlocks', () => {
           expect(inlineBlock.fields.avatars[0].image.text).toBe(uploadDoc.text)
         },
       })
+    })
+
+    test('ensure inline blocks restore their state after undoing a removal', async () => {
+      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+
+      await page.locator('.cell-id a').first().click()
+      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+      // Wait for the page to be fully loaded and elements to be stable
+      await page.waitForLoadState('domcontentloaded')
+
+      // Wait for the specific row to be visible and have its content loaded
+      const row2 = page.locator('#blocks-row-2')
+      await expect(row2).toBeVisible()
+
+      // Get initial count and ensure it's stable
+      const inlineBlocks = page.locator('#blocks-row-2 .inline-block-container')
+      const inlineBlockCount = await inlineBlocks.count()
+      await expect(() => {
+        expect(inlineBlockCount).toBeGreaterThan(0)
+      }).toPass()
+
+      const inlineBlockElement = inlineBlocks.first()
+      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+
+      await page.locator('.drawer--is-open #field-text').fill('value1')
+      await page.locator('.drawer--is-open button[type="submit"]').first().click()
+
+      // remove inline block
+      await inlineBlockElement.click()
+      await page.keyboard.press('Backspace')
+
+      // Check both that this specific element is removed and the total count decreased
+      await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
+
+      await page.keyboard.press('Escape')
+
+      await inlineBlockElement.click()
+
+      // Undo the removal using keyboard shortcut
+      await page.keyboard.press('ControlOrMeta+Z')
+
+      // Wait for the block to be restored
+      await expect(inlineBlocks).toHaveCount(inlineBlockCount)
+
+      // Open the drawer again
+      await inlineBlockElement.locator('.inline-block__editButton').first().click()
+
+      // Check if the text field still contains 'value1'
+      await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
     })
   })
 })

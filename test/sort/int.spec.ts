@@ -444,6 +444,43 @@ describe('Sort', () => {
           parseInt(ordered.docs[1]._order, 16),
         )
       })
+
+      it('should allow to duplicate with reordable', async () => {
+        const doc = await payload.create({
+          collection: 'orderable',
+          data: { title: 'new document' },
+        })
+
+        const docDuplicated = await payload.create({
+          duplicateFromID: doc.id,
+          collection: 'orderable',
+          data: {},
+        })
+        expect(docDuplicated.title).toBe('new document')
+        expect(parseInt(doc._order!, 16)).toBeLessThan(parseInt(docDuplicated._order!, 16))
+
+        await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [doc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: docDuplicated.id,
+              key: docDuplicated._order,
+            },
+          }),
+        })
+
+        const docAfterReorder = await payload.findByID({ collection: 'orderable', id: doc.id })
+        const docDuplicatedAfterReorder = await payload.findByID({
+          collection: 'orderable',
+          id: docDuplicated.id,
+        })
+        expect(parseInt(docAfterReorder._order!, 16)).toBeGreaterThan(
+          parseInt(docDuplicatedAfterReorder._order!, 16),
+        )
+      })
     })
 
     describe('Orderable join', () => {

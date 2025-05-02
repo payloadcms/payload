@@ -200,7 +200,7 @@ export const email: EmailFieldValidation = (
    * Supports multiple subdomains (e.g., user@sub.domain.example.com)
    */
   const emailRegex =
-    /^(?!.*\.\.)[\w.%+-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
   if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')

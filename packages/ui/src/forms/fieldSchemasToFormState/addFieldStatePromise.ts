@@ -456,6 +456,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
+                if (addedByServer) {
+                  state[fieldKey].addedByServer = addedByServer
+                }
+
                 if (includeSchema) {
                   state[fieldKey].fieldSchema = block.fields.find(
                     (blockField) => 'name' in blockField && blockField.name === 'blockType',
@@ -827,6 +831,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       if (passesCondition && typeof tab.admin?.condition === 'function') {
         tabPassesCondition = tab.admin.condition(fullData, data, {
           blockData,
+          operation,
           path: pathSegments,
           user: req.user,
         })

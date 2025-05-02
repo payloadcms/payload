@@ -70,6 +70,7 @@ export interface Config {
     'disable-publish': DisablePublish;
     posts: Post;
     'autosave-posts': AutosavePost;
+    'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
@@ -91,6 +92,7 @@ export interface Config {
     'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
@@ -112,6 +114,7 @@ export interface Config {
   };
   globals: {
     'autosave-global': AutosaveGlobal;
+    'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobal;
     'draft-global': DraftGlobal;
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
@@ -119,6 +122,7 @@ export interface Config {
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobalSelect<false> | AutosaveWithDraftButtonGlobalSelect<true>;
     'draft-global': DraftGlobalSelect<false> | DraftGlobalSelect<true>;
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
     'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
@@ -224,6 +228,17 @@ export interface DraftPost {
     | null;
   relation?: (string | null) | DraftPost;
   restrictedToUpdate?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-draft-button-posts".
+ */
+export interface AutosaveWithDraftButtonPost {
+  id: string;
+  title: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -555,6 +570,10 @@ export interface PayloadLockedDocument {
         value: string | AutosavePost;
       } | null)
     | ({
+        relationTo: 'autosave-with-draft-button-posts';
+        value: string | AutosaveWithDraftButtonPost;
+      } | null)
+    | ({
         relationTo: 'autosave-with-validate-posts';
         value: string | AutosaveWithValidatePost;
       } | null)
@@ -672,6 +691,16 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-draft-button-posts_select".
+ */
+export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -975,6 +1004,17 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-draft-button-global".
+ */
+export interface AutosaveWithDraftButtonGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-global".
  */
 export interface DraftGlobal {
@@ -1023,6 +1063,17 @@ export interface LocalizedGlobal {
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-draft-button-global_select".
+ */
+export interface AutosaveWithDraftButtonGlobalSelect<T extends boolean = true> {
   title?: T;
   _status?: T;
   updatedAt?: T;
@@ -1082,10 +1133,15 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'draft-posts';
-      value: string | DraftPost;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'autosave-posts';
+          value: string | AutosavePost;
+        } | null)
+      | ({
+          relationTo: 'draft-posts';
+          value: string | DraftPost;
+        } | null);
     global?: 'draft-global' | null;
     user?: (string | null) | User;
   };

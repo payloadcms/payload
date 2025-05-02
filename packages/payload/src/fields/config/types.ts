@@ -269,6 +269,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    operation,
     path,
     user,
   }: {
@@ -276,6 +277,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * A string relating to which operation the field type is currently executing within.
+     */
+    operation: Operation
     /**
      * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
      */
@@ -509,9 +514,9 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
-   * A virtual field cannot be used in `admin.useAsTitle`
+   * A virtual field can be used in `admin.useAsTitle` only when linked to a relationship.
    */
-  virtual?: boolean
+  virtual?: boolean | string
 }
 
 export interface FieldBaseClient {
@@ -1056,6 +1061,7 @@ export type SelectField = {
     } & Admin['components']
     isClearable?: boolean
     isSortable?: boolean
+    placeholder?: LabelFunction | string
   } & Admin
   /**
    * Customize the SQL table name
@@ -1088,7 +1094,7 @@ export type SelectField = {
   Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
-  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
+  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable' | 'placeholder'>
 } & FieldBaseClient &
   Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
@@ -1155,10 +1161,11 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  placeholder?: LabelFunction | string
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'placeholder'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
@@ -1950,7 +1957,7 @@ export function fieldShouldBeLocalized({
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {
-  return 'virtual' in field && field.virtual
+  return 'virtual' in field && Boolean(field.virtual)
 }
 
 export type HookName =
