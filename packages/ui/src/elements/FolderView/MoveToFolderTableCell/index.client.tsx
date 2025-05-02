@@ -1,22 +1,26 @@
 'use client'
 
-import type { DefaultCellComponentProps } from 'payload'
-
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
-import { MoveDocToFolderButton } from './index.js'
+import { MoveDocToFolderButton } from '../MoveDocToFolder/index.js'
 
-export const FolderTableCell = (props: DefaultCellComponentProps) => {
+type Props = {
+  collectionSlug: string
+  data: any
+  docTitle: string
+}
+
+export const FolderTableCellClient = ({ collectionSlug, data, docTitle }: Props) => {
   const { config } = useConfig()
   const router = useRouter()
 
-  const docID = props.rowData.id
+  const docID = data.id
 
   const onConfirm = React.useCallback(
     async ({ id }) => {
-      const response = await fetch(`${config.routes.api}/${props.collectionSlug}/${docID}`, {
+      const response = await fetch(`${config.routes.api}/${collectionSlug}/${docID}`, {
         body: JSON.stringify({
           _folder: id,
         }),
@@ -33,7 +37,7 @@ export const FolderTableCell = (props: DefaultCellComponentProps) => {
         console.error('Error moving document to folder:', response.statusText)
       }
     },
-    [config.routes.api, docID, props.collectionSlug, router],
+    [config.routes.api, docID, collectionSlug, router],
   )
 
   return (
@@ -41,11 +45,11 @@ export const FolderTableCell = (props: DefaultCellComponentProps) => {
       buttonProps={{
         size: 'small',
       }}
-      collectionSlug={props.collectionSlug}
-      docData={props.rowData}
+      collectionSlug={collectionSlug}
+      docData={data}
       docID={docID}
-      docTitle={props.rowData.title}
-      fromFolderID={props.rowData?._folder}
+      docTitle={docTitle}
+      fromFolderID={data?._folder}
       modalSlug={`move-doc-to-folder-cell--${docID}`}
       onConfirm={onConfirm}
       skipConfirmModal={false}

@@ -18,12 +18,11 @@ import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
 
 const baseClass = 'move-doc-to-folder'
-const moveDocToFolderDrawerSlug = 'move-doc-to-folder'
 
 /**
  * This is the button shown on the edit document view. It uses the more generic `MoveDocToFolderButton` component.
  */
-export function MoveDocToFolder({ className = '', modalSlug = moveDocToFolderDrawerSlug }) {
+export function MoveDocToFolder({ className = '' }) {
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const currentParentFolder = useFormFields(([fields]) => (fields && fields?._folder) || null)
   const { id, collectionSlug, initialData, title } = useDocumentInfo()
@@ -37,7 +36,7 @@ export function MoveDocToFolder({ className = '', modalSlug = moveDocToFolderDra
       docID={id}
       docTitle={title}
       fromFolderID={currentParentFolder?.value as number | string}
-      modalSlug={modalSlug}
+      modalSlug="move-doc-to-folder"
       onConfirm={({ id }) => {
         if (currentParentFolder.value !== id) {
           dispatchField({
@@ -71,7 +70,7 @@ type MoveDocToFolderButtonProps = {
  */
 export const MoveDocToFolderButton = ({
   buttonProps,
-  className = '',
+  className,
   collectionSlug,
   docData,
   docID,
@@ -108,6 +107,9 @@ export const MoveDocToFolderButton = ({
     }
   }, [config.folders.slug, config.routes.api, fromFolderID, t])
 
+  const titleToRender =
+    docTitle || getTranslation(getEntityConfig({ collectionSlug }).labels.singular, i18n)
+
   return (
     <>
       <Button
@@ -125,7 +127,6 @@ export const MoveDocToFolderButton = ({
 
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
-        // might want to use formatDrawerSlug here
         drawerSlug={drawerSlug}
         fromFolderID={fromFolderID}
         fromFolderName={fromFolderName}
@@ -146,14 +147,14 @@ export const MoveDocToFolderButton = ({
                 toast.success(
                   t('folder:itemHasBeenMoved', {
                     folderName: `"${args.name}"`,
-                    title: docTitle,
+                    title: titleToRender,
                   }),
                 )
               } else {
                 // moved to root
                 toast.success(
                   t('folder:itemHasBeenMovedToRoot', {
-                    title: docTitle,
+                    title: titleToRender,
                   }),
                 )
               }
@@ -164,12 +165,10 @@ export const MoveDocToFolderButton = ({
             }
           }
 
-          closeModal(moveDocToFolderDrawerSlug)
+          closeModal(drawerSlug)
         }}
         skipConfirmModal={skipConfirmModal}
-        title={
-          docTitle || getTranslation(getEntityConfig({ collectionSlug }).labels.singular, i18n)
-        }
+        title={titleToRender}
       />
     </>
   )
