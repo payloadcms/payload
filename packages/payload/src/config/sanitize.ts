@@ -103,7 +103,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): SanitizedConfig => {
     }
   })
 
-  return sanitizedConfig as SanitizedConfig
+  return sanitizedConfig as unknown as SanitizedConfig
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
