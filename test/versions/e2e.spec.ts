@@ -205,6 +205,116 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
+    test('should show currently published version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Current Published Version')
+    })
+
+    test('should show unpublished version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      // Unpublish the document
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: publishedDoc.id,
+        data: {
+          _status: 'draft',
+        },
+        draft: false,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Previously Published')
+    })
+
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    test('global — has versions tab', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+      const href = versionsTab.locator('a').first()
+      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+    })
+
+    test('global — respects max number of versions', async () => {
+      await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    test('global — has versions route', async () => {
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
+      await page.goto(versionsURL)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
     test('collection - should autosave', async () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill('autosave title')
