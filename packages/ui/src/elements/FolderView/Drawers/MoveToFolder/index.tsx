@@ -260,7 +260,7 @@ function Content({
               id: crumb.id,
               name: crumb.name,
               onClick:
-                index !== count - 1
+                index !== breadcrumbs.length - 1
                   ? () => {
                       void setFolderID({ folderID: crumb.id })
                     }
