@@ -71,7 +71,6 @@ export const getHandler = ({
           command,
           typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
         )
-        // new Response({}, {headers:{''}})
         return Response.redirect(signedUrl)
       }
 
