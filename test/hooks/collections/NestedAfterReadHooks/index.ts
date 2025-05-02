@@ -1,3 +1,4 @@
+import wait from '../../../../packages/payload/src/utilities/wait'
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { relationsSlug } from '../Relations'
@@ -62,6 +63,40 @@ const NestedAfterReadHooks: CollectionConfig = {
               name: 'shouldPopulate',
               type: 'relationship',
               relationTo: relationsSlug,
+            },
+            {
+              name: 'blocks',
+              type: 'blocks',
+              defaultValue: [{ blockType: 'blockWithVirtualRelationField' }],
+              blocks: [
+                {
+                  slug: 'blockWithVirtualRelationField',
+                  fields: [
+                    {
+                      name: 'shouldPopulateVirtual',
+                      type: 'relationship',
+                      relationTo: relationsSlug,
+                      hasMany: true,
+                      hooks: {
+                        beforeChange: [
+                          ({ siblingData }) => {
+                            delete siblingData.shouldPopulateVirtual
+                          },
+                        ],
+                        afterRead: [
+                          async ({ req }) => {
+                            await wait(200)
+                            const { docs } = await req.payload.find({
+                              collection: relationsSlug,
+                            })
+                            return docs
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
