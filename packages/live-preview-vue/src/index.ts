@@ -27,7 +27,7 @@ export const useLivePreview = <T extends Record<string, unknown>>(props: {
     isLoading.value = false
   }
 
-  let subscription: (event: MessageEvent) => void
+  let subscription: (event: MessageEvent) => Promise<void> | void
 
   onMounted(() => {
     subscription = subscribe({
