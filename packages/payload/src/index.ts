@@ -89,6 +89,10 @@ import { traverseFields } from './utilities/traverseFields.js'
 
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
+export { getAccessResults } from './auth/getAccessResults.js'
+export { getFieldsToSign } from './auth/getFieldsToSign.js'
+export { getLoginOptions } from './auth/getLoginOptions.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -977,10 +981,8 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
-export { getAccessResults } from './auth/getAccessResults.js'
-export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
+export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -994,6 +996,8 @@ export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
+export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1201,6 +1205,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  UnverifiedEmail,
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
