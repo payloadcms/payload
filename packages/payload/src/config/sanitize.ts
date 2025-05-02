@@ -58,6 +58,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
     const firstCollectionWithAuth = sanitizedConfig.collections.find(({ auth }) => Boolean(auth))
+
     if (firstCollectionWithAuth) {
       sanitizedConfig.admin.user = firstCollectionWithAuth.slug
     } else {
@@ -69,6 +70,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   const userCollection = sanitizedConfig.collections.find(
     ({ slug }) => slug === sanitizedConfig.admin.user,
   )
+
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,

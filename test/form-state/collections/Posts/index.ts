@@ -41,6 +41,21 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'selfManagedFields',
+      type: 'group',
+      fields: [
+        {
+          type: 'text',
+          name: 'selfManagedField',
+        },
+      ],
+      admin: {
+        components: {
+          Field: './collections/Posts/SelfManagedFields.js#SelfManagedFields',
+        },
+      },
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [
@@ -79,7 +94,7 @@ export const PostsCollection: CollectionConfig = {
           defaultValue: 'This is a default value',
           admin: {
             components: {
-              Field: './collections/Posts/TextField.js#CustomTextField',
+              Field: './collections/Posts/CustomTextField.js#CustomTextField',
             },
           },
         },

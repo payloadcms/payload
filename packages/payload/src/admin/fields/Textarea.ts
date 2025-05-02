@@ -26,6 +26,7 @@ type TextareaFieldBaseClientProps = {
   readonly inputRef?: React.Ref<HTMLInputElement>
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: TextareaFieldValidation
 }
 

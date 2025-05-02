@@ -61,6 +61,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     leaves,
     path: pathFromProps,
     plugins,
+    potentiallyStalePath,
     readOnly: readOnlyFromTopLevelProps,
     schemaPath: schemaPathFromProps,
     validate = richTextValidate,
@@ -101,7 +102,8 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     showError,
     value,
   } = useField({
-    potentiallyStalePath: pathFromProps,
+    path: pathFromProps,
+    potentiallyStalePath,
     validate: memoizedValidate,
   })
 

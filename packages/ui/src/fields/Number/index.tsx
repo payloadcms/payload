@@ -39,6 +39,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     },
     onChange: onChangeFromProps,
     path: pathFromProps,
+    potentiallyStalePath,
     readOnly,
     validate,
   } = props
@@ -62,7 +63,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     showError,
     value,
   } = useField<number | number[]>({
-    potentiallyStalePath: pathFromProps,
+    path: pathFromProps,
+    potentiallyStalePath,
     validate: memoizedValidate,
   })
 

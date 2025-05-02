@@ -243,6 +243,20 @@ test.describe('Form State', () => {
     ).toHaveValue('2')
   })
 
+  test('should allow self managed fields to use direct path from props', async () => {
+    await page.goto(postsUrl.create)
+
+    // Ensure the self managed field is rendered with the proper path, i.e. `selfManagedField`
+    // And not the path of the parent group field, i.e. `selfManagedFields` (plural)
+    await expect(page.locator('#field-selfManagedFields.selfManagedField')).toBeVisible()
+
+    const selfManagedField = page.locator('#field-selfManagedFields.selfManagedField')
+    await selfManagedField.fill('Self managed value')
+
+    await saveDocAndAssert(page, '#action-save', 'success')
+    await expect(selfManagedField).toHaveValue('Self managed value')
+  })
+
   test('should queue onChange functions', async () => {
     await page.goto(postsUrl.create)
     await page.locator('#field-array .array-field__add-row').click()

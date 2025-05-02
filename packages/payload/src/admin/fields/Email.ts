@@ -23,6 +23,7 @@ type EmailFieldClientWithoutType = MarkOptional<EmailFieldClient, 'type'>
 
 type EmailFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: EmailFieldValidation
 }
 

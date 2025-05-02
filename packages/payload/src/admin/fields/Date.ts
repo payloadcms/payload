@@ -23,6 +23,7 @@ type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
 
 type DateFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: DateFieldValidation
 }
 
