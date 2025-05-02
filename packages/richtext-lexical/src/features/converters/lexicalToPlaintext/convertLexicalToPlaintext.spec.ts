@@ -252,7 +252,7 @@ describe('convertLexicalToPlaintext', () => {
     })
 
     expect(plaintext).toBe(
-      'Cell 1, Row 1\nCell 2, Row 1\n\nCell 1, Row 2\nCell 2, Row 2\n\nCell in Table 2',
+      'Cell 1, Row 1 | Cell 2, Row 1\nCell 1, Row 2 | Cell 2, Row 2\n\nCell in Table 2',
     )
   })
 })
