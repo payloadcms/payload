@@ -697,7 +697,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 ...(appearance !== 'select' && { DropdownIndicator: null }),
               }}
               customProps={{
-                adminRoute: config.routes.admin,
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentOpen,

@@ -557,7 +557,7 @@ describe('relationship', () => {
       await wait(500)
 
       const originalValue = await page
-        .locator('#field-relationship button.relationship--single-value__text')
+        .locator('#field-relationship .relationship--single-value__text')
         .textContent()
 
       await page.locator('#field-relationship .rs__control').click()
@@ -570,7 +570,7 @@ describe('relationship', () => {
 
       await openDocDrawer({
         page,
-        selector: '#field-relationship .relationship--single-value__drawer-toggler',
+        selector: '#field-relationship button.relationship--single-value__drawer-toggler',
       })
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
