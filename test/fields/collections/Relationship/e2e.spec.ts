@@ -358,7 +358,7 @@ describe('relationship', () => {
     ).toHaveText(`${value}123456`)
   })
 
-  test('single value relationship should open document in a new tab', async () => {
+  test('should open related document in a new tab when meta key is applied', async () => {
     await page.goto(url.create)
 
     const [newPage] = await Promise.all([

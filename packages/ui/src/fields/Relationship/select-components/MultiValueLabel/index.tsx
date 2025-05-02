@@ -55,7 +55,7 @@ export const MultiValueLabel: React.FC<
                 id: value,
                 collectionSlug: relationTo,
                 hasReadPermission,
-                inNewTab: event.metaKey || event.ctrlKey,
+                openInNewTab: event.metaKey || event.ctrlKey,
               })
             }}
             onKeyDown={(e) => {

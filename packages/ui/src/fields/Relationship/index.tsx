@@ -607,7 +607,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
-  const onDocumentNewTabOpen = useCallback<
+  const openDocumentInNewTab = useCallback<
     ReactSelectAdapterProps['customProps']['onDocumentOpen']
   >(
     ({ id, collectionSlug, hasReadPermission }) => {
@@ -622,26 +622,27 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     [config.routes.admin],
   )
 
-  const onDocumentDrawerOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentOpen']
-  >(({ id, collectionSlug, hasReadPermission }) => {
-    openDrawerWhenRelationChanges.current = true
-    setCurrentlyOpenRelationship({
-      id,
-      collectionSlug,
-      hasReadPermission,
-    })
-  }, [])
+  const openDocumentDrawer = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ id, collectionSlug, hasReadPermission }) => {
+      openDrawerWhenRelationChanges.current = true
+      setCurrentlyOpenRelationship({
+        id,
+        collectionSlug,
+        hasReadPermission,
+      })
+    },
+    [],
+  )
 
   const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
-    ({ inNewTab, ...args }) => {
-      if (inNewTab) {
-        onDocumentNewTabOpen(args)
+    ({ openInNewTab, ...args }) => {
+      if (openInNewTab) {
+        openDocumentInNewTab(args)
       } else {
-        onDocumentDrawerOpen(args)
+        openDocumentDrawer(args)
       }
     },
-    [onDocumentNewTabOpen, onDocumentDrawerOpen],
+    [openDocumentInNewTab, openDocumentDrawer],
   )
 
   useEffect(() => {

@@ -17,7 +17,7 @@ type CustomSelectProps = {
     collectionSlug: string
     hasReadPermission: boolean
     id: number | string
-    inNewTab?: boolean
+    openInNewTab?: boolean
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
