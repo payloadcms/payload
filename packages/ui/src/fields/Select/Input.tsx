@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -33,6 +33,7 @@ export type SelectInputProps = {
   readonly onInputChange?: ReactSelectAdapterProps['onInputChange']
   readonly options?: OptionObject[]
   readonly path: string
+  readonly placeholder?: LabelFunction | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
@@ -58,6 +59,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     onInputChange,
     options,
     path,
+    placeholder,
     readOnly,
     required,
     showError,
@@ -125,6 +127,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
             ...option,
             label: getTranslation(option.label, i18n),
           }))}
+          placeholder={placeholder}
           showError={showError}
           value={valueToRender as OptionObject}
         />

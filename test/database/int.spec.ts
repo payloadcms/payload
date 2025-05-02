@@ -1997,6 +1997,23 @@ describe('database', () => {
       expect(draft.docs[0]?.postTitle).toBe('my-title')
     })
 
+    it('should not break when using select', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        select: { postTitle: true },
+      })
+      expect(doc.postTitle).toBe('my-title-10')
+    })
+
     it('should allow virtual field as reference to ID', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
@@ -2127,6 +2144,26 @@ describe('database', () => {
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should not break when using select 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '3-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '3-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+
+      const docWithSelect = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id: doc.id,
+        select: { postCategoryTitle: true },
+      })
+      expect(docWithSelect.postCategoryTitle).toBe('3-category')
     })
 
     it('should allow to query by virtual field 2x deep', async () => {
@@ -2413,5 +2450,38 @@ describe('database', () => {
     })
 
     expect(res.docs[0].id).toBe(customID.id)
+  })
+
+  it('should count with a query that contains subqueries', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'new-category' },
+    })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { title: 'new-post', category: category.id },
+    })
+
+    const result_1 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'new-category',
+        },
+      },
+    })
+
+    expect(result_1.totalDocs).toBe(1)
+
+    const result_2 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'non-existing-category',
+        },
+      },
+    })
+
+    expect(result_2.totalDocs).toBe(0)
   })
 })

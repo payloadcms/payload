@@ -247,6 +247,7 @@ export const createOperation = async <
     let doc
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

@@ -1,5 +1,6 @@
 export const usersSlug = 'users'
 
+export const lexicalFullyFeaturedSlug = 'lexical-fully-featured'
 export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'

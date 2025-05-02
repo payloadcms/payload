@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/admin-bar",
-  "version": "3.35.1",
+  "version": "3.36.1",
   "description": "An admin bar for React apps using Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
