@@ -25,7 +25,12 @@ export default buildConfigWithDefaults({
   globals: [
     {
       slug: 'global',
-      fields: [],
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
     },
   ],
   // onInit: seed,

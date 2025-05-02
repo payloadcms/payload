@@ -165,6 +165,7 @@ export const DocumentControls: React.FC<{
               <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
             {config.folders.enabled &&
+              collectionConfig &&
               Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
                 <MoveDocToFolder />
               )}
