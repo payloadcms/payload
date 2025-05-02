@@ -1,6 +1,6 @@
 import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
-import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
+import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
 type WithDocumentOpen = {
   adminRoute: string
@@ -22,7 +22,6 @@ type WithoutDocumentOpen = {
 }
 
 type CustomSelectProps = {
-  DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
   editableProps?: (
