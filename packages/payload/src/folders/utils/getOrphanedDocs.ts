@@ -30,7 +30,7 @@ export async function getOrphanedDocs({
     ],
   }
 
-  if (collectionSlug && search) {
+  if (collectionSlug && search && payload.collections[collectionSlug].config.admin?.useAsTitle) {
     whereConstraints = {
       [payload.collections[collectionSlug].config.admin.useAsTitle]: {
         like: search,
