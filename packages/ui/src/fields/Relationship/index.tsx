@@ -607,42 +607,28 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
-  const openDocumentInNewTab = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentOpen']
-  >(
-    ({ id, collectionSlug, hasReadPermission }) => {
-      if (hasReadPermission && id && collectionSlug) {
-        const docUrl = formatAdminURL({
-          adminRoute: config.routes.admin,
-          path: `/collections/${collectionSlug}/${id}`,
-        })
-        window.open(docUrl, '_blank')
-      }
-    },
-    [config.routes.admin],
-  )
-
-  const openDocumentDrawer = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
-    ({ id, collectionSlug, hasReadPermission }) => {
-      openDrawerWhenRelationChanges.current = true
-      setCurrentlyOpenRelationship({
-        id,
-        collectionSlug,
-        hasReadPermission,
-      })
-    },
-    [],
-  )
-
   const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
-    ({ openInNewTab, ...args }) => {
+    ({ id, collectionSlug, hasReadPermission, openInNewTab }) => {
       if (openInNewTab) {
-        openDocumentInNewTab(args)
+        if (hasReadPermission && id && collectionSlug) {
+          const docUrl = formatAdminURL({
+            adminRoute: config.routes.admin,
+            path: `/collections/${collectionSlug}/${id}`,
+          })
+
+          window.open(docUrl, '_blank')
+        }
       } else {
-        openDocumentDrawer(args)
+        openDrawerWhenRelationChanges.current = true
+
+        setCurrentlyOpenRelationship({
+          id,
+          collectionSlug,
+          hasReadPermission,
+        })
       }
     },
-    [openDocumentInNewTab, openDocumentDrawer],
+    [setCurrentlyOpenRelationship, config.routes.admin],
   )
 
   useEffect(() => {
