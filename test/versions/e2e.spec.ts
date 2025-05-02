@@ -251,8 +251,6 @@ describe('Versions', () => {
       await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
     })
 
-    // TODO: Check versions/:version-id view for collections / globals
-
     test('global — has versions tab', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(global.global(draftGlobalSlug))
