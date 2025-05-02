@@ -2,11 +2,12 @@
 import React from 'react'
 
 import './index.scss'
+import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { sanitizeID } from '../../utilities/sanitizeID.js'
+import { useDrawerDepth } from '../Drawer/index.js'
 
 const baseClass = 'id-label'
 
@@ -21,7 +22,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
     },
   } = useConfig()
   const { collectionSlug, globalSlug } = useDocumentInfo()
-  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
 
   const docPath = formatAdminURL({
     adminRoute,
@@ -32,13 +33,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
     <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
       {prefix}
       &nbsp;
-      {editDepth === 0 ? (
-        sanitizeID(id)
-      ) : (
-        <a href={docPath} rel="noopener noreferrer" target="_blank">
-          {sanitizeID(id)}
-        </a>
-      )}
+      {drawerDepth === 0 ? sanitizeID(id) : <Link href={docPath}>{sanitizeID(id)}</Link>}
     </div>
   )
 }
