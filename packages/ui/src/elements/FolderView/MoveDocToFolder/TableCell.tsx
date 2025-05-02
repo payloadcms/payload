@@ -43,9 +43,10 @@ export const FolderTableCell = (props: DefaultCellComponentProps) => {
       }}
       collectionSlug={props.collectionSlug}
       docData={props.rowData}
-      docID={props.rowData.id}
+      docID={docID}
       docTitle={props.rowData.title}
       fromFolderID={props.rowData?._folder}
+      modalSlug={`move-doc-to-folder-cell--${docID}`}
       onConfirm={onConfirm}
       skipConfirmModal={false}
     />

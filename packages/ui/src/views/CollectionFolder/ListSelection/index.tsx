@@ -9,13 +9,13 @@ import { toast } from 'sonner'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
+import { MoveItemsToFolderDrawer } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
 import { RenameFolderDrawer } from '../../../elements/FolderView/Drawers/RenameFolder/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
-import { useMoveToFolderDrawer } from '../../../providers/MoveToFolderProvider/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 const moveToFolderDrawerSlug = 'move-to-folder--list'
@@ -47,7 +47,6 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     removeItems,
     renameFolder,
   } = useFolder()
-  const { dispatch } = useMoveToFolderDrawer()
   const { config } = useConfig()
   const { t } = useTranslation()
   const { closeModal, openModal } = useModal()
@@ -137,47 +136,45 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           <React.Fragment key={moveToFolderDrawerSlug}>
             <ListSelectionButton
               onClick={() => {
-                dispatch({
-                  type: 'INITIALIZE',
-                  payload: {
-                    action: 'moveItemsToFolder',
-                    drawerSlug: moveToFolderDrawerSlug,
-                    fromFolderID: folderID,
-                    fromFolderName: currentFolder?.value?._folderOrDocumentTitle,
-                    itemsToMove: getSelectedItems(),
-                    onConfirm: async ({ id, name }) => {
-                      await moveToFolder({
-                        itemsToMove: getSelectedItems(),
-                        toFolderID: id,
-                      })
-
-                      if (id) {
-                        // moved to folder
-                        toast.success(
-                          t('folder:itemsMovedToFolder', {
-                            folderName: `"${name}"`,
-                            title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
-                          }),
-                        )
-                      } else {
-                        // moved to root
-                        toast.success(
-                          t('folder:itemsMovedToRoot', {
-                            title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
-                          }),
-                        )
-                      }
-
-                      closeModal(moveToFolderDrawerSlug)
-                    },
-                  },
-                })
                 openModal(moveToFolderDrawerSlug)
               }}
               type="button"
             >
               {t('general:move')}
             </ListSelectionButton>
+
+            <MoveItemsToFolderDrawer
+              action="moveItemsToFolder"
+              drawerSlug={moveToFolderDrawerSlug}
+              fromFolderID={folderID}
+              fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
+              itemsToMove={getSelectedItems()}
+              onConfirm={async ({ id, name }) => {
+                await moveToFolder({
+                  itemsToMove: getSelectedItems(),
+                  toFolderID: id,
+                })
+
+                if (id) {
+                  // moved to folder
+                  toast.success(
+                    t('folder:itemsMovedToFolder', {
+                      folderName: `"${name}"`,
+                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
+                    }),
+                  )
+                } else {
+                  // moved to root
+                  toast.success(
+                    t('folder:itemsMovedToRoot', {
+                      title: `${count} ${count > 1 ? t('general:items') : t('general:item')}`,
+                    }),
+                  )
+                }
+
+                closeModal(moveToFolderDrawerSlug)
+              }}
+            />
           </React.Fragment>
         ) : null,
         !disableBulkDelete && (

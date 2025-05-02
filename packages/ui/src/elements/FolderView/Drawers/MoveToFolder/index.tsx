@@ -14,7 +14,6 @@ import React from 'react'
 
 import { useConfig } from '../../../../providers/Config/index.js'
 import { FolderProvider, useFolder } from '../../../../providers/Folders/index.js'
-import { useMoveToFolderDrawer } from '../../../../providers/MoveToFolderProvider/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
@@ -148,8 +147,7 @@ function Content({
   skipConfirmModal,
   ...props
 }: MoveToFolderDrawerProps) {
-  const { closeModal, isModalOpen, openModal } = useModal()
-  const { dispatch } = useMoveToFolderDrawer()
+  const { closeModal, openModal } = useModal()
   const [count] = React.useState(() => itemsToMove.length)
   const { i18n, t } = useTranslation()
   const {
@@ -205,15 +203,11 @@ function Content({
     [addItems, folderCollectionConfig.admin.useAsTitle],
   )
 
-  const isOpen = isModalOpen(drawerSlug)
-
-  React.useEffect(() => {
-    if (!isOpen) {
-      dispatch({
-        type: 'CLEAR',
-      })
+  const onConfirmMove = React.useCallback(() => {
+    if (typeof onConfirm === 'function') {
+      void onConfirm(getSelectedFolder())
     }
-  }, [dispatch, drawerSlug, isOpen])
+  }, [getSelectedFolder, onConfirm])
 
   return (
     <>
@@ -223,7 +217,7 @@ function Content({
         }}
         onSave={() => {
           if (skipConfirmModal) {
-            void onConfirm(getSelectedFolder())
+            onConfirmMove()
           } else {
             openModal(confirmModalSlug)
           }
@@ -343,9 +337,7 @@ function Content({
           confirmLabel={t('general:move')}
           heading={t('general:confirmMove')}
           modalSlug={confirmModalSlug}
-          onConfirm={async () => {
-            await onConfirm(getSelectedFolder())
-          }}
+          onConfirm={onConfirmMove}
         />
       )}
     </>
