@@ -804,6 +804,23 @@ describe('List View', () => {
   })
 
   describe('table columns', () => {
+    const openColumnControls = async () => {
+      await page.locator('.list-controls__toggle-columns').click()
+      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+    }
+
+    test('should render field in group as column', async () => {
+      await createPost({ group: { title: 'nested group title 1' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls()
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Title'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-group-title')).toHaveText('nested group title 1')
+    })
+
     test('should hide field column when field.hidden is true', async () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
