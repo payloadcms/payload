@@ -14,12 +14,13 @@ export const insert: Insert = async function insert({
 
   if (onConflictDoUpdate && this.disableOnConflictDoUpdate) {
     const id = onConflictDoUpdate.set.id
-    const where = id !== undefined ? eq(table.id, id) : onConflictDoUpdate.where
+    const where = id !== undefined ? eq(table.id, id) : onConflictDoUpdate.targetWhere
     result = await (db as TransactionPg)
       .update(table)
       .set(onConflictDoUpdate.set)
       .where(where)
       .returning()
+
     if (result.length === 0) {
       result = await (db as TransactionPg).insert(table).values(values).returning()
     }
