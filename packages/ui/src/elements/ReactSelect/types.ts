@@ -1,12 +1,11 @@
 import type { LabelFunction } from 'payload'
 import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
-import type { DocumentDrawerProps, UseDocumentDrawer } from '../DocumentDrawer/types.js'
+import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
 type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
-  DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
   editableProps?: (
@@ -15,10 +14,11 @@ type CustomSelectProps = {
     selectProps: ReactSelectStateManagerProps,
   ) => any
   onDelete?: DocumentDrawerProps['onDelete']
-  onDocumentDrawerOpen?: (args: {
+  onDocumentOpen?: (args: {
     collectionSlug: string
     hasReadPermission: boolean
     id: number | string
+    openInNewTab?: boolean
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
