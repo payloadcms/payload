@@ -358,7 +358,7 @@ describe('relationship', () => {
     ).toHaveText(`${value}123456`)
   })
 
-  test('should open document in a new tab', async () => {
+  test('single value relationship should open document in a new tab', async () => {
     await page.goto(url.create)
 
     const [newPage] = await Promise.all([
@@ -367,6 +367,29 @@ describe('relationship', () => {
         page,
         selector:
           '#field-relationWithAllowCreateToFalse .relationship--single-value__drawer-toggler',
+        withMetaKey: true,
+      }),
+    ])
+
+    // Wait for navigation to complete in the new tab and ensure the edit view is open
+    await expect(newPage.locator('.collection-edit')).toBeVisible()
+  })
+
+  test('multi value relationship should open document in a new tab', async () => {
+    await page.goto(url.create)
+
+    // Select "Seeded text document" relationship
+    await page.locator('#field-relationshipHasMany .rs__control').click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
+    await expect(
+      page.locator('#field-relationshipHasMany .relationship--multi-value-label__drawer-toggler'),
+    ).toBeVisible()
+
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      await openDocDrawer({
+        page,
+        selector: '#field-relationshipHasMany .relationship--multi-value-label__drawer-toggler',
         withMetaKey: true,
       }),
     ])
