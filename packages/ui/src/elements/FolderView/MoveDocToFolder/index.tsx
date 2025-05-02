@@ -22,20 +22,47 @@ const baseClass = 'move-doc-to-folder'
 /**
  * This is the button shown on the edit document view. It uses the more generic `MoveDocToFolderButton` component.
  */
-export function MoveDocToFolder({ className = '' }) {
+export function MoveDocToFolder({
+  buttonProps,
+  className = '',
+}: {
+  buttonProps?: Partial<ButtonProps>
+  className?: string
+}) {
+  const { t } = useTranslation()
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const currentParentFolder = useFormFields(([fields]) => (fields && fields?._folder) || null)
+  const fromFolderID = currentParentFolder?.value
   const { id, collectionSlug, initialData, title } = useDocumentInfo()
   const { setModified } = useForm()
+  const [fromFolderName, setFromFolderName] = React.useState(() => `${t('general:loading')}...`)
+
+  const { config } = useConfig()
+
+  React.useEffect(() => {
+    async function fetchFolderLabel() {
+      if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
+        const response = await fetch(`${config.routes.api}/${config.folders.slug}/${fromFolderID}`)
+        const folderData = await response.json()
+        setFromFolderName(folderData?.name || t('folder:noFolder'))
+      } else {
+        setFromFolderName(t('folder:noFolder'))
+      }
+    }
+
+    void fetchFolderLabel()
+  }, [config.folders.slug, config.routes.api, fromFolderID, t])
 
   return (
     <MoveDocToFolderButton
+      buttonProps={buttonProps}
       className={className}
       collectionSlug={collectionSlug}
       docData={initialData}
       docID={id}
       docTitle={title}
-      fromFolderID={currentParentFolder?.value as number | string}
+      fromFolderID={fromFolderID as number | string}
+      fromFolderName={fromFolderName}
       modalSlug="move-doc-to-folder"
       onConfirm={({ id }) => {
         if (currentParentFolder.value !== id) {
@@ -60,6 +87,7 @@ type MoveDocToFolderButtonProps = {
   docID: number | string
   docTitle?: string
   fromFolderID?: number | string
+  fromFolderName: string
   modalSlug: string
   onConfirm?: (args: { id: number | string; name: string }) => Promise<void> | void
   skipConfirmModal?: boolean
@@ -76,36 +104,16 @@ export const MoveDocToFolderButton = ({
   docID,
   docTitle,
   fromFolderID,
+  fromFolderName,
   modalSlug,
   onConfirm,
   skipConfirmModal,
 }: MoveDocToFolderButtonProps) => {
-  const { config, getEntityConfig } = useConfig()
+  const { getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const drawerDepth = useDrawerDepth()
   const drawerSlug = formatDrawerSlug({ slug: modalSlug, depth: drawerDepth })
-
-  const [fromFolderName, setFromFolderName] = React.useState(() => `${t('general:loading')}...`)
-  const loadedFolderName = React.useRef(false)
-
-  React.useEffect(() => {
-    async function fetchFolderLabel() {
-      if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
-        const response = await fetch(`${config.routes.api}/${config.folders.slug}/${fromFolderID}`)
-        const folderData = await response.json()
-        setFromFolderName(folderData?.name || t('folder:noFolder'))
-        loadedFolderName.current = true
-      } else {
-        setFromFolderName(t('folder:noFolder'))
-        loadedFolderName.current = true
-      }
-    }
-
-    if (!loadedFolderName.current) {
-      void fetchFolderLabel()
-    }
-  }, [config.folders.slug, config.routes.api, fromFolderID, t])
 
   const titleToRender =
     docTitle || getTranslation(getEntityConfig({ collectionSlug }).labels.singular, i18n)
@@ -158,8 +166,6 @@ export const MoveDocToFolderButton = ({
                   }),
                 )
               }
-
-              setFromFolderName(args.name || t('folder:noFolder'))
             } catch (_) {
               // todo: add error toast?
             }

@@ -22,12 +22,12 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
             name: parentFolderFieldName,
             type: 'relationship',
             admin: {
+              allowCreate: false,
+              allowEdit: false,
               components: {
                 Cell: '@payloadcms/ui/rsc#FolderTableCell',
-                Field: false,
+                Field: '@payloadcms/ui#FolderEditField',
               },
-              disableBulkEdit: true,
-              hidden: !debug,
             },
             index: true,
             label: 'Folder',
