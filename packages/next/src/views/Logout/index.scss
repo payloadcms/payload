@@ -1,20 +1,25 @@
-.logout {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  min-height: 100vh;
+@import '../../scss/styles.scss';
 
-  &__wrap {
-    & > *:first-child {
-      margin-top: 0;
-    }
+@layer payload-default {
+  .logout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
 
-    & > *:last-child {
-      margin-bottom: 0;
-    }
+    &__wrap {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: base(0.8);
+      width: 100%;
+      max-width: base(36);
 
-    .btn {
-      margin: 0;
+      & > * {
+        margin: 0;
+      }
     }
   }
 }

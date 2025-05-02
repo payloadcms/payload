@@ -1,43 +1,31 @@
 'use client'
-import type { ClientCollectionConfig, Data } from 'payload'
+import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  DrawerToggler,
   File,
   formatDrawerSlug,
   useConfig,
-  useDocumentDrawer,
   useEditDepth,
-  useModal,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  $getNodeByKey,
-  $getSelection,
-  $isNodeSelection,
-  CLICK_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
-} from 'lexical'
-import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
+import { $getNodeByKey } from 'lexical'
+import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
-import type { ClientComponentProps } from '../../../typesClient.js'
+import type { BaseClientFeatureProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
-import type { UploadFeaturePropsClient } from '../feature.client.js'
+import type { UploadFeaturePropsClient } from '../index.js'
 import type { UploadNode } from '../nodes/UploadNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
+import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-import { $isUploadNode } from '../nodes/UploadNode.js'
 import './index.scss'
 
 const baseClass = 'lexical-upload'
@@ -65,34 +53,38 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
-  const { closeModal } = useModal()
   const { uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
   const [editor] = useLexicalComposerContext()
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const { editorConfig, field } = useEditorConfigContext()
+  const {
+    editorConfig,
+    fieldProps: { readOnly, schemaPath },
+  } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection] = useState<ClientCollectionConfig>(() =>
-    collections.find((coll) => coll.slug === relationTo),
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const componentID = useId()
 
-  const drawerSlug = formatDrawerSlug({
+  const extraFieldsDrawerSlug = formatDrawerSlug({
     slug: `lexical-upload-drawer-` + uuid + componentID, // There can be multiple upload components, each with their own drawer, in one single editor => separate them by componentID
     depth: editDepth,
   })
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
+  // Need to use hook to initialize useEffect that restores cursor position
+  const { toggleDrawer } = useLexicalDrawer(extraFieldsDrawerSlug, true)
+
+  const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler } = useLexicalDocumentDrawer({
     id: value,
     collectionSlug: relatedCollection.slug,
   })
@@ -107,7 +99,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
-      $getNodeByKey(nodeKey).remove()
+      $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
 
@@ -119,61 +111,18 @@ const Component: React.FC<ElementProps> = (props) => {
       })
 
       dispatchCacheBust()
-      closeDrawer()
+      closeDocumentDrawer()
     },
-    [setParams, cacheBust, closeDrawer],
+    [setParams, cacheBust, closeDocumentDrawer],
   )
-
-  const $onDelete = useCallback(
-    (event: KeyboardEvent) => {
-      if (isSelected && $isNodeSelection($getSelection())) {
-        event.preventDefault()
-        const node = $getNodeByKey(nodeKey)
-        if ($isUploadNode(node)) {
-          node.remove()
-          return true
-        }
-      }
-      return false
-    },
-    [isSelected, nodeKey],
-  )
-  const onClick = useCallback(
-    (event: MouseEvent) => {
-      // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
-      if (event.target === uploadRef.current || uploadRef.current?.contains(event.target as Node)) {
-        if (event.shiftKey) {
-          setSelected(!isSelected)
-        } else {
-          if (!isSelected) {
-            clearSelection()
-            setSelected(true)
-          }
-        }
-        return true
-      }
-
-      return false
-    },
-    [isSelected, setSelected, clearSelection],
-  )
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
-
-      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-    )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
-      ?.sanitizedClientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
+      ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   const onExtraFieldsDrawerSubmit = useCallback(
-    (_, data) => {
+    (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
         const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
@@ -185,18 +134,12 @@ const Component: React.FC<ElementProps> = (props) => {
           uploadNode.setData(newData)
         }
       })
-
-      closeModal(drawerSlug)
     },
-    [closeModal, editor, drawerSlug, nodeKey],
+    [editor, nodeKey],
   )
 
   return (
-    <div
-      className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
-      contentEditable={false}
-      ref={uploadRef}
-    >
+    <div className={baseClass} contentEditable={false} ref={uploadRef}>
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
           {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}
@@ -219,28 +162,25 @@ const Component: React.FC<ElementProps> = (props) => {
             {editor.isEditable() && (
               <div className={`${baseClass}__actions`}>
                 {hasExtraFields ? (
-                  <DrawerToggler
+                  <Button
+                    buttonStyle="icon-label"
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={field?.admin?.readOnly}
-                    slug={drawerSlug}
-                  >
-                    <Button
-                      buttonStyle="icon-label"
-                      el="div"
-                      icon="edit"
-                      onClick={(e) => {
-                        e.preventDefault()
-                      }}
-                      round
-                      tooltip={t('fields:editRelationship')}
-                    />
-                  </DrawerToggler>
+                    disabled={readOnly}
+                    el="button"
+                    icon="edit"
+                    onClick={() => {
+                      toggleDrawer()
+                    }}
+                    round
+                    tooltip={t('fields:editRelationship')}
+                  />
                 ) : null}
 
                 <Button
                   buttonStyle="icon-label"
-                  disabled={field?.admin?.readOnly}
-                  el="div"
+                  className={`${baseClass}__swap-drawer-toggler`}
+                  disabled={readOnly}
+                  el="button"
                   icon="swap"
                   onClick={() => {
                     editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
@@ -253,7 +193,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={field?.admin?.readOnly}
+                  disabled={readOnly}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
@@ -272,16 +212,17 @@ const Component: React.FC<ElementProps> = (props) => {
           </DocumentDrawerToggler>
         </div>
       </div>
-      {value && <DocumentDrawer onSave={updateUpload} />}
+      {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
           data={fields}
-          drawerSlug={drawerSlug}
+          drawerSlug={extraFieldsDrawerSlug}
           drawerTitle={t('general:editLabel', {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
           featureKey="upload"
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
+          schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}
         />
       ) : null}

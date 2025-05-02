@@ -1,4 +1,5 @@
-import fs from 'fs'
+// @ts-strict-ignore
+import fs from 'fs/promises'
 import { Readable } from 'stream'
 
 /**
@@ -15,7 +16,7 @@ const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void>
     streamData = null
   }
   // Setup file system writable stream.
-  return fs.writeFileSync(filePath, buffer)
+  return await fs.writeFile(filePath, buffer)
 }
 
 export default saveBufferToFile

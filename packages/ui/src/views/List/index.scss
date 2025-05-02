@@ -1,0 +1,185 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .collection-list {
+    width: 100%;
+
+    &__wrap {
+      padding-bottom: var(--spacing-view-bottom);
+
+      & > *:not(:last-child) {
+        margin-bottom: var(--base);
+      }
+    }
+
+    .list-header {
+      a {
+        text-decoration: none;
+      }
+
+      .btn--withoutPopup,
+      .btn--withPopup {
+        position: relative;
+        margin: 0 0 base(0.2);
+      }
+    }
+
+    &__sub-header {
+      flex-basis: 100%;
+    }
+
+    .table {
+      table {
+        width: 100%;
+        overflow: auto;
+
+        [class^='cell'] > p,
+        [class^='cell'] > span,
+        [class^='cell'] > a {
+          line-clamp: 4;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 4;
+          overflow: hidden;
+          display: -webkit-box;
+          max-width: 100vw;
+        }
+
+        #heading-_select,
+        .cell-_select {
+          display: flex;
+          min-width: unset;
+        }
+
+        #heading-_dragHandle,
+        .cell-_dragHandle {
+          width: 20px;
+          min-width: 0;
+        }
+      }
+    }
+
+    &__no-results {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--base);
+
+      & > * {
+        margin: 0;
+      }
+    }
+
+    &__page-controls {
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .paginator {
+      margin-bottom: 0;
+    }
+
+    &__page-info {
+      [dir='ltr'] & {
+        margin-right: base(1);
+        margin-left: auto;
+      }
+      [dir='rtl'] & {
+        margin-left: base(1);
+        margin-right: auto;
+      }
+    }
+
+    &__list-selection {
+      position: fixed;
+      bottom: 0;
+      z-index: 10;
+      padding: base(0.8) 0;
+      width: 100%;
+      background-color: var(--theme-bg);
+
+      .btn {
+        margin: 0 0 0 base(0.4);
+      }
+
+      .btn {
+        background-color: var(--theme-elevation-100);
+        cursor: pointer;
+        padding: 0 base(0.4);
+        border-radius: $style-radius-s;
+
+        &:hover {
+          background-color: var(--theme-elevation-200);
+        }
+      }
+    }
+
+    &__list-selection-actions {
+      display: flex;
+      gap: base(0.25);
+    }
+
+    &__shimmer {
+      margin-top: base(1.75);
+      width: 100%;
+      > div {
+        margin-top: 8px;
+      }
+    }
+
+    @include mid-break {
+      margin-top: base(0.25);
+
+      &__wrap {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      &__header {
+        gap: base(0.5);
+      }
+
+      &__sub-header {
+        margin-top: 0;
+      }
+
+      &__search-input {
+        margin: 0;
+      }
+
+      // on mobile, extend the table all the way to the viewport edges
+      // this is to visually indicate overflowing content
+      .table {
+        display: flex;
+        width: calc(100% + calc(var(--gutter-h) * 2));
+        max-width: unset;
+        left: calc(var(--gutter-h) * -1);
+        position: relative;
+        padding-left: var(--gutter-h);
+
+        &::after {
+          content: '';
+          height: 1px;
+          padding-right: var(--gutter-h);
+        }
+      }
+
+      &__page-controls {
+        flex-wrap: wrap;
+      }
+
+      &__page-info {
+        margin-left: 0;
+      }
+
+      .paginator {
+        width: 100%;
+        margin-bottom: $baseline;
+      }
+    }
+
+    @include small-break {
+      margin-bottom: base(2.4);
+    }
+  }
+}

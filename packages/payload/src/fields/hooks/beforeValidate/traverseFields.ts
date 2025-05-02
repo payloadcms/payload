@@ -1,11 +1,17 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
 
 type Args<T> = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
@@ -18,9 +24,14 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -30,6 +41,7 @@ type Args<T> = {
 
 export const traverseFields = async <T>({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -38,32 +50,41 @@ export const traverseFields = async <T>({
   global,
   operation,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentIsLocalized,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
-  fields.forEach((field) => {
+
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         id,
+        blockData,
         collection,
         context,
         data,
         doc,
         field,
+        fieldIndex,
         global,
         operation,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentIsLocalized,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
+        siblingFields: fields,
       }),
     )
   })
+
   await Promise.all(promises)
 }

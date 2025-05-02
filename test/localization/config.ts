@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
+
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -9,13 +11,17 @@ import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
+import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
+  cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
   hungarianLocale,
@@ -24,15 +30,14 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
 } from './shared.js'
-
 export type LocalizedPostAllLocale = {
   title: {
     en?: string
@@ -40,7 +45,7 @@ export type LocalizedPostAllLocale = {
   }
 } & LocalizedPost
 
-const openAccess = {
+const openAccess: CollectionConfig['access'] = {
   create: () => true,
   delete: () => true,
   read: () => true,
@@ -54,12 +59,22 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    RichTextCollection,
     BlocksCollection,
     NestedArray,
     NestedFields,
+    LocalizedDrafts,
     {
+      admin: {
+        listSearchableFields: 'name',
+      },
       auth: true,
       fields: [
+        {
+          name: 'name',
+          label: { en: 'Full name' },
+          type: 'text',
+        },
         {
           name: 'relation',
           relationTo: localizedPostsSlug,
@@ -77,6 +92,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
+          label: { en: 'Full title' },
           index: true,
           localized: true,
           type: 'text',
@@ -111,8 +127,15 @@ export default buildConfigWithDefaults({
           ],
           type: 'group',
         },
+        {
+          name: 'unique',
+          type: 'text',
+          localized: true,
+          unique: true,
+        },
       ],
     },
+    NoLocalizedFieldsCollection,
     ArrayCollection,
     {
       fields: [
@@ -123,30 +146,108 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: 'layout',
-          blocks: [
+          type: 'tabs',
+          tabs: [
             {
+              label: 'Main Nav',
+              fields: [
+                {
+                  name: 'nav',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'layout',
+                      blocks: [
+                        {
+                          fields: [
+                            {
+                              name: 'text',
+                              type: 'text',
+                            },
+                            {
+                              name: 'nestedArray',
+                              type: 'array',
+                              fields: [
+                                {
+                                  name: 'text',
+                                  type: 'text',
+                                },
+                                {
+                                  name: 'l2',
+                                  type: 'array',
+                                  fields: [
+                                    {
+                                      name: 'l3',
+                                      type: 'array',
+                                      fields: [
+                                        {
+                                          name: 'l4',
+                                          type: 'array',
+                                          fields: [
+                                            {
+                                              name: 'superNestedText',
+                                              type: 'text',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                          slug: 'text',
+                        },
+                        {
+                          fields: [
+                            {
+                              name: 'number',
+                              type: 'number',
+                            },
+                          ],
+                          slug: 'number',
+                        },
+                      ],
+                      localized: true,
+                      required: true,
+                      type: 'blocks',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'myTab',
               fields: [
                 {
                   name: 'text',
                   type: 'text',
                 },
-              ],
-              slug: 'text',
-            },
-            {
-              fields: [
                 {
-                  name: 'number',
-                  type: 'number',
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
-              slug: 'number',
             },
           ],
-          localized: true,
-          required: true,
-          type: 'blocks',
         },
       ],
       slug: withRequiredLocalizedFields,
@@ -170,14 +271,14 @@ export default buildConfigWithDefaults({
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
           hasMany: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
       ],
@@ -201,14 +302,14 @@ export default buildConfigWithDefaults({
         {
           name: 'relationMultiRelationTo',
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
           name: 'relationMultiRelationToHasMany',
           hasMany: true,
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
@@ -229,14 +330,17 @@ export default buildConfigWithDefaults({
       slug: relationshipLocalizedSlug,
     },
     {
-      access: openAccess,
+      access: {
+        ...openAccess,
+        create: ({ req }) => req.locale !== defaultLocale,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      slug: 'dummy',
+      slug: cannotCreateDefaultLocale,
     },
     NestedToArrayAndBlock,
     Group,
@@ -308,11 +412,28 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-array',
     },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: 'global-text',
+    },
   ],
   localization: {
+    filterAvailableLocales: ({ locales }) => {
+      return locales.filter((locale) => locale.code !== 'xx')
+    },
     defaultLocale,
     fallback: true,
     locales: [
+      {
+        code: 'xx',
+        label: 'FILTERED',
+      },
       {
         code: defaultLocale,
         label: 'English',
@@ -342,19 +463,6 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
-
-    console.log('SEED BEGIN')
-
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) reject(err)
-          resolve(true)
-        })
-      })
-    }
-
-    console.log('INDEXES CREATED')
 
     await payload.create({
       collection,
@@ -439,7 +547,7 @@ export default buildConfigWithDefaults({
         relationship: localizedRelation.id,
       },
     })
-    await payload.create({
+    const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
       data: {
         arrayField: [
@@ -456,6 +564,15 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+    })
+
+    await payload.update({
+      collection: relationshipLocalizedSlug,
+      id: relationshipLocalized.id,
+      data: {
+        relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
+      },
+      locale: 'es',
     })
 
     console.log('SEED 5')

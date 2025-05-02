@@ -5,10 +5,12 @@ import type { FormState, PayloadRequest } from 'payload'
 
 import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@payloadcms/ui'
 import { email, text } from 'payload/shared'
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
+
+import { FormHeader } from '../../../elements/FormHeader/index.js'
 
 export const ForgotPasswordForm: React.FC = () => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: { user: userSlug },
@@ -17,7 +19,7 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const { t } = useTranslation()
   const [hasSubmitted, setHasSubmitted] = useState(false)
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const loginWithUsername = collectionConfig?.auth?.loginWithUsername
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
@@ -54,10 +56,10 @@ export const ForgotPasswordForm: React.FC = () => {
 
   if (hasSubmitted) {
     return (
-      <Fragment>
-        <h1>{t('authentication:emailSent')}</h1>
-        <p>{t('authentication:checkYourEmailForPasswordReset')}</p>
-      </Fragment>
+      <FormHeader
+        description={t('authentication:checkYourEmailForPasswordReset')}
+        heading={t('authentication:emailSent')}
+      />
     )
   }
 
@@ -68,12 +70,14 @@ export const ForgotPasswordForm: React.FC = () => {
       initialState={initialState}
       method="POST"
     >
-      <h1>{t('authentication:forgotPassword')}</h1>
-      <p>
-        {loginWithUsername
-          ? t('authentication:forgotPasswordUsernameInstructions')
-          : t('authentication:forgotPasswordEmailInstructions')}
-      </p>
+      <FormHeader
+        description={
+          loginWithUsername
+            ? t('authentication:forgotPasswordUsernameInstructions')
+            : t('authentication:forgotPasswordEmailInstructions')
+        }
+        heading={t('authentication:forgotPassword')}
+      />
 
       {loginWithUsername ? (
         <TextField
@@ -82,11 +86,15 @@ export const ForgotPasswordForm: React.FC = () => {
             label: t('authentication:username'),
             required: true,
           }}
+          path="username"
           validate={(value) =>
             text(value, {
               name: 'username',
               type: 'text',
+              blockData: {},
               data: {},
+              event: 'onChange',
+              path: ['username'],
               preferences: { fields: {} },
               req: {
                 payload: {
@@ -101,26 +109,32 @@ export const ForgotPasswordForm: React.FC = () => {
         />
       ) : (
         <EmailField
-          autoComplete="email"
           field={{
             name: 'email',
+            admin: {
+              autoComplete: 'email',
+            },
             label: t('general:email'),
             required: true,
           }}
+          path="email"
           validate={(value) =>
             email(value, {
               name: 'email',
               type: 'email',
+              blockData: {},
               data: {},
+              event: 'onChange',
+              path: ['email'],
               preferences: { fields: {} },
-              req: { t } as PayloadRequest,
+              req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,
               siblingData: {},
             })
           }
         />
       )}
-      <FormSubmit>{t('general:submit')}</FormSubmit>
+      <FormSubmit size="large">{t('general:submit')}</FormSubmit>
     </Form>
   )
 }

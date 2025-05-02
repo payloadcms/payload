@@ -1,12 +1,10 @@
 'use client'
-import LinkImport from 'next/link.js' // TODO: abstract this out to support all routers
 import type { MouseEvent } from 'react'
 
 import React from 'react'
 
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+import { Link } from '../Link/index.js'
 
 const baseClass = 'banner'
 

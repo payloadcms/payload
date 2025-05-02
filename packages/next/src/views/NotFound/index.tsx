@@ -1,22 +1,16 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewComponent,
-  ImportMap,
-  PayloadServerReactComponent,
-  SanitizedConfig,
-} from 'payload'
+import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
-import { HydrateAuthProvider } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import React, { Fragment } from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
-export const generatePageMetadata = async ({
+export const generateNotFoundViewMetadata = async ({
   config: configPromise,
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig
@@ -42,28 +36,36 @@ export type GenerateViewMetadata = (args: {
 export const NotFoundPage = async ({
   config: configPromise,
   importMap,
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
-  params: {
+  params: Promise<{
     segments: string[]
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }) => {
   const config = await configPromise
   const { routes: { admin: adminRoute } = {} } = config
 
+  const searchParams = await searchParamsPromise
   const initPageResult = await initPage({
     config,
     importMap,
     redirectUnauthenticatedUser: true,
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
+    useLayoutReq: true,
   })
+
+  const params = await paramsPromise
+
+  if (!initPageResult.req.user || !initPageResult.permissions.canAccessAdmin) {
+    return <NotFoundClient />
+  }
 
   return (
     <DefaultTemplate
@@ -81,6 +83,6 @@ export const NotFoundPage = async ({
   )
 }
 
-export const NotFoundView: PayloadServerReactComponent<AdminViewComponent> = () => {
+export function NotFoundView(props: AdminViewServerProps) {
   return <NotFoundClient marginTop="large" />
 }

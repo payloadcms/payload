@@ -1,6 +1,6 @@
 'use client'
-import type { LexicalEditor } from 'lexical'
-
+import { Button } from '@payloadcms/ui'
+import { $addUpdateTag, isDOMNode, type LexicalEditor } from 'lexical'
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -19,15 +19,17 @@ export function DropDownItem({
   children,
   editor,
   enabled,
+  Icon,
   item,
-  title,
+  tooltip,
 }: {
   active?: boolean
   children: React.ReactNode
   editor: LexicalEditor
   enabled?: boolean
+  Icon: React.ReactNode
   item: ToolbarGroupItem
-  title?: string
+  tooltip?: string
 }): React.ReactNode {
   const [className, setClassName] = useState<string>(baseClass)
 
@@ -46,7 +48,7 @@ export function DropDownItem({
 
   const ref = useRef<HTMLButtonElement>(null)
 
-  const dropDownContext = React.useContext(DropDownContext)
+  const dropDownContext = React.use(DropDownContext)
 
   if (dropDownContext === null) {
     throw new Error('DropDownItem must be used within a DropDown')
@@ -61,17 +63,24 @@ export function DropDownItem({
   }, [ref, registerItem])
 
   return (
-    <button
+    <Button
+      aria-label={tooltip}
+      buttonStyle="none"
       className={className}
+      disabled={enabled === false}
+      icon={Icon}
+      iconPosition="left"
+      iconStyle="none"
       onClick={() => {
         if (enabled !== false) {
-          editor._updateTags = new Set([...editor._updateTags, 'toolbar']) // without setting the tags, our onSelect will not be able to trigger our onChange as focus onChanges are ignored.
-
           editor.focus(() => {
+            editor.update(() => {
+              $addUpdateTag('toolbar')
+            })
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
-            item.onSelect({
+            item.onSelect?.({
               editor,
-              isActive: active,
+              isActive: active!,
             })
           })
         }
@@ -82,11 +91,11 @@ export function DropDownItem({
         e.preventDefault()
       }}
       ref={ref}
-      title={title}
+      tooltip={tooltip}
       type="button"
     >
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -161,7 +170,7 @@ function DropDownItems({
   }, [items, highlightedItem])
 
   return (
-    <DropDownContext.Provider value={contextValue}>
+    <DropDownContext value={contextValue}>
       <div
         className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
         onKeyDown={handleKeyDown}
@@ -169,7 +178,7 @@ function DropDownItems({
       >
         {children}
       </div>
-    </DropDownContext.Provider>
+    </DropDownContext>
   )
 }
 
@@ -220,13 +229,16 @@ export function DropDown({
 
     if (button !== null && showDropDown) {
       const handle = (event: MouseEvent): void => {
-        const { target } = event
-        if (stopCloseOnClickSelf != null) {
-          if (dropDownRef.current != null && dropDownRef.current.contains(target as Node)) {
+        const target = event.target
+        if (!isDOMNode(target)) {
+          return
+        }
+        if (stopCloseOnClickSelf) {
+          if (dropDownRef.current && dropDownRef.current.contains(target)) {
             return
           }
         }
-        if (!button.contains(target as Node)) {
+        if (!button.contains(target)) {
           setShowDropDown(false)
         }
       }

@@ -1,6 +1,6 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useCallback, useState } from 'react'
+import { useModal } from '@faceless-ui/modal'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -10,6 +10,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import './index.scss'
 
 const baseClass = 'status'
@@ -19,10 +20,13 @@ export const Status: React.FC = () => {
     id,
     collectionSlug,
     docPermissions,
-    getVersions,
     globalSlug,
-    publishedDoc,
-    unpublishedVersions,
+    hasPublishedDoc,
+    incrementVersionCount,
+    setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
+    unpublishedVersionCount,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {
@@ -31,7 +35,6 @@ export const Status: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const [processing, setProcessing] = useState(false)
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -41,11 +44,11 @@ export const Status: React.FC = () => {
 
   let statusToRender: 'changed' | 'draft' | 'published'
 
-  if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
+  if (unpublishedVersionCount > 0 && hasPublishedDoc) {
     statusToRender = 'changed'
-  } else if (!publishedDoc) {
+  } else if (!hasPublishedDoc) {
     statusToRender = 'draft'
-  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
+  } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
     statusToRender = 'published'
   }
 
@@ -55,25 +58,33 @@ export const Status: React.FC = () => {
       let method
       let body
 
-      setProcessing(true)
-
       if (action === 'unpublish') {
         body = {
           _status: 'draft',
         }
       }
 
-      if (action === 'revert') {
-        body = publishedDoc
-      }
-
       if (collectionSlug) {
-        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'patch'
       }
+
       if (globalSlug) {
-        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'post'
+      }
+
+      if (action === 'revert') {
+        const publishedDoc = await requests
+          .get(url, {
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((res) => res.json())
+
+        body = publishedDoc
       }
 
       const res = await requests[method](url, {
@@ -97,40 +108,36 @@ export const Status: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        getVersions()
+        incrementVersionCount()
+        setMostRecentVersionIsAutosaved(false)
+
+        if (action === 'unpublish') {
+          setHasPublishedDoc(false)
+        } else if (action === 'revert') {
+          setUnpublishedVersionCount(0)
+        }
       } else {
         toast.error(t('error:unPublishingDocument'))
-      }
-
-      setProcessing(false)
-      if (action === 'revert') {
-        toggleModal(revertModalSlug)
-      }
-
-      if (action === 'unpublish') {
-        toggleModal(unPublishModalSlug)
       }
     },
     [
       api,
       collectionSlug,
-      getVersions,
       globalSlug,
-      i18n.language,
       id,
+      i18n.language,
+      incrementVersionCount,
       locale,
-      publishedDoc,
       resetForm,
-      revertModalSlug,
       serverURL,
+      setUnpublishedVersionCount,
+      setMostRecentVersionIsAutosaved,
       t,
-      toggleModal,
-      unPublishModalSlug,
+      setHasPublishedDoc,
     ],
   )
 
-  const canUpdate = docPermissions?.update?.permission
+  const canUpdate = docPermissions?.update
 
   if (statusToRender) {
     return (
@@ -151,22 +158,13 @@ export const Status: React.FC = () => {
               >
                 {t('version:unpublish')}
               </Button>
-              <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
-                  <h1>{t('version:confirmUnpublish')}</h1>
-                  <p>{t('version:aboutToUnpublish')}</p>
-                  <Button
-                    buttonStyle="secondary"
-                    onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
-                    type="button"
-                  >
-                    {t('general:cancel')}
-                  </Button>
-                  <Button onClick={processing ? undefined : () => performAction('unpublish')}>
-                    {t(processing ? 'version:unpublishing' : 'general:confirm')}
-                  </Button>
-                </div>
-              </Modal>
+              <ConfirmationModal
+                body={t('version:aboutToUnpublish')}
+                confirmingLabel={t('version:unpublishing')}
+                heading={t('version:confirmUnpublish')}
+                modalSlug={unPublishModalSlug}
+                onConfirm={() => performAction('unpublish')}
+              />
             </React.Fragment>
           )}
           {canUpdate && statusToRender === 'changed' && (
@@ -180,25 +178,13 @@ export const Status: React.FC = () => {
               >
                 {t('version:revertToPublished')}
               </Button>
-              <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
-                <div className={`${baseClass}__modal-template`}>
-                  <h1>{t('version:confirmRevertToSaved')}</h1>
-                  <p>{t('version:aboutToRevertToPublished')}</p>
-                  <Button
-                    buttonStyle="secondary"
-                    onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
-                    type="button"
-                  >
-                    {t('general:cancel')}
-                  </Button>
-                  <Button
-                    id="action-revert-to-published-confirm"
-                    onClick={processing ? undefined : () => performAction('revert')}
-                  >
-                    {t(processing ? 'version:reverting' : 'general:confirm')}
-                  </Button>
-                </div>
-              </Modal>
+              <ConfirmationModal
+                body={t('version:aboutToRevertToPublished')}
+                confirmingLabel={t('version:reverting')}
+                heading={t('version:confirmRevertToSaved')}
+                modalSlug={revertModalSlug}
+                onConfirm={() => performAction('revert')}
+              />
             </React.Fragment>
           )}
         </div>

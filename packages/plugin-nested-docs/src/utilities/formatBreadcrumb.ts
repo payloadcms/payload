@@ -10,7 +10,7 @@ export const formatBreadcrumb = (
   let url: string | undefined = undefined
   let label: string
 
-  const lastDoc = docs[docs.length - 1]
+  const lastDoc = docs[docs.length - 1]!
 
   if (typeof pluginConfig?.generateURL === 'function') {
     url = pluginConfig.generateURL(docs, lastDoc)
@@ -19,8 +19,9 @@ export const formatBreadcrumb = (
   if (typeof pluginConfig?.generateLabel === 'function') {
     label = pluginConfig.generateLabel(docs, lastDoc)
   } else {
-    const useAsTitle = collection?.admin?.useAsTitle || 'id'
-    label = lastDoc[useAsTitle] as string
+    const title = collection.admin?.useAsTitle ? lastDoc[collection.admin.useAsTitle] : ''
+
+    label = typeof title === 'string' || typeof title === 'number' ? String(title) : ''
   }
 
   return {

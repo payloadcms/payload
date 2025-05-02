@@ -1,0 +1,25 @@
+{
+  "editorState": {
+    "root": {
+      "children": [
+        {
+          "format": "",
+          "type": "block",
+          "version": 2,
+          "fields": {
+            "blockType": "Code",
+            "language": "ts",
+            "code": "import { buildConfig } from 'payload'\nimport { lexicalEditor } from '@payloadcms/richtext-lexical'\n\nexport default buildConfig({\n  collections: [\n    // your collections here\n  ],\n  // Pass the Lexical editor to the root config\n  editor: lexicalEditor({}),\n})",
+            "id": "6774559ba09e004452672523"
+          }
+        }
+      ],
+      "direction": null,
+      "format": "",
+      "indent": 0,
+      "type": "root",
+      "version": 1
+    }
+  },
+  "frontMatter": []
+}

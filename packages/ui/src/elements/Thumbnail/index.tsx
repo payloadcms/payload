@@ -31,6 +31,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -42,15 +43,21 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
+  let src: null | string = null
+
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  if (fileSrc) {
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img
-          alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
-        />
-      )}
+      {fileExists && <img alt={filename as string} src={src} />}
       {fileExists === false && <File />}
     </div>
   )
@@ -75,6 +82,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -86,12 +94,21 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     }
   }, [fileSrc])
 
+  let src: string = ''
+
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  if (fileSrc) {
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  }
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img alt={alt || filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
-      )}
+      {fileExists && <img alt={alt || filename} src={src} />}
       {fileExists === false && <File />}
     </div>
   )

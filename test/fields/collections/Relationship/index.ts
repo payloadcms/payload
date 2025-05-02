@@ -38,10 +38,25 @@ const RelationshipFields: CollectionConfig = {
     },
     {
       name: 'relationToSelfSelectOnly',
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowCreateToFalse',
       admin: {
         allowCreate: false,
       },
-      relationTo: relationshipFieldsSlug,
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowEditToFalse',
+      admin: {
+        allowEdit: false,
+      },
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
       type: 'relationship',
     },
     {
@@ -99,6 +114,82 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
       minRows: 2,
       type: 'relationship',
+    },
+    {
+      name: 'relationToRow',
+      relationTo: 'row-fields',
+      type: 'relationship',
+    },
+    {
+      name: 'relationToRowMany',
+      relationTo: 'row-fields',
+      type: 'relationship',
+      hasMany: true,
+    },
+    {
+      name: 'relationshipDrawer',
+      relationTo: 'text-fields',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+    },
+    {
+      name: 'relationshipDrawerReadOnly',
+      relationTo: 'text-fields',
+      admin: {
+        readOnly: true,
+        appearance: 'drawer',
+      },
+      type: 'relationship',
+    },
+    {
+      name: 'polymorphicRelationshipDrawer',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: ['text-fields', 'array-fields'],
+    },
+    {
+      name: 'relationshipDrawerHasMany',
+      relationTo: 'text-fields',
+      admin: {
+        appearance: 'drawer',
+      },
+      hasMany: true,
+      type: 'relationship',
+    },
+    {
+      name: 'relationshipDrawerHasManyPolymorphic',
+      relationTo: ['text-fields', 'array-fields'],
+      admin: {
+        appearance: 'drawer',
+      },
+      hasMany: true,
+      type: 'relationship',
+    },
+    {
+      name: 'relationshipDrawerWithAllowCreateFalse',
+      admin: {
+        allowCreate: false,
+        appearance: 'drawer',
+      },
+      type: 'relationship',
+      relationTo: 'text-fields',
+    },
+    {
+      name: 'relationshipDrawerWithFilterOptions',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      filterOptions: ({ relationTo }) => {
+        if (relationTo === 'text-fields') {
+          return {
+            text: {
+              equals: 'list drawer test',
+            },
+          }
+        } else {
+          return true
+        }
+      },
     },
   ],
   slug: relationshipFieldsSlug,

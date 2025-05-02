@@ -31,7 +31,7 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
     config: { collections },
   } = useConfig()
 
-  let enabledRelations: string[] = null
+  let enabledRelations: null | string[] = null
 
   if (clientProps?.enabledCollections) {
     enabledRelations = clientProps?.enabledCollections
@@ -53,22 +53,14 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
 
         if ($isRangeSelection(selection)) {
           const relationshipNode = $createRelationshipNode(payload)
+          // we need to get the focus node before inserting the block node, as $insertNodeToNearestRoot can change the focus node
+          const { focus } = selection
+          const focusNode = focus.getNode()
           // Insert relationship node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
           $insertNodeToNearestRoot(relationshipNode)
 
-          const { focus } = selection
-          const focusNode = focus.getNode()
-
-          // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-          // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
-          if (
-            $isParagraphNode(focusNode) &&
-            focusNode.getTextContentSize() === 0 &&
-            focusNode
-              .getParent()
-              .getChildren()
-              .filter((node) => $isParagraphNode(node)).length > 1
-          ) {
+          // Delete the node it it's an empty paragraph
+          if ($isParagraphNode(focusNode) && !focusNode.__first) {
             focusNode.remove()
           }
         }

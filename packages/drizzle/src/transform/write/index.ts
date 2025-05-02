@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
@@ -8,7 +8,8 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
-  fields: Field[]
+  fields: FlattenedField[]
+  parentIsLocalized?: boolean
   path?: string
   tableName: string
 }
@@ -17,6 +18,7 @@ export const transformForWrite = ({
   adapter,
   data,
   fields,
+  parentIsLocalized,
   path = '',
   tableName,
 }: Args): RowToInsert => {
@@ -48,6 +50,7 @@ export const transformForWrite = ({
     fields,
     locales: rowToInsert.locales,
     numbers: rowToInsert.numbers,
+    parentIsLocalized,
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,

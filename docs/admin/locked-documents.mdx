@@ -1,0 +1,83 @@
+---
+title: Document Locking
+label: Document Locking
+order: 40
+desc: Ensure your documents are locked during editing to prevent concurrent changes from multiple users and maintain data integrity.
+keywords: locking, document locking, edit locking, document, concurrency, Payload, headless, Content Management System, cms, javascript, react, node, nextjs
+---
+
+Document locking in Payload ensures that only one user at a time can edit a document, preventing data conflicts and accidental overwrites. When a document is locked, other users are prevented from making changes until the lock is released, ensuring data integrity in collaborative environments.
+
+The lock is automatically triggered when a user begins editing a document within the Admin Panel and remains in place until the user exits the editing view or the lock expires due to inactivity.
+
+## How it works
+
+When a user starts editing a document, Payload locks it for that user. If another user attempts to access the same document, they will be notified that it is currently being edited. They can then choose one of the following options:
+
+- View in Read-Only: View the document without the ability to make any changes.
+- Take Over: Take over editing from the current user, which locks the document for the new editor and notifies the original user.
+- Return to Dashboard: Navigate away from the locked document and continue with other tasks.
+
+The lock will automatically expire after a set period of inactivity, configurable using the `duration` property in the `lockDocuments` configuration, after which others can resume editing.
+
+<Banner type="info">
+  **Note:** If your application does not require document locking, you can
+  disable this feature for any collection or global by setting the
+  `lockDocuments` property to `false`.
+</Banner>
+
+### Config Options
+
+The `lockDocuments` property exists on both the Collection Config and the Global Config. Document locking is enabled by default, but you can customize the lock duration or turn off the feature for any collection or global.
+
+Here's an example configuration for document locking:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    // other fields...
+  ],
+  lockDocuments: {
+    duration: 600, // Duration in seconds
+  },
+}
+```
+
+#### Locking Options
+
+| Option              | Description                                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`lockDocuments`** | Enables or disables document locking for the collection or global. By default, document locking is enabled. Set to an object to configure, or set to false to disable locking. |
+| **`duration`**      | Specifies the duration (in seconds) for how long a document remains locked without user interaction. The default is 300 seconds (5 minutes).                                   |
+
+### Impact on APIs
+
+Document locking affects both the Local and REST APIs, ensuring that if a document is locked, concurrent users will not be able to perform updates or deletes on that document (including globals). If a user attempts to update or delete a locked document, they will receive an error.
+
+Once the document is unlocked or the lock duration has expired, other users can proceed with updates or deletes as normal.
+
+#### Overriding Locks
+
+For operations like `update` and `delete`, Payload includes an `overrideLock` option. This boolean flag, when set to `false`, enforces document locks, ensuring that the operation will not proceed if another user currently holds the lock.
+
+By default, `overrideLock` is set to `true`, which means that document locks are ignored, and the operation will proceed even if the document is locked. To enforce locks and prevent updates or deletes on locked documents, set `overrideLock: false`.
+
+```ts
+const result = await payload.update({
+  collection: 'posts',
+  id: '123',
+  data: {
+    title: 'New title',
+  },
+  overrideLock: false, // Enforces the document lock, preventing updates if the document is locked
+})
+```
+
+This option is particularly useful in scenarios where administrative privileges or specific workflows require you to override the lock and ensure the operation is completed.

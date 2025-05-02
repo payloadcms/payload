@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared.js'
+import { formsSlug, formSubmissionsSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -28,12 +28,38 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const { id: formID } = await payload.create({
       collection: formsSlug,
       data: {
-        confirmationMessage: [
-          {
-            type: 'paragraph',
-            text: 'Confirmed',
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Confirmed',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
           },
-        ],
+        },
         fields: [
           {
             name: 'name',

@@ -1,20 +1,22 @@
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.js'
+import type { PopulationsByCollection } from './types.js'
 
 import { traverseRichText } from './traverseRichText.js'
 
-export const traverseFields = <T>(args: {
-  externallyUpdatedRelationship?: UpdatedDocument
-  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
+export const traverseFields = <T extends Record<string, any>>(args: {
+  externallyUpdatedRelationship?: DocumentEvent
+  fieldSchema: FieldSchemaJSON
   incomingData: T
+  localeChanged: boolean
   populationsByCollection: PopulationsByCollection
-  result: T
+  result: Record<string, any>
 }): void => {
   const {
     externallyUpdatedRelationship,
     fieldSchema: fieldSchemas,
     incomingData,
+    localeChanged,
     populationsByCollection,
     result,
   } = args
@@ -24,17 +26,15 @@ export const traverseFields = <T>(args: {
       const fieldName = fieldSchema.name
 
       switch (fieldSchema.type) {
-        case 'richText':
-          result[fieldName] = traverseRichText({
-            externallyUpdatedRelationship,
-            incomingData: incomingData[fieldName],
-            populationsByCollection,
-            result: result[fieldName],
-          })
-
-          break
-
         case 'array':
+          if (
+            !incomingData[fieldName] &&
+            incomingData[fieldName] !== undefined &&
+            result?.[fieldName] !== undefined
+          ) {
+            result[fieldName] = []
+          }
+
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
               if (!result[fieldName]) {
@@ -47,8 +47,9 @@ export const traverseFields = <T>(args: {
 
               traverseFields({
                 externallyUpdatedRelationship,
-                fieldSchema: fieldSchema.fields,
+                fieldSchema: fieldSchema.fields!,
                 incomingData: incomingRow,
+                localeChanged,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -62,7 +63,7 @@ export const traverseFields = <T>(args: {
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
-              const incomingBlockJSON = fieldSchema.blocks[incomingBlock.blockType]
+              const incomingBlockJSON = fieldSchema.blocks?.[incomingBlock.blockType]
 
               if (!result[fieldName]) {
                 result[fieldName] = []
@@ -80,8 +81,9 @@ export const traverseFields = <T>(args: {
 
               traverseFields({
                 externallyUpdatedRelationship,
-                fieldSchema: incomingBlockJSON.fields,
+                fieldSchema: incomingBlockJSON!.fields!,
                 incomingData: incomingBlock,
+                localeChanged,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -94,24 +96,27 @@ export const traverseFields = <T>(args: {
 
           break
 
-        case 'tabs':
         case 'group':
+        // falls through
+        case 'tabs':
           if (!result[fieldName]) {
             result[fieldName] = {}
           }
 
           traverseFields({
             externallyUpdatedRelationship,
-            fieldSchema: fieldSchema.fields,
+            fieldSchema: fieldSchema.fields!,
             incomingData: incomingData[fieldName] || {},
+            localeChanged,
             populationsByCollection,
             result: result[fieldName],
           })
 
           break
 
-        case 'upload':
         case 'relationship':
+        // falls through
+        case 'upload':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
             if (!result[fieldName] || !incomingData[fieldName].length) {
@@ -135,11 +140,12 @@ export const traverseFields = <T>(args: {
                 const newRelation = incomingRelation.relationTo
 
                 const hasChanged = newID !== oldID || newRelation !== oldRelation
+
                 const hasUpdated =
                   newRelation === externallyUpdatedRelationship?.entitySlug &&
                   newID === externallyUpdatedRelationship?.id
 
-                if (hasChanged || hasUpdated) {
+                if (hasChanged || hasUpdated || localeChanged) {
                   if (!populationsByCollection[newRelation]) {
                     populationsByCollection[newRelation] = []
                   }
@@ -153,16 +159,17 @@ export const traverseFields = <T>(args: {
               } else {
                 // Handle `hasMany` monomorphic
                 const hasChanged = incomingRelation !== result[fieldName][i]?.id
+
                 const hasUpdated =
                   fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
                   incomingRelation === externallyUpdatedRelationship?.id
 
-                if (hasChanged || hasUpdated) {
-                  if (!populationsByCollection[fieldSchema.relationTo]) {
-                    populationsByCollection[fieldSchema.relationTo] = []
+                if (hasChanged || hasUpdated || localeChanged) {
+                  if (!populationsByCollection[fieldSchema.relationTo!]) {
+                    populationsByCollection[fieldSchema.relationTo!] = []
                   }
 
-                  populationsByCollection[fieldSchema.relationTo].push({
+                  populationsByCollection[fieldSchema.relationTo!]?.push({
                     id: incomingRelation,
                     accessor: i,
                     ref: result[fieldName],
@@ -207,13 +214,14 @@ export const traverseFields = <T>(args: {
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
               const hasChanged = newID !== oldID || newRelation !== oldRelation
+
               const hasUpdated =
                 newRelation === externallyUpdatedRelationship?.entitySlug &&
                 newID === externallyUpdatedRelationship?.id
 
               // if the new value/relation is different from the old value/relation
               // populate the new value, otherwise leave it alone
-              if (hasChanged || hasUpdated) {
+              if (hasChanged || hasUpdated || localeChanged) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
@@ -245,21 +253,22 @@ export const traverseFields = <T>(args: {
                 result[fieldName]
 
               const hasChanged = newID !== oldID
+
               const hasUpdated =
                 fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
                 newID === externallyUpdatedRelationship?.id
 
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone
-              if (hasChanged || hasUpdated) {
+              if (hasChanged || hasUpdated || localeChanged) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  if (!populationsByCollection[fieldSchema.relationTo]) {
-                    populationsByCollection[fieldSchema.relationTo] = []
+                  if (!populationsByCollection[fieldSchema.relationTo!]) {
+                    populationsByCollection[fieldSchema.relationTo!] = []
                   }
 
-                  populationsByCollection[fieldSchema.relationTo].push({
+                  populationsByCollection[fieldSchema.relationTo!]?.push({
                     id: newID,
                     accessor: fieldName,
                     ref: result as Record<string, unknown>,
@@ -270,6 +279,15 @@ export const traverseFields = <T>(args: {
               }
             }
           }
+
+          break
+        case 'richText':
+          result[fieldName] = traverseRichText({
+            externallyUpdatedRelationship,
+            incomingData: incomingData[fieldName],
+            populationsByCollection,
+            result: result[fieldName],
+          })
 
           break
 

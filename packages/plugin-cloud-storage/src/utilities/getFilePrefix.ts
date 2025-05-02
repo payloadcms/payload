@@ -1,14 +1,26 @@
 import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload'
 
 export async function getFilePrefix({
+  clientUploadContext,
   collection,
   filename,
   req,
 }: {
+  clientUploadContext?: unknown
   collection: CollectionConfig
   filename: string
   req: PayloadRequest
 }): Promise<string> {
+  // Prioritize from clientUploadContext if there is:
+  if (
+    clientUploadContext &&
+    typeof clientUploadContext === 'object' &&
+    'prefix' in clientUploadContext &&
+    typeof clientUploadContext.prefix === 'string'
+  ) {
+    return clientUploadContext.prefix
+  }
+
   const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
 
   const files = await req.payload.find({

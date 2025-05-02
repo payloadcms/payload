@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import fs from 'fs'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
@@ -28,7 +29,7 @@ export const readMigrationFiles = async ({
     .readdirSync(payload.db.migrationDir)
     .sort()
     .filter((f) => {
-      return (f.endsWith('.ts') || f.endsWith('.js')) && !f.includes('index.')
+      return (f.endsWith('.ts') || f.endsWith('.js')) && f !== 'index.js' && f !== 'index.ts'
     })
     .map((file) => {
       return path.resolve(payload.db.migrationDir, file)

@@ -1,8 +1,16 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 
-export const buildVersionCollectionFields = (collection: SanitizedCollectionConfig): Field[] => {
-  const fields: Field[] = [
+import { versionSnapshotField } from './baseFields.js'
+
+export const buildVersionCollectionFields = <T extends boolean = false>(
+  config: SanitizedConfig,
+  collection: SanitizedCollectionConfig,
+  flatten?: T,
+): true extends T ? FlattenedField[] : Field[] => {
+  const fields: FlattenedField[] = [
     {
       name: 'parent',
       type: 'relationship',
@@ -13,6 +21,9 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
       name: 'version',
       type: 'group',
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
+      ...(flatten && {
+        flattenedFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
+      }),
     },
     {
       name: 'createdAt',
@@ -33,6 +44,27 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
   ]
 
   if (collection?.versions?.drafts) {
+    if (config.localization) {
+      fields.push(versionSnapshotField)
+
+      fields.push({
+        name: 'publishedLocale',
+        type: 'select',
+        admin: {
+          disableBulkEdit: true,
+          disabled: true,
+        },
+        index: true,
+        options: config.localization.locales.map((locale) => {
+          if (typeof locale === 'string') {
+            return locale
+          }
+
+          return locale.code
+        }),
+      })
+    }
+
     fields.push({
       name: 'latest',
       type: 'checkbox',
@@ -41,15 +73,15 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
       },
       index: true,
     })
+
+    if (collection?.versions?.drafts?.autosave) {
+      fields.push({
+        name: 'autosave',
+        type: 'checkbox',
+        index: true,
+      })
+    }
   }
 
-  if (collection?.versions?.drafts && collection?.versions?.drafts?.autosave) {
-    fields.push({
-      name: 'autosave',
-      type: 'checkbox',
-      index: true,
-    })
-  }
-
-  return fields
+  return fields as true extends T ? FlattenedField[] : Field[]
 }

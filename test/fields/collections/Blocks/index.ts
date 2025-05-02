@@ -1,16 +1,23 @@
-import type { BlockField, CollectionConfig } from 'payload'
+import type { BlocksField, CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { getBlocksFieldSeedData } from './shared.js'
 
-export const getBlocksField = (prefix?: string): BlockField => ({
+export const getBlocksField = (prefix?: string): BlocksField => ({
   name: 'blocks',
   type: 'blocks',
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
+      imageURL: '/api/uploads/file/payload480x320.jpg',
+      interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
+      admin: {
+        components: {
+          Label: './collections/Blocks/components/CustomBlockLabel.tsx',
+        },
+      },
       fields: [
         {
           name: 'text',
@@ -25,7 +32,21 @@ export const getBlocksField = (prefix?: string): BlockField => ({
       ],
     },
     {
+      slug: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+      interfaceName: prefix ? `${prefix}NoBlockname` : 'NoBlockname',
+      admin: {
+        disableBlockName: true,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
       slug: prefix ? `${prefix}Number` : 'number',
+      interfaceName: prefix ? `${prefix}NumberBlock` : 'NumberBlock',
       fields: [
         {
           name: 'number',
@@ -36,6 +57,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
     },
     {
       slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
+      interfaceName: prefix ? `${prefix}SubBlocksBlock` : 'SubBlocksBlock',
       fields: [
         {
           type: 'collapsible',
@@ -45,7 +67,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'text',
+                  slug: 'textRequired',
                   fields: [
                     {
                       name: 'text',
@@ -56,6 +78,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
                 },
                 {
                   slug: 'number',
+                  interfaceName: 'NumberBlock',
                   fields: [
                     {
                       name: 'number',
@@ -73,6 +96,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
     },
     {
       slug: prefix ? `${prefix}Tabs` : 'tabs',
+      interfaceName: prefix ? `${prefix}TabsBlock` : 'TabsBlock',
       fields: [
         {
           type: 'tabs',
@@ -146,7 +170,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'text',
+          slug: 'textInI18nBlock',
           fields: [
             {
               name: 'text',
@@ -304,7 +328,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithMinRows',
           fields: [
             {
               name: 'blockTitle',
@@ -359,6 +383,113 @@ const BlockFields: CollectionConfig = {
               name: 'relationship',
               type: 'relationship',
               relationTo: textFieldsSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blockWithLabels',
+      type: 'blocks',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      blocks: [
+        {
+          labels: {
+            singular: ({ t }) => t('authentication:account'),
+            plural: ({ t }) => t('authentication:generate'),
+          },
+          slug: 'text',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'deduplicatedBlocks',
+      type: 'blocks',
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
+    },
+    {
+      name: 'deduplicatedBlocks2',
+      type: 'blocks',
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
+    },
+    {
+      name: 'localizedReferencesLocalizedBlock',
+      type: 'blocks',
+      blockReferences: ['localizedTextReference'],
+      blocks: [],
+      localized: true,
+    },
+    {
+      name: 'localizedReferences',
+      type: 'blocks',
+      // Needs to be a separate block - otherwise this will break in postgres. This is unrelated to block references
+      // and an issue with all blocks.
+      blockReferences: ['localizedTextReference2'],
+      blocks: [],
+    },
+    {
+      name: 'groupedBlocks',
+      type: 'blocks',
+      admin: {
+        description: 'The purpose of this field is to test Block groups.',
+      },
+      blocks: [
+        {
+          slug: 'blockWithGroupOne',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithGroupTwo',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithLocalizedGroup',
+          admin: {
+            group: {
+              en: 'Group in en',
+              es: 'Group in es',
+            },
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithoutGroup',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
             },
           ],
         },

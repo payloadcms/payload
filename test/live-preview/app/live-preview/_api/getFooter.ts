@@ -1,10 +1,10 @@
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
+import { getPayload } from 'payload'
 
 import type { Footer } from '../../../payload-types.js'
 
 export async function getFooter(): Promise<Footer> {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   try {
     const footer = await payload.findGlobal({

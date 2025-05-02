@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -25,16 +25,16 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
   }
 
-  await collectionConfig.hooks.afterLogout.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        collection: args.collection?.config,
-        context: req.context,
-        req,
-      })) || args
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterLogout?.length) {
+    for (const hook of collectionConfig.hooks.afterLogout) {
+      args =
+        (await hook({
+          collection: args.collection?.config,
+          context: req.context,
+          req,
+        })) || args
+    }
+  }
 
   return true
 }

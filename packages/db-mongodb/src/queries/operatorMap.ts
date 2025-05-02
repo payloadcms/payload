@@ -1,3 +1,5 @@
+export type OperatorMapKey = keyof typeof operatorMap
+
 export const operatorMap = {
   all: '$all',
   equals: '$eq',

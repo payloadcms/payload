@@ -26,24 +26,26 @@ There are four main types of Hooks in Payload:
 - [Field Hooks](/docs/hooks/fields)
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
-  Payload also ships a set of _React_ hooks that you can use in your frontend application. Although they share a common name, these are very different things and should not be confused. [More details](../admin/hooks).
+  **Reminder:** Payload also ships a set of _React_ hooks that you can use in
+  your frontend application. Although they share a common name, these are very
+  different things and should not be confused. [More
+  details](../admin/react-hooks).
 </Banner>
 
 ## Root Hooks
 
 Root Hooks are not associated with any specific Collection, Global, or Field. They are useful for globally-oriented side effects, such as when an error occurs at the application level.
 
-To add Root Hooks, use the `hooks` property in your [Payload Config](/docs/configuration/config):
+To add Root Hooks, use the `hooks` property in your [Payload Config](/docs/configuration/overview):
 
 ```ts
-import {  buildConfig } from 'payload'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
   // highlight-start
   hooks: {
-    afterError: () => {...}
+    afterError:[() => {...}]
   },
   // highlight-end
 })
@@ -51,33 +53,39 @@ export default buildConfig({
 
 The following options are available:
 
-| Option       | Description                                                                                   |
-|--------------|-----------------------------------------------------------------------------------------------|
-| **`afterError`** | Runs after an error occurs in the Payload application.                                         |
+| Option           | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| **`afterError`** | Runs after an error occurs in the Payload application. |
 
 ### afterError
 
-The `afterError` Hook is triggered when an error occurs in the Payload application. This can be useful for logging errors to a third-party service, sending an email to the development team, logging the error to Sentry or DataDog, etc.
+The `afterError` Hook is triggered when an error occurs in the Payload application. This can be useful for logging errors to a third-party service, sending an email to the development team, logging the error to Sentry or DataDog, etc. The output can be used to transform the result object / status code.
 
 ```ts
-import {  buildConfig } from 'payload'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
   hooks: {
-    afterError: async ({ error }) => {
-      // Do something
-    }
+    afterError: [
+      async ({ error }) => {
+        // Do something
+      },
+    ],
   },
 })
 ```
 
 The following arguments are provided to the `afterError` Hook:
 
-| Argument | Description                                                                                   |
-|----------|-----------------------------------------------------------------------------------------------|
-| **`error`**  | The error that occurred.                                                                      |
-| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
+| Argument            | Description                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`error`**         | The error that occurred.                                                                                                                                                                        |
+| **`context`**       | Custom context passed between Hooks. [More details](./context).                                                                                                                                 |
+| **`graphqlResult`** | The GraphQL result object, available if the hook is executed within a GraphQL context.                                                                                                          |
+| **`req`**           | The `PayloadRequest` object that extends [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). Contains currently authenticated `user` and the Local API instance `payload`. |
+| **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against. This will be `undefined` if the hook is executed from a non-collection endpoint or GraphQL.               |
+| **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
 
 ## Async vs. Synchronous
 

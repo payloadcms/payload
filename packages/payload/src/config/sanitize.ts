@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
@@ -8,20 +9,51 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
+  Timezone,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
+import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
-import { InvalidConfiguration } from '../errors/index.js'
-import { sanitizeGlobals } from '../globals/config/sanitize.js'
-import getPreferencesCollection from '../preferences/preferencesCollection.js'
-import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
-import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
-import { defaults } from './defaults.js'
+import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import {
+  baseBlockFields,
+  type CollectionSlug,
+  formatLabels,
+  type GlobalSlug,
+  sanitizeFields,
+} from '../index.js'
+import {
+  getLockedDocumentsCollection,
+  lockedDocumentsCollectionSlug,
+} from '../locked-documents/config.js'
+import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
+import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { getSchedulePublishTask } from '../versions/schedule/job.js'
+import { addDefaultsToConfig } from './defaults.js'
+import { setupOrderable } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
+
+  if (configToSanitize?.compatibility?.allowLocalizedWithinLocalized) {
+    process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized = 'true'
+  }
+
+  // default logging level will be 'error' if not provided
+  sanitizedConfig.loggingLevels = {
+    Forbidden: 'info',
+    Locked: 'info',
+    MissingFile: 'info',
+    NotFound: 'info',
+    ValidationError: 'info',
+    ...(sanitizedConfig.loggingLevels || {}),
+  }
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -43,51 +75,50 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     )
   }
 
+  if (sanitizedConfig?.admin?.timezones) {
+    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezones.supportedTimezones =
+        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+    }
+
+    if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
+      sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
+    }
+  } else {
+    sanitizedConfig.admin.timezones = {
+      supportedTimezones: defaultTimezones,
+    }
+  }
+  // Timezones supported by the Intl API
+  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
+
+  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
+  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
+    if (!_internalSupportedTimezones.includes(timezone.value)) {
+      throw new InvalidConfiguration(
+        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
+      )
+    }
+  })
+
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults = {
-    ...defaults,
-    ...incomingConfig,
-    admin: {
-      ...defaults.admin,
-      ...incomingConfig?.admin,
-      meta: {
-        ...defaults.admin.meta,
-        ...incomingConfig?.admin?.meta,
-      },
-      routes: {
-        ...defaults.admin.routes,
-        ...incomingConfig?.admin?.routes,
-      },
-    },
-    graphQL: {
-      ...defaults.graphQL,
-      ...incomingConfig?.graphQL,
-    },
-    routes: {
-      ...defaults.routes,
-      ...incomingConfig?.routes,
-    },
-    typescript: {
-      ...defaults.typescript,
-      ...incomingConfig?.typescript,
-    },
-  }
-
-  if (!configWithDefaults?.serverURL) {
-    configWithDefaults.serverURL = ''
-  }
-
-  if (process.env.NEXT_BASE_PATH) {
-    if (!incomingConfig?.routes?.api) {
-      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
-      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
-    }
-  }
+  const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
+
+  // Add orderable fields
+  setupOrderable(config as SanitizedConfig)
+
+  if (!config.endpoints) {
+    config.endpoints = []
+  }
+
+  for (const endpoint of authRootEndpoints) {
+    config.endpoints.push(endpoint)
+  }
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
@@ -108,10 +139,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }))
     } else {
       // is Locale[], so convert to string[] for localeCodes
-      config.localization.localeCodes = config.localization.locales.reduce((locales, locale) => {
-        locales.push(locale.code)
-        return locales
-      }, [] as string[])
+      config.localization.localeCodes = config.localization.locales.map((locale) => locale.code)
 
       config.localization.locales = (
         config.localization as LocalizationConfigWithLabels
@@ -120,6 +148,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         toString: () => locale.code,
       }))
     }
+
+    // Default fallback to true if not provided
+    config.localization.fallback = config.localization?.fallback ?? true
   }
 
   const i18nConfig: SanitizedConfig['i18n'] = {
@@ -147,24 +178,193 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
-  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
-  configWithDefaults.collections.push(migrationsCollection)
-
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+
+  const schedulePublishCollections: CollectionSlug[] = []
+
+  const queryPresetsCollections: CollectionSlug[] = []
+
+  const schedulePublishGlobals: GlobalSlug[] = []
+
+  const collectionSlugs = new Set<CollectionSlug>()
+
+  const validRelationships = [
+    ...(config.collections.map((c) => c.slug) ?? []),
+    jobsCollectionSlug,
+    lockedDocumentsCollectionSlug,
+    preferencesCollectionSlug,
+  ]
+
+  /**
+   * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
+   * to be populated with the sanitized blocks
+   */
+  config.blocks = []
+
+  if (incomingConfig.blocks?.length) {
+    for (const block of incomingConfig.blocks) {
+      const sanitizedBlock = block
+
+      if (sanitizedBlock._sanitized === true) {
+        continue
+      }
+      sanitizedBlock._sanitized = true
+
+      sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
+
+      sanitizedBlock.labels = !sanitizedBlock.labels
+        ? formatLabels(sanitizedBlock.slug)
+        : sanitizedBlock.labels
+
+      sanitizedBlock.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: sanitizedBlock.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+
+      const flattenedSanitizedBlock = flattenBlock({ block })
+
+      config.blocks.push(flattenedSanitizedBlock)
+    }
+  }
+
   for (let i = 0; i < config.collections.length; i++) {
+    if (collectionSlugs.has(config.collections[i].slug)) {
+      throw new DuplicateCollection('slug', config.collections[i].slug)
+    }
+
+    collectionSlugs.add(config.collections[i].slug)
+
+    const draftsConfig = config.collections[i]?.versions?.drafts
+
+    if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      schedulePublishCollections.push(config.collections[i].slug)
+    }
+
+    if (config.collections[i].enableQueryPresets) {
+      queryPresetsCollections.push(config.collections[i].slug)
+
+      if (!validRelationships.includes(queryPresetsCollectionSlug)) {
+        validRelationships.push(queryPresetsCollectionSlug)
+      }
+    }
+
     config.collections[i] = await sanitizeCollection(
       config as unknown as Config,
       config.collections[i],
       richTextSanitizationPromises,
+      validRelationships,
     )
   }
 
-  checkDuplicateCollections(config.collections)
-
   if (config.globals.length > 0) {
-    config.globals = await sanitizeGlobals(
+    for (let i = 0; i < config.globals.length; i++) {
+      const draftsConfig = config.globals[i]?.versions?.drafts
+
+      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+        schedulePublishGlobals.push(config.globals[i].slug)
+      }
+
+      config.globals[i] = await sanitizeGlobal(
+        config as unknown as Config,
+        config.globals[i],
+        richTextSanitizationPromises,
+        validRelationships,
+      )
+    }
+  }
+
+  if (schedulePublishCollections.length > 0 || schedulePublishGlobals.length > 0) {
+    if (!Array.isArray(configWithDefaults.jobs?.tasks)) {
+      configWithDefaults.jobs.tasks = []
+    }
+
+    configWithDefaults.jobs.tasks.push(
+      getSchedulePublishTask({
+        adminUserSlug: config.admin.user,
+        collections: schedulePublishCollections,
+        globals: schedulePublishGlobals,
+      }),
+    )
+  }
+
+  // Need to add default jobs collection before locked documents collections
+  if (
+    (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length)
+  ) {
+    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+
+    if (defaultJobsCollection) {
+      if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+        defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+          defaultJobsCollection,
+        })
+
+        const hooks = defaultJobsCollection?.hooks
+        // @todo - delete this check in 4.0
+        if (hooks && config?.jobs?.runHooks !== true) {
+          for (const hook of Object.keys(hooks)) {
+            const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
+            if (hooks[hook]?.length > defaultAmount) {
+              console.warn(
+                `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+              )
+              break
+            }
+          }
+        }
+      }
+      const sanitizedJobsCollection = await sanitizeCollection(
+        config as unknown as Config,
+        defaultJobsCollection,
+        richTextSanitizationPromises,
+        validRelationships,
+      )
+
+      configWithDefaults.collections.push(sanitizedJobsCollection)
+    }
+  }
+
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
       config as unknown as Config,
+      getLockedDocumentsCollection(config as unknown as Config),
       richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      migrationsCollection,
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
+  if (queryPresetsCollections.length > 0) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getQueryPresetsConfig(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
     )
   }
 
@@ -176,6 +376,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (!config.upload) {
     config.upload = { adapters: [] }
   }
+
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
@@ -200,9 +401,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const promises: Promise<void>[] = []
+
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
+
   await Promise.all(promises)
 
   return config as SanitizedConfig

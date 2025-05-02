@@ -1,0 +1,12 @@
+@use '../../../_css/queries.scss' as *;
+
+.nav {
+  display: flex;
+  gap: calc(var(--base) / 4) var(--base);
+  align-items: center;
+  flex-wrap: wrap;
+
+  > * {
+    text-decoration: none;
+  }
+}

@@ -1,4 +1,4 @@
-import type { User } from '../auth/index.js'
+import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
@@ -20,10 +20,23 @@ export type InsideFieldsPreferences = {
   collapsed: CollapsedPreferences
   tabIndex: number
 }
+
 export type FieldsPreferences = {
   [key: string]: InsideFieldsPreferences
 }
 
 export type DocumentPreferences = {
   fields: FieldsPreferences
+}
+
+export type ColumnPreference = {
+  accessor: string
+  active: boolean
+}
+
+export type ListPreferences = {
+  columns?: ColumnPreference[]
+  limit?: number
+  preset?: DefaultDocumentIDType
+  sort?: string
 }

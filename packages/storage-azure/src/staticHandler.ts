@@ -13,9 +13,9 @@ interface Args {
 }
 
 export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, { params: { clientUploadContext, filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, filename, req })
+      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
         path.posix.join(prefix, filename),
       )
@@ -28,6 +28,18 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
       const blob = await blockBlobClient.download(start, end)
 
       const response = blob._response
+
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = response.headers.get('etag')
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers: new Headers({
+            ...response.headers.rawHeaders(),
+          }),
+          status: 304,
+        })
+      }
 
       // Manually create a ReadableStream for the web from a Node.js stream.
       const readableStream = new ReadableStream({

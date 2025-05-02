@@ -1,11 +1,13 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 export const EditDepthContext = createContext(0)
 
-export const EditDepthProvider: React.FC<{ children: React.ReactNode; depth: number }> = ({
-  children,
-  depth,
-}) => <EditDepthContext.Provider value={depth}>{children}</EditDepthContext.Provider>
+export const EditDepthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const parentDepth = useEditDepth()
+  const depth = parentDepth + 1
 
-export const useEditDepth = (): number => useContext(EditDepthContext)
+  return <EditDepthContext value={depth}>{children}</EditDepthContext>
+}
+
+export const useEditDepth = (): number => use(EditDepthContext)

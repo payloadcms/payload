@@ -11,7 +11,14 @@ import { Blocks } from '../../../_components/Blocks/index.js'
 import { Hero } from '../../../_components/Hero/index.js'
 import { RefreshRouteOnSave } from './RefreshRouteOnSave.js'
 
-export default async function SSRPage({ params: { slug = '' } }) {
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function SSRPage({ params: paramsPromise }: Args) {
+  const { slug = ' ' } = await paramsPromise
   const data = await getDoc<Page>({
     slug,
     collection: ssrPagesSlug,
@@ -39,7 +46,7 @@ export async function generateStaticParams() {
   try {
     const ssrPages = await getDocs<Page>(ssrPagesSlug)
     return ssrPages?.map(({ slug }) => slug)
-  } catch (error) {
+  } catch (_err) {
     return []
   }
 }

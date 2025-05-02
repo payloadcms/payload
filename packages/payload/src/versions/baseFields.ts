@@ -1,4 +1,5 @@
-import type { Field } from '../fields/config/types.js'
+// @ts-strict-ignore
+import type { CheckboxField, Field } from '../fields/config/types.js'
 
 export const statuses = [
   {
@@ -27,5 +28,20 @@ const baseVersionFields: Field[] = [
     options: statuses,
   },
 ]
+
+// When publishing a specific locale,
+// we need to create a new draft which acts as a
+// "snapshot" to retain all existing draft data.
+// This field will be used to exclude any snapshot versions
+// from the admin Versions list
+export const versionSnapshotField: CheckboxField = {
+  name: 'snapshot',
+  type: 'checkbox',
+  admin: {
+    disableBulkEdit: true,
+    disabled: true,
+  },
+  index: true,
+}
 
 export default baseVersionFields

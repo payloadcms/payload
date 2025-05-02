@@ -1,18 +1,16 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, ServerProps } from 'payload'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
+import { getSafeRedirect } from '../../utilities/getSafeRedirect.js'
 import { LoginForm } from './LoginForm/index.js'
-
-export { generateLoginMetadata } from './meta.js'
-
+import './index.scss'
 export const loginBaseClass = 'login'
 
-export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { locale, permissions, req } = initPageResult
 
   const {
@@ -24,32 +22,16 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    collections,
     routes: { admin },
   } = config
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeLogins = createMappedComponent(beforeLogin, undefined, undefined, 'beforeLogin')
-
-  const mappedAfterLogins = createMappedComponent(afterLogin, undefined, undefined, 'afterLogin')
+  const redirectUrl = getSafeRedirect(searchParams.redirect, admin)
 
   if (user) {
-    redirect(admin)
+    redirect(redirectUrl)
   }
 
-  const collectionConfig = collections.find(({ slug }) => slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   const prefillAutoLogin =
     typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
@@ -82,7 +64,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      <RenderComponent mappedComponent={mappedBeforeLogins} />
+      {RenderServerComponent({
+        Component: beforeLogin,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        } satisfies ServerProps,
+      })}
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -91,7 +85,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      <RenderComponent mappedComponent={mappedAfterLogins} />
+      {RenderServerComponent({
+        Component: afterLogin,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        } satisfies ServerProps,
+      })}
     </Fragment>
   )
 }

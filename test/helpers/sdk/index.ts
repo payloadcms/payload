@@ -21,7 +21,9 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       'Content-Type': 'application/json',
     }
 
-    if (jwt) headers.Authorization = `JWT ${jwt}`
+    if (jwt) {
+      headers.Authorization = `JWT ${jwt}`
+    }
 
     const json: T = await fetch(`${this.serverURL}/api/local-api`, {
       method: 'post',
@@ -32,7 +34,9 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       }),
     }).then((res) => res.json())
 
-    if (reduceJSON) return reduceJSON<T>(json)
+    if (reduceJSON) {
+      return reduceJSON<T>(json)
+    }
 
     return json
   }
@@ -65,6 +69,17 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
   }: FindArgs<TGeneratedTypes, T>) => {
     return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
       operation: 'find',
+      args,
+      jwt,
+    })
+  }
+
+  findVersions = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: FindArgs<TGeneratedTypes, T>) => {
+    return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
+      operation: 'findVersions',
       args,
       jwt,
     })

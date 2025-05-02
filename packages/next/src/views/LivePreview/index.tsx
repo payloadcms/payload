@@ -1,59 +1,16 @@
-import type {
-  EditViewComponent,
-  LivePreviewConfig,
-  PayloadServerReactComponent,
-  TypeWithID,
-} from 'payload'
+import type { DocumentViewServerProps, LivePreviewConfig } from 'payload'
 
-import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { LivePreviewClient } from './index.client.js'
 import './index.scss'
+import { LivePreviewClient } from './index.client.js'
 
-export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
-  const { initPageResult } = props
+export async function LivePreviewView(props: DocumentViewServerProps) {
+  const { doc, initPageResult } = props
 
-  const {
-    collectionConfig,
-    docID,
-    globalConfig,
-    locale,
-    req: {
-      payload: {
-        config: {
-          admin: { livePreview: topLevelLivePreviewConfig },
-        },
-      } = {},
-    } = {},
-  } = initPageResult
+  const { collectionConfig, globalConfig, locale, req } = initPageResult
 
-  let data: Record<string, unknown> | TypeWithID
-
-  try {
-    if (collectionConfig) {
-      data = await initPageResult.req.payload.findByID({
-        id: docID,
-        collection: collectionConfig.slug,
-        depth: 0,
-        draft: true,
-        fallbackLocale: null,
-      })
-    }
-
-    if (globalConfig) {
-      data = await initPageResult.req.payload.findGlobal({
-        slug: globalConfig.slug,
-        depth: 0,
-        draft: true,
-        fallbackLocale: null,
-      })
-    }
-  } catch (error) {
-    notFound()
-  }
-
-  let livePreviewConfig: LivePreviewConfig = topLevelLivePreviewConfig
+  let livePreviewConfig: LivePreviewConfig = req.payload.config?.admin?.livePreview
 
   if (collectionConfig) {
     livePreviewConfig = {
@@ -83,12 +40,29 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
     typeof livePreviewConfig?.url === 'function'
       ? await livePreviewConfig.url({
           collectionConfig,
-          data,
+          data: doc,
           globalConfig,
           locale,
+          req,
+          /**
+           * @deprecated
+           * Use `req.payload` instead. This will be removed in the next major version.
+           */
           payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
 
-  return <LivePreviewClient breakpoints={breakpoints} initialData={data} url={url} />
+  return (
+    <LivePreviewClient
+      breakpoints={breakpoints}
+      Description={props.Description}
+      initialData={doc}
+      PreviewButton={props.PreviewButton}
+      PublishButton={props.PublishButton}
+      SaveButton={props.SaveButton}
+      SaveDraftButton={props.SaveDraftButton}
+      Upload={props.Upload}
+      url={url}
+    />
+  )
 }

@@ -1,25 +1,41 @@
 import type {
   Adapter,
+  ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Field, Plugin } from 'payload'
+import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
+import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import { UTApi } from 'uploadthing/server'
 
 import { generateURL } from './generateURL.js'
+import { getClientUploadRoute } from './getClientUploadRoute.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
+export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthing>>[0]
+
 export type UploadthingStorageOptions = {
+  /**
+   * Do uploads directly on the client, to bypass limits on Vercel.
+   */
+  clientUploads?:
+    | {
+        access?: ClientUploadsAccess
+        routerInputConfig?: FileRouterInputConfig
+      }
+    | boolean
+
   /**
    * Collection options to apply the adapter to.
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
    * Whether or not to enable the plugin
@@ -47,7 +63,29 @@ export type ACL = 'private' | 'public-read'
 export const uploadthingStorage: UploadthingPlugin =
   (uploadthingStorageOptions: UploadthingStorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (uploadthingStorageOptions.enabled === false) {
+    const isPluginDisabled = uploadthingStorageOptions.enabled === false
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
+      collections: uploadthingStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(uploadthingStorageOptions.clientUploads),
+      serverHandler: getClientUploadRoute({
+        access:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.access
+            : undefined,
+        acl: uploadthingStorageOptions.options.acl || 'public-read',
+        routerInputConfig:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.routerInputConfig
+            : undefined,
+        token: uploadthingStorageOptions.options.token,
+      }),
+      serverHandlerPath: '/storage-uploadthing-client-upload-route',
+    })
+
+    if (isPluginDisabled) {
       return incomingConfig
     }
 
@@ -56,7 +94,7 @@ export const uploadthingStorage: UploadthingPlugin =
       uploadthingStorageOptions.options.acl = 'public-read'
     }
 
-    const adapter = uploadthingInternal(uploadthingStorageOptions, incomingConfig)
+    const adapter = uploadthingInternal(uploadthingStorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -101,7 +139,7 @@ export const uploadthingStorage: UploadthingPlugin =
     })(config)
   }
 
-function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig: Config): Adapter {
+function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
   const fields: Field[] = [
     {
       name: '_key',
@@ -114,6 +152,7 @@ function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig:
 
   return (): GeneratedAdapter => {
     const {
+      clientUploads,
       options: { acl = 'public-read', ...utOptions },
     } = options
 
@@ -121,6 +160,7 @@ function uploadthingInternal(options: UploadthingStorageOptions, incomingConfig:
 
     return {
       name: 'uploadthing',
+      clientUploads,
       fields,
       generateURL,
       handleDelete: getHandleDelete({ utApi }),

@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
-import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
@@ -36,24 +37,24 @@ export const afterChange = async <T extends JsonObject>({
   previousDoc,
   req,
 }: Args<T>): Promise<T> => {
-  const doc = deepCopyObjectSimple(incomingDoc)
-
   await traverseFields({
     collection,
     context,
     data,
-    doc,
+    doc: incomingDoc,
     fields: collection?.fields || global?.fields,
     global,
     operation,
-    path: [],
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     previousDoc,
     previousSiblingDoc: previousDoc,
     req,
-    schemaPath: [],
     siblingData: data,
-    siblingDoc: doc,
+    siblingDoc: incomingDoc,
   })
 
-  return doc
+  return incomingDoc
 }

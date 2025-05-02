@@ -1,0 +1,77 @@
+name: Functionality Bug
+description: '[REPRODUCTION REQUIRED] - Create a bug report'
+labels: ['status: needs-triage', 'validate-reproduction']
+body:
+  - type: textarea
+    attributes:
+      label: Describe the Bug
+    validations:
+      required: true
+
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Link to the code that reproduces this issue
+      description: >-
+        _REQUIRED_: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
+        Either use `pnpx create-payload-app@latest -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction Steps
+      description: Steps to reproduce the behavior, please provide a clear description of how to reproduce the issue, based on the linked minimal reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Which area(s) are affected? (Select all that apply)
+      multiple: true
+      options:
+        - 'Not sure'
+        - 'area: core'
+        - 'area: docs'
+        - 'area: templates'
+        - 'area: ui'
+        - 'db-mongodb'
+        - 'db-postgres'
+        - 'db-sqlite'
+        - 'db-vercel-postgres'
+        - 'email-nodemailer'
+        - 'plugin: cloud'
+        - 'plugin: cloud-storage'
+        - 'plugin: form-builder'
+        - 'plugin: nested-docs'
+        - 'plugin: richtext-lexical'
+        - 'plugin: richtext-slate'
+        - 'plugin: search'
+        - 'plugin: sentry'
+        - 'plugin: seo'
+        - 'plugin: stripe'
+        - 'plugin: other'
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Environment Info
+      description: Paste output from `pnpm payload info` _or_ Payload, Node.js, and Next.js versions. Please avoid using "latest"—specific version numbers help us accurately diagnose and resolve issues.
+      render: text
+      placeholder: |
+        Payload:
+        Node.js:
+        Next.js:
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: Before submitting the issue, go through the steps you've written down to make sure the steps provided are detailed and clear.
+  - type: markdown
+    attributes:
+      value: Contributors should be able to follow the steps provided in order to reproduce the bug.
+  - type: markdown
+    attributes:
+      value: These steps are used to add integration tests to ensure the same issue does not happen again. Thanks in advance!

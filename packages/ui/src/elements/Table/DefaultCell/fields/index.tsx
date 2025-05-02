@@ -17,6 +17,7 @@ export const cellComponents = {
   code: CodeCell,
   date: DateCell,
   File: FileCell,
+  join: RelationshipCell,
   json: JSONCell,
   radio: SelectCell,
   relationship: RelationshipCell,

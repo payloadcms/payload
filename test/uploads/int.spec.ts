@@ -216,7 +216,6 @@ describe('Collections - Uploads', () => {
         expect(doc.filename).toBeDefined()
       })
     })
-
     describe('update', () => {
       it('should replace image and delete old files - by ID', async () => {
         const filePath = path.resolve(dirname, './image.png')
@@ -342,6 +341,25 @@ describe('Collections - Uploads', () => {
         expect(errors).toHaveLength(0)
 
         expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
+      })
+    })
+    describe('read', () => {
+      it('should return the media document with the correct file type', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = 'renamed.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+
+        expect(response.headers.get('content-type')).toContain('image/png')
       })
     })
   })
@@ -722,6 +740,34 @@ describe('Collections - Uploads', () => {
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
     })
+
+    it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
+      const small = await getFileByPath(path.resolve(dirname, './small.png'))
+
+      const result = await payload.create({
+        collection: enlargeSlug,
+        data: {},
+        file: small,
+      })
+
+      expect(result).toBeTruthy()
+
+      const { sizes } = result as unknown as Enlarge
+
+      expect(sizes.undefinedHeightWithoutEnlargement).toMatchObject({
+        filename: null,
+        filesize: null,
+        height: null,
+        mimeType: null,
+        url: null,
+        width: null,
+      })
+
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      })
+    })
   })
 
   describe('Required Files', () => {
@@ -759,6 +805,31 @@ describe('Collections - Uploads', () => {
           message: 'No files were uploaded.',
         }),
       )
+    })
+  })
+
+  describe('Duplicate', () => {
+    it('should duplicate upload collection doc', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+      file.name = 'file-to-duplicate.png'
+
+      const mediaDoc = await payload.create({
+        collection: 'media',
+        data: {},
+        file,
+      })
+
+      expect(mediaDoc).toBeDefined()
+
+      const duplicatedDoc = await payload.duplicate({
+        collection: 'media',
+        id: mediaDoc.id,
+      })
+
+      const expectedPath = path.join(dirname, './media')
+
+      expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
     })
   })
 })

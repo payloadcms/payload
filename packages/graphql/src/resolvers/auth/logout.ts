@@ -13,8 +13,9 @@ export function logout(collection: Collection): any {
 
     const result = await logoutOperation(options)
     const expiredCookie = generateExpiredPayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      config: context.req.payload.config,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
     })
     context.headers['Set-Cookie'] = expiredCookie
     return result

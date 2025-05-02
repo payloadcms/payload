@@ -1,9 +1,12 @@
-import type { Operator, Option } from 'payload'
+import type { LabelFunction, Option, SelectFieldClient } from 'payload'
 
-export type Props = {
-  disabled?: boolean
-  onChange: (val: string) => void
-  operator: Operator
-  options: Option[]
-  value: string
-}
+import type { DefaultFilterProps } from '../types.js'
+
+export type SelectFilterProps = {
+  readonly field: SelectFieldClient
+  readonly isClearable?: boolean
+  readonly onChange: (val: string) => void
+  readonly options: Option[]
+  readonly placeholder?: LabelFunction | string
+  readonly value: string
+} & DefaultFilterProps

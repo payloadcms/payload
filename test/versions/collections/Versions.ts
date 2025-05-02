@@ -29,7 +29,6 @@ const VersionPosts: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'description', 'createdAt'],
-    preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
   },
   fields: [

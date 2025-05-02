@@ -2,7 +2,7 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ShimmerEffect, useAllFormFields, useDocumentEvents } from '@payloadcms/ui'
+import { ShimmerEffect, useAllFormFields, useDocumentEvents, useLocale } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { useEffect } from 'react'
 
@@ -24,6 +24,8 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     setIframeHasLoaded,
     url,
   } = useLivePreviewContext()
+
+  const locale = useLocale()
 
   const { mostRecentUpdate } = useDocumentEvents()
 
@@ -57,6 +59,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
+        locale: locale.code,
       }
 
       // Post message to external popup window
@@ -80,6 +83,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     setIframeHasLoaded,
     fieldSchemaJSON,
     mostRecentUpdate,
+    locale,
   ])
 
   // To support SSR, we transmit a `window.postMessage` event without a payload

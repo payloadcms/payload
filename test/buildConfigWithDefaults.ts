@@ -9,7 +9,9 @@ import {
   HeadingFeature,
   IndentFeature,
   InlineCodeFeature,
+  InlineToolbarFeature,
   ItalicFeature,
+  lexicalEditor,
   LinkFeature,
   OrderedListFeature,
   ParagraphFeature,
@@ -21,7 +23,6 @@ import {
   UnderlineFeature,
   UnorderedListFeature,
   UploadFeature,
-  lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { buildConfig } from 'payload'
@@ -84,6 +85,7 @@ export async function buildConfigWithDefaults(
         SubscriptFeature(),
         SuperscriptFeature(),
         InlineCodeFeature(),
+        InlineToolbarFeature(),
         TreeViewFeature(),
         HeadingFeature(),
         IndentFeature(),
@@ -164,7 +166,9 @@ export async function buildConfigWithDefaults(
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
-    if (typeof config.admin !== 'object') config.admin = {}
+    if (typeof config.admin !== 'object') {
+      config.admin = {}
+    }
     config.admin.disable = true
   }
 

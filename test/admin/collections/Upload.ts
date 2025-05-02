@@ -11,6 +11,13 @@ export const UploadCollection: CollectionConfig = {
     },
   ],
   upload: {
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 100,
+        height: 100,
+      },
+    ],
     adminThumbnail: () => 'https://payloadcms.com/images/universal-truth.jpg',
   },
 }

@@ -14,6 +14,7 @@ pnpm add @payloadcms/storage-gcs
 
 - Configure the `collections` object to specify which collections should use the Google Cloud Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
 
 ```ts
 import { gcsStorage } from '@payloadcms/storage-gcs'
@@ -25,8 +26,8 @@ export default buildConfig({
   plugins: [
     gcsStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },

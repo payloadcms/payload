@@ -2,7 +2,7 @@
 import type { BaseSelection, LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
+import { $createParagraphNode, $createTextNode, $getRoot, getDOMSelection } from 'lexical'
 import * as React from 'react'
 import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
@@ -45,17 +45,14 @@ const formatStep = (step: Step) => {
       case 'click': {
         return `      await page.mouse.click(${value.x}, ${value.y});`
       }
-      case 'press': {
-        return `      await page.keyboard.press('${value}');`
-      }
       case 'keydown': {
         return `      await page.keyboard.keydown('${value}');`
       }
       case 'keyup': {
         return `      await page.keyboard.keyup('${value}');`
       }
-      case 'type': {
-        return `      await page.keyboard.type('${value}');`
+      case 'press': {
+        return `      await page.keyboard.press('${value}');`
       }
       case 'selectAll': {
         return `      await selectAll(page);`
@@ -69,6 +66,9 @@ const formatStep = (step: Step) => {
         focusOffset: ${value.focusOffset},
       });
 `
+      }
+      case 'type': {
+        return `      await page.keyboard.type('${value}');`
       }
       default:
         return ``
@@ -106,7 +106,7 @@ function sanitizeSelection(selection: Selection) {
 
 function getPathFromNodeToEditor(node: Node, rootElement: HTMLElement | null) {
   let currentNode: Node | null | undefined = node
-  const path = []
+  const path: number[] = []
   while (currentNode !== rootElement) {
     if (currentNode !== null && currentNode !== undefined) {
       path.unshift(
@@ -119,14 +119,14 @@ function getPathFromNodeToEditor(node: Node, rootElement: HTMLElement | null) {
 }
 
 const keyPresses = new Set([
-  'Enter',
-  'Backspace',
-  'Delete',
-  'Escape',
+  'ArrowDown',
   'ArrowLeft',
   'ArrowRight',
   'ArrowUp',
-  'ArrowDown',
+  'Backspace',
+  'Delete',
+  'Enter',
+  'Escape',
 ])
 
 type Step = {
@@ -153,7 +153,7 @@ function useTestRecorder(editor: LexicalEditor): [JSX.Element, JSX.Element | nul
 
   const generateTestContent = useCallback(() => {
     const rootElement = editor.getRootElement()
-    const browserSelection = window.getSelection()
+    const browserSelection = getDOMSelection(editor._window)
 
     if (
       rootElement == null ||
@@ -290,7 +290,7 @@ ${steps.map(formatStep).join(`\n`)}
         const skipNextSelectionChange = skipNextSelectionChangeRef.current
         if (previousSelection !== currentSelection) {
           if (dirtyLeaves.size === 0 && dirtyElements.size === 0 && !skipNextSelectionChange) {
-            const browserSelection = window.getSelection()
+            const browserSelection = getDOMSelection(editor._window)
             if (
               browserSelection &&
               (browserSelection.anchorNode == null || browserSelection.focusNode == null)
@@ -346,7 +346,7 @@ ${steps.map(formatStep).join(`\n`)}
     if (!isRecording) {
       return
     }
-    const browserSelection = window.getSelection()
+    const browserSelection = getDOMSelection(editor._window)
     if (
       browserSelection === null ||
       browserSelection.anchorNode == null ||

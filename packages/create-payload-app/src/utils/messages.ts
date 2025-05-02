@@ -34,12 +34,14 @@ export function helpMessage(): void {
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
+      -e     {underline example_name}           Choose specific example
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
+      --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
       -h                            Show help
 `)
@@ -57,12 +59,7 @@ export function successMessage(projectDir: string, packageManager: PackageManage
 ${header('Launch Application:')}
 
   - cd ./${relativePath}
-  - ${
-    packageManager === 'npm' ? 'npm run' : packageManager
-  } dev or follow directions in ${createTerminalLink(
-    'README.md',
-    `file://${path.resolve(projectDir, 'README.md')}`,
-  )}
+  - ${packageManager === 'npm' ? 'npm run' : packageManager} dev or follow directions in README.md
 
 ${header('Documentation:')}
 

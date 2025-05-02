@@ -1,5 +1,4 @@
-import type { Transformer } from '@lexical/markdown'
-import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -11,40 +10,27 @@ import type {
 import type {
   Config,
   Field,
+  FieldSchemaMap,
   JsonObject,
-  Payload,
   PayloadComponent,
   PayloadRequest,
+  PopulateType,
   ReplaceAny,
   RequestContext,
   RichTextField,
   RichTextHooks,
   SanitizedConfig,
   ValidateOptions,
+  ValidationFieldError,
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
+import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
-import type { HTMLConverter } from './converters/html/converter/types.js'
-import type { ClientComponentProps } from './typesClient.js'
+import type { HTMLConverter } from './converters/lexicalToHtml_deprecated/converter/types.js'
+import type { BaseClientFeatureProps } from './typesClient.js'
 
-export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
-  context,
-  currentDepth,
-  depth,
-  draft,
-  editorPopulationPromises,
-  field,
-  fieldPromises,
-  findMany,
-  flattenLocales,
-  node,
-  overrideAccess,
-  populationPromises,
-  req,
-  showHiddenFields,
-  siblingDoc,
-}: {
+export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
   context: RequestContext
   currentDepth: number
   depth: number
@@ -62,6 +48,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   flattenLocales: boolean
   node: T
   overrideAccess: boolean
+  parentIsLocalized: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -148,6 +135,10 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
   locale: string
   overrideAccess: boolean
   /**
+   * Only available in `afterRead` hooks.
+   */
+  populateArg?: PopulateType
+  /**
    *  Only available in `afterRead` field hooks.
    */
   populationPromises: Promise<void>[]
@@ -170,6 +161,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
+  previousNode: T
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
@@ -180,12 +172,11 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
-  duplicate: boolean
   /**
    * Only available in `beforeChange` hooks.
    */
-  errors: { field: string; message: string }[]
-  mergeLocaleActions: (() => Promise<void>)[]
+  errors: ValidationFieldError[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
@@ -194,6 +185,8 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
+  previousNode: T
+
   skipValidation: boolean
 }
 
@@ -228,8 +221,13 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
    * Markdown converters are defined in `markdownTransformers` and not here.
+   *
+   * @deprecated - will be removed in 4.0
    */
   converters?: {
+    /**
+     * @deprecated - will be removed in 4.0
+     */
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
   /**
@@ -282,28 +280,25 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientFeature?: PayloadComponent<never, ClientComponentProps<ClientFeatureProps>>
+  ClientFeature?: PayloadComponent<never, BaseClientFeatureProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
-  componentMap?:
-    | ((args: { i18n: I18nClient; payload: Payload; props: ServerProps; schemaPath: string }) => {
-        [key: string]: PayloadComponent
-      })
+  /**
+   * Adds payload components to the importMap.
+   *
+   * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
+   */
+  componentImports?:
     | {
         [key: string]: PayloadComponent
       }
+    // @ts-expect-error - TODO: fix this
+    | Config['admin']['importMap']['generators'][0]
+    | PayloadComponent[]
   generatedTypes?: {
-    modifyOutputSchema: ({
-      collectionIDFieldTypes,
-      config,
-      currentSchema,
-      field,
-      interfaceNameDefinitions,
-      isRequired,
-    }: {
+    modifyOutputSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
       config?: SanitizedConfig
       /**
@@ -311,6 +306,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
        */
       currentSchema: JSONSchema4
       field: RichTextField<SerializedEditorState, AdapterProps>
+      i18n?: I18n
       /**
        * Allows you to define new top-level interfaces that can be re-used in the output schema.
        */
@@ -323,9 +319,9 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     field: RichTextField
     i18n: I18nClient
     props: ServerProps
-    schemaMap: Map<string, Field[]>
+    schemaMap: FieldSchemaMap
     schemaPath: string
-  }) => Map<string, Field[]> | null
+  }) => FieldSchemaMap | null
   hooks?: RichTextHooks
   /**
    * Here you can provide i18n translations for your feature. These will only be available on the server and client.
@@ -346,7 +342,10 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * In order to access these translations, you would use `i18n.t('lexical:horizontalRule:label')`.
    */
   i18n?: Partial<GenericLanguages>
-  markdownTransformers?: Transformer[]
+  markdownTransformers?: (
+    | ((props: { allNodes: Array<NodeWithHooks>; allTransformers: Transformer[] }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<NodeWithHooks>
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
@@ -376,14 +375,7 @@ export type SanitizedServerFeatures = {
   enabledFeatures: string[]
   generatedTypes: {
     modifyOutputSchemas: Array<
-      ({
-        collectionIDFieldTypes,
-        config,
-        currentSchema,
-        field,
-        interfaceNameDefinitions,
-        isRequired,
-      }: {
+      (args: {
         collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
         config?: SanitizedConfig
         /**
@@ -391,6 +383,7 @@ export type SanitizedServerFeatures = {
          */
         currentSchema: JSONSchema4
         field: RichTextField<SerializedEditorState, AdapterProps>
+        i18n?: I18n
         /**
          * Allows you to define new top-level interfaces that can be re-used in the output schema.
          */
@@ -411,6 +404,7 @@ export type SanitizedServerFeatures = {
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks: RichTextHooks
+  markdownTransformers: Transformer[]
   nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
@@ -419,4 +413,4 @@ export type SanitizedServerFeatures = {
   } /**  The node types mapped to their populationPromises */
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
-} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'markdownTransformers' | 'nodes'>>
+} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>>

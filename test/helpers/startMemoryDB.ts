@@ -1,4 +1,7 @@
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
+import dotenv from 'dotenv'
+dotenv.config()
+
 
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
@@ -7,12 +10,12 @@ export default async () => {
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.DISABLE_PAYLOAD_HMR = 'true'
-  process.env.NODE_OPTIONS = '--no-deprecation'
 
   if (
     (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
     !global._mongoMemoryServer
   ) {
+    console.log('Starting memory db...')
     const db = await MongoMemoryReplSet.create({
       replSet: {
         count: 3,

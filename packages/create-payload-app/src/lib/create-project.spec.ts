@@ -5,11 +5,12 @@ import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
 
-import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
+import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject } from './create-project.js'
 import { dbReplacements } from './replacements.js'
 import { getValidTemplates } from './templates.js'
+import { manageEnvFiles } from './manage-env-files.js'
 
 describe('createProject', () => {
   let projectDir: string
@@ -44,14 +45,41 @@ describe('createProject', () => {
         name: 'plugin',
         type: 'plugin',
         description: 'Template for creating a Payload plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
       }
+
       await createProject({
-        cliArgs: args,
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
         packageManager,
         projectDir,
         projectName,
         template,
+      })
+
+      const packageJsonPath = path.resolve(projectDir, 'package.json')
+      const packageJson = fse.readJsonSync(packageJsonPath)
+
+      // Check package name and description
+      expect(packageJson.name).toStrictEqual(projectName)
+    })
+
+    it('creates example', async () => {
+      const projectName = 'custom-server-example'
+      const example: ProjectExample = {
+        name: 'custom-server',
+        url: 'https://github.com/payloadcms/payload/examples/custom-server#main',
+      }
+
+      await createProject({
+        cliArgs: {
+          ...args,
+          '--local-template': undefined,
+          '--local-example': 'custom-server',
+        } as CliArgs,
+        packageManager,
+        projectDir,
+        projectName,
+        example,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
@@ -125,6 +153,76 @@ describe('createProject', () => {
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
         expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+      })
+    })
+    describe('managing env files', () => {
+      it('updates .env files without overwriting existing data', async () => {
+        const envFilePath = path.join(projectDir, '.env')
+        const envExampleFilePath = path.join(projectDir, '.env.example')
+
+        fse.ensureDirSync(projectDir)
+        fse.ensureFileSync(envFilePath)
+        fse.ensureFileSync(envExampleFilePath)
+
+        const initialEnvContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=old-connection\n`
+        const initialEnvExampleContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=old-connection\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
+
+        fse.writeFileSync(envFilePath, initialEnvContent)
+        fse.writeFileSync(envExampleFilePath, initialEnvExampleContent)
+
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseType: 'mongodb',
+          databaseUri: 'mongodb://localhost:27017/test',
+          payloadSecret: 'test-secret',
+          projectDir,
+          template: undefined,
+        })
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+
+        expect(updatedEnvContent).toContain('CUSTOM_VAR=custom-value')
+        expect(updatedEnvContent).toContain('DATABASE_URI=mongodb://localhost:27017/test')
+        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=test-secret')
+
+        const updatedEnvExampleContent = fse.readFileSync(envExampleFilePath, 'utf-8')
+
+        expect(updatedEnvExampleContent).toContain('CUSTOM_VAR=custom-value')
+        expect(updatedEnvContent).toContain('DATABASE_URI=mongodb://localhost:27017/test')
+        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=test-secret')
+      })
+
+      it('creates .env and .env.example if they do not exist', async () => {
+        const envFilePath = path.join(projectDir, '.env')
+        const envExampleFilePath = path.join(projectDir, '.env.example')
+
+        fse.ensureDirSync(projectDir)
+
+        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
+        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
+
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseUri: '',
+          payloadSecret: '',
+          projectDir,
+          template: undefined,
+        })
+
+        expect(fse.existsSync(envFilePath)).toBe(true)
+        expect(fse.existsSync(envExampleFilePath)).toBe(true)
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+        expect(updatedEnvContent).toContain('DATABASE_URI=your-connection-string-here')
+        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
+
+        const updatedEnvExampleContent = fse.readFileSync(envExampleFilePath, 'utf-8')
+        expect(updatedEnvExampleContent).toContain('DATABASE_URI=your-connection-string-here')
+        expect(updatedEnvExampleContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
       })
     })
   })

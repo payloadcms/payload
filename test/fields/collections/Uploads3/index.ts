@@ -25,10 +25,10 @@ const Uploads3: CollectionConfig = {
       name: 'media',
       relationTo: uploads3Slug,
     },
-    {
-      type: 'richText',
-      name: 'richText',
-    },
+    // {
+    //   type: 'richText',
+    //   name: 'richText',
+    // },
   ],
 }
 

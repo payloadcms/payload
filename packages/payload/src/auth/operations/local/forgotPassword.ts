@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../forgotPassword.js'
@@ -14,7 +15,7 @@ export type Options<T extends CollectionSlug> = {
   }
   disableEmail?: boolean
   expiration?: number
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
 }
 
 async function localForgotPassword<T extends CollectionSlug>(
@@ -42,4 +43,4 @@ async function localForgotPassword<T extends CollectionSlug>(
   })
 }
 
-export default localForgotPassword
+export const forgotPassword = localForgotPassword

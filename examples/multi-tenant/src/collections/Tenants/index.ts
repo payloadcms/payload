@@ -1,15 +1,15 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import { superAdmins } from '../../access/superAdmins'
-import { tenantAdmins } from './access/tenantAdmins'
+import { isSuperAdminAccess } from '@/access/isSuperAdmin'
+import { updateAndDeleteAccess } from './access/updateAndDelete'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   access: {
-    create: superAdmins,
-    read: tenantAdmins,
-    update: tenantAdmins,
-    delete: superAdmins,
+    create: isSuperAdminAccess,
+    delete: updateAndDeleteAccess,
+    read: ({ req }) => Boolean(req.user),
+    update: updateAndDeleteAccess,
   },
   admin: {
     useAsTitle: 'name',
@@ -21,16 +21,31 @@ export const Tenants: CollectionConfig = {
       required: true,
     },
     {
-      name: 'domains',
-      type: 'array',
+      name: 'domain',
+      type: 'text',
+      admin: {
+        description: 'Used for domain-based tenant handling',
+      },
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      admin: {
+        description: 'Used for url paths, example: /tenant-slug/page-slug',
+      },
       index: true,
-      fields: [
-        {
-          name: 'domain',
-          type: 'text',
-          required: true,
-        },
-      ],
+      required: true,
+    },
+    {
+      name: 'allowPublicRead',
+      type: 'checkbox',
+      admin: {
+        description:
+          'If checked, logging in is not required to read. Useful for building public pages.',
+        position: 'sidebar',
+      },
+      defaultValue: false,
+      index: true,
     },
   ],
 }

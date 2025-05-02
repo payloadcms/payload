@@ -36,11 +36,12 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     uploadthingStorage({
+      clientUploads: true,
       collections: {
         [mediaSlug]: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),

@@ -11,10 +11,11 @@ import './index.scss'
 const baseClass = 'bulk-upload--add-files'
 
 type Props = {
+  readonly acceptMimeTypes?: string
   readonly onCancel: () => void
   readonly onDrop: (acceptedFiles: FileList) => void
 }
-export function AddFilesView({ onCancel, onDrop }: Props) {
+export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
   const { t } = useTranslation()
 
   const inputRef = React.useRef(null)
@@ -37,6 +38,7 @@ export function AddFilesView({ onCancel, onDrop }: Props) {
             {t('upload:selectFile')}
           </Button>
           <input
+            accept={acceptMimeTypes}
             aria-hidden="true"
             className={`${baseClass}__hidden-input`}
             hidden

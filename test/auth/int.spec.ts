@@ -1,7 +1,15 @@
-import type { Payload, User } from 'payload'
+import type {
+  BasePayload,
+  EmailFieldValidation,
+  FieldAffectingData,
+  Payload,
+  SanitizedConfig,
+  User,
+} from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -9,7 +17,14 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocalStrategiesSlug,
+  publicUsersSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -101,7 +116,7 @@ describe('Auth', () => {
 
     describe('logged in', () => {
       let token: string | undefined
-      let loggedInUser: User | undefined
+      let loggedInUser: undefined | User
 
       beforeAll(async () => {
         const response = await restClient.POST(`/${slug}/login`, {
@@ -270,7 +285,7 @@ describe('Auth', () => {
 
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
-        const response = await restClient.POST(`/public-users`, {
+        const response = await restClient.POST(`/${publicUsersSlug}`, {
           body: JSON.stringify({
             email: emailToVerify,
             password,
@@ -284,7 +299,7 @@ describe('Auth', () => {
         expect(response.status).toBe(201)
 
         const userResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -300,13 +315,13 @@ describe('Auth', () => {
         expect(_verificationToken).toBeDefined()
 
         const verificationResponse = await restClient.POST(
-          `/public-users/verify/${_verificationToken}`,
+          `/${publicUsersSlug}/verify/${_verificationToken}`,
         )
 
         expect(verificationResponse.status).toBe(200)
 
         const afterVerifyResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -392,6 +407,52 @@ describe('Auth', () => {
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual('updated')
           expect(data.doc.value.property2).toStrictEqual('test')
+
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should only have one preference per user per key', async () => {
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'test', property2: 'test' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'updated', property2: 'updated' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await payload.find({
+            collection: 'payload-preferences',
+            depth: 0,
+            where: {
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(result.docs[0].value.property).toStrictEqual('updated')
+          expect(result.docs[0].value.property2).toStrictEqual('updated')
 
           expect(result.docs).toHaveLength(1)
         })
@@ -663,27 +724,105 @@ describe('Auth', () => {
     })
   })
 
+  describe('disableLocalStrategy', () => {
+    it('should allow create of a user with disableLocalStrategy', async () => {
+      const email = 'test@example.com'
+      const user = await payload.create({
+        collection: partialDisableLocalStrategiesSlug,
+        data: {
+          email,
+          // password is not required
+        },
+      })
+      expect(user.email).toStrictEqual(email)
+    })
+
+    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+      const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
+        // eslint-disable-next-line jest/no-conditional-in-test
+        .filter((field) => 'name' in field && field.name)
+        .map((field) => (field as FieldAffectingData).name)
+
+      expect(authFields).toMatchObject([
+        'updatedAt',
+        'createdAt',
+        'email',
+        'resetPasswordToken',
+        'resetPasswordExpiration',
+        'salt',
+        'hash',
+        'loginAttempts',
+        'lockUntil',
+      ])
+    })
+
+    it('should prevent login of user with disableLocalStrategy.', async () => {
+      await payload.create({
+        collection: partialDisableLocalStrategiesSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await expect(async () => {
+        await payload.login({
+          collection: partialDisableLocalStrategiesSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+      }).rejects.toThrow('You are not allowed to perform this action.')
+    })
+
+    it('rest - should prevent login', async () => {
+      const response = await restClient.POST(`/${partialDisableLocalStrategiesSlug}/login`, {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
+    })
+  })
+
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
       })
 
       const [user1, user2] = usersQuery.docs
 
       const success = await restClient
-        .GET(`/api-keys/${user2.id}`, {
+        .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `api-keys API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(success.apiKey).toStrictEqual(user2.apiKey)
 
-      const fail = await restClient.GET(`/api-keys/${user1.id}`, {
+      const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `api-keys API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
         },
       })
 
@@ -693,7 +832,7 @@ describe('Auth', () => {
     it('should not remove an API key from a user when updating other fields', async () => {
       const apiKey = uuid()
       const user = await payload.create({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           apiKey,
           enableAPIKey: true,
@@ -702,14 +841,14 @@ describe('Auth', () => {
 
       const updatedUser = await payload.update({
         id: user.id,
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           enableAPIKey: true,
         },
       })
 
       const userResult = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         where: {
           id: {
             equals: user.id,
@@ -741,7 +880,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
@@ -772,7 +911,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
@@ -815,6 +954,103 @@ describe('Auth', () => {
       })
 
       expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
+    })
+
+    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+      // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
+      const originalDateNow = Date.now
+      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+        // Move the current time back by 6 minutes (360,000 ms)
+        return originalDateNow() - 6 * 60 * 1000
+      })
+
+      let forgot
+      try {
+        // Call forgotPassword while the mocked Date.now() is active
+        forgot = await payload.forgotPassword({
+          collection: 'users',
+          data: {
+            email: 'dev@payloadcms.com',
+          },
+        })
+      } finally {
+        // Restore the original Date.now() after the forgotPassword call
+        mockDateNow.mockRestore()
+      }
+
+      // Attempt to reset password, which should fail because the token is expired
+      await expect(
+        payload.resetPassword({
+          collection: 'users',
+          data: {
+            password: 'test',
+            token: forgot,
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('Email - format validation', () => {
+    const mockT = jest.fn((key) => key) // Mocks translation function
+
+    const mockContext: Parameters<EmailFieldValidation>[1] = {
+      // @ts-expect-error: Mocking context for email validation
+      req: {
+        payload: {
+          collections: {} as Record<string, never>,
+          config: {} as SanitizedConfig,
+        } as unknown as BasePayload,
+        t: mockT,
+      },
+      required: true,
+      siblingData: {},
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
+    }
+    it('should allow standard formatted emails', () => {
+      expect(emailValidation('user@example.com', mockContext)).toBe(true)
+      expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
+      expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
+      expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
+    })
+
+    it('should not allow emails with double quotes', () => {
+      expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with spaces', () => {
+      expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with consecutive dots', () => {
+      expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with invalid domains', () => {
+      expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow domains starting or ending with a hyphen', () => {
+      expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 })

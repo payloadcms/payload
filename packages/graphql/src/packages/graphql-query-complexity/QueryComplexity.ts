@@ -394,14 +394,14 @@ export class QueryComplexity {
     this.variableValues = coerced
 
     switch (operation.operation) {
-      case 'query':
-        this.complexity += this.nodeComplexity(operation, this.context.getSchema().getQueryType())
-        break
       case 'mutation':
         this.complexity += this.nodeComplexity(
           operation,
           this.context.getSchema().getMutationType(),
         )
+        break
+      case 'query':
+        this.complexity += this.nodeComplexity(operation, this.context.getSchema().getQueryType())
         break
       case 'subscription':
         this.complexity += this.nodeComplexity(

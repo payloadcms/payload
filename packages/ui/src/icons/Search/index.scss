@@ -1,11 +1,13 @@
 @import '../../scss/styles';
 
-.icon--search {
-  height: $baseline;
-  width: $baseline;
+@layer payload-default {
+  .icon--search {
+    height: $baseline;
+    width: $baseline;
 
-  .stroke {
-    stroke: currentColor;
-    stroke-width: $style-stroke-width-s;
+    .stroke {
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-s;
+    }
   }
 }

@@ -1,21 +1,24 @@
 import type {
-  CollectionPermission,
   Document,
-  EditViewComponent,
-  GlobalPermission,
+  DocumentViewServerProps,
+  Locale,
   OptionObject,
-  PayloadServerReactComponent,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
 } from 'payload'
 
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
+import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
-import { deepCopyObjectSimple } from 'payload'
 import React from 'react'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
+import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
-export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
-  const { initPageResult, routeSegments } = props
+export async function VersionView(props: DocumentViewServerProps) {
+  const { i18n, initPageResult, routeSegments, searchParams } = props
 
   const {
     collectionConfig,
@@ -31,9 +34,17 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
 
+  const localeCodesFromParams = searchParams.localeCodes
+    ? JSON.parse(searchParams.localeCodes as string)
+    : null
+
+  const comparisonVersionIDFromParams: string = searchParams.compareValue as string
+
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
+
   const { localization } = config
 
-  let docPermissions: CollectionPermission | GlobalPermission
+  let docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   let slug: string
 
   let doc: Document
@@ -49,8 +60,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findVersionByID({
         id: versionID,
         collection: slug,
-        depth: 1,
-        locale: '*',
+        depth: 0,
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -60,17 +71,25 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
           payload,
+          req,
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }
@@ -84,8 +103,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findGlobalVersionByID({
         id: versionID,
         slug,
-        depth: 1,
-        locale: '*',
+        depth: 0,
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -95,17 +114,23 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }
@@ -119,12 +144,30 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
-  const localeOptions: OptionObject[] =
-    localization &&
-    localization.locales.map(({ code, label }) => ({
-      label,
-      value: code,
+  let selectedLocales: OptionObject[] = []
+  if (localization) {
+    let locales: Locale[] = []
+    if (localeCodesFromParams) {
+      for (const code of localeCodesFromParams) {
+        const locale = localization.locales.find((locale) => locale.code === code)
+        if (!locale) {
+          continue
+        }
+        locales.push(locale)
+      }
+    } else {
+      locales = localization.locales
+    }
+
+    if (localization.filterAvailableLocales) {
+      locales = (await localization.filterAvailableLocales({ locales, req })) || []
+    }
+
+    selectedLocales = locales.map((locale) => ({
+      label: locale.label,
+      value: locale.code,
     }))
+  }
 
   const latestVersion =
     latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
@@ -135,21 +178,84 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     return notFound()
   }
 
+  /**
+   * The doc to compare this version to is either the latest version, or a specific version if specified in the URL.
+   * This specific version is added to the URL when a user selects a version to compare to.
+   */
+  let comparisonDoc = null
+  if (comparisonVersionIDFromParams) {
+    if (collectionSlug) {
+      comparisonDoc = await payload.findVersionByID({
+        id: comparisonVersionIDFromParams,
+        collection: collectionSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        req,
+      })
+    } else {
+      comparisonDoc = await payload.findGlobalVersionByID({
+        id: comparisonVersionIDFromParams,
+        slug: globalSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        req,
+      })
+    }
+  } else {
+    comparisonDoc = latestVersion
+  }
+
+  const schemaMap = getSchemaMap({
+    collectionSlug,
+    config,
+    globalSlug,
+    i18n,
+  })
+
+  const clientSchemaMap = getClientSchemaMap({
+    collectionSlug,
+    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap }),
+    globalSlug,
+    i18n,
+    payload,
+    schemaMap,
+  })
+
+  const RenderedDiff = RenderDiff({
+    clientSchemaMap,
+    comparisonSiblingData: comparisonDoc?.version,
+    customDiffComponents: {},
+    entitySlug: collectionSlug || globalSlug,
+    fieldPermissions: docPermissions?.fields,
+    fields: (collectionConfig || globalConfig)?.fields,
+    i18n,
+    modifiedOnly,
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
+    req,
+    selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
+    versionSiblingData: globalConfig
+      ? {
+          ...doc?.version,
+          createdAt: doc?.version?.createdAt || doc.createdAt,
+          updatedAt: doc?.version?.updatedAt || doc.updatedAt,
+        }
+      : doc?.version,
+  })
+
   return (
     <DefaultVersionView
+      canUpdate={docPermissions?.update}
       doc={doc}
-      /**
-       * After bumping the Next.js canary to 104, and React to 19.0.0-rc-06d0b89e-20240801" we have to deepCopy the permissions object (https://github.com/payloadcms/payload/pull/7541).
-       * If both HydrateClientUser and RenderCustomComponent receive the same permissions object (same object reference), we get a
-       * "TypeError: Cannot read properties of undefined (reading '$$typeof')" error
-       *
-       * // TODO: Revisit this in the future and figure out why this is happening. Might be a React/Next.js bug. We don't know why it happens, and a future React/Next version might unbreak this (keep an eye on this and remove deepCopyObjectSimple if that's the case)
-       */
-      docPermissions={deepCopyObjectSimple(docPermissions)}
-      initialComparisonDoc={latestVersion}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
-      localeOptions={localeOptions}
+      modifiedOnly={modifiedOnly}
+      RenderedDiff={RenderedDiff}
+      selectedLocales={selectedLocales}
       versionID={versionID}
     />
   )

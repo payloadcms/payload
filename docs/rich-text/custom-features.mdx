@@ -1,0 +1,1019 @@
+---
+title: Custom Features
+label: Custom Features
+order: 40
+desc: Building custom features
+keywords: lexical, rich text, editor, headless cms, feature, features
+---
+
+Before you begin building custom features for Lexical, it is crucial to familiarize yourself with the [Lexical docs](https://lexical.dev/docs/intro), particularly the "Concepts" section. This foundation is necessary for understanding Lexical's core principles, such as nodes, editor state, and commands.
+
+Lexical features are designed to be modular, meaning each piece of functionality is encapsulated within just two specific interfaces: one for server-side code and one for client-side code.
+
+By convention, these are named `feature.server.ts` for server-side functionality and `feature.client.ts` for client-side functionality. The primary functionality is housed within `feature.server.ts`, which users will import into their projects. The client-side feature, although defined separately, is integrated and rendered server-side through the server feature.
+
+That way, we still maintain a clear boundary between server and client code, while also centralizing the code needed for a feature in basically one place. This approach is beneficial for managing all the bits and pieces which make up your feature as a whole, such as toolbar entries, buttons, or new nodes, allowing each feature to be neatly contained and managed independently.
+
+<Banner type="warning">
+  **Important:**
+  Do not import directly from core lexical packages - this may break in minor Payload version bumps.
+
+Instead, import the re-exported versions from `@payloadcms/richtext-lexical`. For example, change `import { $insertNodeToNearestRoot } from '@lexical/utils'` to `import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'`
+
+</Banner>
+
+## Do I need a custom feature?
+
+Before you start building a custom feature, consider whether you can achieve your desired functionality using the existing `BlocksFeature`. The `BlocksFeature` is a powerful feature that allows you to create custom blocks with a variety of options, including custom React components, markdown converters, and more. If you can achieve your desired functionality using the `BlocksFeature`, it is recommended to use it instead of building a custom feature.
+
+Using the BlocksFeature, you can add both inline blocks (= can be inserted into a paragraph, in between text) and block blocks (= take up the whole line) to the editor. If you simply want to bring custom react components into the editor, this is the way to go.
+
+### Example: Code Field Block with language picker
+
+This example demonstrates how to create a custom code field block with a language picker using the `BlocksFeature`. First, make sure to explicitly install `@payloadcms/ui` in your project.
+
+Field Config:
+
+```ts
+import {
+  BlocksFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
+export const languages = {
+  ts: 'TypeScript',
+  plaintext: 'Plain Text',
+  tsx: 'TSX',
+  js: 'JavaScript',
+  jsx: 'JSX',
+}
+
+// ...
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            slug: 'Code',
+            fields: [
+              {
+                type: 'select',
+                name: 'language',
+                options: Object.entries(languages).map(([key, value]) => ({
+                  label: value,
+                  value: key,
+                })),
+                defaultValue: 'ts',
+              },
+              {
+                admin: {
+                  components: {
+                    Field: './path/to/CodeComponent#Code',
+                  },
+                },
+                name: 'code',
+                type: 'code',
+              },
+            ],
+          }
+        ],
+        inlineBlocks: [],
+      }),
+    ],
+  }),
+},
+```
+
+CodeComponent.tsx:
+
+```tsx
+'use client'
+import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
+
+import { CodeField, useFormFields } from '@payloadcms/ui'
+import React, { useMemo } from 'react'
+
+import { languages } from './yourFieldConfig'
+
+const languageKeyToMonacoLanguageMap = {
+  plaintext: 'plaintext',
+  ts: 'typescript',
+  tsx: 'typescript',
+}
+
+type Language = keyof typeof languageKeyToMonacoLanguageMap
+
+export const Code: React.FC<CodeFieldClientProps> = ({
+  autoComplete,
+  field,
+  forceRender,
+  path,
+  permissions,
+  readOnly,
+  renderedBlocks,
+  schemaPath,
+  validate,
+}) => {
+  const languageField = useFormFields(([fields]) => fields['language'])
+
+  const language: Language =
+    (languageField?.value as Language) ||
+    (languageField?.initialValue as Language) ||
+    'ts'
+
+  const label = languages[language]
+
+  const props: CodeFieldClient = useMemo<CodeFieldClient>(
+    () => ({
+      ...field,
+      type: 'code',
+      admin: {
+        ...field.admin,
+        editorOptions: undefined,
+        language: languageKeyToMonacoLanguageMap[language] || language,
+      },
+      label,
+    }),
+    [field, language, label],
+  )
+
+  const key = `${field.name}-${language}-${label}`
+
+  return (
+    <CodeField
+      autoComplete={autoComplete}
+      field={props}
+      forceRender={forceRender}
+      key={key}
+      path={path}
+      permissions={permissions}
+      readOnly={readOnly}
+      renderedBlocks={renderedBlocks}
+      schemaPath={schemaPath}
+      validate={validate}
+    />
+  )
+}
+```
+
+## Server Feature
+
+Custom Blocks are not enough? To start building a custom feature, you should start with the server feature, which is the entry-point.
+
+**Example myFeature/feature.server.ts:**
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+
+export const MyFeature = createServerFeature({
+  feature: {},
+  key: 'myFeature',
+})
+```
+
+`createServerFeature` is a helper function which lets you create new features without boilerplate code.
+
+Now, the feature is ready to be used in the editor:
+
+```ts
+import { MyFeature } from './myFeature/feature.server';
+import { lexicalEditor } from '@payloadcms/richtext-lexical';
+
+//...
+ {
+    name: 'richText',
+    type: 'richText',
+    editor: lexicalEditor({
+      features: [
+        MyFeature(),
+      ],
+    }),
+ },
+```
+
+By default, this server feature does nothing - you haven't added any functionality yet. Depending on what you want your feature to do, the ServerFeature type exposes various properties you can set to inject custom functionality into the lexical editor.
+
+### i18n
+
+Each feature can register their own translations, which are automatically scoped to the feature key:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+
+export const MyFeature = createServerFeature({
+  feature: {
+    i18n: {
+      en: {
+        label: 'My Feature',
+      },
+      de: {
+        label: 'Mein Feature',
+      },
+    },
+  },
+  key: 'myFeature',
+})
+```
+
+This allows you to add i18n translations scoped to your feature. This specific example translation will be available under `lexical:myFeature:label` - `myFeature` being your feature key.
+
+### Markdown Transformers#server-feature-markdown-transformers
+
+The Server Feature, just like the Client Feature, allows you to add markdown transformers. Markdown transformers on the server are used when [converting the editor from or to markdown](/docs/rich-text/converting-markdown).
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+import type { ElementTransformer } from '@payloadcms/richtext-lexical/lexical/markdown'
+import { $createMyNode, $isMyNode, MyNode } from './nodes/MyNode'
+
+const MyMarkdownTransformer: ElementTransformer = {
+  type: 'element',
+  dependencies: [MyNode],
+  export: (node, exportChildren) => {
+    if (!$isMyNode(node)) {
+      return null
+    }
+    return '+++'
+  },
+  // match ---
+  regExp: /^+++\s*$/,
+  replace: (parentNode) => {
+    const node = $createMyNode()
+    if (node) {
+      parentNode.replace(node)
+    }
+  },
+}
+
+export const MyFeature = createServerFeature({
+  feature: {
+    markdownTransformers: [MyMarkdownTransformer],
+  },
+  key: 'myFeature',
+})
+```
+
+In this example, the node will be outputted as `+++` in Markdown, and the markdown `+++` will be converted to a `MyNode` node in the editor.
+
+### Nodes#server-feature-nodes
+
+While nodes added to the server feature do not control how the node is rendered in the editor, they control other aspects of the node:
+
+- HTML conversion
+- Node Hooks
+- Sub fields
+- Behavior in a headless editor
+
+The `createNode` helper function is used to create nodes with proper typing. It is recommended to use this function to create nodes.
+
+```ts
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
+import { MyNode } from './nodes/MyNode'
+
+export const MyFeature = createServerFeature({
+  feature: {
+    nodes: [
+      // Use the createNode helper function to more easily create nodes with proper typing
+      createNode({
+        converters: {
+          html: {
+            converter: () => {
+              return `<hr/>`
+            },
+            nodeTypes: [MyNode.getType()],
+          },
+        },
+        // Here you can add your actual node. On the server, they will be
+        // used to initialize a headless editor which can be used to perform
+        // operations on the editor, like markdown / html conversion.
+        node: MyNode,
+      }),
+    ],
+  },
+  key: 'myFeature',
+})
+```
+
+While nodes in the client feature are added by themselves to the nodes array, nodes in the server feature can be added together with the following sibling options:
+
+| Option                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`getSubFields`**              | If a node includes sub-fields (e.g. block and link nodes), passing the subFields schema here will make Payload automatically populate & run hooks for them.                                                                                                                                                                                                                                                                                                   |
+| **`getSubFieldsData`**          | If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.                                                                                                                                                                                                                                                                                                                            |
+| **`graphQLPopulationPromises`** | Allows you to run population logic when a node's data was requested from GraphQL. While `getSubFields` and `getSubFieldsData` automatically handle populating sub-fields (since they run hooks on them), those are only populated in the Rest API. This is because the Rest API hooks do not have access to the 'depth' property provided by GraphQL. In order for them to be populated correctly in GraphQL, the population logic needs to be provided here. |
+| **`node`**                      | The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).                                                                                                                                                                                                                                                                                                        |
+| **`validations`**               | This allows you to provide node validations, which are run when your document is being validated, alongside other Payload fields. You can use it to throw a validation error for a specific node in case its data is incorrect.                                                                                                                                                                                                                               |
+| **`converters`**                | Allows you to define how a node can be serialized into different formats. Currently, only supports HTML. Markdown converters are defined in `markdownTransformers` and not here.                                                                                                                                                                                                                                                                              |
+| **`hooks`**                     | Just like Payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.                                                                                                                                                                                                                                                                                                                                            |
+
+### Feature load order
+
+Server features can also accept a function as the `feature` property (useful for sanitizing props, as mentioned below). This function will be called when the feature is loaded during the Payload sanitization process:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+
+createServerFeature({
+  //...
+  feature: async ({
+    config,
+    isRoot,
+    props,
+    resolvedFeatures,
+    unSanitizedEditorConfig,
+    featureProviderMap,
+  }) => {
+    return {
+      //Actual server feature here...
+    }
+  },
+})
+```
+
+"Loading" here means the process of calling this `feature` function. By default, features are called in the order in which they are added to the editor.
+However, sometimes you might want to load a feature after another feature has been loaded, or require a different feature to be loaded, throwing an error if this is not the case.
+
+Within lexical, one example where this is done are our list features. Both `UnorderedListFeature` and `OrderedListFeature` register the same `ListItem` node. Within `UnorderedListFeature` we register it normally, but within `OrderedListFeature` we want to only register the `ListItem` node if the `UnorderedListFeature` is not present - otherwise, we would have two features registering the same node.
+
+Here is how we do it:
+
+```ts
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
+
+export const OrderedListFeature = createServerFeature({
+  feature: ({ featureProviderMap }) => {
+    return {
+      // ...
+      nodes: featureProviderMap.has('unorderedList')
+        ? []
+        : [
+            createNode({
+              // ...
+            }),
+          ],
+    }
+  },
+  key: 'orderedList',
+})
+```
+
+`featureProviderMap` will always be available and contain all the features, even yet-to-be-loaded ones, so we can check if a feature is loaded by checking if its `key` present in the map.
+
+If you wanted to make sure a feature is loaded before another feature, you can use the `dependenciesPriority` property:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+
+export const MyFeature = createServerFeature({
+  feature: ({ featureProviderMap }) => {
+    return {
+      // ...
+    }
+  },
+  key: 'myFeature',
+  dependenciesPriority: ['otherFeature'],
+})
+```
+
+| Option                     | Description                                                                                                                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`dependenciesSoft`**     | Keys of soft-dependencies needed for this feature. These are optional. Payload will attempt to load them before this feature, but doesn't throw an error if that's not possible.                          |
+| **`dependencies`**         | Keys of dependencies needed for this feature. These dependencies do not have to be loaded first, but they have to exist, otherwise an error will be thrown.                                               |
+| **`dependenciesPriority`** | Keys of priority dependencies needed for this feature. These dependencies have to be loaded first AND have to exist, otherwise an error will be thrown. They will be available in the `feature` property. |
+
+## Client Feature
+
+Most of the functionality which the user actually sees and interacts with, like toolbar items and React components for nodes, resides on the client-side.
+
+To set up your client-side feature, follow these three steps:
+
+1. **Create a Separate File**: Start by creating a new file specifically for your client feature, such as `myFeature/feature.client.ts`. It's important to keep client and server features in separate files to maintain a clean boundary between server and client code.
+2. **'use client'**: Mark that file with a 'use client' directive at the top of the file
+3. **Register the Client Feature**: Register the client feature within your server feature, by passing it to the `ClientFeature` prop. This is needed because the server feature is the sole entry-point of your feature. This also means you are not able to create a client feature without a server feature, as you will not be able to register it otherwise.
+
+**Example myFeature/feature.client.ts:**
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+
+export const MyClientFeature = createClientFeature({})
+```
+
+Explore the APIs available through ClientFeature to add the specific functionality you need. Remember, do not import directly from `'@payloadcms/richtext-lexical'` when working on the client-side, as it will cause errors with webpack or turbopack. Instead, use `'@payloadcms/richtext-lexical/client'` for all client-side imports. Type-imports are excluded from this rule and can always be imported.
+
+### Adding a client feature to the server feature
+
+Inside of your server feature, you can provide an [import path](/docs/custom-components/overview#component-paths) to the client feature like this:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical'
+
+export const MyFeature = createServerFeature({
+  feature: {
+    ClientFeature: './path/to/feature.client#MyClientFeature',
+  },
+  key: 'myFeature',
+  dependenciesPriority: ['otherFeature'],
+})
+```
+
+### Nodes#client-feature-nodes
+
+Add nodes to the `nodes` array in **both** your client & server feature. On the server side, nodes are utilized for backend operations like HTML conversion in a headless editor. On the client side, these nodes are integral to how content is displayed and managed in the editor, influencing how they are rendered, behave, and saved in the database.
+
+Example:
+
+**myFeature/feature.client.ts:**
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import { MyNode } from './nodes/MyNode'
+
+export const MyClientFeature = createClientFeature({
+  nodes: [MyNode],
+})
+```
+
+This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
+
+**myFeature/nodes/MyNode.tsx:**
+
+Here is a basic DecoratorNode example:
+
+```ts
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  DOMExportOutput,
+  EditorConfig,
+  LexicalNode,
+  SerializedLexicalNode,
+} from '@payloadcms/richtext-lexical/lexical'
+
+import { $applyNodeReplacement, DecoratorNode } from '@payloadcms/richtext-lexical/lexical'
+
+// SerializedLexicalNode is the default lexical node.
+// By setting your SerializedMyNode type to SerializedLexicalNode,
+// you are basically saying that this node does not save any additional data.
+// If you want your node to save data, feel free to extend it
+export type SerializedMyNode = SerializedLexicalNode
+
+// Lazy-import the React component to your node here
+const MyNodeComponent = React.lazy(() =>
+  import('../component/index.js').then((module) => ({
+    default: module.MyNodeComponent,
+  })),
+)
+
+/**
+ * This node is a DecoratorNode. DecoratorNodes allow you to render React components in the editor.
+ *
+ * They need both createDom and decorate functions. createDom => outside of the html. decorate => React Component inside of the html.
+ *
+ * If we used DecoratorBlockNode instead, we would only need a decorate method
+ */
+export class MyNode extends DecoratorNode<React.ReactElement> {
+  static clone(node: MyNode): MyNode {
+    return new MyNode(node.__key)
+  }
+
+  static getType(): string {
+    return 'myNode'
+  }
+
+  /**
+   * Defines what happens if you copy a div element from another page and paste it into the lexical editor
+   *
+   * This also determines the behavior of lexical's internal HTML -> Lexical converter
+   */
+  static importDOM(): DOMConversionMap | null {
+    return {
+      div: () => ({
+        conversion: $yourConversionMethod,
+        priority: 0,
+      }),
+    }
+  }
+
+  /**
+   * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
+   */
+  static importJSON(serializedNode: SerializedMyNode): MyNode {
+    return $createMyNode()
+  }
+
+  /**
+   * Determines how the hr element is rendered in the lexical editor. This is only the "initial" / "outer" HTML element.
+   */
+  createDOM(config: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    return element
+  }
+
+  /**
+   * Allows you to render a React component within whatever createDOM returns.
+   */
+  decorate(): React.ReactElement {
+    return <MyNodeComponent nodeKey={this.__key} />
+  }
+
+  /**
+   * Opposite of importDOM, this function defines what happens when you copy a div element from the lexical editor and paste it into another page.
+   *
+   * This also determines the behavior of lexical's internal Lexical -> HTML converter
+   */
+  exportDOM(): DOMExportOutput {
+    return { element: document.createElement('div') }
+  }
+  /**
+   * Opposite of importJSON. This determines what data is saved in the database / in the lexical editor state.
+   */
+  exportJSON(): SerializedLexicalNode {
+    return {
+      type: 'myNode',
+      version: 1,
+    }
+  }
+
+  getTextContent(): string {
+    return '\n'
+  }
+
+  isInline(): false {
+    return false
+  }
+
+  updateDOM(): boolean {
+    return false
+  }
+}
+
+// This is used in the importDOM method. Totally optional if you do not want your node to be created automatically when copy & pasting certain dom elements
+// into your editor.
+function $yourConversionMethod(): DOMConversionOutput {
+  return { node: $createMyNode() }
+}
+
+// This is a utility method to create a new MyNode. Utility methods prefixed with $ make it explicit that this should only be used within lexical
+export function $createMyNode(): MyNode {
+  return $applyNodeReplacement(new MyNode())
+}
+
+// This is just a utility method you can use to check if a node is a MyNode. This also ensures correct typing.
+export function $isMyNode(
+  node: LexicalNode | null | undefined,
+): node is MyNode {
+  return node instanceof MyNode
+}
+```
+
+Please do not add any 'use client' directives to your nodes, as the node class can be used on the server.
+
+### Plugins
+
+One small part of a feature are plugins. The name stems from the lexical playground plugins and is just a small part of a lexical feature.
+Plugins are simply React components which are added to the editor, within all the lexical context providers. They can be used to add any functionality
+to the editor, by utilizing the lexical API.
+
+Most commonly, they are used to register [lexical listeners](https://lexical.dev/docs/concepts/listeners), [node transforms](https://lexical.dev/docs/concepts/transforms) or [commands](https://lexical.dev/docs/concepts/commands).
+For example, you could add a drawer to your plugin and register a command which opens it. That command can then be called from anywhere within lexical, e.g. from within your custom lexical node.
+
+To add a plugin, simply add it to the `plugins` array in your client feature:
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import { MyPlugin } from './plugin'
+
+export const MyClientFeature = createClientFeature({
+  plugins: [MyPlugin],
+})
+```
+
+Example plugin.tsx:
+
+```ts
+'use client'
+import type { LexicalCommand } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  createCommand,
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+} from '@payloadcms/richtext-lexical/lexical'
+
+import { useLexicalComposerContext } from '@payloadcms/richtext-lexical/lexical/react/LexicalComposerContext'
+import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'
+import { useEffect } from 'react'
+
+import type { PluginComponent } from '@payloadcms/richtext-lexical' // type imports can be imported from @payloadcms/richtext-lexical - even on the client
+
+import { $createMyNode } from '../nodes/MyNode'
+import './index.scss'
+
+export const INSERT_MYNODE_COMMAND: LexicalCommand<void> = createCommand(
+  'INSERT_MYNODE_COMMAND',
+)
+
+/**
+ * Plugin which registers a lexical command to insert a new MyNode into the editor
+ */
+export const MyNodePlugin: PluginComponent = () => {
+  // The useLexicalComposerContext hook can be used to access the lexical editor instance
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    return editor.registerCommand(
+      INSERT_MYNODE_COMMAND,
+      (type) => {
+        const selection = $getSelection()
+
+        if (!$isRangeSelection(selection)) {
+          return false
+        }
+
+        const focusNode = selection.focus.getNode()
+
+        if (focusNode !== null) {
+          const newMyNode = $createMyNode()
+          $insertNodeToNearestRoot(newMyNode)
+        }
+
+        return true
+      },
+      COMMAND_PRIORITY_EDITOR,
+    )
+  }, [editor])
+
+  return null
+}
+```
+
+In this example, we register a lexical command, which simply inserts a new MyNode into the editor. This command can be called from anywhere within lexical, e.g. from within a custom node.
+
+### Toolbar groups
+
+Toolbar groups are visual containers which hold toolbar items. There are different toolbar group types which determine _how_ a toolbar item is displayed: `dropdown` and `buttons`.
+
+All the default toolbar groups are exported from `@payloadcms/richtext-lexical/client`. You can use them to add your own toolbar items to the editor:
+
+- Dropdown: `toolbarAddDropdownGroupWithItems`
+- Dropdown: `toolbarTextDropdownGroupWithItems`
+- Buttons: `toolbarFormatGroupWithItems`
+- Buttons: `toolbarFeatureButtonsGroupWithItems`
+
+Within dropdown groups, items are positioned vertically when the dropdown is opened and include the icon & label. Within button groups, items are positioned horizontally and only include the icon. If a toolbar group with the same key is declared twice, all its items will be merged into one group.
+
+#### Custom buttons toolbar group
+
+| Option      | Description                                                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`items`** | All toolbar items part of this toolbar group need to be added here.                                                                                    |
+| **`key`**   | Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.                                        |
+| **`order`** | Determines where the toolbar group will be.                                                                                                            |
+| **`type`**  | Controls the toolbar group type. Set to `buttons` to create a buttons toolbar group, which displays toolbar items horizontally using only their icons. |
+
+Example:
+
+```ts
+import type {
+  ToolbarGroup,
+  ToolbarGroupItem,
+} from '@payloadcms/richtext-lexical'
+
+export const toolbarFormatGroupWithItems = (
+  items: ToolbarGroupItem[],
+): ToolbarGroup => {
+  return {
+    type: 'buttons',
+    items,
+    key: 'myButtonsToolbar',
+    order: 10,
+  }
+}
+```
+
+#### Custom dropdown toolbar group
+
+| Option               | Description                                                                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`items`**          | All toolbar items part of this toolbar group need to be added here.                                                                                                                  |
+| **`key`**            | Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.                                                                      |
+| **`order`**          | Determines where the toolbar group will be.                                                                                                                                          |
+| **`type`**           | Controls the toolbar group type. Set to `dropdown` to create a buttons toolbar group, which displays toolbar items vertically using their icons and labels, if the dropdown is open. |
+| **`ChildComponent`** | The dropdown toolbar ChildComponent allows you to pass in a React Component which will be displayed within the dropdown button.                                                      |
+
+Example:
+
+```ts
+import type {
+  ToolbarGroup,
+  ToolbarGroupItem,
+} from '@payloadcms/richtext-lexical'
+
+import { MyIcon } from './icons/MyIcon'
+
+export const toolbarAddDropdownGroupWithItems = (
+  items: ToolbarGroupItem[],
+): ToolbarGroup => {
+  return {
+    type: 'dropdown',
+    ChildComponent: MyIcon,
+    items,
+    key: 'myDropdownToolbar',
+    order: 10,
+  }
+}
+```
+
+### Toolbar items
+
+Custom nodes and features on its own are pointless, if they can't be added to the editor. You will need to hook in one of our interfaces which allow the user to interact with the editor:
+
+- Fixed toolbar which stays fixed at the top of the editor
+- Inline, floating toolbar which appears when selecting text
+- Slash menu which appears when typing `/` in the editor
+- Markdown transformers, which are triggered when a certain text pattern is typed in the editor
+- Or any other interfaces which can be added via your own plugins. Our toolbars are a prime example of this - they are just plugins.
+
+To add a toolbar item to either the floating or the inline toolbar, you can add a ToolbarGroup with a ToolbarItem to the `toolbarFixed` or `toolbarInline` props of your client feature:
+
+```ts
+'use client'
+
+import {
+  createClientFeature,
+  toolbarAddDropdownGroupWithItems,
+} from '@payloadcms/richtext-lexical/client'
+import { IconComponent } from './icon'
+import { $isHorizontalRuleNode } from './nodes/MyNode'
+import { INSERT_MYNODE_COMMAND } from './plugin'
+import { $isNodeSelection } from '@payloadcms/richtext-lexical/lexical'
+
+export const MyClientFeature = createClientFeature({
+  toolbarFixed: {
+    groups: [
+      toolbarAddDropdownGroupWithItems([
+        {
+          ChildComponent: IconComponent,
+          isActive: ({ selection }) => {
+            if (!$isNodeSelection(selection) || !selection.getNodes().length) {
+              return false
+            }
+
+            const firstNode = selection.getNodes()[0]
+            return $isHorizontalRuleNode(firstNode)
+          },
+          key: 'myNode',
+          label: ({ i18n }) => {
+            return i18n.t('lexical:myFeature:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.dispatchCommand(INSERT_MYNODE_COMMAND, undefined)
+          },
+        },
+      ]),
+    ],
+  },
+})
+```
+
+You will have to provide a toolbar group first, and then the items for that toolbar group (more on that above).
+
+A `ToolbarItem` various props you can use to customize its behavior:
+
+| Option               | Description                                                                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`ChildComponent`** | A React component which is rendered within your toolbar item's default button component. Usually, you want this to be an icon.                                                             |
+| **`Component`**      | A React component which is rendered in place of the toolbar item's default button component, thus completely replacing it. The `ChildComponent` and `onSelect` properties will be ignored. |
+| **`label`**          | The label will be displayed in your toolbar item, if it's within a dropdown group. To make use of i18n, this can be a function.                                                            |
+| **`key`**            | Each toolbar item needs to have a unique key.                                                                                                                                              |
+| **`onSelect`**       | A function which is called when the toolbar item is clicked.                                                                                                                               |
+| **`isEnabled`**      | This is optional and controls if the toolbar item is clickable or not. If `false` is returned here, it will be grayed out and unclickable.                                                 |
+| **`isActive`**       | This is optional and controls if the toolbar item is highlighted or not                                                                                                                    |
+
+The API for adding an item to the floating inline toolbar (`toolbarInline`) is identical. If you wanted to add an item to both the fixed and inline toolbar, you can extract it into its own variable
+(typed as `ToolbarGroup[]`) and add it to both the `toolbarFixed` and `toolbarInline` props.
+
+### Slash Menu groups
+
+We're exporting `slashMenuBasicGroupWithItems` from `@payloadcms/richtext-lexical/client` which you can use to add items to the slash menu labelled "Basic". If you want to create your own slash menu group, here is an example:
+
+```ts
+import type {
+  SlashMenuGroup,
+  SlashMenuItem,
+} from '@payloadcms/richtext-lexical'
+
+export function mwnSlashMenuGroupWithItems(
+  items: SlashMenuItem[],
+): SlashMenuGroup {
+  return {
+    items,
+    key: 'myGroup',
+    label: 'My Group', // <= This can be a function to make use of i18n
+  }
+}
+```
+
+By creating a helper function like this, you can easily re-use it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
+
+| Option      | Description                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **`items`** | An array of `SlashMenuItem`'s which will be displayed in the slash menu.                                                              |
+| **`label`** | The label will be displayed before your Slash Menu group. In order to make use of i18n, this can be a function.                       |
+| **`key`**   | Used for class names and, if label is not provided, for display. Slash menus with the same key will have their items merged together. |
+
+### Slash Menu items
+
+The API for adding items to the slash menu is similar. There are slash menu groups, and each slash menu groups has items. Here is an example:
+
+```ts
+'use client'
+
+import {
+  createClientFeature,
+  slashMenuBasicGroupWithItems,
+} from '@payloadcms/richtext-lexical/client'
+import { INSERT_MYNODE_COMMAND } from './plugin'
+import { IconComponent } from './icon'
+
+export const MyClientFeature = createClientFeature({
+  slashMenu: {
+    groups: [
+      slashMenuBasicGroupWithItems([
+        {
+          Icon: IconComponent,
+          key: 'myNode',
+          keywords: ['myNode', 'myFeature', 'someOtherKeyword'],
+          label: ({ i18n }) => {
+            return i18n.t('lexical:myFeature:label')
+          },
+          onSelect: ({ editor }) => {
+            editor.dispatchCommand(INSERT_MYNODE_COMMAND, undefined)
+          },
+        },
+      ]),
+    ],
+  },
+})
+```
+
+| Option         | Description                                                                                                                                                                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Icon`**     | The icon which is rendered in your slash menu item.                                                                                                                                                                                                                               |
+| **`label`**    | The label will be displayed in your slash menu item. In order to make use of i18n, this can be a function.                                                                                                                                                                        |
+| **`key`**      | Each slash menu item needs to have a unique key. The key will be matched when typing, displayed if no `label` property is set, and used for classNames.                                                                                                                           |
+| **`onSelect`** | A function which is called when the slash menu item is selected.                                                                                                                                                                                                                  |
+| **`keywords`** | Keywords are used to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. In addition to the keywords, the label and key will be used to find the right slash menu item. |
+
+### Markdown Transformers#client-feature-markdown-transformers
+
+The Client Feature, just like the Server Feature, allows you to add markdown transformers. Markdown transformers on the client are used to create new nodes when a certain markdown pattern is typed in the editor.
+
+```ts
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import type { ElementTransformer } from '@payloadcms/richtext-lexical/lexical/markdown'
+import { $createMyNode, $isMyNode, MyNode } from './nodes/MyNode'
+
+const MyMarkdownTransformer: ElementTransformer = {
+  type: 'element',
+  dependencies: [MyNode],
+  export: (node, exportChildren) => {
+    if (!$isMyNode(node)) {
+      return null
+    }
+    return '+++'
+  },
+  // match ---
+  regExp: /^+++\s*$/,
+  replace: (parentNode) => {
+    const node = $createMyNode()
+    if (node) {
+      parentNode.replace(node)
+    }
+  },
+}
+
+export const MyFeature = createClientFeature({
+  markdownTransformers: [MyMarkdownTransformer],
+})
+```
+
+In this example, a new `MyNode` will be inserted into the editor when `+++ ` is typed.
+
+### Providers
+
+You can add providers to your client feature, which will be nested below the `EditorConfigProvider`. This can be useful if you want to provide some context to your nodes or other parts of your feature.
+
+```ts
+'use client'
+
+import { createClientFeature } from '@payloadcms/richtext-lexical/client'
+import { TableContext } from './context'
+
+export const MyClientFeature = createClientFeature({
+  providers: [TableContext],
+})
+```
+
+## Props
+
+To accept props in your feature, type them as a generic.
+
+Server Feature:
+
+```ts
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+})
+```
+
+Client Feature:
+
+```ts
+createClientFeature<UnSanitizedClientProps, SanitizedClientProps>({
+  //...
+})
+```
+
+The unSanitized props are what the user will pass to the feature when they call its provider function and add it to their editor config. You then have an option to sanitize those props.
+To sanitize those in the server feature, you can pass a function to `feature` instead of an object:
+
+```ts
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+  feature: async ({
+    config,
+    isRoot,
+    props,
+    resolvedFeatures,
+    unSanitizedEditorConfig,
+    featureProviderMap,
+  }) => {
+    const sanitizedProps = doSomethingWithProps(props)
+
+    return {
+      sanitizedServerFeatureProps: sanitizedProps,
+      //Actual server feature here...
+    }
+  },
+})
+```
+
+Keep in mind that any sanitized props then have to be returned in the `sanitizedServerFeatureProps` property.
+
+In the client feature, it works similarly:
+
+```ts
+createClientFeature<UnSanitizedClientProps, SanitizedClientProps>(
+  ({
+    clientFunctions,
+    featureProviderMap,
+    props,
+    resolvedFeatures,
+    unSanitizedEditorConfig,
+  }) => {
+    const sanitizedProps = doSomethingWithProps(props)
+    return {
+      sanitizedClientFeatureProps: sanitizedProps,
+      //Actual client feature here...
+    }
+  },
+)
+```
+
+### Bringing props from the server to the client
+
+By default, the client feature will never receive any props from the server feature. In order to pass props from the server to the client, you can need to return those props in the server feature:
+
+```ts
+type UnSanitizedClientProps = {
+  test: string
+}
+
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+  //...
+  feature: {
+    clientFeatureProps: {
+      test: 'myValue',
+    },
+  },
+})
+```
+
+The reason the client feature does not have the same props available as the server by default is because all client props need to be serializable. You can totally accept things like functions or Maps as props in your server feature, but you will not be able to send those to the client. In the end, those props are sent from the server to the client over the network, so they need to be serializable.
+
+## More information
+
+Have a look at the [features we've already built](https://github.com/payloadcms/payload/tree/main/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of Payload or not!

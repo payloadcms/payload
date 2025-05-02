@@ -4,7 +4,7 @@ import { postsSlug } from '../shared.js'
 
 export const postsPage: Partial<Page> = {
   title: 'Posts',
-  slug: 'live-preview/posts',
+  slug: 'posts',
   meta: {
     title: 'Payload Website Template',
     description: 'An open-source website built with Payload and Next.js.',

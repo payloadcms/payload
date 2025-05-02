@@ -1,32 +1,34 @@
-import type { MarkOptional } from 'ts-essentials'
-
-import type { ServerProps, StaticLabel } from '../../config/types.js'
-import type { ClientField, Field } from '../../fields/config/types.js'
-import type { MappedComponent } from '../types.js'
+import type { StaticLabel } from '../../config/types.js'
+import type { Field } from '../../fields/config/types.js'
+import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.js'
 
 export type GenericLabelProps = {
-  readonly as?: 'label' | 'span'
+  readonly as?: 'h3' | 'label' | 'span'
+  readonly hideLocale?: boolean
   readonly htmlFor?: string
-  readonly Label?: MappedComponent
   readonly label?: StaticLabel
+  readonly localized?: boolean
+  readonly path?: string
   readonly required?: boolean
   readonly unstyled?: boolean
 }
 
-type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
-
 export type FieldLabelClientProps<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends Partial<ClientFieldWithOptionalType> = Partial<ClientFieldWithOptionalType>,
 > = {
-  field: TFieldClient
+  field?: TFieldClient
 } & GenericLabelProps
 
-export type FieldLabelServerProps<TFieldServer extends Field> = {
-  field: TFieldServer
+export type FieldLabelServerProps<
+  TFieldServer extends Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = {
+  clientField: TFieldClient
+  readonly field: TFieldServer
 } & GenericLabelProps &
-  Partial<ServerProps>
+  ServerComponentProps
 
-export type SanitizedLabelProps<TFieldClient extends ClientField> = Omit<
+export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType> = Omit<
   FieldLabelClientProps<TFieldClient>,
   'label' | 'required'
 >
@@ -35,6 +37,7 @@ export type FieldLabelClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
 > = React.ComponentType<FieldLabelClientProps<TFieldClient>>
 
-export type FieldLabelServerComponent<TFieldServer extends Field = Field> = React.ComponentType<
-  FieldLabelServerProps<TFieldServer>
->
+export type FieldLabelServerComponent<
+  TFieldServer extends Field = Field,
+  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+> = React.ComponentType<FieldLabelServerProps<TFieldServer, TFieldClient>>

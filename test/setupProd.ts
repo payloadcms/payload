@@ -7,6 +7,7 @@ const dirname = path.dirname(filename)
 
 export const tgzToPkgNameMap = {
   payload: 'payload-*',
+  '@payloadcms/admin-bar': 'payloadcms-admin-bar-*',
   '@payloadcms/db-mongodb': 'payloadcms-db-mongodb-*',
   '@payloadcms/db-postgres': 'payloadcms-db-postgres-*',
   '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
@@ -20,12 +21,13 @@ export const tgzToPkgNameMap = {
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
   '@payloadcms/next': 'payloadcms-next-*',
-  '@payloadcms/plugin-cloud': 'payloadcms-plugin-cloud-*',
+  '@payloadcms/payload-cloud': 'payloadcms-payload-cloud-*',
   '@payloadcms/plugin-cloud-storage': 'payloadcms-plugin-cloud-storage-*',
   '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
+  '@payloadcms/plugin-import-export': 'payloadcms-plugin-import-export-*',
+  '@payloadcms/plugin-multi-tenant': 'payloadcms-plugin-multi-tenant-*',
   '@payloadcms/plugin-nested-docs': 'payloadcms-plugin-nested-docs-*',
   '@payloadcms/plugin-redirects': 'payloadcms-plugin-redirects-*',
-  '@payloadcms/plugin-relationship-object-ids': 'payloadcms-plugin-relationship-object-ids-*',
   '@payloadcms/plugin-search': 'payloadcms-plugin-search-*',
   '@payloadcms/plugin-sentry': 'payloadcms-plugin-sentry-*',
   '@payloadcms/plugin-seo': 'payloadcms-plugin-seo-*',

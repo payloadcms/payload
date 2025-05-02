@@ -10,6 +10,7 @@ export type Props = {
   children: React.ReactNode
   className?: string
   delay?: number
+  position?: 'bottom' | 'top'
   show?: boolean
   /**
    * If the tooltip position should not change depending on if the toolbar is outside the boundingRef. @default false
@@ -24,6 +25,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     children,
     className,
     delay = 350,
+    position: positionFromProps,
     show: showFromProps = true,
     staticPositioning = false,
   } = props
@@ -43,11 +45,11 @@ export const Tooltip: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    let timerId: NodeJS.Timeout
+    let timerID: NodeJS.Timeout
 
     // do not use the delay on transition-out
     if (delay && showFromProps) {
-      timerId = setTimeout(() => {
+      timerID = setTimeout(() => {
         setShow(showFromProps)
       }, delay)
     } else {
@@ -55,8 +57,8 @@ export const Tooltip: React.FC<Props> = (props) => {
     }
 
     return () => {
-      if (timerId) {
-        clearTimeout(timerId)
+      if (timerID) {
+        clearTimeout(timerID)
       }
     }
   }, [showFromProps, delay])
@@ -89,7 +91,7 @@ export const Tooltip: React.FC<Props> = (props) => {
           className,
           show && 'tooltip--show',
           `tooltip--caret-${alignCaret}`,
-          `tooltip--position-${position}`,
+          `tooltip--position-${positionFromProps || position}`,
         ]
           .filter(Boolean)
           .join(' ')}

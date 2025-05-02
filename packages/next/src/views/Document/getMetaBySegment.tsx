@@ -4,12 +4,12 @@ import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } fro
 import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { generateMetadata as apiMeta } from '../API/meta.js'
-import { generateMetadata as editMeta } from '../Edit/meta.js'
-import { generateMetadata as livePreviewMeta } from '../LivePreview/meta.js'
-import { generateNotFoundMeta } from '../NotFound/meta.js'
-import { generateMetadata as versionMeta } from '../Version/meta.js'
-import { generateMetadata as versionsMeta } from '../Versions/meta.js'
+import { generateAPIViewMetadata } from '../API/metadata.js'
+import { generateEditViewMetadata } from '../Edit/metadata.js'
+import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
+import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
+import { generateVersionViewMetadata } from '../Version/metadata.js'
+import { generateVersionsViewMetadata } from '../Versions/metadata.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export type GenerateEditViewMetadata = (
@@ -40,7 +40,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   if (isCollection) {
     // `/:collection/:id`
     if (params.segments.length === 3) {
-      fn = editMeta
+      fn = generateEditViewMetadata
     }
 
     // `/:collection/:id/:view`
@@ -48,15 +48,15 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       switch (params.segments[3]) {
         case 'api':
           // `/:collection/:id/api`
-          fn = apiMeta
+          fn = generateAPIViewMetadata
           break
         case 'preview':
           // `/:collection/:id/preview`
-          fn = livePreviewMeta
+          fn = generateLivePreviewViewMetadata
           break
         case 'versions':
           // `/:collection/:id/versions`
-          fn = versionsMeta
+          fn = generateVersionsViewMetadata
           break
         default:
           break
@@ -68,7 +68,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       switch (params.segments[3]) {
         case 'versions':
           // `/:collection/:id/versions/:version`
-          fn = versionMeta
+          fn = generateVersionViewMetadata
           break
         default:
           break
@@ -79,7 +79,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   if (isGlobal) {
     // `/:global`
     if (params.segments?.length === 2) {
-      fn = editMeta
+      fn = generateEditViewMetadata
     }
 
     // `/:global/:view`
@@ -87,15 +87,15 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       switch (params.segments[2]) {
         case 'api':
           // `/:global/api`
-          fn = apiMeta
+          fn = generateAPIViewMetadata
           break
         case 'preview':
           // `/:global/preview`
-          fn = livePreviewMeta
+          fn = generateLivePreviewViewMetadata
           break
         case 'versions':
           // `/:global/versions`
-          fn = versionsMeta
+          fn = generateVersionsViewMetadata
           break
         default:
           break
@@ -104,7 +104,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
 
     // `/:global/versions/:version`
     if (params.segments?.length === 4 && params.segments[2] === 'versions') {
-      fn = versionMeta
+      fn = generateVersionViewMetadata
     }
   }
 
@@ -135,7 +135,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         globalConfig?.admin?.components?.views?.edit?.[viewKey]
 
       if (customViewConfig) {
-        return editMeta({
+        return generateEditViewMetadata({
           collectionConfig,
           config,
           globalConfig,
@@ -147,5 +147,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     }
   }
 
-  return generateNotFoundMeta({ config, i18n })
+  return generateNotFoundViewMetadata({ config, i18n })
 }

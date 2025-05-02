@@ -3,10 +3,11 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
-import type { Block } from 'payload'
+import type { Block, Field } from 'payload'
 
+//import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import type { FormSubmission } from './payload-types.js'
 
@@ -41,7 +42,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [Pages, Users],
-  editor: slateEditor({}),
+  editor: lexicalEditor({}),
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -58,9 +59,11 @@ export default buildConfigWithDefaults({
 
     await seed(payload)
   },
+  //email: nodemailerAdapter(),
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
+      //defaultToEmail: 'devs@payloadcms.com',
       fields: {
         colorField,
         payment: true,
@@ -101,8 +104,25 @@ export default buildConfigWithDefaults({
       },
       formSubmissionOverrides: {
         fields: ({ defaultFields }) => {
+          const modifiedFields: Field[] = defaultFields.map((field) => {
+            if ('name' in field && field.type === 'group' && field.name === 'payment') {
+              return {
+                ...field,
+                fields: [
+                  ...field.fields, // comment this out to override payments group entirely
+                  {
+                    name: 'stripeCheckoutSession',
+                    type: 'text',
+                  },
+                ],
+              }
+            }
+
+            return field
+          })
+
           return [
-            ...defaultFields,
+            ...modifiedFields,
             {
               name: 'custom',
               type: 'text',

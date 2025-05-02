@@ -1,7 +1,8 @@
-import jwt from 'jsonwebtoken'
+// @ts-strict-ignore
+import { jwtVerify } from 'jose'
 
 import type { Payload, Where } from '../../types/index.js'
-import type { AuthStrategyFunction, User } from '../index.js'
+import type { AuthStrategyFunction, AuthStrategyResult, User } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
 
@@ -13,11 +14,13 @@ type JWTToken = {
 async function autoLogin({
   isGraphQL,
   payload,
+  strategyName = 'local-jwt',
 }: {
   isGraphQL: boolean
   payload: Payload
+  strategyName?: string
 }): Promise<{
-  user: null | User
+  user: AuthStrategyResult['user']
 }> {
   if (
     typeof payload?.config?.admin?.autoLogin !== 'object' ||
@@ -34,13 +37,13 @@ async function autoLogin({
     or: [],
   }
   if (payload.config.admin?.autoLogin.email) {
-    where.or.push({
+    where.or?.push({
       email: {
         equals: payload.config.admin?.autoLogin.email,
       },
     })
   } else if (payload.config.admin?.autoLogin.username) {
-    where.or.push({
+    where.or?.push({
       username: {
         equals: payload.config.admin?.autoLogin.username,
       },
@@ -51,61 +54,67 @@ async function autoLogin({
     await payload.find({
       collection: collection.config.slug,
       depth: isGraphQL ? 0 : collection.config.auth.depth,
+      limit: 1,
+      pagination: false,
       where,
     })
-  ).docs[0]
+  ).docs[0] as AuthStrategyResult['user']
 
   if (!user) {
     return { user: null }
   }
   user.collection = collection.config.slug
-  user._strategy = 'local-jwt'
+  user._strategy = strategyName
 
   return {
-    user: user as User,
+    user,
   }
 }
 
+/**
+ * Authentication strategy function for JWT tokens
+ */
 export const JWTAuthentication: AuthStrategyFunction = async ({
   headers,
   isGraphQL = false,
   payload,
+  strategyName = 'local-jwt',
 }) => {
   try {
     const token = extractJWT({ headers, payload })
 
     if (!token) {
       if (headers.get('DisableAutologin') !== 'true') {
-        return await autoLogin({ isGraphQL, payload })
+        return await autoLogin({ isGraphQL, payload, strategyName })
       }
       return { user: null }
     }
 
-    const decodedPayload = jwt.verify(token, payload.secret) as jwt.JwtPayload & JWTToken
-
+    const secretKey = new TextEncoder().encode(payload.secret)
+    const { payload: decodedPayload } = await jwtVerify<JWTToken>(token, secretKey)
     const collection = payload.collections[decodedPayload.collection]
 
-    const user = await payload.findByID({
+    const user = (await payload.findByID({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
       depth: isGraphQL ? 0 : collection.config.auth.depth,
-    })
+    })) as AuthStrategyResult['user']
 
     if (user && (!collection.config.auth.verify || user._verified)) {
       user.collection = collection.config.slug
-      user._strategy = 'local-jwt'
+      user._strategy = strategyName
       return {
-        user: user as User,
+        user,
       }
     } else {
       if (headers.get('DisableAutologin') !== 'true') {
-        return await autoLogin({ isGraphQL, payload })
+        return await autoLogin({ isGraphQL, payload, strategyName })
       }
       return { user: null }
     }
-  } catch (error) {
+  } catch (ignore) {
     if (headers.get('DisableAutologin') !== 'true') {
-      return await autoLogin({ isGraphQL, payload })
+      return await autoLogin({ isGraphQL, payload, strategyName })
     }
     return { user: null }
   }

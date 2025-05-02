@@ -1,0 +1,244 @@
+---
+title: Queues
+label: Queues
+order: 50
+desc: A Queue is a specific group of jobs which can be executed in the order that they were added.
+keywords: jobs queue, application framework, typescript, node, react, nextjs
+---
+
+Queues are the final aspect of Payload's Jobs Queue and deal with how to _run your jobs_. Up to this point, all we've covered is how to queue up jobs to run, but so far, we aren't actually running any jobs.
+
+<Banner type="default">
+  A **Queue** is a grouping of jobs that should be executed in order of when
+  they were added.
+</Banner>
+
+When you go to run jobs, Payload will query for any jobs that are added to the queue and then run them. By default, all queued jobs are added to the `default` queue.
+
+**But, imagine if you wanted to have some jobs that run nightly, and other jobs which should run every five minutes.**
+
+By specifying the `queue` name when you queue a new job using `payload.jobs.queue()`, you can queue certain jobs with `queue: 'nightly'`, and other jobs can be left as the default queue.
+
+Then, you could configure two different runner strategies:
+
+1. A `cron` that runs nightly, querying for jobs added to the `nightly` queue
+2. Another that runs any jobs that were added to the `default` queue every ~5 minutes or so
+
+## Executing jobs
+
+As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in four ways:
+
+### Cron jobs
+
+You can use the `jobs.autoRun` property to configure cron jobs:
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    // autoRun can optionally be a function that receives `payload` as an argument
+    autoRun: [
+      {
+        cron: '0 * * * *', // every hour at minute 0
+        limit: 100, // limit jobs to process each run
+        queue: 'hourly', // name of the queue
+      },
+      // add as many cron jobs as you want
+    ],
+    shouldAutoRun: async (payload) => {
+      // Tell Payload if it should run jobs or not.
+      // This function will be invoked each time Payload goes to pick up and run jobs.
+      // If this function ever returns false, the cron schedule will be stopped.
+      return true
+    },
+  },
+})
+```
+
+<Banner type="warning">
+  autoRun is intended for use with a dedicated server that is always running,
+  and should not be used on serverless platforms like Vercel.
+</Banner>
+
+### Endpoint
+
+You can execute jobs by making a fetch request to the `/api/payload-jobs/run` endpoint:
+
+```ts
+// Here, we're saying we want to run only 100 jobs for this invocation
+// and we want to pull jobs from the `nightly` queue:
+await fetch('/api/payload-jobs/run?limit=100&queue=nightly', {
+  method: 'GET',
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
+```
+
+This endpoint is automatically mounted for you and is helpful in conjunction with serverless platforms like Vercel, where you might want to use Vercel Cron to invoke a serverless function that executes your jobs.
+
+**Vercel Cron Example**
+
+If you're deploying on Vercel, you can add a `vercel.json` file in the root of your project that configures Vercel Cron to invoke the `run` endpoint on a cron schedule.
+
+Here's an example of what this file will look like:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/payload-jobs/run",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
+
+The configuration above schedules the endpoint `/api/payload-jobs/run` to be invoked every 5 minutes.
+
+The last step will be to secure your `run` endpoint so that only the proper users can invoke the runner.
+
+To do this, you can set an environment variable on your Vercel project called `CRON_SECRET`, which should be a random string—ideally 16 characters or longer.
+
+Then, you can modify the `access` function for running jobs by ensuring that only Vercel can invoke your runner.
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        // Allow logged in users to execute this endpoint (default)
+        if (req.user) return true
+
+        // If there is no logged in user, then check
+        // for the Vercel Cron secret to be present as an
+        // Authorization header:
+        const authHeader = req.headers.get('authorization')
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+      },
+    },
+    // Other job configurations...
+  },
+})
+```
+
+This works because Vercel automatically makes the `CRON_SECRET` environment variable available to the endpoint as the `Authorization` header when triggered by the Vercel Cron, ensuring that the jobs can be run securely.
+
+After the project is deployed to Vercel, the Vercel Cron job will automatically trigger the `/api/payload-jobs/run` endpoint in the specified schedule, running the queued jobs in the background.
+
+### Local API
+
+If you want to process jobs programmatically from your server-side code, you can use the Local API:
+
+**Run all jobs:**
+
+```ts
+const results = await payload.jobs.run()
+
+// You can customize the queue name and limit by passing them as arguments:
+await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// You can provide a where clause to filter the jobs that should be run:
+await payload.jobs.run({
+  where: { 'input.message': { equals: 'secret' } },
+})
+```
+
+**Run a single job:**
+
+```ts
+const results = await payload.jobs.runByID({
+  id: myJobID,
+})
+```
+
+### Bin script
+
+Finally, you can process jobs via the bin script that comes with Payload out of the box.
+
+```sh
+npx payload jobs:run --queue default --limit 10
+```
+
+In addition, the bin script allows you to pass a `--cron` flag to the `jobs:run` command to run the jobs on a scheduled, cron basis:
+
+```sh
+npx payload jobs:run --cron "*/5 * * * *"
+```
+
+## Processing Order
+
+By default, jobs are processed first in, first out (FIFO). This means that the first job added to the queue will be the first one processed. However, you can also configure the order in which jobs are processed.
+
+### Jobs Configuration
+
+You can configure the order in which jobs are processed in the jobs configuration by passing the `processingOrder` property. This mimics the Payload [sort](../queries/sort) property that's used for functionality such as `payload.find()`.
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    processingOrder: '-createdAt', // Process jobs in reverse order of creation = LIFO
+  },
+})
+```
+
+You can also set this on a queue-by-queue basis:
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    processingOrder: {
+      default: 'createdAt', // FIFO
+      queues: {
+        nightly: '-createdAt', // LIFO
+        myQueue: '-createdAt', // LIFO
+      },
+    },
+  },
+})
+```
+
+If you need even more control over the processing order, you can pass a function that returns the processing order - this function will be called every time a queue starts processing jobs.
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    processingOrder: ({ queue }) => {
+      if (queue === 'myQueue') {
+        return '-createdAt' // LIFO
+      }
+      return 'createdAt' // FIFO
+    },
+  },
+})
+```
+
+### Local API
+
+You can configure the order in which jobs are processed in the `payload.jobs.queue` method by passing the `processingOrder` property.
+
+```ts
+const createdJob = await payload.jobs.queue({
+  workflow: 'createPostAndUpdate',
+  input: {
+    title: 'my title',
+  },
+  processingOrder: '-createdAt', // Process jobs in reverse order of creation = LIFO
+})
+```

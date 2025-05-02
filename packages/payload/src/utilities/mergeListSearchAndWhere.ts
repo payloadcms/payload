@@ -1,71 +1,60 @@
+import type { ClientCollectionConfig } from '../collections/config/client.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { FieldAffectingData } from '../fields/config/types.js'
 import type { Where } from '../types/index.js'
 
-import { fieldAffectsData } from '../fields/config/types.js'
-import { default as flattenTopLevelFields } from './flattenTopLevelFields.js'
+const isEmptyObject = (obj: object) => Object.keys(obj).length === 0
 
-const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
-  if ('and' in where) {
-    where.and.push(queryParams)
-  } else if ('or' in where) {
-    where = {
-      and: [where, queryParams],
+export const hoistQueryParamsToAnd = (currentWhere: Where, incomingWhere: Where) => {
+  if (isEmptyObject(incomingWhere)) {
+    return currentWhere
+  }
+
+  if (isEmptyObject(currentWhere)) {
+    return incomingWhere
+  }
+
+  if ('and' in currentWhere && currentWhere.and) {
+    currentWhere.and.push(incomingWhere)
+  } else if ('or' in currentWhere) {
+    currentWhere = {
+      and: [currentWhere, incomingWhere],
     }
   } else {
-    where = {
-      and: [where, queryParams],
+    currentWhere = {
+      and: [currentWhere, incomingWhere],
     }
   }
 
-  return where
-}
-
-const getTitleField = (collection: SanitizedCollectionConfig): FieldAffectingData => {
-  const {
-    admin: { useAsTitle },
-    fields,
-  } = collection
-
-  const topLevelFields = flattenTopLevelFields(fields)
-  return topLevelFields.find(
-    (field) => fieldAffectsData(field) && field.name === useAsTitle,
-  ) as FieldAffectingData
+  return currentWhere
 }
 
 type Args = {
-  collectionConfig: SanitizedCollectionConfig
-  query: {
-    search?: string
-    where?: Where
-  }
+  collectionConfig: ClientCollectionConfig | SanitizedCollectionConfig
+  search: string
+  where?: Where
 }
 
-export const mergeListSearchAndWhere = ({ collectionConfig, query }: Args): Where => {
-  const search = query?.search || undefined
-  let where = query?.where || undefined
-
+export const mergeListSearchAndWhere = ({ collectionConfig, search, where = {} }: Args): Where => {
   if (search) {
     let copyOfWhere = { ...(where || {}) }
 
     const searchAsConditions = (
-      collectionConfig.admin.listSearchableFields || [getTitleField(collectionConfig)?.name || 'id']
-    ).map((fieldName) => {
-      return {
-        [fieldName]: {
-          like: search,
-        },
-      }
-    }, [])
+      collectionConfig.admin.listSearchableFields || [collectionConfig.admin?.useAsTitle || 'id']
+    ).map((fieldName) => ({
+      [fieldName]: {
+        like: search,
+      },
+    }))
 
     if (searchAsConditions.length > 0) {
-      const conditionalSearchFields = {
-        or: [...searchAsConditions],
-      }
-      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, conditionalSearchFields)
+      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, {
+        or: searchAsConditions,
+      })
     }
 
-    where = copyOfWhere
+    if (!isEmptyObject(copyOfWhere)) {
+      where = copyOfWhere
+    }
   }
 
   return where

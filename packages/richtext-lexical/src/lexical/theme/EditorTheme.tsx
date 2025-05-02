@@ -1,4 +1,3 @@
-'use client'
 import type { EditorThemeClasses } from 'lexical'
 
 export const LexicalEditorTheme: EditorThemeClasses = {
@@ -52,6 +51,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
     h6: 'LexicalEditorTheme__h6',
   },
   hr: 'LexicalEditorTheme__hr',
+  hrSelected: 'LexicalEditorTheme__hrSelected',
   indent: 'LexicalEditorTheme__indent',
   inlineImage: 'LexicalEditor__inline-image',
   link: 'LexicalEditorTheme__link',
@@ -79,20 +79,25 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   quote: 'LexicalEditorTheme__quote',
   relationship: 'LexicalEditorTheme__relationship',
   rtl: 'LexicalEditorTheme__rtl',
+  tab: 'LexicalEditorTheme__tabNode',
   table: 'LexicalEditorTheme__table',
   tableAddColumns: 'LexicalEditorTheme__tableAddColumns',
   tableAddRows: 'LexicalEditorTheme__tableAddRows',
+  tableAlignment: {
+    center: 'LexicalEditorTheme__tableAlignmentCenter',
+    right: 'LexicalEditorTheme__tableAlignmentRight',
+  },
   tableCell: 'LexicalEditorTheme__tableCell',
   tableCellActionButton: 'LexicalEditorTheme__tableCellActionButton',
   tableCellActionButtonContainer: 'LexicalEditorTheme__tableCellActionButtonContainer',
-  tableCellEditing: 'LexicalEditorTheme__tableCellEditing',
   tableCellHeader: 'LexicalEditorTheme__tableCellHeader',
-  tableCellPrimarySelected: 'LexicalEditorTheme__tableCellPrimarySelected',
   tableCellResizer: 'LexicalEditorTheme__tableCellResizer',
   tableCellSelected: 'LexicalEditorTheme__tableCellSelected',
-  tableCellSortedIndicator: 'LexicalEditorTheme__tableCellSortedIndicator',
-  tableResizeRuler: 'LexicalEditorTheme__tableCellResizeRuler',
+  tableFrozenColumn: 'LexicalEditorTheme__tableFrozenColumn',
+  tableRowStriping: 'LexicalEditorTheme__tableRowStriping',
+  tableScrollableWrapper: 'LexicalEditorTheme__tableScrollableWrapper',
   tableSelected: 'LexicalEditorTheme__tableSelected',
+  tableSelection: 'LexicalEditorTheme__tableSelection',
   text: {
     bold: 'LexicalEditorTheme__textBold',
     code: 'LexicalEditorTheme__textCode',

@@ -1,13 +1,41 @@
 /**
  * @param {import('next').NextConfig} nextConfig
+ * @param {Object} [options] - Optional configuration options
+ * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
  *
  * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}) => {
+export const withPayload = (nextConfig = {}, options = {}) => {
+  const env = nextConfig?.env || {}
+
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
-      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This may cause stale data to load in the Admin Panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
+    env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
+  }
+
+  if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
+    const turbopackWarningText =
+      'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
+
+    const consoleWarn = console.warn
+    console.warn = (...args) => {
+      // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
+      if (
+        (typeof args[1] === 'string' && args[1].includes(turbopackWarningText)) ||
+        (typeof args[0] === 'string' && args[0].includes(turbopackWarningText))
+      ) {
+        return
+      }
+
+      consoleWarn(...args)
+    }
+  }
+
+  const poweredByHeader = {
+    key: 'X-Powered-By',
+    value: 'Next.js, Payload',
   }
 
   /**
@@ -15,9 +43,7 @@ export const withPayload = (nextConfig = {}) => {
    */
   const toReturn = {
     ...nextConfig,
-    env: {
-      ...(nextConfig?.env || {}),
-    },
+    env,
     outputFileTracingExcludes: {
       ...(nextConfig?.outputFileTracingExcludes || {}),
       '**/*': [
@@ -30,16 +56,8 @@ export const withPayload = (nextConfig = {}) => {
       ...(nextConfig?.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
-    experimental: {
-      ...(nextConfig?.experimental || {}),
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          'payload-mock-package': 'payload-mock-package',
-        },
-      },
-    },
+    // We disable the poweredByHeader here because we add it manually in the headers function below
+    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -60,6 +78,7 @@ export const withPayload = (nextConfig = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
+            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]
@@ -72,6 +91,32 @@ export const withPayload = (nextConfig = {}) => {
       'libsql',
       'pino-pretty',
       'graphql',
+      // Do not bundle server-only packages during dev to improve compile speed
+      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
+        ? [
+            'payload',
+            '@payloadcms/db-mongodb',
+            '@payloadcms/db-postgres',
+            '@payloadcms/db-sqlite',
+            '@payloadcms/db-vercel-postgres',
+            '@payloadcms/drizzle',
+            '@payloadcms/email-nodemailer',
+            '@payloadcms/email-resend',
+            '@payloadcms/graphql',
+            '@payloadcms/payload-cloud',
+            '@payloadcms/plugin-redirects',
+            // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
+            //'@payloadcms/plugin-cloud-storage',
+            //'@payloadcms/plugin-sentry',
+            //'@payloadcms/plugin-stripe',
+            // @payloadcms/richtext-lexical
+            //'@payloadcms/storage-azure',
+            //'@payloadcms/storage-gcs',
+            //'@payloadcms/storage-s3',
+            //'@payloadcms/storage-uploadthing',
+            //'@payloadcms/storage-vercel-blob',
+          ]
+        : []),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -94,6 +139,13 @@ export const withPayload = (nextConfig = {}) => {
           { file: /node_modules\/mongodb\/lib\/utils\.js/ },
           { module: /node_modules\/mongodb\/lib\/bson\.js/ },
           { file: /node_modules\/mongodb\/lib\/bson\.js/ },
+        ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),

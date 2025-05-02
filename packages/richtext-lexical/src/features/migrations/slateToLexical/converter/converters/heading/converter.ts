@@ -11,7 +11,7 @@ export const SlateHeadingConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'heading',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       format: '',

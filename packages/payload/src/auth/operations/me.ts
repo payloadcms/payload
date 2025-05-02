@@ -1,4 +1,5 @@
-import jwt from 'jsonwebtoken'
+// @ts-strict-ignore
+import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -7,6 +8,12 @@ import type { ClientUser, User } from '../types.js'
 export type MeOperationResult = {
   collection?: string
   exp?: number
+  /** @deprecated
+   * use:
+   * ```ts
+   * user._strategy
+   * ```
+   */
   strategy?: string
   token?: string
   user?: ClientUser
@@ -38,13 +45,16 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       showHiddenFields: false,
     })) as User
 
+    if (user) {
+      user.collection = collection.config.slug
+      user._strategy = req.user._strategy
+    }
+
     if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       }
     }
-
-    delete user.collection
 
     // /////////////////////////////////////
     // me hook - Collection
@@ -62,13 +72,19 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     }
 
     result.collection = req.user.collection
+    /** @deprecated
+     * use:
+     * ```ts
+     * user._strategy
+     * ```
+     */
     result.strategy = req.user._strategy
 
     if (!result.user) {
       result.user = user
 
       if (currentToken) {
-        const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+        const decoded = decodeJwt(currentToken)
         if (decoded) {
           result.exp = decoded.exp
         }
@@ -83,17 +99,17 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   // After Me - Collection
   // /////////////////////////////////////
 
-  await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collection?.config,
-        context: req.context,
-        req,
-        response: result,
-      })) || result
-  }, Promise.resolve())
+  if (collection.config.hooks?.afterMe?.length) {
+    for (const hook of collection.config.hooks.afterMe) {
+      result =
+        (await hook({
+          collection: collection?.config,
+          context: req.context,
+          req,
+          response: result,
+        })) || result
+    }
+  }
 
   return result
 }

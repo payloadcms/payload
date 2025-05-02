@@ -1,7 +1,8 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -11,6 +12,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 
 export type Arguments = {
@@ -21,7 +23,9 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -34,8 +38,10 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     depth,
     draft,
     overrideAccess = false,
+    populate,
     req,
     req: { fallbackLocale, locale, payload },
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -110,11 +116,18 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // Update
     // /////////////////////////////////////
 
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     let result = await req.payload.db.updateOne({
       id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
       req,
+      select,
     })
 
     // /////////////////////////////////////
@@ -149,7 +162,9 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -157,17 +172,17 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -188,19 +203,19 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          operation: 'update',
-          previousDoc: prevDocWithLocales,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            operation: 'update',
+            previousDoc: prevDocWithLocales,
+            req,
+          })) || result
+      }
+    }
 
     return result
   } catch (error: unknown) {

@@ -10,25 +10,32 @@ import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../tran
 import { defaults } from '../../defaults.js'
 
 const {
-  description: { maxLength: maxDesc, minLength: minDesc },
-  title: { maxLength: maxTitle, minLength: minTitle },
+  description: { maxLength: maxDescDefault, minLength: minDescDefault },
+  title: { maxLength: maxTitleDefault, minLength: minTitleDefault },
 } = defaults
 
 type OverviewProps = {
+  descriptionOverrides?: {
+    maxLength?: number
+    minLength?: number
+  }
   descriptionPath?: string
   imagePath?: string
+  titleOverrides?: {
+    maxLength?: number
+    minLength?: number
+  }
   titlePath?: string
 } & UIField
 
 export const OverviewComponent: React.FC<OverviewProps> = ({
+  descriptionOverrides,
   descriptionPath: descriptionPathFromContext,
   imagePath: imagePathFromContext,
+  titleOverrides,
   titlePath: titlePathFromContext,
 }) => {
-  const {
-    //  dispatchFields,
-    getFields,
-  } = useForm()
+  const { getFields } = useForm()
 
   const descriptionPath = descriptionPathFromContext || 'meta.description'
   const titlePath = titlePathFromContext || 'meta.title'
@@ -47,15 +54,10 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
   const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const resetAll = useCallback(() => {
-    const fields = getFields()
-    const fieldsWithoutMeta = fields
-    fieldsWithoutMeta['meta.title'].value = ''
-    fieldsWithoutMeta['meta.description'].value = ''
-    fieldsWithoutMeta['meta.image'].value = ''
-    // dispatchFields(fieldsWithoutMeta);
-  }, [getFields])
+  const minDesc = descriptionOverrides?.minLength || minDescDefault
+  const maxDesc = descriptionOverrides?.maxLength || maxDescDefault
+  const minTitle = titleOverrides?.minLength || minTitleDefault
+  const maxTitle = titleOverrides?.maxLength || maxTitleDefault
 
   useEffect(() => {
     if (typeof metaTitle === 'string') {

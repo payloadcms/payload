@@ -14,8 +14,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import {
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormInitializing,
@@ -23,19 +23,27 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
+import { useFieldPath } from '../RenderFields/context.js'
 
 /**
  * Get and set the value of a form field.
  *
- * @see https://payloadcms.com/docs/admin/hooks#usefield
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
-export const useField = <T,>(options: Options): FieldType<T> => {
-  const { disableFormData = false, hasRows, validate } = options
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const {
+    disableFormData = false,
+    hasRows,
+    path: pathFromOptions,
+    potentiallyStalePath,
+    validate,
+  } = options || {}
 
-  const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
+  const pathFromContext = useFieldPath()
 
-  // Prioritize passed in path over context path. If the context path should be prioritized (which is the case for top-level useField calls in fields), it should be passed in as the options path.
-  const path = options.path || pathFromContext
+  // This is a workaround for stale props given to server rendered components.
+  // See the notes in the `potentiallyStalePath` type definition for more details.
+  const path = pathFromOptions || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -44,32 +52,32 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
-  const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
-    dispatchField: dispatch,
-    field: (fields && fields?.[path]) || null,
-  }))
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch)
+  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
   const { t } = useTranslation()
   const { config } = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
+  const documentForm = useDocumentForm()
   const modified = useFormModified()
 
   const filterOptions = field?.filterOptions
-  const value = field?.value as T
-  const initialValue = field?.initialValue as T
+  const value = field?.value as TValue
+  const initialValue = field?.initialValue as TValue
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
 
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
 
+  const pathSegments = path ? path.split('.') : []
+
   // Method to return from `useField`, used to
   // update field values from field component(s)
   const setValue = useCallback(
     (e, disableModifyingForm = false) => {
       const val = e && e.target ? e.target.value : e
-
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
@@ -107,8 +115,10 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result: FieldType<T> = useMemo(
+  const result: FieldType<TValue> = useMemo(
     () => ({
+      customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -117,20 +127,14 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       formSubmitted: submitted,
       initialValue,
       path,
-      permissions,
-      readOnly: readOnly || false,
       rows: field?.rows,
-      schemaPath,
       setValue,
       showError,
       valid: field?.valid,
       value,
     }),
     [
-      field?.errorMessage,
-      field?.rows,
-      field?.valid,
-      field?.errorPaths,
+      field,
       processing,
       setValue,
       showError,
@@ -138,9 +142,6 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       value,
       initialValue,
       path,
-      schemaPath,
-      readOnly,
-      permissions,
       filterOptions,
       initializing,
     ],
@@ -159,13 +160,17 @@ export const useField = <T,>(options: Options): FieldType<T> => {
         let errorMessage: string | undefined = prevErrorMessage.current
         let valid: boolean | string = prevValid.current
 
+        const data = getData()
         const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
+                blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
                 collectionSlug,
-                data: getData(),
+                data: documentForm?.getData ? documentForm.getData() : data,
+                event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {
@@ -176,7 +181,9 @@ export const useField = <T,>(options: Options): FieldType<T> => {
                 } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
               })
-            : true
+            : typeof prevErrorMessage.current === 'string'
+              ? prevErrorMessage.current
+              : prevValid.current
 
         if (typeof isValid === 'string') {
           valid = false

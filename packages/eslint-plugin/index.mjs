@@ -4,6 +4,7 @@ import noRelativeMonorepoImports from './customRules/no-relative-monorepo-import
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
+import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -11,10 +12,13 @@ import noImportsFromSelf from './customRules/no-imports-from-self.js'
 const index = {
   rules: {
     'no-jsx-import-statements': noJsxImportStatements,
-    'no-non-retryable-assertions': noNonRetryableAssertions,
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
+    'proper-payload-logger-usage': properPinoLoggerErrorUsage,
+
+    // Testing-related
+    'no-non-retryable-assertions': noNonRetryableAssertions,
     'no-flaky-assertions': noFlakyAssertions,
     'no-wait-function': {
       create: function (context) {

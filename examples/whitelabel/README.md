@@ -6,12 +6,14 @@ This example demonstrates how to re-brand or white-label the [Payload Admin Pane
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
-2. `cd` into this directory and run `yarn` or `npm install`
-3. `cp .env.example .env` to copy the example environment variables
-4. `yarn dev` or `npm run dev` to start the server and seed the database
-5. `open http://localhost:8000/admin` to access the admin panel
-6. Login with email `dev@payloadcms.com` and password `test`
+1. Run the following command to create a project from the example:
+
+- `npx create-payload-app --example whitelabel`
+
+2. `cp .env.example .env` to copy the example environment variables
+3. `pnpm install && pnpm dev` to install dependencies and start the dev server
+4. `open http://localhost:3000/admin` to access the admin panel
+5. Login with email `dev@payloadcms.com` and password `test`
 
 ## Re-branding walkthrough
 
@@ -19,11 +21,11 @@ Start by navigating to the `payload.config.ts` file and then take a look at the 
 
 The following sub-properties have already been configured:
 
-`favicon`: Image that will be displayed as the tab icon.
+`meta.icons`: Images that will be displayed as the tab icon.
 
-`ogImage`: Image that will appear in the preview when you share links to your admin panel online and through social media.
+`meta.openGraph.images`: Images that will appear in the preview when you share links to your admin panel online and through social media.
 
-`titleSuffix`: Text that appends the meta/page title displayed in the browser tab — _must be a string_.
+`meta.titleSuffix`: Text that appends the meta/page title displayed in the browser tab — _must be a string_.
 
 `graphics.Logo`: Image component to be displayed as the logo on the Sign Up / Login view.
 
@@ -41,10 +43,10 @@ On boot, a seed script is included to create a user.
 
 ## Production
 
-To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
+To run Payload in production, you need to build and start the Admin panel. To do so, follow these steps:
 
-1. First invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
+1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
+1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 
 ### Deployment
 

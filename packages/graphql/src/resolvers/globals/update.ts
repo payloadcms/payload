@@ -1,4 +1,10 @@
-import type { DataFromGlobalSlug, GlobalSlug, PayloadRequest, SanitizedGlobalConfig } from 'payload'
+import type {
+  DataFromGlobalSlug,
+  GlobalSlug,
+  PayloadRequest,
+  SanitizedGlobalConfig,
+  SelectType,
+} from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import { isolateObjectProperty, updateOperationGlobal } from 'payload'
@@ -40,7 +46,7 @@ export function update<TSlug extends GlobalSlug>(
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
-    const result = await updateOperationGlobal<TSlug>(options)
+    const result = await updateOperationGlobal<TSlug, SelectType>(options)
     return result
   }
 }

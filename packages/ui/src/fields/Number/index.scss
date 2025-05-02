@@ -1,30 +1,32 @@
 @import '../../scss/styles.scss';
 
-.field-type.number {
-  position: relative;
-
-  &:not(.has-many) {
-    input {
-      @include formInput;
-    }
-  }
-}
-
-html[data-theme='light'] {
+@layer payload-default {
   .field-type.number {
-    &.error {
+    position: relative;
+
+    &:not(.has-many) {
       input {
-        @include lightInputError;
+        @include formInput;
       }
     }
   }
-}
 
-html[data-theme='dark'] {
-  .field-type.number {
-    &.error {
-      input {
-        @include darkInputError;
+  html[data-theme='light'] {
+    .field-type.number {
+      &.error {
+        input {
+          @include lightInputError;
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .field-type.number {
+      &.error {
+        input {
+          @include darkInputError;
+        }
       }
     }
   }

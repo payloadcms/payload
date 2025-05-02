@@ -1,20 +1,21 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+// @ts-strict-ignore
+import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
-  Field,
   FieldAffectingData,
   RichTextField,
   RichTextFieldClient,
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JsonObject, Payload, PayloadRequest, RequestContext } from '../types/index.js'
-import type { RichTextFieldProps } from './fields/RichText.js'
-import type { CreateMappedComponent } from './types.js'
+import type { RequestContext } from '../index.js'
+import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
+import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
+import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -28,7 +29,6 @@ export type AfterReadRichTextHookArgs<
   draft?: boolean
 
   fallbackLocale?: string
-
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -42,6 +42,8 @@ export type AfterReadRichTextHookArgs<
   operation?: 'create' | 'delete' | 'read' | 'update'
 
   overrideAccess?: boolean
+
+  populate?: PopulateType
 
   populationPromises?: Promise<void>[]
   showHiddenFields?: boolean
@@ -89,20 +91,26 @@ export type BeforeChangeRichTextHookArgs<
 
   duplicate?: boolean
 
-  errors?: { field: string; message: string }[]
+  errors?: ValidationFieldError[]
+  /**
+   * Built up field label
+   *
+   * @example "Group Field > Tab Field > Rich Text Field"
+   */
+  fieldLabelPath: string
   /** Only available in `beforeChange` field hooks */
-  mergeLocaleActions?: (() => Promise<void>)[]
+  mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
   previousValue?: TValue
+
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
   siblingDocWithLocales?: JsonObject
-
   skipValidation?: boolean
 }
 
@@ -120,14 +128,14 @@ export type BaseRichTextHookArgs<
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
-
+  indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
+  parentIsLocalized: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]
-
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /**
@@ -182,32 +190,19 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
-
-export type RichTextGenerateComponentMap = (args: {
-  clientField: RichTextFieldClient
-  createMappedComponent: CreateMappedComponent
-  field: RichTextField
-  i18n: I18nClient
-
-  importMap: ImportMap
-  payload: Payload
-  schemaPath: string
-}) => Map<string, unknown>
-
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateComponentMap: PayloadComponent<any, never>
   generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
     i18n: I18n<any, any>
-    schemaMap: Map<string, Field[]>
+    schemaMap: FieldSchemaMap
     schemaPath: string
-  }) => Map<string, Field[]>
+  }) => FieldSchemaMap
   /**
    * Like an afterRead hook, but runs only for the GraphQL resolver. For populating data, this should be used, as afterRead hooks do not have a depth in graphQL.
    *
@@ -224,6 +219,8 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    parentIsLocalized: boolean
+    populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
@@ -231,16 +228,11 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>
-  outputSchema?: ({
-    collectionIDFieldTypes,
-    config,
-    field,
-    interfaceNameDefinitions,
-    isRequired,
-  }: {
+  outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    i18n?: I18n
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.
      */
@@ -261,7 +253,15 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<never, RichTextFieldProps>
+  /**
+   * Component that will be displayed in the version diff view.
+   * If not provided, richtext content will be diffed as JSON.
+   */
+  DiffComponent?: PayloadComponent<
+    FieldDiffServerProps<RichTextField, RichTextFieldClient>,
+    FieldDiffClientProps<RichTextFieldClient>
+  >
+  FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

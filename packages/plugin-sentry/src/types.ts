@@ -1,36 +1,46 @@
-import type { RequestHandlerOptions } from '@sentry/node/types/handlers'
-import type { ClientOptions } from '@sentry/types'
+import type { ScopeContext } from '@sentry/types'
+import type { AfterErrorHookArgs } from 'payload'
+
+type SentryInstance = {
+  captureException: (err: Error, hint: any) => string
+}
+
+type ContextArgs = {
+  defaultContext: Partial<ScopeContext>
+} & AfterErrorHookArgs
 
 export interface PluginOptions {
   /**
-   * Sentry DSN (Data Source Name)
-   * This is required unless enabled is set to false.
-   * Sentry automatically assigns a DSN when you create a project.
-   * If you don't have a DSN yet, you can create a new project here: https://sentry.io
-   */
-  dsn: null | string
-  /**
    * Enable or disable Sentry plugin
-   * @default false
+   * @default true
    */
   enabled?: boolean
   /**
    * Options passed directly to Sentry
-   * @default false
    */
   options?: {
     /**
      * Sentry will only capture 500 errors by default.
      * If you want to capture other errors, you can add them as an array here.
+     * @default []
      */
     captureErrors?: number[]
     /**
-     * Passes any valid options to Sentry.init()
+     * Set `ScopeContext` for `Sentry.captureException` which includes `user` and other info.
      */
-    init?: Partial<ClientOptions>
+    context?: (args: ContextArgs) => Partial<ScopeContext> | Promise<Partial<ScopeContext>>
     /**
-     * Passes any valid options to Sentry.Handlers.requestHandler()
+     * Log captured exceptions,
+     * @default false
      */
-    requestHandler?: RequestHandlerOptions
+    debug?: boolean
   }
+  /**
+   * Instance of Sentry from
+   * ```ts
+   * import * as Sentry from '@sentry/nextjs'
+   * ```
+   * This is required unless enabled is set to false.
+   */
+  Sentry?: SentryInstance
 }

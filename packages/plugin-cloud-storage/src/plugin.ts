@@ -60,6 +60,14 @@ export const cloudStoragePlugin =
 
           if (!options.disablePayloadAccessControl) {
             handlers.push(adapter.staticHandler)
+            // Else if disablePayloadAccessControl: true and clientUploads is used
+            // Build the "proxied" handler that responses only when the file was requested by client upload in addDataAndFileToRequest
+          } else if (adapter.clientUploads) {
+            handlers.push((req, args) => {
+              if ('clientUploadContext' in args.params) {
+                return adapter.staticHandler(req, args)
+              }
+            })
           }
 
           return {

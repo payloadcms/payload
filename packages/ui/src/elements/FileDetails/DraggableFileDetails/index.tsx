@@ -3,8 +3,6 @@ import React from 'react'
 
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
-import { UploadActions } from '../../Upload/index.js'
-import { FileMeta } from '../FileMeta/index.js'
 import './index.scss'
 
 const baseClass = 'file-details-draggable'
@@ -25,6 +23,7 @@ export type DraggableFileDetailsProps = {
   enableAdjustments?: boolean
   hasImageSizes?: boolean
   hasMany: boolean
+  hideRemoveFile?: boolean
   imageCacheTag?: string
   isSortable?: boolean
   removeItem?: (index: number) => void
@@ -33,8 +32,16 @@ export type DraggableFileDetailsProps = {
 }
 
 export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props) => {
-  const { collectionSlug, doc, imageCacheTag, isSortable, removeItem, rowIndex, uploadConfig } =
-    props
+  const {
+    collectionSlug,
+    doc,
+    hideRemoveFile,
+    imageCacheTag,
+    isSortable,
+    removeItem,
+    rowIndex,
+    uploadConfig,
+  } = props
 
   const { id, filename, thumbnailURL, url } = doc
 
@@ -86,7 +93,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
             <DocumentDrawerToggler>
               <EditIcon />
             </DocumentDrawerToggler>
-            {removeItem && (
+            {!hideRemoveFile && removeItem && (
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__remove`}

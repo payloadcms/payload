@@ -2,9 +2,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField } from 'payload'
 
-import { fieldAffectsData } from 'payload/shared'
-
-import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],
@@ -12,7 +10,7 @@ export const getTextFieldsToBeSearched = (
   i18n: I18nClient,
 ): ClientField[] => {
   if (listSearchableFields) {
-    const flattenedFields = flattenFieldMap({ fields, i18n })
+    const flattenedFields = flattenTopLevelFields({ fields, i18n }) as ClientField[]
     return flattenedFields.filter(
       (field) => fieldAffectsData(field) && listSearchableFields.includes(field.name),
     )

@@ -1,12 +1,21 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "3.0.0-beta.96",
+  "version": "3.36.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/graphql"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -37,7 +46,7 @@
     "build": "pnpm build:types && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
@@ -45,8 +54,8 @@
   "dependencies": {
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
-    "ts-essentials": "7.0.3",
-    "tsx": "4.17.0"
+    "ts-essentials": "10.0.3",
+    "tsx": "4.19.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

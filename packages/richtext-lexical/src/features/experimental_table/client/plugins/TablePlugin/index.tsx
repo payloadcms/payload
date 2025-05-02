@@ -12,17 +12,18 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
+import { INSERT_TABLE_COMMAND, TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
-import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, use, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import './index.scss'
 
 export type CellContextShape = {
@@ -63,7 +64,7 @@ export function TableContext({ children }: { children: JSX.Element }) {
     cellEditorPlugins: null,
   })
   return (
-    <CellContext.Provider
+    <CellContext
       value={useMemo(
         () => ({
           cellEditorConfig: contextValue.cellEditorConfig,
@@ -76,25 +77,30 @@ export function TableContext({ children }: { children: JSX.Element }) {
       )}
     >
       {children}
-    </CellContext.Provider>
+    </CellContext>
   )
 }
 
 export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
-  const cellContext = useContext(CellContext)
-  const { closeModal, toggleModal } = useModal()
+  const cellContext = use(CellContext)
   const editDepth = useEditDepth()
-  const { uuid } = useEditorConfigContext()
+  const {
+    fieldProps: { schemaPath },
+    uuid,
+  } = useEditorConfigContext()
 
   const drawerSlug = formatDrawerSlug({
     slug: 'lexical-table-create-' + uuid,
     depth: editDepth,
   })
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
-    if (!editor.hasNodes([TableNode])) {
-      throw new Error('TablePlugin: TableNode is not registered on editor')
+    if (!editor.hasNodes([TableNode, TableRowNode, TableCellNode])) {
+      throw new Error(
+        'TablePlugin: TableNode, TableRowNode, or TableCellNode is not registered on editor',
+      )
     }
 
     return mergeRegister(
@@ -111,14 +117,14 @@ export const TablePlugin: PluginComponent = () => {
           })
 
           if (rangeSelection) {
-            toggleModal(drawerSlug)
+            toggleDrawer()
           }
           return true
         },
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [cellContext, editor, toggleModal])
+  }, [cellContext, editor, toggleDrawer])
 
   return (
     <React.Fragment>
@@ -127,8 +133,6 @@ export const TablePlugin: PluginComponent = () => {
         drawerTitle="Create Table"
         featureKey="experimental_table"
         handleDrawerSubmit={(_fields, data) => {
-          closeModal(drawerSlug)
-
           if (!data.columns || !data.rows) {
             return
           }
@@ -138,9 +142,14 @@ export const TablePlugin: PluginComponent = () => {
             rows: String(data.rows),
           })
         }}
+        schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
-      <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />
+      <LexicalReactTablePlugin
+        hasCellBackgroundColor={false}
+        hasCellMerge
+        hasHorizontalScroll={true}
+      />
     </React.Fragment>
   )
 }

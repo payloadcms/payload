@@ -1,0 +1,37 @@
+{
+  "name": "@tools/scripts",
+  "version": "0.0.1",
+  "description": "Shared scripts for Payload internal tooling",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
+    "gen-templates": "pnpm runts src/generate-template-variations.ts",
+    "license-check": "pnpm runts src/license-check.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pack-all-to-dest": "pnpm runts src/pack-all-to-dest.ts",
+    "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@swc-node/register": "1.10.9",
+    "@tools/constants": "workspace:*",
+    "@tools/releaser": "workspace:*",
+    "chalk": "^4.1.2",
+    "changelogen": "^0.5.5",
+    "create-payload-app": "workspace:*",
+    "csv-stringify": "^6.5.2",
+    "license-checker": "25.0.1",
+    "open": "^10.1.0"
+  }
+}

@@ -3,15 +3,17 @@ import React from 'react'
 import './index.scss'
 
 export const ChevronIcon: React.FC<{
-  className?: string
-  direction?: 'down' | 'left' | 'right' | 'up'
-  size?: 'large' | 'small'
-}> = ({ className, direction, size }) => (
+  readonly ariaLabel?: string
+  readonly className?: string
+  readonly direction?: 'down' | 'left' | 'right' | 'up'
+  readonly size?: 'large' | 'small'
+}> = ({ ariaLabel, className, direction, size }) => (
   <svg
+    aria-label={ariaLabel}
     className={['icon icon--chevron', className, size && `icon--size-${size}`]
       .filter(Boolean)
       .join(' ')}
-    height={20}
+    height="100%"
     style={{
       transform:
         direction === 'left'
@@ -23,9 +25,9 @@ export const ChevronIcon: React.FC<{
               : undefined,
     }}
     viewBox="0 0 20 20"
-    width={20}
+    width="100%"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M6 8L10 12.5L14 8" strokeLinecap="square" />
+    <path className="stroke" d="M14 8L10 12L6 8" strokeLinecap="square" />
   </svg>
 )

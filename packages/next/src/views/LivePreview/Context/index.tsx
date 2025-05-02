@@ -2,6 +2,7 @@
 import type { ClientField, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
+import { useConfig } from '@payloadcms/ui'
 import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -43,6 +44,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
   const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
+  const { config } = useConfig()
 
   const [zoom, setZoom] = useState(1)
 
@@ -59,7 +61,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
   const [fieldSchemaJSON] = useState(() => {
-    return fieldSchemaToJSON(fieldSchema)
+    return fieldSchemaToJSON(fieldSchema, config)
   })
 
   // The toolbar needs to freely drag and drop around the page
@@ -164,7 +166,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   }, [previewWindowType, isPopupOpen, handleWindowChange])
 
   return (
-    <LivePreviewContext.Provider
+    <LivePreviewContext
       value={{
         appIsReady,
         breakpoint,
@@ -196,6 +198,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
         {listeningForMessages && children}
       </DndContext>
-    </LivePreviewContext.Provider>
+    </LivePreviewContext>
   )
 }

@@ -2,25 +2,24 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { isImage } from 'payload/shared'
 import React from 'react'
-import AnimateHeightImport from 'react-animate-height'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
+import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
+import './index.scss'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
-import './index.scss'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
@@ -34,6 +33,7 @@ export function FileSidebar() {
     isInitializing,
     removeFile,
     setActiveIndex,
+    thumbnailUrls,
     totalErrorCount,
   } = useFormsManager()
   const { initialFiles, maxFiles } = useBulkUpload()
@@ -88,14 +88,27 @@ export function FileSidebar() {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            {typeof maxFiles === 'number' && totalFileCount < maxFiles ? (
-              <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+            {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
+              <Pill
+                className={`${baseClass}__header__addFile`}
+                onClick={() => openModal(addMoreFilesDrawerSlug)}
+              >
+                {t('upload:addFile')}
+              </Pill>
             ) : null}
             <Button
               buttonStyle="transparent"
               className={`${baseClass}__toggler`}
               onClick={() => setShowFiles((prev) => !prev)}
             >
+              <span className={`${baseClass}__toggler__label`}>
+                <strong
+                  title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+                >
+                  {totalFileCount}{' '}
+                  {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
+                </strong>
+              </span>
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
@@ -114,7 +127,7 @@ export function FileSidebar() {
       </div>
 
       <div className={`${baseClass}__animateWrapper`}>
-        <AnimateHeight duration={200} height={!breakpoints.m || showFiles ? 'auto' : 0}>
+        <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
             {isInitializing && forms.length === 0 && initialFiles.length > 0
               ? Array.from(initialFiles).map((file, index) => (
@@ -126,7 +139,7 @@ export function FileSidebar() {
                 ))
               : null}
             {forms.map(({ errorCount, formState }, index) => {
-              const currentFile = formState.file.value as File
+              const currentFile = (formState?.file?.value as File) || ({} as File)
 
               return (
                 <div
@@ -144,13 +157,18 @@ export function FileSidebar() {
                     onClick={() => setActiveIndex(index)}
                     type="button"
                   >
-                    <img alt={currentFile.name} src={URL.createObjectURL(currentFile)} />
+                    <Thumbnail
+                      className={`${baseClass}__thumbnail`}
+                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : null}
+                    />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
-                        {currentFile.name}
+                        {currentFile.name || t('upload:noFile')}
                       </p>
                     </div>
-                    <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    {currentFile instanceof File ? (
+                      <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    ) : null}
                     <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
                       <XIcon />
                     </div>

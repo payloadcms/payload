@@ -21,7 +21,7 @@ import { envPaths } from './envPaths.js'
 const createPlainObject = <T = Record<string, unknown>>(): T => Object.create(null)
 
 const checkValueType = (key: string, value: unknown): void => {
-  const nonJsonTypes = new Set(['undefined', 'symbol', 'function'])
+  const nonJsonTypes = new Set(['function', 'symbol', 'undefined'])
 
   const type = typeof value
 

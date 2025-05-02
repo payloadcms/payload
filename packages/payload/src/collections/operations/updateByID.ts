@@ -1,35 +1,34 @@
+// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type {
   Collection,
-  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
-import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
-import { afterChange } from '../../fields/hooks/afterChange/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
-import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
-import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
-import { saveVersion } from '../../versions/saveVersion.js'
+import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -37,39 +36,51 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
+  publishSpecificLocale?: string
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const updateByIDOperation = async <TSlug extends CollectionSlug>(
+export const updateByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>(
   incomingArgs: Arguments<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
 
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'update',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
+    }
 
     const {
       id,
@@ -79,7 +90,10 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       depth,
       draft: draftArg = false,
       overrideAccess,
+      overrideLock,
       overwriteExistingFiles = false,
+      populate,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -87,6 +101,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -94,10 +109,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    let { data } = args
-    const password = data?.password
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
-    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+    const { data } = args
 
     // /////////////////////////////////////
     // Access
@@ -134,31 +146,6 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       throw new Forbidden(req.t)
     }
 
-    const originalDoc = await afterRead({
-      collection: collectionConfig,
-      context: req.context,
-      depth: 0,
-      doc: docWithLocales,
-      draft: draftArg,
-      fallbackLocale: null,
-      global: null,
-      locale,
-      overrideAccess: true,
-      req,
-      showHiddenFields: true,
-    })
-
-    if (args.collection.config.auth) {
-      ensureUsernameOrEmail<TSlug>({
-        authOptions: args.collection.config.auth,
-        collectionSlug: args.collection.config.slug,
-        data: args.data,
-        operation: 'update',
-        originalDoc,
-        req: args.req,
-      })
-    }
-
     // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
@@ -173,229 +160,37 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       throwOnMissingFile: false,
     })
 
-    data = newFileData
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
-    // /////////////////////////////////////
-    // Delete any associated files
-    // /////////////////////////////////////
+    // ///////////////////////////////////////////////
+    // Update document, runs all document level hooks
+    // ///////////////////////////////////////////////
 
-    await deleteAssociatedFiles({
+    let result = await updateDocument<TSlug, TSelect>({
+      id,
+      accessResults,
+      autosave,
       collectionConfig,
       config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
-      req,
-    })
-
-    // /////////////////////////////////////
-    // beforeValidate - Fields
-    // /////////////////////////////////////
-
-    data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
-      id,
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      global: null,
-      operation: 'update',
-      overrideAccess,
-      req,
-    })
-
-    // /////////////////////////////////////
-    // beforeValidate - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'update',
-          originalDoc,
-          req,
-        })) || data
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req)
-    }
-
-    // /////////////////////////////////////
-    // beforeChange - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'update',
-          originalDoc,
-          req,
-        })) || data
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // beforeChange - Fields
-    // /////////////////////////////////////
-
-    let result = await beforeChange({
-      id,
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: originalDoc,
-      docWithLocales,
-      global: null,
-      operation: 'update',
-      req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate &&
-        data._status !== 'published',
-    })
-
-    // /////////////////////////////////////
-    // Handle potential password update
-    // /////////////////////////////////////
-
-    const dataToUpdate: Record<string, unknown> = { ...result }
-
-    if (shouldSavePassword && typeof password === 'string') {
-      const { hash, salt } = await generatePasswordSaltHash({
-        collection: collectionConfig,
-        password,
-        req,
-      })
-      dataToUpdate.salt = salt
-      dataToUpdate.hash = hash
-      delete dataToUpdate.password
-      delete data.password
-    }
-
-    // /////////////////////////////////////
-    // Update
-    // /////////////////////////////////////
-
-    if (!shouldSaveDraft || data._status === 'published') {
-      result = await req.payload.db.updateOne({
-        id,
-        collection: collectionConfig.slug,
-        data: dataToUpdate,
-        locale,
-        req,
-      })
-    }
-
-    // /////////////////////////////////////
-    // Create version
-    // /////////////////////////////////////
-
-    if (collectionConfig.versions) {
-      result = await saveVersion({
-        id,
-        autosave,
-        collection: collectionConfig,
-        docWithLocales: {
-          ...result,
-          createdAt: docWithLocales.createdAt,
-        },
-        draft: shouldSaveDraft,
-        payload,
-        req,
-      })
-    }
-
-    // /////////////////////////////////////
-    // afterRead - Fields
-    // /////////////////////////////////////
-
-    result = await afterRead({
-      collection: collectionConfig,
-      context: req.context,
+      data: deepCopyObjectSimple(newFileData),
       depth,
-      doc: result,
-      draft: draftArg,
+      docWithLocales,
+      draftArg,
       fallbackLocale,
-      global: null,
+      filesToUpload,
       locale,
       overrideAccess,
+      overrideLock,
+      payload,
+      populate,
+      publishSpecificLocale,
       req,
+      select,
       showHiddenFields,
-    })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // afterChange - Fields
-    // /////////////////////////////////////
-
-    result = await afterChange({
-      collection: collectionConfig,
-      context: req.context,
-      data,
-      doc: result,
-      global: null,
-      operation: 'update',
-      previousDoc: originalDoc,
-      req,
-    })
-
-    // /////////////////////////////////////
-    // afterChange - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          operation: 'update',
-          previousDoc: originalDoc,
-          req,
-        })) || result
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
-    // afterOperation - Collection
-    // /////////////////////////////////////
-
-    result = await buildAfterOperation({
-      args,
-      collection: collectionConfig,
-      operation: 'updateByID',
-      result,
     })
 
     await unlinkTempFiles({
@@ -403,6 +198,17 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       config,
       req,
     })
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = (await buildAfterOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'updateByID',
+      result,
+    })) as TransformCollectionWithSelect<TSlug, TSelect>
 
     // /////////////////////////////////////
     // Return results

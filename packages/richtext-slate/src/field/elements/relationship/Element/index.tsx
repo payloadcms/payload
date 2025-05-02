@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormFieldBase, MappedComponent } from 'payload'
+import type { ListDrawerProps } from '@payloadcms/ui'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -27,12 +27,7 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  name: string
-  richTextComponentMap: Map<string, MappedComponent>
-} & FormFieldBase
-
-const RelationshipElementComponent: React.FC<Props> = () => {
+const RelationshipElementComponent: React.FC = () => {
   const {
     attributes,
     children,
@@ -47,6 +42,7 @@ const RelationshipElementComponent: React.FC<Props> = () => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const [enabledCollectionSlugs] = useState(() =>
     collections
@@ -54,7 +50,7 @@ const RelationshipElementComponent: React.FC<Props> = () => {
       .map(({ slug }) => slug),
   )
   const [relatedCollection, setRelatedCollection] = useState(() =>
-    collections.find((coll) => coll.slug === relationTo),
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const selected = useSelected()
@@ -109,8 +105,8 @@ const RelationshipElementComponent: React.FC<Props> = () => {
     [editor, element, relatedCollection, cacheBust, setParams, closeDrawer],
   )
 
-  const swapRelationship = React.useCallback(
-    ({ collectionSlug, docID }) => {
+  const swapRelationship = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       const elementPath = ReactEditor.findPath(editor, element)
 
       Transforms.setNodes(
@@ -119,12 +115,12 @@ const RelationshipElementComponent: React.FC<Props> = () => {
           type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: collectionSlug,
-          value: { id: docID },
+          value: { id: doc.id },
         },
         { at: elementPath },
       )
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
+      setRelatedCollection(getEntityConfig({ collectionSlug }))
 
       setParams({
         ...initialParams,
@@ -134,7 +130,7 @@ const RelationshipElementComponent: React.FC<Props> = () => {
       closeListDrawer()
       dispatchCacheBust()
     },
-    [closeListDrawer, editor, element, cacheBust, setParams, collections],
+    [closeListDrawer, editor, element, cacheBust, setParams, getEntityConfig],
   )
 
   return (
@@ -194,7 +190,7 @@ const RelationshipElementComponent: React.FC<Props> = () => {
   )
 }
 
-export const RelationshipElement = (props: Props): React.ReactNode => {
+export const RelationshipElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
       <RelationshipElementComponent {...props} />

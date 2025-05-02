@@ -1,18 +1,26 @@
 'use client'
 
-import LinkImport from 'next/link.js'
 import React from 'react'
 
 const baseClass = 'login__form'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
+import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
-import { Form, FormSubmit, PasswordField, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  Form,
+  FormSubmit,
+  Link,
+  PasswordField,
+  useAuth,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL, getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
+import { getSafeRedirect } from '../../../utilities/getSafeRedirect.js'
 import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
@@ -22,7 +30,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: {
@@ -32,12 +40,10 @@ export const LoginForm: React.FC<{
     routes: { admin: adminRoute, api: apiRoute },
   } = config
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
-  const canLoginWithEmail =
-    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
-  const canLoginWithUsername = authOptions.loginWithUsername
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
     if (canLoginWithEmail && canLoginWithUsername) {
@@ -50,6 +56,7 @@ export const LoginForm: React.FC<{
   })
 
   const { t } = useTranslation()
+  const { setUser } = useAuth()
 
   const initialState: FormState = {
     password: {
@@ -73,6 +80,10 @@ export const LoginForm: React.FC<{
     }
   }
 
+  const handleLogin = (data: UserWithToken) => {
+    setUser(data)
+  }
+
   return (
     <Form
       action={`${apiRoute}/${userSlug}/login`}
@@ -80,7 +91,8 @@ export const LoginForm: React.FC<{
       disableSuccessStatus
       initialState={initialState}
       method="POST"
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
+      onSuccess={handleLogin}
+      redirect={getSafeRedirect(searchParams?.redirect, adminRoute)}
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
@@ -91,6 +103,7 @@ export const LoginForm: React.FC<{
             label: t('general:password'),
             required: true,
           }}
+          path="password"
         />
       </div>
       <Link
@@ -98,6 +111,7 @@ export const LoginForm: React.FC<{
           adminRoute,
           path: forgotRoute,
         })}
+        prefetch={false}
       >
         {t('authentication:forgotPasswordQuestion')}
       </Link>

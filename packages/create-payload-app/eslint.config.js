@@ -1,12 +1,12 @@
 import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['bin/cli.js'],
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,

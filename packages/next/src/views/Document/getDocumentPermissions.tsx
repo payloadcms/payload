@@ -1,8 +1,8 @@
 import type {
   Data,
-  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -10,7 +10,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -19,31 +19,34 @@ export const getDocumentPermissions = async (args: {
   id?: number | string
   req: PayloadRequest
 }): Promise<{
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
-  let docPermissions: DocumentPermissions
+  let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
 
   if (collectionConfig) {
     try {
       docPermissions = await docAccessOperation({
-        id: id?.toString(),
+        id,
         collection: {
           config: collectionConfig,
         },
         req: {
           ...req,
-          data,
+          data: {
+            ...data,
+            _status: 'draft',
+          },
         },
       })
 
       if (collectionConfig.versions?.drafts) {
         hasPublishPermission = await docAccessOperation({
-          id: id?.toString(),
+          id,
           collection: {
             config: collectionConfig,
           },
@@ -54,10 +57,10 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 
@@ -81,10 +84,10 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 

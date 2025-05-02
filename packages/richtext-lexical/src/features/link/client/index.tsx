@@ -1,11 +1,12 @@
 'use client'
 
-import type { LexicalNode } from 'lexical'
+import type { Klass, LexicalNode } from 'lexical'
 
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
+import type { ClientFeature } from '../../typesClient.js'
 import type { LinkFields } from '../nodes/types.js'
 import type { ExclusiveLinkCollectionsProps } from '../server/index.js'
 
@@ -22,7 +23,11 @@ import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor/index.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands.js'
 import { LinkPlugin } from './plugins/link/index.js'
 
-export type ClientProps = ExclusiveLinkCollectionsProps
+export type ClientProps = {
+  defaultLinkType?: string
+  defaultLinkURL?: string
+  disableAutoLinks?: 'creationOnly' | true
+} & ExclusiveLinkCollectionsProps
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarFeatureButtonsGroupWithItems([
@@ -45,7 +50,7 @@ const toolbarGroups: ToolbarGroup[] = [
       },
       onSelect: ({ editor, isActive }) => {
         if (!isActive) {
-          let selectedText: string = null
+          let selectedText: string | undefined
           let selectedNodes: LexicalNode[] = []
           editor.getEditorState().read(() => {
             selectedText = $getSelection()?.getTextContent()
@@ -57,11 +62,9 @@ const toolbarGroups: ToolbarGroup[] = [
             return
           }
 
-          const linkFields: LinkFields = {
+          const linkFields: Partial<LinkFields> = {
             doc: null,
-            linkType: 'custom',
             newTab: false,
-            url: 'https://',
           }
 
           editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {
@@ -79,18 +82,22 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-export const LinkFeatureClient = createClientFeature({
+export const LinkFeatureClient = createClientFeature<ClientProps>(({ props }) => ({
   markdownTransformers: [LinkMarkdownTransformer],
-  nodes: [LinkNode, AutoLinkNode],
+  nodes: [LinkNode, props?.disableAutoLinks === true ? null : AutoLinkNode].filter(
+    Boolean,
+  ) as Array<Klass<LexicalNode>>,
   plugins: [
     {
       Component: LinkPlugin,
       position: 'normal',
     },
-    {
-      Component: AutoLinkPlugin,
-      position: 'normal',
-    },
+    props?.disableAutoLinks === true || props?.disableAutoLinks === 'creationOnly'
+      ? null
+      : {
+          Component: AutoLinkPlugin,
+          position: 'normal',
+        },
     {
       Component: ClickableLinkPlugin,
       position: 'normal',
@@ -99,11 +106,12 @@ export const LinkFeatureClient = createClientFeature({
       Component: FloatingLinkEditorPlugin,
       position: 'floatingAnchorElem',
     },
-  ],
+  ].filter(Boolean) as ClientFeature<ClientProps>['plugins'],
+  sanitizedClientFeatureProps: props,
   toolbarFixed: {
     groups: toolbarGroups,
   },
   toolbarInline: {
     groups: toolbarGroups,
   },
-})
+}))

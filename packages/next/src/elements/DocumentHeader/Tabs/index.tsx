@@ -1,12 +1,14 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  DocumentTabClientProps,
+  DocumentTabServerPropsOnly,
   Payload,
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
 } from 'payload'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { getCustomViews } from './getCustomViews.js'
@@ -23,7 +25,7 @@ export const DocumentTabs: React.FC<{
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
   payload: Payload
-  permissions: Permissions
+  permissions: SanitizedPermissions
 }> = (props) => {
   const { collectionConfig, globalConfig, i18n, payload, permissions } = props
   const { config } = payload
@@ -64,6 +66,7 @@ export const DocumentTabs: React.FC<{
                   return (
                     <DocumentTab
                       key={`tab-${index}`}
+                      path={viewConfig && 'path' in viewConfig ? viewConfig.path : ''}
                       {...{
                         ...props,
                         ...(tab || {}),
@@ -80,40 +83,27 @@ export const DocumentTabs: React.FC<{
                 const { path, tab } = CustomView
 
                 if (tab.Component) {
-                  const createMappedComponent = getCreateMappedComponent({
+                  return RenderServerComponent({
+                    clientProps: {
+                      path,
+                    } satisfies DocumentTabClientProps,
+                    Component: tab.Component,
                     importMap: payload.importMap,
+                    key: `tab-custom-${index}`,
                     serverProps: {
+                      collectionConfig,
+                      globalConfig,
                       i18n,
                       payload,
                       permissions,
-                      ...props,
-                      key: `tab-custom-${index}`,
-                      path,
-                    },
+                    } satisfies DocumentTabServerPropsOnly,
                   })
-
-                  const mappedTab = createMappedComponent(
-                    tab.Component,
-                    undefined,
-                    undefined,
-                    'tab.Component',
-                  )
-
-                  return (
-                    <RenderComponent
-                      clientProps={{
-                        key: `tab-custom-${index}`,
-                        path,
-                      }}
-                      key={`tab-custom-${index}`}
-                      mappedComponent={mappedTab}
-                    />
-                  )
                 }
 
                 return (
                   <DocumentTab
                     key={`tab-custom-${index}`}
+                    path={path}
                     {...{
                       ...props,
                       ...tab,
@@ -121,6 +111,7 @@ export const DocumentTabs: React.FC<{
                   />
                 )
               }
+
               return null
             })}
           </ul>

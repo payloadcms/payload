@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es2020.string"],
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": false, // Undo this
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+  },
+  "exclude": ["src/**/*.test.ts"]
+}

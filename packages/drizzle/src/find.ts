@@ -1,4 +1,4 @@
-import type { Find, PayloadRequest, SanitizedCollectionConfig } from 'payload'
+import type { Find, SanitizedCollectionConfig } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -10,28 +10,35 @@ export const find: Find = async function find(
   this: DrizzleAdapter,
   {
     collection,
+    draftsEnabled,
+    joins,
     limit,
     locale,
     page = 1,
     pagination,
-    req = {} as PayloadRequest,
+    req,
+    select,
     sort: sortArg,
     where,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   return findMany({
     adapter: this,
-    fields: collectionConfig.fields,
+    collectionSlug: collectionConfig.slug,
+    draftsEnabled,
+    fields: collectionConfig.flattenedFields,
+    joins,
     limit,
     locale,
     page,
     pagination,
     req,
+    select,
     sort,
     tableName,
     where,

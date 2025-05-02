@@ -1,10 +1,17 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from 'payload'
 
-import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
+import {
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
+import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
@@ -18,6 +25,10 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations to run.' })
     return
+  }
+
+  if ('createExtensions' in this && typeof this.createExtensions === 'function') {
+    await this.createExtensions()
   }
 
   let latestBatch = 0
@@ -75,14 +86,13 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
   const start = Date.now()
-  const req = { payload } as PayloadRequest
-  const adapter = payload.db as DrizzleAdapter
+  const req = await createLocalReq({}, payload)
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
   try {
     await initTransaction(req)
-    const db = adapter?.sessions[await req.transactionID]?.db || adapter.drizzle
+    const db = await getTransaction(payload.db as DrizzleAdapter, req)
     await migration.up({ db, payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({
@@ -100,5 +110,6 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
       err,
       msg: parseError(err, `Error running migration ${migration.name}`),
     })
+    process.exit(1)
   }
 }

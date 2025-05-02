@@ -4,9 +4,6 @@ import { defaultEmail, emailFieldsSlug } from './shared.js'
 
 const EmailFields: CollectionConfig = {
   slug: emailFieldsSlug,
-  admin: {
-    useAsTitle: 'text',
-  },
   defaultSort: 'id',
   fields: [
     {

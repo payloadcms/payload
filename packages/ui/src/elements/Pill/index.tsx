@@ -1,9 +1,9 @@
 'use client'
 import type { ElementType, HTMLAttributes } from 'react'
 
-import LinkWithDefault from 'next/link.js'
-const Link = LinkWithDefault.default
 import React from 'react' // TODO: abstract this out to support all routers
+
+import { Link } from '../Link/index.js'
 
 export type PillProps = {
   alignIcon?: 'left' | 'right'
@@ -20,8 +20,17 @@ export type PillProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: () => void
-  pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white'
+  pillStyle?:
+    | 'always-white'
+    | 'dark'
+    | 'error'
+    | 'light'
+    | 'light-gray'
+    | 'success'
+    | 'warning'
+    | 'white'
   rounded?: boolean
+  size?: 'medium' | 'small'
   to?: string
 }
 
@@ -63,6 +72,7 @@ const DraggablePill: React.FC<PillProps> = (props) => {
 
 const StaticPill: React.FC<PillProps> = (props) => {
   const {
+    id,
     alignIcon = 'right',
     'aria-checked': ariaChecked,
     'aria-controls': ariaControls,
@@ -76,12 +86,14 @@ const StaticPill: React.FC<PillProps> = (props) => {
     onClick,
     pillStyle = 'light',
     rounded,
+    size = 'medium',
     to,
   } = props
 
   const classes = [
     baseClass,
     `${baseClass}--style-${pillStyle}`,
+    `${baseClass}--size-${size}`,
     className && className,
     to && `${baseClass}--has-link`,
     (to || onClick) && `${baseClass}--has-action`,
@@ -98,6 +110,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
   if (onClick && !to) {
     Element = 'button'
   }
+
   if (to) {
     Element = Link
   }
@@ -111,11 +124,12 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-label={ariaLabel}
       className={classes}
       href={to || null}
+      id={id}
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
+      {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }

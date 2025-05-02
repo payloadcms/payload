@@ -1,30 +1,42 @@
 'use client'
-import type { PaginatedDocs, RelationshipFieldProps, Where } from 'payload'
+import type {
+  FilterOptionsResult,
+  PaginatedDocs,
+  RelationshipFieldClientComponent,
+  Where,
+} from 'payload'
 
+import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
+import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
+import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
-import './index.scss'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
@@ -33,39 +45,34 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => {
+const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
       admin: {
         allowCreate = true,
+        allowEdit = true,
+        appearance = 'select',
         className,
         description,
         isSortable = true,
-        readOnly: readOnlyFromAdmin,
+        placeholder,
         sortOptions,
-        style,
-        width,
       } = {},
       hasMany,
       label,
+      localized,
       relationTo,
       required,
     },
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
-    collections,
     routes: { api },
     serverURL,
   } = config
@@ -74,14 +81,22 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const hasMultipleRelations = Array.isArray(relationTo)
-  const [options, dispatchOptions] = useReducer(optionsReducer, [])
+
+  const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+  >({
+    id: undefined,
+    collectionSlug: undefined,
+    hasReadPermission: false,
+  })
+
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
-  const menuIsOpen = useRef(false)
+  const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
 
   const memoizedValidate = useCallback(
@@ -92,31 +107,109 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     },
     [validate, required],
   )
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     filterOptions,
-    formInitializing,
-    formProcessing,
     initialValue,
     path,
     setValue,
     showError,
     value,
   } = useField<Value | Value[]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const readOnly = readOnlyFromProps || readOnlyFromContext || formInitializing
+  const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
   valueRef.current = value
 
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false)
+  const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    id: currentlyOpenRelationship.id,
+    collectionSlug: currentlyOpenRelationship.collectionSlug,
+  })
+
+  // Filter selected values from displaying in the list drawer
+  const listDrawerFilterOptions = useMemo<FilterOptionsResult>(() => {
+    let newFilterOptions = filterOptions
+
+    if (value) {
+      const valuesByRelation = (Array.isArray(value) ? value : [value]).reduce((acc, val) => {
+        if (typeof val === 'object' && val.relationTo) {
+          if (!acc[val.relationTo]) {
+            acc[val.relationTo] = []
+          }
+          acc[val.relationTo].push(val.value)
+        } else if (val) {
+          const relation = Array.isArray(relationTo) ? undefined : relationTo
+          if (relation) {
+            if (!acc[relation]) {
+              acc[relation] = []
+            }
+            acc[relation].push(val)
+          }
+        }
+        return acc
+      }, {})
+
+      ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relation) => {
+        newFilterOptions = {
+          ...(newFilterOptions || {}),
+          [relation]: {
+            ...(typeof filterOptions?.[relation] === 'object' ? filterOptions[relation] : {}),
+            ...(valuesByRelation[relation]
+              ? {
+                  id: {
+                    not_in: valuesByRelation[relation],
+                  },
+                }
+              : {}),
+          },
+        }
+      })
+    }
+
+    return newFilterOptions
+  }, [filterOptions, value, relationTo])
+
+  const [
+    ListDrawer,
+    ,
+    { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
+  ] = useListDrawer({
+    collectionSlugs: hasMultipleRelations ? relationTo : [relationTo],
+    filterOptions: listDrawerFilterOptions,
+  })
+
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
+      const formattedSelection = hasMultipleRelations
+        ? {
+            relationTo: collectionSlug,
+            value: doc.id,
+          }
+        : doc.id
+
+      if (hasMany) {
+        const withSelection = Array.isArray(value) ? value : []
+        setValue([...withSelection, formattedSelection])
+      } else {
+        setValue(formattedSelection)
+      }
+
+      closeListDrawer()
+    },
+    [hasMany, hasMultipleRelations, setValue, closeListDrawer, value],
+  )
+
+  const openDrawerWhenRelationChanges = useRef(false)
 
   const getResults: GetResults = useCallback(
     async ({
+      filterOptions,
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
       lastLoadedPage: lastLoadedPageArg,
       onSuccess,
@@ -161,7 +254,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           }
 
           if (resultsFetched < 10) {
-            const collection = collections.find((coll) => coll.slug === relation)
+            const collection = getEntityConfig({ collectionSlug: relation })
             const fieldToSearch = collection?.admin?.useAsTitle || 'id'
             let fieldToSort = collection?.defaultSort || 'id'
             if (typeof sortOptions === 'string') {
@@ -179,6 +272,9 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
+              select: {
+                [fieldToSearch]: true,
+              },
               sort: fieldToSort,
               where: {
                 and: [
@@ -233,8 +329,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 dispatchOptions({
                   type: 'ADD',
                   collection,
-                  // TODO: fix this
-                  // @ts-expect-error-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -246,8 +340,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               dispatchOptions({
                 type: 'ADD',
                 collection,
-                // TODO: fix this
-                // @ts-expect-error-next-line
                 config,
                 docs: [],
                 i18n,
@@ -271,9 +363,8 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
       hasMany,
       errorLoading,
       search,
-      collections,
+      getEntityConfig,
       locale,
-      filterOptions,
       serverURL,
       sortOptions,
       api,
@@ -284,7 +375,13 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    void getResults({ lastLoadedPage: {}, search: searchArg, sort: true, value: valueArg })
+    void getResults({
+      filterOptions,
+      lastLoadedPage: {},
+      search: searchArg,
+      sort: true,
+      value: valueArg,
+    })
     setSearch(searchArg)
   }, 300)
 
@@ -298,11 +395,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     [search, updateSearch],
   )
 
-  // ///////////////////////////////////
-  // Ensure we have an option for each value
-  // ///////////////////////////////////
-
-  useEffect(() => {
+  const handleValueChange = useEffectEvent((value: Value | Value[]) => {
     const relationMap = createRelationMap({
       hasMany,
       relationTo,
@@ -345,7 +438,7 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
             method: 'POST',
           })
 
-          const collection = collections.find((coll) => coll.slug === relation)
+          const collection = getEntityConfig({ collectionSlug: relation })
           let docs = []
 
           if (response.ok) {
@@ -356,8 +449,6 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           dispatchOptions({
             type: 'ADD',
             collection,
-            // TODO: fix this
-            // @ts-expect-error-next-line
             config,
             docs,
             i18n,
@@ -367,42 +458,46 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         }
       }
     }, Promise.resolve())
-  }, [
-    options,
-    value,
-    hasMany,
-    errorLoading,
-    collections,
-    hasMultipleRelations,
-    serverURL,
-    api,
-    i18n,
-    relationTo,
-    locale,
-    config,
-  ])
+  })
+
+  const prevValue = useRef(value)
+  const isFirstRenderRef = useRef(true)
+  // ///////////////////////////////////
+  // Ensure we have an option for each value
+  // ///////////////////////////////////
+  useEffect(() => {
+    if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
+      handleValueChange(value)
+    }
+    isFirstRenderRef.current = false
+    prevValue.current = value
+  }, [value])
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
     const isIdOnly = relations.reduce((idOnly, relation) => {
-      const collection = collections.find((coll) => coll.slug === relation)
+      const collection = getEntityConfig({ collectionSlug: relation })
       const fieldToSearch = collection?.admin?.useAsTitle || 'id'
       return fieldToSearch === 'id' && idOnly
     }, true)
     setEnableWordBoundarySearch(!isIdOnly)
-  }, [relationTo, collections])
+  }, [relationTo, getEntityConfig])
+
+  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
+    return await getResults(args)
+  })
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     // If the menu is open while filterOptions changes
-    // due to latency of getFormState and fast clicking into this field,
+    // due to latency of form state and fast clicking into this field,
     // re-fetch options
-
-    if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
+    if (hasLoadedFirstPageRef.current && menuIsOpen) {
       setIsLoading(true)
-      void getResults({
+      void getResultsEffectEvent({
+        filterOptions,
         lastLoadedPage: {},
         onSuccess: () => {
           hasLoadedFirstPageRef.current = true
@@ -413,37 +508,105 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     }
 
     // If the menu is not open, still reset the field state
-    // because we need to get new options next time the menu
-    // opens by the user
+    // because we need to get new options next time the menu opens
+    dispatchOptions({
+      type: 'CLEAR',
+      exemptValues: valueRef.current,
+    })
 
-    dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-    hasLoadedFirstPageRef.current = false
-  }, [
-    relationTo,
-    filterOptions,
-    locale,
-    menuIsOpen,
-    getResults,
-    valueRef,
-    hasLoadedFirstPageRef,
-    path,
-  ])
+  }, [relationTo, filterOptions, locale, path, menuIsOpen])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       dispatchOptions({
         type: 'UPDATE',
         collection: args.collectionConfig,
-        // TODO: fix this
-        // @ts-expect-error-next-line
         config,
         doc: args.doc,
         i18n,
       })
+
+      const currentValue = valueRef.current
+      const docID = args.doc.id
+
+      if (hasMany) {
+        const unchanged = (currentValue as Option[]).some((option) =>
+          typeof option === 'string' ? option === docID : option.value === docID,
+        )
+
+        const valuesToSet = (currentValue as Option[]).map((option) =>
+          option.value === docID
+            ? { relationTo: args.collectionConfig.slug, value: docID }
+            : option,
+        )
+
+        setValue(valuesToSet, unchanged)
+      } else {
+        const unchanged = currentValue === docID
+
+        setValue({ relationTo: args.collectionConfig.slug, value: docID }, unchanged)
+      }
     },
-    [i18n, config],
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
+    (args) => {
+      dispatchOptions({
+        type: 'ADD',
+        collection: args.collectionConfig,
+        config,
+        docs: [args.doc],
+        i18n,
+        sort: true,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).concat({
+                relationTo: args.collectionConfig.slug,
+                value: args.doc.id,
+              } as Option)
+            : null,
+        )
+      } else {
+        setValue({
+          relationTo: args.collectionConfig.slug,
+          value: args.doc.id,
+        })
+      }
+    },
+    [i18n, config, hasMany, setValue],
+  )
+
+  const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      dispatchOptions({
+        id: args.id,
+        type: 'REMOVE',
+        collection: args.collectionConfig,
+        config,
+        i18n,
+      })
+
+      if (hasMany) {
+        setValue(
+          valueRef.current
+            ? (valueRef.current as Option[]).filter((option) => {
+                return option.value !== args.id
+              })
+            : null,
+        )
+      } else {
+        setValue(null)
+      }
+
+      return
+    },
+    [i18n, config, hasMany, setValue],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -453,24 +616,46 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
     const r = wordBoundariesRegex(searchFilter || '')
     // breaking the labels to search into smaller parts increases performance
     const breakApartThreshold = 250
-    let string = item.label
+    let labelString = String(item.label)
     // strings less than breakApartThreshold length won't be chunked
-    while (string.length > breakApartThreshold) {
+    while (labelString.length > breakApartThreshold) {
       // slicing by the next space after the length of the search input prevents slicing the string up by partial words
-      const indexOfSpace = string.indexOf(' ', searchFilter.length)
-      if (r.test(string.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))) {
+      const indexOfSpace = labelString.indexOf(' ', searchFilter.length)
+      if (
+        r.test(labelString.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))
+      ) {
         return true
       }
-      string = string.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1)
+      labelString = labelString.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1)
     }
-    return r.test(string.slice(-breakApartThreshold))
+    return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
-  const valueToRender = findOptionsByValue({ options, value })
+  const onDocumentDrawerOpen = useCallback<
+    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
+  >(({ id, collectionSlug, hasReadPermission }) => {
+    openDrawerWhenRelationChanges.current = true
+    setCurrentlyOpenRelationship({
+      id,
+      collectionSlug,
+      hasReadPermission,
+    })
+  }, [])
+
+  useEffect(() => {
+    if (openDrawerWhenRelationChanges.current) {
+      openDrawer()
+      openDrawerWhenRelationChanges.current = false
+    }
+  }, [openDrawer, currentlyOpenRelationship])
+
+  const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
   }
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -480,46 +665,42 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
         className,
         showError && 'error',
         errorLoading && 'error-loading',
-        readOnly && `${baseClass}--read-only`,
-        !readOnly && allowCreate && `${baseClass}--allow-create`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
+        !(readOnly || disabled) && allowCreate && `${baseClass}--allow-create`,
       ]
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!drawerIsOpen}
+              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
               components={{
                 MultiValueLabel,
                 SingleValue,
+                ...(appearance !== 'select' && { DropdownIndicator: null }),
               }}
               customProps={{
-                disableKeyDown: drawerIsOpen,
-                disableMouseDown: drawerIsOpen,
+                disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                disableMouseDown: isDrawerOpen || isListDrawerOpen,
+                onDocumentDrawerOpen,
                 onSave,
-                setDrawerIsOpen,
               }}
-              disabled={readOnly || formProcessing || drawerIsOpen}
+              disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -527,13 +708,15 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
-                  : option.value
+                  : (option.value as string)
               }}
-              isLoading={isLoading}
+              isLoading={appearance === 'select' && isLoading}
               isMulti={hasMany}
+              isSearchable={appearance === 'select'}
               isSortable={isSortable}
+              menuIsOpen={appearance === 'select' ? menuIsOpen : false}
               onChange={
-                !readOnly
+                !(readOnly || disabled)
                   ? (selected) => {
                       if (selected === null) {
                         setValue(hasMany ? [] : null)
@@ -565,25 +748,30 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
               }
               onInputChange={(newSearch) => handleInputChange(newSearch, value)}
               onMenuClose={() => {
-                menuIsOpen.current = false
+                setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                menuIsOpen.current = true
-
-                if (!hasLoadedFirstPageRef.current) {
-                  setIsLoading(true)
-                  void getResults({
-                    lastLoadedPage: {},
-                    onSuccess: () => {
-                      hasLoadedFirstPageRef.current = true
-                      setIsLoading(false)
-                    },
-                    value: initialValue,
-                  })
+                if (appearance === 'drawer') {
+                  openListDrawer()
+                } else if (appearance === 'select') {
+                  setMenuIsOpen(true)
+                  if (!hasLoadedFirstPageRef.current) {
+                    setIsLoading(true)
+                    void getResults({
+                      filterOptions,
+                      lastLoadedPage: {},
+                      onSuccess: () => {
+                        hasLoadedFirstPageRef.current = true
+                        setIsLoading(false)
+                      },
+                      value: initialValue,
+                    })
+                  }
                 }
               }}
               onMenuScrollToBottom={() => {
                 void getResults({
+                  filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
                   search,
@@ -592,10 +780,11 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
                 })
               }}
               options={options}
+              placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!readOnly && allowCreate && (
+            {!(readOnly || disabled) && allowCreate && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}
@@ -607,13 +796,18 @@ const RelationshipFieldComponent: React.FC<RelationshipFieldProps> = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        {AfterInput}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
+      {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+      )}
+      {appearance === 'drawer' && !readOnly && (
+        <ListDrawer allowCreate={allowCreate} enableRowSelections={false} onSelect={onListSelect} />
+      )}
     </div>
   )
 }

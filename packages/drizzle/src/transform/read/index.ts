@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig, TypeWithID } from 'payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 
@@ -11,8 +11,11 @@ type TransformArgs = {
   config: SanitizedConfig
   data: Record<string, unknown>
   fallbackLocale?: false | string
-  fields: Field[]
+  fields: FlattenedField[]
+  joinQuery?: JoinQuery
   locale?: string
+  parentIsLocalized?: boolean
+  tableName: string
 }
 
 // This is the entry point to transform Drizzle output data
@@ -22,6 +25,9 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   config,
   data,
   fields,
+  joinQuery,
+  parentIsLocalized,
+  tableName,
 }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let texts: Record<string, Record<string, unknown>[]> = {}
@@ -49,17 +55,22 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
     adapter,
     blocks,
     config,
+    currentTableName: tableName,
     dataRef: {
       id: data.id,
     },
     deletions,
     fieldPrefix: '',
     fields,
+    joinQuery,
     numbers,
+    parentIsLocalized,
     path: '',
     relationships,
     table: data,
+    tablePath: '',
     texts,
+    topLevelTableName: tableName,
   })
 
   deletions.forEach((deletion) => deletion())

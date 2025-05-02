@@ -7,7 +7,7 @@ import * as React from 'react'
 type Options = {
   uploads: boolean
   user: ClientUser
-  visibleEntities: VisibleEntities
+  visibleEntities?: VisibleEntities
 }
 
 type FilteredCollectionsT = (
@@ -17,7 +17,7 @@ type FilteredCollectionsT = (
 
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ slug, admin: { enableRichTextRelationship }, upload }) => {
-    if (!options.visibleEntities.collections.includes(slug)) {
+    if (!options?.visibleEntities?.collections.includes(slug)) {
       return false
     }
 
@@ -29,8 +29,12 @@ const filterRichTextCollections: FilteredCollectionsT = (collections, options) =
   })
 }
 
-export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
-  const { children, uploads = false, ...rest } = props
+export const EnabledRelationshipsCondition: React.FC<{
+  children: any
+  FallbackComponent?: React.FC
+  uploads?: boolean
+}> = (props) => {
+  const { children, FallbackComponent, uploads = false, ...rest } = props
   const {
     config: { collections },
   } = useConfig()
@@ -38,13 +42,13 @@ export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
   const { visibleEntities } = useEntityVisibility()
 
   const [enabledCollectionSlugs] = React.useState(() =>
-    filterRichTextCollections(collections, { uploads, user, visibleEntities }).map(
+    filterRichTextCollections(collections, { uploads, user: user!, visibleEntities }).map(
       ({ slug }) => slug,
     ),
   )
 
   if (!enabledCollectionSlugs.length) {
-    return null
+    return FallbackComponent ? <FallbackComponent {...rest} /> : null
   }
 
   return React.cloneElement(children, { ...rest, enabledCollectionSlugs })

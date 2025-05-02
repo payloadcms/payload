@@ -1,12 +1,18 @@
 'use client'
 
-import { MarkdownShortcutPlugin as LexicalMarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin.js'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import * as React from 'react'
 
+import { registerMarkdownShortcuts } from '../../../packages/@lexical/markdown/MarkdownShortcuts.js'
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 
 export const MarkdownShortcutPlugin: React.FC = () => {
   const { editorConfig } = useEditorConfigContext()
+  const [editor] = useLexicalComposerContext()
 
-  return <LexicalMarkdownShortcutPlugin transformers={editorConfig.features.markdownTransformers} />
+  React.useEffect(() => {
+    return registerMarkdownShortcuts(editor, editorConfig.features.markdownTransformers ?? [])
+  }, [editor, editorConfig.features.markdownTransformers])
+
+  return null
 }

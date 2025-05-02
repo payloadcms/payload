@@ -8,25 +8,33 @@ type DateFNSKeys =
   | 'ar'
   | 'az'
   | 'bg'
+  | 'ca'
   | 'cs'
+  | 'da'
   | 'de'
   | 'en-US'
   | 'es'
+  | 'et'
   | 'fa-IR'
   | 'fr'
   | 'he'
   | 'hr'
   | 'hu'
+  | 'hy-AM'
   | 'it'
   | 'ja'
   | 'ko'
+  | 'lt'
   | 'nb'
   | 'nl'
   | 'pl'
   | 'pt'
   | 'ro'
+  | 'rs'
+  | 'rs-Latin'
   | 'ru'
   | 'sk'
+  | 'sl-SI'
   | 'sv'
   | 'th'
   | 'tr'
@@ -159,12 +167,12 @@ export type InitTFunction<
 }
 
 export type InitI18n =
+  | ((args: { config: I18nOptions; context: 'api'; language: AcceptedLanguages }) => Promise<I18n>)
   | ((args: {
       config: I18nOptions<ClientTranslationsObject>
       context: 'client'
       language: AcceptedLanguages
     }) => Promise<I18n<ClientTranslationsObject, ClientTranslationKeys>>)
-  | ((args: { config: I18nOptions; context: 'api'; language: AcceptedLanguages }) => Promise<I18n>)
 
 export type LanguagePreference = {
   language: AcceptedLanguages
