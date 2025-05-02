@@ -214,9 +214,7 @@ describe('relationship', () => {
 
     await page.goto(url.edit(doc.id))
 
-    const editBtn = page.locator(
-      '#field-relationship button.relationship--single-value__drawer-toggler',
-    )
+    const editBtn = page.locator('#field-relationship .relationship--single-value__drawer-toggler')
     await expect(editBtn).toHaveCount(0)
   })
 
@@ -366,7 +364,7 @@ describe('relationship', () => {
       await openDocDrawer({
         page,
         selector:
-          '#field-relationWithAllowCreateToFalse button.relationship--single-value__drawer-toggler',
+          '#field-relationWithAllowCreateToFalse .relationship--single-value__drawer-toggler',
         withMetaKey: true,
       }),
     ])
@@ -547,7 +545,7 @@ describe('relationship', () => {
 
       await openDocDrawer({
         page,
-        selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+        selector: '#field-relationship .relationship--single-value__drawer-toggler',
       })
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
