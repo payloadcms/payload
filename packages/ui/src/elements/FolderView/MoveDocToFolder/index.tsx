@@ -34,7 +34,7 @@ export function MoveDocToFolder({ className = '' }) {
       docTitle={title}
       fromFolderID={currentParentFolder?.value as number | string}
       onConfirm={({ id }) => {
-        if (currentParentFolder !== id) {
+        if (currentParentFolder.value !== id) {
           dispatchField({
             type: 'UPDATE',
             path: '_folder',
@@ -139,6 +139,8 @@ export const MoveDocToFolderButton = ({
                       }),
                     )
                   }
+
+                  setFromFolderName(args.name || t('folder:noFolder'))
                 } catch (_) {
                   // todo: add error toast?
                 }
