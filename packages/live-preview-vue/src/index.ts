@@ -30,7 +30,7 @@ export const useLivePreview = <T>(props: {
   let subscription: (event: MessageEvent) => void
 
   onMounted(() => {
-    subscription = subscribe({
+    subscription = void subscribe({
       apiRoute,
       callback: onChange,
       depth,
