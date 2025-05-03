@@ -5,6 +5,7 @@ export type Groups =
   | 'dropConstraint'
   | 'dropTable'
   | 'notNull'
+  | 'renameColumn'
 
 /**
  * Convert an "ADD COLUMN" statement to an "ALTER COLUMN" statement.
@@ -27,28 +28,46 @@ function convertAddColumnToAlterColumn(sql) {
 
 export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> => {
   const groups = {
+    /**
+     * example: ALTER TABLE "posts" ADD COLUMN "category_id" integer
+     */
     addColumn: 'ADD COLUMN',
-    // example: ALTER TABLE "posts" ADD COLUMN "category_id" integer
 
+    /**
+     * example:
+     *  DO $$ BEGIN
+     *   ALTER TABLE "pages_blocks_my_block" ADD CONSTRAINT "pages_blocks_my_block_person_id_users_id_fk" FOREIGN KEY ("person_id") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action;
+     *  EXCEPTION
+     *   WHEN duplicate_object THEN null;
+     *  END $$;
+     */
     addConstraint: 'ADD CONSTRAINT',
-    //example:
-    // DO $$ BEGIN
-    //  ALTER TABLE "pages_blocks_my_block" ADD CONSTRAINT "pages_blocks_my_block_person_id_users_id_fk" FOREIGN KEY ("person_id") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action;
-    // EXCEPTION
-    //  WHEN duplicate_object THEN null;
-    // END $$;
 
+    /**
+     * example: ALTER TABLE "_posts_v_rels" DROP COLUMN IF EXISTS "posts_id";
+     */
     dropColumn: 'DROP COLUMN',
-    // example: ALTER TABLE "_posts_v_rels" DROP COLUMN IF EXISTS "posts_id";
 
+    /**
+     * example: ALTER TABLE "_posts_v_rels" DROP CONSTRAINT "_posts_v_rels_posts_fk";
+     */
     dropConstraint: 'DROP CONSTRAINT',
-    // example: ALTER TABLE "_posts_v_rels" DROP CONSTRAINT "_posts_v_rels_posts_fk";
 
+    /**
+     * example: DROP TABLE "pages_rels";
+     */
     dropTable: 'DROP TABLE',
-    // example: DROP TABLE "pages_rels";
 
+    /**
+     * example: ALTER TABLE "pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;
+     */
     notNull: 'NOT NULL',
-    // example: ALTER TABLE "pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;
+
+    /**
+     * columns were renamed from camelCase to snake_case
+     * example: ALTER TABLE "forms" RENAME COLUMN "confirmationType" TO "confirmation_type";
+     */
+    renameColumn: 'RENAME COLUMN',
   }
 
   const result = Object.keys(groups).reduce((result, group: Groups) => {

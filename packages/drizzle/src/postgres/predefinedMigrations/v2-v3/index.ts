@@ -82,7 +82,19 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   const sqlUpStatements = groupUpSQLStatements(generatedSQL)
 
+  const renameColumnsStatement = sqlUpStatements.renameColumn.join('\n')
+
+  // RENAME COLUMNS
+  if (debug) {
+    payload.logger.info('RENAMING COLUMNS')
+    payload.logger.info(renameColumnsStatement)
+  }
+
+  await db.execute(sql.raw(renameColumnsStatement))
+
   const addColumnsStatement = sqlUpStatements.addColumn.join('\n')
+
+  await db.execute(sql.raw(addColumnsStatement))
 
   if (debug) {
     payload.logger.info('CREATING NEW RELATIONSHIP COLUMNS')
