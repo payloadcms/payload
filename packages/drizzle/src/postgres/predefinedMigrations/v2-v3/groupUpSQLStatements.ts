@@ -7,17 +7,22 @@ export type Groups =
   | 'notNull'
 
 /**
- * Convert an "ADD COLUMN" statement to an "ALTER COLUMN" statement
- * example: ALTER TABLE "pages_blocks_my_block" ADD COLUMN "person_id" integer NOT NULL;
- * to: ALTER TABLE "pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;
- * @param sql
+ * Convert an "ADD COLUMN" statement to an "ALTER COLUMN" statement.
+ * Works with or without a schema name.
+ *
+ * Examples:
+ * 'ALTER TABLE "pages_blocks_my_block" ADD COLUMN "person_id" integer NOT NULL;'
+ * => 'ALTER TABLE "pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;'
+ *
+ * 'ALTER TABLE "public"."pages_blocks_my_block" ADD COLUMN "person_id" integer NOT NULL;'
+ * => 'ALTER TABLE "public"."pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;'
  */
 function convertAddColumnToAlterColumn(sql) {
   // Regular expression to match the ADD COLUMN statement with its constraints
-  const regex = /ALTER TABLE ("[^"]+")\.(".*?") ADD COLUMN ("[^"]+") [\w\s]+ NOT NULL;/
+  const regex = /ALTER TABLE ((?:"[^"]+"\.)?"[^"]+") ADD COLUMN ("[^"]+") [^;]*?NOT NULL;/i
 
   // Replace the matched part with "ALTER COLUMN ... SET NOT NULL;"
-  return sql.replace(regex, 'ALTER TABLE $1.$2 ALTER COLUMN $3 SET NOT NULL;')
+  return sql.replace(regex, 'ALTER TABLE $1 ALTER COLUMN $2 SET NOT NULL;')
 }
 
 export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> => {
