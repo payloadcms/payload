@@ -207,7 +207,7 @@ export const customTranslations = {
       addLabel: 'Add!',
     },
   },
-}
+} satisfies NonNullable<Config['i18n']>['translations']
 
 export type CustomTranslationsObject = typeof customTranslations.en &
   typeof enTranslations
