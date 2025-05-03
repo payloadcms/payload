@@ -88,7 +88,11 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
         return true
       }
       if (line.includes(value)) {
-        result[key].push(line)
+        let statement = line
+        if (key === 'dropConstraint') {
+          statement = line.replace('" DROP CONSTRAINT "', '" DROP CONSTRAINT IF EXISTS "')
+        }
+        result[key].push(statement)
         return true
       }
     })
