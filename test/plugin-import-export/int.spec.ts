@@ -255,6 +255,35 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(str.indexOf('createdAt')).toBeLessThan(str.indexOf('updatedAt'))
     })
 
+    it('should create a CSV file with virtual fields', async () => {
+      const fields = ['id', 'virtual', 'virtualRelationship']
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Virtual ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains the expected virtual fields
+      expect(data[0].virtual).toStrictEqual('virtual value')
+      expect(data[0].virtualRelationship).toStrictEqual('name value')
+    })
+
     it('should create a file for collection csv from array.subfield', async () => {
       let doc = await payload.create({
         collection: 'exports',
