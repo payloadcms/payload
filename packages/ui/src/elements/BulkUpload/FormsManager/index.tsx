@@ -1,6 +1,12 @@
 'use client'
 
-import type { Data, DocumentSlots, FormState, SanitizedDocumentPermissions } from 'payload'
+import type {
+  Data,
+  DocumentSlots,
+  FormState,
+  SanitizedDocumentPermissions,
+  UploadEdits,
+} from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
@@ -41,6 +47,7 @@ type FormsManagerContext = {
   readonly hasSubmitted: boolean
   readonly isInitializing: boolean
   readonly removeFile: (index: number) => void
+  readonly resetUploadEdits?: () => void
   readonly saveAllDocs: ({ overrides }?: { overrides?: Record<string, unknown> }) => Promise<void>
   readonly setActiveIndex: (index: number) => void
   readonly setFormTotalErrorCount: ({
@@ -52,6 +59,7 @@ type FormsManagerContext = {
   }) => void
   readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
+  readonly updateUploadEdits: (args: UploadEdits) => void
 }
 
 const Context = React.createContext<FormsManagerContext>({
@@ -73,6 +81,7 @@ const Context = React.createContext<FormsManagerContext>({
   setFormTotalErrorCount: () => {},
   thumbnailUrls: [],
   totalErrorCount: 0,
+  updateUploadEdits: () => {},
 })
 
 const initialState: State = {
@@ -242,6 +251,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               return {
                 errorCount: form.errorCount,
                 formState: currentFormsData,
+                uploadEdits: form.uploadEdits,
               }
             }
             return form
@@ -295,6 +305,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
         formState: currentFormsData,
+        uploadEdits: currentForms[activeIndex].uploadEdits,
       }
       const newDocs = []
 
@@ -306,7 +317,16 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
-          const req = await fetch(actionURL, {
+          const actionURLWithParams = `${actionURL}${qs.stringify(
+            {
+              uploadEdits: form?.uploadEdits || undefined,
+            },
+            {
+              addQueryPrefix: true,
+            },
+          )}`
+
+          const req = await fetch(actionURLWithParams, {
             body: await createFormData(
               form.formState,
               overrides,
@@ -478,6 +498,31 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
   )
 
+  const updateUploadEdits = React.useCallback<FormsManagerContext['updateUploadEdits']>(
+    (uploadEdits) => {
+      dispatch({
+        type: 'UPDATE_FORM',
+        errorCount: forms[activeIndex].errorCount,
+        formState: forms[activeIndex].formState,
+        index: activeIndex,
+        uploadEdits,
+      })
+    },
+    [activeIndex, forms],
+  )
+
+  const resetUploadEdits = React.useCallback<FormsManagerContext['resetUploadEdits']>(() => {
+    dispatch({
+      type: 'REPLACE',
+      state: {
+        forms: forms.map((form) => ({
+          ...form,
+          uploadEdits: {},
+        })),
+      },
+    })
+  }, [forms])
+
   React.useEffect(() => {
     if (!collectionSlug) {
       return
@@ -529,11 +574,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         hasSubmitted,
         isInitializing,
         removeFile,
+        resetUploadEdits,
         saveAllDocs,
         setActiveIndex,
         setFormTotalErrorCount,
         thumbnailUrls: renderedThumbnails,
         totalErrorCount,
+        updateUploadEdits,
       }}
     >
       {isUploading && (

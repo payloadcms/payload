@@ -131,7 +131,7 @@ export const createSchemaGenerator = ({
           let foreignKeyDeclaration = `${sanitizeObjectKey(key)}: foreignKey({
       columns: [${foreignKey.columns.map((col) => `columns['${col}']`).join(', ')}],
       foreignColumns: [${foreignKey.foreignColumns.map((col) => `${accessProperty(col.table, col.name)}`).join(', ')}],
-      name: '${foreignKey.name}' 
+      name: '${foreignKey.name}'
     })`
 
           if (foreignKey.onDelete) {
@@ -167,11 +167,11 @@ ${Object.entries(table.columns)
 }${
         extrasDeclarations.length
           ? `, (columns) => ({
-    ${extrasDeclarations.join('\n    ')}  
+    ${extrasDeclarations.join('\n    ')}
   })`
           : ''
       }
-) 
+)
 `
 
       tableDeclarations.push(tableCode)
@@ -250,7 +250,7 @@ type DatabaseSchema = {
     `
 
     const finalDeclaration = `
-declare module '${this.packageName}/types' {
+declare module '${this.packageName}' {
   export interface GeneratedDatabaseSchema {
     schema: DatabaseSchema
   }

@@ -5,6 +5,7 @@ import type {
   DocumentPreferences,
   Field as FieldSchema,
   FieldSchemaMap,
+  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -150,6 +151,7 @@ export const iterateFields = async ({
             ? Boolean(
                 field.admin.condition(fullData || {}, data || {}, {
                   blockData,
+                  operation,
                   path: pathSegments,
                   user: req.user,
                 }),

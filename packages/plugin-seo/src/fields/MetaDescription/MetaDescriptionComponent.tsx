@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
+import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
 import {
@@ -38,7 +38,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       required,
     },
     hasGenerateDescriptionFn,
-    path,
     readOnly,
   } = props
 
@@ -59,14 +58,13 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const minLength = minLengthFromProps || minLengthDefault
 
   const {
-    customComponents: { AfterInput, BeforeInput, Label },
+    customComponents: { AfterInput, BeforeInput, Label } = {},
     errorMessage,
+    path,
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField({
-    path,
-  } as Options)
+  }: FieldType<string> = useField()
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
@@ -85,7 +83,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState),
+        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<

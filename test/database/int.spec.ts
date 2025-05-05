@@ -7,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
@@ -21,6 +22,7 @@ import {
   killTransaction,
   QueryError,
 } from 'payload'
+import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
 import type { Global2 } from './payload-types.js'
@@ -782,6 +784,28 @@ describe('database', () => {
       expect(doc.array[0].localizedText).toStrictEqual('goodbye')
       expect(doc.blocks[0].text).toStrictEqual('hello')
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
+
+    it('arrays should work with both long field names and dbName', async () => {
+      const { id } = await payload.create({
+        collection: 'aliases',
+        data: {
+          thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName: [
+            {
+              nestedArray: [{ text: 'some-text' }],
+            },
+          ],
+        },
+      })
+      const res = await payload.findByID({ collection: 'aliases', id })
+      expect(
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
+      ).toHaveLength(1)
+      const item =
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?.[0]
+      assert(item)
+      expect(item.nestedArray).toHaveLength(1)
+      expect(item.nestedArray?.[0]?.text).toBe('some-text')
     })
   })
 
@@ -1954,6 +1978,234 @@ describe('database', () => {
       expect(res.textWithinRow).toBeUndefined()
       expect(res.textWithinTabs).toBeUndefined()
     })
+
+    it('should allow virtual field with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitle).toBe('my-title')
+      const draft = await payload.find({
+        collection: 'virtual-relations',
+        depth: 0,
+        where: { id: { equals: id } },
+      })
+      expect(draft.docs[0]?.postTitle).toBe('my-title')
+    })
+
+    it('should not break when using select', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        select: { postTitle: true },
+      })
+      expect(doc.postTitle).toBe('my-title-10')
+    })
+
+    it('should allow virtual field as reference to ID', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postID).toBe(post.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postID).toBe(post.id)
+    })
+
+    it('should allow virtual field as reference to custom ID', async () => {
+      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { customID: customID.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.customIDValue).toBe(customID.id)
+      const docDepth0 = await payload.findByID({
+        collection: 'virtual-relations',
+        id,
+        depth: 0,
+      })
+      expect(docDepth0.customIDValue).toBe(customID.id)
+    })
+
+    it('should allow deep virtual field as reference to ID', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-3' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'my-title-3' },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postCategoryID).toBe(category.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postCategoryID).toBe(category.id)
+    })
+
+    it('should allow virtual field with reference localized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title', localized: 'localized en' },
+      })
+
+      await payload.update({
+        collection: 'posts',
+        id: post.id,
+        locale: 'es',
+        data: { localized: 'localized es' },
+      })
+
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      let doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postLocalized).toBe('localized en')
+
+      doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id, locale: 'es' })
+      expect(doc.postLocalized).toBe('localized es')
+    })
+
+    it('should allow to query by a virtual field with reference', async () => {
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_1.id },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_2.id },
+      })
+
+      const { docs: ascDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        depth: 0,
+      })
+
+      expect(ascDocs[0]?.id).toBe(doc_1.id)
+
+      expect(ascDocs[1]?.id).toBe(doc_2.id)
+
+      const { docs: descDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        depth: 0,
+      })
+
+      expect(descDocs[1]?.id).toBe(doc_1.id)
+
+      expect(descDocs[0]?.id).toBe(doc_2.id)
+    })
+
+    it.todo('should allow to sort by a virtual field with reference')
+
+    it('should allow virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '1-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '1-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should not break when using select 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '3-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '3-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+
+      const docWithSelect = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id: doc.id,
+        select: { postCategoryTitle: true },
+      })
+      expect(docWithSelect.postCategoryTitle).toBe('3-category')
+    })
+
+    it('should allow to query by virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '2-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '2-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const found = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: '2-category' } },
+      })
+      expect(found.docs).toHaveLength(1)
+      expect(found.docs[0].id).toBe(doc.id)
+    })
+
+    it('should allow referenced virtual field in globals', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const globalData = await payload.updateGlobal({
+        slug: 'virtual-relation-global',
+        data: { post: post.id },
+        depth: 0,
+      })
+      expect(globalData.postTitle).toBe('post')
+    })
+  })
+
+  it('should convert numbers to text', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing',
+        // @ts-expect-error hardcoding a number and expecting that it will convert to string
+        text: 1,
+      },
+    })
+
+    expect(result.text).toStrictEqual('1')
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
@@ -2187,5 +2439,49 @@ describe('database', () => {
     expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
 
     payload.db.allowAdditionalKeys = false
+  })
+
+  it('should not crash when the version field is not selected', async () => {
+    const customID = await payload.create({ collection: 'custom-ids', data: {} })
+    const res = await payload.db.queryDrafts({
+      collection: 'custom-ids',
+      where: { parent: { equals: customID.id } },
+      select: { parent: true },
+    })
+
+    expect(res.docs[0].id).toBe(customID.id)
+  })
+
+  it('should count with a query that contains subqueries', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'new-category' },
+    })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { title: 'new-post', category: category.id },
+    })
+
+    const result_1 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'new-category',
+        },
+      },
+    })
+
+    expect(result_1.totalDocs).toBe(1)
+
+    const result_2 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'non-existing-category',
+        },
+      },
+    })
+
+    expect(result_2.totalDocs).toBe(0)
   })
 })

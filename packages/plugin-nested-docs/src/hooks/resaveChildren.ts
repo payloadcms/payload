@@ -22,7 +22,6 @@ type ResaveArgs = {
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
   if (draft) {
     // If the parent is a draft, don't resave children

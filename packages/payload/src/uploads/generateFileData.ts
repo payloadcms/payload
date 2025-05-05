@@ -10,7 +10,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
+import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { canResizeImage } from './canResizeImage.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
@@ -84,6 +84,10 @@ export const generateFileData = async <T>({
 
   if (!file && uploadEdits && incomingFileData) {
     const { filename, url } = incomingFileData as FileData
+
+    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
+      throw new Forbidden(req.t)
+    }
 
     try {
       if (url && url.startsWith('/') && !disableLocalStorage) {

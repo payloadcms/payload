@@ -110,6 +110,7 @@ export const deleteOperation = async <
     const fullWhere = combineQueries(where, accessResult)
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

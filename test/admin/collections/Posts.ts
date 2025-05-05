@@ -69,6 +69,12 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
+      },
     },
     pagination: {
       defaultLimit: 5,
@@ -235,6 +241,10 @@ export const Posts: CollectionConfig = {
           value: 'option2',
         },
       ],
+    },
+    {
+      name: 'file',
+      type: 'text',
     },
   ],
   labels: {

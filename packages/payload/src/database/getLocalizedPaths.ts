@@ -1,5 +1,6 @@
-import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
+
+import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 
 // @ts-strict-ignore
 import {
@@ -151,21 +152,12 @@ export function getLocalizedPaths({
         }
 
         switch (matchedField.type) {
-          case 'json':
-          case 'richText': {
-            const upcomingSegments = pathSegments.slice(i + 1).join('.')
-            lastIncompletePath.complete = true
-            lastIncompletePath.path = upcomingSegments
-              ? `${currentPath}.${upcomingSegments}`
-              : currentPath
-            return paths
-          }
-
+          case 'join':
           case 'relationship':
           case 'upload': {
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
-            if (typeof matchedField.relationTo !== 'string') {
+            if (matchedField.type !== 'join' && typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid =
                 ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
                 pathSegments.length === 1 ||
@@ -188,7 +180,16 @@ export function getLocalizedPaths({
                 .join('.')
 
               if (nestedPathToQuery) {
-                const relatedCollection = payload.collections[matchedField.relationTo].config
+                let relatedCollection: SanitizedCollectionConfig
+                if (matchedField.type === 'join') {
+                  if (Array.isArray(matchedField.collection)) {
+                    throw new APIError('Not supported')
+                  }
+
+                  relatedCollection = payload.collections[matchedField.collection].config
+                } else {
+                  relatedCollection = payload.collections[matchedField.relationTo as string].config
+                }
 
                 const remainingPaths = getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
@@ -207,6 +208,15 @@ export function getLocalizedPaths({
             }
 
             break
+          }
+          case 'json':
+          case 'richText': {
+            const upcomingSegments = pathSegments.slice(i + 1).join('.')
+            lastIncompletePath.complete = true
+            lastIncompletePath.path = upcomingSegments
+              ? `${currentPath}.${upcomingSegments}`
+              : currentPath
+            return paths
           }
 
           default: {

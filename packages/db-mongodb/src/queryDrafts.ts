@@ -166,7 +166,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
-    result.docs[i] = result.docs[i].version
+    result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }
 
