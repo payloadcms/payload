@@ -160,7 +160,8 @@ export const reduceFields = ({
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
       const formattedField: ReducedField = {
-        label: textFromLabel,
+        label: formattedLabel,
+        plainTextLabel: textFromLabel,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,
