@@ -1,6 +1,7 @@
 'use client'
 
 import type { Data } from 'payload'
+import type { FolderOrDocument } from 'payload/shared'
 
 import React from 'react'
 
@@ -50,7 +51,7 @@ export const FolderTableCellClient = ({ collectionSlug, data, docTitle }: Props)
         size: 'small',
       }}
       collectionSlug={collectionSlug}
-      docData={data}
+      docData={data as FolderOrDocument['value']}
       docID={docID}
       docTitle={docTitle}
       fromFolderID={data?._folder}
