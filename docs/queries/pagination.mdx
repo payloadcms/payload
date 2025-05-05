@@ -55,18 +55,12 @@ All collection `find` queries are paginated automatically. Responses are returne
 
 All Payload APIs support the pagination controls below. With them, you can create paginated lists of documents within your application:
 
-| Control      | Default | Description                                                                                                                                                                                          |
-| ------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limit`      | `10`    | Limits the number of documents returned per page - set to `0` to show all documents, we recommend `pagination: false` alongside with this in order to improve performance of returning all documents |
-| `pagination` | `true`  | Set to `false` to disable pagination and return all documents                                                                                                                                        |
-| `page`       | `1`     | Get a specific page number                                                                                                                                                                           |
+| Control      | Default | Description                                                                                                                                                            |
+| ------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`      | `10`    | Limits the number of documents returned per page - set to `0` to show all documents, we automatically disabled pagination for you when `limit` is `0` for optimisation |
+| `pagination` | `true`  | Set to `false` to disable pagination and return all documents                                                                                                          |
+| `page`       | `1`     | Get a specific page number                                                                                                                                             |
 
 ### Disabling pagination within Local API
 
 For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation.
-
-### Difference between `limit: 0` and `pagination: false`
-
-While you may get the same results when passing just `limit: 0`, the actual logic of pagination is separate and is still being run unless you use `pagination: false`, instead you just get all the results on page 1.
-
-For optimization, we recommend using `limit: 0` with `pagination: false` to avoid running the pagination logic. This is especially important when using `find` with a large number of documents, as it can significantly improve performance.
