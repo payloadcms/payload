@@ -1863,6 +1863,53 @@ describe('Fields', () => {
       })
     })
 
+    it('should work with unnamed group', async () => {
+      const groupDoc = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          insideUnnamedGroup: 'Hello world',
+          deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+        },
+      })
+      expect(groupDoc).toMatchObject({
+        id: expect.any(String),
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
+    it('should work with unnamed group - graphql', async () => {
+      const mutation = `mutation {
+              createGroupField(
+                data: {
+                  insideUnnamedGroup: "Hello world",
+                  deeplyNestedGroup: { insideNestedUnnamedGroup: "Secondfield" },
+                  group: {text: "hello"}
+                }
+              ) {
+                insideUnnamedGroup
+                deeplyNestedGroup {
+                  insideNestedUnnamedGroup
+                }
+              }
+            }`
+
+      const groupDoc = await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: mutation }),
+      })
+
+      const data = (await groupDoc.json()).data.createGroupField
+
+      expect(data).toMatchObject({
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
     it('should query a subfield within a localized group', async () => {
       const text = 'find this'
       const hit = await payload.create({
