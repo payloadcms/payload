@@ -28,7 +28,7 @@ import {
   SortHeader,
   SortRow,
   Table,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
 import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'

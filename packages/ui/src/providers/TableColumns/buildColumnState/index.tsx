@@ -26,7 +26,10 @@ import React from 'react'
 import type { SortColumnProps } from '../../../elements/SortColumn/index.js'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
-import { SortColumn } from '../../../elements/SortColumn/index.js'
+import {
+  SortColumn,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+} from '../../../exports/client/index.js'
 import { filterFields } from './filterFields.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
