@@ -113,6 +113,16 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
         : [],
       required: true,
     },
+    {
+      name: 'owner',
+      type: 'relationship',
+      access: {
+        update: ({ doc, req }) => req?.user && doc?.owner === req.user.id,
+      },
+      defaultValue: ({ req }) => req.user,
+      relationTo: config.admin.user ?? 'users', // TODO: remove this fallback when the args are properly typed as `SanitizedConfig`
+      required: true,
+    },
   ],
   hooks: {
     beforeValidate: [

@@ -71,6 +71,7 @@ describe('Query Presets', () => {
           data: {
             title: 'Only Logged In Users',
             relatedCollection: 'pages',
+            owner: user.id,
           },
         })
 
@@ -84,6 +85,7 @@ describe('Query Presets', () => {
         data: {
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
+          owner: user.id,
         },
       })
 
@@ -174,6 +176,7 @@ describe('Query Presets', () => {
             },
           },
           relatedCollection: 'pages',
+          owner: user.id,
         },
       })
 
@@ -251,6 +254,7 @@ describe('Query Presets', () => {
             },
           },
           relatedCollection: 'pages',
+          owner: user.id,
         },
       })
 
@@ -312,6 +316,7 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user,
         data: {
+          owner: user.id,
           title: 'Everyone',
           where: {
             text: {
@@ -377,6 +382,94 @@ describe('Query Presets', () => {
 
       expect(presetUpdatedByUser2.title).toBe('Everyone (Update 2)')
     })
+
+    it('should allow "owner" access despite owner not existing in defined access', async () => {
+      const presetWithOwner = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user,
+        data: {
+          owner: user.id,
+          title: 'Owner',
+          relatedCollection: 'pages',
+          access: {
+            read: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+            update: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+            delete: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+          },
+        },
+      })
+
+      const foundPresetWithOwnerUser = await payload.findByID({
+        collection: queryPresetsCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: presetWithOwner.id,
+      })
+
+      expect(foundPresetWithOwnerUser.id).toBe(presetWithOwner.id)
+    })
+
+    it('should only allow update to the owner field if the user is the owner', async () => {
+      const presetWithOwner = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user,
+        data: {
+          owner: user.id,
+          title: 'Owner',
+          relatedCollection: 'pages',
+          access: {
+            read: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+            update: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+            delete: {
+              constraint: 'specificUsers',
+              users: [user2.id],
+            },
+          },
+        },
+      })
+
+      try {
+        await payload.update({
+          collection: queryPresetsCollectionSlug,
+          id: presetWithOwner.id,
+          user: user2,
+          overrideAccess: false,
+          data: {
+            owner: user2.id,
+          },
+        })
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      }
+
+      const updatedPreset = await payload.update({
+        collection: queryPresetsCollectionSlug,
+        id: presetWithOwner.id,
+        user,
+        overrideAccess: false,
+        data: {
+          owner: user2.id,
+        },
+      })
+
+      expect(updatedPreset.owner.id).toBe(user2.id)
+    })
   })
 
   describe('user-defined access control', () => {
@@ -385,6 +478,7 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user,
         data: {
+          owner: user.id,
           title: 'Top-Level Access Control Override',
           relatedCollection: 'pages',
           access: {
@@ -431,6 +525,7 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user,
         data: {
+          owner: user.id,
           title: 'Specific Roles',
           where: {
             text: {
@@ -510,6 +605,7 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user,
         data: {
+          owner: user.id,
           relatedCollection: 'pages',
           title: 'Noone',
           where: {
@@ -547,6 +643,7 @@ describe('Query Presets', () => {
         collection: 'payload-query-presets',
         user,
         data: {
+          owner: user.id,
           title: 'Disabled Query Presets',
           relatedCollection: 'pages',
         },
@@ -565,6 +662,7 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user,
         data: {
+          owner: user.id,
           title: 'Where Object Formatting',
           where: {
             text: {

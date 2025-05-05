@@ -63,6 +63,11 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
                     equals: 'everyone',
                   },
                 },
+                {
+                  owner: {
+                    equals: req?.user?.id,
+                  },
+                },
                 ...(await Promise.all(
                   (config?.queryPresets?.constraints?.[operation] || []).map(async (constraint) => {
                     const constraintAccess = constraint.access

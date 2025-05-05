@@ -10,11 +10,11 @@ type SeededQueryPreset = {
 } & Omit<QueryPreset, 'id' | 'relatedCollection'>
 
 export const seedData: {
-  everyone: SeededQueryPreset
-  onlyMe: SeededQueryPreset
+  everyone: (args: { userID: string }) => SeededQueryPreset
+  onlyMe: (args: { userID: string }) => SeededQueryPreset
   specificUsers: (args: { userID: string }) => SeededQueryPreset
 } = {
-  onlyMe: {
+  onlyMe: ({ userID }: { userID: string }) => ({
     relatedCollection: pagesSlug,
     isShared: false,
     title: 'Only Me',
@@ -40,8 +40,9 @@ export const seedData: {
         equals: 'example page',
       },
     },
-  },
-  everyone: {
+    owner: userID,
+  }),
+  everyone: ({ userID }: { userID: string }) => ({
     relatedCollection: pagesSlug,
     isShared: true,
     title: 'Everyone',
@@ -67,7 +68,8 @@ export const seedData: {
         equals: 'example page',
       },
     },
-  },
+    owner: userID,
+  }),
   specificUsers: ({ userID }: { userID: string }) => ({
     title: 'Specific Users',
     isShared: true,
@@ -97,6 +99,7 @@ export const seedData: {
       },
     ],
     relatedCollection: pagesSlug,
+    owner: userID,
   }),
 }
 
@@ -158,14 +161,14 @@ export const seed = async (_payload: Payload) => {
           collection: 'payload-query-presets',
           user: devUser,
           overrideAccess: false,
-          data: seedData.everyone,
+          data: seedData.everyone({ userID: devUser?.id || '' }),
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
           user: devUser,
           overrideAccess: false,
-          data: seedData.onlyMe,
+          data: seedData.onlyMe({ userID: devUser?.id || '' }),
         }),
       () =>
         _payload.create({
@@ -173,6 +176,7 @@ export const seed = async (_payload: Payload) => {
           user: devUser,
           overrideAccess: false,
           data: {
+            owner: devUser?.id,
             relatedCollection: 'pages',
             title: 'Noone',
             access: {
