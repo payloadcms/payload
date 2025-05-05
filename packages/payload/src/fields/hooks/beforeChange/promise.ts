@@ -383,48 +383,81 @@ export const promise = async ({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
+      if (fieldAffectsData(field)) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
 
-      if (typeof siblingDocWithLocales[field.name] !== 'object') {
-        siblingDocWithLocales[field.name] = {}
-      }
+        if (typeof siblingDocWithLocales[field.name] !== 'object') {
+          siblingDocWithLocales[field.name] = {}
+        }
 
-      await traverseFields({
-        id,
-        blockData,
-        collection,
-        context,
-        data,
-        doc,
-        docWithLocales,
-        errors,
-        fieldLabelPath:
-          field?.label === false
-            ? fieldLabelPath
-            : buildFieldLabel(
-                fieldLabelPath,
-                getTranslatedLabel(field?.label || field?.name, req.i18n),
-              ),
-        fields: field.fields,
-        global,
-        mergeLocaleActions,
-        operation,
-        parentIndexPath: '',
-        parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        req,
-        siblingData: siblingData[field.name] as JsonObject,
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
-        skipValidation: skipValidationFromHere,
-      })
+        await traverseFields({
+          id,
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          docWithLocales,
+          errors,
+          fieldLabelPath:
+            field?.label === false
+              ? fieldLabelPath
+              : buildFieldLabel(
+                  fieldLabelPath,
+                  getTranslatedLabel(field?.label || field?.name, req.i18n),
+                ),
+          fields: field.fields,
+          global,
+          mergeLocaleActions,
+          operation,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          req,
+          siblingData: siblingData[field.name] as JsonObject,
+          siblingDoc: siblingDoc[field.name] as JsonObject,
+          siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
+          skipValidation: skipValidationFromHere,
+        })
+      } else {
+        await traverseFields({
+          id,
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          docWithLocales,
+          errors,
+          fieldLabelPath:
+            field?.label === false
+              ? fieldLabelPath
+              : buildFieldLabel(
+                  fieldLabelPath,
+                  getTranslatedLabel(field?.label || field?.type, req.i18n),
+                ),
+          fields: field.fields,
+          global,
+          mergeLocaleActions,
+          operation,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          req,
+          siblingData,
+          siblingDoc,
+          siblingDocWithLocales,
+          skipValidation: skipValidationFromHere,
+        })
+      }
 
       break
     }

@@ -301,6 +301,51 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          type: 'text',
+          name: 'insideUnnamedGroup',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Deeply nested group',
+      fields: [
+        {
+          type: 'group',
+          label: 'Deeply nested group',
+          fields: [
+            {
+              type: 'group',
+              name: 'deeplyNestedGroup',
+              label: 'Deeply nested group',
+              fields: [
+                {
+                  type: 'group',
+                  label: 'Deeply nested group',
+                  fields: [
+                    {
+                      type: 'group',
+                      label: 'Deeply nested group',
+                      fields: [
+                        {
+                          type: 'text',
+                          name: 'insideNestedUnnamedGroup',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

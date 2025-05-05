@@ -375,9 +375,10 @@ export const promise = async <T>({
       }
     }
   } else {
-    // Finally, we traverse fields which do not affect data here
+    // Finally, we traverse fields which do not affect data here - collapsibles, rows, unnamed groups
     switch (field.type) {
       case 'collapsible':
+      case 'group':
       case 'row': {
         await traverseFields({
           id,

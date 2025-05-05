@@ -212,25 +212,47 @@ export const promise = async ({
     }
 
     case 'group': {
-      await traverseFields({
-        blockData,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        parentIndexPath: '',
-        parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
+      if (fieldAffectsData(field)) {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: previousDoc[field.name] as JsonObject,
+          req,
+          siblingData: (siblingData?.[field.name] as JsonObject) || {},
+          siblingDoc: siblingDoc[field.name] as JsonObject,
+        })
+      } else {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...previousSiblingDoc },
+          req,
+          siblingData: siblingData || {},
+          siblingDoc: { ...siblingDoc },
+        })
+      }
 
       break
     }

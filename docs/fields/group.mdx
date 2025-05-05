@@ -35,9 +35,9 @@ export const MyGroupField: Field = {
 
 | Option                 | Description                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
+| **`name`**             | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
 | **`fields`** \*        | Array of field types to nest within this Group.                                                                                                                                                                                                                                    |
-| **`label`**            | Used as a heading in the Admin Panel and to name the generated GraphQL type.                                                                                                                                                                                                       |
+| **`label`**            | Used as a heading in the Admin Panel and to name the generated GraphQL type. Required when name is undefined, defaults to name converted to words.                                                                                                                                 |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                    |
 | **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                              |
@@ -86,11 +86,46 @@ export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
-      name: 'pageMeta', // required
+      name: 'pageMeta',
       type: 'group', // required
       interfaceName: 'Meta', // optional
       fields: [
         // required
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+          minLength: 20,
+          maxLength: 100,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          required: true,
+          minLength: 40,
+          maxLength: 160,
+        },
+      ],
+    },
+  ],
+}
+```
+
+## Presentational group fields
+
+You can also use the Group field to create a presentational group of fields. This is useful when you want to group fields together visually without affecting the data structure.
+The label will be required when a `name` is not provided.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      label: 'Page meta',
+      type: 'group', // required
+      fields: [
         {
           name: 'title',
           type: 'text',

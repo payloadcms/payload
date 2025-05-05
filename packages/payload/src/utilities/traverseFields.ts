@@ -2,7 +2,11 @@
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
-import { fieldHasSubFields, fieldShouldBeLocalized } from '../fields/config/types.js'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldShouldBeLocalized,
+} from '../fields/config/types.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
@@ -329,22 +333,38 @@ export const traverseFields = ({
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        for (const key in currentRef as Record<string, unknown>) {
-          if (currentRef[key]) {
-            traverseFields({
-              callback,
-              callbackStack,
-              config,
-              fields: field.fields,
-              fillEmpty,
-              isTopLevel: false,
-              leavesFirst,
-              parentIsLocalized: true,
-              parentRef: currentParentRef,
-              ref: currentRef[key],
-            })
+        if (fieldAffectsData(field)) {
+          for (const key in currentRef as Record<string, unknown>) {
+            if (currentRef[key]) {
+              traverseFields({
+                callback,
+                callbackStack,
+                config,
+                fields: field.fields,
+                fillEmpty,
+                isTopLevel: false,
+                leavesFirst,
+                parentIsLocalized: true,
+                parentRef: currentParentRef,
+                ref: currentRef[key],
+              })
+            }
           }
+        } else {
+          traverseFields({
+            callback,
+            callbackStack,
+            config,
+            fields: field.fields,
+            fillEmpty,
+            isTopLevel: false,
+            leavesFirst,
+            parentIsLocalized,
+            parentRef: currentParentRef,
+            ref: currentRef,
+          })
         }
+
         return
       }
 

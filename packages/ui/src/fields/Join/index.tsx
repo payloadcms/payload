@@ -10,7 +10,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
@@ -68,7 +68,7 @@ const getInitialDrawerData = ({
 
   const nextSegments = segments.slice(1, segments.length)
 
-  if (field.type === 'tab' || field.type === 'group') {
+  if (field.type === 'tab' || (field.type === 'group' && fieldAffectsData(field))) {
     return {
       [field.name]: getInitialDrawerData({
         collectionSlug,

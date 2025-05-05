@@ -1,6 +1,6 @@
 import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -635,7 +635,74 @@ export const traverseFields = <T extends Record<string, unknown>>({
           break
         }
 
-        case 'group':
+        case 'group': {
+          if (fieldAffectsData(field)) {
+            const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
+            const groupData = {}
+            const locale = table._locale as string
+            const refKey = isLocalized && locale ? locale : field.name
+
+            if (isLocalized && locale) {
+              delete table._locale
+            }
+            ref[refKey] = traverseFields<Record<string, unknown>>({
+              adapter,
+              blocks,
+              config,
+              currentTableName,
+              dataRef: groupData as Record<string, unknown>,
+              deletions,
+              fieldPrefix: groupFieldPrefix,
+              fields: field.flattenedFields,
+              joinQuery,
+              numbers,
+              parentIsLocalized: parentIsLocalized || field.localized,
+              path: `${sanitizedPath}${field.name}`,
+              relationships,
+              table,
+              tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
+              texts,
+              topLevelTableName,
+              withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
+            })
+
+            if ('_order' in ref) {
+              delete ref._order
+            }
+          }
+
+          return
+        }
+
+        case 'number': {
+          if (typeof fieldData === 'string') {
+            val = Number.parseFloat(fieldData)
+          }
+
+          break
+        }
+
+        case 'point': {
+          if (typeof fieldData === 'string') {
+            val = JSON.parse(fieldData)
+          }
+
+          break
+        }
+
+        case 'relationship':
+        case 'upload': {
+          if (
+            val &&
+            typeof field.relationTo === 'string' &&
+            adapter.payload.collections[field.relationTo].customIDType === 'number'
+          ) {
+            val = Number(val)
+          }
+
+          break
+        }
+
         case 'tab': {
           const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
           const groupData = {}
@@ -671,35 +738,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
 
           return
-        }
-
-        case 'number': {
-          if (typeof fieldData === 'string') {
-            val = Number.parseFloat(fieldData)
-          }
-
-          break
-        }
-
-        case 'point': {
-          if (typeof fieldData === 'string') {
-            val = JSON.parse(fieldData)
-          }
-
-          break
-        }
-
-        case 'relationship':
-        case 'upload': {
-          if (
-            val &&
-            typeof field.relationTo === 'string' &&
-            adapter.payload.collections[field.relationTo].customIDType === 'number'
-          ) {
-            val = Number(val)
-          }
-
-          break
         }
         case 'text': {
           if (typeof fieldData === 'string') {

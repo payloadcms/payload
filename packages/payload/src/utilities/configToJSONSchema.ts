@@ -367,25 +367,26 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'group':
-          case 'tab': {
-            fieldSchema = {
-              ...baseFieldSchema,
-              type: 'object',
-              additionalProperties: false,
-              ...fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                field.flattenedFields,
-                interfaceNameDefinitions,
-                config,
-                i18n,
-              ),
-            }
+          case 'group': {
+            if (fieldAffectsData(field)) {
+              fieldSchema = {
+                ...baseFieldSchema,
+                type: 'object',
+                additionalProperties: false,
+                ...fieldsToJSONSchema(
+                  collectionIDFieldTypes,
+                  field.flattenedFields,
+                  interfaceNameDefinitions,
+                  config,
+                  i18n,
+                ),
+              }
 
-            if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+                fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+              }
             }
             break
           }
@@ -486,6 +487,7 @@ export function fieldsToJSONSchema(
             }
             break
           }
+
           case 'radio': {
             fieldSchema = {
               ...baseFieldSchema,
@@ -503,7 +505,6 @@ export function fieldsToJSONSchema(
 
             break
           }
-
           case 'relationship':
           case 'upload': {
             if (Array.isArray(field.relationTo)) {
@@ -595,7 +596,6 @@ export function fieldsToJSONSchema(
 
             break
           }
-
           case 'richText': {
             if (!field?.editor) {
               throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -628,6 +628,7 @@ export function fieldsToJSONSchema(
 
             break
           }
+
           case 'select': {
             const optionEnums = buildOptionEnums(field.options)
             // We get the previous field to check for a date in the case of a timezone select
@@ -673,6 +674,27 @@ export function fieldsToJSONSchema(
               break
             }
 
+            break
+          }
+          case 'tab': {
+            fieldSchema = {
+              ...baseFieldSchema,
+              type: 'object',
+              additionalProperties: false,
+              ...fieldsToJSONSchema(
+                collectionIDFieldTypes,
+                field.flattenedFields,
+                interfaceNameDefinitions,
+                config,
+                i18n,
+              ),
+            }
+
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+            }
             break
           }
 

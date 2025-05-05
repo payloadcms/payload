@@ -607,10 +607,11 @@ export class BasePayload {
     for (const collection of this.config.collections) {
       let customIDType = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
-        if (
-          ['array', 'blocks', 'group'].includes(field.type) ||
-          (field.type === 'tab' && 'name' in field)
-        ) {
+        if (['array', 'blocks'].includes(field.type) || field.type === 'tab') {
+          return true
+        }
+
+        if (field.type === 'group' && fieldAffectsData(field)) {
           return true
         }
 
@@ -1282,6 +1283,8 @@ export type {
   JSONFieldClient,
   Labels,
   LabelsClient,
+  NamedGroupField,
+  NamedGroupFieldClient,
   NamedTab,
   NonPresentationalField,
   NonPresentationalFieldClient,
@@ -1318,6 +1321,8 @@ export type {
   TextFieldClient,
   UIField,
   UIFieldClient,
+  UnnamedGroupField,
+  UnnamedGroupFieldClient,
   UnnamedTab,
   UploadField,
   UploadFieldClient,

@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { getFieldPaths, tabHasName } from 'payload/shared'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
@@ -34,7 +34,6 @@ export const traverseFields = ({
 
     switch (field.type) {
       case 'array':
-      case 'group':
         traverseFields({
           config,
           fields: field.fields,
@@ -66,6 +65,7 @@ export const traverseFields = ({
         })
 
         break
+
       case 'collapsible':
       case 'row':
         traverseFields({
@@ -76,6 +76,29 @@ export const traverseFields = ({
           parentSchemaPath,
           schemaMap,
         })
+
+        break
+
+      case 'group':
+        if (fieldAffectsData(field)) {
+          traverseFields({
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: '',
+            parentSchemaPath: schemaPath,
+            schemaMap,
+          })
+        } else {
+          traverseFields({
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: indexPath,
+            parentSchemaPath,
+            schemaMap,
+          })
+        }
 
         break
 

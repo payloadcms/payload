@@ -105,7 +105,19 @@ export const sanitizeQueryValue = ({
   | undefined => {
   let formattedValue = val
   let formattedOperator = operator
-  if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
+
+  if (['array', 'blocks', 'tab'].includes(field.type) && path.includes('.')) {
+    const segments = path.split('.')
+    segments.shift()
+    const foundField = getFieldFromSegments({ field, payload, segments })
+
+    if (foundField) {
+      field = foundField
+    }
+  }
+
+  // Handle named groups separately from unnamed groups
+  if (field.type === 'group' && 'name' in field && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
     const foundField = getFieldFromSegments({ field, payload, segments })
