@@ -179,8 +179,12 @@ export const reduceFields = ({
  * Used to make React elements searchable in filter dropdowns.
  */
 const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
-  if (!reactNode) {return ''}
-  if (typeof reactNode === 'string') {return reactNode}
+  if (!reactNode) {
+    return ''
+  }
+  if (typeof reactNode === 'string') {
+    return reactNode
+  }
 
   const html = renderToStaticMarkup(reactNode)
 
