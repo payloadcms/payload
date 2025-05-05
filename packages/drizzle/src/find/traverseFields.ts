@@ -13,7 +13,7 @@ import {
   type SelectType,
   type Where,
 } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -344,40 +344,41 @@ export const traverseFields = ({
         break
       }
 
-      case 'group':
-      case 'tab': {
-        const fieldSelect = select?.[field.name]
+      case 'group': {
+        if (fieldAffectsData(field)) {
+          const fieldSelect = select?.[field.name]
 
-        if (fieldSelect === false) {
-          break
+          if (fieldSelect === false) {
+            break
+          }
+
+          traverseFields({
+            _locales,
+            adapter,
+            collectionSlug,
+            currentArgs,
+            currentTableName,
+            depth,
+            draftsEnabled,
+            fields: field.flattenedFields,
+            joinQuery,
+            joins,
+            locale,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            path: `${path}${field.name}_`,
+            select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
+            selectAllOnCurrentLevel:
+              selectAllOnCurrentLevel ||
+              fieldSelect === true ||
+              (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
+            selectMode,
+            tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
+            topLevelArgs,
+            topLevelTableName,
+            versions,
+            withTabledFields,
+          })
         }
-
-        traverseFields({
-          _locales,
-          adapter,
-          collectionSlug,
-          currentArgs,
-          currentTableName,
-          depth,
-          draftsEnabled,
-          fields: field.flattenedFields,
-          joinQuery,
-          joins,
-          locale,
-          parentIsLocalized: parentIsLocalized || field.localized,
-          path: `${path}${field.name}_`,
-          select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
-          selectAllOnCurrentLevel:
-            selectAllOnCurrentLevel ||
-            fieldSelect === true ||
-            (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
-          selectMode,
-          tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
-          topLevelArgs,
-          topLevelTableName,
-          versions,
-          withTabledFields,
-        })
 
         break
       }
@@ -678,7 +679,6 @@ export const traverseFields = ({
 
         break
       }
-
       case 'point': {
         if (adapter.name === 'sqlite') {
           break
@@ -752,6 +752,43 @@ export const traverseFields = ({
             currentArgs.columns[fieldPath] = true
           }
         }
+
+        break
+      }
+
+      case 'tab': {
+        const fieldSelect = select?.[field.name]
+
+        if (fieldSelect === false) {
+          break
+        }
+
+        traverseFields({
+          _locales,
+          adapter,
+          collectionSlug,
+          currentArgs,
+          currentTableName,
+          depth,
+          draftsEnabled,
+          fields: field.flattenedFields,
+          joinQuery,
+          joins,
+          locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          path: `${path}${field.name}_`,
+          select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
+          selectAllOnCurrentLevel:
+            selectAllOnCurrentLevel ||
+            fieldSelect === true ||
+            (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
+          selectMode,
+          tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
+          topLevelArgs,
+          topLevelTableName,
+          versions,
+          withTabledFields,
+        })
 
         break
       }

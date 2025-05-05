@@ -1,7 +1,7 @@
 import type { FlattenedField } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldAffectsData, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -224,7 +224,79 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'group' || field.type === 'tab') {
+    if (field.type === 'group') {
+      if (
+        fieldAffectsData(field) &&
+        typeof data[field.name] === 'object' &&
+        data[field.name] !== null
+      ) {
+        if (isLocalized) {
+          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            // preserve array ID if there is
+            localeData._uuid = data.id || data._uuid
+
+            traverseFields({
+              adapter,
+              arrays,
+              baseTableName,
+              blocks,
+              blocksToDelete,
+              columnPrefix: `${columnName}_`,
+              data: localeData as Record<string, unknown>,
+              existingLocales,
+              fieldPrefix: `${fieldName}_`,
+              fields: field.flattenedFields,
+              forcedLocale: localeKey,
+              insideArrayOrBlock,
+              locales,
+              numbers,
+              parentIsLocalized: parentIsLocalized || field.localized,
+              parentTableName,
+              path: `${path || ''}${field.name}.`,
+              relationships,
+              relationshipsToDelete,
+              row,
+              selects,
+              texts,
+              withinArrayOrBlockLocale: localeKey,
+            })
+          })
+        } else {
+          // preserve array ID if there is
+          const groupData = data[field.name] as Record<string, unknown>
+          groupData._uuid = data.id || data._uuid
+
+          traverseFields({
+            adapter,
+            arrays,
+            baseTableName,
+            blocks,
+            blocksToDelete,
+            columnPrefix: `${columnName}_`,
+            data: groupData,
+            existingLocales,
+            fieldPrefix: `${fieldName}_`,
+            fields: field.flattenedFields,
+            insideArrayOrBlock,
+            locales,
+            numbers,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            parentTableName,
+            path: `${path || ''}${field.name}.`,
+            relationships,
+            relationshipsToDelete,
+            row,
+            selects,
+            texts,
+            withinArrayOrBlockLocale,
+          })
+        }
+      }
+
+      return
+    }
+
+    if (field.type === 'tab') {
       if (typeof data[field.name] === 'object' && data[field.name] !== null) {
         if (isLocalized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
