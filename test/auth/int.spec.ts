@@ -1016,6 +1016,7 @@ describe('Auth', () => {
       expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
       expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
       expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
     })
 
     it('should not allow emails with double quotes', () => {
@@ -1044,6 +1045,12 @@ describe('Auth', () => {
     it('should not allow domains starting or ending with a hyphen', () => {
       expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
       expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 })
