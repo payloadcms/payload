@@ -46,7 +46,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return searchParams
+      return searchParams || {}
     } else {
       return {
         limit: String(defaultLimit),
@@ -56,7 +56,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   })
 
   const mergeQuery = useCallback(
-    (newQuery: ListQuery): ListQuery => {
+    (newQuery: ListQuery = {}): ListQuery => {
       let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
 
       if ('where' in newQuery || 'search' in newQuery) {
@@ -204,7 +204,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSortChange,
         handleWhereChange,
         orderableFieldName,
-        query: currentQuery,
+        query: currentQuery || {},
         refineListData,
         setModified,
         ...contextRef.current,

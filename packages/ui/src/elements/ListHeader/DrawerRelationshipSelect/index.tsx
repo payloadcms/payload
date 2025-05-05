@@ -29,6 +29,7 @@ export const DrawerRelationshipSelect = () => {
         <FieldLabel label={t('upload:selectCollectionToBrowse')} />
         <ReactSelect
           className={`${listHeaderClass}__select-collection`}
+          isClearable={false}
           onChange={setSelectedOption}
           options={enabledCollectionConfigs.map((coll) => ({
             label: getTranslation(coll.labels.singular, i18n),
