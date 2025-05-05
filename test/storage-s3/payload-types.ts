@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     'media-with-prefix': MediaWithPrefix;
+    'media-with-signed-downloads': MediaWithSignedDownload;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
+    'media-with-signed-downloads': MediaWithSignedDownloadsSelect<false> | MediaWithSignedDownloadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -173,6 +175,24 @@ export interface MediaWithPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-signed-downloads".
+ */
+export interface MediaWithSignedDownload {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -202,6 +222,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
+      } | null)
+    | ({
+        relationTo: 'media-with-signed-downloads';
+        value: string | MediaWithSignedDownload;
       } | null)
     | ({
         relationTo: 'users';
@@ -297,6 +321,23 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-signed-downloads_select".
+ */
+export interface MediaWithSignedDownloadsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;

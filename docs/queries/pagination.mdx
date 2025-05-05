@@ -55,10 +55,11 @@ All collection `find` queries are paginated automatically. Responses are returne
 
 All Payload APIs support the pagination controls below. With them, you can create paginated lists of documents within your application:
 
-| Control | Description                             |
-| ------- | --------------------------------------- |
-| `limit` | Limits the number of documents returned |
-| `page`  | Get a specific page number              |
+| Control      | Default | Description                                                                                                                                                            |
+| ------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`      | `10`    | Limits the number of documents returned per page - set to `0` to show all documents, we automatically disabled pagination for you when `limit` is `0` for optimisation |
+| `pagination` | `true`  | Set to `false` to disable pagination and return all documents                                                                                                          |
+| `page`       | `1`     | Get a specific page number                                                                                                                                             |
 
 ### Disabling pagination within Local API
 
