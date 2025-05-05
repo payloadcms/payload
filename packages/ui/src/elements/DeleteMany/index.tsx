@@ -273,6 +273,7 @@ export function DeleteMany_v4({ afterDelete, search, selections, where }: Delete
     <React.Fragment>
       <ListSelectionButton
         aria-label={t('general:delete')}
+        className="delete-documents__toggle"
         onClick={() => {
           openModal(confirmManyDeleteDrawerSlug)
         }}

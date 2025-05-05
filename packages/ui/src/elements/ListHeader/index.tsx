@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const baseClass = 'list-header'
+export const listHeaderClass = 'list-header'
 
 type ListHeaderProps = {
   readonly Actions?: React.ReactNode[]
@@ -13,20 +13,22 @@ type ListHeaderProps = {
 }
 export const ListHeader: React.FC<ListHeaderProps> = (props) => {
   return (
-    <header className={[baseClass, props.className].filter(Boolean).join(' ')}>
-      <div className={`${baseClass}__content`}>
-        <div className={`${baseClass}__title-and-actions`}>
-          <h1 className={`${baseClass}__title`}>{props.title}</h1>
+    <header className={[listHeaderClass, props.className].filter(Boolean).join(' ')}>
+      <div className={`${listHeaderClass}__content`}>
+        <div className={`${listHeaderClass}__title-and-actions`}>
+          <h1 className={`${listHeaderClass}__title`}>{props.title}</h1>
           {props.TitleActions.length ? (
-            <div className={`${baseClass}__title-actions`}>{props.TitleActions}</div>
+            <div className={`${listHeaderClass}__title-actions`}>{props.TitleActions}</div>
           ) : null}
         </div>
         {props.Actions.length ? (
-          <div className={`${baseClass}__actions`}>{props.Actions}</div>
+          <div className={`${listHeaderClass}__actions`}>{props.Actions}</div>
         ) : null}
       </div>
       {props.AfterListHeaderContent ? (
-        <div className={`${baseClass}__after-header-content`}>{props.AfterListHeaderContent}</div>
+        <div className={`${listHeaderClass}__after-header-content`}>
+          {props.AfterListHeaderContent}
+        </div>
       ) : null}
     </header>
   )

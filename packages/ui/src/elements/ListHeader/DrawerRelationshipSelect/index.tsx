@@ -7,6 +7,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useListDrawerContext } from '../../ListDrawer/Provider.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
+import { listHeaderClass } from '../index.js'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -27,7 +28,7 @@ export const DrawerRelationshipSelect = () => {
       <div className={`${drawerBaseClass}__select-collection-wrap`}>
         <FieldLabel label={t('upload:selectCollectionToBrowse')} />
         <ReactSelect
-          className={`${drawerBaseClass}__select-collection`}
+          className={`${listHeaderClass}__select-collection`}
           onChange={setSelectedOption}
           options={enabledCollectionConfigs.map((coll) => ({
             label: getTranslation(coll.labels.singular, i18n),

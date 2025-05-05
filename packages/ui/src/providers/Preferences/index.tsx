@@ -59,6 +59,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
           const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
+            credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
             },

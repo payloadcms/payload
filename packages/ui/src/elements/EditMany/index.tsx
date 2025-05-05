@@ -56,7 +56,7 @@ export const EditMany_v4: React.FC<
   }
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, `${baseClass}__toggle`].filter(Boolean).join(' ')}>
       <ListSelectionButton
         aria-label={t('general:edit')}
         onClick={() => {
