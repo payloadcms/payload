@@ -1,6 +1,7 @@
 'use client'
 import type {
   ClientUser,
+  Data,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
@@ -45,7 +46,7 @@ export const DocumentControls: React.FC<{
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
   }
-  readonly data?: any
+  readonly data?: Data
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly hasPublishPermission?: boolean

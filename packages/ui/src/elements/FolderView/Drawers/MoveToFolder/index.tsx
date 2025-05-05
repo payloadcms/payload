@@ -1,6 +1,6 @@
 'use client'
 
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, Document } from 'payload'
 import type {
   FolderBreadcrumb,
   FolderDocumentItemKey,
@@ -111,6 +111,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
           setDocuments([])
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e)
       }
 
@@ -183,7 +184,7 @@ function Content({
   }, [breadcrumbs, getSelectedItems])
 
   const onCreateSuccess = React.useCallback(
-    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Record<string, any> }) => {
+    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
       const itemValue: FolderOrDocument['value'] = {
         id: doc?.id,
         _folder: doc?._folder,

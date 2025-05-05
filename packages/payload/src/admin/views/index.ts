@@ -1,4 +1,4 @@
-import type { ClientTranslationsObject, I18n } from '@payloadcms/translations'
+import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
@@ -8,13 +8,12 @@ import type {
   CustomComponent,
   Locale,
   MetaConfig,
-  Params,
   PayloadComponent,
   SanitizedConfig,
   ServerProps,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { Payload, PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
 import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'

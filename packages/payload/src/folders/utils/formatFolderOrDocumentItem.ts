@@ -1,11 +1,11 @@
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, Document } from '../../index.js'
 import type { FolderOrDocument } from '../types.js'
 
 type Args = {
   isUpload: boolean
   relationTo: CollectionSlug
   useAsTitle?: string
-  value: any
+  value: Document
 }
 export function formatFolderOrDocumentItem({
   isUpload,

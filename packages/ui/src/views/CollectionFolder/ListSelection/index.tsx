@@ -189,7 +189,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
                         relationTo: slug,
                         value: {
                           id,
-                        } as any,
+                        } as FolderOrDocument['value'],
                       })
                     })
                   }

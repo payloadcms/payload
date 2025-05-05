@@ -75,7 +75,10 @@ export function SortByPill() {
                 onClick={() => {
                   sortAndUpdateState({
                     documentsToSort: documents,
-                    sortOn: value as any,
+                    sortOn: value as keyof Pick<
+                      FolderOrDocument['value'],
+                      '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
+                    >,
                     subfoldersToSort: subfolders,
                   })
                   close()
@@ -96,7 +99,7 @@ export function SortByPill() {
                 onClick={() => {
                   sortAndUpdateState({
                     documentsToSort: documents,
-                    sortDirection: value as any,
+                    sortDirection: value,
                     subfoldersToSort: subfolders,
                   })
                   close()

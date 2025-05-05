@@ -48,6 +48,3 @@ export type FolderOrDocument = {
     updatedAt: string
   } & DocumentMediaData
 }
-
-export type FolderSubfolders = FolderOrDocument[]
-export type FolderDocuments = FolderOrDocument[]

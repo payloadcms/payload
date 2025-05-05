@@ -1,7 +1,7 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { CollectionSlug, FolderListViewClientProps } from 'payload'
+import type { CollectionSlug, Document, FolderListViewClientProps } from 'payload'
 import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
 import { useDndMonitor } from '@dnd-kit/core'
@@ -125,7 +125,7 @@ export function DefaultFolderView(
   }, '')
 
   const onCreateSuccess = React.useCallback(
-    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Record<string, any> }) => {
+    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
       const collectionConfig = getEntityConfig({ collectionSlug })
       const itemValue: FolderOrDocument['value'] = {
         id: doc?.id,

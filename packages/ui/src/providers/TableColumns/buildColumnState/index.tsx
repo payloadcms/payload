@@ -56,7 +56,7 @@ export type BuildColumnStateArgs = {
       docs: PaginatedDocs['docs']
     }
   | {
-      collectionSlug: never | undefined
+      collectionSlug?: undefined
       dataType: 'polymorphic'
       docs: {
         relationTo: CollectionSlug

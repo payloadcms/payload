@@ -1,5 +1,7 @@
 'use client'
 
+import type { Data } from 'payload'
+
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
@@ -8,7 +10,7 @@ import { MoveDocToFolderButton } from '../MoveDocToFolder/index.js'
 
 type Props = {
   collectionSlug: string
-  data: any
+  data: Data
   docTitle: string
 }
 

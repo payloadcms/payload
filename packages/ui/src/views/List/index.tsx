@@ -101,7 +101,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
 

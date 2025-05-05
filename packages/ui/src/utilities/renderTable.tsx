@@ -82,7 +82,7 @@ export const renderTable = ({
   collections?: string[]
   columnPreferences: ListPreferences['columns']
   columns?: ListPreferences['columns']
-  customCellProps?: Record<string, any>
+  customCellProps?: Record<string, unknown>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean

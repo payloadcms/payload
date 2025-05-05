@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug, Document } from 'payload'
 import type { FolderBreadcrumb, FolderOrDocument, GetFolderDataResult } from 'payload/shared'
 
 import { useRouter } from 'next/navigation.js'
@@ -913,7 +913,7 @@ export function FolderProvider({
             })
             if (res.status === 200) {
               const json = await res.json()
-              const { docs } = json as { docs: any[] }
+              const { docs } = json as { docs: Document[] }
               const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>((doc: any) =>
                 formatFolderOrDocumentItem({
                   isUpload: Boolean(collectionConfig.upload),
@@ -930,6 +930,8 @@ export function FolderProvider({
             }
           } catch (error) {
             toast.error(t('general:error'))
+            // eslint-disable-next-line no-console
+            console.error(error)
             continue
           }
         }

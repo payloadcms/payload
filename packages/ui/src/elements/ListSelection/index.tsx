@@ -50,17 +50,12 @@ export function ListSelection_v4({ count, ListActions, SelectionActions }: ListS
 }
 
 type ListSelectionButtonProps = {} & ButtonProps
-export function ListSelectionButton({
-  buttonStyle,
-  children,
-  className,
-  ...props
-}: ListSelectionButtonProps) {
+export function ListSelectionButton({ children, className, ...props }: ListSelectionButtonProps) {
   return (
     <Button
+      {...props}
       buttonStyle="none"
       className={[`${baseClass}__button`, className].filter(Boolean).join(' ')}
-      {...props}
     >
       {children}
     </Button>

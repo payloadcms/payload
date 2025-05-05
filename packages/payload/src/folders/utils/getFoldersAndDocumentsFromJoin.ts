@@ -1,7 +1,7 @@
 import type { User } from '../../auth/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { Payload } from '../../types/index.js'
+import type { Document, Payload } from '../../types/index.js'
 import type { FolderOrDocument } from '../types.js'
 
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
@@ -48,12 +48,12 @@ export async function queryDocumentsAndFoldersFromJoin({
         equals: parentFolderID,
       },
     },
-  })) as PaginatedDocs<any>
+  })) as PaginatedDocs<Document>
 
   const childrenDocs = subfolderDoc?.docs[0]?.documentsAndFolders?.docs || []
 
   const results: QueryDocumentsAndFoldersResults = childrenDocs.reduce(
-    (acc: QueryDocumentsAndFoldersResults, doc: any) => {
+    (acc: QueryDocumentsAndFoldersResults, doc: Document) => {
       const { relationTo, value } = doc
       const item = formatFolderOrDocumentItem({
         isUpload: Boolean(payload.collections[relationTo].config.upload),

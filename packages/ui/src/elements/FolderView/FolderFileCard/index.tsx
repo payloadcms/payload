@@ -57,6 +57,7 @@ export function FolderFileCard({
   const ref = React.useRef(null)
 
   React.useEffect(() => {
+    const copyOfRef = ref.current
     if (isFocused && ref.current) {
       ref.current.focus()
     } else if (!isFocused && ref.current) {
@@ -64,8 +65,8 @@ export function FolderFileCard({
     }
 
     return () => {
-      if (ref.current) {
-        ref.current.blur()
+      if (copyOfRef) {
+        copyOfRef.blur()
       }
     }
   }, [isFocused])

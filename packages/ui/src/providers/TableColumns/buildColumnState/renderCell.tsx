@@ -3,6 +3,7 @@ import type {
   ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
+  Document,
   Field,
   Payload,
 } from 'payload'
@@ -23,7 +24,7 @@ type RenderCellArgs = {
   readonly collectionSlug: string
   readonly columnIndex: number
   readonly customCellProps: DefaultCellComponentProps['customCellProps']
-  readonly doc: any
+  readonly doc: Document
   readonly enableRowSelections: boolean
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean

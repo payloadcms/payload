@@ -66,7 +66,7 @@ export function DroppableBreadcrumb({
         .filter(Boolean)
         .join(' ')}
       onClick={onClick}
-      ref={setNodeRef as unknown as any}
+      ref={setNodeRef}
       type="button"
     >
       {children}

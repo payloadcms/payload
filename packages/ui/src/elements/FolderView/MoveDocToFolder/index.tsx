@@ -1,5 +1,7 @@
 'use client'
 
+import type { FolderOrDocument } from 'payload/shared'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -58,7 +60,7 @@ export function MoveDocToFolder({
       buttonProps={buttonProps}
       className={className}
       collectionSlug={collectionSlug}
-      docData={initialData}
+      docData={initialData as FolderOrDocument['value']}
       docID={id}
       docTitle={title}
       fromFolderID={fromFolderID as number | string}
@@ -83,7 +85,7 @@ type MoveDocToFolderButtonProps = {
   buttonProps?: Partial<ButtonProps>
   className?: string
   collectionSlug: string
-  docData: any
+  docData: FolderOrDocument['value']
   docID: number | string
   docTitle?: string
   fromFolderID?: number | string
