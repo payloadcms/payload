@@ -275,7 +275,23 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   )
 
   const removeThumbnails = React.useCallback((indexes: number[]) => {
-    thumbnailUrlsRef.current = thumbnailUrlsRef.current.filter((_, i) => !indexes.includes(i))
+    const indexSet = new Set(indexes)
+    const newArr: (string | undefined)[] = new Array(
+      Math.max(thumbnailUrlsRef.current.length - indexes.length, 0),
+    )
+
+    let shiftIndex = 0
+
+    for (let i = 0; i < thumbnailUrlsRef.current.length; i++) {
+      if (!indexSet.has(i)) {
+        if (thumbnailUrlsRef.current[i]) {
+          newArr[shiftIndex] = thumbnailUrlsRef.current[i]
+        }
+        shiftIndex++
+      }
+    }
+
+    thumbnailUrlsRef.current = newArr
     setRenderedThumbnails([...thumbnailUrlsRef.current])
   }, [])
 
