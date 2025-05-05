@@ -1,6 +1,7 @@
 export type Groups =
   | 'addColumn'
   | 'addConstraint'
+  | 'createTable'
   | 'dropColumn'
   | 'dropConstraint'
   | 'dropTable'
@@ -42,6 +43,16 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
      *  END $$;
      */
     addConstraint: 'ADD CONSTRAINT',
+
+    /**
+     * example: CREATE TABLE IF NOT EXISTS "payload_locked_documents" (
+     *  "id" serial PRIMARY KEY NOT NULL,
+     *  "global_slug" varchar,
+     *  "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+     *  "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+     * );
+     */
+    createTable: 'CREATE TABLE',
 
     /**
      * example: ALTER TABLE "_posts_v_rels" DROP COLUMN IF EXISTS "posts_id";

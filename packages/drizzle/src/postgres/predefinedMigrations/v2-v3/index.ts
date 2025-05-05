@@ -41,16 +41,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
   const { generateDrizzleJson, generateMigration, upSnapshot } = adapter.requireDrizzleKit()
-
-  const toSnapshot: Record<string, unknown> = {}
-
-  for (const key of Object.keys(adapter.schema).filter(
-    (key) => !key.startsWith('payload_locked_documents'),
-  )) {
-    toSnapshot[key] = adapter.schema[key]
-  }
-
-  const drizzleJsonAfter = generateDrizzleJson(toSnapshot) as DrizzleSnapshotJSON
+  const drizzleJsonAfter = generateDrizzleJson(adapter.schema) as DrizzleSnapshotJSON
 
   // Get the previous migration snapshot
   const previousSnapshot = fs
@@ -82,6 +73,16 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   const sqlUpStatements = groupUpSQLStatements(generatedSQL)
 
+  const createTableStatement = sqlUpStatements.createTable.join('\n')
+
+  // CREATE TABLES
+  if (debug) {
+    payload.logger.info('CREATING TABLES')
+    payload.logger.info(createTableStatement)
+  }
+
+  await db.execute(sql.raw(createTableStatement))
+
   const renameColumnsStatement = sqlUpStatements.renameColumn.join('\n')
 
   // RENAME COLUMNS
@@ -104,6 +105,9 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   await db.execute(sql.raw(addColumnsStatement))
 
   for (const collection of payload.config.collections) {
+    if (collection.slug === 'payload-locked-documents') {
+      continue
+    }
     const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
     const pathsToQuery: PathsToQuery = new Set()
 
