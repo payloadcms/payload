@@ -11,9 +11,12 @@ import { MissingEditorProp } from 'payload'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
-import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
+import {
+  DefaultCell,
+  RenderDefaultCell,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+} from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
-import { RenderDefaultCell } from '../RenderDefaultCell/index.js'
 
 type RenderCellArgs = {
   readonly clientField: ClientField
