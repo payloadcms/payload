@@ -72,6 +72,8 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   const sqlUpStatements = groupUpSQLStatements(generatedSQL)
 
+  const db = await getTransaction(adapter, req)
+
   const createTableStatement = sqlUpStatements.createTable.join('\n')
 
   // CREATE TABLES
@@ -100,8 +102,6 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info('CREATING NEW RELATIONSHIP COLUMNS')
     payload.logger.info(addColumnsStatement)
   }
-
-  const db = await getTransaction(adapter, req)
 
   await db.execute(sql.raw(addColumnsStatement))
 
