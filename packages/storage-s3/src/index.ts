@@ -51,7 +51,6 @@ export type S3StorageOptions = {
       | true
     >
   >
-
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *
@@ -72,6 +71,10 @@ export type S3StorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * Use pre-signed URLs for files downloading. Can be overriden per-collection.
+   */
+  signedDownloads?: SignedDownloadsConfig
 }
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
@@ -169,15 +172,26 @@ export const s3Storage: S3StoragePlugin =
 
 function s3StorageInternal(
   getStorageClient: () => AWS.S3,
-  { acl, bucket, clientUploads, collections, config = {} }: S3StorageOptions,
+  {
+    acl,
+    bucket,
+    clientUploads,
+    collections,
+    config = {},
+    signedDownloads: topLevelSignedDownloads,
+  }: S3StorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     const collectionStorageConfig = collections[collection.slug]
 
-    const signedDownloads =
+    let signedDownloads: null | SignedDownloadsConfig =
       typeof collectionStorageConfig === 'object'
         ? (collectionStorageConfig.signedDownloads ?? false)
-        : false
+        : null
+
+    if (signedDownloads === null) {
+      signedDownloads = topLevelSignedDownloads ?? null
+    }
 
     return {
       name: 's3',
@@ -195,7 +209,7 @@ function s3StorageInternal(
         bucket,
         collection,
         getStorageClient,
-        signedDownloads,
+        signedDownloads: signedDownloads ?? false,
       }),
     }
   }
