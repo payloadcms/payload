@@ -65,16 +65,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       whereConstraints.push(queryWithSearch)
     }
 
-    if (selectAll) {
-      // Match the current filter/search, or default to all docs
-      whereConstraints.push(
-        (parseSearchParams(searchParams)?.where as Where) || {
-          id: {
-            exists: true,
-          },
-        },
-      )
-    } else {
+    if (!selectAll) {
       // If we're not selecting all, we need to select specific docs
       whereConstraints.push({
         id: {
