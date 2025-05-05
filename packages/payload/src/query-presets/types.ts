@@ -25,7 +25,7 @@ export type QueryPreset = {
 
 export type QueryPresetConstraint = {
   access: Access<QueryPreset>
-  fields: Field[]
+  fields?: Field[]
   label: string
   value: string
 }
