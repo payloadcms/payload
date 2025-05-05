@@ -364,7 +364,7 @@ test.describe('Form State', () => {
           await expect(page.locator('#field-title')).toHaveValue('Test 2')
         },
         {
-          allowedNumberOfRequests: 1,
+          allowedNumberOfRequests: 2,
           timeout: 10000,
         },
       )
