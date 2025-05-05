@@ -21,6 +21,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
       routes: { admin: adminRoute },
     },
   } = useConfig()
+
   const { collectionSlug, globalSlug } = useDocumentInfo()
   const drawerDepth = useDrawerDepth()
 
@@ -33,7 +34,7 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
     <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>
       {prefix}
       &nbsp;
-      {drawerDepth === 0 ? sanitizeID(id) : <Link href={docPath}>{sanitizeID(id)}</Link>}
+      {drawerDepth > 1 ? <Link href={docPath}>{sanitizeID(id)}</Link> : sanitizeID(id)}
     </div>
   )
 }

@@ -349,7 +349,7 @@ describe('Document View', () => {
       expect(drawer2Left > drawerLeft).toBe(true)
     })
 
-    test('document can be opened in the same tabfrom within the drawer', async () => {
+    test('document drawer displays a link to document', async () => {
       await navigateToDoc(page, postsUrl)
 
       // change the relationship to a document which is a different one than the current one
@@ -361,7 +361,7 @@ describe('Document View', () => {
       await page
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
-      await wait(500)
+
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
 
