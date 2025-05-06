@@ -216,13 +216,6 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
 
-export type ResolveAuthCollectionSlug<T> = 'auth' extends keyof T
-  ? keyof T['auth']
-  : // @ts-expect-error
-    keyof T['authUntyped']
-
-export type AuthCollectionSlug = ResolveAuthCollectionSlug<GeneratedTypes>
-
 export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
