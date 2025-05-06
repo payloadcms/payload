@@ -1,4 +1,9 @@
-import type { DefaultServerCellComponentProps, Payload } from 'payload'
+import type {
+  DefaultServerCellComponentProps,
+  Payload,
+  RowData,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
@@ -8,6 +13,11 @@ import React from 'react'
 export const RscEntrySlateCell: React.FC<
   {
     i18n: I18nClient
+    onClick?: (args: {
+      cellData: unknown
+      collectionSlug: SanitizedCollectionConfig['slug']
+      rowData: RowData
+    }) => void
     payload: Payload
   } & DefaultServerCellComponentProps
 > = (props) => {

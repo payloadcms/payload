@@ -225,7 +225,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? docs.map((doc, i) => {
             const isLinkedColumn = index === activeColumnsIndices[0]
 
-            const cellClientProps: DefaultCellComponentProps = {
+            const cellClientProps = {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,
@@ -234,15 +234,12 @@ export const buildColumnState = (args: Args): Column[] => {
 
             const cellServerProps: DefaultServerCellComponentProps = {
               cellData: cellClientProps.cellData,
-              className: baseCellClientProps.className,
               collectionConfig,
               collectionSlug: collectionConfig.slug,
-              columnIndex: baseCellClientProps.columnIndex,
               customCellProps: baseCellClientProps.customCellProps,
               field: _field,
               i18n,
               link: cellClientProps.link,
-              onClick: baseCellClientProps.onClick,
               payload,
               rowData: doc,
             }
