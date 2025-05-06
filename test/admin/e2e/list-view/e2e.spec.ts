@@ -1083,6 +1083,28 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
+    test('should set custom columns', async () => {
+      await page.goto(postsUrl.list)
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+
+      // should not have the ID column #heading-id but title and description should be visible
+      await expect(page.locator('#heading-id')).toBeHidden()
+      await expect(page.locator('#heading-title')).toBeVisible()
+      await expect(page.locator('#heading-description')).toBeVisible()
+
+      await page.locator('#set-columns-button').click()
+
+      // should have the ID and title column but not the description anymore
+      await expect(page.locator('#heading-id')).toBeVisible()
+      await expect(page.locator('#heading-title')).toBeVisible()
+      await expect(page.locator('#heading-description')).toBeHidden()
+
+      // url should have the columns param with title and id
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .toContain('columns=%5B%22id%22%2C%22title%22%5D')
+    })
+
     test('should reset default columns', async () => {
       await page.goto(postsUrl.list)
       await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
