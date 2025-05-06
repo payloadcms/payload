@@ -111,6 +111,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     collection.graphQL.type = buildObjectType({
       name: singularName,
       baseFields,
+      collectionSlug: collectionConfig.slug,
       config,
       fields,
       forceNullable: forceNullableObjectType,
@@ -339,6 +340,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
       collection.graphQL.versionType = buildObjectType({
         name: `${singularName}Version`,
+        collectionSlug: collectionConfig.slug,
         config,
         fields: versionCollectionFields,
         forceNullable: forceNullableObjectType,

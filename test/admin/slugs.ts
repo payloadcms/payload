@@ -3,6 +3,7 @@ export const customViews1CollectionSlug = 'custom-views-one'
 export const customViews2CollectionSlug = 'custom-views-two'
 export const customViewsTabsSlug = 'custom-views-tabs'
 export const geoCollectionSlug = 'geo'
+export const arrayCollectionSlug = 'array'
 export const postsCollectionSlug = 'posts'
 export const group1Collection1Slug = 'group-one-collection-ones'
 export const group1Collection2Slug = 'group-one-collection-twos'
@@ -14,6 +15,7 @@ export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
 export const disableCopyToLocale = 'disable-copy-to-locale'
 export const uploadCollectionSlug = 'uploads'
+export const placeholderCollectionSlug = 'placeholder'
 
 export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
@@ -24,6 +26,7 @@ export const collectionSlugs = [
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  arrayCollectionSlug,
   postsCollectionSlug,
   group1Collection1Slug,
   group1Collection2Slug,

@@ -36,7 +36,6 @@ type Args = {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as unknown as BasePostgresAdapter
-  const db = await getTransaction(adapter, req)
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
@@ -88,6 +87,8 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     payload.logger.info('CREATING NEW RELATIONSHIP COLUMNS')
     payload.logger.info(addColumnsStatement)
   }
+
+  const db = await getTransaction(adapter, req)
 
   await db.execute(sql.raw(addColumnsStatement))
 

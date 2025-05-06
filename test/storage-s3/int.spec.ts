@@ -4,11 +4,15 @@ import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { mediaSlug, mediaWithPrefixSlug, mediaWithSignedDownloadsSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+let restClient: NextRESTClient
 
 let payload: Payload
 
@@ -17,7 +21,7 @@ describe('@payloadcms/storage-s3', () => {
   let client: AWS.S3Client
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     TEST_BUCKET = process.env.S3_BUCKET
 
     client = new AWS.S3({
@@ -77,15 +81,38 @@ describe('@payloadcms/storage-s3', () => {
     expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
+  it('can download with signed downloads', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/image.png`)
+    expect(response.status).toBe(302)
+    const url = response.headers.get('Location')
+    expect(url).toBeDefined()
+    expect(url!).toContain(`/${TEST_BUCKET}/image.png`)
+    expect(new URLSearchParams(url!).get('x-id')).toBe('GetObject')
+    const file = await fetch(url!)
+    expect(file.headers.get('Content-Type')).toBe('image/png')
+  })
+
   describe('R2', () => {
     it.todo('can upload')
   })
 
   async function createTestBucket() {
-    const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
+    try {
+      const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
 
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
+      if (makeBucketRes.$metadata.httpStatusCode !== 200) {
+        throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
+      }
+    } catch (e) {
+      if (e instanceof AWS.BucketAlreadyOwnedByYou) {
+        console.log('Bucket already exists')
+      }
     }
   }
 
@@ -96,7 +123,9 @@ describe('@payloadcms/storage-s3', () => {
       }),
     )
 
-    if (!listedObjects?.Contents?.length) return
+    if (!listedObjects?.Contents?.length) {
+      return
+    }
 
     const deleteParams = {
       Bucket: TEST_BUCKET,

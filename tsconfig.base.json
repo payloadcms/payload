@@ -31,7 +31,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/query-presets/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],

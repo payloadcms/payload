@@ -117,6 +117,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

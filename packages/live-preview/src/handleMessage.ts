@@ -1,6 +1,6 @@
 import type { FieldSchemaJSON } from 'payload'
 
-import type { LivePreviewMessageEvent } from './types.js'
+import type { CollectionPopulationRequestHandler, LivePreviewMessageEvent } from './types.js'
 
 import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
@@ -29,9 +29,10 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   depth?: number
   event: LivePreviewMessageEvent<T>
   initialData: T
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const { apiRoute, depth, event, initialData, serverURL } = args
+  const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
     const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
@@ -57,6 +58,7 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
       incomingData: data,
       initialData: _payloadLivePreview?.previousData || initialData,
       locale,
+      requestHandler,
       serverURL,
     })
 

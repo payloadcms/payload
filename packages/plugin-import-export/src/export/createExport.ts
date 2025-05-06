@@ -87,7 +87,7 @@ export const createExport = async (args: CreateExportArgs) => {
         let isFirstBatch = true
 
         while (result.docs.length > 0) {
-          const csvInput = result.docs.map((doc) => flattenObject(doc))
+          const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
           const csvString = stringify(csvInput, { header: isFirstBatch })
           this.push(encoder.encode(csvString))
           isFirstBatch = false
@@ -119,7 +119,7 @@ export const createExport = async (args: CreateExportArgs) => {
     result = await payload.find(findArgs)
 
     if (isCSV) {
-      const csvInput = result.docs.map((doc) => flattenObject(doc))
+      const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
       outputData.push(stringify(csvInput, { header: isFirstBatch }))
       isFirstBatch = false
     } else {

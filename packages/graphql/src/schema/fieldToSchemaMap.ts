@@ -8,6 +8,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  FlattenedJoinField,
   GraphQLInfo,
   GroupField,
   JoinField,
@@ -68,6 +69,7 @@ function formattedNameResolver({
 }
 
 type SharedArgs = {
+  collectionSlug?: string
   config: SanitizedConfig
   forceNullable?: boolean
   graphqlResult: GraphQLInfo
@@ -340,7 +342,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
     }
   },
-  join: ({ field, graphqlResult, objectTypeConfig, parentName }) => {
+  join: ({ collectionSlug, field, graphqlResult, objectTypeConfig, parentName }) => {
     const joinName = combineParentName(parentName, toWords(field.name, true))
 
     const joinType = {
@@ -385,9 +387,23 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         const draft = Boolean(args.draft ?? context.req.query?.draft)
 
-        const fullWhere = combineQueries(where, {
-          [field.on]: { equals: parent._id ?? parent.id },
-        })
+        const targetField = (field as FlattenedJoinField).targetField
+
+        const fullWhere = combineQueries(
+          where,
+          Array.isArray(targetField.relationTo)
+            ? {
+                [field.on]: {
+                  equals: {
+                    relationTo: collectionSlug,
+                    value: parent._id ?? parent.id,
+                  },
+                },
+              }
+            : {
+                [field.on]: { equals: parent._id ?? parent.id },
+              },
+        )
 
         if (Array.isArray(collection)) {
           throw new Error('GraphQL with array of join.field.collection is not implemented')

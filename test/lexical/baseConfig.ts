@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type Config } from 'payload'
 
+import { LexicalFullyFeatured } from './collections/_LexicalFullyFeatured/index.js'
 import ArrayFields from './collections/Array/index.js'
 import {
   getLexicalFieldsCollection,
@@ -26,6 +27,7 @@ const dirname = path.dirname(filename)
 export const baseConfig: Partial<Config> = {
   // ...extend config here
   collections: [
+    LexicalFullyFeatured,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
       inlineBlocks: lexicalInlineBlocks,
@@ -42,9 +44,17 @@ export const baseConfig: Partial<Config> = {
     ArrayFields,
   ],
   globals: [TabsWithRichText],
+
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      beforeDashboard: [
+        {
+          path: './components/CollectionsExplained.tsx#CollectionsExplained',
+        },
+      ],
     },
   },
   onInit: async (payload) => {

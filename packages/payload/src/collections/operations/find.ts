@@ -102,6 +102,7 @@ export const findOperation = async <
     } = args
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

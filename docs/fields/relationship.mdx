@@ -94,6 +94,7 @@ The Relationship Field inherits all of the default options from the base [Field 
 | **`allowCreate`** | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
 | **`allowEdit`**   | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                                   |
 | **`sortOptions`** | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sort-options)                                |
+| **`placeholder`** | Define a custom text or function to replace the generic default placeholder                                                                 |
 | **`appearance`**  | Set to `drawer` or `select` to change the behavior of the field. Defaults to `select`.                                                      |
 
 ### Sort Options
@@ -149,7 +150,7 @@ The `filterOptions` property can either be a `Where` query, or a function return
 | `id`          | The `id` of the current document being edited. Will be `undefined` during the `create` operation or when called on a `Filter` component within the list view.                            |
 | `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property.                                                                                                  |
 | `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.                                                                                                 |
-| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field. Will be an emprt object when called on a `Filter` component within the list view. |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view. |
 | `user`        | An object containing the currently authenticated user.                                                                                                                                   |
 
 ## Example

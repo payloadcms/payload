@@ -38,6 +38,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         description,
         isClearable = true,
         isSortable = true,
+        placeholder,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -118,6 +119,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
+      placeholder={placeholder}
       readOnly={readOnly || disabled}
       required={required}
       showError={showError}

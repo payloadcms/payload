@@ -87,6 +87,7 @@ export const findByIDOperation = async <
     } = args
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

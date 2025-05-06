@@ -16,7 +16,8 @@ export const countDistinct: CountDistinct = async function countDistinct(
       })
       .from(this.tables[tableName])
       .where(where)
-    return Number(countResult[0].count)
+
+    return Number(countResult?.[0]?.count ?? 0)
   }
 
   let query = db
@@ -39,5 +40,5 @@ export const countDistinct: CountDistinct = async function countDistinct(
   // Instead, COUNT (GROUP BY id) can be used which is still slower than COUNT(*) but acceptable.
   const countResult = await query
 
-  return Number(countResult[0].count)
+  return Number(countResult?.[0]?.count ?? 0)
 }

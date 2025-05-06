@@ -70,8 +70,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     const fullWhere = combineQueries(where, accessResults)
 
     const select = sanitizeSelect({
+      fields: buildVersionGlobalFields(payload.config, globalConfig, true),
       forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
       select: incomingSelect,
+      versions: true,
     })
 
     // /////////////////////////////////////

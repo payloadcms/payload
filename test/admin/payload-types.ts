@@ -83,6 +83,7 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOne;
     'group-two-collection-twos': GroupTwoCollectionTwo;
     geo: Geo;
+    array: Array;
     'disable-duplicate': DisableDuplicate;
     'disable-copy-to-locale': DisableCopyToLocale;
     'base-list-filters': BaseListFilter;
@@ -110,6 +111,7 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
+    array: ArraySelect<false> | ArraySelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
@@ -428,6 +430,21 @@ export interface Geo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array".
+ */
+export interface Array {
+  id: string;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
@@ -549,6 +566,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'geo';
         value: string | Geo;
+      } | null)
+    | ({
+        relationTo: 'array';
+        value: string | Array;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
@@ -840,6 +861,20 @@ export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
  */
 export interface GeoSelect<T extends boolean = true> {
   point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array_select".
+ */
+export interface ArraySelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

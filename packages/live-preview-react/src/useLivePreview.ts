@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // To prevent the flicker of stale data while the post message is being sent,
 // you can conditionally render loading UI based on the `isLoading` state
 
-export const useLivePreview = <T extends any>(props: {
+export const useLivePreview = <T extends Record<string, unknown>>(props: {
   apiRoute?: string
   depth?: number
   initialData: T
@@ -21,7 +21,7 @@ export const useLivePreview = <T extends any>(props: {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const hasSentReadyMessage = useRef<boolean>(false)
 
-  const onChange = useCallback((mergedData) => {
+  const onChange = useCallback((mergedData: T) => {
     setData(mergedData)
     setIsLoading(false)
   }, [])
