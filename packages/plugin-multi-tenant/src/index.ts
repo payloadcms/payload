@@ -1,8 +1,11 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
+import { deepMergeSimple } from 'payload'
+
 import type { MultiTenantPluginConfig } from './types.js'
 
+import { translations } from '../translations/index.js'
 import { defaults } from './defaults.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
@@ -229,6 +232,21 @@ export const multiTenantPlugin =
             usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
+
+        /**
+         * Add custom tenant field that watches and dispatches updates to the selector
+         */
+        collection.fields.push({
+          name: '_watchTenant',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
+              },
+            },
+          },
+        })
       } else if (pluginConfig.collections?.[collection.slug]) {
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
@@ -339,6 +357,15 @@ export const multiTenantPlugin =
       },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
+
+    /**
+     * Merge plugin translations
+     */
+
+    incomingConfig.i18n = {
+      ...incomingConfig.i18n,
+      translations: deepMergeSimple(translations, incomingConfig.i18n?.translations ?? {}),
+    }
 
     return incomingConfig
   }
