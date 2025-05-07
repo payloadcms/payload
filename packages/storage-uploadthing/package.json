@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-uploadthing",
-  "version": "3.35.1",
+  "version": "3.36.1",
   "description": "Payload storage adapter for uploadthing",
   "homepage": "https://payloadcms.com",
   "repository": {

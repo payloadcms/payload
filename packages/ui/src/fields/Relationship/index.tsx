@@ -22,6 +22,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        placeholder,
         sortOptions,
       } = {},
       hasMany,

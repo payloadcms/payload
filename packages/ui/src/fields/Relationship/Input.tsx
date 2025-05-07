@@ -78,7 +78,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { code: locale } = useLocale()
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
-    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
   >({
     id: undefined,
     collectionSlug: undefined,
@@ -110,18 +110,28 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     let newFilterOptions = filterOptions
 
     if (value) {
-      ;(hasMany === false ? [value] : value).forEach((val) => {
-        relationTo.forEach((relation) => {
-          newFilterOptions = {
-            ...(filterOptions || {}),
-            [relation]: {
-              ...(typeof filterOptions?.[relation] === 'object' ? filterOptions[relation] : {}),
-              id: {
-                not_in: [typeof val === 'object' ? val.value : val],
-              },
-            },
-          }
-        })
+      const valuesByRelation = (hasMany === false ? [value] : value).reduce((acc, val) => {
+        if (!acc[val.relationTo]) {
+          acc[val.relationTo] = []
+        }
+        acc[val.relationTo].push(val.value)
+        return acc
+      }, {})
+
+      ;(Array.isArray(relationTo) ? relationTo : [relationTo]).forEach((relation) => {
+        newFilterOptions = {
+          ...(newFilterOptions || {}),
+          [relation]: {
+            ...(typeof filterOptions?.[relation] === 'object' ? filterOptions[relation] : {}),
+            ...(valuesByRelation[relation]
+              ? {
+                  id: {
+                    not_in: valuesByRelation[relation],
+                  },
+                }
+              : {}),
+          },
+        }
       })
     }
 
@@ -140,12 +150,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     ({ collectionSlug, doc }) => {
       if (hasMany) {
-        const withSelection = Array.isArray(value) ? value : []
-        withSelection.push({
-          relationTo: collectionSlug,
-          value: doc.id,
-        })
-        onChange(withSelection)
+        onChange([
+          ...(Array.isArray(value) ? value : []),
+          {
+            relationTo: collectionSlug,
+            value: doc.id,
+          },
+        ])
       } else if (hasMany === false) {
         onChange({
           relationTo: collectionSlug,
@@ -591,16 +602,17 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
-  const onDocumentDrawerOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
-  >(({ id, collectionSlug, hasReadPermission }) => {
-    openDrawerWhenRelationChanges.current = true
-    setCurrentlyOpenRelationship({
-      id,
-      collectionSlug,
-      hasReadPermission,
-    })
-  }, [])
+  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ id, collectionSlug, hasReadPermission }) => {
+      openDrawerWhenRelationChanges.current = true
+      setCurrentlyOpenRelationship({
+        id,
+        collectionSlug,
+        hasReadPermission,
+      })
+    },
+    [],
+  )
 
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
@@ -655,7 +667,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               customProps={{
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentDrawerOpen,
+                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || isDrawerOpen || isListDrawerOpen}
