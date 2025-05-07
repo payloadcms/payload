@@ -103,7 +103,7 @@ import {
 
 const lexicalJSON = convertMarkdownToLexical({
   editorConfig: await editorConfigFactory.default({
-    config, // <= make sure you have access to your Payload Config
+    config, // <= Make sure you have access to your Payload Config
   }),
   markdown: '# Hello world\n\nThis is a **test**.',
 })
@@ -180,6 +180,7 @@ const BannerBlock: Block = {
      * Convert from MDX -> Lexical:
      */
     import: ({ children, markdownToLexical, props }) => {
+      // Note that if 'props' does not console log any data, it likely means you do not have access to your editor config.
       return {
         type: props?.type,
         content: markdownToLexical({ markdown: children }),
@@ -219,6 +220,8 @@ const Pages: CollectionConfig = {
             const markdown = convertLexicalToMarkdown({
               data,
               editorConfig: editorConfigFactory.fromField({
+                // If you would like to access global fields i.e. the field you're trying to access is not a sibling, you can get the field information from the req prop
+                // e.g. req.payload.collections.nameOfYourCollection.config.fields...
                 field: siblingFields.find(
                   (field) =>
                     'name' in field && field.name === 'nameOfYourRichTextField',
