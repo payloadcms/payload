@@ -1,5 +1,7 @@
 import type { CollectionSlug, Config } from 'payload'
 
+import { getCustomEndpointHandler } from './endpoints/getCustomEndpointHandler.js'
+
 export type MyPluginConfig = {
   /**
    * List of collections to add a custom field
@@ -75,9 +77,7 @@ export const myPlugin =
     )
 
     config.endpoints.push({
-      handler: () => {
-        return Response.json({ message: 'Hello from custom endpoint' })
-      },
+      handler: getCustomEndpointHandler(),
       method: 'get',
       path: '/my-plugin-endpoint',
     })

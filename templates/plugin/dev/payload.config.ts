@@ -6,7 +6,6 @@ import { myPlugin } from 'plugin-package-name-placeholder'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
-import { devUser } from './helpers/credentials.js'
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
 import { seed } from './seed.js'
 
@@ -19,7 +18,6 @@ if (!process.env.ROOT_DIR) {
 
 export default buildConfig({
   admin: {
-    autoLogin: devUser,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -38,6 +36,7 @@ export default buildConfig({
     },
   ],
   db: mongooseAdapter({
+    ensureIndexes: true,
     url: process.env.DATABASE_URI || '',
   }),
   editor: lexicalEditor(),

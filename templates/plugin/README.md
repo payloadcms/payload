@@ -63,7 +63,7 @@ In the root folder, you will see various files that relate to the configuration 
 - .**prettierrc**.json - Configuration for Prettier code formatting.
 - **tsconfig**.json - Configures the compiler options for TypeScript
 - .**swcrc** - Configuration for SWC, a fast compiler that transpiles and bundles TypeScript.
-- **jest**.config.js - Config file for Jest, defining how tests are run and how modules are resolved
+- **vitest**.config.js - Config file for Vitest, defining how tests are run and how modules are resolved
 
 **IMPORTANT\***: You will need to modify these files.
 
@@ -184,11 +184,11 @@ If possible, include JSDoc comments to describe the options and their types. Thi
 
 ##### Testing
 
-Having a test suite for your plugin is essential to ensure quality and stability. Jest is a popular testing framework, widely used for testing JavaScript and particularly for applications built with React.
+Having a test suite for your plugin is essential to ensure quality and stability. **Vitest** is a fast, modern testing framework that works seamlessly with Vite and supports TypeScript out of the box.
 
-Jest organizes tests into test suites and cases. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
+Vitest organizes tests into test suites and cases, similar to other testing frameworks. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
 
-Writing tests with Jest is very straightforward and you can learn more about how it works in the [Jest documentation.](https://jestjs.io/)
+Writing tests with Vitest is very straightforward, and you can learn more about how it works in the [Vitest documentation.](https://vitest.dev/)
 
 For this template, we stubbed out `int.spec.ts` in the `dev` folder where you can write your tests.
 
