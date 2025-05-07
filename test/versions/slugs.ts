@@ -19,6 +19,7 @@ export const mediaCollectionSlug = 'media'
 export const versionCollectionSlug = 'version-posts'
 
 export const disablePublishSlug = 'disable-publish'
+export const errorOnUnpublishSlug = 'error-on-unpublish'
 
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
