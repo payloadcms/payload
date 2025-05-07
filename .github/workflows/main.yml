@@ -279,6 +279,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
           - joins
           - field-error-states
           - fields-relationship
@@ -293,14 +294,10 @@ jobs:
           - fields__collections__Email
           - fields__collections__Indexed
           - fields__collections__JSON
-          - fields__collections__Lexical__e2e__main
-          - fields__collections__Lexical__e2e__blocks
-          - fields__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - fields__collections__Number
           - fields__collections__Point
           - fields__collections__Radio
           - fields__collections__Relationship
-          - fields__collections__RichText
           - fields__collections__Row
           - fields__collections__Select
           - fields__collections__Tabs
@@ -308,6 +305,12 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - hooks
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
+          - query-presets
           - form-state
           - live-preview
           - localization
@@ -318,6 +321,7 @@ jobs:
           - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
+          - sort
           - versions
           - uploads
     env:

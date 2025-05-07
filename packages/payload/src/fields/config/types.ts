@@ -57,7 +57,7 @@ import type {
   EmailFieldLabelServerComponent,
   FieldDescriptionClientProps,
   FieldDescriptionServerProps,
-  FieldDiffClientComponent,
+  FieldDiffClientProps,
   FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
@@ -228,7 +228,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -251,7 +251,11 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-}) => boolean | Promise<boolean>
+}
+
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
+  args: FieldAccessArgs<TData, TSiblingData>,
+) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -265,6 +269,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    operation,
     path,
     user,
   }: {
@@ -272,6 +277,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * A string relating to which operation the field type is currently executing within.
+     */
+    operation: Operation
     /**
      * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
      */
@@ -322,7 +331,7 @@ type Admin = {
   components?: {
     Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
     Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
-    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>
     Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
@@ -443,6 +452,7 @@ export type OptionObject = {
   label: OptionLabel
   value: string
 }
+
 export type Option = OptionObject | string
 
 export type FieldGraphQLType = {
@@ -504,9 +514,9 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
-   * A virtual field cannot be used in `admin.useAsTitle`
+   * A virtual field can be used in `admin.useAsTitle` only when linked to a relationship.
    */
-  virtual?: boolean
+  virtual?: boolean | string
 }
 
 export interface FieldBaseClient {
@@ -1051,6 +1061,7 @@ export type SelectField = {
     } & Admin['components']
     isClearable?: boolean
     isSortable?: boolean
+    placeholder?: LabelFunction | string
   } & Admin
   /**
    * Customize the SQL table name
@@ -1083,7 +1094,7 @@ export type SelectField = {
   Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
-  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
+  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable' | 'placeholder'>
 } & FieldBaseClient &
   Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
@@ -1138,6 +1149,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
+  appearance?: 'drawer' | 'select'
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
@@ -1149,10 +1161,11 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  placeholder?: LabelFunction | string
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'placeholder'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
@@ -1349,7 +1362,7 @@ export type BlockJSX = {
    */
   export: (props: {
     fields: BlockFields
-    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+    lexicalToMarkdown: (props: { editorState: Record<string, any> }) => string
   }) =>
     | {
         children?: string
@@ -1367,7 +1380,7 @@ export type BlockJSX = {
     children: string
     closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
     htmlToLexical?: ((props: { html: string }) => any) | null
-    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
   }) => BlockFields | false
@@ -1544,6 +1557,17 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
+  /**
+   * If true, enables custom ordering for the collection with the relationship, and joined documents can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   sanitizedMany?: JoinField[]
   type: 'join'
   validate?: never
@@ -1557,7 +1581,15 @@ export type JoinFieldClient = {
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
-    'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
+    | 'collection'
+    | 'defaultLimit'
+    | 'defaultSort'
+    | 'index'
+    | 'maxDepth'
+    | 'on'
+    | 'orderable'
+    | 'type'
+    | 'where'
   >
 
 export type FlattenedBlock = {
@@ -1925,7 +1957,7 @@ export function fieldShouldBeLocalized({
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {
-  return 'virtual' in field && field.virtual
+  return 'virtual' in field && Boolean(field.virtual)
 }
 
 export type HookName =

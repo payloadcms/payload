@@ -15,17 +15,13 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
       submissionData,
     })
 
-    const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-    const target: string = node.fields.newTab ? ' target="_blank"' : ''
-
     let href: string =
       node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
 
     if (submissionData) {
       href = replaceDoubleCurlys(href, submissionData)
     }
-
-    return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+    return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
   },
   nodeTypes: ['link'],
 }

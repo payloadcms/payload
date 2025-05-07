@@ -114,7 +114,7 @@ describe('Document View', () => {
       })
       expect(collectionItems.docs.length).toBe(1)
       await page.goto(
-        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems.docs[0].id}/api`,
+        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems?.docs[0]?.id}/api`,
       )
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
@@ -337,20 +337,91 @@ describe('Document View', () => {
       await navigateToDoc(page, postsUrl)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
+
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      await wait(500)
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      const drawer1Box = await drawer1Content.boundingBox()
+      await expect.poll(() => drawer1Box).not.toBeNull()
+      const drawerLeft = drawer1Box!.x
+
+      await drawer1Content
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
+      await expect(drawer2Content).toBeVisible()
+
+      const drawer2Box = await drawer2Content.boundingBox()
+      await expect.poll(() => drawer2Box).not.toBeNull()
+      const drawer2Left = drawer2Box!.x
+
+      await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
+    })
+
+    test('document drawer displays a link to document', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      // change the relationship to a document which is a different one than the current one
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option').nth(2).click()
+      await saveDocAndAssert(page)
+
+      // open relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      // modify the title to trigger the leave page modal
+      await page.locator('.drawer__content #field-title').fill('New Title')
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      await documentLink.click()
+
+      const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
+      await expect(leavePageModal).toBeVisible()
+
+      await leavePageModal.click()
+      await page.waitForURL(postsUrl.edit(documentId))
+    })
+
+    test('document can be opened in a new tab from within the drawer', async () => {
+      await navigateToDoc(page, postsUrl)
       await page
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
       await wait(500)
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
-      const drawerLeft = await drawer1Content.boundingBox().then((box) => box.x)
-      await drawer1Content
-        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
-        .click()
-      const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
-      await expect(drawer2Content).toBeVisible()
-      const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
-      expect(drawer2Left > drawerLeft).toBe(true)
+
+      const currentUrl = page.url()
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        documentLink.click({ modifiers: ['ControlOrMeta'] }),
+      ])
+
+      // Wait for navigation to complete in the new tab and ensure correct URL
+      await expect(newPage.locator('.doc-header')).toBeVisible()
+      // using contain here, because after load the lists view will add query params like "?limit=10"
+      expect(newPage.url()).toContain(postsUrl.edit(documentId))
+
+      // Ensure the original page did not change
+      expect(page.url()).toBe(currentUrl)
     })
   })
 
@@ -546,6 +617,35 @@ describe('Document View', () => {
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
+    })
+  })
+
+  describe('reserved field names', () => {
+    test('should allow creation of field named file in non-upload enabled collection', async () => {
+      await page.goto(postsUrl.create)
+      const fileField = page.locator('#field-file')
+      await fileField.fill('some file text')
+      await saveDocAndAssert(page)
+
+      await expect(fileField).toHaveValue('some file text')
+    })
+  })
+
+  describe('custom document controls', () => {
+    test('should show custom elements in document controls in collection', async () => {
+      await page.goto(postsUrl.create)
+      const customDraftButton = page.locator('#custom-draft-button')
+      const customSaveButton = page.locator('#custom-save-button')
+
+      await expect(customDraftButton).toBeVisible()
+      await expect(customSaveButton).toBeVisible()
+    })
+
+    test('should show custom elements in document controls in global', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      const customDraftButton = page.locator('#custom-draft-button')
+
+      await expect(customDraftButton).toBeVisible()
     })
   })
 })

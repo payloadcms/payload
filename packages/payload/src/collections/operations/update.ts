@@ -4,7 +4,7 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -26,6 +26,8 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -45,6 +47,12 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: Sort
   where: Where
 }
 
@@ -96,6 +104,7 @@ export const updateOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
+      sort: incomingSort,
       where,
     } = args
 
@@ -128,6 +137,11 @@ export const updateOperation = async <
 
     const fullWhere = combineQueries(where, accessResult)
 
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
+
     let docs
 
     if (collectionConfig.versions?.drafts && shouldSaveDraft) {
@@ -147,6 +161,7 @@ export const updateOperation = async <
         locale,
         pagination: false,
         req,
+        sort: getQueryDraftsSort({ collectionConfig, sort }),
         where: versionsWhere,
       })
 
@@ -158,6 +173,7 @@ export const updateOperation = async <
         locale,
         pagination: false,
         req,
+        sort,
         where: fullWhere,
       })
 
@@ -185,6 +201,7 @@ export const updateOperation = async <
 
       try {
         const select = sanitizeSelect({
+          fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
           select: incomingSelect,
         })

@@ -38,7 +38,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -56,11 +56,13 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField<number | number[]>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -88,7 +90,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -101,7 +103,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [readOnly, disabled, setValue],
   )
 
   // useEffect update valueToRender:
@@ -131,7 +133,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         'number',
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
@@ -153,7 +155,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
@@ -179,7 +181,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         ) : (
           <div>
             <input
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}

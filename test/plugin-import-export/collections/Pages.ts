@@ -17,7 +17,7 @@ export const Pages: CollectionConfig = {
   fields: [
     {
       name: 'title',
-      label: 'Title',
+      label: { en: 'Title', es: 'Título', de: 'Titel' },
       type: 'text',
       required: true,
     },
@@ -97,6 +97,19 @@ export const Pages: CollectionConfig = {
       name: 'author',
       type: 'relationship',
       relationTo: 'users',
+    },
+    {
+      name: 'virtualRelationship',
+      type: 'text',
+      virtual: 'author.name',
+    },
+    {
+      name: 'virtual',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [() => 'virtual value'],
+      },
     },
     {
       name: 'hasManyNumber',

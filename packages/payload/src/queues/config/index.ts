@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
+import type { BaseJob } from './types/workflowTypes.js'
 
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
@@ -211,12 +212,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
         ({ doc, req }) => {
           // This hook is used to add the virtual `tasks` field to the document, that is computed from the `log` field
 
-          doc.taskStatus = getJobTaskStatus({
-            jobLog: doc.log,
-            tasksConfig: req.payload.config.jobs.tasks,
-          })
-
-          return doc
+          return jobAfterRead({ config: req.payload.config, doc })
         },
       ],
       /**
@@ -239,4 +235,12 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   }
 
   return jobsCollection
+}
+
+export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: BaseJob }): BaseJob {
+  doc.taskStatus = getJobTaskStatus({
+    jobLog: doc.log || [],
+    tasksConfig: config.jobs.tasks,
+  })
+  return doc
 }

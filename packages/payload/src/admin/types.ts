@@ -555,6 +555,7 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
@@ -581,6 +582,9 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  BeforeDocumentControlsClientProps,
+  BeforeDocumentControlsServerProps,
+  BeforeDocumentControlsServerPropsOnly,
   DocumentSubViewTypes,
   DocumentTabClientProps,
   /**

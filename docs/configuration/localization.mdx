@@ -107,7 +107,7 @@ _\* An asterisk denotes that a property is required._
 In some projects you may want to filter the available locales shown in the admin UI selector. You can do this by providing a `filterAvailableLocales` function in your Payload Config. This is called on the server side and is passed the array of locales. This means that you can determine what locales are visible in the localizer selection menu at the top of the admin panel. You could do this per user, or implement a function that scopes these to tenants and more. Here is an example using request headers in a multi-tenant application:
 
 ```ts
-// ... rest of payload config
+// ... rest of Payload config
 localization: {
   defaultLocale: 'en',
   locales: ['en', 'es'],
