@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "console-table-printer": "2.12.1",
-    "drizzle-orm": "0.36.1",
+    "drizzle-orm": "0.43.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
