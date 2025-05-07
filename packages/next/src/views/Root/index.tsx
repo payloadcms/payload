@@ -167,6 +167,7 @@ export const RootPage = async ({
           params={params}
           payload={initPageResult?.req.payload}
           permissions={initPageResult?.permissions}
+          req={initPageResult?.req}
           searchParams={searchParams}
           user={initPageResult?.req.user}
           viewActions={serverProps.viewActions}
