@@ -2,6 +2,8 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
+import type { Preferences } from '../../forms/Form/types.js'
+
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { deepMergeSimple } from '../../utilities/deepMerge.js'
@@ -9,13 +11,13 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
 type PreferencesContext = {
-  getPreference: <T = unknown>(key: string) => Promise<T>
+  getPreference: <T = Preferences>(key: string) => Promise<T>
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
    * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
    */
-  setPreference: <T = unknown>(key: string, value: T, merge?: boolean) => Promise<void>
+  setPreference: <T = Preferences>(key: string, value: T, merge?: boolean) => Promise<void>
 }
 
 const Context = createContext({} as PreferencesContext)
