@@ -2,8 +2,6 @@ import { ModalToggler } from '@faceless-ui/modal'
 import Link from 'next/link'
 import React from 'react'
 
-import type { MainMenu } from '../../payload-types'
-
 import { getCachedGlobal } from '../../utilities/getGlobals'
 import { Gutter } from '../Gutter'
 import { MenuIcon } from '../icons/Menu'
@@ -35,7 +33,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
 }
 
 export async function Header() {
-  const header: MainMenu = await getCachedGlobal('main-menu', 1)()
+  const header = await getCachedGlobal('main-menu', 1)()
 
   const navItems = header?.navItems || []
 
