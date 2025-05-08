@@ -1,3 +1,11 @@
+## [2.32.3](https://github.com/payloadcms/payload/compare/v2.32.2...v2.32.3) (2025-05-08)
+
+
+### Bug Fixes
+
+* filter state resetting when removing previous condition in WhereBuilder ([#12262](https://github.com/payloadcms/payload/issues/12262)) ([a09fefa](https://github.com/payloadcms/payload/commit/a09fefaed746ff945d16f41647f1fdb32200e35e))
+* **upload:** ensure only image files are read for preview ([#9562](https://github.com/payloadcms/payload/issues/9562)) ([5ecee3f](https://github.com/payloadcms/payload/commit/5ecee3f6f6cbaec06a0b48ca251a25c2993e8451)), closes [#9559](https://github.com/payloadcms/payload/issues/9559)
+
 ## [2.32.2](https://github.com/payloadcms/payload/compare/v2.32.1...v2.32.2) (2025-03-14)
 
 - Bumps dependencies ([#11702](https://github.com/payloadcms/payload/pull/11702)) ([#11705](https://github.com/payloadcms/payload/pull/11705))
