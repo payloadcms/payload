@@ -26,7 +26,7 @@ export type ValueWithRelation = {
   value: number | string
 }
 
-export type Value = number | string | ValueWithRelation
+export type Value = ValueWithRelation
 
 type CLEAR = {
   exemptValues?: Value | Value[]
@@ -61,15 +61,26 @@ type REMOVE = {
 
 export type Action = ADD | CLEAR | REMOVE | UPDATE
 
-export type GetResults = (args: {
-  filterOptions?: FilterOptionsResult
-  lastFullyLoadedRelation?: number
-  lastLoadedPage: Record<string, number>
-  onSuccess?: () => void
-  search?: string
-  sort?: boolean
-  value?: Value | Value[]
-}) => Promise<void>
+export type HasManyValueUnion =
+  | {
+      hasMany: false
+      value?: ValueWithRelation
+    }
+  | {
+      hasMany: true
+      value?: ValueWithRelation[]
+    }
+
+export type GetResults = (
+  args: {
+    filterOptions?: FilterOptionsResult
+    lastFullyLoadedRelation?: number
+    lastLoadedPage: Record<string, number>
+    onSuccess?: () => void
+    search?: string
+    sort?: boolean
+  } & HasManyValueUnion,
+) => Promise<void>
 
 export type RelationshipInputProps = {
   readonly AfterInput: React.ReactNode // optional
@@ -82,8 +93,6 @@ export type RelationshipInputProps = {
   readonly description: StaticDescription // optional
   readonly Error: React.ReactNode // optional
   readonly filterOptions: FilterOptionsResult // optional
-  readonly initialValue: Value | Value[] // optional
-  readonly isPolymorphic: boolean
   readonly isSortable: boolean // optional
   readonly Label: React.ReactNode // optional
   readonly label: StaticLabel // optional
@@ -103,11 +112,13 @@ export type RelationshipInputProps = {
 type SharedRelationshipInputProps =
   | {
       readonly hasMany: false
+      readonly initialValue?: null | ValueWithRelation
       readonly onChange: (value: ValueWithRelation, modifyForm?: boolean) => void
       readonly value?: null | ValueWithRelation
     }
   | {
       readonly hasMany: true
+      readonly initialValue?: null | ValueWithRelation[]
       readonly onChange: (value: ValueWithRelation[], modifyForm?: boolean) => void
       readonly value?: null | ValueWithRelation[]
     }

@@ -110,8 +110,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     description,
     Error,
     filterOptions,
-    initialValue,
-    isPolymorphic: Array.isArray(relationTo),
     isSortable,
     Label,
     label,
@@ -128,45 +126,54 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     style: styles,
   }
 
-  if (hasMany) {
-    return (
-      <RelationshipInput
-        {...sharedProps}
-        hasMany={true}
-        onChange={handleChangeHasMulti}
-        value={
-          value
-            ? (Array.isArray(value) ? value : [value]).map((val) => {
-                if (isPolymorphic) {
-                  return val as ValueWithRelation
-                } else {
-                  return {
-                    relationTo: safeRelationTo[0],
-                    value: val as ValueWithRelation['value'],
-                  }
-                }
-              })
-            : null
-        }
-      />
-    )
-  }
-
   return (
     <RelationshipInput
       {...sharedProps}
-      hasMany={false}
-      onChange={handleChangeSingle}
-      value={
-        value
-          ? isPolymorphic
-            ? (value as ValueWithRelation)
-            : {
-                relationTo: safeRelationTo[0],
-                value: value as ValueWithRelation['value'],
-              }
-          : null
-      }
+      {...(hasMany === true
+        ? {
+            hasMany: true,
+            initialValue: (Array.isArray(initialValue)
+              ? initialValue.map((initVal) => {
+                  return isPolymorphic
+                    ? initVal
+                    : {
+                        relationTo: safeRelationTo[0],
+                        value: initVal,
+                      }
+                })
+              : initialValue) as ValueWithRelation[],
+            onChange: handleChangeHasMulti,
+            value: (Array.isArray(value)
+              ? value.map((val) => {
+                  return isPolymorphic
+                    ? val
+                    : {
+                        relationTo: safeRelationTo[0],
+                        value: val,
+                      }
+                })
+              : value) as ValueWithRelation[],
+          }
+        : {
+            hasMany: false,
+            initialValue: (initialValue
+              ? isPolymorphic
+                ? initialValue
+                : {
+                    relationTo: safeRelationTo[0],
+                    value: initialValue,
+                  }
+              : initialValue) as ValueWithRelation,
+            onChange: handleChangeSingle,
+            value: (value
+              ? isPolymorphic
+                ? value
+                : {
+                    relationTo: safeRelationTo[0],
+                    value,
+                  }
+              : value) as ValueWithRelation,
+          })}
     />
   )
 }

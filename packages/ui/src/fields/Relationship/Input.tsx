@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { GetResults, Option, RelationshipInputProps, Value } from './types.js'
+import type { GetResults, HasManyValueUnion, Option, RelationshipInputProps } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -49,7 +49,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     filterOptions,
     hasMany,
     initialValue,
-    isPolymorphic,
     isSortable = true,
     label,
     Label,
@@ -174,6 +173,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const getResults: GetResults = useCallback(
     async ({
       filterOptions,
+      hasMany: hasManyArg,
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
       lastLoadedPage: lastLoadedPageArg,
       onSuccess,
@@ -194,12 +194,19 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           : relations.slice(lastFullyLoadedRelationToUse + 1)
 
       let resultsFetched = 0
-      const relationMap = createRelationMap({
-        hasMany,
-        isPolymorphic,
-        relationTo,
-        value: valueArg,
-      })
+      const relationMap = createRelationMap(
+        hasManyArg === true
+          ? {
+              hasMany: true,
+              relationTo,
+              value: valueArg,
+            }
+          : {
+              hasMany: false,
+              relationTo,
+              value: valueArg,
+            },
+      )
 
       if (!errorLoading) {
         await relationsToFetch.reduce(async (priorRelation, relation) => {
@@ -322,8 +329,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [
       permissions,
       relationTo,
-      hasMany,
-      isPolymorphic,
       errorLoading,
       search,
       getEntityConfig,
@@ -338,34 +343,52 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     ],
   )
 
-  const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    void getResults({
-      filterOptions,
-      lastLoadedPage: {},
-      search: searchArg,
-      sort: true,
-      value: valueArg,
-    })
-    setSearch(searchArg)
-  }, 300)
+  const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
+    ({ hasMany: hasManyArg, search: searchArg, value }) => {
+      void getResults({
+        filterOptions,
+        lastLoadedPage: {},
+        search: searchArg,
+        sort: true,
+        ...(hasManyArg === true
+          ? {
+              hasMany: hasManyArg,
+              value,
+            }
+          : {
+              hasMany: hasManyArg,
+              value,
+            }),
+      })
+      setSearch(searchArg)
+    },
+    300,
+  )
 
   const handleInputChange = useCallback(
-    (searchArg: string, valueArg: Value | Value[]) => {
-      if (search !== searchArg) {
+    (options: { search: string } & HasManyValueUnion) => {
+      if (search !== options.search) {
         setLastLoadedPage({})
-        updateSearch(searchArg, valueArg, searchArg !== '')
+        updateSearch(options)
       }
     },
     [search, updateSearch],
   )
 
-  const handleValueChange = useEffectEvent((value: Value | Value[]) => {
-    const relationMap = createRelationMap({
-      hasMany,
-      isPolymorphic,
-      relationTo,
-      value,
-    })
+  const handleValueChange = useEffectEvent(({ hasMany: hasManyArg, value }: HasManyValueUnion) => {
+    const relationMap = createRelationMap(
+      hasManyArg === true
+        ? {
+            hasMany: hasManyArg,
+            relationTo,
+            value,
+          }
+        : {
+            hasMany: hasManyArg,
+            relationTo,
+            value,
+          },
+    )
 
     void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation
@@ -432,11 +455,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   // ///////////////////////////////////
   useEffect(() => {
     if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
-      handleValueChange(value)
+      handleValueChange(hasMany === true ? { hasMany, value } : { hasMany, value })
     }
     isFirstRenderRef.current = false
     prevValue.current = value
-  }, [value])
+  }, [value, hasMany])
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
@@ -452,36 +475,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
     return await getResults(args)
   })
-
-  // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
-  // Note - effect should not run on first run
-  useEffect(() => {
-    // If the menu is open while filterOptions changes
-    // due to latency of form state and fast clicking into this field,
-    // re-fetch options
-    if (hasLoadedFirstPageRef.current && menuIsOpen) {
-      setIsLoading(true)
-      void getResultsEffectEvent({
-        filterOptions,
-        lastLoadedPage: {},
-        onSuccess: () => {
-          hasLoadedFirstPageRef.current = true
-          setIsLoading(false)
-        },
-        value: valueRef.current,
-      })
-    }
-
-    // If the menu is not open, still reset the field state
-    // because we need to get new options next time the menu opens
-    dispatchOptions({
-      type: 'CLEAR',
-      exemptValues: valueRef.current,
-    })
-
-    setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
-  }, [relationTo, filterOptions, locale, path, menuIsOpen])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -614,6 +607,44 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [],
   )
 
+  // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
+  // Note - effect should not run on first run
+  useEffect(() => {
+    // If the menu is open while filterOptions changes
+    // due to latency of form state and fast clicking into this field,
+    // re-fetch options
+    if (hasLoadedFirstPageRef.current && menuIsOpen) {
+      setIsLoading(true)
+      void getResultsEffectEvent({
+        filterOptions,
+        lastLoadedPage: {},
+        onSuccess: () => {
+          hasLoadedFirstPageRef.current = true
+          setIsLoading(false)
+        },
+        ...(hasMany === true
+          ? {
+              hasMany,
+              value: valueRef.current as ValueWithRelation[],
+            }
+          : {
+              hasMany,
+              value: valueRef.current as ValueWithRelation,
+            }),
+      })
+    }
+
+    // If the menu is not open, still reset the field state
+    // because we need to get new options next time the menu opens
+    dispatchOptions({
+      type: 'CLEAR',
+      exemptValues: valueRef.current,
+    })
+
+    setLastFullyLoadedRelation(-1)
+    setLastLoadedPage({})
+  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
+
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
       openDrawer()
@@ -705,7 +736,20 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                     }
                   : undefined
               }
-              onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+              onInputChange={(newSearch) =>
+                handleInputChange({
+                  search: newSearch,
+                  ...(hasMany === true
+                    ? {
+                        hasMany,
+                        value,
+                      }
+                    : {
+                        hasMany,
+                        value,
+                      }),
+                })
+              }
               onMenuClose={() => {
                 setMenuIsOpen(false)
               }}
@@ -724,6 +768,15 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                         setIsLoading(false)
                       },
                       value: initialValue,
+                      ...(hasMany === true
+                        ? {
+                            hasMany,
+                            value,
+                          }
+                        : {
+                            hasMany,
+                            value,
+                          }),
                     })
                   }
                 }
@@ -735,7 +788,15 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   lastLoadedPage,
                   search,
                   sort: false,
-                  value: initialValue,
+                  ...(hasMany === true
+                    ? {
+                        hasMany,
+                        value: initialValue,
+                      }
+                    : {
+                        hasMany,
+                        value: initialValue,
+                      }),
                 })
               }}
               options={options}
@@ -744,11 +805,18 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             />
             {!readOnly && allowCreate && (
               <AddNewRelation
-                hasMany={hasMany}
                 path={path}
                 relationTo={relationTo}
                 setValue={onChange}
-                value={value}
+                {...(hasMany === true
+                  ? {
+                      hasMany,
+                      value,
+                    }
+                  : {
+                      hasMany,
+                      value,
+                    })}
               />
             )}
           </div>
