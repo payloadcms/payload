@@ -1,12 +1,13 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
+import type { Document } from '../types/index.js'
 
 export type FolderInterface = {
   _folder?: FolderInterface | (number | string | undefined)
   documentsAndFolders?: {
     docs: {
       relationTo: CollectionSlug
-      value: any
+      value: Document
     }[]
   }
   name: string

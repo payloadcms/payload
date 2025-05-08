@@ -914,13 +914,14 @@ export function FolderProvider({
             if (res.status === 200) {
               const json = await res.json()
               const { docs } = json as { docs: Document[] }
-              const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>((doc: any) =>
-                formatFolderOrDocumentItem({
-                  isUpload: Boolean(collectionConfig.upload),
-                  relationTo: collectionSlug,
-                  useAsTitle: collectionConfig.admin.useAsTitle,
-                  value: doc,
-                }),
+              const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>(
+                (doc: Document) =>
+                  formatFolderOrDocumentItem({
+                    isUpload: Boolean(collectionConfig.upload),
+                    relationTo: collectionSlug,
+                    useAsTitle: collectionConfig.admin.useAsTitle,
+                    value: doc,
+                  }),
               )
               if (collectionSlug === folderCollectionSlug) {
                 successfullyMovedFolderItems.push(...formattedItems)
