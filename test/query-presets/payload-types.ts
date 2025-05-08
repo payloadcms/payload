@@ -262,6 +262,7 @@ export interface PayloadQueryPreset {
     | boolean
     | null;
   relatedCollection: 'pages' | 'posts';
+  owner: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -368,6 +369,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   where?: T;
   columns?: T;
   relatedCollection?: T;
+  owner?: T;
   updatedAt?: T;
   createdAt?: T;
 }

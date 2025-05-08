@@ -106,11 +106,11 @@ describe('Query Presets', () => {
         }),
         payload.create({
           collection: 'payload-query-presets',
-          data: seedData.everyone,
+          data: seedData.everyone({ userID: user?.id || '' }),
         }),
         payload.create({
           collection: 'payload-query-presets',
-          data: seedData.onlyMe,
+          data: seedData.onlyMe({ userID: user?.id || '' }),
         }),
         payload.create({
           collection: 'payload-query-presets',
