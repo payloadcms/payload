@@ -56,6 +56,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     maxResultsPerRequest = 10,
     onChange,
     path,
+    placeholder,
     readOnly,
     relationTo,
     required,
@@ -800,6 +801,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 })
               }}
               options={options}
+              placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
             />
@@ -807,14 +809,15 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               <AddNewRelation
                 path={path}
                 relationTo={relationTo}
-                setValue={onChange}
                 {...(hasMany === true
                   ? {
                       hasMany,
+                      onChange,
                       value,
                     }
                   : {
                       hasMany,
+                      onChange,
                       value,
                     })}
               />

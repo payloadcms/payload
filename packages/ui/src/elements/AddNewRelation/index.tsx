@@ -23,9 +23,9 @@ const baseClass = 'relationship-add-new'
 export const AddNewRelation: React.FC<Props> = ({
   Button: ButtonFromProps,
   hasMany,
+  onChange,
   path,
   relationTo,
-  setValue,
   unstyled,
   value,
 }) => {
@@ -75,8 +75,8 @@ export const AddNewRelation: React.FC<Props> = ({
           //   sort: true,
           // })
 
-          if (hasMany) {
-            setValue([
+          if (hasMany === true) {
+            onChange([
               ...(Array.isArray(value) ? value : []),
               {
                 relationTo: collectionConfig?.slug,
@@ -84,14 +84,17 @@ export const AddNewRelation: React.FC<Props> = ({
               },
             ])
           } else {
-            setValue(doc.id)
+            onChange({
+              relationTo: relatedCollections[0].slug,
+              value: doc.id,
+            })
           }
         }
 
         setSelectedCollection(undefined)
       }
     },
-    [relationTo, collectionConfig, hasMany, setValue, value],
+    [collectionConfig, hasMany, onChange, value, relatedCollections],
   )
 
   const onPopupToggle = useCallback((state) => {

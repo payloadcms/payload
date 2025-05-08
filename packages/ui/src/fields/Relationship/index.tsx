@@ -118,6 +118,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     maxRows: field?.maxRows,
     minRows: field?.minRows,
     path,
+    placeholder,
     readOnly: readOnly || disabled,
     relationTo: safeRelationTo,
     required,

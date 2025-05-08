@@ -4,6 +4,7 @@ import type {
   ClientConfig,
   CollectionSlug,
   FilterOptionsResult,
+  LabelFunction,
   StaticDescription,
   StaticLabel,
 } from 'payload'
@@ -101,6 +102,7 @@ export type RelationshipInputProps = {
   readonly maxRows: number // optional
   readonly minRows: number // optional
   readonly path: string
+  readonly placeholder?: LabelFunction | string
   readonly readOnly: boolean // optional
   readonly relationTo: string[]
   readonly required: boolean // optional
