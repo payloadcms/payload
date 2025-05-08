@@ -20,6 +20,17 @@ type Args = {
   req?: Partial<PayloadRequest>
 }
 
+const runStatementGroup = async ({ adapter, db, debug, statements }) => {
+  const addColumnsStatement = statements.join('\n')
+
+  if (debug) {
+    adapter.payload.logger.info(debug)
+    adapter.payload.logger.info(addColumnsStatement)
+  }
+
+  await db.execute(sql.raw(addColumnsStatement))
+}
+
 /**
  * Moves upload and relationship columns from the join table and into the tables while moving data
  * This is done in the following order:
@@ -74,36 +85,55 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   const db = await getTransaction(adapter, req)
 
-  const createTableStatement = sqlUpStatements.createTable.join('\n')
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'CREATING TYPES' : null,
+    statements: sqlUpStatements.createType,
+  })
 
-  // CREATE TABLES
-  if (debug) {
-    payload.logger.info('CREATING TABLES')
-    payload.logger.info(createTableStatement)
-  }
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'ALTERING TYPES' : null,
+    statements: sqlUpStatements.alterType,
+  })
 
-  await db.execute(sql.raw(createTableStatement))
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'CREATING TABLES' : null,
+    statements: sqlUpStatements.createTable,
+  })
 
-  const renameColumnsStatement = sqlUpStatements.renameColumn.join('\n')
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'RENAMING COLUMNS' : null,
+    statements: sqlUpStatements.renameColumn,
+  })
 
-  // RENAME COLUMNS
-  if (debug) {
-    payload.logger.info('RENAMING COLUMNS')
-    payload.logger.info(renameColumnsStatement)
-  }
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'CREATING NEW RELATIONSHIP COLUMNS' : null,
+    statements: sqlUpStatements.addColumn,
+  })
 
-  await db.execute(sql.raw(renameColumnsStatement))
+  // SET DEFAULTS
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'SETTING DEFAULTS' : null,
+    statements: sqlUpStatements.setDefault,
+  })
 
-  const addColumnsStatement = sqlUpStatements.addColumn.join('\n')
-
-  await db.execute(sql.raw(addColumnsStatement))
-
-  if (debug) {
-    payload.logger.info('CREATING NEW RELATIONSHIP COLUMNS')
-    payload.logger.info(addColumnsStatement)
-  }
-
-  await db.execute(sql.raw(addColumnsStatement))
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'CREATING INDEXES' : null,
+    statements: sqlUpStatements.createIndex,
+  })
 
   for (const collection of payload.config.collections) {
     if (collection.slug === 'payload-locked-documents') {
@@ -254,52 +284,58 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   }
 
   // ADD CONSTRAINT
-  const addConstraintsStatement = sqlUpStatements.addConstraint.join('\n')
-
-  if (debug) {
-    payload.logger.info('ADDING CONSTRAINTS')
-    payload.logger.info(addConstraintsStatement)
-  }
-
-  await db.execute(sql.raw(addConstraintsStatement))
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'ADDING CONSTRAINTS' : null,
+    statements: sqlUpStatements.addConstraint,
+  })
 
   // NOT NULL
-  const notNullStatements = sqlUpStatements.notNull.join('\n')
-
-  if (debug) {
-    payload.logger.info('NOT NULL CONSTRAINTS')
-    payload.logger.info(notNullStatements)
-  }
-
-  await db.execute(sql.raw(notNullStatements))
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'NOT NULL CONSTRAINTS' : null,
+    statements: sqlUpStatements.notNull,
+  })
 
   // DROP TABLE
-  const dropTablesStatement = sqlUpStatements.dropTable.join('\n')
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'DROPPING TABLES' : null,
+    statements: sqlUpStatements.dropTable,
+  })
 
-  if (debug) {
-    payload.logger.info('DROPPING TABLES')
-    payload.logger.info(dropTablesStatement)
-  }
-
-  await db.execute(sql.raw(dropTablesStatement))
+  // DROP INDEX
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'DROPPING INDEXES' : null,
+    statements: sqlUpStatements.dropIndex,
+  })
 
   // DROP CONSTRAINT
-  const dropConstraintsStatement = sqlUpStatements.dropConstraint.join('\n')
-
-  if (debug) {
-    payload.logger.info('DROPPING CONSTRAINTS')
-    payload.logger.info(dropConstraintsStatement)
-  }
-
-  await db.execute(sql.raw(dropConstraintsStatement))
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'DROPPING CONSTRAINTS' : null,
+    statements: sqlUpStatements.dropConstraint,
+  })
 
   // DROP COLUMN
-  const dropColumnsStatement = sqlUpStatements.dropColumn.join('\n')
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'DROPPING COLUMNS' : null,
+    statements: sqlUpStatements.dropColumn,
+  })
 
-  if (debug) {
-    payload.logger.info('DROPPING COLUMNS')
-    payload.logger.info(dropColumnsStatement)
-  }
-
-  await db.execute(sql.raw(dropColumnsStatement))
+  // DROP TYPES
+  await runStatementGroup({
+    adapter,
+    db,
+    debug: debug ? 'DROPPING TYPES' : null,
+    statements: sqlUpStatements.dropType,
+  })
 }

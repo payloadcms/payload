@@ -1,12 +1,19 @@
 export type Groups =
   | 'addColumn'
   | 'addConstraint'
+  | 'alterType'
+  | 'createIndex'
   | 'createTable'
+  | 'createType'
+  | 'disableRowSecurity'
   | 'dropColumn'
   | 'dropConstraint'
+  | 'dropIndex'
   | 'dropTable'
+  | 'dropType'
   | 'notNull'
   | 'renameColumn'
+  | 'setDefault'
 
 /**
  * Convert an "ADD COLUMN" statement to an "ALTER COLUMN" statement.
@@ -75,6 +82,41 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
     notNull: 'NOT NULL',
 
     /**
+     * example: CREATE TYPE "public"."enum__pages_v_published_locale" AS ENUM('en', 'es');
+     */
+    createType: 'CREATE TYPE',
+
+    /**
+     * example: ALTER TYPE "public"."enum_pages_blocks_cta" ADD VALUE 'copy';
+     */
+    alterType: 'ALTER TYPE',
+
+    /**
+     * example: ALTER TABLE "categories_rels" DISABLE ROW LEVEL SECURITY;
+     */
+    disableRowSecurity: 'DISABLE ROW LEVEL SECURITY;',
+
+    /**
+     * example: DROP INDEX IF EXISTS "pages_title_idx";
+     */
+    dropIndex: 'DROP INDEX IF EXISTS',
+
+    /**
+     * example: ALTER TABLE "pages" ALTER COLUMN "_status" SET DEFAULT 'draft';
+     */
+    setDefault: 'SET DEFAULT',
+
+    /**
+     * example: CREATE INDEX IF NOT EXISTS "payload_locked_documents_global_slug_idx" ON "payload_locked_documents" USING btree ("global_slug");
+     */
+    createIndex: 'INDEX IF NOT EXISTS',
+
+    /**
+     * example: DROP TYPE "public"."enum__pages_v_published_locale";
+     */
+    dropType: 'DROP TYPE',
+
+    /**
      * columns were renamed from camelCase to snake_case
      * example: ALTER TABLE "forms" RENAME COLUMN "confirmationType" TO "confirmation_type";
      */
@@ -86,7 +128,17 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
     return result
   }, {}) as Record<Groups, string[]>
 
+  // push multi-line changes to a single grouping
+  let isCreateTable = false
+
   for (const line of list) {
+    if (isCreateTable) {
+      result.createTable.push(line)
+      if (line.includes(');')) {
+        isCreateTable = false
+      }
+      continue
+    }
     Object.entries(groups).some(([key, value]) => {
       if (line.endsWith('NOT NULL;')) {
         // split up the ADD COLUMN and ALTER COLUMN NOT NULL statements
