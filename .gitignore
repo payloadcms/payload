@@ -3,6 +3,7 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+.turbo
 
 # Custom actions
 !.github/actions/**/dist
