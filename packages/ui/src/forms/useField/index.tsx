@@ -47,7 +47,6 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
-  const initializing = useFormInitializing()
   const { user } = useAuth()
   const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
@@ -58,7 +57,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const { t } = useTranslation()
   const { config } = useConfig()
 
-  const { getData, getDataByPath, getSiblingData, setModified } = useForm()
+  const { getData, getDataByPath, getSiblingData, initializing, setModified } = useForm()
   const documentForm = useDocumentForm()
   const modified = useFormModified()
 
