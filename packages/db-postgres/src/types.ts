@@ -40,6 +40,12 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
+  /**
+   * Pass `true` to disable use of ON CONFLICT DO UPDATE.
+   * This will fallback to a legacy update-then-insert upsert strategy.
+   * @default false
+   */
+  disableOnConflictDoUpdate?: boolean
   extensions?: string[]
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
@@ -90,6 +96,7 @@ declare module 'payload' {
 
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
+    disableOnConflictDoUpdate?: boolean
     drizzle: Drizzle
     enums: Record<string, GenericEnum>
     extensions: Record<string, boolean>

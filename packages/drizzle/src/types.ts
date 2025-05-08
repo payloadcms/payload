@@ -13,12 +13,18 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type {
   PgColumn,
+  PgInsertOnConflictDoUpdateConfig,
   PgTable,
   PgTransaction,
   Precision,
   UpdateDeleteAction,
 } from 'drizzle-orm/pg-core'
-import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
+import type {
+  SQLiteColumn,
+  SQLiteInsertOnConflictDoUpdateConfig,
+  SQLiteTable,
+  SQLiteTransaction,
+} from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
 import type {
   BaseDatabaseAdapter,
@@ -115,7 +121,9 @@ export type Execute<T> = (args: {
 
 export type Insert = (args: {
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
-  onConflictDoUpdate?: unknown
+  onConflictDoUpdate?:
+    | PgInsertOnConflictDoUpdateConfig<any>
+    | SQLiteInsertOnConflictDoUpdateConfig<any>
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
@@ -320,6 +328,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
+  disableOnConflictDoUpdate?: boolean
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>

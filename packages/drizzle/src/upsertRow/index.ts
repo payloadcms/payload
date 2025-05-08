@@ -60,7 +60,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       } else {
         ;[insertedRow] = await adapter.insert({
           db,
-          onConflictDoUpdate: { set: rowToInsert.row, target, where },
+          onConflictDoUpdate: { set: rowToInsert.row, target, targetWhere: where },
           tableName,
           values: rowToInsert.row,
         })
