@@ -2228,10 +2228,10 @@ describe('database', () => {
         where: { id: { in: [doc_1.id, doc_2.id] } },
       })
 
-      expect(graphqlDesc[0].id).toBe(post_2.id)
-      expect(graphqlDesc[1].id).toBe(post_1.id)
-      expect(localDesc[0].id).toBe(post_2.id)
-      expect(localDesc[1].id).toBe(post_1.id)
+      expect(graphqlDesc[0].id).toBe(doc_2.id)
+      expect(graphqlDesc[1].id).toBe(doc_1.id)
+      expect(localDesc[0].id).toBe(doc_2.id)
+      expect(localDesc[1].id).toBe(doc_1.id)
 
       const queryAsc = `query {
         VirtualRelations(
@@ -2257,10 +2257,10 @@ describe('database', () => {
         where: { id: { in: [doc_1.id, doc_2.id] } },
       })
 
-      expect(graphqlAsc[1].id).toBe(post_2.id)
-      expect(graphqlAsc[0].id).toBe(post_1.id)
-      expect(localAsc[1].id).toBe(post_2.id)
-      expect(localAsc[0].id).toBe(post_1.id)
+      expect(graphqlAsc[1].id).toBe(doc_2.id)
+      expect(graphqlAsc[0].id).toBe(doc_1.id)
+      expect(localAsc[1].id).toBe(doc_2.id)
+      expect(localAsc[0].id).toBe(doc_1.id)
     })
   })
 
