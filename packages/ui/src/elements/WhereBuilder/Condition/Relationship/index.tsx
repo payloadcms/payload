@@ -23,7 +23,7 @@ const maxResultsPerRequest = 10
 export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { admin: { isSortable } = {}, hasMany, relationTo },
+    field: { admin: { isSortable, placeholder } = {}, hasMany, relationTo },
     filterOptions,
     onChange,
     value,
@@ -324,7 +324,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch])
+  }, [i18n, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
@@ -412,7 +412,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           onInputChange={handleInputChange}
           onMenuScrollToBottom={handleScrollToBottom}
           options={options}
-          placeholder={t('general:selectValue')}
+          placeholder={placeholder}
           value={valueToRender}
         />
       )}

@@ -183,6 +183,17 @@ function mergeData(
   return toLocaleData
 }
 
+function removeIds(data: Data): Data {
+  if (Array.isArray(data)) {
+    return data.map(removeIds)
+  }
+  if (typeof data === 'object' && data !== null) {
+    const { id: _id, ...rest } = data
+    return Object.fromEntries(Object.entries(rest).map(([key, value]) => [key, removeIds(value)]))
+  }
+  return data
+}
+
 export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) => {
   const { req } = args
 
@@ -288,7 +299,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const { id, ...fromLocaleDataWithoutID } = fromLocaleData.value
+  const fromLocaleDataWithoutID = removeIds(fromLocaleData.value)
+  const toLocaleDataWithoutID = removeIds(toLocaleData.value)
 
   return globalSlug
     ? await payload.updateGlobal({
@@ -296,8 +308,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         data: overrideData
           ? fromLocaleDataWithoutID
           : mergeData(
-              fromLocaleData.value,
-              toLocaleData.value,
+              fromLocaleDataWithoutID,
+              toLocaleDataWithoutID,
               globals[globalSlug].config.fields,
               req,
               false,
@@ -313,8 +325,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         data: overrideData
           ? fromLocaleDataWithoutID
           : mergeData(
-              fromLocaleData.value,
-              toLocaleData.value,
+              fromLocaleDataWithoutID,
+              toLocaleDataWithoutID,
               collections[collectionSlug].config.fields,
               req,
               false,

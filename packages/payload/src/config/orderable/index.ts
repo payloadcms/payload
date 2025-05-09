@@ -83,6 +83,13 @@ export const addOrderableFieldsAndHook = (
         hidden: true,
         readOnly: true,
       },
+      hooks: {
+        beforeDuplicate: [
+          ({ siblingData }) => {
+            delete siblingData[orderableFieldName]
+          },
+        ],
+      },
       index: true,
       required: true,
       // override the schema to make order fields optional for payload.create()
@@ -275,5 +282,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
   if (!config.endpoints) {
     config.endpoints = []
   }
+
   config.endpoints.push(reorderEndpoint)
 }
