@@ -125,6 +125,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({

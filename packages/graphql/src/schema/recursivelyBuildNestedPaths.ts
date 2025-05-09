@@ -17,7 +17,7 @@ export const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentNam
   if (field.type === 'tabs') {
     // if the tab has a name, treat it as a group
     // otherwise, treat it as a row
-    return (field.tabs as Tab[]).reduce((tabSchema, tab: any) => {
+    return field.tabs.reduce((tabSchema, tab: any) => {
       tabSchema.push(
         ...recursivelyBuildNestedPaths({
           field: {

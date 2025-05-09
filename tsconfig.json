@@ -86,8 +86,12 @@
     },
   ],
   "include": [
-    "${configDir}/src",
-    ".next/types/**/*.ts",
-    "./scripts/**/*.ts",
+    "${configDir}/**/*.ts",
+    "${configDir}/**/*.tsx",
+    "${configDir}/**/*.cjs",
+    "${configDir}/**/*.js",
+    "${configDir}/**/*.jsx",
+    "${configDir}/**/*.mjs",
+    // ".next/types/**/*.ts"
   ]
 }

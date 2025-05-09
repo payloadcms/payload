@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'

@@ -10,6 +10,7 @@ import globals from 'globals'
 import importX from 'eslint-plugin-import-x'
 import typescriptParser from '@typescript-eslint/parser'
 import { deepMerge } from './deepMerge.js'
+import reactCompiler from 'eslint-plugin-react-compiler'
 
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
@@ -205,6 +206,10 @@ export const rootEslintConfig = [
       'no-restricted-exports': 'off',
     },
     files: ['*.config.ts', 'config.ts'],
+  },
+  {
+    name: 'React Compiler',
+    ...reactCompiler.configs.recommended,
   },
 ]
 
