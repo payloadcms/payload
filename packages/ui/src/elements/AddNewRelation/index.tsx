@@ -4,7 +4,6 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { Value } from '../../fields/Relationship/types.js'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
@@ -24,9 +23,9 @@ const baseClass = 'relationship-add-new'
 export const AddNewRelation: React.FC<Props> = ({
   Button: ButtonFromProps,
   hasMany,
+  onChange,
   path,
   relationTo,
-  setValue,
   unstyled,
   value,
 }) => {
@@ -54,18 +53,15 @@ export const AddNewRelation: React.FC<Props> = ({
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
-        const newValue: Value = Array.isArray(relationTo)
-          ? {
-              relationTo: collectionConfig?.slug,
-              value: doc.id,
-            }
-          : doc.id
-
         // ensure the value is not already in the array
-        const isNewValue =
-          Array.isArray(relationTo) && Array.isArray(value)
-            ? !value.some((v) => v && typeof v === 'object' && v.value === doc.id)
-            : value !== doc.id
+        let isNewValue = false
+        if (!value) {
+          isNewValue = true
+        } else {
+          isNewValue = Array.isArray(value)
+            ? !value.some((v) => v && v.value === doc.id)
+            : value.value !== doc.id
+        }
 
         if (isNewValue) {
           // dispatchOptions({
@@ -79,17 +75,26 @@ export const AddNewRelation: React.FC<Props> = ({
           //   sort: true,
           // })
 
-          if (hasMany) {
-            setValue([...(Array.isArray(value) ? value : []), newValue])
+          if (hasMany === true) {
+            onChange([
+              ...(Array.isArray(value) ? value : []),
+              {
+                relationTo: collectionConfig?.slug,
+                value: doc.id,
+              },
+            ])
           } else {
-            setValue(newValue)
+            onChange({
+              relationTo: relatedCollections[0].slug,
+              value: doc.id,
+            })
           }
         }
 
         setSelectedCollection(undefined)
       }
     },
-    [relationTo, collectionConfig, hasMany, setValue, value],
+    [collectionConfig, hasMany, onChange, value, relatedCollections],
   )
 
   const onPopupToggle = useCallback((state) => {

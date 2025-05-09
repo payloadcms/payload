@@ -103,10 +103,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
         const clearedOptions = optionGroup.options.filter((option) => {
           if (exemptValues) {
             return exemptValues.some((exemptValue) => {
-              return (
-                exemptValue &&
-                option.value === (typeof exemptValue === 'object' ? exemptValue.value : exemptValue)
-              )
+              return exemptValue && option.value === exemptValue.value
             })
           }
 

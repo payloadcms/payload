@@ -1326,10 +1326,16 @@ export interface RelationshipField {
       } | null);
   relationshipDrawerHasMany?: (string | TextField)[] | null;
   relationshipDrawerHasManyPolymorphic?:
-    | {
-        relationTo: 'text-fields';
-        value: string | TextField;
-      }[]
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
     | null;
   relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
   relationshipDrawerWithFilterOptions?: {
