@@ -3,29 +3,30 @@ import type { Connect, Migration, Payload } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { withReplicas } from 'drizzle-orm/pg-core'
 
 import type { PostgresAdapter } from './types.js'
 
 const connectWithReconnect = async function ({
   adapter,
-  payload,
+  pool,
   reconnect = false,
 }: {
   adapter: PostgresAdapter
-  payload: Payload
+  pool: PostgresAdapter['pool']
   reconnect?: boolean
 }) {
   let result
 
   if (!reconnect) {
-    result = await adapter.pool.connect()
+    result = await pool.connect()
   } else {
     try {
-      result = await adapter.pool.connect()
+      result = await pool.connect()
     } catch (ignore) {
       setTimeout(() => {
-        payload.logger.info('Reconnecting to postgres')
-        void connectWithReconnect({ adapter, payload, reconnect: true })
+        adapter.payload.logger.info('Reconnecting to postgres')
+        void connectWithReconnect({ adapter, pool, reconnect: true })
       }, 1000)
     }
   }
@@ -35,7 +36,7 @@ const connectWithReconnect = async function ({
   result.prependListener('error', (err) => {
     try {
       if (err.code === 'ECONNRESET') {
-        void connectWithReconnect({ adapter, payload, reconnect: true })
+        void connectWithReconnect({ adapter, pool, reconnect: true })
       }
     } catch (ignore) {
       // swallow error
@@ -54,11 +55,52 @@ export const connect: Connect = async function connect(
   try {
     if (!this.pool) {
       this.pool = new this.pg.Pool(this.poolOptions)
-      await connectWithReconnect({ adapter: this, payload: this.payload })
+      await connectWithReconnect({ adapter: this, pool: this.pool })
     }
+
+    // read replicas docs: https://orm.drizzle.team/docs/read-replicas
+    // const primaryDb = drizzle("postgres://user:password@host:port/primary_db");
+    // const read1 = drizzle("postgres://user:password@host:port/read_replica_1");
+    // const read2 = drizzle("postgres://user:password@host:port/read_replica_2");
+    // const db = withReplicas(primaryDb, [read1, read2]);
+
+    // AI recommendation
+    // import { Pool } from "pg";
+    // import { drizzle } from "drizzle-orm/node-postgres";
+    // import { withReplicas } from 'drizzle-orm/pg-core';
+    //
+    // // Create pool connections for each database
+    // const primaryPool = new Pool({ connectionString: "postgres://user:password@host:port/primary_db" });
+    // const read1Pool = new Pool({ connectionString: "postgres://user:password@host:port/read_replica_1" });
+    // const read2Pool = new Pool({ connectionString: "postgres://user:password@host:port/read_replica_2" });
+    //
+    // // Create Drizzle instances from the pools
+    // const primaryDb = drizzle({ client: primaryPool });
+    // const read1 = drizzle({ client: read1Pool });
+    // const read2 = drizzle({ client: read2Pool });
+    //
+    // // Use withReplicas to manage routing
+    // const db = withReplicas(primaryDb, [read1, read2]);
 
     const logger = this.logger || false
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
+
+    if (this.readReplicaOptions) {
+      const readReplicas = this.readReplicaOptions.map((connectionString) => {
+        const options = {
+          ...this.poolOptions,
+          connectionString,
+        }
+        const pool = new this.pg.Pool(options)
+        void connectWithReconnect({
+          adapter: this,
+          pool,
+        })
+        return drizzle({ client: pool, logger, schema: this.schema })
+      })
+      const myReplicas = withReplicas(this.drizzle, [readReplicas[0], readReplicas[1]])
+      this.drizzle = myReplicas
+    }
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
