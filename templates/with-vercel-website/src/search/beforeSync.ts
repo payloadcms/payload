@@ -37,6 +37,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
         disableErrors: true,
         depth: 0,
         select: { title: true },
+        req,
       })
 
       if (doc !== null) {
