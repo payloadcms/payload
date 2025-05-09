@@ -630,7 +630,7 @@ describe('Fields', () => {
           data: doc,
         })
       }
-      global.d = true
+
       const res = await payload.find({
         collection: 'date-fields',
         where: { 'array.date': { greater_than: new Date('2025-06-01').toISOString() } },
