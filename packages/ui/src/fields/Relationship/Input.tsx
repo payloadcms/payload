@@ -2,7 +2,7 @@
 import type { FilterOptionsResult, PaginatedDocs, ValueWithRelation, Where } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -569,15 +569,27 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   }, [])
 
   const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
-    ({ id, collectionSlug, hasReadPermission }) => {
-      openDrawerWhenRelationChanges.current = true
-      setCurrentlyOpenRelationship({
-        id,
-        collectionSlug,
-        hasReadPermission,
-      })
+    ({ id, collectionSlug, hasReadPermission, openInNewTab }) => {
+      if (openInNewTab) {
+        if (hasReadPermission && id && collectionSlug) {
+          const docUrl = formatAdminURL({
+            adminRoute: config.routes.admin,
+            path: `/collections/${collectionSlug}/${id}`,
+          })
+
+          window.open(docUrl, '_blank')
+        }
+      } else {
+        openDrawerWhenRelationChanges.current = true
+
+        setCurrentlyOpenRelationship({
+          id,
+          collectionSlug,
+          hasReadPermission,
+        })
+      }
     },
-    [],
+    [config.routes.admin],
   )
 
   const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {

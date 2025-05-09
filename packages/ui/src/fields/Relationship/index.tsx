@@ -28,7 +28,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       hasMany,
       label,
       localized,
-      relationTo,
+      relationTo: relationToProp,
       required,
     },
     path: pathFromProps,
@@ -60,8 +60,10 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   })
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-  const isPolymorphic = Array.isArray(relationTo)
-  const safeRelationTo = Array.isArray(relationTo) ? relationTo : [relationTo]
+  const isPolymorphic = Array.isArray(relationToProp)
+  const [relationTo] = React.useState(() =>
+    Array.isArray(relationToProp) ? relationToProp : [relationToProp],
+  )
 
   const handleChangeHasMulti = useCallback(
     (value: ValueWithRelation[], disableModifyForm?: boolean) => {
@@ -99,6 +101,62 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     [isPolymorphic, setValue],
   )
 
+  const memoizedValue: ValueWithRelation | ValueWithRelation[] = React.useMemo(() => {
+    if (hasMany === true) {
+      return (
+        Array.isArray(value)
+          ? value.map((val) => {
+              return isPolymorphic
+                ? val
+                : {
+                    relationTo: Array.isArray(relationTo) ? relationTo[0] : relationTo,
+                    value: val,
+                  }
+            })
+          : value
+      ) as ValueWithRelation[]
+    } else {
+      return (
+        value
+          ? isPolymorphic
+            ? value
+            : {
+                relationTo: Array.isArray(relationTo) ? relationTo[0] : relationTo,
+                value,
+              }
+          : value
+      ) as ValueWithRelation
+    }
+  }, [hasMany, value, isPolymorphic, relationTo])
+
+  const memoizedInitialValue: ValueWithRelation | ValueWithRelation[] = React.useMemo(() => {
+    if (hasMany === true) {
+      return (
+        Array.isArray(initialValue)
+          ? initialValue.map((val) => {
+              return isPolymorphic
+                ? val
+                : {
+                    relationTo: Array.isArray(relationTo) ? relationTo[0] : relationTo,
+                    value: val,
+                  }
+            })
+          : initialValue
+      ) as ValueWithRelation[]
+    } else {
+      return (
+        initialValue
+          ? isPolymorphic
+            ? initialValue
+            : {
+                relationTo: Array.isArray(relationTo) ? relationTo[0] : relationTo,
+                value: initialValue,
+              }
+          : initialValue
+      ) as ValueWithRelation
+    }
+  }, [initialValue, isPolymorphic, relationTo, hasMany])
+
   const sharedProps = {
     AfterInput,
     allowCreate,
@@ -120,7 +178,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     path,
     placeholder,
     readOnly: readOnly || disabled,
-    relationTo: safeRelationTo,
+    relationTo,
     required,
     showError,
     sortOptions: sortOptions as any, // todo: fix this, handle Record<string, string> type
@@ -133,47 +191,15 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {...(hasMany === true
         ? {
             hasMany: true,
-            initialValue: (Array.isArray(initialValue)
-              ? initialValue.map((initVal) => {
-                  return isPolymorphic
-                    ? initVal
-                    : {
-                        relationTo: safeRelationTo[0],
-                        value: initVal,
-                      }
-                })
-              : initialValue) as ValueWithRelation[],
+            initialValue: memoizedInitialValue as ValueWithRelation[],
             onChange: handleChangeHasMulti,
-            value: (Array.isArray(value)
-              ? value.map((val) => {
-                  return isPolymorphic
-                    ? val
-                    : {
-                        relationTo: safeRelationTo[0],
-                        value: val,
-                      }
-                })
-              : value) as ValueWithRelation[],
+            value: memoizedValue as ValueWithRelation[],
           }
         : {
             hasMany: false,
-            initialValue: (initialValue
-              ? isPolymorphic
-                ? initialValue
-                : {
-                    relationTo: safeRelationTo[0],
-                    value: initialValue,
-                  }
-              : initialValue) as ValueWithRelation,
+            initialValue: memoizedInitialValue as ValueWithRelation,
             onChange: handleChangeSingle,
-            value: (value
-              ? isPolymorphic
-                ? value
-                : {
-                    relationTo: safeRelationTo[0],
-                    value,
-                  }
-              : value) as ValueWithRelation,
+            value: memoizedValue as ValueWithRelation,
           })}
     />
   )
