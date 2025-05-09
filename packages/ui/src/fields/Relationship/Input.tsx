@@ -449,34 +449,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     }, Promise.resolve())
   })
 
-  const prevValue = useRef(value)
-  const isFirstRenderRef = useRef(true)
-  // ///////////////////////////////////
-  // Ensure we have an option for each value
-  // ///////////////////////////////////
-  useEffect(() => {
-    if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
-      handleValueChange(hasMany === true ? { hasMany, value } : { hasMany, value })
-    }
-    isFirstRenderRef.current = false
-    prevValue.current = value
-  }, [value, hasMany])
-
-  // Determine if we should switch to word boundary search
-  useEffect(() => {
-    const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
-    const isIdOnly = relations.reduce((idOnly, relation) => {
-      const collection = getEntityConfig({ collectionSlug: relation })
-      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-      return fieldToSearch === 'id' && idOnly
-    }, true)
-    setEnableWordBoundarySearch(!isIdOnly)
-  }, [relationTo, getEntityConfig])
-
-  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
-    return await getResults(args)
-  })
-
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       dispatchOptions({
@@ -608,6 +580,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [],
   )
 
+  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
+    return await getResults(args)
+  })
+
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
@@ -645,6 +621,30 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
   }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
+
+  const prevValue = useRef(value)
+  const isFirstRenderRef = useRef(true)
+  // ///////////////////////////////////
+  // Ensure we have an option for each value
+  // ///////////////////////////////////
+  useEffect(() => {
+    if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
+      handleValueChange(hasMany === true ? { hasMany, value } : { hasMany, value })
+    }
+    isFirstRenderRef.current = false
+    prevValue.current = value
+  }, [value, hasMany])
+
+  // Determine if we should switch to word boundary search
+  useEffect(() => {
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
+    const isIdOnly = relations.reduce((idOnly, relation) => {
+      const collection = getEntityConfig({ collectionSlug: relation })
+      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+      return fieldToSearch === 'id' && idOnly
+    }, true)
+    setEnableWordBoundarySearch(!isIdOnly)
+  }, [relationTo, getEntityConfig])
 
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
@@ -723,14 +723,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                       if (hasMany) {
                         if (selected === null) {
                           onChange([])
-                        } else if (Array.isArray(selected)) {
+                        } else {
                           onChange(selected as ValueWithRelation[])
                         }
                       } else if (hasMany === false) {
                         if (selected === null) {
                           onChange(null)
-                        } else if (!Array.isArray(selected)) {
-                          // @todo: parent will need to handle polymorphic values
+                        } else {
                           onChange(selected as ValueWithRelation)
                         }
                       }
@@ -768,7 +767,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                         hasLoadedFirstPageRef.current = true
                         setIsLoading(false)
                       },
-                      value: initialValue,
                       ...(hasMany === true
                         ? {
                             hasMany,

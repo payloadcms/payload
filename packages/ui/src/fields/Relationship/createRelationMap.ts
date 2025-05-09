@@ -37,7 +37,7 @@ export const createRelationMap: CreateRelationMap = ({ hasMany, relationTo, valu
         }
       })
     } else {
-      add(relationTo[0], value.value)
+      add(value.relationTo, value.value)
     }
   }
 
