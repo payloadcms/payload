@@ -267,8 +267,11 @@ declare module '${this.packageName}' {
  */
 `
 
+    const importTypes = `import type {} from '${this.packageName}'`
+
     let code = [
       warning,
+      importTypes,
       ...importDeclarationsSanitized,
       schemaDeclaration,
       ...enumDeclarations,
