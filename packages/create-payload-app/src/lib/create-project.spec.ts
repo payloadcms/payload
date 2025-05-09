@@ -63,6 +63,30 @@ describe('createProject', () => {
       expect(packageJson.name).toStrictEqual(projectName)
     })
 
+    it('updates project name in plugin template importMap file', async () => {
+      const projectName = 'my-custom-plugin'
+      const template: ProjectTemplate = {
+        name: 'plugin',
+        type: 'plugin',
+        description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
+      }
+
+      await createProject({
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
+        packageManager,
+        projectDir,
+        projectName,
+        template,
+      })
+
+      const importMapPath = path.resolve(projectDir, './dev/app/(payload)/admin/importMap.js')
+      const importMapFile = fse.readFileSync(importMapPath, 'utf-8')
+
+      expect(importMapFile).not.toContain('plugin-package-name-placeholder')
+      expect(importMapFile).toContain('my-custom-plugin')
+    })
+
     it('creates example', async () => {
       const projectName = 'custom-server-example'
       const example: ProjectExample = {
