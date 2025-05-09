@@ -26,8 +26,8 @@ export default buildConfig({
   plugins: [
     gcsStorage({
       collections: {
-        media: true,
-        'media-with-prefix': {
+        [Media.slug]: true,
+        [MediaWithPrefix.slug]: {
           prefix,
         },
       },
