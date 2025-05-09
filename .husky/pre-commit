@@ -1,1 +1,0 @@
-pnpm run lint-staged --quiet
