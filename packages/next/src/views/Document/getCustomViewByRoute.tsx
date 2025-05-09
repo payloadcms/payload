@@ -38,10 +38,12 @@ export const getCustomViewByRoute = ({
 
       return false
     })?.[1]
-
-    if (foundViewConfig && 'Component' in foundViewConfig) {
+    if (foundViewConfig && ('Component' in foundViewConfig || 'path' in foundViewConfig)) {
       return {
-        Component: foundViewConfig.Component,
+        Component:
+          'Component' in foundViewConfig && foundViewConfig.Component
+            ? foundViewConfig.Component
+            : null,
         viewKey,
       }
     }

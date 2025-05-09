@@ -7,6 +7,7 @@ import {
   collectionSlugs,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
+  customViewsTabsSlug,
   geoCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
@@ -112,6 +113,15 @@ export const seed = async (_payload) => {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: customViewsTabsSlug,
+          data: {
+            title: 'Live Preview Default Tab',
+          },
           depth: 0,
           overrideAccess: true,
         }),
