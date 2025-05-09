@@ -100,6 +100,7 @@ export const renderField: RenderFieldMethod = ({
     req,
     siblingData,
     user: req.user,
+    value: 'name' in fieldConfig && data?.[fieldConfig.name],
   }
 
   switch (fieldConfig.type) {
