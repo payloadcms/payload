@@ -2,10 +2,12 @@ import type { Page } from '@playwright/test'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -280,5 +282,65 @@ describe('Text', () => {
 
     // Verify it does not become editable
     await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
+  })
+
+  test('should filter Text field hasMany: false in the collection list view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Text',
+      operatorLabel: 'is in',
+      value: 'Another text document',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: false in the collection list view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Text',
+      operatorLabel: 'is not in',
+      value: 'Another text document',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is in',
+      value: 'one',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - is not in', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'is not in',
+      value: 'four',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
   })
 })

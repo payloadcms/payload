@@ -83,6 +83,13 @@ export const addOrderableFieldsAndHook = (
         hidden: true,
         readOnly: true,
       },
+      hooks: {
+        beforeDuplicate: [
+          ({ siblingData }) => {
+            delete siblingData[orderableFieldName]
+          },
+        ],
+      },
       index: true,
       required: true,
       // override the schema to make order fields optional for payload.create()
@@ -106,24 +113,26 @@ export const addOrderableFieldsAndHook = (
     collection.hooks.beforeChange = []
   }
 
-  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, operation, req }) => {
-    // Only set _order on create, not on update (unless explicitly provided)
-    if (operation === 'create') {
-      for (const orderableFieldName of orderableFieldNames) {
-        if (!data[orderableFieldName]) {
-          const lastDoc = await req.payload.find({
-            collection: collection.slug,
-            depth: 0,
-            limit: 1,
-            pagination: false,
-            req,
-            select: { [orderableFieldName]: true },
-            sort: `-${orderableFieldName}`,
-          })
+  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
+    for (const orderableFieldName of orderableFieldNames) {
+      if (!data[orderableFieldName] && !originalDoc?.[orderableFieldName]) {
+        const lastDoc = await req.payload.find({
+          collection: collection.slug,
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          req,
+          select: { [orderableFieldName]: true },
+          sort: `-${orderableFieldName}`,
+          where: {
+            [orderableFieldName]: {
+              exists: true,
+            },
+          },
+        })
 
-          const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
-          data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
-        }
+        const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+        data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
       }
     }
 
@@ -163,7 +172,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
     }
     if (
       typeof target !== 'object' ||
-      typeof target.id !== 'string' ||
+      typeof target.id === 'undefined' ||
       typeof target.key !== 'string'
     ) {
       return new Response(JSON.stringify({ error: 'target must be an object with id and key' }), {
@@ -255,7 +264,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         },
         depth: 0,
         req,
-        select: { id: true },
       })
     }
 
@@ -274,5 +282,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
   if (!config.endpoints) {
     config.endpoints = []
   }
+
   config.endpoints.push(reorderEndpoint)
 }

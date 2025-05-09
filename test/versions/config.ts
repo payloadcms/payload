@@ -4,6 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
+import AutosaveWithDraftButtonPosts from './collections/AutosaveWithDraftButton.js'
 import AutosaveWithValidate from './collections/AutosaveWithValidate.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
@@ -11,12 +12,14 @@ import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
+import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
+import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
@@ -35,10 +38,12 @@ export default buildConfigWithDefaults({
     DisablePublish,
     Posts,
     AutosavePosts,
+    AutosaveWithDraftButtonPosts,
     AutosaveWithValidate,
     DraftPosts,
     DraftWithMax,
     DraftsWithValidate,
+    ErrorOnUnpublish,
     LocalizedPosts,
     VersionPosts,
     CustomIDs,
@@ -46,7 +51,14 @@ export default buildConfigWithDefaults({
     TextCollection,
     Media,
   ],
-  globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
+  globals: [
+    AutosaveGlobal,
+    AutosaveWithDraftButtonGlobal,
+    DraftGlobal,
+    DraftWithMaxGlobal,
+    DisablePublishGlobal,
+    LocalizedGlobal,
+  ],
   indexSortableFields: true,
   localization: {
     defaultLocale: 'en',

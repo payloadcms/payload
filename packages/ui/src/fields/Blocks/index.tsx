@@ -48,7 +48,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
@@ -98,16 +98,17 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     errorPaths,
+    path,
     rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -293,7 +294,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={RowLabels?.[i]}
+                      Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
