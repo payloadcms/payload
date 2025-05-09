@@ -100,7 +100,11 @@ export const reduceFields = ({
       return reduced
     }
 
-    if ((field.type === 'group' || field.type === 'array') && 'fields' in field) {
+    if (
+      (field.type === 'group' || field.type === 'array') &&
+      'fields' in field &&
+      !field.admin.disableListFilter
+    ) {
       const translatedLabel = getTranslation(field.label || '', i18n)
 
       const labelWithPrefix = labelPrefix
