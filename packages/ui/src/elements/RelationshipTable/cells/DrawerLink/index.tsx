@@ -47,7 +47,7 @@ export const DrawerLink: React.FC<{
 
   return (
     <div className="drawer-link">
-      <DefaultCell {...cellProps} className="drawer-link__cell" link={false} onClick={null} />
+      <DefaultCell {...cellProps} className="drawer-link__cell" link />
       <DocumentDrawerToggler>
         <EditIcon />
       </DocumentDrawerToggler>
