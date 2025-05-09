@@ -159,6 +159,7 @@ export type BasePostgresAdapter = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push: boolean
+  readReplicaOptions?: string[]
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
