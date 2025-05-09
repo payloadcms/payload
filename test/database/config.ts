@@ -460,6 +460,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'virtual-relations',
       admin: { useAsTitle: 'postTitle' },
+      access: { read: () => true },
       fields: [
         {
           name: 'postTitle',
