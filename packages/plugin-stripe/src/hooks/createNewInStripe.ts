@@ -61,7 +61,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
         syncedFields = deepen(syncedFields)
 
         // api version can only be the latest, stripe recommends ts ignoring it
-        const stripe = new Stripe(pluginConfig.stripeSecretKey || '', { apiVersion: '2022-08-01' })
+        const stripe = new Stripe(pluginConfig?.stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
         if (operation === 'update') {
           if (logs) {
