@@ -84,31 +84,31 @@ export type GetResults = (
 ) => Promise<void>
 
 export type RelationshipInputProps = {
-  readonly AfterInput: React.ReactNode // optional
-  readonly allowCreate: boolean // optional
-  readonly allowEdit: boolean // optional
-  readonly appearance: 'drawer' | 'select' // optional
-  readonly BeforeInput: React.ReactNode // optional
-  readonly className: string // optional
-  readonly Description: React.ReactNode // optional
-  readonly description: StaticDescription // optional
-  readonly Error: React.ReactNode // optional
-  readonly filterOptions: FilterOptionsResult // optional
-  readonly isSortable: boolean // optional
-  readonly Label: React.ReactNode // optional
-  readonly label: StaticLabel // optional
-  readonly localized: boolean // optional
-  readonly maxResultsPerRequest: number // optional
-  readonly maxRows: number // optional
-  readonly minRows: number // optional
+  readonly AfterInput?: React.ReactNode
+  readonly allowCreate?: boolean
+  readonly allowEdit?: boolean
+  readonly appearance?: 'drawer' | 'select'
+  readonly BeforeInput?: React.ReactNode
+  readonly className?: string
+  readonly Description?: React.ReactNode
+  readonly description?: StaticDescription
+  readonly Error?: React.ReactNode
+  readonly filterOptions?: FilterOptionsResult
+  readonly isSortable?: boolean
+  readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
+  readonly localized?: boolean
+  readonly maxResultsPerRequest?: number
+  readonly maxRows?: number
+  readonly minRows?: number
   readonly path: string
   readonly placeholder?: LabelFunction | string
-  readonly readOnly: boolean // optional
+  readonly readOnly?: boolean
   readonly relationTo: string[]
-  readonly required: boolean // optional
-  readonly showError: boolean // optional
-  readonly sortOptions: Partial<Record<CollectionSlug, string>> // optional
-  readonly style: React.CSSProperties // optional
+  readonly required?: boolean
+  readonly showError?: boolean
+  readonly sortOptions?: Partial<Record<CollectionSlug, string>>
+  readonly style?: React.CSSProperties
 } & SharedRelationshipInputProps
 
 type SharedRelationshipInputProps =
