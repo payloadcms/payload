@@ -8,7 +8,7 @@
     "declaration": true,
     "declarationMap": true,
     "target": "ES2022",
-    "rootDir": "${configDir}/src",
+    "rootDir": "${configDir}",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
@@ -31,7 +31,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
@@ -81,6 +81,13 @@
       ]
     }
   },
-  "include": ["${configDir}/src"],
-  "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
+  "include": [
+    "${configDir}/**/*.ts",
+    "${configDir}/**/*.tsx",
+    "${configDir}/**/*.cjs",
+    "${configDir}/**/*.js",
+    "${configDir}/**/*.jsx",
+    "${configDir}/**/*.mjs"
+  ],
+  "exclude": ["${configDir}/**/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }
