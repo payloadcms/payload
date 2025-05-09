@@ -1,10 +1,18 @@
 export type Groups =
   | 'addColumn'
   | 'addConstraint'
+  | 'alterType'
+  | 'createIndex'
+  | 'createTable'
+  | 'createType'
+  | 'disableRowSecurity'
   | 'dropColumn'
   | 'dropConstraint'
+  | 'dropIndex'
   | 'dropTable'
+  | 'dropType'
   | 'notNull'
+  | 'setDefault'
 
 /**
  * Convert an "ADD COLUMN" statement to an "ALTER COLUMN" statement
@@ -44,6 +52,35 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
 
     notNull: 'NOT NULL',
     // example: ALTER TABLE "pages_blocks_my_block" ALTER COLUMN "person_id" SET NOT NULL;
+
+    createType: 'CREATE TYPE',
+    // example: CREATE TYPE "public"."enum__pages_v_published_locale" AS ENUM('en', 'es');
+
+    alterType: 'ALTER TYPE',
+    // example: ALTER TYPE "public"."enum_pages_blocks_cta" ADD VALUE 'copy';
+
+    createTable: 'CREATE TABLE',
+    // example:   CREATE TABLE IF NOT EXISTS "payload_locked_documents" (
+    //   	"id" serial PRIMARY KEY NOT NULL,
+    //   	"global_slug" varchar,
+    //   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+    //   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+    //   );
+
+    disableRowSecurity: 'DISABLE ROW LEVEL SECURITY;',
+    // example: ALTER TABLE "categories_rels" DISABLE ROW LEVEL SECURITY;
+
+    dropIndex: 'DROP INDEX IF EXISTS',
+    // example: DROP INDEX IF EXISTS "pages_title_idx";
+
+    setDefault: 'SET DEFAULT',
+    // example: ALTER TABLE "pages" ALTER COLUMN "_status" SET DEFAULT 'draft';
+
+    createIndex: 'INDEX IF NOT EXISTS',
+    // example: CREATE INDEX IF NOT EXISTS "payload_locked_documents_global_slug_idx" ON "payload_locked_documents" USING btree ("global_slug");
+
+    dropType: 'DROP TYPE',
+    // example: DROP TYPE "public"."enum__pages_v_published_locale";
   }
 
   const result = Object.keys(groups).reduce((result, group: Groups) => {
@@ -51,7 +88,17 @@ export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> =
     return result
   }, {}) as Record<Groups, string[]>
 
+  // push multi-line changes to a single grouping
+  let isCreateTable = false
+
   for (const line of list) {
+    if (isCreateTable) {
+      result.createTable.push(line)
+      if (line.includes(');')) {
+        isCreateTable = false
+      }
+      continue
+    }
     Object.entries(groups).some(([key, value]) => {
       if (line.endsWith('NOT NULL;')) {
         // split up the ADD COLUMN and ALTER COLUMN NOT NULL statements
