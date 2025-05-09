@@ -708,7 +708,6 @@ describe('General', () => {
       await checkLocaleLabels('Spanish (es)', 'English (en)')
 
       // Change locale to Spanish
-      await localizerButton.click()
       await expect(localeListItem1).toContainText('Spanish (es)')
       await localeListItem1.click()
 

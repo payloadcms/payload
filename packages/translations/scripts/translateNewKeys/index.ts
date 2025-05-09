@@ -98,7 +98,10 @@ export async function translateObject(props: {
       allTranslatedTranslationsObject?.[targetLang].translations,
       fromTranslationsObject,
     )
-    console.log(`Keys which do not exist in English:`, keysWhichDoNotExistInFromlang)
+    if (keysWhichDoNotExistInFromlang.length) {
+      console.log(`Keys which do not exist in English:`, keysWhichDoNotExistInFromlang)
+    }
+
     /**
      * If a key does not exist in the fromTranslationsObject, it should be deleted from the target language object
      */
@@ -124,11 +127,16 @@ export async function translateObject(props: {
       allTranslatedTranslationsObject?.[targetLang].translations,
     )
 
-    console.log('Missing keys for lang', targetLang, ':', missingKeys)
+    if (missingKeys.length) {
+      console.log('Missing keys for lang', targetLang, ':', missingKeys)
+    }
 
     for (const missingKey of missingKeys) {
       const keys: string[] = missingKey.split('.')
-      const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
+      const sourceText = keys.reduce<GenericTranslationsObject | string>(
+        (acc, key) => acc[key],
+        fromTranslationsObject,
+      )
       if (!sourceText || typeof sourceText !== 'string') {
         throw new Error(
           `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}. (2)`,
@@ -158,6 +166,13 @@ export async function translateObject(props: {
           }
           targetObj[keys[keys.length - 1]] = translated
 
+          if (!allTranslatedTranslationsObject[targetLang]) {
+            allTranslatedTranslationsObject[targetLang] = {
+              dateFNSKey: targetLang,
+              translations: {},
+            }
+          }
+
           allTranslatedTranslationsObject[targetLang].translations = sortKeys(
             deepMergeSimple(
               allTranslatedTranslationsObject[targetLang].translations,
@@ -175,7 +190,7 @@ export async function translateObject(props: {
   }
 
   // merge with existing translations
-  console.log('Merged object:', allTranslatedTranslationsObject)
+  // console.log('Merged object:', allTranslatedTranslationsObject)
 
   console.log('New translations:', allOnlyNewTranslatedTranslationsObject)
 
@@ -209,6 +224,8 @@ export async function translateObject(props: {
     // save
 
     for (const key of languages) {
+      if (!allTranslatedTranslationsObject?.[key]) {return}
+
       // e.g. sanitize rs-latin to rsLatin
       const sanitizedKey = key.replace(
         /-(\w)(\w*)/g,

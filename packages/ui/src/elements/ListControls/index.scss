@@ -31,7 +31,7 @@
     &__buttons-wrap {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: calc(var(--base) / 4);
     }
 
     .column-selector,

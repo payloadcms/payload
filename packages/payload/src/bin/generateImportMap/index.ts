@@ -38,7 +38,7 @@ export type ImportMap = {
   [path: UserImportPath]: any
 }
 
-export type AddToImportMap = (payloadComponent: PayloadComponent | PayloadComponent[]) => void
+export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
 
 export async function generateImportMap(
   config: SanitizedConfig,

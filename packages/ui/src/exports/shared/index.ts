@@ -6,7 +6,7 @@ export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializabl
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
-export { filterFields } from '../../providers/TableColumns/filterFields.js'
+export { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 export { requests } from '../../utilities/api.js'
