@@ -1,0 +1,150 @@
+@import '@payloadcms/ui/scss';
+
+.variantOptions {
+  &__header {
+    margin-bottom: 0.5rem;
+  }
+
+  &__add-row {
+    margin: 1rem 0 0 0;
+  }
+
+  &__draggable-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .optionItemWrapper {
+    border-radius: 0.25rem;
+    border: 1px solid var(--theme-elevation-200);
+
+    &:hover {
+      border-color: var(--theme-elevation-300);
+    }
+  }
+
+  .optionItemContainer {
+    interpolate-size: allow-keywords;
+    height: 0;
+    overflow: hidden;
+    transition: height ease 0.25s;
+
+    &--expanded {
+      height: auto;
+      overflow: unset;
+    }
+  }
+
+  .optionItemContents {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .optionItemActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .optionItemActionsGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .optionItemDelete {
+    color: var(--theme-elevation-600);
+    margin-block: 0;
+
+    svg {
+      width: 1.25rem;
+    }
+  }
+
+  .optionItemCancel {
+    margin-block: 0;
+  }
+
+  .optionItemSave {
+    margin-block: 0;
+  }
+
+  .optionItemHeader {
+    padding-inline-start: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+    &.optionItemHeader--collapsed {
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .optionItemHeading {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .optionItemPreviewLabel {
+    padding: 0.125rem 0.75rem;
+    border-radius: 0.25rem;
+    background: var(--theme-elevation-0);
+  }
+
+  .optionItemPreviewOptions {
+    list-style: none;
+    display: flex;
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .optionItemPreviewOption {
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--theme-elevation-150);
+  }
+
+  .optionItemPreviewNoOptions {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--theme-elevation-150);
+  }
+
+  .optionLabelInput {
+    display: flex;
+    align-items: stretch;
+
+    .field-type.text {
+      flex-grow: 1;
+    }
+
+    .popup {
+      flex-grow: 0;
+
+      .popup-button {
+        border: 1px solid var(--theme-elevation-150);
+        border-radius: var(--style-radius-s);
+        background: var(--theme-input-bg);
+        padding: 0 10px;
+        height: 100%;
+        margin-left: -2px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+
+        &:hover {
+          border-color: var(--theme-elevation-250);
+        }
+      }
+    }
+  }
+}
