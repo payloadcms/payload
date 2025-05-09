@@ -56,7 +56,7 @@ export const migrateRelationships = async ({
     ${where} ORDER BY parent_id LIMIT 500 OFFSET ${offset * 500};
   `
 
-    paginationResult = await adapter.drizzle.execute(sql.raw(`${paginationStatement}`))
+    paginationResult = await db.execute(sql.raw(`${paginationStatement}`))
 
     if (paginationResult.rows.length === 0) {
       return
@@ -72,7 +72,7 @@ export const migrateRelationships = async ({
       payload.logger.info(statement)
     }
 
-    const result = await adapter.drizzle.execute(sql.raw(`${statement}`))
+    const result = await db.execute(sql.raw(`${statement}`))
 
     const docsToResave: DocsToResave = {}
 
