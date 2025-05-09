@@ -75,6 +75,19 @@ export const findMany = async function find({
     tableName,
     versions,
   })
+
+  if (orderBy) {
+    for (const key in selectFields) {
+      const column = selectFields[key]
+      if (column.primary) {
+        continue
+      }
+      if (!orderBy.some((col) => col.column === column)) {
+        delete selectFields[key]
+      }
+    }
+  }
+
   const selectDistinctResult = await selectDistinct({
     adapter,
     db,
