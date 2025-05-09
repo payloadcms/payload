@@ -115,12 +115,14 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {
+    header: Header;
     global: Global;
     'global-2': Global2;
     'global-3': Global3;
     'virtual-relation-global': VirtualRelationGlobal;
   };
   globalsSelect: {
+    header: HeaderSelect<false> | HeaderSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
     'global-2': Global2Select<false> | Global2Select<true>;
     'global-3': Global3Select<false> | Global3Select<true>;
@@ -979,6 +981,39 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: string;
+  itemsLvl1?:
+    | {
+        label?: string | null;
+        itemsLvl2?:
+          | {
+              label?: string | null;
+              itemsLvl3?:
+                | {
+                    label?: string | null;
+                    itemsLvl4?:
+                      | {
+                          label?: string | null;
+                          id?: string | null;
+                        }[]
+                      | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global".
  */
 export interface Global {
@@ -1017,6 +1052,39 @@ export interface VirtualRelationGlobal {
   post?: (string | null) | Post;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  itemsLvl1?:
+    | T
+    | {
+        label?: T;
+        itemsLvl2?:
+          | T
+          | {
+              label?: T;
+              itemsLvl3?:
+                | T
+                | {
+                    label?: T;
+                    itemsLvl4?:
+                      | T
+                      | {
+                          label?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -6,6 +6,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
+import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -121,9 +122,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
       )
 
-      if (field.dbName) {
-        fieldData = table[`_${arrayTableName}`]
-      }
+      fieldData = table[getArrayRelationName({ field, path: fieldName, tableName: arrayTableName })]
 
       if (Array.isArray(fieldData)) {
         if (isLocalized) {
