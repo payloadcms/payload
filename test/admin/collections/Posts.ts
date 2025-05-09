@@ -15,6 +15,7 @@ export const Posts: CollectionConfig = {
     components: {
       beforeListTable: [
         '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+        '/components/SetColumns/index.js#SetColumnsButton',
         {
           path: '/components/Banner/index.js#Banner',
           clientProps: {
