@@ -425,6 +425,7 @@ export const transform = ({
         for (const locale of config.localization.localeCodes) {
           sanitizeDate({
             field,
+            locale,
             ref: fieldRef,
             value: fieldRef[locale],
           })
