@@ -46,6 +46,7 @@ export const findMany = async function find({
   const offset = skip || (page - 1) * limit
 
   if (limit === 0) {
+    pagination = false
     limit = undefined
   }
 
