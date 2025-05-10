@@ -13,7 +13,7 @@ export function loadEnv(path?: string) {
     return
   }
 
-  const dev = process.env.NODE_ENV === 'development'
+  const dev = process.env.NODE_ENV !== 'production'
   const { loadedEnvFiles } = loadEnvConfig(process.cwd(), dev)
 
   if (!loadedEnvFiles?.length) {
