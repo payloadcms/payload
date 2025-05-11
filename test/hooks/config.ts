@@ -88,8 +88,6 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
           afterRead2: true,
         }
       })
-
-      //collection1?.hooks?.afterRead.push(() => {})
       return config
     },
   ],
