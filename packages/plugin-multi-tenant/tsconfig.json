@@ -1,4 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../payload" }, { "path": "../ui"}, { "path": "../translations"}]
+  "references": [{ "path": "../payload" }, { "path": "../ui"}, { "path": "../translations"}],
+  "exclude": ["scripts"]
 }

@@ -3,7 +3,6 @@ import type { AcceptedLanguages, GenericTranslationsObject } from '@payloadcms/t
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-// @ts-ignore
 import { translateObject } from '../../translations/scripts/translateNewKeys/index.js'
 import { translations } from '../src/translations/index.js'
 import { enTranslations } from '../src/translations/languages/en.js'
