@@ -119,6 +119,10 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       access: {
         update: ({ doc, req }) => Boolean(req?.user && doc?.owner === req.user.id),
       },
+      admin: {
+        description:
+          'The "owner" bypasses all other access control defined on this preset. Only the current owner can tranfer ownership to another user.',
+      },
       defaultValue: ({ req }) => req.user,
       relationTo: config.admin?.user ?? 'users', // TODO: remove this fallback when the args are properly typed as `SanitizedConfig`
       required: true,

@@ -392,8 +392,8 @@ describe('Query Presets', () => {
 
   test('only shows query presets related to the underlying collection', async () => {
     // no results on `users` collection
-    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
-    await page.goto(postsUrl.list)
+    const usersURL = new AdminUrlUtil(serverURL, 'users')
+    await page.goto(usersURL.list)
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
     await expect(drawer.locator('.collection-list__no-results')).toBeVisible()
