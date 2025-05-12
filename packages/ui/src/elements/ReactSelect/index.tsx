@@ -84,7 +84,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         captureMenuScroll
         customProps={customProps}
         isLoading={isLoading}
-        placeholder={getTranslation(placeholder, i18n)}
         {...props}
         className={classes}
         classNamePrefix="rs"
@@ -113,6 +112,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
+        placeholder={getTranslation(placeholder, i18n)}
         styles={styles}
         unstyled={true}
         value={value}
@@ -160,7 +160,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     <CreatableSelect
       captureMenuScroll
       isLoading={isLoading}
-      placeholder={getTranslation(placeholder, i18n)}
       {...props}
       className={classes}
       classNamePrefix="rs"
@@ -191,6 +190,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
+      placeholder={getTranslation(placeholder, i18n)}
       styles={styles}
       unstyled={true}
       value={value}
