@@ -402,11 +402,11 @@ describe('List View', () => {
       await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
-      await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+      await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
         conditionField.locator('.rs__menu-list').locator('div', {
-          hasText: exactText('Tab 1 > Title'),
+          hasText: exactText('Title'),
         }),
       ).toBeVisible()
     })
@@ -708,9 +708,7 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField
-        .locator('.rs__option', { hasText: exactText('Title') })
-        .click()
+      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
