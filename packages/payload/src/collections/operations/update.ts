@@ -201,6 +201,7 @@ export const updateOperation = async <
 
       try {
         const select = sanitizeSelect({
+          fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
           select: incomingSelect,
         })

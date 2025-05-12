@@ -7,9 +7,9 @@ import type {
 } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { wordBoundariesRegex } from 'payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
@@ -56,6 +56,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        placeholder,
         sortOptions,
       } = {},
       hasMany,
@@ -82,7 +83,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const hasMultipleRelations = Array.isArray(relationTo)
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
-    Parameters<ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']>[0]
+    Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
   >({
     id: undefined,
     collectionSlug: undefined,
@@ -271,6 +272,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
+              select: {
+                [fieldToSearch]: true,
+              },
               sort: fieldToSort,
               where: {
                 and: [
@@ -627,16 +631,29 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     return r.test(labelString.slice(-breakApartThreshold))
   }, [])
 
-  const onDocumentDrawerOpen = useCallback<
-    ReactSelectAdapterProps['customProps']['onDocumentDrawerOpen']
-  >(({ id, collectionSlug, hasReadPermission }) => {
-    openDrawerWhenRelationChanges.current = true
-    setCurrentlyOpenRelationship({
-      id,
-      collectionSlug,
-      hasReadPermission,
-    })
-  }, [])
+  const onDocumentOpen = useCallback<ReactSelectAdapterProps['customProps']['onDocumentOpen']>(
+    ({ id, collectionSlug, hasReadPermission, openInNewTab }) => {
+      if (openInNewTab) {
+        if (hasReadPermission && id && collectionSlug) {
+          const docUrl = formatAdminURL({
+            adminRoute: config.routes.admin,
+            path: `/collections/${collectionSlug}/${id}`,
+          })
+
+          window.open(docUrl, '_blank')
+        }
+      } else {
+        openDrawerWhenRelationChanges.current = true
+
+        setCurrentlyOpenRelationship({
+          id,
+          collectionSlug,
+          hasReadPermission,
+        })
+      }
+    },
+    [setCurrentlyOpenRelationship, config.routes.admin],
+  )
 
   useEffect(() => {
     if (openDrawerWhenRelationChanges.current) {
@@ -693,7 +710,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               customProps={{
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentDrawerOpen,
+                onDocumentOpen,
                 onSave,
               }}
               disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}
@@ -776,6 +793,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 })
               }}
               options={options}
+              placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
             />
