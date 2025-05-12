@@ -15,7 +15,7 @@ import React from 'react'
 import type {
   PluginMultiTenantTranslationKeys,
   PluginMultiTenantTranslations,
-} from '../../../translations/index.js'
+} from '../../translations/index.js'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.scss'
@@ -95,6 +95,8 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
                 return <b>{children}</b>
               },
             }}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             i18nKey="plugin-multi-tenant:confirm-tenant-switch--body"
             t={t}
             variables={{
@@ -105,6 +107,8 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         }
         heading={
           <Translation
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             i18nKey="plugin-multi-tenant:confirm-tenant-switch--heading"
             t={t}
             variables={{
