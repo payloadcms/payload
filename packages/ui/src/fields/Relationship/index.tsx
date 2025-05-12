@@ -11,6 +11,8 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { RelationshipInput } from './Input.js'
 import './index.scss'
 
+export { RelationshipInput }
+
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
     field,
