@@ -7,20 +7,20 @@ type RelationMap = {
 
 type CreateRelationMap = (args: {
   hasMany: boolean
-  isPolymorphic: boolean
-  relationTo: string[]
+  relationTo: string | string[]
   value: null | Value | Value[] // really needs to be `ValueWithRelation`
 }) => RelationMap
 
-export const createRelationMap: CreateRelationMap = ({
-  hasMany,
-  isPolymorphic,
-  relationTo,
-  value,
-}) => {
-  const relationMap: RelationMap = relationTo.reduce((map, current) => {
-    return { ...map, [current]: [] }
-  }, {})
+export const createRelationMap: CreateRelationMap = ({ hasMany, relationTo, value }) => {
+  const hasMultipleRelations = Array.isArray(relationTo)
+  let relationMap: RelationMap
+  if (Array.isArray(relationTo)) {
+    relationMap = relationTo.reduce((map, current) => {
+      return { ...map, [current]: [] }
+    }, {})
+  } else {
+    relationMap = { [relationTo]: [] }
+  }
 
   if (value === null) {
     return relationMap
@@ -38,20 +38,25 @@ export const createRelationMap: CreateRelationMap = ({
 
   if (hasMany && Array.isArray(value)) {
     value.forEach((val) => {
-      if (isPolymorphic && typeof val === 'object' && 'relationTo' in val && 'value' in val) {
+      if (
+        hasMultipleRelations &&
+        typeof val === 'object' &&
+        'relationTo' in val &&
+        'value' in val
+      ) {
         add(val.relationTo, val.value)
       }
 
-      if (!isPolymorphic && typeof relationTo === 'string') {
+      if (!hasMultipleRelations && typeof relationTo === 'string') {
         add(relationTo, val)
       }
     })
-  } else if (isPolymorphic) {
+  } else if (hasMultipleRelations && Array.isArray(relationTo)) {
     if (typeof value === 'object' && 'relationTo' in value && 'value' in value) {
       add(value.relationTo, value.value)
     }
   } else {
-    add(relationTo[0], value)
+    add(relationTo, value)
   }
 
   return relationMap
