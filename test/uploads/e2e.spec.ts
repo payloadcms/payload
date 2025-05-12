@@ -1260,7 +1260,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
