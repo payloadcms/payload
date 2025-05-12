@@ -12,6 +12,7 @@ export const hungarianLocale = 'hu'
 
 // Slugs
 export const localizedPostsSlug = 'localized-posts'
+export const localizedDateFieldsSlug = 'localized-date-fields'
 export const withLocalizedRelSlug = 'with-localized-relationship'
 export const relationshipLocalizedSlug = 'relationship-localized'
 export const withRequiredLocalizedFields = 'localized-required'

@@ -75,6 +75,7 @@ export interface Config {
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
     'draft-with-validate-posts': DraftWithValidatePost;
+    'error-on-unpublish': ErrorOnUnpublish;
     'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
@@ -97,6 +98,7 @@ export interface Config {
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
+    'error-on-unpublish': ErrorOnUnpublishSelect<false> | ErrorOnUnpublishSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
@@ -283,6 +285,17 @@ export interface DraftWithMaxPost {
  * via the `definition` "draft-with-validate-posts".
  */
 export interface DraftWithValidatePost {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unpublish".
+ */
+export interface ErrorOnUnpublish {
   id: string;
   title: string;
   updatedAt: string;
@@ -590,6 +603,10 @@ export interface PayloadLockedDocument {
         value: string | DraftWithValidatePost;
       } | null)
     | ({
+        relationTo: 'error-on-unpublish';
+        value: string | ErrorOnUnpublish;
+      } | null)
+    | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
       } | null)
@@ -773,6 +790,16 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
  * via the `definition` "draft-with-validate-posts_select".
  */
 export interface DraftWithValidatePostsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unpublish_select".
+ */
+export interface ErrorOnUnpublishSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
