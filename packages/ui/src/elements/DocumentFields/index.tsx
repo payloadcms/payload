@@ -6,6 +6,7 @@ import React, { useMemo } from 'react'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { SidebarProvider } from '../../providers/Sidebar/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
@@ -85,7 +86,7 @@ export const DocumentFields: React.FC<Args> = ({
         </Gutter>
       </div>
       {hasSidebarFields ? (
-        <div className={`${baseClass}__sidebar-wrap`}>
+        <SidebarProvider className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
               <RenderFields
@@ -99,7 +100,7 @@ export const DocumentFields: React.FC<Args> = ({
               />
             </div>
           </div>
-        </div>
+        </SidebarProvider>
       ) : null}
     </div>
   )
