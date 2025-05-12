@@ -65,4 +65,36 @@ describe('Lexical Fully Featured', () => {
     const paragraph = lexical.editor.locator('> p')
     await expect(paragraph).toHaveText('')
   })
+
+  test('can add new custom fields in link feature modal', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+
+    await lexical.editor.fill('link')
+    await lexical.editor.selectText()
+
+    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
+    const linkButton = page.locator(linkButtonClass).first()
+
+    await linkButton.click()
+
+    const customField = lexical.drawer.locator('#field-someText')
+
+    await expect(customField).toBeVisible()
+  })
+
+  test('can set default value of newTab checkbox to checked', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+
+    await lexical.editor.fill('link')
+    await lexical.editor.selectText()
+
+    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
+    const linkButton = page.locator(linkButtonClass).first()
+
+    await linkButton.click()
+
+    const checkboxField = lexical.drawer.locator(`[id^="field-newTab"]`)
+
+    await expect(checkboxField).toBeChecked()
+  })
 })

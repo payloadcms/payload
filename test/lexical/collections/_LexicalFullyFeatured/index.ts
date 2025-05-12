@@ -1,10 +1,11 @@
-import type { CollectionConfig } from 'payload'
+import type { CheckboxField, CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  LinkFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -24,6 +25,19 @@ export const LexicalFullyFeatured: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
+          LinkFeature({
+            fields: ({ defaultFields }) => {
+              const modifiedFields = defaultFields.map((field) => {
+                if (field.name === 'newTab') {
+                  return { ...field, defaultValue: true } as CheckboxField
+                }
+
+                return field
+              })
+
+              return [...modifiedFields, { type: 'text', name: 'someText' }]
+            },
+          }),
           FixedToolbarFeature(),
           EXPERIMENTAL_TableFeature(),
           BlocksFeature({
