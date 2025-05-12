@@ -8,7 +8,7 @@ export function findMissingKeys(
   targetObj: GenericTranslationsObject,
   prefix = '',
 ): string[] {
-  let missingKeys = []
+  let missingKeys: string[] = []
 
   for (const key in baseObj) {
     const baseValue = baseObj[key]

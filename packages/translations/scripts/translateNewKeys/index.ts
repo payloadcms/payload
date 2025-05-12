@@ -128,7 +128,10 @@ export async function translateObject(props: {
 
     for (const missingKey of missingKeys) {
       const keys: string[] = missingKey.split('.')
-      const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
+      const sourceText = keys.reduce(
+        (acc, key) => acc[key] as GenericTranslationsObject,
+        fromTranslationsObject,
+      )
       if (!sourceText || typeof sourceText !== 'string') {
         throw new Error(
           `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}. (2)`,
@@ -158,9 +161,9 @@ export async function translateObject(props: {
           }
           targetObj[keys[keys.length - 1]] = translated
 
-          allTranslatedTranslationsObject[targetLang].translations = sortKeys(
+          allTranslatedTranslationsObject[targetLang]!.translations = sortKeys(
             deepMergeSimple(
-              allTranslatedTranslationsObject[targetLang].translations,
+              allTranslatedTranslationsObject[targetLang]!.translations,
               allOnlyNewTranslatedTranslationsObject[targetLang],
             ),
           )
@@ -218,10 +221,10 @@ export async function translateObject(props: {
       const filePath = path.resolve(targetFolder, `${sanitizedKey}.ts`)
 
       // prefix & translations
-      let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
+      let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key]?.translations)}\n`
 
       // suffix
-      fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
+      fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key]?.dateFNSKey}'`)}\n`
 
       // eslint
       fileContent = await applyEslintFixes(fileContent, filePath)
