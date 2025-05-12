@@ -14,6 +14,12 @@ export const index = [
       },
     },
   },
+  {
+  // TODO: This is a good rule, but it has been temporarily disabled
+  // until the migration to ts-strict is complete for this package 
+  // because `typescript-strict-plugin` causes this rule to conflict with tsc.
+  '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+  }
 ]
 
 export default index

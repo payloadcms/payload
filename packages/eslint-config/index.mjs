@@ -63,11 +63,6 @@ const reactA11yRules = {
 const typescriptRules = {
   '@typescript-eslint/no-use-before-define': 'off',
 
-  // This is a good rule, but for some reason I still don't understand, it sometimes conflicts with TSC.
-  // I've commented on a few occasions where this happened at https://github.com/payloadcms/payload/pull/11226#issuecomment-2713898801
-  // and on the PRs that reference that one.
-  '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-
   // Type-aware any rules:
   '@typescript-eslint/no-unsafe-assignment': 'off',
   '@typescript-eslint/no-unsafe-member-access': 'off',
