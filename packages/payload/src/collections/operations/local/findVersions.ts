@@ -112,6 +112,8 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     where,
   } = options
 
+  options.overrideAccess = overrideAccess
+
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {
