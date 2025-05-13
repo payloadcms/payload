@@ -27,6 +27,5 @@ for (const key of Object.keys(translations) as AcceptedLanguages[]) {
 void translateObject({
   allTranslationsObject: allTranslations,
   fromTranslationsObject: enTranslations,
-  //languages: ['de'],
   targetFolder: path.resolve(dirname, '../../../../packages/translations/src/languages'),
 })

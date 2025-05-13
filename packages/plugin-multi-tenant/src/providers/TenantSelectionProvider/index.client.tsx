@@ -129,13 +129,14 @@ export const TenantSelectionProviderClient = ({
     if (userID && !tenantCookie) {
       // User is logged in, but does not have a tenant cookie, set it
       setSelectedTenantID(initialValue)
+      setTenantOptions(tenantOptionsFromProps)
       if (initialValue) {
         setCookie(String(initialValue))
       } else {
         deleteCookie()
       }
     }
-  }, [userID, tenantCookie, initialValue, setCookie, deleteCookie, router])
+  }, [userID, tenantCookie, initialValue, setCookie, deleteCookie, router, tenantOptionsFromProps])
 
   React.useEffect(() => {
     if (!userID && tenantCookie) {

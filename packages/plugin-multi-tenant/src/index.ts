@@ -3,6 +3,7 @@ import type { CollectionConfig, Config } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
 import { defaults } from './defaults.js'
@@ -362,9 +363,20 @@ export const multiTenantPlugin =
      * Merge plugin translations
      */
 
+    const simplifiedTranslations = Object.entries(translations).reduce(
+      (acc, [key, value]) => {
+        acc[key] = value.translations
+        return acc
+      },
+      {} as Record<string, PluginDefaultTranslationsObject>,
+    )
+
     incomingConfig.i18n = {
       ...incomingConfig.i18n,
-      translations: deepMergeSimple(translations, incomingConfig.i18n?.translations ?? {}),
+      translations: deepMergeSimple(
+        simplifiedTranslations,
+        incomingConfig.i18n?.translations ?? {},
+      ),
     }
 
     return incomingConfig
