@@ -929,6 +929,12 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  array?:
+    | {
+        date?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2500,6 +2506,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
     | {
         dayAndTime?: T;
         dayAndTime_tz?: T;
+        id?: T;
+      };
+  array?:
+    | T
+    | {
+        date?: T;
         id?: T;
       };
   updatedAt?: T;

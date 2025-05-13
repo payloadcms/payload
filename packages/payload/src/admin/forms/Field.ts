@@ -91,6 +91,7 @@ export type ServerComponentProps = {
   req: PayloadRequest
   siblingData: Data
   user: User
+  value?: unknown
 }
 
 export type ClientFieldBase<
