@@ -11,7 +11,7 @@ import type {
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
 
@@ -308,43 +308,40 @@ export const getTableColumnFromPath = ({
       }
 
       case 'group': {
-        if (fieldAffectsData(field)) {
-          if (locale && isFieldLocalized && adapter.payload.config.localization) {
-            newTableName = `${tableName}${adapter.localesSuffix}`
+        if (locale && isFieldLocalized && adapter.payload.config.localization) {
+          newTableName = `${tableName}${adapter.localesSuffix}`
 
-            let condition = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID)
+          let condition = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID)
 
-            if (locale !== 'all') {
-              condition = and(condition, eq(adapter.tables[newTableName]._locale, locale))
-            }
-
-            addJoinTable({
-              condition,
-              joins,
-              table: adapter.tables[newTableName],
-            })
+          if (locale !== 'all') {
+            condition = and(condition, eq(adapter.tables[newTableName]._locale, locale))
           }
-          return getTableColumnFromPath({
-            adapter,
-            aliasTable,
-            collectionPath,
-            columnPrefix: `${columnPrefix}${field.name}_`,
-            constraintPath: `${constraintPath}${field.name}.`,
-            constraints,
-            fields: field.flattenedFields,
+
+          addJoinTable({
+            condition,
             joins,
-            locale,
-            parentIsLocalized: parentIsLocalized || field.localized,
-            pathSegments: pathSegments.slice(1),
-            rootTableName,
-            selectFields,
-            selectLocale,
-            tableName: newTableName,
-            tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
-            value,
+            table: adapter.tables[newTableName],
           })
         }
-        break
+        return getTableColumnFromPath({
+          adapter,
+          aliasTable,
+          collectionPath,
+          columnPrefix: `${columnPrefix}${field.name}_`,
+          constraintPath: `${constraintPath}${field.name}.`,
+          constraints,
+          fields: field.flattenedFields,
+          joins,
+          locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          pathSegments: pathSegments.slice(1),
+          rootTableName,
+          selectFields,
+          selectLocale,
+          tableName: newTableName,
+          tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
+          value,
+        })
       }
 
       case 'join': {
