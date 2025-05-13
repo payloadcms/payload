@@ -1,9 +1,9 @@
+import type { CollectionConfig } from '../index.js'
 // @ts-strict-ignore
-import type { Field } from '../../fields/config/types.js'
-import type { CollectionConfig } from '../../index.js'
+import type { Field } from './config/types.js'
 
-import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
-import { fieldAffectsData } from '../../fields/config/types.js'
+import { ReservedFieldName } from '../errors/ReservedFieldName.js'
+import { fieldAffectsData } from './config/types.js'
 
 // Note for future reference: We've slimmed down the reserved field names but left them in here for reference in case it's needed in the future.
 

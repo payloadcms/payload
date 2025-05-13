@@ -2,7 +2,7 @@ import type { Config } from '../../config/types.js'
 import type { CollectionConfig, Field } from '../../index.js'
 
 import { ReservedFieldName } from '../../errors/index.js'
-import { sanitizeCollection } from './sanitize.js'
+import { sanitizeCollection } from '../../collections/config/sanitize.js'
 
 describe('reservedFieldNames - collections -', () => {
   const config = {

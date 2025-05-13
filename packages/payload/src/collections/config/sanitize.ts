@@ -26,7 +26,6 @@ import {
   addDefaultsToCollectionConfig,
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
-import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -57,7 +56,9 @@ export const sanitizeCollection = async (
   const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
 
   const joins: SanitizedJoins = {}
+
   const polymorphicJoins: SanitizedJoin[] = []
+
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
@@ -175,9 +176,6 @@ export const sanitizeCollection = async (
       sanitized.upload = {}
     }
 
-    // sanitize fields for reserved names
-    sanitizeUploadFields(sanitized.fields, sanitized)
-
     sanitized.upload.cacheTags = sanitized.upload?.cacheTags ?? true
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
@@ -195,9 +193,6 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.auth) {
-    // sanitize fields for reserved names
-    sanitizeAuthFields(sanitized.fields, sanitized)
-
     sanitized.auth = addDefaultsToAuthConfig(
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
