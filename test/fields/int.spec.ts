@@ -2404,7 +2404,7 @@ describe('Fields', () => {
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
