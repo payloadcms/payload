@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
-import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
+import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -22,7 +22,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-describe('Lexical Fully Featured', () => {
+describe('Lexical Link Feature', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -39,30 +39,41 @@ describe('Lexical Fully Featured', () => {
         path.resolve(dirname, './collections/Upload2/uploads2'),
       ],
     })
-    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await lexical.editor.first().focus()
   })
-  test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async ({
-    page,
-  }) => {
+
+  test('can add new custom fields in link feature modal', async ({ page }) => {
     const lexical = new LexicalHelpers(page)
-    await lexical.slashCommand('block')
-    await lexical.slashCommand('relationship')
-    await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.save('drawer')
-    await expect(lexical.decorator).toHaveCount(2)
-    await lexical.slashCommand('upload')
-    await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
-    await lexical.drawer
-      .locator('.file-field__remote-file')
-      .fill('https://payloadcms.com/images/universal-truth.jpg')
-    await lexical.drawer.getByText('Add file').click()
-    await lexical.save('drawer')
-    await expect(lexical.decorator).toHaveCount(3)
-    const paragraph = lexical.editor.locator('> p')
-    await expect(paragraph).toHaveText('')
+
+    await lexical.editor.fill('link')
+    await lexical.editor.selectText()
+
+    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
+    const linkButton = page.locator(linkButtonClass).first()
+
+    await linkButton.click()
+
+    const customField = lexical.drawer.locator('#field-someText')
+
+    await expect(customField).toBeVisible()
+  })
+
+  test('can set default value of newTab checkbox to checked', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+
+    await lexical.editor.fill('link')
+    await lexical.editor.selectText()
+
+    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
+    const linkButton = page.locator(linkButtonClass).first()
+
+    await linkButton.click()
+
+    const checkboxField = lexical.drawer.locator(`[id^="field-newTab"]`)
+
+    await expect(checkboxField).toBeChecked()
   })
 })
