@@ -5,17 +5,31 @@ import type {
   ImageSize,
   PayloadRequest,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 export interface File {
   buffer: Buffer
+  clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
   tempFilePath?: string
 }
 
+export type ClientUploadsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type ClientUploadsConfig =
+  | {
+      access?: ClientUploadsAccess
+    }
+  | boolean
+
 export type HandleUpload = (args: {
+  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
@@ -42,10 +56,14 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequest,
-  args: { doc?: TypeWithID; params: { collection: string; filename: string } },
+  args: {
+    doc?: TypeWithID
+    params: { clientUploadContext?: unknown; collection: string; filename: string }
+  },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -79,7 +97,7 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
-  collections: Record<string, CollectionOptions>
+  collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin
    *

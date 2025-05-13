@@ -1,20 +1,19 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientField,
+  RelationshipFieldDiffClientComponent,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig } from '@payloadcms/ui'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
-import ReactDiffViewerImport from 'react-diff-viewer-continued'
+import ReactDiffViewer from 'react-diff-viewer-continued'
 
-import type { DiffComponentProps } from '../types.js'
-
-import Label from '../../Label/index.js'
-import { diffStyles } from '../styles.js'
 import './index.scss'
-
-const ReactDiffViewer = (ReactDiffViewerImport.default ||
-  ReactDiffViewerImport) as unknown as typeof ReactDiffViewerImport.default
+import { diffStyles } from '../styles.js'
 
 const baseClass = 'relationship-diff'
 
@@ -25,20 +24,23 @@ const generateLabelFromValue = (
   field: ClientField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
+  config: ClientConfig,
+  parentIsLocalized: boolean,
 ): string => {
   if (Array.isArray(value)) {
     return value
-      .map((v) => generateLabelFromValue(collections, field, locale, v))
+      .map((v) => generateLabelFromValue(collections, field, locale, v, config, parentIsLocalized))
       .filter(Boolean) // Filters out any undefined or empty values
       .join(', ')
   }
 
   let relatedDoc: RelationshipValue
-  let valueToReturn = '' as any
+  let valueToReturn: RelationshipValue | string = ''
 
   const relationTo = 'relationTo' in field ? field.relationTo : undefined
 
   if (value === null || typeof value === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- We want to return a string specifilly for null and undefined
     return String(value)
   }
 
@@ -65,7 +67,7 @@ const generateLabelFromValue = (
     let titleFieldIsLocalized = false
 
     if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
-      titleFieldIsLocalized = useAsTitleField.localized
+      titleFieldIsLocalized = fieldShouldBeLocalized({ field: useAsTitleField, parentIsLocalized })
     }
 
     if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
@@ -76,32 +78,38 @@ const generateLabelFromValue = (
       valueToReturn = relatedDoc
     }
 
-    if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
+    if (typeof valueToReturn === 'object' && titleFieldIsLocalized && valueToReturn?.[locale]) {
       valueToReturn = valueToReturn[locale]
     }
   } else if (relatedDoc) {
     // Handle non-polymorphic `hasMany` relationships or fallback
     if (typeof relatedDoc?.id !== 'undefined') {
-      valueToReturn = relatedDoc.id
+      valueToReturn = String(relatedDoc.id)
     } else {
       valueToReturn = relatedDoc
     }
   }
 
-  if (typeof valueToReturn === 'object' && valueToReturn !== null) {
+  if (
+    (valueToReturn && typeof valueToReturn === 'object' && valueToReturn !== null) ||
+    typeof valueToReturn !== 'string'
+  ) {
     valueToReturn = JSON.stringify(valueToReturn)
   }
 
   return valueToReturn
 }
 
-const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
-  comparison,
+export const Relationship: RelationshipFieldDiffClientComponent = ({
+  comparisonValue,
   field,
-  i18n,
   locale,
-  version,
+  parentIsLocalized,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+  const { config } = useConfig()
+
   const placeholder = `[${i18n.t('general:noValue')}]`
 
   const {
@@ -111,25 +119,45 @@ const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
   let versionToRender: string | undefined = placeholder
   let comparisonToRender: string | undefined = placeholder
 
-  if (version) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
+  if (versionValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
       versionToRender =
-        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
-        placeholder
+        versionValue
+          .map((val) =>
+            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
+          )
+          .join(', ') || placeholder
     } else {
-      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
+      versionToRender =
+        generateLabelFromValue(
+          collections,
+          field,
+          locale,
+          versionValue,
+          config,
+          parentIsLocalized,
+        ) || placeholder
     }
   }
 
-  if (comparison) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
+  if (comparisonValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
       comparisonToRender =
-        comparison
-          .map((val) => generateLabelFromValue(collections, field, locale, val))
+        comparisonValue
+          .map((val) =>
+            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
+          )
           .join(', ') || placeholder
     } else {
       comparisonToRender =
-        generateLabelFromValue(collections, field, locale, comparison) || placeholder
+        generateLabelFromValue(
+          collections,
+          field,
+          locale,
+          comparisonValue,
+          config,
+          parentIsLocalized,
+        ) || placeholder
     }
   }
 
@@ -140,10 +168,10 @@ const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
 
   return (
     <div className={baseClass}>
-      <Label>
+      <FieldDiffLabel>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {getTranslation(label, i18n)}
-      </Label>
+      </FieldDiffLabel>
       <ReactDiffViewer
         hideLineNumbers
         newValue={versionToRender}
@@ -155,5 +183,3 @@ const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
     </div>
   )
 }
-
-export default Relationship

@@ -1,51 +1,41 @@
 'use client'
-import type { JSONFieldProps } from 'payload'
+import type { JSONFieldClientComponent } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import { type OnMount } from '@monaco-editor/react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'json-field'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-
-const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
+const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        editorOptions,
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {},
+      admin: { className, description, editorOptions, maxHeight } = {},
       jsonSchema,
       label,
+      localized,
       required,
     },
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
-  const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
+  const [editorKey, setEditorKey] = useState<string>('')
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -56,43 +46,58 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     [validate, required, jsonError],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    initialValue,
+    path,
+    setValue,
+    showError,
+    value,
+  } = useField<string>({
+    potentiallyStalePath: pathFromProps,
+    validate: memoizedValidate,
+  })
 
-  const { formInitializing, formProcessing, initialValue, path, setValue, showError, value } =
-    useField<string>({
-      path: pathFromContext ?? pathFromProps ?? name,
-      validate: memoizedValidate,
-    })
+  const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
+    (value || initialValue) !== undefined
+      ? JSON.stringify(value ?? initialValue, null, 2)
+      : undefined,
+  )
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
-  const handleMount = useCallback(
+  const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
       if (!jsonSchema) {
         return
       }
 
-      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-      const modelUri = monaco.Uri.parse(jsonSchema.uri)
-
-      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         enableSchemaRequest: true,
-        schemas: [...existingSchemas, jsonSchema],
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []),
+          jsonSchema,
+        ],
         validate: true,
       })
 
-      editor.setModel(model)
+      const uri = jsonSchema.uri
+      const newUri = uri.includes('?')
+        ? `${uri}&${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
+        : `${uri}?${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
+
+      editor.setModel(
+        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+      )
     },
     [jsonSchema, value],
   )
 
   const handleChange = useCallback(
     (val) => {
-      if (disabled) {
+      if (readOnly || disabled) {
         return
       }
-      setStringValue(val)
+      inputChangeFromRef.current = 'user'
 
       try {
         setValue(val ? JSON.parse(val) : null)
@@ -102,20 +107,23 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         setJsonError(e)
       }
     },
-    [disabled, setValue, setStringValue],
+    [readOnly, disabled, setValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) {
-      return
+    if (inputChangeFromRef.current === 'system') {
+      setInitialStringValue(
+        (value || initialValue) !== undefined
+          ? JSON.stringify(value ?? initialValue, null, 2)
+          : undefined,
+      )
+      setEditorKey(new Date().toString())
     }
 
-    setStringValue(
-      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-    )
+    inputChangeFromRef.current = 'system'
+  }, [initialValue, value])
 
-    setHasLoadedValue(true)
-  }, [initialValue, value, hasLoadedValue])
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -124,45 +132,42 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         baseClass,
         className,
         showError && 'error',
-        disabled && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError message={jsonError} path={path} showError={showError} />}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
+          key={editorKey}
+          maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={disabled}
-          value={stringValue}
+          readOnly={readOnly || disabled}
+          value={initialStringValue}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

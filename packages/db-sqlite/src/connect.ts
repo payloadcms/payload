@@ -1,6 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { pushDevSchema } from '@payloadcms/drizzle'
@@ -27,7 +26,7 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
+    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -37,8 +36,11 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to SQLite. Details: ${err.message}`, err)
-    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
+    const message = err instanceof Error ? err.message : String(err)
+    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${message}` })
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
 
@@ -51,9 +53,11 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as Migration[] })
   }
 }

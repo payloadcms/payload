@@ -1,0 +1,348 @@
+---
+title: Multi-Tenant Plugin
+label: Multi-Tenant
+order: 40
+desc: Scaffolds multi-tenancy for your Payload application
+keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, indexing, search, search engine
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-multi-tenant](https://img.shields.io/npm/v/@payloadcms/plugin-multi-tenant)
+
+This plugin sets up multi-tenancy for your application from within your [Admin Panel](../admin/overview). It does so by adding a `tenant` field to all specified collections. Your front-end application can then query data by tenant. You must add the Tenants collection so you control what fields are available for each tenant.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%multi-tenant&template=bug_report.md&title=plugin-multi-tenant%3A)
+  with as much detail as possible.
+</Banner>
+
+## Core features
+
+- Adds a `tenant` field to each specified collection
+- Adds a tenant selector to the admin panel, allowing you to switch between tenants
+- Filters list view results by selected tenant
+- Filters relationship fields by selected tenant
+- Ability to create "global" like collections, 1 doc per tenant
+- Automatically assign a tenant to new documents
+
+<Banner type="error">
+  **Warning**
+
+By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
+strong access control on your tenants collection to prevent deletions by unauthorized users.
+
+You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+
+</Banner>
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+  pnpm add @payloadcms/plugin-multi-tenant
+```
+
+### Options
+
+The plugin accepts an object with the following properties:
+
+```ts
+type MultiTenantPluginConfig<ConfigTypes = unknown> = {
+  /**
+   * After a tenant is deleted, the plugin will attempt to clean up related documents
+   * - removing documents with the tenant ID
+   * - removing the tenant from users
+   *
+   * @default true
+   */
+  cleanupAfterTenantDelete?: boolean
+  /**
+   * Automatically
+   */
+  collections: {
+    [key in CollectionSlug]?: {
+      /**
+       * Set to `true` if you want the collection to behave as a global
+       *
+       * @default false
+       */
+      isGlobal?: boolean
+      /**
+       * Set to `false` if you want to manually apply the baseListFilter
+       *
+       * @default true
+       */
+      useBaseListFilter?: boolean
+      /**
+       * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
+       *
+       * @default true
+       */
+      useTenantAccess?: boolean
+    }
+  }
+  /**
+   * Enables debug mode
+   * - Makes the tenant field visible in the admin UI within applicable collections
+   *
+   * @default false
+   */
+  debug?: boolean
+  /**
+   * Enables the multi-tenant plugin
+   *
+   * @default true
+   */
+  enabled?: boolean
+  /**
+   * Field configuration for the field added to all tenant enabled collections
+   */
+  tenantField?: {
+    access?: RelationshipField['access']
+    /**
+     * The name of the field added to all tenant enabled collections
+     *
+     * @default 'tenant'
+     */
+    name?: string
+  }
+  /**
+   * Field configuration for the field added to the users collection
+   *
+   * If `includeDefaultField` is `false`, you must include the field on your users collection manually
+   * This is useful if you want to customize the field or place the field in a specific location
+   */
+  tenantsArrayField?:
+    | {
+        /**
+         * Access configuration for the array field
+         */
+        arrayFieldAccess?: ArrayField['access']
+        /**
+         * Name of the array field
+         *
+         * @default 'tenants'
+         */
+        arrayFieldName?: string
+        /**
+         * Name of the tenant field
+         *
+         * @default 'tenant'
+         */
+        arrayTenantFieldName?: string
+        /**
+         * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
+         */
+        includeDefaultField?: true
+        /**
+         * Additional fields to include on the tenants array field
+         */
+        rowFields?: Field[]
+        /**
+         * Access configuration for the tenant field
+         */
+        tenantFieldAccess?: RelationshipField['access']
+      }
+    | {
+        arrayFieldAccess?: never
+        arrayFieldName?: string
+        arrayTenantFieldName?: string
+        /**
+         * When `includeDefaultField` is `false`, you must include the field on your users collection manually
+         */
+        includeDefaultField?: false
+        rowFields?: never
+        tenantFieldAccess?: never
+      }
+  /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
+  /**
+   * The slug for the tenant collection
+   *
+   * @default 'tenants'
+   */
+  tenantsSlug?: string
+  /**
+   * Function that determines if a user has access to _all_ tenants
+   *
+   * Useful for super-admin type users
+   */
+  userHasAccessToAllTenants?: (
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
+  ) => boolean
+  /**
+   * Opt out of adding access constraints to the tenants collection
+   */
+  useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
+}
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import type { Config } from './payload-types'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'tenants',
+      admin: {
+        useAsTitle: 'name'
+      }
+      fields: [
+        // remember, you own these fields
+        // these are merely suggestions/examples
+        {
+        name: 'name',
+        type: 'text',
+        required: true,
+        },
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'domain',
+          type: 'text',
+          required: true,
+        }
+      ],
+    },
+  ],
+  plugins: [
+    multiTenantPlugin<Config>({
+      collections: {
+        pages: {},
+        navigation: {
+          isGlobal: true,
+        }
+      },
+    }),
+  ],
+})
+
+export default config
+```
+
+## Front end usage
+
+The plugin scaffolds out everything you will need to separate data by tenant. You can use the `tenant` field to filter data from enabled collections in your front-end application.
+
+In your frontend you can query and constrain data by tenant with the following:
+
+```tsx
+const pagesBySlug = await payload.find({
+  collection: 'pages',
+  depth: 1,
+  draft: false,
+  limit: 1000,
+  overrideAccess: false,
+  where: {
+    // your constraint would depend on the
+    // fields you added to the tenants collection
+    // here we are assuming a slug field exists
+    // on the tenant collection, like in the example above
+    'tenant.slug': {
+      equals: 'gold',
+    },
+  },
+})
+```
+
+### NextJS rewrites
+
+Using NextJS rewrites and this route structure `/[tenantDomain]/[slug]`, we can rewrite routes specifically for domains requested:
+
+```ts
+async rewrites() {
+  return [
+    {
+      source: '/((?!admin|api)):path*',
+      destination: '/:tenantDomain/:path*',
+      has: [
+        {
+          type: 'host',
+          value: '(?<tenantDomain>.*)',
+        },
+      ],
+    },
+  ];
+}
+```
+
+### React Hooks
+
+Below are the hooks exported from the plugin that you can import into your own custom components to consume.
+
+#### useTenantSelection
+
+You can import this like so:
+
+```tsx
+import { useTenantSelection } from '@payloadcms/plugin-multi-tenant/client'
+
+...
+
+const tenantContext = useTenantSelection()
+```
+
+The hook returns the following context:
+
+```ts
+type ContextType = {
+  /**
+   * Array of options to select from
+   */
+  options: OptionObject[]
+  /**
+   * The currently selected tenant ID
+   */
+  selectedTenantID: number | string | undefined
+  /**
+   * Prevents a refresh when the tenant is changed
+   *
+   * If not switching tenants while viewing a "global", set to true
+   */
+  setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Sets the selected tenant ID
+   *
+   * @param args.id - The ID of the tenant to select
+   * @param args.refresh - Whether to refresh the page after changing the tenant
+   */
+  setTenant: (args: {
+    id: number | string | undefined
+    refresh?: boolean
+  }) => void
+}
+```
+
+## Examples
+
+The [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) also contains an official [Multi-Tenant](https://github.com/payloadcms/payload/tree/main/examples/multi-tenant) example.

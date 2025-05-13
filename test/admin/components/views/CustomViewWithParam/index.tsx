@@ -4,7 +4,7 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import {
   customParamViewPath,
@@ -12,7 +12,7 @@ import {
   customParamViewTitle,
 } from '../../../shared.js'
 
-export const CustomViewWithParam: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
+export function CustomViewWithParam({ initPageResult, params }: AdminViewServerProps) {
   const {
     req: {
       payload: {

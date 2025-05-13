@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Field, FieldWithSubFields } from './config/types.js'
 
 import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'

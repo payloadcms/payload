@@ -1,5 +1,5 @@
 'use client'
-import type { BlockFieldProps } from 'payload'
+import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -11,7 +11,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -32,17 +32,14 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
+const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    descriptionProps,
-    errorProps,
-    field,
     field: {
       name,
-      _path: pathFromProps,
-      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, isSortable = true } = {},
+      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -51,22 +48,23 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
       minRows: minRowsProp,
       required,
     },
-    forceRender = false,
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    permissions,
+    readOnly,
+    schemaPath: schemaPathFromProps,
     validate,
   } = props
 
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const schemaPath = schemaPathFromProps ?? name
 
-  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
+    config,
   } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
@@ -79,7 +77,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -99,42 +97,35 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
-  const { path: pathFromContext } = useFieldProps()
-
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
-    formInitializing,
-    formProcessing,
     path,
-    permissions,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string): Promise<void> => {
-      await addFieldRow({
-        data: { blockType },
+    (rowIndex: number, blockType: string) => {
+      addFieldRow({
+        blockType,
         path,
         rowIndex,
-        schemaPath: `${schemaPath}.${blockType}`,
+        schemaPath,
       })
-      setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -151,23 +142,19 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({
-        type: 'REMOVE_ROW',
+      removeFieldRow({
         path,
         rowIndex,
       })
-
-      setModified(true)
     },
-    [path, dispatchFields, setModified],
+    [path, removeFieldRow],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({ moveFromIndex, moveToIndex, path })
     },
-    [dispatchFields, path, setModified],
+    [moveFieldRow, path],
   )
 
   const toggleCollapseAll = useCallback(
@@ -176,6 +163,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
         collapsed,
         rows,
       })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -189,6 +177,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -201,7 +190,7 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
-  const showRequired = disabled && rows.length === 0
+  const showRequired = readOnly && rows.length === 0
 
   return (
     <div
@@ -213,28 +202,23 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
+      id={`field-${path?.replace(/\./g, '__')}`}
     >
       {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Description}
-                label={label}
-                required={required}
-                unstyled
-                {...(labelProps || {})}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={
+                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                }
               />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
@@ -264,13 +248,12 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
+      {BeforeInput}
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -279,37 +262,50 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => {
-            const { blockType } = row
-            const blockToRender = blocks.find((block) => block.slug === blockType)
+            const { blockType, isLoading } = row
+            const blockConfig: ClientBlock =
+              config.blocksMap[blockType] ??
+              ((blockReferences ?? blocks).find(
+                (block) => typeof block !== 'string' && block.slug === blockType,
+              ) as ClientBlock)
 
-            if (blockToRender) {
+            if (blockConfig) {
+              const rowPath = `${path}.${i}`
+
               const rowErrorCount = errorPaths.filter((errorPath) =>
-                errorPath.startsWith(`${path}.${i}`),
+                errorPath.startsWith(rowPath + '.'),
               ).length
+
               return (
-                <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disabled || !isSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
-                      block={blockToRender}
-                      blocks={blocks}
+                      block={blockConfig}
+                      blocks={blockReferences ?? blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
-                      forceRender={forceRender}
+                      fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
-                      indexPath={indexPath}
+                      isLoading={isLoading}
                       isSortable={isSortable}
+                      Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
-                      path={path}
+                      parentPath={path}
+                      path={rowPath}
                       permissions={permissions}
-                      readOnly={disabled}
+                      readOnly={readOnly || disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
-                      schemaPath={schemaPath}
+                      schemaPath={schemaPath + blockConfig.slug}
                       setCollapse={setCollapse}
                     />
                   )}
@@ -340,11 +336,16 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <DrawerToggler
+            className={`${baseClass}__drawer-toggler`}
+            disabled={readOnly || disabled}
+            slug={drawerSlug}
+          >
             <Button
               buttonStyle="icon-label"
+              disabled={readOnly || disabled}
               el="span"
               icon="plus"
               iconPosition="left"
@@ -356,12 +357,13 @@ const BlocksFieldComponent: React.FC<BlockFieldProps> = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blocks}
+            blocks={blockReferences ?? blocks}
             drawerSlug={drawerSlug}
             labels={labels}
           />
         </Fragment>
       )}
+      {AfterInput}
     </div>
   )
 }

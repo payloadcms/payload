@@ -1,0 +1,47 @@
+name: v2 Bug Report
+description: Report a bug for Payload v2. ONLY CRITICAL bugs will be fixed in v2.
+labels: ['status: needs-triage', 'v2']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ONLY CRITICAL bugs will be fixed in v2.
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Link to reproduction
+      description: Want us to look into your issue faster? Follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Describe the Bug
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior, please provide a clear description of how to reproduce the issue, based on the linked minimal reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Payload Version
+      description: What version of Payload are you running?
+    validations:
+      required: true
+  - type: input
+    id: adapters-plugins
+    attributes:
+      label: Adapters and Plugins
+      description: What adapters and plugins are you using? ie. db-mongodb, db-postgres, bundler-webpack, etc.
+  - type: markdown
+    attributes:
+      value: Before submitting the issue, go through the steps you've written down to make sure the steps provided are detailed and clear.
+  - type: markdown
+    attributes:
+      value: Contributors should be able to follow the steps provided in order to reproduce the bug.
+  - type: markdown
+    attributes:
+      value: These steps are used to add integration tests to ensure the same issue does not happen again. Thanks in advance!

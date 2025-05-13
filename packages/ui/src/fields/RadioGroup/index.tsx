@@ -1,50 +1,44 @@
 'use client'
-import type { RadioFieldProps } from 'payload'
+import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-
-const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
+const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
+    disableModifyingForm: disableModifyingFormFromProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
       admin: {
         className,
         description,
         layout = 'horizontal',
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {} as RadioFieldProps['field']['admin'],
+      } = {} as RadioFieldClientProps['field']['admin'],
       label,
+      localized,
       options = [],
       required,
-    } = {} as RadioFieldProps['field'],
-    labelProps,
+    } = {} as RadioFieldClientProps['field'],
     onChange: onChangeFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    readOnly,
     validate,
     value: valueFromProps,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { uuid } = useForm()
 
@@ -57,23 +51,21 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
     [validate, options, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
   const {
-    formInitializing,
-    formProcessing,
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const value = valueFromContext || valueFromProps
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -83,30 +75,24 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        disabled && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
-      <FieldError
-        CustomError={field?.admin?.components?.Error}
-        field={field}
-        path={path}
-        {...(errorProps || {})}
-        alignCaret="left"
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
       />
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
+        {BeforeInput}
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
@@ -131,28 +117,27 @@ const RadioGroupFieldComponent: React.FC<RadioFieldProps> = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!disabled) {
-                      setValue(optionValue)
+                    if (!(readOnly || disabled)) {
+                      setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={disabled}
+                  readOnly={readOnly || disabled}
                   uuid={uuid}
                 />
               </li>
             )
           })}
         </ul>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        {AfterInput}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
     </div>
   )
 }
 
-export const RadioGroupField = withCondition(RadioGroupFieldComponent)
+export const RadioGroupField: any = withCondition(RadioGroupFieldComponent)

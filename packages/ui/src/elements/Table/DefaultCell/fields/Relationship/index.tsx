@@ -1,14 +1,19 @@
 'use client'
-import type { DefaultCellComponentProps, RelationshipFieldClient, UploadFieldClient } from 'payload'
+import type {
+  DefaultCellComponentProps,
+  JoinFieldClient,
+  RelationshipFieldClient,
+  UploadFieldClient,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
-import { formatDocTitle } from '../../../../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
 import './index.scss'
@@ -17,16 +22,26 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps
-  extends DefaultCellComponentProps<any, RelationshipFieldClient | UploadFieldClient> {}
+export type RelationshipCellProps = DefaultCellComponentProps<
+  JoinFieldClient | RelationshipFieldClient | UploadFieldClient
+>
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
-  cellData,
-  customCellContext,
+  cellData: cellDataFromProps,
+  customCellProps: customCellContext,
   field,
-  field: { label, relationTo },
+  field: { label },
 }) => {
-  const { config } = useConfig()
+  // conditionally extract relationTo both both relationship and join fields
+  const relationTo =
+    ('relationTo' in field && field.relationTo) || ('collection' in field && field.collection)
+
+  // conditionally extract docs from join fields
+  const cellData = useMemo(() => {
+    return 'collection' in field ? cellDataFromProps?.docs : cellDataFromProps
+  }, [cellDataFromProps, field])
+
+  const { config, getEntityConfig } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
@@ -80,7 +95,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     <div className={baseClass} ref={intersectionRef}>
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value]
-        const relatedCollection = collections.find(({ slug }) => slug === relationTo)
+        const relatedCollection = getEntityConfig({
+          collectionSlug: relationTo,
+        })
 
         const label = formatDocTitle({
           collectionConfig: relatedCollection,
@@ -93,15 +110,17 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         let fileField = null
 
         if (field.type === 'upload') {
-          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
+          const fieldPreviewAllowed = 'displayPreview' in field ? field.displayPreview : undefined
           const previewAllowed =
-            field.displayPreview || (relatedCollectionPreview && field.displayPreview !== false)
+            fieldPreviewAllowed ?? relatedCollection.upload?.displayPreview ?? true
 
           if (previewAllowed && document) {
             fileField = (
               <FileCell
                 cellData={label}
-                customCellContext={customCellContext}
+                collectionConfig={relatedCollection}
+                collectionSlug={relatedCollection.slug}
+                customCellProps={customCellContext}
                 field={field}
                 rowData={document}
               />

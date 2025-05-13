@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { mediaSlug } from '../shared.js'
+
 export const Media: CollectionConfig = {
-  slug: 'media',
+  slug: mediaSlug,
   upload: true,
   access: {
     read: () => true,

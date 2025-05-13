@@ -1,10 +1,11 @@
-import type { FormState } from 'payload'
+import type { FormState, UploadEdits } from 'payload'
 
 export type State = {
   activeIndex: number
   forms: {
     errorCount: number
     formState: FormState
+    uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
 }
@@ -14,6 +15,14 @@ type Action =
       count: number
       index: number
       type: 'UPDATE_ERROR_COUNT'
+    }
+  | {
+      errorCount: number
+      formState: FormState
+      index: number
+      type: 'UPDATE_FORM'
+      updatedFields?: Record<string, unknown>
+      uploadEdits?: UploadEdits
     }
   | {
       files: FileList
@@ -35,18 +44,6 @@ type Action =
 
 export function formsManagementReducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'REPLACE': {
-      return {
-        ...state,
-        ...action.state,
-      }
-    }
-    case 'SET_ACTIVE_INDEX': {
-      return {
-        ...state,
-        activeIndex: action.index,
-      }
-    }
     case 'ADD_FORMS': {
       const newForms: State['forms'] = []
       for (let i = 0; i < action.files.length; i++) {
@@ -60,6 +57,7 @@ export function formsManagementReducer(state: State, action: Action): State {
               value: action.files[i],
             },
           },
+          uploadEdits: {},
         }
       }
 
@@ -89,6 +87,18 @@ export function formsManagementReducer(state: State, action: Action): State {
         totalErrorCount: state.totalErrorCount - removedForm.errorCount,
       }
     }
+    case 'REPLACE': {
+      return {
+        ...state,
+        ...action.state,
+      }
+    }
+    case 'SET_ACTIVE_INDEX': {
+      return {
+        ...state,
+        activeIndex: action.index,
+      }
+    }
     case 'UPDATE_ERROR_COUNT': {
       const forms = [...state.forms]
       forms[action.index].errorCount = action.count
@@ -96,6 +106,29 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
+        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+      }
+    }
+    case 'UPDATE_FORM': {
+      const updatedForms = [...state.forms]
+      updatedForms[action.index].errorCount = action.errorCount
+
+      // Merge the existing formState with the new formState
+      updatedForms[action.index] = {
+        ...updatedForms[action.index],
+        formState: {
+          ...updatedForms[action.index].formState,
+          ...action.formState,
+        },
+        uploadEdits: {
+          ...updatedForms[action.index].uploadEdits,
+          ...action.uploadEdits,
+        },
+      }
+
+      return {
+        ...state,
+        forms: updatedForms,
         totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }

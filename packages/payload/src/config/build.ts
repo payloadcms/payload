@@ -9,11 +9,10 @@ import { sanitizeConfig } from './sanitize.js'
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
   if (Array.isArray(config.plugins)) {
-    const configAfterPlugins = await config.plugins.reduce(async (acc, plugin) => {
-      const configAfterPlugin = await acc
-      return plugin(configAfterPlugin)
-    }, Promise.resolve(config))
-
+    let configAfterPlugins = config
+    for (const plugin of config.plugins) {
+      configAfterPlugins = await plugin(configAfterPlugins)
+    }
     return await sanitizeConfig(configAfterPlugins)
   }
 

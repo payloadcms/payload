@@ -1,10 +1,10 @@
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
+import { getPayload } from 'payload'
 
 import type { Header } from '../../../payload-types.js'
 
 export async function getHeader(): Promise<Header> {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   try {
     const header = await payload.findGlobal({

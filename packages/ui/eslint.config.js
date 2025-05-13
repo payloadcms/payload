@@ -1,10 +1,9 @@
 import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 import reactCompiler from 'eslint-plugin-react-compiler'
 const { rules } = reactCompiler
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const index = [
   ...rootEslintConfig,
   {

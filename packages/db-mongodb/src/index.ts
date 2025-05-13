@@ -1,17 +1,37 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
+import type {
+  ClientSession,
+  Connection,
+  ConnectOptions,
+  QueryOptions,
+  SchemaOptions,
+} from 'mongoose'
+import type {
+  BaseDatabaseAdapter,
+  CollectionSlug,
+  DatabaseAdapterObj,
+  Migration,
+  Payload,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateGlobalArgs,
+  UpdateGlobalVersionArgs,
+  UpdateOneArgs,
+  UpdateVersionArgs,
+} from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
 import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 import { connect } from './connect.js'
 import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -34,14 +54,36 @@ import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateJobs } from './updateJobs.js'
+import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
+  /**
+   * By default, Payload strips all additional keys from MongoDB data that don't exist
+   * in the Payload schema. If you have some data that you want to include to the result
+   * but it doesn't exist in Payload, you can enable this flag
+   * @default false
+   */
+  allowAdditionalKeys?: boolean
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * import { Types } from 'mongoose'
+   *
+   * const id = new Types.ObjectId().toHexString()
+   * const doc = await payload.create({ collection: 'posts', data: {id, title: "my title"}})
+   * assertEq(doc.id, id)
+   * ```
+   */
+  allowIDOnCreate?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+
   /**
    * If enabled, collation allows for language-specific rules for string comparison.
    * This configuration can include the following options:
@@ -66,24 +108,31 @@ export interface Args {
    * Defaults to disabled.
    */
   collation?: Omit<CollationOptions, 'locale'>
+
+  collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
   /** Extra configuration options */
   connectOptions?: {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    /**
+     * Set false to disable $facet aggregation in non-supporting databases, Defaults to true
+     * @deprecated Payload doesn't use `$facet` anymore anywhere.
+     */
     useFacet?: boolean
   } & ConnectOptions
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  transactionOptions?: TransactionOptions | false
+  prodMigrations?: Migration[]
+  transactionOptions?: false | TransactionOptions
+
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -93,6 +142,7 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
   connection: Connection
+  ensureIndexes: boolean
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
@@ -115,6 +165,7 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
     prodMigrations?: {
@@ -124,6 +175,17 @@ declare module 'payload' {
     }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateGlobal: <T extends Record<string, unknown>>(
+      args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
+    ) => Promise<T>
+    updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
+
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
+    updateVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -131,9 +193,13 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
+  allowAdditionalKeys = false,
+  allowIDOnCreate = false,
   autoPluralization = true,
+  collectionsSchemaOptions = {},
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -150,20 +216,31 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connectOptions: connectOptions || {},
+      // @ts-expect-error initialize without a connection
       connection: undefined,
-      count,
+      connectOptions: connectOptions || {},
       disableIndexHints,
+      ensureIndexes,
+      // @ts-expect-error don't have globals model yet
       globals: undefined,
+      // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
+      updateJobs,
+      updateMany,
       url,
       versions: {},
       // DatabaseAdapter
-      beginTransaction: transactionOptions ? beginTransaction : undefined,
+      allowAdditionalKeys,
+      allowIDOnCreate,
+      beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
+      collectionsSchemaOptions,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
@@ -191,10 +268,13 @@ export function mongooseAdapter({
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 
   return {
+    name: 'mongoose',
+    allowIDOnCreate,
     defaultIDType: 'text',
     init: adapter,
   }
@@ -221,7 +301,9 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

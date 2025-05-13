@@ -13,11 +13,11 @@ const baseClass = 'per-page'
 const defaultLimits = collectionDefaults.admin.pagination.limits
 
 export type PerPageProps = {
-  defaultLimit?: number
-  handleChange?: (limit: number) => void
-  limit: number
-  limits: number[]
-  resetPage?: boolean
+  readonly defaultLimit?: number
+  readonly handleChange?: (limit: number) => void
+  readonly limit: number
+  readonly limits: number[]
+  readonly resetPage?: boolean
 }
 
 export const PerPage: React.FC<PerPageProps> = ({
@@ -61,7 +61,7 @@ export const PerPage: React.FC<PerPageProps> = ({
               >
                 {limitNumber === limitToUse && (
                   <div className={`${baseClass}__chevron`}>
-                    <ChevronIcon direction="right" />
+                    <ChevronIcon direction="right" size="small" />
                   </div>
                 )}
                 &nbsp;

@@ -1,11 +1,18 @@
-import type { PaginatedDocs } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.js'
+import type { CollectionPopulationRequestHandler, PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
-const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
+const defaultRequestHandler = ({
+  apiPath,
+  endpoint,
+  serverURL,
+}: {
+  apiPath: string
+  endpoint: string
+  serverURL: string
+}) => {
   const url = `${serverURL}${apiPath}/${endpoint}`
   return fetch(url, {
     credentials: 'include',
@@ -15,22 +22,24 @@ const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
   })
 }
 
-export const mergeData = async <T>(args: {
+// Relationships are only updated when their `id` or `relationTo` changes, by comparing the old and new values
+// This needs to also happen when locale changes, except this is not not part of the API response
+// Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
+let prevLocale: string | undefined
+
+export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: ({
-    apiPath,
-    endpoint,
-    serverURL,
-  }: {
-    apiPath: string
-    endpoint: string
-    serverURL: string
-  }) => Promise<Response>
+  /**
+   * @deprecated Use `requestHandler` instead
+   */
+  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
-  externallyUpdatedRelationship?: UpdatedDocument
-  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
+  externallyUpdatedRelationship?: DocumentEvent
+  fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
+  locale?: string
+  requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -45,6 +54,7 @@ export const mergeData = async <T>(args: {
     fieldSchema,
     incomingData,
     initialData,
+    locale,
     returnNumberOfRequests,
     serverURL,
   } = args
@@ -57,6 +67,7 @@ export const mergeData = async <T>(args: {
     externallyUpdatedRelationship,
     fieldSchema,
     incomingData,
+    localeChanged: prevLocale !== locale,
     populationsByCollection,
     result,
   })
@@ -66,20 +77,21 @@ export const mergeData = async <T>(args: {
       let res: PaginatedDocs
 
       const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
+      const requestHandler =
+        args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
       try {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())
 
         if (res?.docs?.length > 0) {
           res.docs.forEach((doc) => {
-            populationsByCollection[collection].forEach((population) => {
+            populationsByCollection[collection]?.forEach((population) => {
               if (population.id === doc.id) {
                 population.ref[population.accessor] = doc
               }
@@ -91,6 +103,8 @@ export const mergeData = async <T>(args: {
       }
     }),
   )
+
+  prevLocale = locale
 
   return {
     ...result,

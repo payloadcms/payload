@@ -1,21 +1,17 @@
 'use client'
-import React, { createContext, useContext, useState } from 'react'
+import type { DocumentEvent } from 'payload'
 
-export type UpdatedDocument = {
-  entitySlug: string
-  id?: number | string
-  updatedAt: string
-}
+import React, { createContext, use, useState } from 'react'
 
 const Context = createContext({
   mostRecentUpdate: null,
-  reportUpdate: (doc: UpdatedDocument) => null, // eslint-disable-line @typescript-eslint/no-unused-vars
+  reportUpdate: (doc: DocumentEvent) => null,
 })
 
 export const DocumentEventsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mostRecentUpdate, reportUpdate] = useState<UpdatedDocument>(null)
+  const [mostRecentUpdate, reportUpdate] = useState<DocumentEvent>(null)
 
-  return <Context.Provider value={{ mostRecentUpdate, reportUpdate }}>{children}</Context.Provider>
+  return <Context value={{ mostRecentUpdate, reportUpdate }}>{children}</Context>
 }
 
-export const useDocumentEvents = () => useContext(Context)
+export const useDocumentEvents = () => use(Context)

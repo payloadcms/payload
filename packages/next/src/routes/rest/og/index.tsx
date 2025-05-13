@@ -1,9 +1,8 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadHandler } from 'payload'
 
-import { getCreateMappedComponent, PayloadIcon } from '@payloadcms/ui/shared'
+import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
-import { NextResponse } from 'next/server.js'
 import path from 'path'
 import React from 'react'
 import { fileURLToPath } from 'url'
@@ -17,11 +16,11 @@ export const runtime = 'nodejs'
 
 export const contentType = 'image/png'
 
-export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
+export const generateOGImage: PayloadHandler = async (req) => {
   const config = req.payload.config
 
   if (config.admin.meta.defaultOGImageType === 'off') {
-    return NextResponse.json({ error: `Open Graph images are disabled` }, { status: 400 })
+    return Response.json({ error: `Open Graph images are disabled` }, { status: 400 })
   }
 
   try {
@@ -33,18 +32,6 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
     const leader = hasLeader ? searchParams.get('leader')?.slice(0, 100).replace('-', ' ') : ''
     const description = searchParams.has('description') ? searchParams.get('description') : ''
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: req.payload.importMap,
-      serverProps: {},
-    })
-
-    const mappedIcon = createMappedComponent(
-      config.admin?.components?.graphics?.Icon,
-      undefined,
-      PayloadIcon,
-      'config.admin.components.graphics.Icon',
-    )
-
     let fontData
 
     try {
@@ -53,7 +40,7 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       // Or better yet, use a CDN like Google Fonts if ever supported
       fontData = fs.readFile(path.join(dirname, 'roboto-regular.woff'))
     } catch (e) {
-      console.error(`Error reading font file or not readable: ${e.message}`) // eslint-disable-line no-console
+      req.payload.logger.error(`Error reading font file or not readable: ${e.message}`)
     }
 
     const fontFamily = 'Roboto, sans-serif'
@@ -62,8 +49,10 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       (
         <OGImage
           description={description}
+          Fallback={PayloadIcon}
           fontFamily={fontFamily}
-          Icon={mappedIcon}
+          Icon={config.admin?.components?.graphics?.Icon}
+          importMap={req.payload.importMap}
           leader={leader}
           title={title}
         />
@@ -86,7 +75,7 @@ export const generateOGImage = async ({ req }: { req: PayloadRequest }) => {
       },
     )
   } catch (e: any) {
-    console.error(`${e.message}`) // eslint-disable-line no-console
-    return NextResponse.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
+    req.payload.logger.error(`Error generating Open Graph image: ${e.message}`)
+    return Response.json({ error: `Internal Server Error: ${e.message}` }, { status: 500 })
   }
 }

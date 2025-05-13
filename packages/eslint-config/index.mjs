@@ -2,7 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
-import eslintConfigPrettier from 'eslint-config-prettier'
+import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
 import jestExtends from './configs/jest/index.mjs'
@@ -86,7 +86,7 @@ const typescriptRules = {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_',
       destructuredArrayIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^ignore',
+      caughtErrorsIgnorePattern: '^(_|ignore)',
     },
   ],
   '@typescript-eslint/no-base-to-string': 'warn',
@@ -104,10 +104,10 @@ const typescriptRules = {
       },
     },
   ],
+  '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 /** @type {FlatConfig} */
 const baseExtends = deepMerge(
@@ -116,7 +116,7 @@ const baseExtends = deepMerge(
   regexpPluginConfigs['flat/recommended'],
 )
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   {
     name: 'Settings',

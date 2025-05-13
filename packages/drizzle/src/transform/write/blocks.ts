@@ -1,5 +1,6 @@
-import type { BlockField } from 'payload'
+import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -15,9 +16,10 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
-  field: BlockField
+  field: FlattenedBlocksField
   locale?: string
   numbers: Record<string, unknown>[]
+  parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -40,6 +42,7 @@ export const transformBlocks = ({
   field,
   locale,
   numbers,
+  parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
@@ -48,12 +51,24 @@ export const transformBlocks = ({
   withinArrayOrBlockLocale,
 }: Args) => {
   data.forEach((blockRow, i) => {
-    if (typeof blockRow.blockType !== 'string') return
-    const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
-    if (!matchedBlock) return
+    if (typeof blockRow.blockType !== 'string') {
+      return
+    }
+
+    const matchedBlock =
+      adapter.payload.blocks[blockRow.blockType] ??
+      ((field.blockReferences ?? field.blocks).find(
+        (block) => typeof block !== 'string' && block.slug === blockRow.blockType,
+      ) as FlattenedBlock | undefined)
+
+    if (!matchedBlock) {
+      return
+    }
     const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockType]) blocks[blockType] = []
+    if (!blocks[blockType]) {
+      blocks[blockType] = []
+    }
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -64,8 +79,12 @@ export const transformBlocks = ({
       },
     }
 
-    if (field.localized && locale) newRow.row._locale = locale
-    if (withinArrayOrBlockLocale) newRow.row._locale = withinArrayOrBlockLocale
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && locale) {
+      newRow.row._locale = locale
+    }
+    if (withinArrayOrBlockLocale) {
+      newRow.row._locale = withinArrayOrBlockLocale
+    }
 
     const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 
@@ -90,9 +109,11 @@ export const transformBlocks = ({
       columnPrefix: '',
       data: blockRow,
       fieldPrefix: '',
-      fields: matchedBlock.fields,
+      fields: matchedBlock.flattenedFields,
+      insideArrayOrBlock: true,
       locales: newRow.locales,
       numbers,
+      parentIsLocalized: parentIsLocalized || field.localized,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,

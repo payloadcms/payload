@@ -7,8 +7,8 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import './index.scss'
 import { PopupTrigger } from './PopupTrigger/index.js'
+import './index.scss'
 
 const baseClass = 'popup'
 
@@ -17,6 +17,7 @@ export type PopupProps = {
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   buttonClassName?: string
+  buttonSize?: 'large' | 'medium' | 'small'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode
@@ -24,6 +25,7 @@ export type PopupProps = {
   disabled?: boolean
   forceOpen?: boolean
   horizontalAlign?: 'center' | 'left' | 'right'
+  id?: string
   initActive?: boolean
   noBackground?: boolean
   onToggleOpen?: (active: boolean) => void
@@ -36,9 +38,11 @@ export type PopupProps = {
 
 export const Popup: React.FC<PopupProps> = (props) => {
   const {
+    id,
     boundingRef,
     button,
     buttonClassName,
+    buttonSize,
     buttonType = 'default',
     caret = true,
     children,
@@ -56,6 +60,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     verticalAlign: verticalAlignFromProps = 'top',
   } = props
   const { height: windowHeight, width: windowWidth } = useWindowInfo()
+
   const [intersectionRef, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
     rootMargin: '-100px 0px 0px 0px',
@@ -156,6 +161,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     baseClass,
     className,
     `${baseClass}--size-${size}`,
+    buttonSize && `${baseClass}--button-size-${buttonSize}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
     active && `${baseClass}--active`,
@@ -165,7 +171,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     .join(' ')
 
   return (
-    <div className={classes}>
+    <div className={classes} id={id}>
       <div className={`${baseClass}__trigger-wrap`}>
         {showOnHover ? (
           <div
@@ -182,6 +188,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                 disabled,
                 noBackground,
                 setActive,
+                size: buttonSize,
               }}
             />
           </div>
@@ -195,6 +202,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
               disabled,
               noBackground,
               setActive,
+              size: buttonSize,
             }}
           />
         )}
@@ -205,7 +213,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
           <div className={`${baseClass}__scroll-container`}>
             <div className={`${baseClass}__scroll-content`}>
               {render && render({ close: () => setActive(false) })}
-              {children && children}
+              {children}
             </div>
           </div>
         </div>

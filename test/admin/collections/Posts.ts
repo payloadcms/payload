@@ -2,8 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { slugPluralLabel, slugSingularLabel } from '../shared.js'
-import { postsCollectionSlug } from '../slugs.js'
+import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
+import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
@@ -12,6 +12,74 @@ export const Posts: CollectionConfig = {
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
+    components: {
+      beforeListTable: [
+        '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeListTable custom component',
+          },
+        },
+      ],
+      Description: {
+        path: '/components/ViewDescription/index.js#ViewDescription',
+      },
+      afterListTable: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterListTable custom component',
+          },
+        },
+      ],
+      listMenuItems: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'listMenuItems',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Many of them',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Ok last one',
+          },
+        },
+      ],
+      afterList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterList custom component',
+          },
+        },
+      ],
+      beforeList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeList custom component',
+          },
+        },
+      ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
+      },
+    },
+    pagination: {
+      defaultLimit: 5,
+      limits: [5, 10, 15],
+    },
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {
@@ -62,16 +130,16 @@ export const Posts: CollectionConfig = {
             },
           ],
           label: 'Tab 1',
+          admin: {
+            description: customTabAdminDescription,
+          },
         },
-      ],
-    },
-    {
-      name: 'group',
-      type: 'group',
-      fields: [
         {
-          name: 'title',
-          type: 'text',
+          label: 'Tab 2',
+          fields: [],
+          admin: {
+            description: () => `t:${customTabAdminDescription}`,
+          },
         },
       ],
     },
@@ -84,12 +152,51 @@ export const Posts: CollectionConfig = {
       relationTo: 'posts',
     },
     {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
+    },
+    {
       name: 'customCell',
       type: 'text',
       admin: {
         components: {
           Cell: '/components/CustomCell/index.js#CustomCell',
         },
+      },
+    },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: uploadCollectionSlug,
+    },
+    {
+      name: 'hiddenField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
       },
     },
     {
@@ -103,6 +210,41 @@ export const Posts: CollectionConfig = {
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
       },
+    },
+    {
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
+      type: 'text',
     },
   ],
   labels: {

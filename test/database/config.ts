@@ -4,8 +4,24 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
+import { randomUUID } from 'crypto'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
+import {
+  customIDsSlug,
+  customSchemaSlug,
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fakeCustomIDsSlug,
+  fieldsPersistanceSlug,
+  pgMigrationSlug,
+  placesSlug,
+  postsSlug,
+  relationASlug,
+  relationBSlug,
+  relationshipsMigrationSlug,
+} from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -21,12 +37,109 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug: 'posts',
+      slug: 'categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
+      slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+          // access: { read: () => false },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          name: 'category',
+        },
+        {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'number',
+          type: 'number',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              fields: [
+                                                {
+                                                  name: 'D4',
+                                                  type: 'text',
+                                                },
+                                              ],
+                                              label: 'Collapsible2',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                  label: 'Tab1',
+                                },
+                              ],
+                            },
+                          ],
+                          label: 'Collapsible2',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              label: 'Tab1',
+            },
+          ],
+        },
+        {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
         },
         {
           name: 'throwAfterChange',
@@ -41,6 +154,31 @@ export default buildConfigWithDefaults({
               },
             ],
           },
+        },
+        {
+          name: 'arrayWithIDs',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'blocksWithIDs',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
         },
       ],
       hooks: {
@@ -60,7 +198,33 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'default-values',
+      slug: errorOnUnnamedFieldsSlug,
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'UnnamedTab',
+              fields: [
+                {
+                  name: 'groupWithinUnnamedTab',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: defaultValuesSlug,
       fields: [
         {
           name: 'title',
@@ -91,10 +255,15 @@ export default buildConfigWithDefaults({
             { value: 'default', label: 'Default' },
           ],
         },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
+        },
       ],
     },
     {
-      slug: 'relation-a',
+      slug: relationASlug,
       fields: [
         {
           name: 'title',
@@ -111,7 +280,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'relation-b',
+      slug: relationBSlug,
       fields: [
         {
           name: 'title',
@@ -133,7 +302,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'pg-migrations',
+      slug: pgMigrationSlug,
       fields: [
         {
           name: 'relation1',
@@ -201,7 +370,7 @@ export default buildConfigWithDefaults({
       versions: true,
     },
     {
-      slug: 'custom-schema',
+      slug: customSchemaSlug,
       dbName: 'customs',
       fields: [
         {
@@ -275,6 +444,260 @@ export default buildConfigWithDefaults({
         drafts: true,
       },
     },
+    {
+      slug: placesSlug,
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-relations',
+      admin: { useAsTitle: 'postTitle' },
+      fields: [
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: 'post.title',
+        },
+        {
+          name: 'postCategoryTitle',
+          type: 'text',
+          virtual: 'post.category.title',
+        },
+        {
+          name: 'postCategoryID',
+          type: 'json',
+          virtual: 'post.category.id',
+        },
+        {
+          name: 'postID',
+          type: 'json',
+          virtual: 'post.id',
+        },
+        {
+          name: 'postLocalized',
+          type: 'text',
+          virtual: 'post.localized',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+        {
+          name: 'customID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
+        {
+          name: 'customIDValue',
+          type: 'text',
+          virtual: 'customID.id',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      slug: fieldsPersistanceSlug,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          virtual: true,
+        },
+        {
+          name: 'textHooked',
+          type: 'text',
+          virtual: true,
+          hooks: { afterRead: [() => 'hooked'] },
+        },
+        {
+          name: 'array',
+          type: 'array',
+          virtual: true,
+          fields: [],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinRow',
+              virtual: true,
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinCollapsible',
+              virtual: true,
+            },
+          ],
+          label: 'Colllapsible',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'tab',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textWithinTabs',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: customIDsSlug,
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ value, operation }) => {
+                if (operation === 'create') {
+                  return randomUUID()
+                }
+                return value
+              },
+            ],
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      slug: fakeCustomIDsSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: relationshipsMigrationSlug,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'default-values',
+          name: 'relationship',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['default-values'],
+          name: 'relationship_2',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: 'compound-indexes',
+      fields: [
+        {
+          name: 'one',
+          type: 'text',
+        },
+        {
+          name: 'two',
+          type: 'text',
+        },
+        {
+          name: 'three',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'four',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      indexes: [
+        {
+          fields: ['one', 'two'],
+          unique: true,
+        },
+        {
+          fields: ['three', 'group.four'],
+          unique: true,
+        },
+      ],
+    },
+    {
+      slug: 'aliases',
+      fields: [
+        {
+          name: 'thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName',
+          dbName: 'shortname',
+          type: 'array',
+          fields: [
+            {
+              name: 'nestedArray',
+              type: 'array',
+              dbName: 'short_nested_1',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {
@@ -288,19 +711,48 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'global-2',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'global-3',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-relation-global',
+      fields: [
+        {
+          type: 'text',
+          name: 'postTitle',
+          virtual: 'post.title',
+        },
+        {
+          type: 'relationship',
+          name: 'post',
+          relationTo: 'posts',
+        },
+      ],
+    },
   ],
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

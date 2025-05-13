@@ -11,7 +11,6 @@ const AutosavePosts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'description', 'createdAt', '_status'],
-    preview: () => 'https://payloadcms.com',
   },
   versions: {
     maxPerDoc: 35,
@@ -19,6 +18,7 @@ const AutosavePosts: CollectionConfig = {
       autosave: {
         interval: 2000,
       },
+      schedulePublish: true,
     },
   },
   access: {

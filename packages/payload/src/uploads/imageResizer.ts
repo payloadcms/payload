@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -176,6 +177,15 @@ const getImageResizeAction = ({
     }
   }
 
+  if (withoutEnlargement === undefined && (!targetWidth || !targetHeight)) {
+    if (
+      (targetWidth && originalImage.width < targetWidth) ||
+      (targetHeight && originalImage.height < targetHeight)
+    ) {
+      return 'omit'
+    }
+  }
+
   const originalImageIsSmallerXOrY =
     originalImage.width < targetWidth || originalImage.height < targetHeight
   if (fit === 'contain' || fit === 'inside') {
@@ -291,6 +301,18 @@ export async function resizeAndTransformImageSizes({
   const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
   const originalImageMeta = await sharpBase.metadata()
 
+  let adjustedDimensions = { ...dimensions }
+
+  // Images with an exif orientation of 5, 6, 7, or 8 are auto-rotated by sharp
+  // Need to adjust the dimensions to match the original image
+  if ([5, 6, 7, 8].includes(originalImageMeta.orientation)) {
+    adjustedDimensions = {
+      ...dimensions,
+      height: dimensions.width,
+      width: dimensions.height,
+    }
+  }
+
   const resizeImageMeta = {
     height: extractHeightFromImage(originalImageMeta),
     width: originalImageMeta.width,
@@ -315,7 +337,7 @@ export async function resizeAndTransformImageSizes({
       if (resizeAction === 'resizeWithFocalPoint') {
         let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
 
-        const originalAspectRatio = dimensions.width / dimensions.height
+        const originalAspectRatio = adjustedDimensions.width / adjustedDimensions.height
 
         // Calculate resizeWidth based on original aspect ratio if it's undefined
         if (resizeHeight && !resizeWidth) {
@@ -338,6 +360,7 @@ export async function resizeAndTransformImageSizes({
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
+          fastShrinkOnLoad: false,
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
         })
@@ -455,7 +478,7 @@ export async function resizeAndTransformImageSizes({
 
       if (await fileExists(imagePath)) {
         try {
-          fs.unlinkSync(imagePath)
+          await fs.unlink(imagePath)
         } catch {
           // Ignore unlink errors
         }

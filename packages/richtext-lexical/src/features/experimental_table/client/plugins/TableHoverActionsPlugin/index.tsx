@@ -6,17 +6,19 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
+  $getTableAndElementByKey,
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
   $insertTableColumn__EXPERIMENTAL,
   $insertTableRow__EXPERIMENTAL,
   $isTableCellNode,
   $isTableNode,
+  getTableElement,
   TableNode,
 } from '@lexical/table'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
-import { $getNearestNodeFromDOMNode } from 'lexical'
-import { useEffect, useRef, useState } from 'react'
+import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
@@ -25,15 +27,19 @@ import { useDebounce } from '../../utils/useDebounce.js'
 
 const BUTTON_WIDTH_PX = 20
 
-function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement }): JSX.Element {
+function TableHoverActionsContainer({
+  anchorElem,
+}: {
+  anchorElem: HTMLElement
+}): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const editorConfig = useEditorConfigContext()
   const [isShownRow, setShownRow] = useState<boolean>(false)
   const [isShownColumn, setShownColumn] = useState<boolean>(false)
   const [shouldListenMouseMove, setShouldListenMouseMove] = useState<boolean>(false)
   const [position, setPosition] = useState({})
-  const codeSetRef = useRef<Set<NodeKey>>(new Set())
-  const tableDOMNodeRef = useRef<HTMLElement | null>(null)
+  const tableSetRef = useRef<Set<NodeKey>>(new Set())
+  const tableCellDOMNodeRef = useRef<HTMLElement | null>(null)
 
   const debouncedOnMouseMove = useDebounce(
     (event: MouseEvent) => {
@@ -49,77 +55,110 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
         return
       }
 
-      tableDOMNodeRef.current = tableDOMNode
+      tableCellDOMNodeRef.current = tableDOMNode
 
       let hoveredRowNode: null | TableCellNode = null
       let hoveredColumnNode: null | TableCellNode = null
       let tableDOMElement: HTMLElement | null = null
 
-      editor.update(() => {
-        const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode)
+      editor.getEditorState().read(
+        () => {
+          const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode)
 
-        if ($isTableCellNode(maybeTableCell)) {
-          const table = $findMatchingParent(maybeTableCell, (node) => $isTableNode(node))
-          if (!$isTableNode(table)) {
-            return
-          }
+          if ($isTableCellNode(maybeTableCell)) {
+            const table = $findMatchingParent(maybeTableCell, (node) => $isTableNode(node))
+            if (!$isTableNode(table)) {
+              return
+            }
 
-          tableDOMElement = editor.getElementByKey(table?.getKey())
+            tableDOMElement = getTableElement(table, editor.getElementByKey(table.getKey()))
 
-          if (tableDOMElement) {
-            const rowCount = table.getChildrenSize()
-            const colCount =
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-              ((table as TableNode).getChildAtIndex(0) as TableRowNode)?.getChildrenSize()
+            if (tableDOMElement) {
+              const rowCount = table.getChildrenSize()
+              const colCount = (table.getChildAtIndex(0) as TableRowNode)?.getChildrenSize()
 
-            const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell)
-            const colIndex = $getTableColumnIndexFromTableCellNode(maybeTableCell)
+              const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell)
+              const colIndex = $getTableColumnIndexFromTableCellNode(maybeTableCell)
 
-            if (rowIndex === rowCount - 1) {
-              hoveredRowNode = maybeTableCell
-            } else if (colIndex === colCount - 1) {
-              hoveredColumnNode = maybeTableCell
+              if (rowIndex === rowCount - 1) {
+                hoveredRowNode = maybeTableCell
+              } else if (colIndex === colCount - 1) {
+                hoveredColumnNode = maybeTableCell
+              }
             }
           }
-        }
-      })
+        },
+        { editor },
+      )
 
-      if (tableDOMElement) {
-        const {
-          bottom: tableElemBottom,
+      if (!tableDOMElement) {
+        return
+      }
+
+      // this is the scrollable div container of the table (in case of overflow)
+      const tableContainerElement = (tableDOMElement as HTMLTableElement).parentElement
+
+      if (!tableContainerElement) {
+        return
+      }
+
+      const {
+        bottom: tableElemBottom,
+        height: tableElemHeight,
+        left: tableElemLeft,
+        right: tableElemRight,
+        width: tableElemWidth,
+        y: tableElemY,
+      } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
+
+      let tableHasScroll = false
+      if (
+        tableContainerElement &&
+        tableContainerElement.classList.contains('LexicalEditorTheme__tableScrollableWrapper')
+      ) {
+        tableHasScroll = tableContainerElement.scrollWidth > tableContainerElement.clientWidth
+      }
+
+      const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
+
+      if (hoveredRowNode) {
+        setShownColumn(false)
+        setShownRow(true)
+        setPosition({
+          height: BUTTON_WIDTH_PX,
+          left:
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetLeft
+              : tableElemLeft - editorElemLeft,
+          top: tableElemBottom - editorElemY + 5,
+          width:
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetWidth
+              : tableElemWidth,
+        })
+      } else if (hoveredColumnNode) {
+        setShownColumn(true)
+        setShownRow(false)
+        setPosition({
           height: tableElemHeight,
-          right: tableElemRight,
-          width: tableElemWidth,
-          x: tableElemX,
-          y: tableElemY,
-        } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
-
-        const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
-
-        if (hoveredRowNode) {
-          setShownColumn(false)
-          setShownRow(true)
-          setPosition({
-            height: BUTTON_WIDTH_PX,
-            left: tableElemX - editorElemLeft,
-            top: tableElemBottom - editorElemY + 5,
-            width: tableElemWidth,
-          })
-        } else if (hoveredColumnNode) {
-          setShownColumn(true)
-          setShownRow(false)
-          setPosition({
-            height: tableElemHeight,
-            left: tableElemRight - editorElemLeft + 5,
-            top: tableElemY - editorElemY,
-            width: BUTTON_WIDTH_PX,
-          })
-        }
+          left: tableElemRight - editorElemLeft + 5,
+          top: tableElemY - editorElemY,
+          width: BUTTON_WIDTH_PX,
+        })
       }
     },
     50,
     250,
   )
+
+  // Hide the buttons on any table dimensions change to prevent last row cells
+  // overlap behind the 'Add Row' button when text entry changes cell height
+  const tableResizeObserver = useMemo(() => {
+    return new ResizeObserver(() => {
+      setShownRow(false)
+      setShownColumn(false)
+    })
+  }, [])
 
   useEffect(() => {
     if (!shouldListenMouseMove) {
@@ -141,34 +180,47 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
       editor.registerMutationListener(
         TableNode,
         (mutations) => {
-          editor.getEditorState().read(() => {
-            for (const [key, type] of mutations) {
-              switch (type) {
-                case 'created':
-                  codeSetRef.current.add(key)
-                  setShouldListenMouseMove(codeSetRef.current.size > 0)
-                  break
-
-                case 'destroyed':
-                  codeSetRef.current.delete(key)
-                  setShouldListenMouseMove(codeSetRef.current.size > 0)
-                  break
-
-                default:
-                  break
+          editor.getEditorState().read(
+            () => {
+              let resetObserver = false
+              for (const [key, type] of mutations) {
+                switch (type) {
+                  case 'created': {
+                    tableSetRef.current.add(key)
+                    resetObserver = true
+                    break
+                  }
+                  case 'destroyed': {
+                    tableSetRef.current.delete(key)
+                    resetObserver = true
+                    break
+                  }
+                  default:
+                    break
+                }
               }
-            }
-          })
+              if (resetObserver) {
+                // Reset resize observers
+                tableResizeObserver.disconnect()
+                for (const tableKey of tableSetRef.current) {
+                  const { tableElement } = $getTableAndElementByKey(tableKey)
+                  tableResizeObserver.observe(tableElement)
+                }
+                setShouldListenMouseMove(tableSetRef.current.size > 0)
+              }
+            },
+            { editor },
+          )
         },
         { skipInitialization: false },
       ),
     )
-  }, [editor])
+  }, [editor, tableResizeObserver])
 
   const insertAction = (insertRow: boolean) => {
     editor.update(() => {
-      if (tableDOMNodeRef.current) {
-        const maybeTableNode = $getNearestNodeFromDOMNode(tableDOMNodeRef.current)
+      if (tableCellDOMNodeRef.current) {
+        const maybeTableNode = $getNearestNodeFromDOMNode(tableCellDOMNodeRef.current)
         maybeTableNode?.selectEnd()
         if (insertRow) {
           $insertTableRow__EXPERIMENTAL()
@@ -181,20 +233,28 @@ function TableHoverActionsContainer({ anchorElem }: { anchorElem: HTMLElement })
     })
   }
 
+  if (!editor?.isEditable()) {
+    return null
+  }
+
   return (
     <>
       {isShownRow && (
         <button
+          aria-label="Add Row"
           className={editorConfig.editorConfig.lexical.theme.tableAddRows}
           onClick={() => insertAction(true)}
           style={{ ...position }}
+          type="button"
         />
       )}
       {isShownColumn && (
         <button
+          aria-label="Add Column"
           className={editorConfig.editorConfig.lexical.theme.tableAddColumns}
           onClick={() => insertAction(false)}
           style={{ ...position }}
+          type="button"
         />
       )}
     </>
@@ -210,7 +270,7 @@ function getMouseInfo(
 } {
   const target = event.target
 
-  if (target && target instanceof HTMLElement) {
+  if (isHTMLElement(target)) {
     const tableDOMNode = target.closest<HTMLElement>(
       `td.${editorConfig.theme.tableCell}, th.${editorConfig.theme.tableCell}`,
     )
@@ -233,5 +293,10 @@ export function TableHoverActionsPlugin({
 }: {
   anchorElem?: HTMLElement
 }): null | React.ReactPortal {
+  const [editor] = useLexicalComposerContext()
+  if (!editor?.isEditable()) {
+    return null
+  }
+
   return createPortal(<TableHoverActionsContainer anchorElem={anchorElem} />, anchorElem)
 }

@@ -1,0 +1,184 @@
+---
+title: Select
+label: Select
+order: 30
+desc: Payload select determines which fields are selected to the result.
+keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+By default, Payload's APIs will return _all fields_ for a given collection or global. But, you may not need all of that data for all of your queries. Sometimes, you might want just a few fields from the response, which can speed up the Payload API and reduce the amount of JSON that is sent to you from the API.
+
+This is where Payload's `select` feature comes in. Here, you can define exactly which fields you'd like to retrieve from the API.
+
+## Local API
+
+To specify `select` in the [Local API](../local-api/overview), you can use the `select` option in your query:
+
+```ts
+import type { Payload } from 'payload'
+
+// Include mode
+const getPosts = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    select: {
+      text: true,
+      // select a specific field from group
+      group: {
+        number: true,
+      },
+      // select all fields from array
+      array: true,
+    }, // highlight-line
+  })
+
+  return posts
+}
+
+// Exclude mode
+const getPosts = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    // Select everything except for array and group.number
+    select: {
+      array: false,
+      group: {
+        number: false,
+      },
+    }, // highlight-line
+  })
+
+  return posts
+}
+```
+
+<Banner type="warning">
+  **Important:** To perform querying with `select` efficiently, Payload
+  implements your `select` query on the database level. Because of that, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control,
+  regardless of the `select` query you can use `forceSelect` collection config
+  property.
+</Banner>
+
+## REST API
+
+To specify select in the [REST API](../rest-api/overview), you can use the `select` parameter in your query:
+
+```ts
+fetch(
+  'https://localhost:3000/api/posts?select[color]=true&select[group][number]=true',
+) // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```
+
+To understand the syntax, you need to understand that complex URL search strings are parsed into a JSON object. This one isn't too bad, but more complex queries get unavoidably more difficult to write.
+
+For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-esm`](https://www.npmjs.com/package/qs-esm) package to parse your JSON / object-formatted queries into query strings:
+
+```ts
+import { stringify } from 'qs-esm'
+import type { Where } from 'payload'
+
+const select: Where = {
+  text: true,
+  group: {
+    number: true,
+  },
+  // This query could be much more complex
+  // and QS would handle it beautifully
+}
+
+const getPosts = async () => {
+  const stringifiedQuery = stringify(
+    {
+      select, // ensure that `qs` adds the `select` property, too!
+    },
+    { addQueryPrefix: true },
+  )
+
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
+  // Continue to handle the response below...
+}
+```
+
+<Banner type="info">
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
+</Banner>
+
+## defaultPopulate collection config property
+
+The `defaultPopulate` property allows you specify which fields to select when populating the collection from another document.
+This is especially useful for links where only the `slug` is needed instead of the entire document.
+
+With this feature, you can dramatically reduce the amount of JSON that is populated from [Relationship](/docs/fields/relationship) or [Upload](/docs/fields/upload) fields.
+
+For example, in your content model, you might have a `Link` field which links out to a different page. When you go to retrieve these links, you really only need the `slug` of the page.
+
+Loading all of the page content, its related links, and everything else is going to be overkill and will bog down your Payload APIs. Instead, you can define the `defaultPopulate` property on your `Pages` collection, so that when Payload "populates" a related Page, it only selects the `slug` field and therefore returns significantly less JSON:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+// The TSlug generic can be passed to have type safety for `defaultPopulate`.
+// If avoided, the `defaultPopulate` type resolves to `SelectType`.
+export const Pages: CollectionConfig<'pages'> = {
+  slug: 'pages',
+  // Specify `select`.
+  defaultPopulate: {
+    slug: true,
+  },
+  fields: [
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
+
+<Banner type="warning">
+  **Important:** When using `defaultPopulate` on a collection with
+  [Uploads](/docs/fields/upload) enabled and you want to select the `url` field,
+  it is important to specify `filename: true` as well, otherwise Payload will
+  not be able to construct the correct file URL, instead returning `url: null`.
+</Banner>
+
+## populate
+
+Setting `defaultPopulate` will enforce that each time Payload performs a "population" of a related document, only the fields specified will be queried and returned. However, you can override `defaultPopulate` with the `populate` property in the Local and REST API:
+
+**Local API:**
+
+```ts
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    populate: {
+      // Select only `text` from populated docs in the "pages" collection
+      // Now, no matter what the `defaultPopulate` is set to on the "pages" collection,
+      // it will be overridden, and the `text` field will be returned instead.
+      pages: {
+        text: true,
+      }, // highlight-line
+    },
+  })
+
+  return posts
+}
+```
+
+**REST API:**
+
+```ts
+fetch('https://localhost:3000/api/posts?populate[pages][text]=true') // highlight-line
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+```

@@ -8,7 +8,10 @@ import { recurseNodes } from '../utilities/forEachNodeRecursively.js'
 
 export type Args = {
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
-} & Parameters<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>[0]
+  parentIsLocalized: boolean
+} & Parameters<
+  NonNullable<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>
+>[0]
 
 /**
  * Appends all new populationPromises to the populationPromises prop
@@ -24,12 +27,13 @@ export const populateLexicalPopulationPromises = ({
   findMany,
   flattenLocales,
   overrideAccess,
+  parentIsLocalized,
   populationPromises,
   req,
   showHiddenFields,
   siblingDoc,
 }: Args) => {
-  const shouldPopulate = depth && currentDepth <= depth
+  const shouldPopulate = depth && currentDepth! <= depth
 
   if (!shouldPopulate) {
     return
@@ -37,11 +41,12 @@ export const populateLexicalPopulationPromises = ({
 
   recurseNodes({
     callback: (node) => {
-      if (editorPopulationPromises?.has(node.type)) {
-        for (const promise of editorPopulationPromises.get(node.type)) {
+      const editorPopulationPromisesOfNodeType = editorPopulationPromises?.get(node.type)
+      if (editorPopulationPromisesOfNodeType) {
+        for (const promise of editorPopulationPromisesOfNodeType) {
           promise({
             context,
-            currentDepth,
+            currentDepth: currentDepth!,
             depth,
             draft,
             editorPopulationPromises,
@@ -50,7 +55,8 @@ export const populateLexicalPopulationPromises = ({
             findMany,
             flattenLocales,
             node,
-            overrideAccess,
+            overrideAccess: overrideAccess!,
+            parentIsLocalized,
             populationPromises,
             req,
             showHiddenFields,

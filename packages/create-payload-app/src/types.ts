@@ -2,26 +2,31 @@ import type arg from 'arg'
 
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
+  '--branch': StringConstructor
   '--db': StringConstructor
   '--db-accept-recommended': BooleanConstructor
   '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
+
+  '--example': StringConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
+  '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
-  '--template-branch': StringConstructor
+  '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
 
   // Aliases
 
+  '-e': string
   '-h': string
   '-n': string
   '-t': string
@@ -30,6 +35,11 @@ export interface Args extends arg.Spec {
 export type CliArgs = arg.Result<Args>
 
 export type ProjectTemplate = GitTemplate | PluginTemplate
+
+export type ProjectExample = {
+  name: string
+  url: string
+}
 
 /**
  * Template that is cloned verbatim from a git repo
@@ -57,7 +67,7 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercelPostgres'
+export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
 
 export type DbDetails = {
   dbUri: string

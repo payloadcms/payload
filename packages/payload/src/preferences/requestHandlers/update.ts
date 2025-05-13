@@ -1,9 +1,10 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import update from '../operations/update.js'
+import { update } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (incomingReq) => {
   // We cannot import the addDataAndFileToRequest utility here from the 'next' package because of dependency issues
@@ -12,7 +13,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
 
   try {
     data = await incomingReq.json()
-  } catch (error) {
+  } catch (_err) {
     data = {}
   }
 

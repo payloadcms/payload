@@ -1,5 +1,6 @@
 import type {
   SerializedLineBreakNode as _SerializedLineBreakNode,
+  SerializedTabNode as _SerializedTabNode,
   SerializedTextNode as _SerializedTextNode,
   SerializedEditorState,
   SerializedElementNode,
@@ -8,8 +9,8 @@ import type {
 } from 'lexical'
 
 import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
-import type { SerializedInlineBlockNode } from './features/blocks/client/nodes/InlineBlocksNode.js'
 import type { SerializedBlockNode } from './features/blocks/server/nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './features/blocks/server/nodes/InlineBlocksNode.js'
 import type {
   SerializedTableCellNode,
   SerializedTableNode,
@@ -55,6 +56,14 @@ export type SerializedTextNode = Spread<
   _SerializedTextNode
 >
 
+export type SerializedTabNode = Spread<
+  {
+    children?: never // required so that our typed editor state doesn't automatically add children
+    type: 'tab'
+  },
+  _SerializedTabNode
+>
+
 export type SerializedLineBreakNode = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
@@ -84,6 +93,7 @@ export type DefaultNodeTypes =
   | SerializedParagraphNode
   | SerializedQuoteNode
   | SerializedRelationshipNode
+  | SerializedTabNode
   | SerializedTextNode
   | SerializedUploadNode
 

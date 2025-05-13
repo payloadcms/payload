@@ -1,11 +1,13 @@
 import type { Editor } from 'slate'
 
-import { useAddClientFunction, useFieldProps } from '@payloadcms/ui'
+import { useAddClientFunction } from '@payloadcms/ui'
+
+import { useSlateProps } from './SlatePropsProvider.js'
 
 type Plugin = (editor: Editor) => Editor
 
 export const useSlatePlugin = (key: string, plugin: Plugin) => {
-  const { schemaPath } = useFieldProps()
+  const { schemaPath } = useSlateProps()
 
   useAddClientFunction(`slatePlugin.${schemaPath}.${key}`, plugin)
 }

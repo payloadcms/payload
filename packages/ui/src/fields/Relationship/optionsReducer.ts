@@ -3,7 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { Action, Option, OptionGroup } from './types.js'
 
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {
@@ -28,36 +28,6 @@ const sortOptions = (options: Option[]): Option[] =>
 
 export const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => {
   switch (action.type) {
-    case 'CLEAR': {
-      return []
-    }
-
-    case 'UPDATE': {
-      const { collection, config, doc, i18n } = action
-      const relation = collection.slug
-      const newOptions = [...state]
-
-      const docTitle = formatDocTitle({
-        collectionConfig: collection,
-        data: doc,
-        dateFormat: config.admin.dateFormat,
-        fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
-        i18n,
-      })
-
-      const foundOptionGroup = newOptions.find(
-        (optionGroup) => optionGroup.label === collection.labels.plural,
-      )
-      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
-
-      if (foundOption) {
-        foundOption.label = docTitle
-        foundOption.relationTo = relation
-      }
-
-      return newOptions
-    }
-
     case 'ADD': {
       const { collection, config, docs, i18n, ids = [], sort } = action
       const relation = collection.slug
@@ -100,6 +70,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
         ) {
           loadedIDs.push({ id, relationTo: relation })
           newSubOptions.push({
+            allowEdit: false,
             label: `${i18n.t('general:untitled')} - ID: ${id}`,
             relationTo: relation,
             value: id,
@@ -116,6 +87,82 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
           label: getTranslation(collection.labels.plural, i18n),
           options: sort ? sortOptions(newSubOptions) : newSubOptions,
         })
+      }
+
+      return newOptions
+    }
+
+    case 'CLEAR': {
+      const exemptValues = action.exemptValues
+        ? Array.isArray(action.exemptValues)
+          ? action.exemptValues
+          : [action.exemptValues]
+        : []
+
+      const clearedStateWithExemptValues = state.filter((optionGroup) => {
+        const clearedOptions = optionGroup.options.filter((option) => {
+          if (exemptValues) {
+            return exemptValues.some((exemptValue) => {
+              return (
+                exemptValue &&
+                option.value === (typeof exemptValue === 'object' ? exemptValue.value : exemptValue)
+              )
+            })
+          }
+
+          return false
+        })
+
+        optionGroup.options = clearedOptions
+
+        return clearedOptions.length > 0
+      })
+
+      return clearedStateWithExemptValues
+    }
+
+    case 'REMOVE': {
+      const { id, collection } = action
+
+      const newOptions = [...state]
+
+      const indexOfGroup = newOptions.findIndex(
+        (optionGroup) => optionGroup.label === collection.labels.plural,
+      )
+
+      if (indexOfGroup === -1) {
+        return newOptions
+      }
+
+      newOptions[indexOfGroup] = {
+        ...newOptions[indexOfGroup],
+        options: newOptions[indexOfGroup].options.filter((option) => option.value !== id),
+      }
+
+      return newOptions
+    }
+
+    case 'UPDATE': {
+      const { collection, config, doc, i18n } = action
+      const relation = collection.slug
+      const newOptions = [...state]
+
+      const docTitle = formatDocTitle({
+        collectionConfig: collection,
+        data: doc,
+        dateFormat: config.admin.dateFormat,
+        fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+        i18n,
+      })
+
+      const foundOptionGroup = newOptions.find(
+        (optionGroup) => optionGroup.label === collection.labels.plural,
+      )
+      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
+
+      if (foundOption) {
+        foundOption.label = docTitle
+        foundOption.relationTo = relation
       }
 
       return newOptions

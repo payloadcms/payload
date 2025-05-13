@@ -6,11 +6,15 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import { deepMerge } from '../../deepMerge.js'
 
-/** @type {import('eslint').Linter.FlatConfig} */
+/** @type {import('eslint').Linter.Config} */
 export const index = deepMerge(
   react.configs['recommended-type-checked'],
   {
-    rules: reactHooks.configs.recommended.rules,
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+      '@eslint-react/naming-convention/use-state': 'off',
+    },
   },
   {
     rules: reactRules,

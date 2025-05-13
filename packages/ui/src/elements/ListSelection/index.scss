@@ -1,18 +1,24 @@
 @import '../../scss/styles.scss';
 
-.list-selection {
-  margin-left: auto;
-  color: var(--theme-elevation-500);
-
-  &__button {
+@layer payload-default {
+  .list-selection {
+    display: flex;
+    margin-left: auto;
     color: var(--theme-elevation-500);
-    background: unset;
-    border: none;
-    text-decoration: underline;
-    cursor: pointer;
-  }
+    gap: 0.5em;
 
-  @include small-break {
-    margin-bottom: base(0.5);
+    &__button {
+      color: var(--theme-elevation-500);
+      background: unset;
+      border: none;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    @include small-break {
+      margin-bottom: base(0.5);
+    }
   }
 }

@@ -1,37 +1,42 @@
 'use client'
-import type { ClientBlock, FieldPermissions, Labels, Row } from 'payload'
+import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = {
+type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[] | ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
-  forceRender?: boolean
+  fields: ClientField[]
   hasMaxRows?: boolean
-  indexPath: string
+  isLoading?: boolean
   isSortable?: boolean
+  Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  parentPath: string
   path: string
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
@@ -41,20 +46,23 @@ type BlockFieldProps = {
   setCollapse: (id: string, collapsed: boolean) => void
 } & UseDraggableSortableReturn
 
-export const BlockRow: React.FC<BlockFieldProps> = ({
+export const BlockRow: React.FC<BlocksFieldProps> = ({
   addRow,
   attributes,
   block,
   blocks,
   duplicateRow,
   errorCount,
-  forceRender,
+  fields,
   hasMaxRows,
+  isLoading: isLoadingFromProps,
   isSortable,
+  Label,
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
@@ -66,11 +74,14 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
+
+  const showBlockName = !block.admin?.disableBlockName
 
   const classNames = [
     `${baseClass}__row`,
@@ -79,9 +90,22 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+
+  if (permissions === true) {
+    blockPermissions = true
+  } else {
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    if (permissionsBlockSpecific === true) {
+      blockPermissions = true
+    } else {
+      blockPermissions = permissionsBlockSpecific?.fields
+    }
+  }
+
   return (
     <div
-      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
+      id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
@@ -119,23 +143,31 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             : undefined
         }
         header={
-          block?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'block', formData: row }}
-              mappedComponent={block.admin.components.Label}
-            />
+          isLoading ? (
+            <ShimmerEffect height="1rem" width="8rem" />
           ) : (
             <div className={`${baseClass}__block-header`}>
-              <span className={`${baseClass}__block-number`}>
-                {String(rowIndex + 1).padStart(2, '0')}
-              </span>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                pillStyle="white"
-              >
-                {getTranslation(block.labels.singular, i18n)}
-              </Pill>
-              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+              <RowLabel
+                CustomComponent={Label}
+                label={
+                  <>
+                    <span className={`${baseClass}__block-number`}>
+                      {String(rowIndex + 1).padStart(2, '0')}
+                    </span>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                      pillStyle="white"
+                    >
+                      {getTranslation(block.labels.singular, i18n)}
+                    </Pill>
+                    {showBlockName && (
+                      <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                    )}
+                  </>
+                }
+                path={path}
+                rowNumber={rowIndex}
+              />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           )
@@ -144,16 +176,20 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={block.fields}
-          forceRender={forceRender}
-          margins="small"
-          path={path}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
-          readOnly={readOnly}
-          schemaPath={`${schemaPath}.${block.slug}`}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={blockPermissions}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )

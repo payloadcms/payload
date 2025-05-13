@@ -1,5 +1,7 @@
 @import '../../../../scss/styles.scss';
 
-.condition-value-number {
-  @include formInput;
+@layer payload-default {
+  .condition-value-number {
+    @include formInput;
+  }
 }

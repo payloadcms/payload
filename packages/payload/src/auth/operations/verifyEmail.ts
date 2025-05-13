@@ -1,9 +1,9 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import { APIError } from '../../errors/index.js'
+import { APIError, Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -16,6 +16,10 @@ export type Args = {
 
 export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   const { collection, req, token } = args
+
+  if (collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
   }
@@ -34,9 +38,6 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
     if (!user) {
       throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
     }
-    if (user && user._verified === true) {
-      throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
-    }
 
     await req.payload.db.updateOne({
       id: user.id,
@@ -47,6 +48,7 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
         _verified: true,
       },
       req,
+      returning: false,
     })
 
     if (shouldCommit) {

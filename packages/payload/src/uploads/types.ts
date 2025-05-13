@@ -1,4 +1,4 @@
-import type { ResizeOptions, Sharp, Metadata as SharpMetadata } from 'sharp'
+import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -11,6 +11,16 @@ export type FileSize = {
   mimeType: null | string
   width: null | number
 }
+
+// TODO: deprecate in Payload v4.
+/**
+ * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ */
+export type FileSizeImproved = {
+  url: null | string
+} & FileSize
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -83,6 +93,14 @@ export type ImageSize = {
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
@@ -100,6 +118,12 @@ export type UploadConfig = {
    * @default true
    */
   bulkUpload?: boolean
+  /**
+   * Appends a cache tag to the image URL when fetching the thumbnail in the admin panel. It may be desirable to disable this when hosting via CDNs with strict parameters.
+   *
+   * @default true
+   */
+  cacheTags?: boolean
   /**
    * Enables cropping of images.
    * @default true
@@ -154,9 +178,17 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      params: { collection: string; filename: string }
+      params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
+   */
+  hideFileInputOnCreate?: boolean
+  /**
+   * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
+   */
+  hideRemoveFile?: boolean
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
@@ -169,6 +201,17 @@ export type UploadConfig = {
    * @default undefined
    */
   modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
+  /**
+   * Controls the behavior of pasting/uploading files from URLs.
+   * If set to `false`, fetching from remote URLs is disabled.
+   * If an allowList is provided, server-side fetching will be enabled for specified URLs.
+   * @default true (client-side fetching enabled)
+   */
+  pasteURL?:
+    | {
+        allowList: AllowList
+      }
+    | false
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize

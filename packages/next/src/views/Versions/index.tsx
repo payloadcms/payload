@@ -1,11 +1,9 @@
-import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
-
-import { Gutter, ListQueryProvider } from '@payloadcms/ui'
+import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
+import { type DocumentViewServerProps, logError, type PaginatedDocs } from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'
@@ -13,7 +11,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function VersionsView(props: DocumentViewServerProps) {
   const { initPageResult, searchParams } = props
 
   const {
@@ -25,6 +23,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       i18n,
       payload,
       payload: { config },
+      t,
       user,
     },
   } = initPageResult
@@ -34,6 +33,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   const { limit, page, sort } = searchParams
 
   const {
+    localization,
     routes: { api: apiRoute },
     serverURL,
   } = config
@@ -45,6 +45,26 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
+    const whereQuery: {
+      and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
+    } = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localization && collectionConfig?.versions?.drafts) {
+      whereQuery.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
@@ -55,33 +75,61 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
+        where: whereQuery,
       })
       if (collectionConfig?.versions?.drafts) {
         latestDraftVersion = await getLatestVersion({
           slug: collectionSlug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'draft',
         })
-        latestPublishedVersion = await getLatestVersion({
-          slug: collectionSlug,
-          type: 'collection',
-          payload,
-          status: 'published',
+        const publishedDoc = await payload.count({
+          collection: collectionSlug,
+          depth: 0,
+          overrideAccess: true,
+          req,
+          where: {
+            id: {
+              equals: id,
+            },
+            _status: {
+              equals: 'published',
+            },
+          },
         })
+
+        // If we pass a latestPublishedVersion to buildVersionColumns,
+        // this will be used to display it as the "current published version".
+        // However, the latest published version might have been unpublished in the meantime.
+        // Hence, we should only pass the latest published version if there is a published document.
+        latestPublishedVersion =
+          publishedDoc.totalDocs > 0 &&
+          (await getLatestVersion({
+            slug: collectionSlug,
+            type: 'collection',
+            parentID: id,
+            payload,
+            status: 'published',
+          }))
       }
-    } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+    } catch (err) {
+      logError({ err, payload })
     }
   }
 
   if (globalSlug) {
     limitToUse = limitToUse || 10
+    const whereQuery =
+      localization && globalConfig?.versions?.drafts
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : {}
+
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
@@ -92,6 +140,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         req,
         sort: sort as string,
         user,
+        where: whereQuery,
       })
 
       if (globalConfig?.versions?.drafts) {
@@ -108,8 +157,8 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
           status: 'published',
         })
       }
-    } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+    } catch (err) {
+      logError({ err, payload })
     }
 
     if (!versionsData) {
@@ -135,11 +184,18 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
     collectionConfig,
     config,
     docID: id,
+    docs: versionsData?.docs,
     globalConfig,
     i18n,
     latestDraftVersion: latestDraftVersion?.id,
     latestPublishedVersion: latestPublishedVersion?.id,
   })
+
+  const pluralLabel = collectionConfig?.labels?.plural
+    ? typeof collectionConfig.labels.plural === 'function'
+      ? collectionConfig.labels.plural({ i18n, t })
+      : collectionConfig.labels.plural
+    : globalConfig?.label
 
   return (
     <React.Fragment>
@@ -147,7 +203,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />
@@ -158,6 +214,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
             defaultLimit={limitToUse}
             defaultSort={sort as string}
             modifySearchParams
+            orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
           >
             <VersionsViewClient
               baseClass={baseClass}

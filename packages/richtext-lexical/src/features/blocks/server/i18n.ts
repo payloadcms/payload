@@ -37,6 +37,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Bloky',
   },
+  da: {
+    inlineBlocks: {
+      create: 'Opret {{label}}',
+      edit: 'Rediger {{label}}',
+      label: 'Indlejrede blokke',
+      remove: 'Fjern {{label}}',
+    },
+    label: 'Blokke',
+  },
   de: {
     inlineBlocks: {
       create: 'Erstelle {{label}}',
@@ -63,6 +72,15 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Eliminar {{label}}',
     },
     label: 'Bloques',
+  },
+  et: {
+    inlineBlocks: {
+      create: 'Loo {{label}}',
+      edit: 'Muuda {{label}}',
+      label: 'Sisseehitatud plokid',
+      remove: 'Eemalda {{label}}',
+    },
+    label: 'Plokk',
   },
   fa: {
     inlineBlocks: {
@@ -192,18 +210,18 @@ export const i18n: Partial<GenericLanguages> = {
   },
   rs: {
     inlineBlocks: {
-      create: 'Kreiraj {{label}}',
-      edit: 'Izmeni {{label}}',
-      label: 'Umetnuti blokovi',
-      remove: 'Ukloni {{label}}',
+      create: 'Креирај {{label}}',
+      edit: 'Измени {{label}}',
+      label: 'Уметнути блокови',
+      remove: 'Уклони {{label}}',
     },
-    label: 'Blokovi',
+    label: 'Блокови',
   },
   'rs-latin': {
     inlineBlocks: {
       create: 'Kreiraj {{label}}',
       edit: 'Izmeni {{label}}',
-      label: 'Unutar blokovi',
+      label: 'Umetnuti blokovi',
       remove: 'Ukloni {{oznaka}}',
     },
     label: 'Blokovi',
@@ -225,6 +243,15 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Odstráňte {{label}}',
     },
     label: 'Bloky',
+  },
+  sl: {
+    inlineBlocks: {
+      create: 'Ustvari {{oznaka}}',
+      edit: 'Uredi {{label}}',
+      label: 'Vrstični bloki',
+      remove: 'Odstrani {{label}}',
+    },
+    label: 'Bloki',
   },
   sv: {
     inlineBlocks: {

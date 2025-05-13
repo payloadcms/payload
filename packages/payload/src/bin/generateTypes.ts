@@ -1,8 +1,12 @@
-import fs from 'fs'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
+import { initI18n } from '@payloadcms/translations'
+import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
 
+import { addSelectGenericsToGeneratedTypes } from '../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import { getLogger } from '../utilities/logger.js'
 
@@ -10,7 +14,7 @@ export async function generateTypes(
   config: SanitizedConfig,
   options?: { log: boolean },
 ): Promise<void> {
-  const logger = getLogger()
+  const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   const shouldLog = options?.log ?? true
@@ -19,7 +23,13 @@ export async function generateTypes(
     logger.info('Compiling TS types for Collections and Globals...')
   }
 
-  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
+  const languages = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
+
+  const language = languages.includes('en') ? 'en' : config.i18n.fallbackLanguage
+
+  const i18n = await initI18n({ config: config.i18n, context: 'api', language })
+
+  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
   const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
@@ -36,6 +46,8 @@ export async function generateTypes(
     unreachableDefinitions: true,
   })
 
+  compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
+
   if (config.typescript.declare !== false) {
     if (config.typescript.declare?.ignoreTSError) {
       compiled += `\n\n${declareWithTSIgnoreError}`
@@ -46,7 +58,7 @@ export async function generateTypes(
 
   // Diff the compiled types against the existing types file
   try {
-    const existingTypes = fs.readFileSync(outputFile, 'utf-8')
+    const existingTypes = await fs.readFile(outputFile, 'utf-8')
 
     if (compiled === existingTypes) {
       return
@@ -55,7 +67,7 @@ export async function generateTypes(
     // swallow err
   }
 
-  fs.writeFileSync(outputFile, compiled)
+  await fs.writeFile(outputFile, compiled)
   if (shouldLog) {
     logger.info(`Types written to ${outputFile}`)
   }

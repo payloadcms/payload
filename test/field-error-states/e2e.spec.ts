@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -14,7 +15,7 @@ const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('field error states', () => {
+describe('Field Error States', () => {
   let serverURL: string
   let page: Page
   let validateDraftsOff: AdminUrlUtil
@@ -56,7 +57,10 @@ describe('field error states', () => {
 
     // add third child array
     await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
+
+    // remove the row
     await page.locator('#parentArray-0-childArray-row-2 .array-actions__button').click()
+
     await page
       .locator('#parentArray-0-childArray-row-2 .array-actions__action.array-actions__remove')
       .click()
@@ -67,6 +71,7 @@ describe('field error states', () => {
       '#parentArray-row-0 > .collapsible > .collapsible__toggle-wrap .array-field__row-error-pill',
       { state: 'hidden', timeout: 500 },
     )
+
     expect(errorPill).toBeNull()
   })
 
@@ -76,13 +81,11 @@ describe('field error states', () => {
       await saveDocAndAssert(page, '#action-save-draft')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
     test('should validate drafts when enabled', async () => {
       await page.goto(validateDraftsOn.create)
       await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
     test('should show validation errors when validate and autosave are enabled', async () => {
       await page.goto(validateDraftsOnAutosave.create)
       await page.locator('#field-title').fill('valid')
@@ -100,6 +103,7 @@ describe('field error states', () => {
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('original value 2')
       await saveDocAndAssert(page)
+      await wait(500)
 
       // create relation to doc
       await page.goto(prevValueRelation.create)

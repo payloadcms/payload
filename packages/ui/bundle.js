@@ -36,8 +36,11 @@ const useClientPlugin = {
 
         result.outputFiles.forEach((file) => {
           let contents = file.text
-          contents = contents.replace(directiveRegex, '') // Remove existing use client directives
-          contents = directive + '\n' + contents // Prepend our use client directive
+
+          if (!file.path.endsWith('.map')) {
+            contents = contents.replace(directiveRegex, '') // Remove existing use client directives
+            contents = directive + '\n' + contents // Prepend our use client directive
+          }
 
           if (originalWrite) {
             const filePath = path.join(build.initialOptions.outdir, path.basename(file.path))
@@ -119,7 +122,6 @@ function require(m) {
       'react',
       'react-dom',
       'next',
-      'react-animate-height',
       'crypto',
     ],
     //packages: 'external',
@@ -162,7 +164,6 @@ function require(m) {
       'react',
       'react-dom',
       'next',
-      'react-animate-height',
       'crypto',
       '@floating-ui/react',
       'date-fns',

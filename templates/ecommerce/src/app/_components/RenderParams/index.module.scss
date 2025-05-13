@@ -1,9 +1,0 @@
-@import '../../_css/common.scss';
-
-.renderParams {
-  margin-bottom: calc(var(--base) * 2);
-
-  @include mid-break {
-    margin-bottom: var(--base);
-  }
-}

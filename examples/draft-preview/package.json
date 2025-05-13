@@ -1,0 +1,47 @@
+{
+  "name": "payload-example-preview",
+  "version": "1.0.0",
+  "description": "Payload preview example.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:schema": "payload-graphql generate:schema",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "seed": "npm run payload migrate:fresh",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+  },
+  "dependencies": {
+    "@payloadcms/admin-bar": "latest",
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-slate": "latest",
+    "@payloadcms/ui": "latest",
+    "dotenv": "^8.2.0",
+    "escape-html": "^1.0.3",
+    "graphql": "^16.9.0",
+    "next": "^15.2.3",
+    "payload": "latest",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@payloadcms/graphql": "latest",
+    "@swc/core": "^1.6.13",
+    "@types/escape-html": "^1.0.2",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.0",
+    "slate": "^0.82.0",
+    "tsx": "^4.16.2",
+    "typescript": "5.5.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  }
+}

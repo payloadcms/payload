@@ -8,7 +8,7 @@ import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
+import { mediaSlug, pagesSlug, postsSlug, tenantsSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
@@ -32,6 +32,7 @@ export const Pages: CollectionConfig = {
         },
       },
     },
+    preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [
     {
@@ -75,6 +76,16 @@ export const Pages: CollectionConfig = {
         {
           label: 'Test',
           fields: [
+            {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'relationToLocalized',
+              type: 'relationship',
+              relationTo: postsSlug,
+            },
             {
               label: 'Rich Text — Slate',
               type: 'richText',
@@ -187,7 +198,7 @@ export const Pages: CollectionConfig = {
         {
           name: 'image',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: mediaSlug,
         },
       ],
     },

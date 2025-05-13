@@ -1,32 +1,55 @@
-import type { CreateGlobalVersion, Document, PayloadRequest } from 'payload'
+import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { getGlobal } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
-) {
-  const VersionModel = this.versions[globalSlug]
-  const options = await withSession(this, req)
-
-  const [doc] = await VersionModel.create(
-    [
-      {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
-      },
-    ],
-    options,
+  {
+    autosave,
+    createdAt,
+    globalSlug,
+    parent,
+    publishedLocale,
     req,
-  )
+    returning,
+    snapshot,
+    updatedAt,
+    versionData,
+  },
+) {
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
-  await VersionModel.updateMany(
+  const options = {
+    session: await getSession(this, req),
+  }
+
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
+  })
+
+  let [doc] = await Model.create([data], options, req)
+
+  await Model.updateMany(
     {
       $and: [
         {
@@ -50,13 +73,18 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    return null
   }
-  return result
+
+  doc = doc.toObject()
+
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
+
+  return doc
 }

@@ -1,7 +1,15 @@
-import type { AdminViewComponent, AdminViewProps, ImportMap, SanitizedConfig } from 'payload'
+import type {
+  AdminViewServerProps,
+  DocumentSubViewTypes,
+  ImportMap,
+  PayloadComponent,
+  SanitizedConfig,
+  ServerPropsFromView,
+  ViewTypes,
+} from 'payload'
 import type React from 'react'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
@@ -16,7 +24,9 @@ import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
+import { attachViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getDocumentViewInfo } from './getDocumentViewInfo.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
@@ -28,12 +38,12 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewProps>
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewServerProps>
 }
 
 export type ViewFromConfig = {
-  Component?: React.FC<AdminViewProps>
-  payloadComponent?: AdminViewComponent
+  Component?: React.FC<AdminViewServerProps>
+  payloadComponent?: PayloadComponent<AdminViewServerProps>
 }
 
 const oneSegmentViews: OneSegmentViews = {
@@ -46,14 +56,7 @@ const oneSegmentViews: OneSegmentViews = {
   unauthorized: UnauthorizedView,
 }
 
-export const getViewFromConfig = ({
-  adminRoute,
-  config,
-  currentRoute,
-  importMap,
-  searchParams,
-  segments,
-}: {
+type GetViewFromConfigArgs = {
   adminRoute: string
   config: SanitizedConfig
   currentRoute: string
@@ -62,15 +65,31 @@ export const getViewFromConfig = ({
     [key: string]: string | string[]
   }
   segments: string[]
-}): {
+}
+
+type GetViewFromConfigResult = {
   DefaultView: ViewFromConfig
+  documentSubViewType?: DocumentSubViewTypes
   initPageOptions: Parameters<typeof initPage>[0]
+  serverProps: ServerPropsFromView
   templateClassName: string
   templateType: 'default' | 'minimal'
-} => {
+  viewType?: ViewTypes
+}
+
+export const getViewFromConfig = ({
+  adminRoute,
+  config,
+  currentRoute,
+  importMap,
+  searchParams,
+  segments,
+}: GetViewFromConfigArgs): GetViewFromConfigResult => {
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
+  let documentSubViewType: DocumentSubViewTypes
+  let viewType: ViewTypes
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -79,10 +98,26 @@ export const getViewFromConfig = ({
     searchParams,
   }
 
-  const [segmentOne, segmentTwo] = segments
+  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive] = segments
 
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
+  let matchedCollection: SanitizedConfig['collections'][number] = undefined
+  let matchedGlobal: SanitizedConfig['globals'][number] = undefined
+
+  const serverProps: ServerPropsFromView = {
+    viewActions: config?.admin?.components?.actions || [],
+  }
+
+  if (isCollection) {
+    matchedCollection = config.collections.find(({ slug }) => slug === segmentTwo)
+    serverProps.collectionConfig = matchedCollection
+  }
+
+  if (isGlobal) {
+    matchedGlobal = config.globals.find(({ slug }) => slug === segmentTwo)
+    serverProps.globalConfig = matchedGlobal
+  }
 
   switch (segments.length) {
     case 0: {
@@ -92,7 +127,7 @@ export const getViewFromConfig = ({
         }
         templateClassName = 'dashboard'
         templateType = 'default'
-        initPageOptions.redirectUnauthenticatedUser = true
+        viewType = 'dashboard'
       }
       break
     }
@@ -132,25 +167,25 @@ export const getViewFromConfig = ({
         templateType = 'minimal'
 
         if (viewKey === 'account') {
-          initPageOptions.redirectUnauthenticatedUser = true
           templateType = 'default'
+          viewType = 'account'
         }
       }
       break
     }
     case 2: {
-      if (segmentOne === 'reset') {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         ViewToRender = {
           Component: ResetPassword,
         }
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
+        viewType = 'reset'
       }
 
-      if (isCollection) {
+      if (isCollection && matchedCollection) {
         // --> /collections/:collectionSlug
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: ListView,
@@ -158,9 +193,12 @@ export const getViewFromConfig = ({
 
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
-      } else if (isGlobal) {
+        viewType = 'list'
+        serverProps.viewActions = serverProps.viewActions.concat(
+          matchedCollection.admin.components?.views?.list?.actions,
+        )
+      } else if (isGlobal && matchedGlobal) {
         // --> /globals/:globalSlug
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: DocumentView,
@@ -168,6 +206,15 @@ export const getViewFromConfig = ({
 
         templateClassName = 'global-edit'
         templateType = 'default'
+        viewType = 'document'
+
+        // add default view actions
+        serverProps.viewActions = serverProps.viewActions.concat(
+          getViewActions({
+            editConfig: matchedGlobal.admin?.components?.views?.edit,
+            viewKey: 'default',
+          }),
+        )
       }
       break
     }
@@ -180,14 +227,14 @@ export const getViewFromConfig = ({
 
         templateClassName = 'verify'
         templateType = 'minimal'
-      } else if (isCollection) {
+        viewType = 'verify'
+      } else if (isCollection && matchedCollection) {
         // Custom Views
         // --> /collections/:collectionSlug/:id
+        // --> /collections/:collectionSlug/:id/api
         // --> /collections/:collectionSlug/:id/preview
         // --> /collections/:collectionSlug/:id/versions
-        // --> /collections/:collectionSlug/:id/versions/:versionId
-        // --> /collections/:collectionSlug/:id/api
-        initPageOptions.redirectUnauthenticatedUser = true
+        // --> /collections/:collectionSlug/:id/versions/:versionID
 
         ViewToRender = {
           Component: DocumentView,
@@ -195,13 +242,22 @@ export const getViewFromConfig = ({
 
         templateClassName = `collection-default-edit`
         templateType = 'default'
-      } else if (isGlobal) {
+
+        const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+        viewType = viewInfo.viewType
+        documentSubViewType = viewInfo.documentSubViewType
+
+        attachViewActions({
+          collectionOrGlobal: matchedCollection,
+          serverProps,
+          viewKeyArg: documentSubViewType,
+        })
+      } else if (isGlobal && matchedGlobal) {
         // Custom Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/preview
-        // --> /globals/:globalSlug/versions/:versionId
+        // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
-        initPageOptions.redirectUnauthenticatedUser = true
 
         ViewToRender = {
           Component: DocumentView,
@@ -209,6 +265,16 @@ export const getViewFromConfig = ({
 
         templateClassName = `global-edit`
         templateType = 'default'
+
+        const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
+        viewType = viewInfo.viewType
+        documentSubViewType = viewInfo.documentSubViewType
+
+        attachViewActions({
+          collectionOrGlobal: matchedGlobal,
+          serverProps,
+          viewKeyArg: documentSubViewType,
+        })
       }
       break
   }
@@ -217,10 +283,15 @@ export const getViewFromConfig = ({
     ViewToRender = getCustomViewByRoute({ config, currentRoute })?.view
   }
 
+  serverProps.viewActions.reverse()
+
   return {
     DefaultView: ViewToRender,
+    documentSubViewType,
     initPageOptions,
+    serverProps,
     templateClassName,
     templateType,
+    viewType,
   }
 }

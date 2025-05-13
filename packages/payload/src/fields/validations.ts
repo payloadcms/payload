@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
@@ -9,7 +10,7 @@ import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   DateField,
@@ -20,6 +21,8 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
+  RelationshipValueMany,
+  RelationshipValueSingle,
   RichTextField,
   SelectField,
   TextareaField,
@@ -32,6 +35,11 @@ import { isNumber } from '../utilities/isNumber.js'
 import { isValidID } from '../utilities/isValidID.js'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
+
+export type TextFieldManyValidation = Validate<string[], unknown, unknown, TextField>
+
+export type TextFieldSingleValidation = Validate<string, unknown, unknown, TextField>
+
 export const text: TextFieldValidation = (
   value,
   {
@@ -93,6 +101,7 @@ export const text: TextFieldValidation = (
 }
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
+
 export const password: PasswordFieldValidation = (
   value,
   {
@@ -135,6 +144,7 @@ export type ConfirmPasswordFieldValidation = Validate<
   { password: string },
   TextField
 >
+
 export const confirmPassword: ConfirmPasswordFieldValidation = (
   value,
   { req: { t }, required, siblingData },
@@ -151,12 +161,13 @@ export const confirmPassword: ConfirmPasswordFieldValidation = (
 }
 
 export type EmailFieldValidation = Validate<string, unknown, { username?: string }, EmailField>
+
 export const email: EmailFieldValidation = (
   value,
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections, config },
       t,
     },
     required,
@@ -164,7 +175,9 @@ export const email: EmailFieldValidation = (
   },
 ) => {
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -177,7 +190,19 @@ export const email: EmailFieldValidation = (
     }
   }
 
-  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
+  /**
+   * Disallows emails with double quotes (e.g., "user"@example.com, user@"example.com", "user@example.com")
+   * Rejects spaces anywhere in the email (e.g., user @example.com, user@ example.com, user name@example.com)
+   * Prevents consecutive dots in the local or domain part (e.g., user..name@example.com, user@example..com)
+   * Disallows domains that start or end with a hyphen (e.g., user@-example.com, user@example-.com)
+   * Allows standard email formats (e.g., user@example.com, user.name+alias@example.co.uk, user-name@example.org)
+   * Allows domains with consecutive hyphens as long as they are not leading/trailing (e.g., user@ex--ample.com)
+   * Supports multiple subdomains (e.g., user@sub.domain.example.com)
+   */
+  const emailRegex =
+    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+
+  if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
 
@@ -185,12 +210,13 @@ export const email: EmailFieldValidation = (
 }
 
 export type UsernameFieldValidation = Validate<string, unknown, { email?: string }, TextField>
+
 export const username: UsernameFieldValidation = (
   value,
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections, config },
       t,
     },
     required,
@@ -200,7 +226,9 @@ export const username: UsernameFieldValidation = (
   let maxLength: number
 
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -221,14 +249,15 @@ export const username: UsernameFieldValidation = (
     return t('validation:shorterThanMax', { maxLength })
   }
 
-  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
-    return t('validation:username')
+  if (!value && required) {
+    return t('validation:required')
   }
 
   return true
 }
 
 export type TextareaFieldValidation = Validate<string, unknown, unknown, TextareaField>
+
 export const textarea: TextareaFieldValidation = (
   value,
   {
@@ -265,6 +294,7 @@ export const textarea: TextareaFieldValidation = (
 }
 
 export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
+
 export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
   if (required && value === undefined) {
     return t('validation:required')
@@ -279,6 +309,7 @@ export type JSONFieldValidation = Validate<
   unknown,
   { jsonError?: string } & JSONField
 >
+
 export const json: JSONFieldValidation = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
@@ -338,16 +369,17 @@ export const json: JSONFieldValidation = async (
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
-        return t(ajv.errorsText())
+        return ajv.errorsText()
       }
     } catch (error) {
-      return t(error.message)
+      return error.message
     }
   }
   return true
 }
 
 export type CheckboxFieldValidation = Validate<boolean, unknown, unknown, CheckboxField>
+
 export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required }) => {
   if ((value && typeof value !== 'boolean') || (required && typeof value !== 'boolean')) {
     return t('validation:trueOrFalse')
@@ -357,9 +389,26 @@ export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required 
 }
 
 export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
-export const date: DateFieldValidation = (value, { req: { t }, required }) => {
-  if (value && !isNaN(Date.parse(value.toString()))) {
+
+export const date: DateFieldValidation = (
+  value,
+  { name, req: { t }, required, siblingData, timezone },
+) => {
+  const validDate = value && !isNaN(Date.parse(value.toString()))
+
+  // We need to also check for the timezone data based on this field's config
+  // We cannot do this inside the timezone field validation as it's visually hidden
+  const hasRequiredTimezone = timezone && required
+  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  // Always resolve to true if the field is not required, as timezone may be optional too then
+  const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
+
+  if (validDate && validTimezone) {
     return true
+  }
+
+  if (validDate && !validTimezone) {
+    return t('validation:timezoneRequired')
   }
 
   if (value) {
@@ -374,6 +423,7 @@ export const date: DateFieldValidation = (value, { req: { t }, required }) => {
 }
 
 export type RichTextFieldValidation = Validate<object, unknown, unknown, RichTextField>
+
 export const richText: RichTextFieldValidation = async (value, options) => {
   if (!options?.editor) {
     throw new Error('richText field has no editor property.')
@@ -420,6 +470,11 @@ const validateArrayLength = (
 }
 
 export type NumberFieldValidation = Validate<number | number[], unknown, unknown, NumberField>
+
+export type NumberFieldManyValidation = Validate<number[], unknown, unknown, NumberField>
+
+export type NumberFieldSingleValidation = Validate<number, unknown, unknown, NumberField>
+
 export const number: NumberFieldValidation = (
   value,
   { hasMany, max, maxRows, min, minRows, req: { t }, required },
@@ -463,12 +518,17 @@ export const number: NumberFieldValidation = (
 }
 
 export type ArrayFieldValidation = Validate<unknown[], unknown, unknown, ArrayField>
+
 export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t }, required }) => {
   return validateArrayLength(value, { maxRows, minRows, required, t })
 }
 
-export type BlockFieldValidation = Validate<unknown, unknown, unknown, BlockField>
-export const blocks: BlockFieldValidation = (value, { maxRows, minRows, req: { t }, required }) => {
+export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
+
+export const blocks: BlocksFieldValidation = (
+  value,
+  { maxRows, minRows, req: { t }, required },
+) => {
   return validateArrayLength(value, { maxRows, minRows, required, t })
 }
 
@@ -479,7 +539,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -496,8 +556,10 @@ const validateFilterOptions: Validate<
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
+                blockData,
                 data,
                 relationTo: collection,
+                req,
                 siblingData,
                 user,
               })
@@ -536,7 +598,7 @@ const validateFilterOptions: Validate<
             falseCollections.push(collection)
           }
 
-          const result = await payload.find({
+          const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
             limit: 0,
@@ -606,8 +668,13 @@ const validateFilterOptions: Validate<
 
 export type UploadFieldValidation = Validate<unknown, unknown, unknown, UploadField>
 
+export type UploadFieldManyValidation = Validate<unknown[], unknown, unknown, UploadField>
+
+export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, UploadField>
+
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -678,6 +745,10 @@ export const upload: UploadFieldValidation = async (value, options) => {
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -689,8 +760,24 @@ export type RelationshipFieldValidation = Validate<
   unknown,
   RelationshipField
 >
+
+export type RelationshipFieldManyValidation = Validate<
+  RelationshipValueMany,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
+export type RelationshipFieldSingleValidation = Validate<
+  RelationshipValueSingle,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -763,10 +850,19 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
     }
   }
 
+  if (event === 'onChange') {
+    return true
+  }
+
   return validateFilterOptions(value, options)
 }
 
 export type SelectFieldValidation = Validate<string | string[], unknown, unknown, SelectField>
+
+export type SelectFieldManyValidation = Validate<string[], unknown, unknown, SelectField>
+
+export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
+
 export const select: SelectFieldValidation = (
   value,
   { hasMany, options, req: { t }, required },
@@ -805,6 +901,7 @@ export const select: SelectFieldValidation = (
 }
 
 export type RadioFieldValidation = Validate<unknown, unknown, unknown, RadioField>
+
 export const radio: RadioFieldValidation = (value, { options, req: { t }, required }) => {
   if (value) {
     const valueMatchesOption = options.some(
@@ -822,6 +919,7 @@ export type PointFieldValidation = Validate<
   unknown,
   PointField
 >
+
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
@@ -842,7 +940,12 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
   return true
 }
 
-export default {
+/**
+ * Built-in field validations used by Payload
+ *
+ * These can be re-used in custom validations
+ */
+export const validations = {
   array,
   blocks,
   checkbox,

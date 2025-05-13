@@ -1,14 +1,16 @@
-.verify {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  flex-wrap: wrap;
-  min-height: 100vh;
-
-  &__brand {
+@layer payload-default {
+  .verify {
     display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: calc(var(--base) * 2);
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    min-height: 100vh;
+
+    &__brand {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: calc(var(--base) * 2);
+    }
   }
 }

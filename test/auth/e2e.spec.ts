@@ -1,10 +1,9 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -20,6 +19,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
 
@@ -81,14 +81,12 @@ const createFirstUser = async ({
     .not.toContain('create-first-user')
 }
 
-describe('auth', () => {
+describe('Auth', () => {
   let page: Page
+  let context: BrowserContext
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
-
-  // Allows for testing create-first-user
-  process.env.SKIP_ON_INIT = 'true'
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -96,27 +94,37 @@ describe('auth', () => {
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+    // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'auth',
+      deleteOnly: true,
+    })
+
+    await payload.create({
+      collection: apiKeysSlug,
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: apiKeysSlug,
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
     await createFirstUser({ page, serverURL })
 
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -180,7 +188,6 @@ describe('auth', () => {
 
     test('should have up-to-date user in `useAuth` hook', async () => {
       await page.goto(url.account)
-      await page.waitForURL(url.account)
       await expect(page.locator('#users-api-result')).toHaveText('Hello, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Hello, world!')
       const field = page.locator('#field-custom')

@@ -1,8 +1,8 @@
+import type { Config } from 'payload'
+
 // IMPORTANT: ensure that imports do not contain React components, etc. as this breaks Playwright tests
 // Instead of pointing to the bundled code, which will include React components, use direct import paths
 import { formatAdminURL } from '../../packages/ui/src/utilities/formatAdminURL.js' // eslint-disable-line payload/no-relative-monorepo-imports
-
-import type { Config } from 'payload'
 
 export class AdminUrlUtil {
   account: string
@@ -15,9 +15,14 @@ export class AdminUrlUtil {
 
   list: string
 
+  login: string
+
+  logout: string
+
   routes: Config['routes']
 
   serverURL: string
+
   constructor(serverURL: string, slug: string, routes?: Config['routes']) {
     this.routes = {
       admin: routes?.admin || '/admin',
@@ -39,6 +44,18 @@ export class AdminUrlUtil {
       serverURL: this.serverURL,
     })
 
+    this.login = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: '/login',
+      serverURL: this.serverURL,
+    })
+
+    this.logout = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: '/logout',
+      serverURL: this.serverURL,
+    })
+
     this.list = formatAdminURL({
       adminRoute: this.routes.admin,
       path: `/collections/${this.entitySlug}`,
@@ -54,7 +71,7 @@ export class AdminUrlUtil {
 
   collection(slug: string): string {
     return formatAdminURL({
-      adminRoute: this.routes.admin,
+      adminRoute: this.routes?.admin,
       path: `/collections/${slug}`,
       serverURL: this.serverURL,
     })
@@ -66,7 +83,7 @@ export class AdminUrlUtil {
 
   global(slug: string): string {
     return formatAdminURL({
-      adminRoute: this.routes.admin,
+      adminRoute: this.routes?.admin,
       path: `/globals/${slug}`,
       serverURL: this.serverURL,
     })

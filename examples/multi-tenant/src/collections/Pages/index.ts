@@ -1,43 +1,32 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import richText from '../../fields/richText'
-import { tenant } from '../../fields/tenant'
-import { loggedIn } from './access/loggedIn'
-import { tenantAdmins } from './access/tenantAdmins'
-import { tenants } from './access/tenants'
-import formatSlug from './hooks/formatSlug'
+import { ensureUniqueSlug } from './hooks/ensureUniqueSlug'
+import { superAdminOrTenantAdminAccess } from '@/collections/Pages/access/superAdminOrTenantAdmin'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  access: {
+    create: superAdminOrTenantAdminAccess,
+    delete: superAdminOrTenantAdminAccess,
+    read: () => true,
+    update: superAdminOrTenantAdminAccess,
+  },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'updatedAt'],
-  },
-  access: {
-    read: tenants,
-    create: loggedIn,
-    update: tenantAdmins,
-    delete: tenantAdmins,
   },
   fields: [
     {
       name: 'title',
       type: 'text',
-      required: true,
     },
     {
       name: 'slug',
-      label: 'Slug',
       type: 'text',
-      index: true,
-      admin: {
-        position: 'sidebar',
-      },
+      defaultValue: 'home',
       hooks: {
-        beforeValidate: [formatSlug('title')],
+        beforeValidate: [ensureUniqueSlug],
       },
+      index: true,
     },
-    tenant,
-    richText(),
   ],
 }

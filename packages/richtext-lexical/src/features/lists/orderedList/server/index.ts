@@ -17,7 +17,7 @@ export const OrderedListFeature = createServerFeature({
         : [
             createNode({
               converters: {
-                html: ListHTMLConverter,
+                html: ListHTMLConverter as any, // ListHTMLConverter uses a different generic type than ListNode[exportJSON], thus we need to cast as any
               },
               node: ListNode,
             }),

@@ -1,9 +1,10 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import findOne from '../operations/findOne.js'
+import { findOne } from '../operations/findOne.js'
 
 export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Response> => {
   // We cannot import the addDataAndFileToRequest utility here from the 'next' package because of dependency issues

@@ -1,6 +1,6 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
+import type { SaveDraftButtonClientProps } from 'payload'
 
 import React, { useCallback, useRef } from 'react'
 
@@ -8,7 +8,6 @@ import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -17,14 +16,16 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const DefaultSaveDraftButton: React.FC = () => {
+export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
+    useDocumentInfo()
+
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -33,10 +34,10 @@ export const DefaultSaveDraftButton: React.FC = () => {
   const { submit } = useForm()
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const disabled = (operation === 'update' && !modified) || uploadStatus === 'uploading'
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (disabled) {
       return
     }
 
@@ -63,10 +64,22 @@ export const DefaultSaveDraftButton: React.FC = () => {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+
+    setUnpublishedVersionCount((count) => count + 1)
+  }, [
+    submit,
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    locale,
+    id,
+    disabled,
+    setUnpublishedVersionCount,
+  ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (forceDisable) {
+    if (disabled) {
       // absorb the event
     }
 
@@ -82,7 +95,7 @@ export const DefaultSaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable}
+      disabled={disabled}
       onClick={() => {
         return void saveDraft()
       }}
@@ -93,15 +106,4 @@ export const DefaultSaveDraftButton: React.FC = () => {
       {t('version:saveDraft')}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const SaveDraftButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultSaveDraftButton />
 }

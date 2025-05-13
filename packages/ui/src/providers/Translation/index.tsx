@@ -4,17 +4,17 @@ import type {
   ClientTranslationKeys,
   ClientTranslationsObject,
   I18nClient,
+  I18nOptions,
   Language,
   TFunction,
 } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig, LanguageOptions } from 'payload'
+import type { LanguageOptions } from 'payload'
 
 import { importDateFNSLocale, t } from '@payloadcms/translations'
 import { enUS } from 'date-fns/locale/en-US'
-import React, { createContext, useContext, useEffect, useState } from 'react'
-
-import { useRouteCache } from '../RouteCache/index.js'
+import { useRouter } from 'next/navigation.js'
+import React, { createContext, use, useEffect, useState } from 'react'
 
 type ContextType<
   TAdditionalTranslations = {},
@@ -48,7 +48,7 @@ const Context = createContext<ContextType<any, any>>({
 type Props = {
   children: React.ReactNode
   dateFNSKey: Language['dateFNSKey']
-  fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  fallbackLang: I18nOptions['fallbackLanguage']
   language: string
   languageOptions: LanguageOptions
   switchLanguageServerAction: (lang: string) => Promise<void>
@@ -64,7 +64,7 @@ export const TranslationProvider: React.FC<Props> = ({
   switchLanguageServerAction,
   translations,
 }) => {
-  const { clearRouteCache } = useRouteCache()
+  const router = useRouter()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
   const nextT: ContextType['t'] = (key, vars): string =>
@@ -78,13 +78,13 @@ export const TranslationProvider: React.FC<Props> = ({
     async (lang: string) => {
       try {
         await switchLanguageServerAction(lang)
-        clearRouteCache()
+        router.refresh()
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error loading language: "${lang}"`, error)
       }
     },
-    [switchLanguageServerAction, clearRouteCache],
+    [switchLanguageServerAction, router],
   )
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export const TranslationProvider: React.FC<Props> = ({
   }, [dateFNSKey])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         i18n: {
           dateFNS,
@@ -114,11 +114,11 @@ export const TranslationProvider: React.FC<Props> = ({
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export const useTranslation = <
   TAdditionalTranslations = {},
   TAdditionalClientTranslationKeys extends string = never,
->() => useContext<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)
+>() => use<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)

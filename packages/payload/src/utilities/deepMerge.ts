@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import deepMerge from 'deepmerge'
 
 import { isPlainObject } from './isPlainObject.js'
@@ -8,7 +9,11 @@ export { deepMerge }
  *
  * Array handling: Arrays in the target object are combined with the source object's arrays.
  */
-export function deepMergeWithCombinedArrays<T extends object>(obj1: object, obj2: object): T {
+export function deepMergeWithCombinedArrays<T extends object>(
+  obj1: object,
+  obj2: object,
+  options: deepMerge.Options = {},
+): T {
   return deepMerge<T>(obj1, obj2, {
     arrayMerge: (target, source, options) => {
       const destination = target.slice()
@@ -24,6 +29,7 @@ export function deepMergeWithCombinedArrays<T extends object>(obj1: object, obj2
       })
       return destination
     },
+    ...options,
   })
 }
 

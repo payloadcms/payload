@@ -2,9 +2,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -30,7 +30,7 @@
         "./src/payload.config.ts"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2022",
   },
   "include": [
     "next-env.d.ts",

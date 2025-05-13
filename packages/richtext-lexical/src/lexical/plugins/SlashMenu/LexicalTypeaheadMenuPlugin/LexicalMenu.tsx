@@ -1,5 +1,5 @@
 'use client'
-import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
+import type { BaseSelection, LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { JSX, ReactPortal, RefObject } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -7,6 +7,7 @@ import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
   $isRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_LOW,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
@@ -19,6 +20,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
 import type { SlashMenuGroupInternal, SlashMenuItem, SlashMenuItemInternal } from './types.js'
+
+import { CAN_USE_DOM } from '../../../utils/canUseDOM.js'
 
 export type MenuResolution = {
   getRect: () => DOMRect
@@ -79,18 +82,18 @@ function getFullMatchOffset(documentText: string, entryText: string, offset: num
  * Split Lexical TextNode and return a new TextNode only containing matched text.
  * Common use cases include: removing the node, replacing with a new node.
  */
-function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
+function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | undefined {
   const selection = $getSelection()
   if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-    return null
+    return
   }
   const anchor = selection.anchor
   if (anchor.type !== 'text') {
-    return null
+    return
   }
   const anchorNode = anchor.getNode()
   if (!anchorNode.isSimpleText()) {
-    return null
+    return
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
@@ -98,7 +101,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
-    return null
+    return
   }
   let newNode
   if (startOffset === 0) {
@@ -145,12 +148,13 @@ function isTriggerVisibleInNearestScrollContainer(
 // Reposition the menu on scroll, window resize, and element resize.
 export function useDynamicPositioning(
   resolution: MenuResolution | null,
-  targetElement: HTMLElement | null,
+  targetElementRef: RefObject<HTMLElement | null>,
   onReposition: () => void,
   onVisibilityChange?: (isInView: boolean) => void,
 ) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
+    const targetElement = targetElementRef.current
     if (targetElement != null && resolution != null) {
       const rootElement = editor.getRootElement()
       const rootScrollParent =
@@ -184,12 +188,12 @@ export function useDynamicPositioning(
       })
       resizeObserver.observe(targetElement)
       return () => {
-        resizeObserver.unobserve(targetElement)
+        resizeObserver.disconnect()
         window.removeEventListener('resize', onReposition)
         document.removeEventListener('scroll', handleScroll, true)
       }
     }
-  }, [targetElement, editor, onVisibilityChange, onReposition, resolution])
+  }, [editor, onVisibilityChange, onReposition, resolution, targetElementRef])
 }
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
@@ -204,21 +208,14 @@ export function LexicalMenu({
   // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
   groups,
   menuRenderFn,
-  onSelectItem,
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
-  anchorElementRef: RefObject<HTMLElement>
+  anchorElementRef: RefObject<HTMLElement | null>
   close: () => void
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -244,7 +241,7 @@ export function LexicalMenu({
       const allItems = groups.flatMap((group) => group.items)
 
       if (allItems.length) {
-        const firstMatchingItem = allItems[0]
+        const firstMatchingItem = allItems[0]!
         updateSelectedItem(firstMatchingItem)
       }
     }
@@ -256,21 +253,38 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
+      close()
+
       editor.update(() => {
         const textNodeContainingQuery =
           resolution.match != null && shouldSplitNodeWithQuery
             ? $splitNodeContainingQuery(resolution.match)
             : null
 
-        onSelectItem(
-          selectedItem,
-          textNodeContainingQuery,
-          close,
-          resolution.match ? resolution.match.matchingString : '',
-        )
+        if (textNodeContainingQuery) {
+          textNodeContainingQuery.remove()
+        }
       })
+
+      setTimeout(() => {
+        // Needed in Firefox. See https://github.com/payloadcms/payload/issues/10724
+        let selection: BaseSelection | undefined
+        editor.read(() => {
+          selection = $getSelection()?.clone()
+        })
+        editor.update(() => {
+          if (selection) {
+            $setSelection(selection)
+          }
+        })
+
+        selectedItem.onSelect({
+          editor,
+          queryString: resolution.match ? resolution.match.matchingString : '',
+        })
+      }, 0)
     },
-    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
+    [editor, shouldSplitNodeWithQuery, resolution.match, close],
   )
 
   useEffect(() => {
@@ -320,6 +334,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== allItems.length - 1 ? selectedIndex + 1 : 0
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -346,6 +363,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allItems.length - 1
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -431,15 +451,30 @@ export function LexicalMenu({
   )
 }
 
+function setContainerDivAttributes(containerDiv: HTMLElement, className?: string) {
+  if (className != null) {
+    containerDiv.className = className
+  }
+  containerDiv.setAttribute('aria-label', 'Slash menu')
+  containerDiv.setAttribute('role', 'listbox')
+  containerDiv.style.display = 'block'
+  containerDiv.style.position = 'absolute'
+}
+
 export function useMenuAnchorRef(
   anchorElem: HTMLElement,
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-): RefObject<HTMLElement> {
+): RefObject<HTMLElement | null> {
   const [editor] = useLexicalComposerContext()
-  const anchorElementRef = useRef<HTMLElement>(document.createElement('div'))
+  const anchorElementRef = useRef<HTMLElement | null>(
+    CAN_USE_DOM ? document.createElement('div') : null,
+  )
   const positionMenu = useCallback(() => {
+    if (anchorElementRef.current === null || parent === undefined) {
+      return
+    }
     const rootElement = editor.getRootElement()
     const containerDiv = anchorElementRef.current
 
@@ -483,16 +518,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className
-        }
-        containerDiv.setAttribute('aria-label', 'Slash menu')
-        containerDiv.setAttribute('id', 'slash-menu')
-        containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
+        setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
@@ -510,6 +539,7 @@ export function useMenuAnchorRef(
         const containerDiv = anchorElementRef.current
         if (containerDiv !== null && containerDiv.isConnected) {
           containerDiv.remove()
+          containerDiv.removeAttribute('id')
         }
       }
     }
@@ -526,7 +556,7 @@ export function useMenuAnchorRef(
     [resolution, setResolution],
   )
 
-  useDynamicPositioning(resolution, anchorElementRef.current, positionMenu, onVisibilityChange)
+  useDynamicPositioning(resolution, anchorElementRef, positionMenu, onVisibilityChange)
 
   return anchorElementRef
 }

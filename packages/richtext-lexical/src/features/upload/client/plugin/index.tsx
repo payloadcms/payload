@@ -14,9 +14,9 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponentWithAnchor } from '../../../typesClient.js'
+import type { PluginComponent } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
-import type { UploadFeaturePropsClient } from '../feature.client.js'
+import type { UploadFeaturePropsClient } from '../index.js'
 
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
@@ -26,9 +26,7 @@ export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
-  clientProps,
-}) => {
+export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
   const {
     config: { collections },
@@ -55,22 +53,14 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
                   value: payload.value,
                 },
               })
+              // we need to get the focus node before inserting the block node, as $insertNodeToNearestRoot can change the focus node
+              const { focus } = selection
+              const focusNode = focus.getNode()
               // Insert upload node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
               $insertNodeToNearestRoot(uploadNode)
 
-              const { focus } = selection
-              const focusNode = focus.getNode()
-
-              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
-              if (
-                $isParagraphNode(focusNode) &&
-                focusNode.getTextContentSize() === 0 &&
-                focusNode
-                  .getParent()
-                  .getChildren()
-                  .filter((node) => $isParagraphNode(node)).length > 1
-              ) {
+              // Delete the node it it's an empty paragraph
+              if ($isParagraphNode(focusNode) && !focusNode.__first) {
                 focusNode.remove()
               }
             }

@@ -4,13 +4,12 @@ import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
-import { $getNearestNodeFromDOMNode, $getNodeByKey } from 'lexical'
+import { $getNearestNodeFromDOMNode, $getNodeByKey, isHTMLElement } from 'lexical'
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
-import { isHTMLElement } from '../../../utils/guard.js'
 import { Point } from '../../../utils/point.js'
 import { calculateDistanceFromScrollerElem } from '../utils/calculateDistanceFromScrollerElem.js'
 import { getNodeCloseToPoint } from '../utils/getNodeCloseToPoint.js'
@@ -80,7 +79,7 @@ function useDraggableBlockMenu(
     boundingBox?: DOMRect
     elem: HTMLElement | null
     isBelow: boolean
-  }>(null)
+  } | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
 
@@ -223,7 +222,7 @@ function useDraggableBlockMenu(
               : -(menuRef?.current?.getBoundingClientRect()?.width ?? 0)),
           targetLineElem,
           targetBlockElem,
-          lastTargetBlock,
+          lastTargetBlock!,
           pageY,
           anchorElem,
           event,
@@ -243,8 +242,8 @@ function useDraggableBlockMenu(
             isBelow,
           })
         }
-      } else {
-        hideTargetLine(targetLineElem, lastTargetBlock?.elem)
+      } else if (lastTargetBlock?.elem) {
+        hideTargetLine(targetLineElem, lastTargetBlock.elem)
         setLastTargetBlock({
           boundingBox: targetBlockElem.getBoundingClientRect(),
           elem: targetBlockElem,
@@ -343,8 +342,10 @@ function useDraggableBlockMenu(
         setTimeout(() => {
           // add new temp html element to newInsertedElem with the same height and width and the class block-selected
           // to highlight the new inserted element
-          const newInsertedElemRect = newInsertedElem.getBoundingClientRect()
-
+          const newInsertedElemRect = newInsertedElem?.getBoundingClientRect()
+          if (!newInsertedElemRect) {
+            return
+          }
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
@@ -414,7 +415,9 @@ function useDraggableBlockMenu(
 
   function onDragEnd(): void {
     isDraggingBlockRef.current = false
-    hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    if (lastTargetBlock?.elem) {
+      hideTargetLine(targetLineRef.current, lastTargetBlock?.elem)
+    }
   }
 
   return createPortal(

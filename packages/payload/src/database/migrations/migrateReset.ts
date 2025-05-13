@@ -1,7 +1,8 @@
-import type { PayloadRequest } from '../../types/index.js'
+// @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -18,7 +19,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     return
   }
 
-  const req = { payload } as PayloadRequest
+  const req = await createLocalReq({}, payload)
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
@@ -31,7 +32,8 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       try {
         const start = Date.now()
         await initTransaction(req)
-        await migration.down({ payload, req })
+        const session = payload.db.sessions?.[await req.transactionID]
+        await migration.down({ payload, req, session })
         await payload.delete({
           collection: 'payload-migrations',
           req,
@@ -62,6 +64,6 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       },
     })
   } catch (err: unknown) {
-    payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+    payload.logger.error({ err, msg: 'Error deleting dev migration' })
   }
 }

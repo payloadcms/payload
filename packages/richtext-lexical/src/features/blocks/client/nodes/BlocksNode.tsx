@@ -4,26 +4,21 @@ import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-import type { BlockFields, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
+import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
-
-const BlockComponent = React.lazy(() =>
-  import('../component/index.js').then((module) => ({
-    default: module.BlockComponent,
-  })),
-)
+import { BlockComponent } from '../component/index.js'
 
 export class BlockNode extends ServerBlockNode {
-  static clone(node: ServerBlockNode): ServerBlockNode {
+  static override clone(node: ServerBlockNode): ServerBlockNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importJSON(serializedNode: SerializedBlockNode): BlockNode {
+  static override importJSON(serializedNode: SerializedBlockNode): BlockNode {
     if (serializedNode.version === 1) {
       // Convert (version 1 had the fields wrapped in another, unnecessary data property)
       serializedNode = {
@@ -39,16 +34,22 @@ export class BlockNode extends ServerBlockNode {
     return node
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <BlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return (
+      <BlockComponent
+        cacheBuster={this.getCacheBuster()}
+        formData={this.getFields()}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
-  exportJSON(): SerializedBlockNode {
+  override exportJSON(): SerializedBlockNode {
     return super.exportJSON()
   }
 }
 
-export function $createBlockNode(fields: Exclude<BlockFields, 'id'>): BlockNode {
+export function $createBlockNode(fields: BlockFieldsOptionalID): BlockNode {
   return new BlockNode({
     fields: {
       ...fields,

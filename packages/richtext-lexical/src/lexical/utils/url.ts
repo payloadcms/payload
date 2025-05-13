@@ -15,9 +15,20 @@ export function sanitizeUrl(url: string): string {
   return 'https://'
 }
 
-// Source: https://stackoverflow.com/a/8234912/2013580
-const absoluteRegExp =
-  /(?:[A-Za-z]{3,9}:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)(?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?\w*/
+/**
+ * This regex checks for absolute URLs in a string. Tested for the following use cases:
+ * - http://example.com
+ * - https://example.com
+ * - ftp://files.example.com
+ * - http://example.com/resource
+ * - https://example.com/resource?key=value
+ * - http://example.com/resource#anchor
+ * - http://www.example.com
+ * - https://sub.example.com/path/file
+ * - mailto:
+ */
+export const absoluteRegExp =
+  /^(?:[a-zA-Z][a-zA-Z\d+.-]*:(?:\/\/)?(?:[-;:&=+$,\w]+@)?[A-Za-z\d]+(?:\.[A-Za-z\d]+)+|www\.[A-Za-z\d]+(?:\.[A-Za-z\d]+)+|(?:tel|mailto):[\w+.-]+)(?:\/[+~%/\w-]*)?(?:\?[-;&=%\w]*)?(?:#\w+)?$/
 
 /**
  * This regex checks for relative URLs starting with / or anchor links starting with # in a string. Tested for the following use cases:
@@ -25,7 +36,7 @@ const absoluteRegExp =
  * - /privacy-policy#primary-terms
  * - #primary-terms
  *  */
-const relativeOrAnchorRegExp = /^[\w\-./]*(?:#\w[\w-]*)?$/
+export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:#\w[\w-]*)?|#[\w\-]+)$/
 
 /**
  * Prevents unreasonable URLs from being inserted into the editor.

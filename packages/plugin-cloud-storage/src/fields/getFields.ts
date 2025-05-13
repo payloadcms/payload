@@ -21,7 +21,7 @@ export const getFields = ({
   generateFileURL,
   prefix,
 }: Args): Field[] => {
-  const baseURLField: Field = {
+  const baseURLField: TextField = {
     name: 'url',
     type: 'text',
     admin: {
@@ -31,7 +31,7 @@ export const getFields = ({
     label: 'URL',
   }
 
-  const basePrefixField: Field = {
+  const basePrefixField: TextField = {
     name: 'prefix',
     type: 'text',
     admin: {
@@ -67,7 +67,7 @@ export const getFields = ({
         ...(existingURLField?.hooks?.afterRead || []),
       ],
     },
-  })
+  } as TextField)
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -108,7 +108,7 @@ export const getFields = ({
           fields: [
             ...(adapter.fields || []),
             {
-              ...(existingSizeURLField || ({} as any)),
+              ...(existingSizeURLField || {}),
               ...baseURLField,
               hooks: {
                 afterRead: [
@@ -124,7 +124,7 @@ export const getFields = ({
               },
             },
           ],
-        }
+        } as Field
       }),
     }
 
@@ -151,7 +151,7 @@ export const getFields = ({
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    })
+    } as TextField)
   }
 
   return fields

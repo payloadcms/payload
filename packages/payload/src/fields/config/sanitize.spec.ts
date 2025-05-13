@@ -2,7 +2,7 @@ import type { Config } from '../../config/types.js'
 import type {
   ArrayField,
   Block,
-  BlockField,
+  BlocksField,
   CheckboxField,
   Field,
   NumberField,
@@ -156,7 +156,7 @@ describe('sanitizeFields', () => {
             fields,
             validRelationships: [],
           })
-        )[0] as BlockField
+        )[0] as BlocksField
         expect(sanitizedField.name).toStrictEqual('noLabelBlock')
         expect(sanitizedField.label).toStrictEqual(false)
         expect(sanitizedField.type).toStrictEqual('blocks')
@@ -209,7 +209,7 @@ describe('sanitizeFields', () => {
           fields,
           validRelationships: [],
         })
-      )[0] as BlockField
+      )[0] as BlocksField
       expect(sanitizedField.name).toStrictEqual('specialBlock')
       expect(sanitizedField.label).toStrictEqual('Special Block')
       expect(sanitizedField.type).toStrictEqual('blocks')
@@ -360,6 +360,73 @@ describe('sanitizeFields', () => {
         validRelationships: [],
       })
       expect(sanitizedFields).toStrictEqual([])
+    })
+  })
+  describe('blocks', () => {
+    it('should maintain admin.blockName true after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              admin: {
+                disableBlockName: true,
+              },
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(true)
+    })
+    it('should default admin.disableBlockName to true after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
     })
   })
 })

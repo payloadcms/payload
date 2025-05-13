@@ -1,12 +1,5 @@
 'use client'
-import type {
-  MappedComponent,
-  OptionObject,
-  SelectFieldClient,
-  StaticDescription,
-  StaticLabel,
-} from 'payload'
-import type { MarkOptional } from 'ts-essentials'
+import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -14,68 +7,64 @@ import React from 'react'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectInputProps = {
-  readonly afterInput?: MappedComponent[]
-  readonly beforeInput?: MappedComponent[]
+  readonly AfterInput?: React.ReactNode
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
-  readonly Description?: MappedComponent
+  readonly Description?: React.ReactNode
   readonly description?: StaticDescription
-  readonly descriptionProps?: Record<string, unknown>
-  readonly Error?: MappedComponent
-  readonly errorProps?: Record<string, unknown>
-  readonly field?: MarkOptional<SelectFieldClient, 'type'>
+  readonly Error?: React.ReactNode
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
-  readonly Label?: MappedComponent
-  readonly label: StaticLabel
-  readonly labelProps?: Record<string, unknown>
+  readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
+  readonly localized?: boolean
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
+  readonly onInputChange?: ReactSelectAdapterProps['onInputChange']
   readonly options?: OptionObject[]
   readonly path: string
+  readonly placeholder?: LabelFunction | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: string
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
-    afterInput,
-    beforeInput,
+    AfterInput,
+    BeforeInput,
     className,
     Description,
     description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     hasMany = false,
     isClearable = true,
     isSortable = true,
-    Label,
     label,
-    labelProps,
+    Label,
+    localized,
     onChange,
+    onInputChange,
     options,
     path,
+    placeholder,
     readOnly,
     required,
     showError,
     style,
     value,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -96,6 +85,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
+  } else {
+    // If value is not present then render nothing, allowing select fields to reset to their initial 'Select an option' state
+    valueToRender = null
   }
 
   return (
@@ -110,41 +102,40 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
-      <FieldLabel
-        field={field}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
+        {BeforeInput}
         <ReactSelect
           disabled={readOnly}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={onChange}
+          onInputChange={onInputChange}
           options={options.map((option) => ({
             ...option,
             label: getTranslation(option.label, i18n),
           }))}
+          placeholder={placeholder}
           showError={showError}
           value={valueToRender as OptionObject}
         />
-        <RenderComponent mappedComponent={afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

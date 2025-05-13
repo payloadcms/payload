@@ -1,4 +1,4 @@
-import type { Config, GroupField, TabsField, TextField } from 'payload'
+import type { Config, Field, GroupField, TabsField } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
@@ -20,33 +20,35 @@ import { translations } from './translations/index.js'
 export const seoPlugin =
   (pluginConfig: SEOPluginConfig) =>
   (config: Config): Config => {
+    const defaultFields: Field[] = [
+      OverviewField({}),
+      MetaTitleField({
+        hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
+      }),
+      MetaDescriptionField({
+        hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
+      }),
+      ...(pluginConfig?.uploadsCollection
+        ? [
+            MetaImageField({
+              hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
+              relationTo: pluginConfig.uploadsCollection as string,
+            }),
+          ]
+        : []),
+      PreviewField({
+        hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
+      }),
+    ]
+
     const seoFields: GroupField[] = [
       {
         name: 'meta',
         type: 'group',
         fields: [
-          OverviewField({}),
-          MetaTitleField({
-            hasGenerateFn: typeof pluginConfig?.generateTitle === 'function',
-            overrides: pluginConfig?.fieldOverrides?.title as unknown as TextField,
-          }),
-          MetaDescriptionField({
-            hasGenerateFn: typeof pluginConfig?.generateDescription === 'function',
-            overrides: pluginConfig?.fieldOverrides?.description,
-          }),
-          ...(pluginConfig?.uploadsCollection
-            ? [
-                MetaImageField({
-                  hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
-                  overrides: pluginConfig?.fieldOverrides?.image,
-                  relationTo: pluginConfig.uploadsCollection,
-                }),
-              ]
-            : []),
-          ...(pluginConfig?.fields || []),
-          PreviewField({
-            hasGenerateFn: typeof pluginConfig?.generateURL === 'function',
-          }),
+          ...(pluginConfig?.fields && typeof pluginConfig.fields === 'function'
+            ? pluginConfig.fields({ defaultFields })
+            : defaultFields),
         ],
         interfaceName: pluginConfig.interfaceName,
         label: 'SEO',
@@ -64,8 +66,8 @@ export const seoPlugin =
             if (pluginConfig?.tabbedUI) {
               // prevent issues with auth enabled collections having an email field that shouldn't be moved to the SEO tab
               const emailField =
-                (collection.auth ||
-                  !(typeof collection.auth === 'object' && collection.auth.disableLocalStrategy)) &&
+                collection.auth &&
+                !(typeof collection.auth === 'object' && collection.auth.disableLocalStrategy) &&
                 collection.fields?.find((field) => 'name' in field && field.name === 'email')
               const hasOnlyEmailField = collection.fields?.length === 1 && emailField
 
@@ -132,17 +134,22 @@ export const seoPlugin =
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-            if (data) {
-              req.data = data
-            }
+            const reqData = data ?? req.data
 
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
-                  ...req.data,
+                  ...data,
+                  collectionConfig: config.collections?.find(
+                    (c) => c.slug === reqData.collectionSlug,
+                  ),
+                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
                   req,
-                } as unknown as Parameters<GenerateTitle>[0])
+                } satisfies Parameters<GenerateTitle>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -151,17 +158,22 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-            if (data) {
-              req.data = data
-            }
+            const reqData = data ?? req.data
 
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
-                  ...req.data,
+                  ...data,
+                  collectionConfig: config.collections?.find(
+                    (c) => c.slug === reqData.collectionSlug,
+                  ),
+                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
                   req,
-                } as unknown as Parameters<GenerateDescription>[0])
+                } satisfies Parameters<GenerateDescription>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -170,17 +182,22 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-            if (data) {
-              req.data = data
-            }
+            const reqData = data ?? req.data
 
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
-                  ...req.data,
+                  ...data,
+                  collectionConfig: config.collections?.find(
+                    (c) => c.slug === reqData.collectionSlug,
+                  ),
+                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
                   req,
-                } as unknown as Parameters<GenerateURL>[0])
+                } satisfies Parameters<GenerateURL>[0])
               : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
@@ -189,19 +206,24 @@ export const seoPlugin =
         },
         {
           handler: async (req) => {
-            const data = await req.json()
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-            if (data) {
-              req.data = data
-            }
+            const reqData = data ?? req.data
 
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
-                  ...req.data,
+                  ...data,
+                  collectionConfig: config.collections?.find(
+                    (c) => c.slug === reqData.collectionSlug,
+                  ),
+                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
                   req,
-                } as unknown as Parameters<GenerateImage>[0])
+                } satisfies Parameters<GenerateImage>[0])
               : ''
-            return new Response(result, { status: 200 })
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
           path: '/plugin-seo/generate-image',
@@ -220,7 +242,7 @@ export const seoPlugin =
                   tabs: [
                     // append a new tab onto the end of the tabs array, if there is one at the first index
                     // if needed, create a new `Content` tab in the first index for this global's base fields
-                    ...(global?.fields?.[0].type === 'tabs' && global?.fields?.[0].tabs
+                    ...(global?.fields?.[0]?.type === 'tabs' && global?.fields?.[0].tabs
                       ? global.fields[0].tabs
                       : [
                           {
@@ -240,7 +262,7 @@ export const seoPlugin =
                 ...global,
                 fields: [
                   ...seoTabs,
-                  ...(global?.fields?.[0].type === 'tabs' ? global.fields.slice(1) : []),
+                  ...(global?.fields?.[0]?.type === 'tabs' ? global.fields.slice(1) : []),
                 ],
               }
             }
@@ -255,7 +277,7 @@ export const seoPlugin =
         }) || [],
       i18n: {
         ...config.i18n,
-        translations: deepMergeSimple(translations, config.i18n?.translations),
+        translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
       },
     }
   }

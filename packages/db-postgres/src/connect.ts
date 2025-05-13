@@ -1,9 +1,8 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Payload } from 'payload'
+import type { Connect, Migration, Payload } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
@@ -23,7 +22,7 @@ const connectWithReconnect = async function ({
   } else {
     try {
       result = await adapter.pool.connect()
-    } catch (err) {
+    } catch (ignore) {
       setTimeout(() => {
         payload.logger.info('Reconnecting to postgres')
         void connectWithReconnect({ adapter, payload, reconnect: true })
@@ -38,7 +37,7 @@ const connectWithReconnect = async function ({
       if (err.code === 'ECONNRESET') {
         void connectWithReconnect({ adapter, payload, reconnect: true })
       }
-    } catch (err) {
+    } catch (ignore) {
       // swallow error
     }
   })
@@ -61,12 +60,12 @@ export const connect: Connect = async function connect(
 
   try {
     if (!this.pool) {
-      this.pool = new pg.Pool(this.poolOptions)
+      this.pool = new this.pg.Pool(this.poolOptions)
       await connectWithReconnect({ adapter: this, payload: this.payload })
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
+    this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -75,11 +74,33 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
-  } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
-    if (typeof this.rejectInitializing === 'function') this.rejectInitializing()
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated && this.connect) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
+
+  await this.createExtensions()
 
   // Only push schema if not in production
   if (
@@ -90,9 +111,11 @@ export const connect: Connect = async function connect(
     await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  if (typeof this.resolveInitializing === 'function') this.resolveInitializing()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
   }
 }

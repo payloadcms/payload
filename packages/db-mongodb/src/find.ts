@@ -1,21 +1,39 @@
-import type { PaginateOptions } from 'mongoose'
-import type { Find, PayloadRequest } from 'payload'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
+import type { Find } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    draftsEnabled,
+    joins = {},
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    projection,
+    req,
+    select,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const Model = this.collections[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const options = await withSession(this, req)
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  const session = await getSession(this, req)
 
   let hasNearConstraint = false
 
@@ -24,34 +42,50 @@ export const find: Find = async function find(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
+  const sortAggregation: PipelineStage[] = []
+
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
+      sortAggregation,
       timestamps: true,
     })
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    options,
+    options: {
+      session,
+    },
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
+  }
+
+  if (select) {
+    paginationOptions.projection = buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    })
   }
 
   if (this.collation) {
@@ -70,8 +104,8 @@ export const find: Find = async function find(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
           hint: { _id: 1 },
+          session,
         }),
       )
     }
@@ -80,7 +114,8 @@ export const find: Find = async function find(
   if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
@@ -88,14 +123,44 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  let result
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection: collectionSlug,
+    collectionConfig,
+    draftsEnabled,
+    joins,
+    locale,
+    query,
+  })
+
+  if (aggregate || sortAggregation.length > 0) {
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query,
+      session: paginationOptions.options?.session ?? undefined,
+      sort: paginationOptions.sort as object,
+      sortAggregation,
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
+  } else {
+    result = await Model.paginate(query, paginationOptions)
   }
+
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: collectionConfig.fields,
+    operation: 'read',
+  })
+
+  return result
 }

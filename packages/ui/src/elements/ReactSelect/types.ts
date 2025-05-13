@@ -1,3 +1,4 @@
+import type { LabelFunction } from 'payload'
 import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -7,8 +8,20 @@ type CustomSelectProps = {
   disableMouseDown?: boolean
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
+  editableProps?: (
+    data: Option<{ label: string; value: string }>,
+    className: string,
+    selectProps: ReactSelectStateManagerProps,
+  ) => any
+  onDelete?: DocumentDrawerProps['onDelete']
+  onDocumentOpen?: (args: {
+    collectionSlug: string
+    hasReadPermission: boolean
+    id: number | string
+    openInNewTab?: boolean
+  }) => void
+  onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
-  setDrawerIsOpen?: (isOpen: boolean) => void
 }
 
 // augment the types for the `Select` component from `react-select`
@@ -56,7 +69,12 @@ export type ReactSelectAdapterProps = {
   disabled?: boolean
   filterOption?:
     | ((
-        { data, label, value }: { data: Option; label: string; value: string },
+        {
+          allowEdit,
+          data,
+          label,
+          value,
+        }: { allowEdit: boolean; data: Option; label: string; value: string },
         search: string,
       ) => boolean)
     | undefined
@@ -75,6 +93,7 @@ export type ReactSelectAdapterProps = {
   isOptionSelected?: any
   isSearchable?: boolean
   isSortable?: boolean
+  menuIsOpen?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
   onChange?: (value: Option | Option[]) => void
@@ -83,7 +102,7 @@ export type ReactSelectAdapterProps = {
   onMenuOpen?: () => void
   onMenuScrollToBottom?: () => void
   options: Option[] | OptionGroup[]
-  placeholder?: string
+  placeholder?: LabelFunction | string
   showError?: boolean
   value?: Option | Option[]
 }

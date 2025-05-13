@@ -63,7 +63,6 @@ export function getNodeCloseToPoint(props: Props): Output {
     point: { x, y },
     startIndex = 0,
     useEdgeAsDefault = false,
-    verbose = false,
   } = props
 
   // Use cache
@@ -99,25 +98,23 @@ export function getNodeCloseToPoint(props: Props): Output {
   // Return null if matching block element is the first or last node
   editor.getEditorState().read(() => {
     if (useEdgeAsDefault) {
-      const [firstNode, lastNode] = [
-        editor.getElementByKey(topLevelNodeKeys[0]),
-        editor.getElementByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]),
-      ]
+      const firstNode = editor.getElementByKey(topLevelNodeKeys[0]!)
+      const lastNode = editor.getElementByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]!)
 
-      const [firstNodeRect, lastNodeRect] = [
-        getBoundingClientRectWithoutTransform(firstNode),
-        getBoundingClientRectWithoutTransform(lastNode),
-      ]
+      if (firstNode && lastNode) {
+        const [firstNodeRect, lastNodeRect] = [
+          getBoundingClientRectWithoutTransform(firstNode),
+          getBoundingClientRectWithoutTransform(lastNode),
+        ]
 
-      if (firstNodeRect && lastNodeRect) {
         if (y < firstNodeRect.top) {
           closestBlockElem.blockElem = firstNode
           closestBlockElem.distance = firstNodeRect.top - y
-          closestBlockElem.blockNode = $getNodeByKey(topLevelNodeKeys[0])
+          closestBlockElem.blockNode = $getNodeByKey(topLevelNodeKeys[0]!)
           closestBlockElem.foundAtIndex = 0
         } else if (y > lastNodeRect.bottom) {
           closestBlockElem.distance = y - lastNodeRect.bottom
-          closestBlockElem.blockNode = $getNodeByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1])
+          closestBlockElem.blockNode = $getNodeByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]!)
           closestBlockElem.blockElem = lastNode
           closestBlockElem.foundAtIndex = topLevelNodeKeys.length - 1
         }
@@ -136,7 +133,7 @@ export function getNodeCloseToPoint(props: Props): Output {
     let direction = Indeterminate
 
     while (index >= 0 && index < topLevelNodeKeys.length) {
-      const key = topLevelNodeKeys[index]
+      const key = topLevelNodeKeys[index]!
       const elem = editor.getElementByKey(key)
       if (elem === null) {
         break

@@ -1,37 +1,73 @@
-import type { PayloadRequest, UpdateVersion } from 'payload'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
+
+import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { id, collection, locale, req = {} as PayloadRequest, versionData, where },
+  {
+    id,
+    collection: collectionSlug,
+    locale,
+    options: optionsArgs = {},
+    req,
+    returning,
+    select,
+    versionData,
+    where,
+  },
 ) {
-  const VersionModel = this.versions[collection]
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
+
   const whereToUse = where || { id: { equals: id } }
-  const options = {
-    ...(await withSession(this, req)),
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+
+  const flattenedFields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+
+  const options: MongooseUpdateQueryOptions = {
+    ...optionsArgs,
     lean: true,
     new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
   }
 
-  const query = await VersionModel.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: flattenedFields,
     locale,
-    payload: this.payload,
     where: whereToUse,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const result = JSON.parse(JSON.stringify(doc))
-
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    await Model.updateOne(query, versionData, options)
+    return null
   }
-  return result
+
+  const doc = await Model.findOneAndUpdate(query, versionData, options)
+
+  if (!doc) {
+    return null
+  }
+
+  transform({ adapter: this, data: doc, fields, operation: 'read' })
+
+  return doc
 }

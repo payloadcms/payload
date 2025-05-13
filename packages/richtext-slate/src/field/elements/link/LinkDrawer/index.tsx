@@ -4,17 +4,16 @@ import type { FormProps } from '@payloadcms/ui'
 
 import {
   Drawer,
+  EditDepthProvider,
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
   useDocumentInfo,
   useEditDepth,
-  useFieldProps,
   useHotkey,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'
@@ -29,43 +28,59 @@ export const LinkDrawer: React.FC<Props> = ({
   fields,
   handleModalSubmit,
   initialState,
+  schemaPath,
 }) => {
   const { t } = useTranslation()
-  const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
-  const { id } = useDocumentInfo()
-  const { config } = useConfig()
+
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: fieldMapPath,
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions: {
+          fields: true,
         },
-        serverURL: config.serverURL,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: fieldMapPath ?? '',
       })
+
+      return state
     },
 
-    [config.routes.api, config.serverURL, fieldMapPath, id],
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, fieldMapPath],
   )
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-      <Form
-        beforeSubmit={[onChange]}
-        disableValidationOnSubmit
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={handleModalSubmit}
-      >
-        <RenderFields fields={fields} forceRender path="" readOnly={false} schemaPath="" />
-        <LinkSubmit />
-      </Form>
-    </Drawer>
+    <EditDepthProvider>
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleModalSubmit}
+        >
+          <RenderFields
+            fields={fields}
+            forceRender
+            parentIndexPath=""
+            parentPath={''}
+            parentSchemaPath=""
+            permissions={true}
+            readOnly={false}
+          />
+          <LinkSubmit />
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }
 

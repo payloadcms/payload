@@ -25,11 +25,12 @@ export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, row
   const { getDataByPath, getSiblingData } = useWatchForm()
   const collapsibleData = getSiblingData(path)
   const arrayData = getDataByPath(path)
+
   const data = arrayData || collapsibleData
 
-  return <RowLabel.Provider value={{ data, path, rowNumber }}>{children}</RowLabel.Provider>
+  return <RowLabel value={{ data, path, rowNumber }}>{children}</RowLabel>
 }
 
 export const useRowLabel = <T,>() => {
-  return React.useContext(RowLabel) as RowLabelType<T>
+  return React.use(RowLabel) as RowLabelType<T>
 }

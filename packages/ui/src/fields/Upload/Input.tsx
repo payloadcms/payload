@@ -2,13 +2,9 @@
 
 import type {
   ClientCollectionConfig,
-  FieldDescriptionClientProps,
-  FieldErrorClientProps,
   FieldLabelClientProps,
   FilterOptionsResult,
   JsonObject,
-  MappedComponent,
-  PaginatedDocs,
   StaticDescription,
   StaticLabel,
   UploadFieldClient,
@@ -22,20 +18,21 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
+import type { PopulateDocs, ReloadDoc } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
 import { UploadComponentHasOne } from './HasOne/index.js'
@@ -46,26 +43,28 @@ export const baseClass = 'upload'
 type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
+  readonly AfterInput?: React.ReactNode
+  readonly allowCreate?: boolean
   /**
    * Controls the visibility of the "Create new collection" button
    */
-  readonly allowNewUpload?: boolean
   readonly api?: string
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
-  readonly Description?: MappedComponent
+  readonly Description?: React.ReactNode
   readonly description?: StaticDescription
-  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly Error?: MappedComponent
-  readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly field?: MarkOptional<UploadFieldClient, 'type'>
+  readonly displayPreview?: boolean
+  readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
+  readonly hideRemoveFile?: boolean
   readonly isSortable?: boolean
-  readonly Label?: MappedComponent
-  readonly label: StaticLabel
+  readonly Label?: React.ReactNode
+  readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly onChange?: (e) => void
   readonly path: string
@@ -76,26 +75,25 @@ export type UploadInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: (number | string)[] | (number | string)
-  readonly width?: string
 }
 
 export function UploadInput(props: UploadInputProps) {
   const {
-    allowNewUpload,
+    AfterInput,
+    allowCreate,
     api,
+    BeforeInput,
     className,
     Description,
     description,
-    descriptionProps,
+    displayPreview,
     Error,
-    errorProps,
-    field,
     filterOptions: filterOptionsFromProps,
     hasMany,
     isSortable,
     Label,
     label,
-    labelProps,
+    localized,
     maxRows,
     onChange: onChangeFromProps,
     path,
@@ -106,7 +104,6 @@ export function UploadInput(props: UploadInputProps) {
     showError,
     style,
     value,
-    width,
   } = props
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
@@ -115,13 +112,20 @@ export function UploadInput(props: UploadInputProps) {
       value: JsonObject
     }[]
   >()
+
   const [activeRelationTo, setActiveRelationTo] = React.useState<string>(
     Array.isArray(relationTo) ? relationTo[0] : relationTo,
   )
 
   const { openModal } = useModal()
-  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
-    useBulkUpload()
+  const {
+    drawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setInitialFiles,
+    setMaxFiles,
+    setOnSuccess,
+  } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
@@ -134,7 +138,7 @@ export function UploadInput(props: UploadInputProps) {
         id: {
           ...((filterOptionsFromProps?.[activeRelationTo] as any)?.id || {}),
           not_in: ((filterOptionsFromProps?.[activeRelationTo] as any)?.id?.not_in || []).concat(
-            ...((Array.isArray(value) || value ? [value] : []) || []),
+            ...(Array.isArray(value) || value ? [value] : []),
           ),
         },
       },
@@ -146,6 +150,7 @@ export function UploadInput(props: UploadInputProps) {
       collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
       filterOptions,
     })
+
   const [
     CreateDocDrawer,
     ,
@@ -154,19 +159,24 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
+  /**
+   * Prevent initial retrieval of documents from running more than once
+   */
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
+    if (!allowCreate) {
+      return false
+    }
+
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
-        if (permissions.collections[activeRelationTo].create?.permission === true) {
-          return true
-        }
+        return true
       }
     }
 
     return false
-  }, [activeRelationTo, permissions])
+  }, [activeRelationTo, permissions, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -177,11 +187,12 @@ export function UploadInput(props: UploadInputProps) {
     [onChangeFromProps],
   )
 
-  const populateDocs = React.useCallback(
-    async (
-      ids: (number | string)[],
-      relatedCollectionSlug: string,
-    ): Promise<null | PaginatedDocs> => {
+  const populateDocs = React.useCallback<PopulateDocs>(
+    async (ids, relatedCollectionSlug) => {
+      if (!ids.length) {
+        return
+      }
+
       const query: {
         [key: string]: unknown
         where: Where
@@ -213,18 +224,30 @@ export function UploadInput(props: UploadInputProps) {
       })
       if (response.ok) {
         const json = await response.json()
-        const sortedDocs = ids.map((id) =>
+        let sortedDocs = ids.map((id) =>
           json.docs.find((doc) => {
             return String(doc.id) === String(id)
           }),
         )
+
+        if (sortedDocs.includes(undefined) && hasMany) {
+          sortedDocs = sortedDocs.map((doc, index) =>
+            doc
+              ? doc
+              : {
+                  id: ids[index],
+                  filename: `${t('general:untitled')} - ID: ${ids[index]}`,
+                  isPlaceholder: true,
+                },
+          )
+        }
 
         return { ...json, docs: sortedDocs }
       }
 
       return null
     },
-    [code, serverURL, api, i18n.language],
+    [code, serverURL, api, i18n.language, t, hasMany],
   )
 
   const onUploadSuccess = useCallback(
@@ -268,35 +291,37 @@ export function UploadInput(props: UploadInputProps) {
         setInitialFiles(fileListToUse)
       }
       setCollectionSlug(relationTo)
-      setOnSuccess(onUploadSuccess)
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
+      setCurrentActivePath(path)
       openModal(drawerSlug)
     },
     [
       drawerSlug,
       hasMany,
-      onUploadSuccess,
       openModal,
       relationTo,
       setCollectionSlug,
       setInitialFiles,
-      setOnSuccess,
       maxRows,
       setMaxFiles,
+      path,
+      setCurrentActivePath,
     ],
   )
 
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs) => {
-      const selectedDocIDs = Object.entries(docs).reduce<string[]>((acc, [docID, isSelected]) => {
+      const selectedDocIDs = []
+
+      for (const [id, isSelected] of docs) {
         if (isSelected) {
-          acc.push(docID)
+          selectedDocIDs.push(id)
         }
-        return acc
-      }, [])
+      }
+
       const loadedDocs = await populateDocs(selectedDocIDs, activeRelationTo)
       if (loadedDocs) {
         setPopulatedDocs((currentDocs) => [
@@ -331,9 +356,9 @@ export function UploadInput(props: UploadInputProps) {
     [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
-  const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
-    async ({ collectionSlug, docID }) => {
-      const loadedDocs = await populateDocs([docID], collectionSlug)
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    async ({ collectionSlug, doc }) => {
+      const loadedDocs = await populateDocs([doc.id], collectionSlug)
       const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
       setPopulatedDocs((currentDocs) => {
         if (selectedDoc) {
@@ -356,13 +381,43 @@ export function UploadInput(props: UploadInputProps) {
         return currentDocs
       })
       if (hasMany) {
-        onChange([...(Array.isArray(value) ? value : []), docID])
+        onChange([...(Array.isArray(value) ? value : []), doc.id])
       } else {
-        onChange(docID)
+        onChange(doc.id)
       }
       closeListDrawer()
     },
     [closeListDrawer, hasMany, populateDocs, onChange, value, activeRelationTo],
+  )
+
+  const reloadDoc = React.useCallback<ReloadDoc>(
+    async (docID, collectionSlug) => {
+      const { docs } = await populateDocs([docID], collectionSlug)
+
+      if (docs[0]) {
+        let updatedDocsToPropogate = []
+        setPopulatedDocs((currentDocs) => {
+          const existingDocIndex = currentDocs?.findIndex((doc) => {
+            const hasExisting = doc.value?.id === docs[0].id || doc.value?.isPlaceholder
+            return hasExisting && doc.relationTo === collectionSlug
+          })
+          if (existingDocIndex > -1) {
+            const updatedDocs = [...currentDocs]
+            updatedDocs[existingDocIndex] = {
+              relationTo: collectionSlug,
+              value: docs[0],
+            }
+            updatedDocsToPropogate = updatedDocs
+            return updatedDocs
+          }
+        })
+
+        if (updatedDocsToPropogate.length && hasMany) {
+          onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        }
+      }
+    },
+    [populateDocs, onChange, hasMany],
   )
 
   // only hasMany can reorder
@@ -387,6 +442,7 @@ export function UploadInput(props: UploadInputProps) {
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
+        loadedValueDocsRef.current = true
         const loadedDocs = await populateDocs(
           Array.isArray(value) ? value : [value],
           activeRelationTo,
@@ -397,8 +453,6 @@ export function UploadInput(props: UploadInputProps) {
           )
         }
       }
-
-      loadedValueDocsRef.current = true
     }
 
     if (!loadedValueDocsRef.current) {
@@ -406,10 +460,14 @@ export function UploadInput(props: UploadInputProps) {
     }
   }, [populateDocs, activeRelationTo, value])
 
+  useEffect(() => {
+    setOnSuccess(path, onUploadSuccess)
+  }, [value, path, onUploadSuccess, setOnSuccess])
+
   const showDropzone =
-    !readOnly &&
-    (!value ||
-      (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)))
+    !value ||
+    (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)) ||
+    (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined')
 
   return (
     <div
@@ -422,38 +480,34 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      id={`field-${path?.replace(/\./g, '__')}`}
+      style={style}
     >
-      <FieldLabel
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-        field={field as UploadFieldClient}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${baseClass}__wrap`}>
-        <FieldError
-          CustomError={Error}
-          path={path}
-          {...(errorProps || {})}
-          field={field as UploadFieldClient}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
       </div>
-
+      {BeforeInput}
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
           <>
             {populatedDocs && populatedDocs?.length > 0 ? (
               <UploadComponentHasMany
+                displayPreview={displayPreview}
                 fileDocs={populatedDocs}
                 isSortable={isSortable && !readOnly}
                 onRemove={onRemove}
                 onReorder={onReorder}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
             ) : (
@@ -465,44 +519,58 @@ export function UploadInput(props: UploadInputProps) {
             )}
           </>
         ) : null}
-
         {!hasMany && value ? (
           <>
-            {populatedDocs && populatedDocs?.length > 0 ? (
+            {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
               <UploadComponentHasOne
+                displayPreview={displayPreview}
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
+            ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
+              <>
+                {t('general:untitled')} - ID: {value}
+              </>
             ) : (
               <ShimmerEffect height="62px" />
             )}
           </>
         ) : null}
-
         {showDropzone ? (
-          <Dropzone multipleFiles={hasMany} onChange={onLocalFileSelection}>
+          <Dropzone
+            disabled={readOnly || !canCreate}
+            multipleFiles={hasMany}
+            onChange={onLocalFileSelection}
+          >
             <div className={`${baseClass}__dropzoneContent`}>
               <div className={`${baseClass}__dropzoneContent__buttons`}>
-                <Button
-                  buttonStyle="pill"
-                  className={`${baseClass}__createNewToggler`}
-                  disabled={readOnly || !canCreate}
-                  onClick={() => {
-                    if (!readOnly) {
-                      if (hasMany) {
-                        onLocalFileSelection()
-                      } else {
-                        openCreateDocDrawer()
-                      }
-                    }
-                  }}
-                  size="small"
-                >
-                  {t('general:createNew')}
-                </Button>
-                <span className={`${baseClass}__dropzoneContent__orText`}>{t('general:or')}</span>
+                {canCreate && (
+                  <>
+                    <Button
+                      buttonStyle="pill"
+                      className={`${baseClass}__createNewToggler`}
+                      disabled={readOnly || !canCreate}
+                      onClick={() => {
+                        if (!readOnly) {
+                          if (hasMany) {
+                            onLocalFileSelection()
+                          } else {
+                            openCreateDocDrawer()
+                          }
+                        }
+                      }}
+                      size="small"
+                    >
+                      {t('general:createNew')}
+                    </Button>
+                    <span className={`${baseClass}__dropzoneContent__orText`}>
+                      {t('general:or')}
+                    </span>
+                  </>
+                )}
                 <Button
                   buttonStyle="pill"
                   className={`${baseClass}__listToggler`}
@@ -512,18 +580,20 @@ export function UploadInput(props: UploadInputProps) {
                 >
                   {t('fields:chooseFromExisting')}
                 </Button>
-
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
+                  allowCreate={canCreate}
                   enableRowSelections={hasMany}
                   onBulkSelect={onListBulkSelect}
                   onSelect={onListSelect}
                 />
               </div>
 
-              <p className={`${baseClass}__dragAndDropText`}>
-                {t('general:or')} {t('upload:dragAndDrop')}
-              </p>
+              {canCreate && !readOnly && (
+                <p className={`${baseClass}__dragAndDropText`}>
+                  {t('general:or')} {t('upload:dragAndDrop')}
+                </p>
+              )}
             </div>
           </Dropzone>
         ) : (
@@ -538,11 +608,10 @@ export function UploadInput(props: UploadInputProps) {
           </>
         )}
       </div>
-      <FieldDescription
-        Description={Description}
-        description={description}
-        {...(descriptionProps || {})}
-        field={field as UploadFieldClient}
+      {AfterInput}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

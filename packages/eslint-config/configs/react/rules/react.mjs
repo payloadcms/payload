@@ -1,4 +1,4 @@
-/** @type {import('eslint').Linter.FlatConfig} */
+/** @type {import('eslint').Linter.Config} */
 export const index = {
   '@eslint-react/dom/no-dangerously-set-innerhtml': 'off',
   '@eslint-react/dom/no-dangerously-set-innerhtml-with-children': 'off',

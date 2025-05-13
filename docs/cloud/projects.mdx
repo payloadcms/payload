@@ -9,10 +9,11 @@ keywords: cloud, payload cloud, projects, project, overview, database, file stor
 ## Overview
 
 <Banner>
-  The overview tab shows your most recent deployment, along with build and deployment logs. From
-  here, you can see your live URL, deployment details like timestamps and commit hash, as well as
-  the status of your deployment. You can also trigger a redeployment manually, which will rebuild
-  your project using the current configuration.
+  The overview tab shows your most recent deployment, along with build and
+  deployment logs. From here, you can see your live URL, deployment details like
+  timestamps and commit hash, as well as the status of your deployment. You can
+  also trigger a redeployment manually, which will rebuild your project using
+  the current configuration.
 </Banner>
 
 ![Payload Cloud Overview Page](https://payloadcms.com/images/docs/cloud/overview-page.jpg)
@@ -28,7 +29,7 @@ Your Payload Cloud project comes with a MongoDB serverless Atlas DB instance or 
 
 Payload Cloud gives you S3 file storage backed by Cloudflare as a CDN, and this plugin extends Payload so that all of your media will be stored in S3 rather than locally.
 
-AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/plugin-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
+AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/payload/tree/main/packages/payload-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
 
 ### Accessing Files Outside of Payload Cloud
 
@@ -59,7 +60,9 @@ You can update settings from your Project’s Settings tab. Changes to your buil
 From the Environment Variables page of the Settings tab, you can add, update and delete variables for use in your project. Like build settings, these changes will trigger a redeployment of your project.
 
 <Banner>
-  Note: For security reasons, any variables you wish to provide to the [Admin Panel](../admin/overview) must be prefixed with `NEXT_PUBLIC_`. [More details](../configuration/environment-vars).
+  Note: For security reasons, any variables you wish to provide to the [Admin
+  Panel](../admin/overview) must be prefixed with `NEXT_PUBLIC_`. [More
+  details](../configuration/environment-vars).
 </Banner>
 
 ## Custom Domains
@@ -67,8 +70,9 @@ From the Environment Variables page of the Settings tab, you can add, update and
 With Payload Cloud, you can add custom domain names to your project. To do so, first go to the Domains page of the Settings tab of your project. Here you can see your default domain. To add a new domain, type in the domain name you wish to use.
 
 <Banner>
-  Note: do not include the protocol (http:// or https://) or any paths (/page). Only include the
-  domain name and extension, and optionally a subdomain. - your-domain.com - backend.your-domain.com
+  Note: do not include the protocol (http:// or https://) or any paths (/page).
+  Only include the domain name and extension, and optionally a subdomain. -
+  your-domain.com - backend.your-domain.com
 </Banner>
 
 Once you click save, a DNS record will be generated for your domain name to point to your live project. Add this record into your DNS provider’s records, and once the records are resolving properly (this can take 1hr to 48hrs in some cases), your domain will now to point to your live project.
@@ -84,7 +88,7 @@ export default buildConfig({
 
 ## Email
 
-Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](https://payloadcms.com/docs/email/overview) overview.
+Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](../email/overview) overview.
 
 If you are on the Pro or Enterprise plan, you can add your own custom Email domain name. From the Email page of your project’s Settings, add the domain you wish to use for email delivery. This will generate a set of DNS records. Add these records to your DNS provider and click verify to check that your records are resolving properly. Once verified, your emails will now be sent from your custom domain name.
 
@@ -98,21 +102,27 @@ From there, you are ready to make updates to your project. When you are ready to
 
 Projects generated from a template will come pre-configured with the official Cloud Plugin, but if you are using your own repository you will need to add this into your project. To do so, add the plugin to your Payload Config:
 
-`yarn add @payloadcms/plugin-cloud`
+`pnpm add @payloadcms/payload-cloud`
 
 ```js
-import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   // rest of config
 })
 ```
 
 <Banner type="warning">
-  **Note:** If your Payload Config already has an email with transport, this will take precedence
-  over Payload Cloud's email service.
+  **Note:** If your Payload Config already has an email with transport, this
+  will take precedence over Payload Cloud's email service.
+</Banner>
+
+<Banner type="info">
+  Good to know: the Payload Cloud Plugin was previously named
+  `@payloadcms/plugin-cloud`. If you are using this plugin, you should update to
+  the new package name.
 </Banner>
 
 #### **Optional configuration**

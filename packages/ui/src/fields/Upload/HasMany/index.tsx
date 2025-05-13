@@ -11,10 +11,17 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
+import { isImage } from 'payload/shared'
+
 import './index.scss'
+
+import type { ReloadDoc } from '../types.js'
+
+import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
 
 type Props = {
   readonly className?: string
+  readonly displayPreview?: boolean
   readonly fileDocs: {
     relationTo: string
     value: JsonObject
@@ -23,10 +30,22 @@ type Props = {
   readonly onRemove?: (value) => void
   readonly onReorder?: (value) => void
   readonly readonly?: boolean
+  readonly reloadDoc: ReloadDoc
   readonly serverURL: string
 }
+
 export function UploadComponentHasMany(props: Props) {
-  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, serverURL } = props
+  const {
+    className,
+    displayPreview,
+    fileDocs,
+    isSortable,
+    onRemove,
+    onReorder,
+    readonly,
+    reloadDoc,
+    serverURL,
+  } = props
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -62,8 +81,36 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
+          let src: string
+          let thumbnailSrc: string
+
+          if (value.url) {
+            try {
+              src = new URL(value.url, serverURL).toString()
+            } catch {
+              src = `${serverURL}${value.url}`
+            }
+          }
+
+          if (value.thumbnailURL) {
+            try {
+              thumbnailSrc = new URL(value.thumbnailURL, serverURL).toString()
+            } catch {
+              thumbnailSrc = `${serverURL}${value.thumbnailURL}`
+            }
+          }
+
+          if (isImage(value.mimeType)) {
+            thumbnailSrc = getBestFitFromSizes({
+              sizes: value.sizes,
+              thumbnailURL: thumbnailSrc,
+              url: src,
+              width: value.width,
+            })
+          }
+
           return (
-            <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
+            <DraggableSortableItem disabled={!isSortable || readonly} id={id} key={id}>
               {(draggableSortableItemProps) => (
                 <div
                   className={[
@@ -80,7 +127,7 @@ export function UploadComponentHasMany(props: Props) {
                   }}
                 >
                   <UploadCard size="small">
-                    {isSortable && draggableSortableItemProps && (
+                    {draggableSortableItemProps && (
                       <div
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
@@ -96,11 +143,14 @@ export function UploadComponentHasMany(props: Props) {
                       alt={(value?.alt || value?.filename) as string}
                       byteSize={value.filesize as number}
                       collectionSlug={relationTo}
+                      displayPreview={displayPreview}
                       filename={value.filename as string}
                       id={id}
                       mimeType={value?.mimeType as string}
                       onRemove={() => removeItem(index)}
-                      src={`${serverURL}${value.url}`}
+                      reloadDoc={reloadDoc}
+                      src={src}
+                      thumbnailSrc={thumbnailSrc}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

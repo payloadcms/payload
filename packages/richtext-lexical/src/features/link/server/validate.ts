@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
@@ -13,30 +13,39 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, collectionSlug, operation, preferences, req },
+      options: { id, collectionSlug, data, operation, preferences, req },
     },
   }) => {
     /**
-     * Run buildStateFromSchema as that properly validates link fields and link sub-fields
+     * Run fieldSchemasToFormState as that properly validates link fields and link sub-fields
      */
 
-    const result = await buildStateFromSchema({
+    const result = await fieldSchemasToFormState({
       id,
       collectionSlug,
       data: node.fields,
-      fieldSchema: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
+      documentData: data,
+      fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
+      fieldSchemaMap: undefined,
+      initialBlockData: node.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      permissions: {},
       preferences,
+      renderAllFields: false,
       req,
-      siblingData: node.fields,
+      schemaPath: '',
     })
 
-    let errorPaths = []
+    const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths) {
-        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
+      const fieldState = result[fieldKey]
+      if (fieldState?.errorPaths?.length) {
+        for (const errorPath of fieldState.errorPaths) {
+          errorPathsSet.add(errorPath)
+        }
       }
     }
+    const errorPaths = Array.from(errorPathsSet)
 
     if (errorPaths.length) {
       return 'The following fields are invalid: ' + errorPaths.join(', ')

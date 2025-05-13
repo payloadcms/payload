@@ -26,9 +26,6 @@ const AutosaveGlobal: GlobalConfig = {
       }
     },
   },
-  admin: {
-    preview: () => 'https://payloadcms.com',
-  },
   fields: [
     {
       name: 'title',

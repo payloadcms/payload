@@ -5,9 +5,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const JSONCell: React.FC<DefaultCellComponentProps<string, JSONFieldClient>> = ({
-  cellData,
-}) => {
+export const JSONCell: React.FC<DefaultCellComponentProps<JSONFieldClient>> = ({ cellData }) => {
   const textToShow = cellData?.length > 100 ? `${cellData.substring(0, 100)}\u2026` : cellData
 
   return (

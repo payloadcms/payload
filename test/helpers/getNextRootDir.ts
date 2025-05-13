@@ -33,8 +33,19 @@ export function getNextRootDir(testSuite?: string) {
     }
 
     if (hasNextConfig) {
+      let rootDir = testSuiteDir
+      if (process.env.PAYLOAD_TEST_PROD === 'true') {
+        // If in prod mode, there may be a testSuite/prod folder. If so, use that as the rootDir
+        const prodDir = resolve(testSuiteDir, 'prod')
+        try {
+          fs.accessSync(prodDir, fs.constants.F_OK)
+          rootDir = prodDir
+        } catch (err) {
+          // Swallow err - no prod folder
+        }
+      }
       return {
-        rootDir: testSuiteDir,
+        rootDir,
         adminRoute,
       }
     }

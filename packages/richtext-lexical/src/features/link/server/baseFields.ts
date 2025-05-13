@@ -4,15 +4,18 @@ import type {
   RadioField,
   SanitizedConfig,
   TextField,
+  TextFieldSingleValidation,
   User,
 } from 'payload'
+
+import type { LinkFields } from '../nodes/types.js'
 
 import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 
 export const getBaseFields = (
   config: SanitizedConfig,
-  enabledCollections: CollectionSlug[],
-  disabledCollections: CollectionSlug[],
+  enabledCollections?: CollectionSlug[],
+  disabledCollections?: CollectionSlug[],
   maxDepth?: number,
 ): FieldAffectingData[] => {
   let enabledRelations: CollectionSlug[]
@@ -67,6 +70,10 @@ export const getBaseFields = (
       hooks: {
         beforeChange: [
           ({ value }) => {
+            if (!value) {
+              return
+            }
+
             if (!validateUrl(value)) {
               return encodeURIComponent(value)
             }
@@ -76,11 +83,14 @@ export const getBaseFields = (
       },
       label: ({ t }) => t('fields:enterURL'),
       required: true,
-      validate: (value: string) => {
+      validate: ((value: string, options) => {
+        if ((options?.siblingData as LinkFields)?.linkType === 'internal') {
+          return // no validation needed, as no url should exist for internal links
+        }
         if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
         }
-      },
+      }) as TextFieldSingleValidation,
     },
   ]
 
@@ -91,14 +101,16 @@ export const getBaseFields = (
       value: 'internal',
     })
     ;(baseFields[2] as TextField).admin = {
-      condition: ({ linkType }) => linkType !== 'internal',
+      condition: (_data, _siblingData) => {
+        return _siblingData.linkType !== 'internal'
+      },
     }
 
     baseFields.push({
       name: 'doc',
       admin: {
-        condition: ({ linkType }) => {
-          return linkType === 'internal'
+        condition: (_data, _siblingData) => {
+          return _siblingData.linkType === 'internal'
         },
       },
       // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
@@ -106,10 +118,12 @@ export const getBaseFields = (
       filterOptions:
         !enabledCollections && !disabledCollections
           ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+              const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
+                .hidden
               if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
                 return false
               }
+              return true
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),

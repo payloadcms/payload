@@ -22,7 +22,9 @@ export function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

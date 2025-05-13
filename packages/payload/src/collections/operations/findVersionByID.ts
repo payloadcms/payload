@@ -1,6 +1,7 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
@@ -9,6 +10,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   collection: Collection
@@ -17,7 +21,9 @@ export type Arguments = {
   disableErrors?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -31,8 +37,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     depth,
     disableErrors,
     overrideAccess,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -62,12 +70,20 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
+    const select = sanitizeSelect({
+      fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
+      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      select: incomingSelect,
+      versions: true,
+    })
+
     const versionsQuery = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       pagination: false,
       req,
+      select,
       where: fullWhere,
     })
 
@@ -86,22 +102,27 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       return null
     }
 
+    if (!result.version) {
+      // Fallback if not selected
+      ;(result as any).version = {}
+    }
+
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result.version =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result.version,
-          query: fullWhere,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeRead?.length) {
+      for (const hook of collectionConfig.hooks.beforeRead) {
+        result.version =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result.version,
+            query: fullWhere,
+            req,
+          })) || result.version
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -118,7 +139,9 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 
@@ -126,18 +149,18 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result.version =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result.version,
-          query: fullWhere,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result.version =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result.version,
+            query: fullWhere,
+            req,
+          })) || result.version
+      }
+    }
 
     // /////////////////////////////////////
     // Return results

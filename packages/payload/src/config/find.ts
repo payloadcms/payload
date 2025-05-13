@@ -1,6 +1,13 @@
-import { findUpSync, pathExistsSync } from 'find-up'
+// @ts-strict-ignore
 import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
+
+import { findUpSync } from '../utilities/findUp.js'
+
+/**
+ * List of all filenames to detect as a Payload configuration file.
+ */
+export const payloadConfigFileNames = ['payload.config.js', 'payload.config.ts']
 
 /**
  * Returns the source and output paths from the nearest tsconfig.json file.
@@ -61,7 +68,7 @@ export const findConfig = (): string => {
   const { configPath, outPath, rootPath, srcPath } = getTSConfigPaths()
 
   // if configPath is absolute file, not folder, return it
-  if (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts') {
+  if (configPath && (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts')) {
     return configPath
   }
 
@@ -75,26 +82,10 @@ export const findConfig = (): string => {
       continue
     }
 
-    const configPath = findUpSync(
-      (dir) => {
-        const tsPath = path.join(dir, 'payload.config.ts')
-        const hasTS = pathExistsSync(tsPath)
-
-        if (hasTS) {
-          return tsPath
-        }
-
-        const jsPath = path.join(dir, 'payload.config.js')
-        const hasJS = pathExistsSync(jsPath)
-
-        if (hasJS) {
-          return jsPath
-        }
-
-        return undefined
-      },
-      { cwd: searchPath },
-    )
+    const configPath = findUpSync({
+      dir: searchPath,
+      fileNames: payloadConfigFileNames,
+    })
 
     if (configPath) {
       return configPath
@@ -104,16 +95,18 @@ export const findConfig = (): string => {
   // If no config file is found in the directories defined by tsconfig.json,
   // try searching in the 'src' and 'dist' directory as a last resort, as they are most commonly used
   if (process.env.NODE_ENV === 'production') {
-    const distConfigPath = findUpSync(['payload.config.js', 'payload.config.ts'], {
-      cwd: path.resolve(process.cwd(), 'dist'),
+    const distConfigPath = findUpSync({
+      dir: path.resolve(process.cwd(), 'dist'),
+      fileNames: ['payload.config.js'],
     })
 
     if (distConfigPath) {
       return distConfigPath
     }
   } else {
-    const srcConfigPath = findUpSync(['payload.config.js', 'payload.config.ts'], {
-      cwd: path.resolve(process.cwd(), 'src'),
+    const srcConfigPath = findUpSync({
+      dir: path.resolve(process.cwd(), 'src'),
+      fileNames: payloadConfigFileNames,
     })
 
     if (srcConfigPath) {

@@ -1,5 +1,9 @@
 'use client'
-import type { ArrayFieldProps, ArrayField as ArrayFieldType } from 'payload'
+import type {
+  ArrayFieldClientComponent,
+  ArrayFieldClientProps,
+  ArrayField as ArrayFieldType,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -9,7 +13,10 @@ import { Button } from '../../elements/Button/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -20,30 +27,17 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
 
 const baseClass = 'array-field'
 
-export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
+export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
-    field,
     field: {
       name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        components: { RowLabel },
-        description,
-        isSortable = true,
-        readOnly: readOnlyFromAdmin,
-      } = {},
+      admin: { className, description, isSortable = true } = {},
       fields,
       label,
       localized,
@@ -52,24 +46,19 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       required,
     },
     forceRender = false,
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path: pathFromProps,
+    permissions,
+    readOnly,
+    schemaPath: schemaPathFromProps,
     validate,
   } = props
 
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
-  const {
-    indexPath,
-    path: pathFromContext,
-    permissions,
-    readOnly: readOnlyFromContext,
-  } = useFieldProps()
+  const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -80,7 +69,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -88,13 +77,19 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: ArrayFieldProps): Partial<ArrayFieldType['labels']> => {
+  const getLabels = (p: ArrayFieldClientProps): Partial<ArrayFieldType['labels']> => {
     if ('labels' in p && p?.labels) {
       return p.labels
     }
+
+    if ('labels' in p.field && p.field.labels) {
+      return { plural: p.field.labels?.plural, singular: p.field.labels?.singular }
+    }
+
     if ('label' in p.field && p.field.label) {
       return { plural: undefined, singular: p.field.label }
     }
+
     return { plural: t('general:rows'), singular: t('general:row') }
   }
 
@@ -106,6 +101,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       if (!editingDefaultLocale && value === null) {
         return true
       }
+
       if (typeof validate === 'function') {
         return validate(value, { ...options, maxRows, minRows, required })
       }
@@ -114,38 +110,39 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   )
 
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
-    formInitializing,
-    formProcessing,
     path,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const addRow = useCallback(
-    async (rowIndex: number): Promise<void> => {
-      await addFieldRow({ path, rowIndex, schemaPath })
-      setModified(true)
+    (rowIndex: number) => {
+      addFieldRow({
+        path,
+        rowIndex,
+        schemaPath,
+      })
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex + 1}`)
+        scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
     (rowIndex: number) => {
       dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
+
       setModified(true)
 
       setTimeout(() => {
@@ -157,18 +154,20 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
-      setModified(true)
+      removeFieldRow({ path, rowIndex })
     },
-    [dispatchFields, path, setModified],
+    [removeFieldRow, path],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
     },
-    [dispatchFields, path, setModified],
+    [path, moveFieldRow],
   )
 
   const toggleCollapseAll = useCallback(
@@ -177,8 +176,8 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         collapsed,
         rows,
       })
-      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
     },
     [dispatchFields, path, rows, setDocFieldPreferences],
   )
@@ -190,6 +189,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -201,8 +201,8 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = disabled && rows.length === 0
-  const showMinRows = rows.length < minRows || (required && rows.length === 0)
+  const showRequired = (readOnly || disabled) && rows.length === 0
+  const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
 
   return (
     <div
@@ -217,32 +217,33 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
       id={`field-${path.replace(/\./g, '__')}`}
     >
       {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Label}
-                label={label}
-                required={required}
-                unstyled
-                {...(labelProps || {})}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={
+                  <FieldLabel
+                    as="span"
+                    label={label}
+                    localized={localized}
+                    path={path}
+                    required={required}
+                  />
+                }
               />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rows.length > 0 && (
+          {rows?.length > 0 && (
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -265,47 +266,56 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
+      {BeforeInput}
+      {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {rows.map((row, i) => {
+          {rows.map((rowData, i) => {
+            const { id: rowID, isLoading } = rowData
+
+            const rowPath = `${path}.${i}`
+
             const rowErrorCount = errorPaths?.filter((errorPath) =>
-              errorPath.startsWith(`${path}.${i}.`),
+              errorPath.startsWith(rowPath + '.'),
             ).length
+
             return (
-              <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
+                    CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
-                    indexPath={indexPath}
+                    isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
-                    path={path}
+                    parentPath={path}
+                    path={rowPath}
                     permissions={permissions}
-                    readOnly={disabled}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
-                    row={row}
-                    rowCount={rows.length}
+                    row={rowData}
+                    rowCount={rows?.length}
                     rowIndex={i}
-                    RowLabel={RowLabel}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
                   />
@@ -334,7 +344,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
@@ -348,6 +358,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldProps> = (props) => {
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
+      {AfterInput}
     </div>
   )
 }

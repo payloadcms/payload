@@ -1,8 +1,10 @@
-import type { CreateVersion, Document, PayloadRequest } from 'payload'
+import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
@@ -11,30 +13,57 @@ export const createVersion: CreateVersion = async function createVersion(
     collectionSlug,
     createdAt,
     parent,
-    req = {} as PayloadRequest,
+    publishedLocale,
+    req,
+    returning,
+    snapshot,
     updatedAt,
     versionData,
   },
 ) {
-  const VersionModel = this.versions[collectionSlug]
-  const options = await withSession(this, req)
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
-  const [doc] = await VersionModel.create(
-    [
+  const options = {
+    session: await getSession(this, req),
+  }
+
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
+  })
+
+  let [doc] = await Model.create([data], options, req)
+
+  const parentQuery = {
+    $or: [
       {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
+        parent: {
+          $eq: data.parent,
+        },
       },
     ],
-    options,
-    req,
-  )
+  }
 
-  await VersionModel.updateMany(
+  await Model.updateMany(
     {
       $and: [
         {
@@ -42,14 +71,15 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parent: {
-            $eq: parent,
-          },
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,
+          },
+        },
+        {
+          updatedAt: {
+            $lt: new Date(doc.updatedAt),
           },
         },
       ],
@@ -58,13 +88,18 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    return null
   }
-  return result
+
+  doc = doc.toObject()
+
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
+
+  return doc
 }

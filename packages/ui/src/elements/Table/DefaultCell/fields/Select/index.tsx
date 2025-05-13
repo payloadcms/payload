@@ -7,7 +7,7 @@ import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface SelectCellProps extends DefaultCellComponentProps<any, SelectFieldClient> {}
+export interface SelectCellProps extends DefaultCellComponentProps<SelectFieldClient> {}
 
 export const SelectCell: React.FC<SelectCellProps> = ({ cellData, field: { options } }) => {
   const { i18n } = useTranslation()

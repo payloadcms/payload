@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { reduceFieldsToValues } from 'payload/shared'
 import React from 'react'
 
+import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -23,17 +24,21 @@ export function AddingFilesView() {
     activeIndex,
     collectionSlug,
     docPermissions,
+    documentSlots,
     forms,
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    resetUploadEdits,
+    updateUploadEdits,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
-  const { config } = useConfig()
+  const { getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
+  const { user } = useAuth()
   const { openModal } = useModal()
 
-  const collection = config.collections.find((c) => c.slug === collectionSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={baseClass}>
@@ -42,21 +47,34 @@ export function AddingFilesView() {
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
-          title={getTranslation(collection.labels.singular, i18n)}
+          title={getTranslation(collectionConfig.labels.singular, i18n)}
         />
         {activeForm ? (
           <DocumentInfoProvider
             collectionSlug={collectionSlug}
+            currentEditor={user}
             docPermissions={docPermissions}
+            hasPublishedDoc={false}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={null}
             initialData={reduceFieldsToValues(activeForm.formState, true)}
             initialState={activeForm.formState}
+            isLocked={false}
             key={`${activeIndex}-${forms.length}`}
+            lastUpdateTime={0}
+            mostRecentVersionIsAutosaved={false}
+            unpublishedVersionCount={0}
+            Upload={documentSlots.Upload}
+            versionCount={0}
           >
-            <ActionsBar />
-            <EditForm submitted={hasSubmitted} />
+            <ActionsBar collectionConfig={collectionConfig} />
+            <EditForm
+              resetUploadEdits={resetUploadEdits}
+              submitted={hasSubmitted}
+              updateUploadEdits={updateUploadEdits}
+              uploadEdits={activeForm?.uploadEdits}
+            />
           </DocumentInfoProvider>
         ) : null}
       </div>

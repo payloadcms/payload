@@ -1,5 +1,4 @@
 'use client'
-import type { ElementType } from 'react'
 
 import React from 'react'
 
@@ -11,16 +10,21 @@ export type Props = {
   buttonAriaLabel?: string
   href?: string
   id?: string
-  Link?: ElementType
+  /**
+   * @deprecated
+   * This prop is deprecated and will be removed in the next major version.
+   * Components now import their own `Link` directly from `next/link`.
+   */
+  Link?: React.ElementType
   onClick?: () => void
   title: string
-  titleAs?: ElementType
+  titleAs?: React.ElementType
 }
 
 const baseClass = 'card'
 
 export const Card: React.FC<Props> = (props) => {
-  const { id, actions, buttonAriaLabel, href, Link, onClick, title, titleAs } = props
+  const { id, actions, buttonAriaLabel, href, onClick, title, titleAs } = props
 
   const classes = [baseClass, id, (onClick || href) && `${baseClass}--has-onclick`]
     .filter(Boolean)
@@ -38,7 +42,6 @@ export const Card: React.FC<Props> = (props) => {
           buttonStyle="none"
           className={`${baseClass}__click`}
           el="link"
-          Link={Link}
           onClick={onClick}
           to={href}
         />

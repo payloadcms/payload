@@ -1,0 +1,76 @@
+---
+title: Jobs
+label: Jobs
+order: 40
+desc: A Job is a set of work that is offloaded from your APIs and will be processed at a later date.
+keywords: jobs queue, application framework, typescript, node, react, nextjs
+---
+
+Now that we have covered Tasks and Workflows, we can tie them together with a concept called a Job.
+
+<Banner type="default">
+  Whereas you define Workflows and Tasks, which control your business logic, a
+  **Job** is an individual instance of either a Task or a Workflow which
+  contains many tasks.
+</Banner>
+
+For example, let's say we have a Workflow or Task that describes the logic to sync information from Payload to a third-party system. This is how you'd declare how to sync that info, but it wouldn't do anything on its own. In order to run that task or workflow, you'd create a Job that references the corresponding Task or Workflow.
+
+Jobs are stored in the Payload database in the `payload-jobs` collection, and you can decide to keep a running list of all jobs, or configure Payload to delete the job when it has been successfully executed.
+
+#### Queuing a new job
+
+In order to queue a job, you can use the `payload.jobs.queue` function.
+
+Here's how you'd queue a new Job, which will run a `createPostAndUpdate` workflow:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  // Pass the name of the workflow
+  workflow: 'createPostAndUpdate',
+  // The input type will be automatically typed
+  // according to the input you've defined for this workflow
+  input: {
+    title: 'my title',
+  },
+})
+```
+
+In addition to being able to queue new Jobs based on Workflows, you can also queue a job for a single Task:
+
+```ts
+const createdJob = await payload.jobs.queue({
+  task: 'createPost',
+  input: {
+    title: 'my title',
+  },
+})
+```
+
+#### Cancelling Jobs
+
+Payload allows you to cancel jobs that are either queued or currently running. When cancelling a running job, the current task will finish executing, but no subsequent tasks will run. This happens because the job checks its cancellation status between tasks.
+
+##### Cancel a Single Job
+
+To cancel a specific job, use the `payload.jobs.cancelByID` method with the job's ID:
+
+```ts
+await payload.jobs.cancelByID({
+  id: createdJob.id,
+})
+```
+
+##### Cancel Multiple Jobs
+
+To cancel multiple jobs at once, use the `payload.jobs.cancel` method with a `Where` query:
+
+```ts
+await payload.jobs.cancel({
+  where: {
+    workflowSlug: {
+      equals: 'createPost',
+    },
+  },
+})
+```

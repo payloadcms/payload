@@ -1,33 +1,29 @@
 .customButton {
   :global(.btn) {
-    background-color: var(--theme-success-500);
-    color: var(--theme-success-900);
+    background-color: var(--theme-success-150);
+    color: var(--theme-success-750);
 
     &:hover {
-      background-color: var(--theme-success-550) !important;
+      background-color: var(--theme-success-100) !important;
     }
 
     &:disabled {
-      background-color: var(--theme-success-750);
-      color: var(--theme-success-500);
+      background-color: var(--theme-success-100);
+      color: var(--theme-success-750);
     }
   }
-}
 
-[data-theme='dark'] {
-  .customButton {
-    :global(.btn) {
-      background-color: var(--theme-success-500) !important;
-      color: var(--theme-success-100) !important;
+  :global(.popup-button) {
+    background-color: var(--theme-success-150);
+    color: var(--theme-success-750);
 
-      &:hover {
-        background-color: var(--theme-success-400) !important;
-      }
+    &:hover {
+      background-color: var(--theme-success-100) !important;
+    }
 
-      &:disabled {
-        background-color: var(--theme-success-750) !important;
-        color: var(--theme-success-250) !important;
-      }
+    &:disabled {
+      background-color: var(--theme-success-100);
+      color: var(--theme-success-750);
     }
   }
 }

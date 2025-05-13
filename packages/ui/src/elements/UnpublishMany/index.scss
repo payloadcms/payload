@@ -1,18 +1,21 @@
 @import '../../scss/styles.scss';
 
-.unpublish-many {
-  @include blur-bg;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: base(2);
-
-  &__template {
-    z-index: 1;
-    position: relative;
-  }
-
-  .btn {
-    margin-right: $baseline;
+@layer payload-default {
+  .unpublish-many {
+    &__toggle {
+      font-size: inherit;
+      line-height: inherit;
+      display: inline-flex;
+      background: transparent;
+      color: var(--theme-elevation-800);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 0;
+      padding: 0;
+      align-items: center;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   }
 }

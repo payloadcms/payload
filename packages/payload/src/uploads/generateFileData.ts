@@ -1,8 +1,8 @@
+// @ts-strict-ignore
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
-import { mkdirSync } from 'node:fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
@@ -10,7 +10,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
+import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
 import { canResizeImage } from './canResizeImage.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
@@ -25,6 +25,7 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
@@ -40,6 +41,7 @@ type Result<T> = Promise<{
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  isDuplicating,
   operation,
   originalDoc,
   overwriteExistingFiles,
@@ -59,6 +61,7 @@ export const generateFileData = async <T>({
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
+    isDuplicating,
     operation,
     originalDoc,
     req,
@@ -77,8 +80,14 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  if (!file && uploadEdits && data) {
-    const { filename, url } = data as FileData
+  const incomingFileData = isDuplicating ? originalDoc : data
+
+  if (!file && uploadEdits && incomingFileData) {
+    const { filename, url } = incomingFileData as FileData
+
+    if (filename && (filename.includes('../') || filename.includes('..\\'))) {
+      throw new Forbidden(req.t)
+    }
 
     try {
       if (url && url.startsWith('/') && !disableLocalStorage) {
@@ -88,7 +97,7 @@ export const generateFileData = async <T>({
         overwriteExistingFiles = true
       } else if (filename && url) {
         file = await getExternalFile({
-          data: data as FileData,
+          data: incomingFileData as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
@@ -97,6 +106,10 @@ export const generateFileData = async <T>({
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
+  }
+
+  if (isDuplicating) {
+    overwriteExistingFiles = false
   }
 
   if (!file) {
@@ -111,7 +124,7 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    mkdirSync(staticPath, { recursive: true })
+    await fs.mkdir(staticPath, { recursive: true })
   }
 
   let newData = data
@@ -131,7 +144,7 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
@@ -227,26 +240,61 @@ export const generateFileData = async <T>({
         withMetadata,
       })
 
-      filesToSave.push({
-        buffer: croppedImage,
-        path: `${staticPath}/${fsSafeName}`,
-      })
+      // Apply resize after cropping to ensure it conforms to resizeOptions
+      if (resizeOptions) {
+        const resizedAfterCrop = await sharp(croppedImage)
+          .resize({
+            fit: resizeOptions?.fit || 'cover',
+            height: resizeOptions?.height,
+            position: resizeOptions?.position || 'center',
+            width: resizeOptions?.width,
+          })
+          .toBuffer({ resolveWithObject: true })
 
-      fileForResize = {
-        ...file,
-        data: croppedImage,
-        size: info.size,
+        filesToSave.push({
+          buffer: resizedAfterCrop.data,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...fileForResize,
+          data: resizedAfterCrop.data,
+          size: resizedAfterCrop.info.size,
+        }
+
+        fileData.width = resizedAfterCrop.info.width
+        fileData.height = resizedAfterCrop.info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages
+            ? resizedAfterCrop.info.height / metadata.pages
+            : resizedAfterCrop.info.height
+        }
+        fileData.filesize = resizedAfterCrop.info.size
+      } else {
+        // If resizeOptions is not present, just save the cropped image
+        filesToSave.push({
+          buffer: croppedImage,
+          path: `${staticPath}/${fsSafeName}`,
+        })
+
+        fileForResize = {
+          ...file,
+          data: croppedImage,
+          size: info.size,
+        }
+
+        fileData.width = info.width
+        fileData.height = info.height
+        if (fileIsAnimatedType) {
+          const metadata = await sharpFile.metadata()
+          fileData.height = metadata.pages ? info.height / metadata.pages : info.height
+        }
+        fileData.filesize = info.size
       }
-      fileData.width = info.width
-      fileData.height = info.height
-      if (fileIsAnimatedType) {
-        const metadata = await sharpFile.metadata()
-        fileData.height = metadata.pages ? info.height / metadata.pages : info.height
-      }
-      fileData.filesize = info.size
 
       if (file.tempFilePath) {
-        await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+        await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {
         req.file = fileForResize
       }
@@ -259,7 +307,7 @@ export const generateFileData = async <T>({
       // If using temp files and the image is being resized, write the file to the temp path
       if (fileBuffer?.data || file.data.length > 0) {
         if (file.tempFilePath) {
-          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+          await fs.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
           req.file = {
@@ -318,11 +366,12 @@ export const generateFileData = async <T>({
  */
 function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
+  isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc: unknown
   req: PayloadRequest
 }): UploadEdits {
-  const { data, operation, originalDoc, req } = args
+  const { data, isDuplicating, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
   const uploadEdits =
@@ -337,10 +386,19 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData
 
-  // If no change in focal point, return undefined.
-  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
-    return undefined
+  if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
+    // If no change in focal point, return undefined.
+    // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+      return undefined
+    }
+
+    if (isDuplicating) {
+      uploadEdits.focalPoint = {
+        x: incomingData?.focalX || origDoc.focalX,
+        y: incomingData?.focalY || origDoc.focalX,
+      }
+    }
   }
 
   if (incomingData?.focalX && incomingData?.focalY) {
@@ -358,5 +416,6 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       y: 50,
     }
   }
+
   return uploadEdits
 }

@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import LinkImport from 'next/link.js'
 import React from 'react'
@@ -10,7 +10,7 @@ import { Button } from '@payloadcms/ui'
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
 import { ClientForm } from './index.client.js'
 
-export const CustomView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export function CustomView({ initPageResult }: AdminViewServerProps) {
   const {
     req: {
       payload: {

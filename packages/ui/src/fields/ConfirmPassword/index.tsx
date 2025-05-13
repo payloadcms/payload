@@ -16,10 +16,10 @@ export type ConfirmPasswordFieldProps = {
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
-  const { disabled, path = 'confirm-password' } = props
+  const { disabled: disabledFromProps, path = 'confirm-password' } = props
   const { t } = useTranslation()
 
-  const { setValue, showError, value } = useField({
+  const { disabled, setValue, showError, value } = useField({
     path,
     validate: (value, options) => {
       return confirmPassword(value, {
@@ -38,19 +38,16 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
         .join(' ')}
     >
       <FieldLabel
-        field={null}
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError field={null} path={path} />
-        {/* disable eslint here because the label is dynamic */}
-        {}
+        <FieldError path={path} />
         <input
           aria-label={t('authentication:confirmPassword')}
           autoComplete="off"
-          disabled={!!disabled}
+          disabled={!!(disabled || disabledFromProps)}
           id="field-confirm-password"
           name="confirm-password"
           onChange={setValue}

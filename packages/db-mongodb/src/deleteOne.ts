@@ -1,29 +1,53 @@
-import type { DeleteOne, Document, PayloadRequest } from 'payload'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { DeleteOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection: collectionSlug, req, returning, select, where },
 ) {
-  const Model = this.collections[collection]
-  const options = await withSession(this, req)
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
+  const options: MongooseUpdateQueryOptions = {
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
+  }
+
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  if (returning === false) {
+    await Model.deleteOne(query, options)?.lean()
+    return null
+  }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  const doc = await Model.findOneAndDelete(query, options)?.lean()
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  if (!doc) {
+    return null
+  }
 
-  return result
+  transform({
+    adapter: this,
+    data: doc,
+    fields: collectionConfig.fields,
+    operation: 'read',
+  })
+
+  return doc
 }
