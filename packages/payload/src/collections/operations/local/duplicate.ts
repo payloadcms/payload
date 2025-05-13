@@ -110,8 +110,6 @@ export async function duplicate<
     showHiddenFields,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

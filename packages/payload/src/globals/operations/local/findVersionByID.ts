@@ -87,8 +87,6 @@ export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
     showHiddenFields,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
   if (!globalConfig) {

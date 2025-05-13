@@ -205,7 +205,7 @@ const createFindDataloaderCacheKey = ({
     includeLockStatus,
     joins,
     limit,
-    overrideAccess ?? req.overrideAccess,
+    overrideAccess,
     page,
     pagination,
     populate,

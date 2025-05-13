@@ -24,8 +24,6 @@ async function localUnlock<TSlug extends CollectionSlug>(
 ): Promise<boolean> {
   const { collection: collectionSlug, data, overrideAccess = true } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

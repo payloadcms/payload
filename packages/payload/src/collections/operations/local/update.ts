@@ -222,8 +222,6 @@ async function updateLocal<
     where,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {
