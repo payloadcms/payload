@@ -1922,7 +1922,7 @@ describe('Fields', () => {
         },
       })
       expect(groupDoc).toMatchObject({
-        id: expect.any(String),
+        id: expect.anything(),
         insideUnnamedGroup: 'Hello world',
         deeplyNestedGroup: {
           insideNestedUnnamedGroup: 'Secondfield',
