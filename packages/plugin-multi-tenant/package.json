@@ -71,7 +71,6 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "generateTranslations": "node --no-deprecation --import @swc-node/register/esm-register scripts/generateTranslations.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack:plugin": "pnpm prepublishOnly && pnpm copyfiles && pnpm pack",

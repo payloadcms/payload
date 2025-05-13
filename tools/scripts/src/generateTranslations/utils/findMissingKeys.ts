@@ -1,4 +1,4 @@
-import type { GenericTranslationsObject } from '../../src/types.js'
+import type { GenericTranslationsObject } from '@payloadcms/translations'
 
 /**
  * Returns keys which are present in baseObj but not in targetObj

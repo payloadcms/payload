@@ -1928,6 +1928,9 @@ importers:
 
   tools/scripts:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../../packages/translations
       '@swc-node/register':
         specifier: 1.10.9
         version: 1.10.9(@swc/core@1.10.12(@swc/helpers@0.5.15))(@swc/types@0.1.17)(typescript@5.7.3)
@@ -1955,6 +1958,9 @@ importers:
       open:
         specifier: ^10.1.0
         version: 10.1.0
+      payload:
+        specifier: workspace:*
+        version: link:../../packages/payload
 
 packages:
 
