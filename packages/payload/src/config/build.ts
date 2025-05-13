@@ -24,6 +24,7 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
       } else {
         // If the plugin returns a new config object that is no longer a draft, we need to merge it into the mutable config
         for (const key of Object.keys(newConfig)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           mutableConfig[key as any] = newConfig[key as any]
         }
       }
