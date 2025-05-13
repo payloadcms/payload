@@ -68,8 +68,6 @@ export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
 ): Promise<DataFromGlobalSlug<TSlug>> {
   const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
 
-  options.overrideAccess = overrideAccess
-
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
   if (!globalConfig) {

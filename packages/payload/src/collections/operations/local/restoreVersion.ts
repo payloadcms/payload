@@ -83,8 +83,6 @@ export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
     showHiddenFields,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

@@ -6,9 +6,12 @@ import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { queryPresetsCollectionSlug } from './config.js'
 
-export const preventLockout: Validate = async (value, { data, req: incomingReq }) => {
+export const preventLockout: Validate = async (
+  value,
+  { data, overrideAccess, req: incomingReq },
+) => {
   // Use context to ensure an infinite loop doesn't occur
-  if (!incomingReq.context.isValidationReq && !incomingReq.overrideAccess) {
+  if (!incomingReq.context.isValidationReq && !overrideAccess) {
     const req = await createLocalReq(
       {
         context: {

@@ -58,8 +58,6 @@ export default async function countLocal<TSlug extends CollectionSlug>(
 ): Promise<{ totalDocs: number }> {
   const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

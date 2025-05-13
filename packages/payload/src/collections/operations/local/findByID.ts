@@ -129,8 +129,6 @@ export default async function findByIDLocal<
     showHiddenFields,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

@@ -413,6 +413,7 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
+  overrideAccess?: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */

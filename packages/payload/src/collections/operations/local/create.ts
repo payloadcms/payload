@@ -140,8 +140,6 @@ export default async function createLocal<
     showHiddenFields,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

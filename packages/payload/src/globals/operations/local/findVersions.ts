@@ -109,8 +109,6 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     where,
   } = options
 
-  options.overrideAccess = overrideAccess
-
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
   if (!globalConfig) {
