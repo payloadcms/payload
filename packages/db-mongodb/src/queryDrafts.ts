@@ -151,6 +151,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       query: versionQuery,
       session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
+      sortAggregation,
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
   } else {
