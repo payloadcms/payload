@@ -10,11 +10,11 @@ type SeededQueryPreset = {
 } & Omit<QueryPreset, 'id' | 'relatedCollection'>
 
 export const seedData: {
-  everyone: (args: { ownerUserID: string }) => SeededQueryPreset
-  onlyMe: (args: { ownerUserID: string }) => SeededQueryPreset
-  specificUsers: (args: { adminUserID: string; ownerUserID: string }) => SeededQueryPreset
+  everyone: () => SeededQueryPreset
+  onlyMe: () => SeededQueryPreset
+  specificUsers: (args: { adminUserID: string }) => SeededQueryPreset
 } = {
-  onlyMe: ({ ownerUserID }: { ownerUserID: string }) => ({
+  onlyMe: () => ({
     relatedCollection: pagesSlug,
     isShared: false,
     title: 'Only Me',
@@ -40,9 +40,8 @@ export const seedData: {
         equals: 'example page',
       },
     },
-    owner: ownerUserID,
   }),
-  everyone: ({ ownerUserID }: { ownerUserID: string }) => ({
+  everyone: () => ({
     relatedCollection: pagesSlug,
     isShared: true,
     title: 'Everyone',
@@ -68,9 +67,8 @@ export const seedData: {
         equals: 'example page',
       },
     },
-    owner: ownerUserID,
   }),
-  specificUsers: ({ adminUserID, ownerUserID }: { adminUserID: string; ownerUserID: string }) => ({
+  specificUsers: ({ adminUserID }: { adminUserID: string }) => ({
     title: 'Specific Users',
     isShared: true,
     where: {
@@ -99,12 +97,11 @@ export const seedData: {
       },
     ],
     relatedCollection: pagesSlug,
-    owner: ownerUserID,
   }),
 }
 
 export const seed = async (_payload: Payload) => {
-  const [adminUser, ownerUser] = await executePromises(
+  const [adminUser] = await executePromises(
     [
       () =>
         _payload.create({
@@ -113,16 +110,6 @@ export const seed = async (_payload: Payload) => {
             email: devCredentials.email,
             password: devCredentials.password,
             name: 'Admin',
-            roles: ['admin'],
-          },
-        }),
-      () =>
-        _payload.create({
-          collection: usersSlug,
-          data: {
-            email: 'owner@payloadcms.com',
-            password: regularCredentials.password,
-            name: 'Owner',
             roles: ['admin'],
           },
         }),
@@ -165,7 +152,6 @@ export const seed = async (_payload: Payload) => {
           user: adminUser,
           overrideAccess: false,
           data: seedData.specificUsers({
-            ownerUserID: ownerUser?.id || '',
             adminUserID: adminUser?.id || '',
           }),
         }),
@@ -174,22 +160,20 @@ export const seed = async (_payload: Payload) => {
           collection: 'payload-query-presets',
           user: adminUser,
           overrideAccess: false,
-          data: seedData.everyone({ ownerUserID: ownerUser?.id || '' }),
+          data: seedData.everyone(),
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
           user: adminUser,
           overrideAccess: false,
-          data: seedData.onlyMe({ ownerUserID: ownerUser?.id || '' }),
+          data: seedData.onlyMe(),
         }),
       () =>
         _payload.create({
           collection: 'payload-query-presets',
           user: adminUser,
-          overrideAccess: false,
           data: {
-            owner: ownerUser?.id,
             relatedCollection: 'pages',
             title: 'Noone',
             access: {

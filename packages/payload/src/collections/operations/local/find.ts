@@ -150,6 +150,8 @@ export async function findLocal<
     where,
   } = options
 
+  options.overrideAccess = overrideAccess
+
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {

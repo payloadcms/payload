@@ -261,9 +261,9 @@ export interface PayloadQueryPreset {
     | null;
   relatedCollection: 'pages' | 'posts';
   /**
-   * The "owner" bypasses all other access control defined on this preset. Only the current owner can tranfer ownership to another user.
+   * This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
-  owner: string | User;
+  isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -368,7 +368,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   where?: T;
   columns?: T;
   relatedCollection?: T;
-  owner?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }

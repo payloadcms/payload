@@ -93,6 +93,8 @@ export default async function findOneLocal<
     showHiddenFields,
   } = options
 
+  options.overrideAccess = overrideAccess
+
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
   if (!globalConfig) {

@@ -58,6 +58,8 @@ export default async function countGlobalVersionsLocal<TSlug extends GlobalSlug>
 ): Promise<{ totalDocs: number }> {
   const { disableErrors, global: globalSlug, overrideAccess = true, where } = options
 
+  options.overrideAccess = overrideAccess
+
   const global = payload.globals.config.find(({ slug }) => slug === globalSlug)
 
   if (!global) {

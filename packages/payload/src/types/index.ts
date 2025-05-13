@@ -36,6 +36,8 @@ export type CustomPayloadRequestProperties = {
    */
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   locale?: 'all' | TypedLocale
+  /** The `overrideAccess` value attached to the request options, if any */
+  overrideAccess?: boolean
   /**
    * The payload object
    */

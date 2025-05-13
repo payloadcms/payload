@@ -1,4 +1,3 @@
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, User } from 'payload'
 
 import path from 'path'
@@ -11,7 +10,6 @@ const queryPresetsCollectionSlug = 'payload-query-presets'
 
 let payload: Payload
 let adminUser: User
-let ownerUser: User
 let editorUser: User
 let publicUser: User
 
@@ -29,16 +27,6 @@ describe('Query Presets', () => {
         data: {
           email: devUser.email,
           password: devUser.password,
-        },
-      })
-      ?.then((result) => result.user)
-
-    ownerUser = await payload
-      .login({
-        collection: 'users',
-        data: {
-          email: 'owner@payloadcms.com',
-          password: regularUser.password,
         },
       })
       ?.then((result) => result.user)
@@ -81,7 +69,6 @@ describe('Query Presets', () => {
           data: {
             title: 'Only Logged In Users',
             relatedCollection: 'pages',
-            owner: ownerUser.id,
           },
         })
 
@@ -95,7 +82,6 @@ describe('Query Presets', () => {
         data: {
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
-          owner: ownerUser.id,
         },
       })
 
@@ -168,6 +154,7 @@ describe('Query Presets', () => {
       const presetForSpecificUsers = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
+        overrideAccess: false,
         data: {
           title: 'Specific Users',
           where: {
@@ -186,7 +173,6 @@ describe('Query Presets', () => {
             },
           },
           relatedCollection: 'pages',
-          owner: ownerUser.id,
         },
       })
 
@@ -244,9 +230,9 @@ describe('Query Presets', () => {
     })
 
     it('should respect access when set to "onlyMe"', async () => {
-      // create a new doc so that the creating user is the owner
       const presetForOnlyMe = await payload.create({
         collection: queryPresetsCollectionSlug,
+        overrideAccess: false,
         user: adminUser,
         data: {
           title: 'Only Me',
@@ -264,7 +250,6 @@ describe('Query Presets', () => {
             },
           },
           relatedCollection: 'pages',
-          owner: ownerUser.id,
         },
       })
 
@@ -324,9 +309,9 @@ describe('Query Presets', () => {
     it('should respect access when set to "everyone"', async () => {
       const presetForEveryone = await payload.create({
         collection: queryPresetsCollectionSlug,
+        overrideAccess: false,
         user: adminUser,
         data: {
-          owner: ownerUser.id,
           title: 'Everyone',
           where: {
             text: {
@@ -393,92 +378,92 @@ describe('Query Presets', () => {
       expect(presetUpdatedByEditorUser.title).toBe('Everyone (Update 2)')
     })
 
-    it('should allow "owner" access despite owner not existing in defined access', async () => {
-      const presetWithOwner = await payload.create({
-        collection: queryPresetsCollectionSlug,
-        user: adminUser,
-        data: {
-          owner: ownerUser.id,
-          title: 'Owner',
-          relatedCollection: 'pages',
-          access: {
-            read: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-            update: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-            delete: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-          },
-        },
-      })
-
-      const foundPresetWithOwnerUser = await payload.findByID({
-        collection: queryPresetsCollectionSlug,
-        depth: 0,
-        user: ownerUser,
-        overrideAccess: false,
-        id: presetWithOwner.id,
-      })
-
-      expect(foundPresetWithOwnerUser.id).toBe(presetWithOwner.id)
-    })
-
-    it('should only allow update to the owner field if the user is the owner', async () => {
-      const presetWithOwner = await payload.create({
-        collection: queryPresetsCollectionSlug,
-        user: adminUser,
-        data: {
-          owner: ownerUser.id,
-          title: 'Owner',
-          relatedCollection: 'pages',
-          access: {
-            read: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-            update: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-            delete: {
-              constraint: 'specificUsers',
-              users: [editorUser.id],
-            },
-          },
-        },
-      })
-
+    it('should prevent accidental lockout', async () => {
+      // attempt to create a preset without access to read or update
       try {
-        await payload.update({
+        const presetWithoutAccess = await payload.create({
           collection: queryPresetsCollectionSlug,
-          id: presetWithOwner.id,
           user: adminUser,
           overrideAccess: false,
           data: {
-            owner: adminUser.id,
+            title: 'Prevent Lockout',
+            relatedCollection: 'pages',
+            access: {
+              read: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+              update: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+              delete: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+            },
           },
         })
+
+        expect(presetWithoutAccess).toBeFalsy()
       } catch (error: unknown) {
-        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+        expect((error as Error).message).toBe('The following field is invalid: Sharing settings')
       }
 
-      const updatedPreset = await payload.update({
+      const presetWithUser1 = await payload.create({
         collection: queryPresetsCollectionSlug,
-        id: presetWithOwner.id,
-        user: ownerUser,
+        user: adminUser,
         overrideAccess: false,
         data: {
-          owner: adminUser.id,
+          title: 'Prevent Lockout',
+          relatedCollection: 'pages',
+          access: {
+            read: {
+              constraint: 'specificUsers',
+              users: [adminUser.id],
+            },
+            update: {
+              constraint: 'specificUsers',
+              users: [adminUser.id],
+            },
+            delete: {
+              constraint: 'specificUsers',
+              users: [adminUser.id],
+            },
+          },
         },
       })
 
-      expect(updatedPreset.owner.id).toBe(adminUser.id)
+      // attempt to update the preset to lock the user out of access
+      try {
+        const presetUpdatedByUser1 = await payload.update({
+          collection: queryPresetsCollectionSlug,
+          id: presetWithUser1.id,
+          user: adminUser,
+          overrideAccess: false,
+          data: {
+            title: 'Prevent Lockout (Updated)',
+            access: {
+              read: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+              update: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+              delete: {
+                constraint: 'specificUsers',
+                users: [],
+              },
+            },
+          },
+        })
+
+        expect(presetUpdatedByUser1).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('The following field is invalid: Sharing settings')
+      }
     })
   })
 
@@ -487,8 +472,8 @@ describe('Query Presets', () => {
       const preset = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
+        overrideAccess: false,
         data: {
-          owner: ownerUser.id,
           title: 'Top-Level Access Control Override',
           relatedCollection: 'pages',
           access: {
@@ -534,8 +519,8 @@ describe('Query Presets', () => {
       const presetForSpecificRoles = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
+        overrideAccess: false,
         data: {
-          owner: ownerUser.id,
           title: 'Specific Roles',
           where: {
             text: {
@@ -615,7 +600,6 @@ describe('Query Presets', () => {
         collection: queryPresetsCollectionSlug,
         user: adminUser,
         data: {
-          owner: ownerUser.id,
           relatedCollection: 'pages',
           title: 'Noone',
           where: {
@@ -652,8 +636,8 @@ describe('Query Presets', () => {
       const result = await payload.create({
         collection: 'payload-query-presets',
         user: adminUser,
+        overrideAccess: false,
         data: {
-          owner: ownerUser.id,
           title: 'Disabled Query Presets',
           relatedCollection: 'pages',
         },
@@ -671,8 +655,8 @@ describe('Query Presets', () => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,
         user: adminUser,
+        overrideAccess: false,
         data: {
-          owner: ownerUser.id,
           title: 'Where Object Formatting',
           where: {
             text: {

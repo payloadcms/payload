@@ -405,7 +405,6 @@ export type LabelsClient = {
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   /**
-  /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
   blockData: Partial<TData>
