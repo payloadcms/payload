@@ -12,7 +12,7 @@ import { queryPresetsCollectionSlug } from './config.js'
  * How it works:
  *   1. Creates a temporary record with the incoming data
  *   2. Attempts to read and update that record with the incoming user
- *   3. If either of those fail, it means the user has removed their own access
+ *   3. If either of those fail, throws an error to the user
  *   4. Once finished, prevents the temp record from persisting to the database
  */
 export const preventLockout: Validate = async (
@@ -68,7 +68,15 @@ export const preventLockout: Validate = async (
       })
 
       canUpdate = true
+    } catch (_err) {
+      if (!canRead) {
+        throw new APIError('Cannot remove yourself from reading this preset.', 403, {}, true)
+      }
 
+      if (!canUpdate) {
+        throw new APIError('Cannot remove yourself from updating this preset.', 403, {}, true)
+      }
+    } finally {
       if (transactionID) {
         await killTransaction(req)
       } else {
@@ -78,14 +86,6 @@ export const preventLockout: Validate = async (
           collection: queryPresetsCollectionSlug,
           req,
         })
-      }
-    } catch (_err) {
-      if (!canRead) {
-        throw new APIError('Cannot remove yourself from reading this preset.', 403, {}, true)
-      }
-
-      if (!canUpdate) {
-        throw new APIError('Cannot remove yourself from updating this preset.', 403, {}, true)
       }
     }
   }
