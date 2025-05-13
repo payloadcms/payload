@@ -119,14 +119,14 @@ const RichTextComponent: React.FC<
 
   const dispatchFieldUpdateTask = useRef<number>(undefined)
 
-  const updateFieldValue = (editorState: EditorState) => {
-    const newState = editorState.toJSON()
-    prevValueRef.current = newState
-    setValue(newState)
-  }
-
   const handleChange = useCallback(
     (editorState: EditorState) => {
+      const updateFieldValue = (editorState: EditorState) => {
+        const newState = editorState.toJSON()
+        prevValueRef.current = newState
+        setValue(newState)
+      }
+
       if (typeof window.requestIdleCallback === 'function') {
         // Cancel earlier scheduled value updates,
         // so that a CPU-limited event loop isn't flooded with n callbacks for n keystrokes into the rich text field,
