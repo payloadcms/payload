@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const svTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
     'confirm-tenant-switch--body':
-      'Du är på väg att ändra ägande från <0>{{fromTenant}}</0> till <0>{{toTenant}}</0>',
+      'Du är på väg att ändra ägare från <0>{{fromTenant}}</0> till <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Bekräfta ändring av {{tenantLabel}}',
   },
 }
