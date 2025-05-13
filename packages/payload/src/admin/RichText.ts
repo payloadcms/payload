@@ -102,11 +102,11 @@ export type BeforeChangeRichTextHookArgs<
   mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
   previousValue?: TValue
-
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
