@@ -123,6 +123,7 @@ export const MyCollection: CollectionConfig = {
             tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
+              order: '100',
             },
             // highlight-end
           },
@@ -143,6 +144,7 @@ The following options are available for tabs:
 | ----------- | ------------------------------------------------------------------------------------------------------------- |
 | `label`     | The label to display in the tab.                                                                              |
 | `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.            |
+| `order`     | The order in which the tab appears in the navigation. Can be set on default and custom tabs.                  |
 | `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
 
 ### Tab Components
@@ -178,4 +180,52 @@ export function MyCustomTabComponent(props: DocumentTabClientProps) {
     <Link href="/my-custom-tab">This is a custom Document Tab (Client)</Link>
   )
 }
+```
+
+## Replacing the Default View
+
+In some cases, you may want to replace the default document view with a different view, such as a Live Preview or a custom view. It is possible to do this by adjusting properties on the `view` option.
+
+To swap the default view with another, follow these steps:
+
+1. **Update the `default` key's `path` and `tab.href`**: Set these to a new path (for example, `/edit`) so the original default view is no longer mounted at the root path.
+
+2. **Set your new view's `path` and `tab.href` to the root**: For the new default view, set its `path` and `tab.href` to an empty string (`''`). This mounts your chosen view at the root and ensures it is the initial view shown.
+
+3. _(Optional)_ **Reorder tabs**: If you want the new default view's tab to appear first in the navigation, adjust its `order` property to a lower number (e.g., `0`).
+
+**Example: Swapping the Default Edit View with Live Preview**
+
+The following example swaps the default Edit View with the Live Preview view. When a user visits a document, the Live Preview will now be displayed first, and the Edit View will be available under the `/edit` path:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    components: {
+      views: {
+        edit: {
+          // highlight-start
+          default: {
+            path: '/edit',
+            tab: {
+              href: '/edit',
+              order: 100,
+            },
+          },
+          livePreview: {
+            path: '',
+            tab: {
+              href: '',
+              order: 0,
+            },
+          },
+        },
+        // highlight-end
+      },
+    },
+  },
+})
 ```
