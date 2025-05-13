@@ -1,4 +1,4 @@
-import { createDraft, finishDraft, setAutoFreeze } from 'immer'
+import { createDraft, finishDraft, isDraft, setAutoFreeze } from 'immer'
 
 import type { Config, SanitizedConfig } from './types.js'
 
@@ -18,7 +18,15 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
     let mutableConfig: Config = createDraft(config) as Config
 
     for (const plugin of config.plugins) {
-      mutableConfig = await plugin(mutableConfig)
+      const newConfig = await plugin(mutableConfig)
+      if (isDraft(newConfig)) {
+        mutableConfig = newConfig
+      } else {
+        // If the plugin returns a new config object that is no longer a draft, we need to merge it into the mutable config
+        for (const key of Object.keys(newConfig)) {
+          mutableConfig[key] = newConfig[key]
+        }
+      }
     }
 
     const configAfterPlugins = finishDraft(mutableConfig)
