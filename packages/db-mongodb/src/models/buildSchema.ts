@@ -409,7 +409,7 @@ const group: FieldSchemaGenerator<GroupField> = (
       ),
     })
   } else {
-    field.fields.forEach((subField: Field) => {
+    field.fields.forEach((subField) => {
       if (fieldIsVirtual(subField)) {
         return
       }
@@ -417,7 +417,13 @@ const group: FieldSchemaGenerator<GroupField> = (
       const addFieldSchema = getSchemaGenerator(subField.type)
 
       if (addFieldSchema) {
-        addFieldSchema(subField, schema, payload, buildSchemaOptions, parentIsLocalized)
+        addFieldSchema(
+          subField,
+          schema,
+          payload,
+          buildSchemaOptions,
+          (parentIsLocalized || field.localized) ?? false,
+        )
       }
     })
   }

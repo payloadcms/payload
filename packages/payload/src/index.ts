@@ -611,7 +611,7 @@ export class BasePayload {
           return true
         }
 
-        if (field.type === 'group' && fieldAffectsData(field)) {
+        if (field.type === 'group') {
           return true
         }
 

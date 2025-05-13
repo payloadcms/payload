@@ -15,7 +15,7 @@ import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -1614,7 +1614,7 @@ describe('Fields', () => {
     it('should create with ids and nested ids', async () => {
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })

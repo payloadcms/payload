@@ -447,7 +447,12 @@ export const promise = async <T>({
     }
 
     case 'group': {
-      if (fieldAffectsData(field)) {
+      let groupSiblingData = siblingData
+      let groupSiblingDoc = siblingDoc
+
+      const isNamedGroup = fieldAffectsData(field)
+
+      if (isNamedGroup) {
         if (typeof siblingData[field.name] !== 'object') {
           siblingData[field.name] = {}
         }
@@ -456,49 +461,29 @@ export const promise = async <T>({
           siblingDoc[field.name] = {}
         }
 
-        const groupData = siblingData[field.name] as Record<string, unknown>
-        const groupDoc = siblingDoc[field.name] as Record<string, unknown>
-
-        await traverseFields({
-          id,
-          blockData,
-          collection,
-          context,
-          data,
-          doc,
-          fields: field.fields,
-          global,
-          operation,
-          overrideAccess,
-          parentIndexPath: '',
-          parentIsLocalized: parentIsLocalized || field.localized,
-          parentPath: path,
-          parentSchemaPath: schemaPath,
-          req,
-          siblingData: groupData as JsonObject,
-          siblingDoc: groupDoc as JsonObject,
-        })
-      } else {
-        await traverseFields({
-          id,
-          blockData,
-          collection,
-          context,
-          data,
-          doc,
-          fields: field.fields,
-          global,
-          operation,
-          overrideAccess,
-          parentIndexPath: '',
-          parentIsLocalized: parentIsLocalized || field.localized,
-          parentPath: path,
-          parentSchemaPath: schemaPath,
-          req,
-          siblingData,
-          siblingDoc,
-        })
+        groupSiblingData = siblingData[field.name] as Record<string, unknown>
+        groupSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
       }
+
+      await traverseFields({
+        id,
+        blockData,
+        collection,
+        context,
+        data,
+        doc,
+        fields: field.fields,
+        global,
+        operation,
+        overrideAccess,
+        parentIndexPath: isNamedGroup ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        parentPath: isNamedGroup ? path : parentPath,
+        parentSchemaPath: schemaPath,
+        req,
+        siblingData: groupSiblingData,
+        siblingDoc: groupSiblingDoc,
+      })
 
       break
     }
