@@ -91,6 +91,7 @@ type CreateLocalReq = (
     context?: RequestContext
     fallbackLocale?: false | TypedLocale
     locale?: string
+    overrideAccess?: boolean
     req?: Partial<PayloadRequest>
     urlSuffix?: string
     user?: User
@@ -99,7 +100,15 @@ type CreateLocalReq = (
 ) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
+  {
+    context,
+    fallbackLocale,
+    locale: localeArg,
+    overrideAccess,
+    req = {} as PayloadRequest,
+    urlSuffix,
+    user,
+  },
   payload,
 ): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
@@ -130,6 +139,7 @@ export const createLocalReq: CreateLocalReq = async (
     req.headers = new Headers()
   }
 
+  req.overrideAccess = overrideAccess ?? req?.overrideAccess
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
