@@ -1928,9 +1928,6 @@ importers:
 
   tools/scripts:
     dependencies:
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../../packages/translations
       '@swc-node/register':
         specifier: 1.10.9
         version: 1.10.9(@swc/core@1.10.12(@swc/helpers@0.5.15))(@swc/types@0.1.17)(typescript@5.7.3)
@@ -1961,6 +1958,16 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
+    devDependencies:
+      '@payloadcms/plugin-multi-tenant':
+        specifier: workspace:*
+        version: link:../../packages/plugin-multi-tenant
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../../packages/richtext-lexical
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../../packages/translations
 
 packages:
 

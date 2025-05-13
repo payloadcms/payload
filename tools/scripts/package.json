@@ -26,7 +26,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@payloadcms/translations": "workspace:*",
     "@swc-node/register": "1.10.9",
     "@tools/constants": "workspace:*",
     "@tools/releaser": "workspace:*",
@@ -37,5 +36,10 @@
     "license-checker": "25.0.1",
     "open": "^10.1.0",
     "payload": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/plugin-multi-tenant": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/translations": "workspace:*"
   }
 }

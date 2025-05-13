@@ -1,10 +1,10 @@
 import type { AcceptedLanguages, GenericTranslationsObject } from '@payloadcms/translations'
 
+import { translations } from '@payloadcms/translations/all'
+import { enTranslations } from '@payloadcms/translations/languages/en'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { translations } from '../../../../packages/translations/src/exports/all.js'
-import { enTranslations } from '../../../../packages/translations/src/languages/en.js'
 import { translateObject } from './utils/index.js'
 
 const filename = fileURLToPath(import.meta.url)
