@@ -108,6 +108,7 @@ const traverseFields = ({
 
     switch (field.type) {
       case 'array':
+      case 'group':
       case 'tab': {
         const fieldSelect = select[field.name] as SelectType
 
@@ -181,23 +182,6 @@ const traverseFields = ({
           })
         }
 
-        break
-      }
-
-      case 'group': {
-        if (fieldAffectsData(field)) {
-          const fieldSelect = select[field.name] as SelectType
-
-          traverseFields({
-            adapter,
-            databaseSchemaPath: fieldDatabaseSchemaPath,
-            fields: field.flattenedFields,
-            parentIsLocalized: parentIsLocalized || field.localized,
-            projection,
-            select: fieldSelect,
-            selectMode,
-          })
-        }
         break
       }
 
