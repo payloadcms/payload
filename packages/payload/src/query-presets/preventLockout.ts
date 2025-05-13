@@ -6,6 +6,15 @@ import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { queryPresetsCollectionSlug } from './config.js'
 
+/**
+ * Prevents "accidental lockouts" where a user makes an update that removes their own access to the preset.
+ * This is effectively an access control function proxied through a `validate` function.
+ * How it works:
+ *   1. Creates a temporary record with the incoming data
+ *   2. Attempts to read and update that record with the incoming user
+ *   3. If either of those fail, it means the user has removed their own access
+ *   4. Once finished, prevents the temp record from persisting to the database
+ */
 export const preventLockout: Validate = async (
   value,
   { data, overrideAccess, req: incomingReq },
