@@ -6,12 +6,6 @@ import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 export const index = [
   ...rootEslintConfig,
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     settings: {
       next: {
         rootDir: '../../app/',
