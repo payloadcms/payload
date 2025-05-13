@@ -139,7 +139,7 @@ export const createLocalReq: CreateLocalReq = async (
     req.headers = new Headers()
   }
 
-  req.overrideAccess = overrideAccess ?? req?.overrideAccess
+  req.overrideAccess = overrideAccess ?? req?.overrideAccess ?? true
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
