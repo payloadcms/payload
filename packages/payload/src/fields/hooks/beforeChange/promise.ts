@@ -486,6 +486,7 @@ export const promise = async ({
             mergeLocaleActions,
             operation,
             originalDoc: doc,
+            overrideAccess,
             parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
