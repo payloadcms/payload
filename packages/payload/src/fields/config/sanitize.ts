@@ -35,7 +35,7 @@ import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
-  collectionConfig: CollectionConfig
+  collectionConfig?: CollectionConfig
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
