@@ -68,13 +68,22 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   )
 
   const handleChangeHasMulti = useCallback(
-    (value: ValueWithRelation[], disableModifyForm?: boolean) => {
-      if (!value) {
-        setValue(null, Boolean(disableModifyForm))
+    (newValue: ValueWithRelation[]) => {
+      if (!newValue) {
+        setValue(null, newValue !== value)
         return
       }
 
-      const dataToSet = value.map((val) => {
+      const unchanged =
+        Array.isArray(value) &&
+        Array.isArray(newValue) &&
+        value.length === newValue.length &&
+        value.every((val, idx) => {
+          const newVal = newValue[idx]
+          return val.value === newVal.value && val.relationTo === newVal.relationTo
+        })
+
+      const dataToSet = newValue.map((val) => {
         if (isPolymorphic) {
           return val
         } else {
@@ -82,25 +91,31 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         }
       })
 
-      setValue(dataToSet, Boolean(disableModifyForm))
+      setValue(dataToSet, Boolean(unchanged))
     },
-    [isPolymorphic, setValue],
+    [isPolymorphic, setValue, value],
   )
 
   const handleChangeSingle = useCallback(
-    (value: ValueWithRelation, disableModifyForm?: boolean) => {
-      if (!value) {
-        setValue(null, Boolean(disableModifyForm))
+    (newValue: ValueWithRelation) => {
+      if (!newValue) {
+        setValue(null, newValue !== value)
         return
       }
 
+      const unchanged =
+        value &&
+        newValue &&
+        (value as ValueWithRelation).value === newValue.value &&
+        (value as ValueWithRelation).relationTo === newValue.relationTo
+
       if (isPolymorphic) {
-        setValue(value, Boolean(disableModifyForm))
+        setValue(newValue, Boolean(unchanged))
       } else {
-        setValue(value.value, Boolean(disableModifyForm))
+        setValue(newValue.value, Boolean(unchanged))
       }
     },
-    [isPolymorphic, setValue],
+    [isPolymorphic, setValue, value],
   )
 
   const memoizedValue: ValueWithRelation | ValueWithRelation[] = React.useMemo(() => {
@@ -159,37 +174,33 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }
   }, [initialValue, isPolymorphic, relationTo, hasMany])
 
-  const sharedProps = {
-    AfterInput,
-    allowCreate,
-    allowEdit,
-    appearance,
-    BeforeInput,
-    className,
-    Description,
-    description,
-    Error,
-    filterOptions,
-    isSortable,
-    Label,
-    label,
-    localized,
-    maxResultsPerRequest: 10,
-    maxRows: field?.maxRows,
-    minRows: field?.minRows,
-    path,
-    placeholder,
-    readOnly: readOnly || disabled,
-    relationTo,
-    required,
-    showError,
-    sortOptions: sortOptions as any, // todo: fix this, handle Record<string, string> type
-    style: styles,
-  }
-
   return (
     <RelationshipInput
-      {...sharedProps}
+      AfterInput={AfterInput}
+      allowCreate={allowCreate}
+      allowEdit={allowEdit}
+      appearance={appearance}
+      BeforeInput={BeforeInput}
+      className={className}
+      Description={Description}
+      description={description}
+      Error={Error}
+      filterOptions={filterOptions}
+      isSortable={isSortable}
+      Label={Label}
+      label={label}
+      localized={localized}
+      maxResultsPerRequest={10}
+      maxRows={field?.maxRows}
+      minRows={field?.minRows}
+      path={path}
+      placeholder={placeholder}
+      readOnly={readOnly || disabled}
+      relationTo={relationTo}
+      required={required}
+      showError={showError}
+      sortOptions={sortOptions as any}
+      style={styles}
       {...(hasMany === true
         ? {
             hasMany: true,

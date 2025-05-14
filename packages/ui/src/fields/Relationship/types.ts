@@ -115,12 +115,12 @@ type SharedRelationshipInputProps =
   | {
       readonly hasMany: false
       readonly initialValue?: null | ValueWithRelation
-      readonly onChange: (value: ValueWithRelation, modifyForm?: boolean) => void
+      readonly onChange: (value: ValueWithRelation) => void
       readonly value?: null | ValueWithRelation
     }
   | {
       readonly hasMany: true
       readonly initialValue?: null | ValueWithRelation[]
-      readonly onChange: (value: ValueWithRelation[], modifyForm?: boolean) => void
+      readonly onChange: (value: ValueWithRelation[]) => void
       readonly value?: null | ValueWithRelation[]
     }

@@ -468,10 +468,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             : [valueRef.current]
           : []
 
-        const unchanged = currentValue.some((option: ValueWithRelation) => {
-          return option.value === docID && option.relationTo === args.collectionConfig.slug
-        })
-
         const valuesToSet = currentValue.map((option: ValueWithRelation) => {
           return {
             relationTo: option.value === docID ? args.collectionConfig.slug : option.relationTo,
@@ -479,11 +475,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           }
         })
 
-        onChange(valuesToSet, unchanged)
+        onChange(valuesToSet)
       } else if (hasMany === false) {
-        const unchanged = !Array.isArray(valueRef.current) && valueRef.current.value === docID
-
-        onChange({ relationTo: args.collectionConfig.slug, value: docID }, unchanged)
+        onChange({ relationTo: args.collectionConfig.slug, value: docID })
       }
     },
     [i18n, config, hasMany, onChange],
