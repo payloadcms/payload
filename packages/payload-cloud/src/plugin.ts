@@ -16,6 +16,14 @@ export const generateRandomString = (): string => {
   return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
+const DEFAULT_CRON = '* * * * *'
+const DEFAULT_LIMIT = 10
+const DEFAULT_CRON_JOB = {
+  cron: DEFAULT_CRON,
+  limit: DEFAULT_LIMIT,
+  queue: 'default',
+}
+
 export const payloadCloudPlugin =
   (pluginOptions?: PluginOptions) =>
   async (incomingConfig: Config): Promise<Config> => {
@@ -100,15 +108,6 @@ export const payloadCloudPlugin =
     }
 
     // We make sure to only run cronjobs on one instance using a instance identifier stored in a global.
-
-    const DEFAULT_CRON = '* * * * *'
-    const DEFAULT_LIMIT = 10
-    const DEFAULT_CRON_JOB = {
-      cron: DEFAULT_CRON,
-      limit: DEFAULT_LIMIT,
-      queue: 'default',
-    }
-
     config.globals = [
       ...(config.globals || []),
       {
