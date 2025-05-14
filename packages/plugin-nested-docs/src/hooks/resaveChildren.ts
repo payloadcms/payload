@@ -110,10 +110,10 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 }
 
 export const resaveChildren =
-  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  (pluginConfig: NestedDocsPluginConfig, collectionSlug: string): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
     await resave({
-      collection,
+      collection: req.payload.collections[collectionSlug]?.config!,
       doc,
       draft: doc._status === 'published' ? false : true,
       pluginConfig,

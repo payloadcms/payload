@@ -53,13 +53,21 @@ export const nestedDocsPlugin =
           hooks: {
             ...(collection.hooks || {}),
             afterChange: [
-              resaveChildren(pluginConfig, collection),
-              resaveSelfAfterCreate(pluginConfig, collection),
+              resaveChildren(pluginConfig, collection.slug),
+              resaveSelfAfterCreate(pluginConfig, collection.slug),
               ...(collection?.hooks?.afterChange || []),
             ],
             beforeChange: [
-              async ({ data, originalDoc, req }) =>
-                populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
+              async ({ data, originalDoc, req }) => {
+                return populateBreadcrumbs(
+                  req,
+                  pluginConfig,
+                  req.payload.collections[collection.slug]?.config!,
+                  data,
+                  originalDoc,
+                )
+              },
+
               ...(collection?.hooks?.beforeChange || []),
             ],
           },
