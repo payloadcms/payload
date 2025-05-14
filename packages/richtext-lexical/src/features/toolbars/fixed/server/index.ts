@@ -15,8 +15,11 @@ export type FixedToolbarFeatureProps = {
    * Custom configurations for toolbar groups
    * Key is the group key (e.g. 'format', 'indent', 'align')
    * Value is a partial ToolbarGroup object that will be merged with the default configuration
+   *
+   * @note Props passed via customGroups must be serializable. Avoid using functions or dynamic components.
+   * ChildComponent, if provided, must be a serializable server component.
    */
-  customGroups?: Record<string, Partial<ToolbarGroup>>
+  customGroups?: Record<string, Partial<Omit<ToolbarGroup, 'isEnabled' | 'items'>>>
   /**
    * @default false
    *
