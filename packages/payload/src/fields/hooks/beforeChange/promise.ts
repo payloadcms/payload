@@ -178,6 +178,7 @@ export const promise = async ({
         object,
         object
       >
+
       const validationResult = await validateFn(valueToValidate as never, {
         ...field,
         id,
@@ -188,6 +189,7 @@ export const promise = async ({
         // @ts-expect-error
         jsonError,
         operation,
+        overrideAccess,
         path: pathSegments,
         preferences: { fields: {} },
         previousValue: siblingDoc[field.name],
