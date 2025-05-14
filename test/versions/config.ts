@@ -12,6 +12,7 @@ import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
+import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
@@ -42,6 +43,7 @@ export default buildConfigWithDefaults({
     DraftPosts,
     DraftWithMax,
     DraftsWithValidate,
+    ErrorOnUnpublish,
     LocalizedPosts,
     VersionPosts,
     CustomIDs,

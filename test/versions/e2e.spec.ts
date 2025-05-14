@@ -60,6 +60,7 @@ import {
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
   draftWithValidateCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
@@ -86,6 +87,7 @@ describe('Versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
+  let errorOnUnpublishURL: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -124,6 +126,7 @@ describe('Versions', () => {
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
+      errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
     })
 
     test('collection — has versions tab', async () => {
@@ -577,6 +580,22 @@ describe('Versions', () => {
 
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('collections — should show custom error message when unpublishing fails', async () => {
+      const publishedDoc = await payload.create({
+        collection: errorOnUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+        },
+      })
+      await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await expect(
+        page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
+      ).toBeVisible()
     })
 
     test('should show documents title in relationship even if draft document', async () => {
