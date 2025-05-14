@@ -390,17 +390,42 @@ export const promise = async ({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
+      let groupSiblingData = siblingData
+      let groupSiblingDoc = siblingDoc
+      let groupSiblingDocWithLocales = siblingDocWithLocales
+
+      const isNamedGroup = fieldAffectsData(field)
+
+      if (isNamedGroup) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+
+        if (typeof siblingDocWithLocales[field.name] !== 'object') {
+          siblingDocWithLocales[field.name] = {}
+        }
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+
+        if (typeof siblingDocWithLocales[field.name] !== 'object') {
+          siblingDocWithLocales[field.name] = {}
+        }
+
+        groupSiblingData = siblingData[field.name] as JsonObject
+        groupSiblingDoc = siblingDoc[field.name] as JsonObject
+        groupSiblingDocWithLocales = siblingDocWithLocales[field.name] as JsonObject
       }
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
-
-      if (typeof siblingDocWithLocales[field.name] !== 'object') {
-        siblingDocWithLocales[field.name] = {}
-      }
+      const fallbackLabel = field?.label || (isNamedGroup ? field.name : field?.type)
 
       await traverseFields({
         id,
@@ -414,23 +439,20 @@ export const promise = async ({
         fieldLabelPath:
           field?.label === false
             ? fieldLabelPath
-            : buildFieldLabel(
-                fieldLabelPath,
-                getTranslatedLabel(field?.label || field?.name, req.i18n),
-              ),
+            : buildFieldLabel(fieldLabelPath, getTranslatedLabel(fallbackLabel, req.i18n)),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         overrideAccess,
-        parentIndexPath: '',
+        parentIndexPath: isNamedGroup ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
+        parentPath: isNamedGroup ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
-        siblingData: siblingData[field.name] as JsonObject,
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
+        siblingData: groupSiblingData,
+        siblingDoc: groupSiblingDoc,
+        siblingDocWithLocales: groupSiblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
 
