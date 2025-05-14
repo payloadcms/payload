@@ -88,7 +88,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     collection.graphQL = {} as Collection['graphQL']
 
     const hasIDField =
-      flattenTopLevelFields(fields).findIndex(
+      flattenTopLevelFields({ fields }).findIndex(
         (field) => fieldAffectsData(field) && field.name === 'id',
       ) > -1
 

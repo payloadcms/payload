@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 import React, { useId, useMemo } from 'react'
@@ -53,6 +53,25 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       {filteredColumns.map((col, i) => {
         const { accessor, active, field } = col
 
+        const label =
+          field && 'labelWithPrefix' in field
+            ? field.labelWithPrefix
+            : 'label' in field
+              ? field.label
+              : undefined
+
+        const rawKeyCandidate =
+          ('labelWithPrefix' in field && field.labelWithPrefix) ||
+          ('name' in field && field.name) ||
+          i
+
+        const rawKey =
+          typeof rawKeyCandidate === 'string' || typeof rawKeyCandidate === 'number'
+            ? rawKeyCandidate
+            : ''
+
+        const labelKey = String(rawKey).replace(/\s+/g, '-')
+
         return (
           <Pill
             alignIcon="left"
@@ -63,14 +82,12 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${field && 'name' in field ? field?.name : i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${labelKey}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               void toggleColumn(accessor)
             }}
           >
-            {col.CustomLabel ?? (
-              <FieldLabel label={field && 'label' in field && field.label} unstyled />
-            )}
+            {col.CustomLabel ?? <FieldLabel label={label as StaticLabel} unstyled />}
           </Pill>
         )
       })}

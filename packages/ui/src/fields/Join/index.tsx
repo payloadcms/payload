@@ -43,7 +43,7 @@ const getInitialDrawerData = ({
   fields: ClientField[]
   segments: string[]
 }) => {
-  const flattenedFields = flattenTopLevelFields(fields)
+  const flattenedFields = flattenTopLevelFields({ fields })
 
   const path = segments[0]
 

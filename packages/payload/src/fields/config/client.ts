@@ -467,7 +467,9 @@ export const createClientFields = ({
     clientFields.push(clientField)
   }
 
-  const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
+  const hasID = flattenTopLevelFields({ fields, i18n }).some(
+    (f) => fieldAffectsData(f) && f.name === 'id',
+  )
 
   if (!disableAddingID && !hasID) {
     clientFields.push({

@@ -36,6 +36,7 @@ import {
 } from '../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
 import { filterFields } from './filterFields.js'
+import { findValueInDoc } from './findValueInDoc.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -70,15 +71,17 @@ export const buildColumnState = (args: Args): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields(
-    filterFields(clientCollectionConfig.fields),
-    true,
-  ) as ClientField[]
+  let sortedFieldMap = flattenTopLevelFields({
+    fields: filterFields(clientCollectionConfig.fields),
+    i18n,
+    keepPresentationalFields: true,
+  }) as ClientField[]
 
-  let _sortedFieldMap = flattenTopLevelFields(
-    filterFields(collectionConfig.fields),
-    true,
-  ) as Field[] // TODO: think of a way to avoid this additional flatten
+  let _sortedFieldMap = flattenTopLevelFields({
+    fields: filterFields(collectionConfig.fields),
+    i18n,
+    keepPresentationalFields: true,
+  }) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -197,11 +200,18 @@ export const buildColumnState = (args: Args): Column[] => {
       field.type &&
       (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
 
+    const label =
+      'labelWithPrefix' in field
+        ? field.labelWithPrefix
+        : 'label' in field
+          ? field.label
+          : undefined
+
     const Heading = (
       <SortColumn
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         Label={CustomLabel}
-        label={field && 'label' in field ? (field.label as StaticLabel) : undefined}
+        label={label as StaticLabel}
         name={'name' in field ? field.name : undefined}
         {...(sortColumnProps || {})}
       />
@@ -227,7 +237,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
             const cellClientProps: DefaultCellComponentProps = {
               ...baseCellClientProps,
-              cellData: 'name' in field ? doc[field.name] : undefined,
+              cellData: 'name' in field ? findValueInDoc(doc, field.name) : undefined,
               link: isLinkedColumn,
               rowData: doc,
             }

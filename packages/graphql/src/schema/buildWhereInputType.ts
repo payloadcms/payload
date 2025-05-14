@@ -32,7 +32,7 @@ export const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQL
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
-  const idField = flattenTopLevelFields(fields).find(
+  const idField = flattenTopLevelFields({ fields }).find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
