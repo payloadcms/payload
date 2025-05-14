@@ -193,7 +193,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
 
       let taskConfig: TaskConfig<string>
       if (!isInline) {
-        taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
+        taskConfig =
+          req.payload.config.jobs.tasks?.length &&
+          req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
 
         if (!taskConfig) {
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
