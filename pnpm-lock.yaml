@@ -1958,6 +1958,19 @@ importers:
       open:
         specifier: ^10.1.0
         version: 10.1.0
+      payload:
+        specifier: workspace:*
+        version: link:../../packages/payload
+    devDependencies:
+      '@payloadcms/plugin-multi-tenant':
+        specifier: workspace:*
+        version: link:../../packages/plugin-multi-tenant
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../../packages/richtext-lexical
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../../packages/translations
 
 packages:
 
