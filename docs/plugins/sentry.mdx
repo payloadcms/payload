@@ -89,7 +89,7 @@ export default config
 If you want Sentry to capture Postgres query performance traces, you need to inject the Sentry-patched `pg` driver into the Postgres adapter. This ensures Sentry’s instrumentation hooks into your database calls.
 
 ```ts
-import * as Sentry from '@sentry/node'
+import * as Sentry from '@sentry/nextjs'
 import { buildConfig } from 'payload'
 import { sentryPlugin } from '@payloadcms/plugin-sentry'
 import { postgresAdapter } from '@payloadcms/db-postgres'
