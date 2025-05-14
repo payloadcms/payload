@@ -1,6 +1,9 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
+import { deepMergeSimple } from 'payload'
+
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
 import { defaults } from './defaults.js'
@@ -10,6 +13,7 @@ import { addTenantCleanup } from './hooks/afterTenantDelete.js'
 import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsBySelectedTenant.js'
 import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
 import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
+import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineListFilters } from './utilities/combineListFilters.js'
@@ -229,6 +233,21 @@ export const multiTenantPlugin =
             usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
+
+        /**
+         * Add custom tenant field that watches and dispatches updates to the selector
+         */
+        collection.fields.push({
+          name: '_watchTenant',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
+              },
+            },
+          },
+        })
       } else if (pluginConfig.collections?.[collection.slug]) {
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
@@ -339,6 +358,26 @@ export const multiTenantPlugin =
       },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
+
+    /**
+     * Merge plugin translations
+     */
+
+    const simplifiedTranslations = Object.entries(translations).reduce(
+      (acc, [key, value]) => {
+        acc[key] = value.translations
+        return acc
+      },
+      {} as Record<string, PluginDefaultTranslationsObject>,
+    )
+
+    incomingConfig.i18n = {
+      ...incomingConfig.i18n,
+      translations: deepMergeSimple(
+        simplifiedTranslations,
+        incomingConfig.i18n?.translations ?? {},
+      ),
+    }
 
     return incomingConfig
   }
