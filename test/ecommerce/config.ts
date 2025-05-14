@@ -9,11 +9,12 @@ import { ecommercePlugin } from '@payloadcms/ecommerce/plugin'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users],
+  collections: [Users, Media],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

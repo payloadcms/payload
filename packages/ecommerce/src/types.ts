@@ -60,7 +60,7 @@ export type PaymentAdapter = {
      */
     createTransaction?: (args: {
       data: Record<string, any>
-      operation: 'create' | 'update'
+      operation: 'create'
       req: PayloadRequest
     }) => Promise<Record<string, any>> | Record<string, any>
   }

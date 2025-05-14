@@ -9,7 +9,9 @@ import { cartItemsField } from '../fields/cartItemsField.js'
 import { currencyField } from '../fields/currencyField.js'
 import { statusField } from '../fields/statusField.js'
 import { afterChange } from './hooks/afterChange.js'
+import { afterRead } from './hooks/afterRead.js'
 import { beforeChange } from './hooks/beforeChange.js'
+import { beforeChangePayments } from './hooks/beforeChangePayments.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
@@ -73,6 +75,10 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
   const baseConfig: CollectionConfig = {
     slug: 'transactions',
     ...overrides,
+    access: {
+      read: () => true,
+      ...(overrides?.access || []),
+    },
     admin: {
       defaultColumns: ['createdAt', 'customer', 'order', 'amount', 'status'],
       ...overrides?.admin,
@@ -84,8 +90,17 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
         ...(currenciesConfig ? [afterChange({ currenciesConfig, paymentMethods })] : []),
         ...(overrides?.hooks?.afterChange || []),
       ],
+      afterRead: [
+        ...(currenciesConfig ? [afterRead({ currenciesConfig, paymentMethods })] : []),
+        ...(overrides?.hooks?.afterRead || []),
+      ],
       beforeChange: [
-        ...(currenciesConfig ? [beforeChange({ currenciesConfig, paymentMethods })] : []),
+        ...(currenciesConfig
+          ? [
+              beforeChange({ currenciesConfig, paymentMethods }),
+              beforeChangePayments({ currenciesConfig, paymentMethods }),
+            ]
+          : []),
         ...(overrides?.hooks?.beforeChange || []),
       ],
     },

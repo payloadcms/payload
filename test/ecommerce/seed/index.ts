@@ -81,12 +81,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         product: hoodieProduct.id,
         options: [small!.id, white!.id],
         inventory: 10,
-        prices: [
-          {
-            amount: 1999,
-            currency: 'USD',
-          },
-        ],
+        priceInUSD: {
+          enabled: true,
+          amount: 1999,
+        },
       },
     })
 
@@ -96,12 +94,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         product: hoodieProduct.id,
         options: [white!.id, medium!.id],
         inventory: 492,
-        prices: [
-          {
-            amount: 1999,
-            currency: 'USD',
-          },
-        ],
+        priceInUSD: {
+          enabled: true,
+          amount: 1999,
+        },
       },
     })
 
@@ -109,16 +105,15 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       collection: 'products',
       data: {
         name: 'Hat',
-        prices: [
-          {
-            amount: 1299,
-            currency: 'USD',
-          },
-          {
-            amount: 1099,
-            currency: 'EUR',
-          },
-        ],
+
+        priceInUSD: {
+          enabled: true,
+          amount: 1999,
+        },
+        priceInEUR: {
+          enabled: true,
+          amount: 1999,
+        },
       },
     })
 

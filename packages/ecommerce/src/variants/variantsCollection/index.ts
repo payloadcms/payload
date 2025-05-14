@@ -142,7 +142,7 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
     })
 
     if (currenciesConfig) {
-      defaultFields.push(pricesField({ currenciesConfig }))
+      defaultFields.push(...pricesField({ currenciesConfig }))
     }
   }
 

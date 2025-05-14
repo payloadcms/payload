@@ -16,7 +16,7 @@
     position: absolute;
     left: 10px;
     top: 50%;
-    transform: translateY(calc(-50% + 0.1em));
+    transform: translateY(calc(-50%));
     color: var(--theme-elevation-500);
     user-select: none;
     pointer-events: none;

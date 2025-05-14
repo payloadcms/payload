@@ -1,4 +1,4 @@
-import type { ArrayField } from 'payload'
+import type { ArrayField, GroupField } from 'payload'
 
 import type { CurrenciesConfig } from '../types.js'
 
@@ -15,57 +15,39 @@ type Props = {
   overrides?: Partial<ArrayField>
 }
 
-export const pricesField: (props: Props) => ArrayField = ({
+export const pricesField: (props: Props) => GroupField[] = ({
   conditionalPath,
   currenciesConfig,
   enableVariants,
   overrides,
 }) => {
-  const minRows = 1
-  const maxRows = currenciesConfig.supportedCurrencies.length ?? 1
+  const currencies = currenciesConfig.supportedCurrencies
 
-  const defaultCurrency =
-    (currenciesConfig.defaultCurrency ?? currenciesConfig.supportedCurrencies.length === 1)
-      ? currenciesConfig.supportedCurrencies[0]?.code
-      : undefined
+  const fields: GroupField[] = currencies.map((currency) => {
+    const name = `priceIn${currency.code}`
+    const label = `Price (${currency.code})`
 
-  const defaultValue = [
-    {
-      amount: 0,
-      currency: defaultCurrency,
-    },
-  ]
-
-  const field: ArrayField = {
-    name: 'prices',
-    type: 'array',
-    maxRows,
-    minRows,
-    ...(defaultValue && { defaultValue }),
-    ...overrides,
-    admin: {
-      components: {
-        RowLabel: {
-          clientProps: {
-            currenciesConfig,
-          },
-          path: '@payloadcms/ecommerce/ui#PriceRowLabel',
+    return {
+      name,
+      type: 'group',
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
         },
-      },
-      initCollapsed: true,
-      ...(enableVariants
-        ? {
-            condition: (data) => {
-              const path = conditionalPath ?? 'enableVariants'
-
-              return !data?.[path]
+        amountField({
+          currenciesConfig,
+          currency,
+          overrides: {
+            admin: {
+              condition: (_, siblingData) => Boolean(siblingData?.enabled),
             },
-          }
-        : {}),
-      readOnly: maxRows === minRows,
-    },
-    fields: [amountField({ currenciesConfig }), currencyField({ currenciesConfig })],
-  }
+          },
+        }),
+      ],
+      label,
+    }
+  })
 
-  return field
+  return fields
 }

@@ -4,6 +4,7 @@ import type { Stripe } from 'stripe'
 import type { BasePaymentAdapterArgs, PaymentAdapter } from '../../types.js'
 
 import { webhooksEndpoint } from './endpoints/webhooks.js'
+import { createTransaction } from './hooks/createTransaction.js'
 
 type StripeWebhookHandler = (args: {
   event: Stripe.Event
@@ -80,6 +81,13 @@ export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (prop
     name: 'stripe',
     endpoints: [webhooksEndpoint({ apiVersion, appInfo, secretKey, webhooks, webhookSecret })],
     group: groupField,
+    hooks: {
+      createTransaction: createTransaction({
+        apiVersion,
+        appInfo,
+        secretKey,
+      }),
+    },
     label,
   }
 }

@@ -1,13 +1,21 @@
 import type { NumberField } from 'payload'
 
-import type { CurrenciesConfig } from '../types.js'
+import type { CurrenciesConfig, Currency } from '../types.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig
+  /**
+   * Use this specific currency for the field.
+   */
+  currency?: Currency
   overrides?: Partial<NumberField>
 }
 
-export const amountField: (props: Props) => NumberField = ({ currenciesConfig, overrides }) => {
+export const amountField: (props: Props) => NumberField = ({
+  currenciesConfig,
+  currency,
+  overrides,
+}) => {
   // @ts-expect-error - issue with payload types
   const field: NumberField = {
     name: 'amount',
@@ -18,6 +26,7 @@ export const amountField: (props: Props) => NumberField = ({ currenciesConfig, o
         Field: {
           clientProps: {
             currenciesConfig,
+            currency,
           },
           path: '@payloadcms/ecommerce/ui#PriceInput',
         },

@@ -2,7 +2,7 @@ import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
-import type { EcommercePluginConfig } from '../types.js'
+import type { EcommercePluginConfig, PaymentAdapter } from '../types.js'
 
 import { USD } from '../currencies/index.js'
 import { ordersCollection } from '../orders/ordersCollection.js'
@@ -21,6 +21,23 @@ export const ecommercePlugin =
     }
 
     const customersCollectionSlug = pluginConfig.customersCollectionSlug || 'users'
+
+    if (pluginConfig.paymentMethods?.length && pluginConfig.paymentMethods.length > 0) {
+      pluginConfig.paymentMethods.forEach((method) => {
+        if (method.endpoints && method.endpoints.length > 0) {
+          const endpoints = method.endpoints.map((endpoint) => {
+            const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
+
+            return {
+              ...endpoint,
+              path: `/payments/${method.name}${path}`,
+            }
+          })
+
+          incomingConfig.endpoints!.push(...endpoints)
+        }
+      })
+    }
 
     // Ensure collections exists
     if (!incomingConfig.collections) {
@@ -91,23 +108,6 @@ export const ecommercePlugin =
 
     if (!incomingConfig.endpoints) {
       incomingConfig.endpoints = []
-    }
-
-    if (pluginConfig.paymentMethods?.length && pluginConfig.paymentMethods.length > 0) {
-      pluginConfig.paymentMethods.forEach((method) => {
-        if (method.endpoints && method.endpoints.length > 0) {
-          const endpoints = method.endpoints.map((endpoint) => {
-            const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
-
-            return {
-              ...endpoint,
-              path: `/payments/${method.name}${path}`,
-            }
-          })
-
-          incomingConfig.endpoints!.push(...endpoints)
-        }
-      })
     }
 
     return {

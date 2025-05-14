@@ -26,7 +26,7 @@ export const productsCollection: (props?: Props) => CollectionConfig = (props) =
   const baseFields = [
     ...defaultFields,
     ...(enableVariants ? variantsFields() : []),
-    ...(currenciesConfig ? [pricesField({ currenciesConfig, enableVariants })] : []),
+    ...(currenciesConfig ? [...pricesField({ currenciesConfig, enableVariants })] : []),
   ]
 
   const fields =
