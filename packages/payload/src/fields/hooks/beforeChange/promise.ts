@@ -45,6 +45,7 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
+  overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean
   parentPath: string
@@ -80,6 +81,7 @@ export const promise = async ({
   global,
   mergeLocaleActions,
   operation,
+  overrideAccess,
   parentIndexPath,
   parentIsLocalized,
   parentPath,
@@ -176,6 +178,7 @@ export const promise = async ({
         object,
         object
       >
+
       const validationResult = await validateFn(valueToValidate as never, {
         ...field,
         id,
@@ -186,6 +189,7 @@ export const promise = async ({
         // @ts-expect-error
         jsonError,
         operation,
+        overrideAccess,
         path: pathSegments,
         preferences: { fields: {} },
         previousValue: siblingDoc[field.name],
@@ -261,6 +265,7 @@ export const promise = async ({
               global,
               mergeLocaleActions,
               operation,
+              overrideAccess,
               parentIndexPath: '',
               parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
@@ -326,6 +331,7 @@ export const promise = async ({
                 global,
                 mergeLocaleActions,
                 operation,
+                overrideAccess,
                 parentIndexPath: '',
                 parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
@@ -368,6 +374,7 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
+        overrideAccess,
         parentIndexPath: indexPath,
         parentIsLocalized,
         parentPath,
@@ -415,6 +422,7 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
+        overrideAccess,
         parentIndexPath: '',
         parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
@@ -480,6 +488,7 @@ export const promise = async ({
             mergeLocaleActions,
             operation,
             originalDoc: doc,
+            overrideAccess,
             parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
@@ -546,6 +555,7 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
+        overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
@@ -578,6 +588,7 @@ export const promise = async ({
         global,
         mergeLocaleActions,
         operation,
+        overrideAccess,
         parentIndexPath: indexPath,
         parentIsLocalized,
         parentPath: path,
