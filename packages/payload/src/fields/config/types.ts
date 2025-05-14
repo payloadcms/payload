@@ -413,7 +413,6 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
-  overrideAccess?: boolean
   /**
    * The `overrideAccess` flag that was attached to the request. This is used to bypass access control checks for fields.
    */
