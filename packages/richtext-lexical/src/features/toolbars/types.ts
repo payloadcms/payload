@@ -116,9 +116,8 @@ export type ToolbarGroupItem = {
   order?: number
 }
 
-type CustomDropdownGroup = Partial<Omit<ToolbarDropdownGroup, 'isEnabled' | 'items'>>
-type CustomButtonsGroup = Partial<
-  Omit<ToolbarButtonsGroup, 'ChildComponent' | 'isEnabled' | 'items' | 'maxActiveItems'>
+export type CustomGroups = Record<
+  string,
+  | Partial<Omit<ToolbarButtonsGroup, 'items' | 'key'>>
+  | Partial<Omit<ToolbarDropdownGroup, 'isEnabled' | 'items' | 'key'>>
 >
-type CustomGroup = CustomButtonsGroup | CustomDropdownGroup
-export type CustomGroups = Record<string, CustomGroup>
