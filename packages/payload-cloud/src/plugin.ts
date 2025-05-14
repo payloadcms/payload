@@ -126,13 +126,13 @@ export const payloadCloudPlugin =
       },
     ]
 
-    if (pluginOptions?.enableAutoRun === false || !config.jobs) {
+    if (pluginOptions?.enableAutoRun === false) {
       return config
     }
 
-    const oldAutoRunCopy = config.jobs.autoRun ?? []
+    const oldAutoRunCopy = config.jobs?.autoRun ?? []
 
-    const hasExistingAutorun = Boolean(config.jobs.autoRun)
+    const hasExistingAutorun = Boolean(config.jobs?.autoRun)
 
     const newShouldAutoRun = async (payload: Payload) => {
       if (process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
@@ -150,8 +150,8 @@ export const payloadCloudPlugin =
       return false
     }
 
-    if (!config.jobs.shouldAutoRun) {
-      config.jobs.shouldAutoRun = newShouldAutoRun
+    if (!config.jobs?.shouldAutoRun) {
+      ;(config.jobs ??= {}).shouldAutoRun = newShouldAutoRun
     }
 
     const newAutoRun = async (payload: Payload) => {
