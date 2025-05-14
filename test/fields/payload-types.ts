@@ -929,6 +929,12 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  array?:
+    | {
+        date?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1326,10 +1332,16 @@ export interface RelationshipField {
       } | null);
   relationshipDrawerHasMany?: (string | TextField)[] | null;
   relationshipDrawerHasManyPolymorphic?:
-    | {
-        relationTo: 'text-fields';
-        value: string | TextField;
-      }[]
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
     | null;
   relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
   relationshipDrawerWithFilterOptions?: {
@@ -2490,6 +2502,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
     | {
         dayAndTime?: T;
         dayAndTime_tz?: T;
+        id?: T;
+      };
+  array?:
+    | T
+    | {
+        date?: T;
         id?: T;
       };
   updatedAt?: T;

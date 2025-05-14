@@ -8,7 +8,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
  *
  * {@link https://payloadcms.com/docs/live-preview/frontend View the documentation}
  */
-export const useLivePreview = <T>(props: {
+export const useLivePreview = <T extends Record<string, unknown>>(props: {
   apiRoute?: string
   depth?: number
   initialData: T
@@ -27,7 +27,7 @@ export const useLivePreview = <T>(props: {
     isLoading.value = false
   }
 
-  let subscription: (event: MessageEvent) => void
+  let subscription: (event: MessageEvent) => Promise<void> | void
 
   onMounted(() => {
     subscription = subscribe({
