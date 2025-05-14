@@ -143,30 +143,16 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   name: 'group',
-    //   type: 'group',
-    //   fields: [
-    //     {
-    //       name: 'groupTitle',
-    //       type: 'text',
-    //     },
-    //     {
-    //       name: 'innerGroup',
-    //       type: 'group',
-    //       fields: [
-    //         {
-    //           name: 'innerGroupTitle',
-    //           type: 'text',
-    //         },
-    //         {
-    //           name: 'innerGroupDescription',
-    //           type: 'text',
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+        },
+      ],
+    },
     {
       name: 'relationship',
       type: 'relationship',

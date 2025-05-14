@@ -17,8 +17,11 @@ import type {
 import { fieldAffectsData, fieldIsPresentationalOnly, tabHasName } from '../fields/config/types.js'
 
 type FlattenedField<TField> = TField extends ClientField
-  ? { labelWithPrefix?: string } & (FieldAffectingDataClient | FieldPresentationalOnlyClient)
-  : { labelWithPrefix?: string } & (FieldAffectingData | FieldPresentationalOnly)
+  ? { accessor?: string; labelWithPrefix?: string } & (
+      | FieldAffectingDataClient
+      | FieldPresentationalOnlyClient
+    )
+  : { accessor?: string; labelWithPrefix?: string } & (FieldAffectingData | FieldPresentationalOnly)
 
 type TabType<TField> = TField extends ClientField ? ClientTab : Tab
 
@@ -77,13 +80,16 @@ function flattenFields<TField extends ClientField | Field>({
         ? translatedLabel
           ? labelPrefix + ' > ' + translatedLabel
           : labelPrefix
-        : translatedLabel
+        : undefined
 
       const name = 'name' in field ? field.name : undefined
+
+      const accessor = labelPrefix ? [...labelPrefix.split(' > '), name ?? ''].join('-') : name
 
       acc.push({
         ...(field as FlattenedField<TField>),
         name,
+        accessor,
         labelWithPrefix,
       })
     } else if (field.type === 'tabs' && 'tabs' in field) {

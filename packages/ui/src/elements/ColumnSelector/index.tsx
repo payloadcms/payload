@@ -54,14 +54,16 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
         const { accessor, active, field } = col
 
         const label =
-          field && 'labelWithPrefix' in field
+          field && 'labelWithPrefix' in field && field.labelWithPrefix !== undefined
             ? field.labelWithPrefix
             : 'label' in field
               ? field.label
               : undefined
 
         const rawKeyCandidate =
-          ('labelWithPrefix' in field && field.labelWithPrefix) ||
+          ('labelWithPrefix' in field &&
+            field.labelWithPrefix !== undefined &&
+            field.labelWithPrefix) ||
           ('name' in field && field.name) ||
           i
 
