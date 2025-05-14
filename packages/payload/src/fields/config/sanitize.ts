@@ -104,13 +104,14 @@ export const sanitizeFields = async ({
     const fieldAffectsData = _fieldAffectsData(field)
 
     if (isTopLevelField && fieldAffectsData && field.name) {
-      if (collectionConfig.upload) {
+      if (collectionConfig && collectionConfig.upload) {
         if (reservedBaseUploadFieldNames.includes(field.name)) {
           throw new ReservedFieldName(field, field.name)
         }
       }
 
       if (
+        collectionConfig &&
         collectionConfig.auth &&
         typeof collectionConfig.auth === 'object' &&
         !collectionConfig.auth.disableLocalStrategy
