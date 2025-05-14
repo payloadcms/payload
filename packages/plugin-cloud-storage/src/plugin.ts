@@ -77,11 +77,11 @@ export const cloudStoragePlugin =
               ...(existingCollection.hooks || {}),
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
-                getAfterDeleteHook({ adapter, collection: existingCollection }),
+                getAfterDeleteHook({ adapter, collectionSlug: existingCollection.slug }),
               ],
               beforeChange: [
                 ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ adapter, collection: existingCollection }),
+                getBeforeChangeHook({ adapter, collectionSlug: existingCollection.slug }),
               ],
             },
             upload: {
@@ -100,8 +100,8 @@ export const cloudStoragePlugin =
       }),
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
-        if (config.onInit) {
-          await config.onInit(payload)
+        if (payload.config.onInit) {
+          await payload.config.onInit(payload)
         }
       },
     }
