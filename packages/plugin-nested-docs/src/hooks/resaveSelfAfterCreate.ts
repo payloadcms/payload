@@ -12,7 +12,10 @@ export const resaveSelfAfterCreate =
       return undefined
     }
 
-    const collection = req.payload.collections[collectionSlug]?.config!
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!collection) {
+      throw new Error(`Collection ${collectionSlug} not found`)
+    }
 
     const { locale, payload } = req
     const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'

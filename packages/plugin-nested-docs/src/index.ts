@@ -59,13 +59,12 @@ export const nestedDocsPlugin =
             ],
             beforeChange: [
               async ({ data, originalDoc, req }) => {
-                return populateBreadcrumbs(
-                  req,
-                  pluginConfig,
-                  req.payload.collections[collection.slug]?.config!,
-                  data,
-                  originalDoc,
-                )
+                const collectionConfig = req.payload.collections[collection.slug]?.config
+                if (!collectionConfig) {
+                  throw new Error(`Collection ${collection.slug} not found`)
+                }
+
+                return populateBreadcrumbs(req, pluginConfig, collectionConfig, data, originalDoc)
               },
 
               ...(collection?.hooks?.beforeChange || []),
