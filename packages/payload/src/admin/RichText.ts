@@ -65,6 +65,7 @@ export type AfterChangeRichTextHookArgs<
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
+
 export type BeforeValidateRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
@@ -102,6 +103,7 @@ export type BeforeChangeRichTextHookArgs<
   mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
@@ -190,6 +192,7 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,

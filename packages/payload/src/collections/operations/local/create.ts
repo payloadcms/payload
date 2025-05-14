@@ -139,6 +139,7 @@ export default async function createLocal<
     select,
     showHiddenFields,
   } = options
+
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {
