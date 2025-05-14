@@ -115,3 +115,10 @@ export type ToolbarGroupItem = {
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }
+
+type CustomDropdownGroup = Partial<Omit<ToolbarDropdownGroup, 'isEnabled' | 'items'>>
+type CustomButtonsGroup = Partial<
+  Omit<ToolbarButtonsGroup, 'ChildComponent' | 'isEnabled' | 'items' | 'maxActiveItems'>
+>
+type CustomGroup = CustomButtonsGroup | CustomDropdownGroup
+export type CustomGroups = Record<string, CustomGroup>

@@ -1,4 +1,4 @@
-import type { ToolbarGroup } from '../../types.js'
+import type { CustomGroups } from '../../types.js'
 
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 
@@ -19,7 +19,7 @@ export type FixedToolbarFeatureProps = {
    * @note Props passed via customGroups must be serializable. Avoid using functions or dynamic components.
    * ChildComponent, if provided, must be a serializable server component.
    */
-  customGroups?: Record<string, Partial<Omit<ToolbarGroup, 'isEnabled' | 'items'>>>
+  customGroups?: CustomGroups
   /**
    * @default false
    *
