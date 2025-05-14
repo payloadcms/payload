@@ -20,11 +20,11 @@ export const preventLockout: Validate = async (
   { data, overrideAccess, req: incomingReq },
 ) => {
   // Use context to ensure an infinite loop doesn't occur
-  if (!incomingReq.context.isValidationReq && !overrideAccess) {
+  if (!incomingReq.context._preventLockout && !overrideAccess) {
     const req = await createLocalReq(
       {
         context: {
-          isValidationReq: true,
+          _preventLockout: true,
         },
         req: {
           user: incomingReq.user,
@@ -34,7 +34,7 @@ export const preventLockout: Validate = async (
     )
 
     // Might be `null` if no transactions are enabled
-    const transactionID = await initTransaction(req)
+    const transaction = await initTransaction(req)
 
     // create a temp record to validate the constraints, using the req
     const tempPreset = await req.payload.create({
@@ -75,7 +75,7 @@ export const preventLockout: Validate = async (
         throw new APIError('Cannot remove yourself from this preset.', 403, {}, true)
       }
     } finally {
-      if (transactionID) {
+      if (transaction) {
         await killTransaction(req)
       } else {
         // delete the temp record
