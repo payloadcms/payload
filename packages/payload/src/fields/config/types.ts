@@ -415,6 +415,10 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   operation?: Operation
   overrideAccess?: boolean
   /**
+   * The `overrideAccess` flag that was attached to the request. This is used to bypass access control checks for fields.
+   */
+  overrideAccess?: boolean
+  /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]

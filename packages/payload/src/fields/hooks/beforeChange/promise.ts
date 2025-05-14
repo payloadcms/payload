@@ -178,6 +178,7 @@ export const promise = async ({
         object,
         object
       >
+
       const validationResult = await validateFn(valueToValidate as never, {
         ...field,
         id,

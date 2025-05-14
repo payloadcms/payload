@@ -65,6 +65,7 @@ export type AfterChangeRichTextHookArgs<
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
+
 export type BeforeValidateRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
@@ -190,6 +191,7 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,

@@ -477,9 +477,11 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
               return value
             }
+
             const previousNodeIDMap: {
               [key: string]: SerializedLexicalNode
             } = {}
+
             const originalNodeWithLocalesIDMap: {
               [key: string]: SerializedLexicalNode
             } = {}
@@ -529,7 +531,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-
                     previousNode: previousNodeIDMap[id]!,
                     req,
                     skipValidation: skipValidation!,
