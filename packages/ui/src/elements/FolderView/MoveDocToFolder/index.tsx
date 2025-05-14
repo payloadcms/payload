@@ -4,7 +4,7 @@ import type { FolderOrDocument } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useId } from 'react'
 import { toast } from 'sonner'
 
 import type { Props as ButtonProps } from '../../Button/types.js'
@@ -40,6 +40,7 @@ export function MoveDocToFolder({
   const [fromFolderName, setFromFolderName] = React.useState(() => `${t('general:loading')}...`)
 
   const { config } = useConfig()
+  const modalID = useId()
 
   React.useEffect(() => {
     async function fetchFolderLabel() {
@@ -65,7 +66,7 @@ export function MoveDocToFolder({
       docTitle={title}
       fromFolderID={fromFolderID as number | string}
       fromFolderName={fromFolderName}
-      modalSlug="move-doc-to-folder"
+      modalSlug={`move-to-folder-${modalID}`}
       onConfirm={({ id }) => {
         if (currentParentFolder.value !== id) {
           dispatchField({
