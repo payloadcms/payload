@@ -4,7 +4,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-dotenv.config({ path: path.resolve(dirname, '../../', '.env') })
+dotenv.config({ path: path.resolve(dirname, '../../../../', '.env') })
 
 export async function translateText(text: string, targetLang: string) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {

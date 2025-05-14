@@ -1,17 +1,17 @@
 /* eslint no-console: 0 */
 
-import fs from 'fs'
-import path from 'path'
-import { format } from 'prettier'
-
 import type {
   AcceptedLanguages,
   GenericLanguages,
   GenericTranslationsObject,
-} from '../../src/types.js'
+} from '@payloadcms/translations'
 
-import { deepMergeSimple } from '../../src/utilities/deepMergeSimple.js'
-import { acceptedLanguages } from '../../src/utilities/languages.js'
+import { acceptedLanguages } from '@payloadcms/translations'
+import fs from 'fs'
+import path from 'path'
+import { deepMergeSimple } from 'payload/shared'
+import { format } from 'prettier'
+
 import { applyEslintFixes } from './applyEslintFixes.js'
 import { findMissingKeys } from './findMissingKeys.js'
 import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
@@ -104,16 +104,16 @@ export async function translateObject(props: {
      */
     for (const key of keysWhichDoNotExistInFromlang) {
       // Delete those keys in the target language object obj[lang]
-      const keys = key.split('.')
+      const keys: string[] = key.split('.')
       let targetObj = allTranslatedTranslationsObject?.[targetLang].translations
       for (let i = 0; i < keys.length - 1; i += 1) {
-        const nextObj = targetObj[keys[i]]
+        const nextObj = targetObj[keys[i] as string]
         if (typeof nextObj !== 'object') {
           throw new Error(`Key ${keys[i]} is not an object in ${targetLang} (1)`)
         }
         targetObj = nextObj
       }
-      delete targetObj[keys[keys.length - 1]]
+      delete targetObj[keys[keys.length - 1] as string]
     }
 
     if (!allTranslatedTranslationsObject?.[targetLang].translations) {
@@ -128,7 +128,10 @@ export async function translateObject(props: {
 
     for (const missingKey of missingKeys) {
       const keys: string[] = missingKey.split('.')
-      const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
+      const sourceText = keys.reduce(
+        (acc, key) => acc[key] as GenericTranslationsObject,
+        fromTranslationsObject,
+      )
       if (!sourceText || typeof sourceText !== 'string') {
         throw new Error(
           `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}. (2)`,
@@ -147,20 +150,20 @@ export async function translateObject(props: {
           }
           let targetObj = allOnlyNewTranslatedTranslationsObject?.[targetLang]
           for (let i = 0; i < keys.length - 1; i += 1) {
-            if (!targetObj[keys[i]]) {
-              targetObj[keys[i]] = {}
+            if (!targetObj[keys[i] as string]) {
+              targetObj[keys[i] as string] = {}
             }
-            const nextObj = targetObj[keys[i]]
+            const nextObj = targetObj[keys[i] as string]
             if (typeof nextObj !== 'object') {
               throw new Error(`Key ${keys[i]} is not an object in ${targetLang} (3)`)
             }
             targetObj = nextObj
           }
-          targetObj[keys[keys.length - 1]] = translated
+          targetObj[keys[keys.length - 1] as string] = translated
 
-          allTranslatedTranslationsObject[targetLang].translations = sortKeys(
+          allTranslatedTranslationsObject[targetLang]!.translations = sortKeys(
             deepMergeSimple(
-              allTranslatedTranslationsObject[targetLang].translations,
+              allTranslatedTranslationsObject[targetLang]!.translations,
               allOnlyNewTranslatedTranslationsObject[targetLang],
             ),
           )
@@ -180,9 +183,14 @@ export async function translateObject(props: {
   console.log('New translations:', allOnlyNewTranslatedTranslationsObject)
 
   if (inlineFile?.length) {
-    const simpleTranslationsObject = {}
+    const simpleTranslationsObject: GenericTranslationsObject = {}
     for (const lang in allTranslatedTranslationsObject) {
-      simpleTranslationsObject[lang] = allTranslatedTranslationsObject[lang].translations
+      if (lang in allTranslatedTranslationsObject) {
+        simpleTranslationsObject[lang as keyof typeof allTranslatedTranslationsObject] =
+          allTranslatedTranslationsObject[
+            lang as keyof typeof allTranslatedTranslationsObject
+          ]!.translations
+      }
     }
 
     // write allTranslatedTranslationsObject
@@ -218,10 +226,10 @@ export async function translateObject(props: {
       const filePath = path.resolve(targetFolder, `${sanitizedKey}.ts`)
 
       // prefix & translations
-      let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key].translations)}\n`
+      let fileContent: string = `${tsFilePrefix.replace('{{locale}}', sanitizedKey)}${generateTsObjectLiteral(allTranslatedTranslationsObject[key]?.translations || {})}\n`
 
       // suffix
-      fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key].dateFNSKey}'`)}\n`
+      fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key]?.dateFNSKey}'`)}\n`
 
       // eslint
       fileContent = await applyEslintFixes(fileContent, filePath)
