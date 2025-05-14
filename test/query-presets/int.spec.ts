@@ -407,7 +407,7 @@ describe('Query Presets', () => {
 
         expect(presetWithoutAccess).toBeFalsy()
       } catch (error: unknown) {
-        expect((error as Error).message).toBe('The following field is invalid: Sharing settings')
+        expect((error as Error).message).toBe('Cannot remove yourself from this preset.')
       }
 
       const presetWithUser1 = await payload.create({
@@ -462,7 +462,7 @@ describe('Query Presets', () => {
 
         expect(presetUpdatedByUser1).toBeFalsy()
       } catch (error: unknown) {
-        expect((error as Error).message).toBe('The following field is invalid: Sharing settings')
+        expect((error as Error).message).toBe('Cannot remove yourself from this preset.')
       }
     })
   })

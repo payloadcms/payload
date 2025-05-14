@@ -54,6 +54,7 @@ export const preventLockout: Validate = async (
         id: tempPreset.id,
         collection: queryPresetsCollectionSlug,
         overrideAccess: false,
+        req,
         user: req.user,
       })
 
@@ -64,17 +65,14 @@ export const preventLockout: Validate = async (
         collection: queryPresetsCollectionSlug,
         data: tempPreset,
         overrideAccess: false,
+        req,
         user: req.user,
       })
 
       canUpdate = true
     } catch (_err) {
-      if (!canRead) {
-        throw new APIError('Cannot remove yourself from reading this preset.', 403, {}, true)
-      }
-
-      if (!canUpdate) {
-        throw new APIError('Cannot remove yourself from updating this preset.', 403, {}, true)
+      if (!canRead || !canUpdate) {
+        throw new APIError('Cannot remove yourself from this preset.', 403, {}, true)
       }
     } finally {
       if (transactionID) {
