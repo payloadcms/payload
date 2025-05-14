@@ -103,12 +103,10 @@ export const sanitizeFields = async ({
 
     const fieldAffectsData = _fieldAffectsData(field)
 
-    if (isTopLevelField) {
+    if (isTopLevelField && fieldAffectsData && field.name) {
       if (collectionConfig.upload && typeof collectionConfig.upload === 'object') {
-        if (fieldAffectsData && field.name) {
-          if (reservedBaseUploadFieldNames.includes(field.name)) {
-            throw new ReservedFieldName(field, field.name)
-          }
+        if (reservedBaseUploadFieldNames.includes(field.name)) {
+          throw new ReservedFieldName(field, field.name)
         }
       }
 
@@ -117,19 +115,17 @@ export const sanitizeFields = async ({
         typeof collectionConfig.auth === 'object' &&
         !collectionConfig.auth.disableLocalStrategy
       ) {
-        if (fieldAffectsData && field.name) {
-          if (reservedBaseAuthFieldNames.includes(field.name)) {
+        if (reservedBaseAuthFieldNames.includes(field.name)) {
+          throw new ReservedFieldName(field, field.name)
+        }
+
+        if (collectionConfig.auth.verify) {
+          if (reservedAPIKeyFieldNames.includes(field.name)) {
             throw new ReservedFieldName(field, field.name)
           }
 
-          if (collectionConfig.auth.verify) {
-            if (reservedAPIKeyFieldNames.includes(field.name)) {
-              throw new ReservedFieldName(field, field.name)
-            }
-
-            if (reservedVerifyFieldNames.includes(field.name)) {
-              throw new ReservedFieldName(field, field.name)
-            }
+          if (reservedVerifyFieldNames.includes(field.name)) {
+            throw new ReservedFieldName(field, field.name)
           }
         }
       }

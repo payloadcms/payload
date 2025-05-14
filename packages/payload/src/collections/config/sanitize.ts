@@ -42,7 +42,9 @@ export const sanitizeCollection = async (
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
+
   collection._sanitized = true
+
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
@@ -97,17 +99,21 @@ export const sanitizeCollection = async (
     // add default timestamps fields only as needed
     let hasUpdatedAt: boolean | null = null
     let hasCreatedAt: boolean | null = null
+
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') {
           hasUpdatedAt = true
         }
+
         if (field.name === 'createdAt') {
           hasCreatedAt = true
         }
       }
+
       return hasCreatedAt && hasUpdatedAt
     })
+
     if (!hasUpdatedAt) {
       sanitized.fields.push({
         name: 'updatedAt',
@@ -120,6 +126,7 @@ export const sanitizeCollection = async (
         label: ({ t }) => t('general:updatedAt'),
       })
     }
+
     if (!hasCreatedAt) {
       sanitized.fields.push({
         name: 'createdAt',

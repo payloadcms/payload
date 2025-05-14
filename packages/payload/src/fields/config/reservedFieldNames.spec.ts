@@ -25,6 +25,7 @@ describe('reservedFieldNames - collections -', () => {
           label: 'some-collection',
         },
       ]
+
       await expect(async () => {
         await sanitizeCollection(
           // @ts-expect-error
@@ -53,6 +54,7 @@ describe('reservedFieldNames - collections -', () => {
           label: 'some-collection',
         },
       ]
+
       await expect(async () => {
         await sanitizeCollection(
           // @ts-expect-error
@@ -93,6 +95,7 @@ describe('reservedFieldNames - collections -', () => {
           label: 'some-collection',
         },
       ]
+
       await expect(async () => {
         await sanitizeCollection(
           // @ts-expect-error
@@ -121,6 +124,7 @@ describe('reservedFieldNames - collections -', () => {
           label: 'some-collection',
         },
       ]
+
       await expect(async () => {
         await sanitizeCollection(
           // @ts-expect-error
@@ -149,6 +153,7 @@ describe('reservedFieldNames - collections -', () => {
           label: 'some-collection',
         },
       ]
+
       await expect(async () => {
         await sanitizeCollection(
           // @ts-expect-error
