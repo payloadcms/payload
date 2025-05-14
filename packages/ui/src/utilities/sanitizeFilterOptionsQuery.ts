@@ -8,7 +8,6 @@ export const sanitizeFilterOptionsQuery = (query: Where): Where => {
         sanitizeFilterOptionsQuery(val)
       }
     } else if (
-      key === 'id' &&
       value &&
       typeof value === 'object' &&
       'in' in value &&
@@ -16,7 +15,7 @@ export const sanitizeFilterOptionsQuery = (query: Where): Where => {
       value.in.length === 0
     ) {
       {
-        query['id'] = { exists: false }
+        query[key] = { exists: false }
       }
     }
   }
