@@ -149,6 +149,7 @@ export default async function createLocal<
   }
 
   const req = await createLocalReq(options, payload)
+
   req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug, TSelect>({

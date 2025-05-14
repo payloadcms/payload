@@ -108,7 +108,6 @@ export type BeforeChangeRichTextHookArgs<
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
   previousValue?: TValue
-
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
