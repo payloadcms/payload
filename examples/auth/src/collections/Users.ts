@@ -25,6 +25,7 @@ export const Users: CollectionConfig = {
     create: anyone,
     update: adminsAndUser,
     delete: admins,
+    unlock: admins,
     admin: ({ req: { user } }) => checkRole(['admin'], user),
   },
   hooks: {
