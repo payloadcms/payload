@@ -1,5 +1,7 @@
-export function generateTsObjectLiteral(obj: any): string {
-  const lines = []
+import type { JsonObject } from 'payload'
+
+export function generateTsObjectLiteral(obj: JsonObject): string {
+  const lines: string[] = []
   const entries = Object.entries(obj)
   for (const [key, value] of entries) {
     const safeKey = /^[\w$]+$/.test(key) ? key : JSON.stringify(key)
