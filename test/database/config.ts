@@ -715,7 +715,7 @@ export default buildConfigWithDefaults({
               ],
             },
           ],
-          name: 'blocksLocalized',
+          name: 'testBlocksLocalized',
         },
         {
           type: 'blocks',
@@ -730,7 +730,7 @@ export default buildConfigWithDefaults({
               ],
             },
           ],
-          name: 'blocks',
+          name: 'testBlocks',
         },
       ],
     },

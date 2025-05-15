@@ -502,7 +502,7 @@ export interface Alias {
  */
 export interface Block {
   id: string;
-  blocksLocalized?:
+  testBlocksLocalized?:
     | {
         text?: string | null;
         id?: string | null;
@@ -510,7 +510,7 @@ export interface Block {
         blockType: 'cta';
       }[]
     | null;
-  blocks?:
+  testBlocks?:
     | {
         text?: string | null;
         id?: string | null;
@@ -966,7 +966,7 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks_select".
  */
 export interface BlocksSelect<T extends boolean = true> {
-  blocksLocalized?:
+  testBlocksLocalized?:
     | T
     | {
         cta?:
@@ -977,7 +977,7 @@ export interface BlocksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  blocks?:
+  testBlocks?:
     | T
     | {
         cta?:

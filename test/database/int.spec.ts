@@ -2489,12 +2489,12 @@ describe('database', () => {
     const res = await payload.create({
       collection: 'blocks',
       data: {
-        blocks: [{ blockType: 'cta', text: 'text' }],
-        blocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
       },
     })
 
-    expect(res.blocks[0]?.text).toBe('text')
-    expect(res.blocksLocalized[0]?.text).toBe('text-localized')
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 })
