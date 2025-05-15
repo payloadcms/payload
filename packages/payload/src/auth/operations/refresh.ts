@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import url from 'url'
+import { v4 as uuid } from 'uuid'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
@@ -101,9 +102,21 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     }
 
     if (!result) {
+      // Q: Should we update the existing session's expiresAt or create a new one?
+
+      const newSessionID = uuid()
+
+      // Add session to user
+      if (!user.sessions?.length) {
+        user.sessions = [{ id: newSessionID, createdAt: new Date() }]
+      } else {
+        user.sessions.push({ id: newSessionID, createdAt: new Date() })
+      }
+
       const fieldsToSign = getFieldsToSign({
         collectionConfig,
         email: user?.email as string,
+        sid: newSessionID,
         user: args?.req?.user,
       })
 
@@ -159,6 +172,23 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
+
+    // TODO: only do this if sessions are enabled
+    if (user.sessions?.length) {
+      req.payload.logger.info({
+        msg: 'DEBUG: refreshOperation - Updating user sessions',
+        user,
+      })
+
+      // Q: Should we prune the sessions array to remove old sessions here?
+      await req.payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: user,
+        req,
+        returning: false,
+      })
+    }
 
     if (shouldCommit) {
       await commitTransaction(req)

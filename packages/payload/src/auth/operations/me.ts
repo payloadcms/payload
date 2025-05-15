@@ -87,6 +87,14 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
         const decoded = decodeJwt(currentToken)
         if (decoded) {
           result.exp = decoded.exp
+
+          const isSessionValid = user.sessions?.some((s) => s.id === decoded.sid)
+
+          req.payload.logger.info({
+            isSessionValid,
+            msg: 'DEBUG: me operation - checking session validity',
+          })
+          // Q: Do something with the session? Update a timestamp?
         }
         if (!collection.config.auth.removeTokenFromResponses) {
           result.token = currentToken

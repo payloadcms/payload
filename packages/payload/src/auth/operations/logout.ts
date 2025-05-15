@@ -1,9 +1,11 @@
 import { status as httpStatus } from 'http-status'
+import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
+import { extractJWT } from '../extractJWT.js'
 
 export type Arguments = {
   collection: Collection
@@ -35,6 +37,35 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
         })) || args
     }
   }
+
+  const token = extractJWT(req)
+  const decodedToken = token ? decodeJwt(token) : undefined
+  if (!decodedToken) {
+    throw new APIError('Invalid token', httpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  const sessionsAfterLogout = ((user.sessions || []) as Array<{ id: string }>).filter(
+    (s) => s.id !== decodedToken.sid,
+  )
+  req.payload.logger.info({
+    allSessions: user.sessions,
+    msg: 'Logging out and updating user',
+    sessionIDFromToken: decodedToken.sid,
+    sessionsAfterLogout,
+  })
+
+  const updatedUser = await req.payload.update({
+    id: user.id,
+    collection: collectionConfig.slug,
+    data: {
+      sessions: sessionsAfterLogout,
+    },
+  })
+
+  req.payload.logger.info({
+    msg: `Removed session ${decodedToken.sid as string} from user ${user.id}`,
+    user: updatedUser,
+  })
 
   return true
 }

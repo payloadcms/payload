@@ -93,6 +93,7 @@ export interface Config {
     hooks: Hook;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
+    'payload-sessions': PayloadSession;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
@@ -122,6 +123,7 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-sessions': PayloadSessionsSelect<false> | PayloadSessionsSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
@@ -837,6 +839,26 @@ export interface PayloadPreference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-sessions".
+ */
+export interface PayloadSession {
+  id: string;
+  session: string;
+  expiration: string;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
@@ -1217,6 +1239,17 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
   user?: T;
   key?: T;
   value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-sessions_select".
+ */
+export interface PayloadSessionsSelect<T extends boolean = true> {
+  session?: T;
+  expiration?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }

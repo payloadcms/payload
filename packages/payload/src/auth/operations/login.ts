@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+
+import { v4 as uuid } from 'uuid'
+
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -115,7 +118,9 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    let user
+    let user:
+      | ({ sessions?: Array<{ createdAt: Date; expiresAt: Date; id: string }> } & User)
+      | null = null
     const { email: unsanitizedEmail, password } = data
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
@@ -249,9 +254,37 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       })
     }
 
+    // Add session to user
+    const newSessionID = uuid()
+    const now = new Date()
+    const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+    const expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+    req.payload.logger.info({
+      createdAt: now,
+      expiresAt,
+      msg: 'DEBUG: loginOperation - Adding session to user',
+      newSessionID,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
+    })
+
+    const session = { id: newSessionID, createdAt: now, expiresAt }
+    if (!user.sessions?.length) {
+      user.sessions = [session]
+    } else {
+      user.sessions.push(session)
+    }
+
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
       email: sanitizedEmail,
+      sid: newSessionID,
+      user,
+    })
+
+    console.log({
+      msg: `User ${user.id} logged in`,
+      newSessionID,
       user,
     })
 
@@ -346,6 +379,21 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       operation: 'login',
       result,
     })
+
+    // TODO: only do this if sessions are enabled
+    if (user.sessions?.length) {
+      req.payload.logger.info({
+        msg: 'DEBUG: loginOperation - Updating user sessions',
+        user,
+      })
+      await payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: user,
+        req,
+        returning: false,
+      })
+    }
 
     // /////////////////////////////////////
     // Return results

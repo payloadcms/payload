@@ -273,6 +273,13 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
+
+  /**
+   * Use sessions for authentication. Enabled by default.
+   * @default true
+   */
+  useSessions?: boolean
+
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
    * @link https://payloadcms.com/docs/authentication/email#email-verification
