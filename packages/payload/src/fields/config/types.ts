@@ -1208,7 +1208,7 @@ export type PolymorphicRelationshipField = {
 
 export type PolymorphicRelationshipFieldClient = {
   admin?: {
-    sortOptions?: Pick<PolymorphicRelationshipField['admin'], 'sortOptions'>
+    sortOptions?: PolymorphicRelationshipField['admin']['sortOptions']
   } & RelationshipAdminClient
 } & Pick<PolymorphicRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
