@@ -83,6 +83,7 @@ export interface Config {
     'relationships-migration': RelationshipsMigration;
     'compound-indexes': CompoundIndex;
     aliases: Alias;
+    'blocks-docs': BlocksDoc;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -106,6 +107,7 @@ export interface Config {
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
     aliases: AliasesSelect<false> | AliasesSelect<true>;
+    'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -499,6 +501,31 @@ export interface Alias {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-docs".
+ */
+export interface BlocksDoc {
+  id: string;
+  testBlocksLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta';
+      }[]
+    | null;
+  testBlocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -584,6 +611,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'aliases';
         value: string | Alias;
+      } | null)
+    | ({
+        relationTo: 'blocks-docs';
+        value: string | BlocksDoc;
       } | null)
     | ({
         relationTo: 'users';
@@ -930,6 +961,36 @@ export interface AliasesSelect<T extends boolean = true> {
               id?: T;
             };
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-docs_select".
+ */
+export interface BlocksDocsSelect<T extends boolean = true> {
+  testBlocksLocalized?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  testBlocks?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

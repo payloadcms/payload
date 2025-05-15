@@ -26,6 +26,10 @@ import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
+import {
+  InternalBlockTableNameIndex,
+  resolveBlockTableName,
+} from '../utilities/validateExistingBlockIsIdentical.js'
 
 const flattenAllWherePaths = (where: Where, paths: string[]) => {
   for (const k in where) {
@@ -250,7 +254,7 @@ export const traverseFields = ({
 
         ;(field.blockReferences ?? field.blocks).forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
-          const blockKey = `_blocks_${block.slug}`
+          const blockKey = `_blocks_${block.slug}${!block[InternalBlockTableNameIndex] ? '' : `_${block[InternalBlockTableNameIndex]}`}`
 
           let blockSelect: boolean | SelectType | undefined
 
@@ -290,8 +294,9 @@ export const traverseFields = ({
               with: {},
             }
 
-            const tableName = adapter.tableNameMap.get(
-              `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+            const tableName = resolveBlockTableName(
+              block,
+              adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
             if (typeof blockSelect === 'object') {

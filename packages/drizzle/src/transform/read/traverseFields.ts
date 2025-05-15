@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -248,8 +249,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   (block) => typeof block !== 'string' && block.slug === row.blockType,
                 ) as FlattenedBlock | undefined)
 
-              const tableName = adapter.tableNameMap.get(
-                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              const tableName = resolveBlockTableName(
+                block,
+                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
               )
 
               if (block) {
@@ -327,8 +329,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   delete row._index
                 }
 
-                const tableName = adapter.tableNameMap.get(
-                  `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                const tableName = resolveBlockTableName(
+                  block,
+                  adapter.tableNameMap.get(
+                    `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                  ),
                 )
 
                 acc.push(
