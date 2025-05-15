@@ -25,6 +25,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
@@ -245,6 +246,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
+              select: {
+                [fieldToSearch]: true,
+              },
               sort: fieldToSort,
               where: {
                 and: [
@@ -268,6 +272,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
               query.where.and.push(relationFilterOption)
             }
+
+            sanitizeFilterOptionsQuery(query.where)
 
             const response = await fetch(`${serverURL}${api}/${relation}`, {
               body: qs.stringify(query),

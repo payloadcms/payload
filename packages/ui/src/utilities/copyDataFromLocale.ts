@@ -130,7 +130,11 @@ function iterateFields(
           break
 
         case 'group': {
-          if (field.name in toLocaleData && fromLocaleData?.[field.name] !== undefined) {
+          if (
+            fieldAffectsData(field) &&
+            field.name in toLocaleData &&
+            fromLocaleData?.[field.name] !== undefined
+          ) {
             iterateFields(
               field.fields,
               fromLocaleData[field.name],
@@ -138,6 +142,8 @@ function iterateFields(
               req,
               parentIsLocalized || field.localized,
             )
+          } else {
+            iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
           }
           break
         }

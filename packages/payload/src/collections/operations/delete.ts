@@ -5,7 +5,6 @@ import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
-  BeforeOperationHook,
   BulkOperationResult,
   Collection,
   DataFromCollectionSlug,
