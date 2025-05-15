@@ -129,7 +129,7 @@ export async function translateObject(props: {
     for (const missingKey of missingKeys) {
       const keys: string[] = missingKey.split('.')
       const sourceText = keys.reduce(
-        (acc, key) => acc[key] as GenericTranslationsObject,
+        (acc, key) => acc[key],
         fromTranslationsObject,
       )
       if (!sourceText || typeof sourceText !== 'string') {

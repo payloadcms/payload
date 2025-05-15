@@ -33,6 +33,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -298,6 +299,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
             if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
               query.where.and.push(relationFilterOption)
             }
+
+            sanitizeFilterOptionsQuery(query.where)
 
             const response = await fetch(`${serverURL}${api}/${relation}`, {
               body: qs.stringify(query),

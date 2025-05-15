@@ -15,7 +15,7 @@ import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -1614,7 +1614,7 @@ describe('Fields', () => {
     it('should create with ids and nested ids', async () => {
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
@@ -1909,6 +1909,53 @@ describe('Fields', () => {
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
+        },
+      })
+    })
+
+    it('should work with unnamed group', async () => {
+      const groupDoc = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          insideUnnamedGroup: 'Hello world',
+          deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+        },
+      })
+      expect(groupDoc).toMatchObject({
+        id: expect.anything(),
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
+    it('should work with unnamed group - graphql', async () => {
+      const mutation = `mutation {
+              createGroupField(
+                data: {
+                  insideUnnamedGroup: "Hello world",
+                  deeplyNestedGroup: { insideNestedUnnamedGroup: "Secondfield" },
+                  group: {text: "hello"}
+                }
+              ) {
+                insideUnnamedGroup
+                deeplyNestedGroup {
+                  insideNestedUnnamedGroup
+                }
+              }
+            }`
+
+      const groupDoc = await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: mutation }),
+      })
+
+      const data = (await groupDoc.json()).data.createGroupField
+
+      expect(data).toMatchObject({
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
         },
       })
     })
@@ -2357,7 +2404,7 @@ describe('Fields', () => {
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
