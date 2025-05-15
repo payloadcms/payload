@@ -31,7 +31,9 @@ export type ClientTab =
     >)
   | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<UnnamedTab, 'fields'>)
 
-type TabsFieldBaseClientProps = FieldPaths
+type TabsFieldBaseClientProps = {
+  potentiallyStalePath?: string
+} & FieldPaths
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 

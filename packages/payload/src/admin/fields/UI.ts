@@ -15,6 +15,7 @@ type UIFieldClientWithoutType = MarkOptional<UIFieldClient, 'type'>
 
 type UIFieldBaseClientProps = {
   readonly path: string
+  readonly potentiallyStalePath?: string
 }
 
 type UIFieldBaseServerProps = Pick<FieldPaths, 'path'>

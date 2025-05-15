@@ -26,6 +26,7 @@ type CodeFieldBaseClientProps = {
   readonly autoComplete?: string
   readonly onMount?: EditorProps['onMount']
   readonly path: string
+  readonly potentiallyStalePath?: string
   readonly validate?: CodeFieldValidation
 }
 
