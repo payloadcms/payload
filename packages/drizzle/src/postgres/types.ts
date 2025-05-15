@@ -135,6 +135,7 @@ export type BasePostgresAdapter = {
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   disableCreateDatabase: boolean
+  disableOnConflictDoUpdate?: boolean
   drizzle: PostgresDB
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>

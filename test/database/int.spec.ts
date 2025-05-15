@@ -2495,4 +2495,31 @@ describe('database', () => {
 
     expect(result_2.totalDocs).toBe(0)
   })
+
+  const drizzleDescribe = process.env.PAYLOAD_DATABASE !== 'mongoose' ? describe : describe.skip
+
+  drizzleDescribe('drizzle disableOnConflictDoUpdate', () => {
+    // eslint-disable-next-line jest/no-duplicate-hooks
+    beforeAll(() => {
+      payload.db.disableOnConflictDoUpdate = true
+    })
+
+    // eslint-disable-next-line jest/no-duplicate-hooks
+    afterAll(() => {
+      payload.db.disableOnConflictDoUpdate = false
+    })
+
+    it('should correctly upsert when disableOnConflictDoUpdate is enabled', async () => {
+      const doc = await payload.create({ collection: 'posts', data: { title: 'post to upsert' } })
+
+      const updated = await payload.db.upsert({
+        collection: 'posts',
+        data: { title: 'updated post' },
+        where: { id: { equals: doc.id } },
+      })
+
+      expect(updated.id).toBe(doc.id)
+      expect(updated.title).toBe('updated post')
+    })
+  })
 })
