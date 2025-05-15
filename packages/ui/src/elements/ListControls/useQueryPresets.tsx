@@ -68,6 +68,9 @@ export const useQueryPresets = ({
   const filterOptions = useMemo(
     () => ({
       'payload-query-presets': {
+        isTemp: {
+          not_equals: true,
+        },
         relatedCollection: {
           equals: collectionSlug,
         },

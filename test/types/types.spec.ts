@@ -145,4 +145,17 @@ describe('Types testing', () => {
       expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
     })
   })
+
+  describe('fields', () => {
+    describe('Group', () => {
+      test('correctly ignores unnamed group', () => {
+        expect<Post>().type.toHaveProperty('insideUnnamedGroup')
+      })
+
+      test('generates nested group name', () => {
+        expect<Post>().type.toHaveProperty('namedGroup')
+        expect<NonNullable<Post['namedGroup']>>().type.toHaveProperty('insideNamedGroup')
+      })
+    })
+  })
 })

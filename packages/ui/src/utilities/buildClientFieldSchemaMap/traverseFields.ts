@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 
 import {
-  type ClientBlock,
   type ClientConfig,
   type ClientField,
   type ClientFieldSchemaMap,
@@ -10,7 +9,7 @@ import {
   type FieldSchemaMap,
   type Payload,
 } from 'payload'
-import { getFieldPaths, tabHasName } from 'payload/shared'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
@@ -45,8 +44,7 @@ export const traverseFields = ({
     clientSchemaMap.set(schemaPath, field)
 
     switch (field.type) {
-      case 'array':
-      case 'group':
+      case 'array': {
         traverseFields({
           clientSchemaMap,
           config,
@@ -59,6 +57,7 @@ export const traverseFields = ({
         })
 
         break
+      }
 
       case 'blocks':
         ;(field.blockReferences ?? field.blocks).map((_block) => {
@@ -85,6 +84,7 @@ export const traverseFields = ({
         })
 
         break
+
       case 'collapsible':
       case 'row':
         traverseFields({
@@ -98,6 +98,33 @@ export const traverseFields = ({
           schemaMap,
         })
         break
+
+      case 'group': {
+        if (fieldAffectsData(field)) {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: '',
+            parentSchemaPath: schemaPath,
+            payload,
+            schemaMap,
+          })
+        } else {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: indexPath,
+            parentSchemaPath,
+            payload,
+            schemaMap,
+          })
+        }
+        break
+      }
 
       case 'richText': {
         // richText sub-fields are not part of the ClientConfig or the Config.
