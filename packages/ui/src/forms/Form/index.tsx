@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -41,8 +41,6 @@ import {
   BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
-  FormWatchContext,
   InitializingContext,
   ModifiedContext,
   ProcessingContext,
@@ -50,12 +48,12 @@ import {
   useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
-import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { FormStateStoreContext, useCreateFormStateStore, useFormStateStore } from './store.js'
 
 const baseClass = 'form'
 
-export const Form: React.FC<FormProps> = (props) => {
+const FormComponent: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
 
@@ -119,9 +117,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
 
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
+  const store = useFormStateStore((store) => store)
 
-  const [formState, dispatchFields] = fieldsReducer
+  const formState = useMemo(() => store.state, [store])
+
+  const dispatchFields = useMemo(() => store.dispatchFields, [store])
 
   contextRef.current.fields = formState
 
@@ -190,13 +190,13 @@ export const Form: React.FC<FormProps> = (props) => {
     await Promise.all(validationPromises)
 
     if (!dequal(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
+      store.dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
     setIsValid(isValid)
 
     return isValid
-  }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
+  }, [collectionSlug, config, store, id, operation, t, user, documentForm])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -801,12 +801,7 @@ export const Form: React.FC<FormProps> = (props) => {
             <InitializingContext value={!isMounted || (isMounted && initializing)}>
               <ProcessingContext value={processing}>
                 <BackgroundProcessingContext value={backgroundProcessing}>
-                  <ModifiedContext value={modified}>
-                    {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                    <FormFieldsContext.Provider value={fieldsReducer}>
-                      {children}
-                    </FormFieldsContext.Provider>
-                  </ModifiedContext>
+                  <ModifiedContext value={modified}>{children}</ModifiedContext>
                 </BackgroundProcessingContext>
               </ProcessingContext>
             </InitializingContext>
@@ -817,10 +812,20 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 }
 
+export const Form = (props) => {
+  const formStateStore = useCreateFormStateStore(props.initialState)
+
+  return (
+    <FormStateStoreContext value={formStateStore}>
+      <FormComponent {...props} />
+    </FormStateStoreContext>
+  )
+}
+
 export {
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
+  // FormFieldsContext,
   FormWatchContext,
   ModifiedContext,
   ProcessingContext,

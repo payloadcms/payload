@@ -1,7 +1,7 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
-import { useCallback, useMemo, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
@@ -22,7 +22,7 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
-import { formStateStore } from '../Form/store.js'
+import { useFormStateStore } from '../Form/store.js'
 import { useFieldPath } from '../RenderFields/context.js'
 
 /**
@@ -52,19 +52,11 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
-  const field = useSyncExternalStore(
-    (callback) => formStateStore.subscribe(path, callback),
-    () => formStateStore.getSnapshot(path),
-  )
+  const field = useFormStateStore((store) => store.state[path])
 
-  const value = field.value
+  const value = field?.value
 
-  const dispatchField = useMemo(
-    () => (value: unknown) => {
-      formStateStore.setField(path, value)
-    },
-    [path],
-  )
+  const dispatchField = useFormStateStore((store) => store.dispatchFields)
 
   const { t } = useTranslation()
   const { config } = useConfig()

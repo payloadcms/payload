@@ -2,11 +2,11 @@
 import type { RenderedField } from 'payload'
 
 import { createContext, use } from 'react'
-import {
-  createContext as createSelectorContext,
-  useContextSelector,
-  useContext as useFullContext,
-} from 'use-context-selector'
+// import {
+//   createContext as createSelectorContext,
+//   useContextSelector,
+//   useContext as useFullContext,
+// } from 'use-context-selector'
 
 import type { Context, FormFieldsContext as FormFieldsContextType } from './types.js'
 
@@ -22,7 +22,7 @@ const ProcessingContext = createContext(false)
 const BackgroundProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
-const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
+// const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
 
 export type RenderedFieldSlots = Map<string, RenderedField>
 
@@ -56,20 +56,20 @@ const useFormInitializing = (): boolean => use(InitializingContext)
  */
 const useFormFields = <Value = unknown>(
   selector: (context: FormFieldsContextType) => Value,
-): Value => useContextSelector(FormFieldsContext, selector)
+): Value => {}
 
 /**
  * Get the state of all form fields.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#useallformfields
  */
-const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
+const useAllFormFields = (): FormFieldsContextType => {}
 
 export {
   BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
-  FormFieldsContext,
+  // FormFieldsContext,
   FormWatchContext,
   InitializingContext,
   ModifiedContext,

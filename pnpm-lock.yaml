@@ -1618,12 +1618,12 @@ importers:
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
-      use-context-selector:
-        specifier: 2.0.0
-        version: 2.0.0(react@19.1.0)(scheduler@0.25.0)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
+      zustand:
+        specifier: 5.0.4
+        version: 5.0.4(@types/react@19.1.0)(immer@9.0.21)(react@19.1.0)
     devDependencies:
       '@babel/cli':
         specifier: 7.26.4
@@ -8577,6 +8577,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch-native@1.6.4:
     resolution: {integrity: sha512-IhOigYzAKHd244OC0JIMIUrjzctirCmPkaIfhDeGcEETWof5zKYUW7e7MYvChGWh/4CJeXEgsRyGzuF334rOOQ==}
@@ -10265,12 +10266,6 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
-  use-context-selector@2.0.0:
-    resolution: {integrity: sha512-owfuSmUNd3eNp3J9CdDl0kMgfidV+MkDvHPpvthN5ThqM+ibMccNE0k+Iq7TWC6JPFvGZqanqiGCuQx6DyV24g==}
-    peerDependencies:
-      react: 19.1.0
-      scheduler: '>=0.19.0'
-
   use-isomorphic-layout-effect@1.2.0:
     resolution: {integrity: sha512-q6ayo8DWoPZT0VdG4u3D3uxcgONP3Mevx2i2b0434cwWBoL+aelL1DzkXI6w3PhTZzUeR2kaVlZn70iCiseP6w==}
     peerDependencies:
@@ -10520,6 +10515,24 @@ packages:
 
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+
+  zustand@5.0.4:
+    resolution: {integrity: sha512-39VFTN5InDtMd28ZhjLyuTnlytDr9HfwO512Ai4I8ZABCoyAj4F1+sr7sD1jP/+p7k77Iko0Pb5NhgBFDCX0kQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: 19.1.0
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -20546,11 +20559,6 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  use-context-selector@2.0.0(react@19.1.0)(scheduler@0.25.0):
-    dependencies:
-      react: 19.1.0
-      scheduler: 0.25.0
-
   use-isomorphic-layout-effect@1.2.0(@types/react@19.1.0)(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -20808,5 +20816,11 @@ snapshots:
       zod: 3.23.8
 
   zod@3.23.8: {}
+
+  zustand@5.0.4(@types/react@19.1.0)(immer@9.0.21)(react@19.1.0):
+    optionalDependencies:
+      '@types/react': 19.1.0
+      immer: 9.0.21
+      react: 19.1.0
 
   zwitch@2.0.4: {}
