@@ -15,17 +15,12 @@ export type ServerFunctionArgs = {
   name: string
 }
 
-export type ServerFunctionClientArgs<Args = Record<string, unknown>> = {
-  args: Args
+export type ServerFunctionClientArgs = {
+  args: Record<string, unknown>
   name: string
 }
 
-export type ServerFunctionClient = <
-  Args = Record<string, unknown>,
-  Result = Promise<unknown> | unknown,
->(
-  args: ServerFunctionClientArgs<Args>,
-) => Result
+export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
 export type ServerFunction = (
   args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
