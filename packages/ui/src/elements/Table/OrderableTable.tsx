@@ -136,9 +136,9 @@ export const OrderableTable: React.FC<Props> = ({
 
       if (response.status === 200 && (await response.json())['message'] === 'initial migration') {
         throw new Error(
-          'It looks like you have enabled "orderable" on a collection with existing documents' +
-            'and this is the first time you have sorted documents. We have run an automatic migration' +
-            'to add an initial sort order to the documents. Please refresh the page and try again.',
+          'You have enabled "orderable" on a collection with existing documents' +
+            'and this is the first time you have sorted documents. We have run an automatic migration ' +
+            'to add an initial order to the documents. Please refresh the page and try again.',
         )
       }
     } catch (err) {
