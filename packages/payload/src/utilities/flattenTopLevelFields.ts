@@ -30,6 +30,7 @@ type FlattenFieldsArgs<TField extends ClientField | Field> = {
   i18n?: I18nClient
   keepPresentationalFields?: boolean
   labelPrefix?: string
+  namePrefix?: string
 }
 
 /**
@@ -44,6 +45,7 @@ function flattenFields<TField extends ClientField | Field>({
   i18n,
   keepPresentationalFields,
   labelPrefix,
+  namePrefix,
 }: FlattenFieldsArgs<TField>): FlattenedField<TField>[] {
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     if ('fields' in field && field.type !== 'array') {
@@ -56,12 +58,20 @@ function flattenFields<TField extends ClientField | Field>({
           : labelPrefix
         : translatedLabel
 
+      const nameWithPrefix =
+        'name' in field && field.name
+          ? namePrefix
+            ? `${namePrefix}-${field.name}`
+            : field.name
+          : namePrefix
+
       acc.push(
         ...flattenFields<TField>({
           fields: 'fields' in field ? (field.fields as TField[]) : [],
           i18n,
           keepPresentationalFields,
           labelPrefix: labelWithPrefix,
+          namePrefix: nameWithPrefix,
         }),
       )
     } else if (
@@ -84,7 +94,7 @@ function flattenFields<TField extends ClientField | Field>({
 
       const name = 'name' in field ? field.name : undefined
 
-      const accessor = labelPrefix ? [...labelPrefix.split(' > '), name ?? ''].join('-') : name
+      const accessor = namePrefix && name ? `${namePrefix}-${name}` : (name ?? '')
 
       acc.push({
         ...(field as FlattenedField<TField>),
