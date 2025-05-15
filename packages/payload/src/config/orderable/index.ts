@@ -91,15 +91,6 @@ export const addOrderableFieldsAndHook = (
         ],
       },
       index: true,
-      required: true,
-      // override the schema to make order fields optional for payload.create()
-      typescriptSchema: [
-        () => ({
-          type: 'string',
-          required: false,
-        }),
-      ],
-      unique: true,
     }
 
     collection.fields.unshift(orderField)
@@ -170,16 +161,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         status: 400,
       })
     }
-    if (
-      typeof target !== 'object' ||
-      typeof target.id === 'undefined' ||
-      typeof target.key !== 'string'
-    ) {
-      return new Response(JSON.stringify({ error: 'target must be an object with id and key' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
     if (newKeyWillBe !== 'greater' && newKeyWillBe !== 'less') {
       return new Response(JSON.stringify({ error: 'newKeyWillBe must be "greater" or "less"' }), {
         headers: { 'Content-Type': 'application/json' },
@@ -212,6 +193,55 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         },
         collection.access.update,
       )
+    }
+    /**
+     * If there is no target.key, we can assume the user enabled `orderable`
+     * on a collection with existing documents, and that this is the first
+     * time they tried to reorder them. Therefore, we perform a one-time
+     * migration by setting the key value for all documents. We do this
+     * instead of enforcing `required` and `unique` at the database schema
+     * level, so that users don't have to run a migration when they enable
+     * `orderable` on a collection with existing documents.
+     */
+    if (!target.key) {
+      const { docs } = await req.payload.find({
+        collection: collection.slug,
+        req,
+        select: { [orderableFieldName]: true },
+      })
+      if (docs.some((doc) => doc[orderableFieldName] !== null)) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          "Corrupted data: Some documents don't have an orderable field, " +
+            "while others do. This shouldn't happen. " +
+            'Please open an issue with a reproduction.',
+        )
+      }
+      for (const doc of docs) {
+        await req.payload.update({
+          id: doc.id,
+          collection: collection.slug,
+          data: {
+            // no data needed since the order hooks will handle this
+          },
+          req,
+        })
+      }
+      return new Response(JSON.stringify({ message: 'initial migration', success: true }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    if (
+      typeof target !== 'object' ||
+      typeof target.id === 'undefined' ||
+      typeof target.key !== 'string'
+    ) {
+      return new Response(JSON.stringify({ error: 'target must be an object with id' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
     }
 
     const targetId = target.id
