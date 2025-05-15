@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "ecommerce": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variantOptionsAlreadyExists": {
+          "type": "string"
+        },
+        "productRquired": {
+          "type": "string"
+        },
+        "variantOptionsRequired": {
+          "type": "string"
+        },
+        "variantOptionsRequiredAll": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "variantOptionsAlreadyExists",
+        "productRquired",
+        "variantOptionsRequired",
+        "variantOptionsRequiredAll"
+      ]
+    }
+  },
+  "required": ["ecommerce"]
+}
