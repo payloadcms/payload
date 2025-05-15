@@ -22,12 +22,18 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type ValueWithRelation = {
+export type PolymorphicRelationValue = {
   relationTo: string
   value: number | string
 }
 
-export type Value = ValueWithRelation
+export type MonomorphicRelationValue = number | string
+
+export type Value =
+  | MonomorphicRelationValue
+  | MonomorphicRelationValue[]
+  | PolymorphicRelationValue
+  | PolymorphicRelationValue[]
 
 type CLEAR = {
   exemptValues?: Value | Value[]
@@ -65,11 +71,11 @@ export type Action = ADD | CLEAR | REMOVE | UPDATE
 export type HasManyValueUnion =
   | {
       hasMany: false
-      value?: ValueWithRelation
+      value?: PolymorphicRelationValue
     }
   | {
       hasMany: true
-      value?: ValueWithRelation[]
+      value?: PolymorphicRelationValue[]
     }
 
 export type GetResults = (
@@ -114,13 +120,13 @@ export type RelationshipInputProps = {
 type SharedRelationshipInputProps =
   | {
       readonly hasMany: false
-      readonly initialValue?: null | ValueWithRelation
-      readonly onChange: (value: ValueWithRelation) => void
-      readonly value?: null | ValueWithRelation
+      readonly initialValue?: null | PolymorphicRelationValue
+      readonly onChange: (value: PolymorphicRelationValue) => void
+      readonly value?: null | PolymorphicRelationValue
     }
   | {
       readonly hasMany: true
-      readonly initialValue?: null | ValueWithRelation[]
-      readonly onChange: (value: ValueWithRelation[]) => void
-      readonly value?: null | ValueWithRelation[]
+      readonly initialValue?: null | PolymorphicRelationValue[]
+      readonly onChange: (value: PolymorphicRelationValue[]) => void
+      readonly value?: null | PolymorphicRelationValue[]
     }
