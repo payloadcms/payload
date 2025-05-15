@@ -115,7 +115,7 @@ export const resaveChildren =
     await resave({
       collection,
       doc,
-      draft: doc._status === 'published' ? false : true,
+      draft: (!doc._status || doc._status === 'published') ? false : true,
       pluginConfig,
       req,
     })
