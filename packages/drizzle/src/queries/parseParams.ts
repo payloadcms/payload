@@ -14,7 +14,7 @@ import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
-export type QueryContext = { sort: Sort }
+export type QueryContext = { rawSort?: SQL; sort: Sort }
 
 type Args = {
   adapter: DrizzleAdapter
@@ -348,6 +348,7 @@ export function parseParams({
                       }
                       if (geoConstraints.length) {
                         context.sort = relationOrPath
+                        context.rawSort = sql`${table[columnName]} <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)`
                         constraints.push(and(...geoConstraints))
                       }
                       break
