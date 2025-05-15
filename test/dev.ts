@@ -1,12 +1,15 @@
 import nextEnvImport from '@next/env'
 import chalk from 'chalk'
-import { createServer } from 'http'
+import { readFileSync } from 'fs'
+import { createServer as createServerHTTP } from 'http'
+import { createServer as createServerHTTPS } from 'https'
 import minimist from 'minimist'
 import nextImport from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import open from 'open'
+import { join } from 'path'
 import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
@@ -32,10 +35,24 @@ if (shouldStartMemoryDB) {
   process.env.START_MEMORY_DB = 'true'
 }
 
+const https = process.argv.includes('--experimental-https')
+
 loadEnv()
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+let httpsOptions = {}
+
+if (https) {
+  const key = readFileSync(join(dirname, 'dev-certs', 'localhost-key.pem'))
+  const cert = readFileSync(join(dirname, 'dev-certs', 'localhost-cert.pem'))
+
+  httpsOptions = {
+    key,
+    cert,
+  }
+}
 
 const {
   _: [_testSuiteArg = '_community'],
@@ -83,7 +100,7 @@ if (args.o) {
 
 const findOpenPort = (startPort: number): Promise<number> => {
   return new Promise((resolve, reject) => {
-    const server = createServer()
+    const server = https ? createServerHTTPS() : createServerHTTP()
     server.listen(startPort, () => {
       console.log(`✓ Running on port ${startPort}`)
       server.close(() => resolve(startPort))
@@ -97,6 +114,7 @@ const findOpenPort = (startPort: number): Promise<number> => {
   })
 }
 
+const protocol = https ? 'https' : 'http'
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
 const availablePort = await findOpenPort(port)
@@ -111,6 +129,11 @@ const app = nextImport({
   hostname: 'localhost',
   port: availablePort,
   dir: rootDir,
+  ...(https
+    ? {
+        experimentalHttpsServer: httpsOptions,
+      }
+    : {}),
 })
 
 const handle = app.getRequestHandler()
@@ -120,20 +143,29 @@ let resolveServer: () => void
 const serverPromise = new Promise<void>((res) => (resolveServer = res))
 
 void app.prepare().then(() => {
-  createServer(async (req, res) => {
-    const parsedUrl = parse(req.url || '', true)
-    await handle(req, res, parsedUrl)
-  }).listen(availablePort, () => {
-    resolveServer()
-  })
+  if (https) {
+    createServerHTTPS(httpsOptions, async (req, res) => {
+      const parsedUrl = parse(req.url || '', true)
+      await handle(req, res, parsedUrl)
+    }).listen(availablePort, () => {
+      resolveServer()
+    })
+  } else {
+    createServerHTTP(async (req, res) => {
+      const parsedUrl = parse(req.url || '', true)
+      await handle(req, res, parsedUrl)
+    }).listen(availablePort, () => {
+      resolveServer()
+    })
+  }
 })
 
 await serverPromise
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
 // fetch the admin url to force a render
-void fetch(`http://localhost:${availablePort}${adminRoute}`)
-void fetch(`http://localhost:${availablePort}/api/access`)
+void fetch(`${protocol}://localhost:${availablePort}${adminRoute}`)
+void fetch(`${protocol}://localhost:${availablePort}/api/access`)
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
 process.on('SIGINT', () => {
   if (child) {
