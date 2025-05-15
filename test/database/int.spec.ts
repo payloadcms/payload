@@ -1466,4 +1466,9 @@ describe('database', () => {
     expect(query2.totalDocs).toEqual(1)
     expect(query3.totalDocs).toEqual(1)
   })
+
+  it('can have localized and non localized blocks', async () => {
+    await payload.create({ collection: 'blocks-test', data: {} })
+    expect(true).toBeTruthy()
+  })
 })

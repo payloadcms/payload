@@ -550,6 +550,41 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'blocks-test',
+      endpoints: [
+        {
+          path: '/:id',
+          handler: () => Response.json({ a: 1 }),
+          method: 'get',
+        },
+      ],
+      fields: [
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'normal',
+              fields: [{ name: 'text', type: 'text' }],
+            },
+          ],
+        },
+        {
+          name: 'blocksLocalized',
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              dbName: (collectionTableName) =>
+                `${collectionTableName.tableName!}_blocks_localized_normal`,
+              slug: 'normal',
+              fields: [{ name: 'text', type: 'text' }],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {

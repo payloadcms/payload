@@ -52,6 +52,7 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      blockTableNamesMap: {},
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.flattenedFields,
@@ -69,6 +70,7 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blockTableNamesMap: {},
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
@@ -88,6 +90,7 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      blockTableNamesMap: {},
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.flattenedFields,
@@ -109,6 +112,7 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blockTableNamesMap: {},
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

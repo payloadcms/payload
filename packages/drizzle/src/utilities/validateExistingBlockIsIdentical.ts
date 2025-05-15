@@ -1,4 +1,4 @@
-import type { Block, Field } from 'payload'
+import type { Block, Field, FlattenedBlock } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
@@ -67,7 +67,7 @@ export const validateExistingBlockIsIdentical = ({
   rootTableName,
   table,
   tableLocales,
-}: Args): void => {
+}: Args): boolean => {
   const fieldNames = getFlattenedFieldNames(block.fields)
 
   const missingField =
@@ -84,6 +84,7 @@ export const validateExistingBlockIsIdentical = ({
     })
 
   if (missingField) {
+    return false
     throw new InvalidConfiguration(
       `The table ${rootTableName} has multiple blocks with slug ${
         block.slug
@@ -94,8 +95,14 @@ export const validateExistingBlockIsIdentical = ({
   }
 
   if (Boolean(localized) !== Boolean(table.columns._locale)) {
+    return false
     throw new InvalidConfiguration(
       `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not. Block schemas of the same name must match exactly.`,
     )
   }
+}
+
+const InternalBlockTableNameIndex = Symbol('InternalBlockTableNameIndex')
+export const setInternalBlockIndex = (block: FlattenedBlock, index: number) => {
+  block[InternalBlockTableNameIndex] = index
 }

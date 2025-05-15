@@ -23,6 +23,7 @@ export interface Config {
     'custom-ids': CustomId;
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
+    'blocks-test': BlocksTest;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -42,6 +43,7 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
+    'blocks-test': BlocksTestSelect<false> | BlocksTestSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -347,6 +349,31 @@ export interface RelationshipsMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-test".
+ */
+export interface BlocksTest {
+  id: string;
+  blocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'normal';
+      }[]
+    | null;
+  blocksLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'normal';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -416,6 +443,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-migration';
         value: string | RelationshipsMigration;
+      } | null)
+    | ({
+        relationTo: 'blocks-test';
+        value: string | BlocksTest;
       } | null)
     | ({
         relationTo: 'users';
@@ -697,6 +728,36 @@ export interface FakeCustomIdsSelect<T extends boolean = true> {
 export interface RelationshipsMigrationSelect<T extends boolean = true> {
   relationship?: T;
   relationship_2?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-test_select".
+ */
+export interface BlocksTestSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        normal?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksLocalized?:
+    | T
+    | {
+        normal?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -31,6 +31,7 @@ type Args = {
    * ie. indexes, multiple columns, etc
    */
   baseIndexes?: Record<string, RawIndex>
+  blockTableNamesMap: Record<string, number>
   buildNumbers?: boolean
   buildRelationships?: boolean
   disableNotNull: boolean
@@ -67,6 +68,7 @@ export const buildTable = ({
   baseColumns = {},
   baseForeignKeys = {},
   baseIndexes = {},
+  blockTableNamesMap,
   disableNotNull,
   disableRelsTableUnique = false,
   disableUnique = false,
@@ -115,6 +117,7 @@ export const buildTable = ({
     hasManyTextField,
   } = traverseFields({
     adapter,
+    blockTableNamesMap,
     columns,
     disableNotNull,
     disableRelsTableUnique,
