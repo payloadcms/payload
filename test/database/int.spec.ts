@@ -2484,4 +2484,17 @@ describe('database', () => {
 
     expect(result_2.totalDocs).toBe(0)
   })
+
+  it('can have localized and non localized blocks', async () => {
+    const res = await payload.create({
+      collection: 'blocks',
+      data: {
+        blocks: [{ blockType: 'cta', text: 'text' }],
+        blocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+
+    expect(res.blocks[0]?.text).toBe('text')
+    expect(res.blocksLocalized[0]?.text).toBe('text-localized')
+  })
 })

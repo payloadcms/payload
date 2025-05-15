@@ -698,6 +698,42 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'blocks',
+      fields: [
+        {
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'blocksLocalized',
+        },
+        {
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'blocks',
+        },
+      ],
+    },
   ],
   globals: [
     {
