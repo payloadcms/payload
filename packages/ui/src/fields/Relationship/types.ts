@@ -36,7 +36,7 @@ export type Value =
   | PolymorphicRelationValue[]
 
 type CLEAR = {
-  exemptValues?: Value | Value[]
+  exemptValues?: PolymorphicRelationValue | PolymorphicRelationValue[]
   type: 'CLEAR'
 }
 
