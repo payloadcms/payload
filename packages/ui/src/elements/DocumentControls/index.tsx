@@ -157,20 +157,24 @@ export const DocumentControls: React.FC<{
 
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
+  const showFolderMetaIcon =
+    config.folders.enabled &&
+    collectionConfig &&
+    Object.keys(config.folders.collections).includes(collectionConfig.slug)
+  const showLockedMetaIcon = user && readOnlyForIncomingUser
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <div className={`${baseClass}__meta-icons`}>
-            {user && readOnlyForIncomingUser && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
-            {config.folders.enabled &&
-              collectionConfig &&
-              Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
-                <MoveDocToFolder />
+          {showLockedMetaIcon || showFolderMetaIcon ? (
+            <div className={`${baseClass}__meta-icons`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-          </div>
+              {showFolderMetaIcon && <MoveDocToFolder />}
+            </div>
+          ) : null}
 
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (

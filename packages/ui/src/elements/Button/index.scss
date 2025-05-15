@@ -13,11 +13,12 @@
   }
 
   .btn {
+    --btn-font-weight: normal;
     * {
       pointer-events: none;
     }
 
-    // colors
+    // button aesthetic styles
     &--style-primary {
       --color: var(--theme-elevation-0);
       --bg-color: var(--theme-elevation-800);
@@ -95,6 +96,21 @@
         --hover-color: var(--color);
       }
     }
+
+    &--style-tab {
+      --bg-color: transparent;
+      --hover-bg: var(--theme-elevation-50);
+      --color: var(--theme-text);
+      --btn-font-weight: 500;
+
+      &.btn--disabled {
+        --btn-font-weight: 600;
+        --hover-box-shadow: var(--box-shadow);
+        --bg-color: var(--theme-elevation-100);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
   }
 
   .popup--active .btn {
@@ -165,11 +181,11 @@
     border-radius: var(--style-radius-s);
     font-size: var(--base-body-size);
     font-family: var(--font-body);
+    font-weight: var(--btn-font-weight, normal);
     margin-block: var(--margin-block);
     line-height: var(--btn-line-height);
     border: 0;
     cursor: pointer;
-    font-weight: normal;
     text-decoration: none;
     transition-property: border, color, box-shadow, background;
     transition-duration: 100ms;

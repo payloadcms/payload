@@ -17,6 +17,7 @@ export type Props = {
     | 'primary'
     | 'secondary'
     | 'subtle'
+    | 'tab'
     | 'transparent'
   children?: React.ReactNode
   className?: string

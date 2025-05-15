@@ -68,7 +68,6 @@ export const DocumentTab: React.FC<
         baseClass={baseClass}
         href={href}
         isActive={isActive}
-        isCollection={!!collectionConfig && !globalConfig}
         newTab={newTab}
       >
         <span className={`${baseClass}__label`}>

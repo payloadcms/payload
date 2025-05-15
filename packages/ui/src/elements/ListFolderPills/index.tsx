@@ -23,7 +23,7 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle="pill"
+        buttonStyle="tab"
         className={[
           `${baseClass}__button`,
           viewType === 'folders' && `${baseClass}__button--active`,
@@ -32,7 +32,6 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
           .join(' ')}
         disabled={viewType === 'folders'}
         el={viewType === 'list' ? 'link' : 'div'}
-        size="small"
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}/folders`,
@@ -42,13 +41,12 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
         {t('folder:byFolder')}
       </Button>
       <Button
-        buttonStyle="pill"
+        buttonStyle="tab"
         className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
         disabled={viewType === 'list'}
         el={viewType === 'folders' ? 'link' : 'div'}
-        size="small"
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}`,
