@@ -670,18 +670,6 @@ describe('Relationships', () => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
-          const director_1 = await payload.create({
-            collection: 'directors',
-            data: { name: 'Dan', localized: 'Dan' },
-          })
-
-          await payload.update({
-            collection: 'directors',
-            id: director_1.id,
-            locale: 'de',
-            data: { localized: 'Mr. Dan' },
-          })
-
           const director_2 = await payload.create({
             collection: 'directors',
             data: { name: 'Mr. Dan', localized: 'Mr. Dan' },
@@ -692,6 +680,18 @@ describe('Relationships', () => {
             id: director_2.id,
             locale: 'de',
             data: { localized: 'Dan' },
+          })
+
+          const director_1 = await payload.create({
+            collection: 'directors',
+            data: { name: 'Dan', localized: 'Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_1.id,
+            locale: 'de',
+            data: { localized: 'Mr. Dan' },
           })
 
           const movie_1 = await payload.create({

@@ -15,7 +15,4 @@ export const Pages: CollectionConfig = {
       type: 'text',
     },
   ],
-  versions: {
-    drafts: true,
-  },
 }

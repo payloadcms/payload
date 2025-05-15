@@ -132,6 +132,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'drizzle-kit/api',
           'sharp',
           'libsql',
+          'require-in-the-middle',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),

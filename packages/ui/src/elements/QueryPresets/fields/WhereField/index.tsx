@@ -104,7 +104,7 @@ export const QueryPresetsWhereField: JSONFieldClientComponent = ({
         {value
           ? transformWhereToNaturalLanguage(
               value as Where,
-              getTranslation(collectionConfig.labels.plural, i18n),
+              getTranslation(collectionConfig?.labels?.plural, i18n),
             )
           : 'No where query'}
       </div>
