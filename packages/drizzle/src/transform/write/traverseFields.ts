@@ -184,7 +184,7 @@ export const traverseFields = ({
         blocksToDelete.add(
           resolveBlockTableName(
             matchedBlock,
-            adapter.tableNameMap.get(`${baseTableName}_blocks_${matchedBlock.slug}`),
+            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
           ),
         )
       })
