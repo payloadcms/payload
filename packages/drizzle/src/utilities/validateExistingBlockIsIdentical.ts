@@ -121,6 +121,8 @@ export const validateExistingBlockIsIdentical = ({
     // The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not.
     return false
   }
+
+  return true
 }
 
 export const InternalBlockTableNameIndex = Symbol('InternalBlockTableNameIndex')
