@@ -208,15 +208,12 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         collection: collection.slug,
         req,
         select: { [orderableFieldName]: true },
+        where: {
+          [orderableFieldName]: {
+            exists: false,
+          },
+        },
       })
-      if (docs.some((doc) => doc[orderableFieldName] !== null)) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          "Corrupted data: Some documents don't have an orderable field, " +
-            "while others do. This shouldn't happen. " +
-            'Please open an issue with a reproduction.',
-        )
-      }
       for (const doc of docs) {
         await req.payload.update({
           id: doc.id,
