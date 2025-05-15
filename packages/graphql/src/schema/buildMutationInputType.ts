@@ -54,7 +54,7 @@ export const getCollectionIDType = (
   type: keyof typeof idFieldTypes,
   collection: SanitizedCollectionConfig,
 ): GraphQLScalarType => {
-  const idField = flattenTopLevelFields({ fields: collection.fields }).find(
+  const idField = flattenTopLevelFields(collection.fields).find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 

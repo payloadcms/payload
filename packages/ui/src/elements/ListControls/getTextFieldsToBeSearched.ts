@@ -10,7 +10,7 @@ export const getTextFieldsToBeSearched = (
   i18n: I18nClient,
 ): ClientField[] => {
   if (listSearchableFields) {
-    const flattenedFields = flattenTopLevelFields({ fields, i18n }) as ClientField[]
+    const flattenedFields = flattenTopLevelFields(fields, { i18n }) as ClientField[]
 
     return flattenedFields.filter(
       (field) => fieldAffectsData(field) && listSearchableFields.includes(field.name),

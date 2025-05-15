@@ -467,7 +467,7 @@ export const createClientFields = ({
     clientFields.push(clientField)
   }
 
-  const hasID = flattenTopLevelFields({ fields, i18n }).some(
+  const hasID = flattenTopLevelFields(fields, { i18n }).some(
     (f) => fieldAffectsData(f) && f.name === 'id',
   )
 

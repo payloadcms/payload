@@ -71,14 +71,12 @@ export const buildColumnState = (args: Args): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields({
-    fields: filterFields(clientCollectionConfig.fields),
+  let sortedFieldMap = flattenTopLevelFields(filterFields(clientCollectionConfig.fields), {
     i18n,
     keepPresentationalFields: true,
   }) as ClientField[]
 
-  let _sortedFieldMap = flattenTopLevelFields({
-    fields: filterFields(collectionConfig.fields),
+  let _sortedFieldMap = flattenTopLevelFields(filterFields(collectionConfig.fields), {
     i18n,
     keepPresentationalFields: true,
   }) as Field[] // TODO: think of a way to avoid this additional flatten

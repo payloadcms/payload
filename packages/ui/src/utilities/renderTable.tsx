@@ -118,7 +118,7 @@ export const renderTable = ({
 
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields({ fields, i18n, keepPresentationalFields: true })?.some(
+          flattenTopLevelFields(fields, { i18n, keepPresentationalFields: true })?.some(
             (field) => 'name' in field && field.name === column.accessor,
           ),
         )
@@ -139,8 +139,7 @@ export const renderTable = ({
   } else {
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields({
-            fields: clientCollectionConfig.fields,
+          flattenTopLevelFields(clientCollectionConfig.fields, {
             i18n,
             keepPresentationalFields: true,
           })?.some((field) => 'name' in field && field.name === column.accessor),

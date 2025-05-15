@@ -15,7 +15,7 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
   }
 
   if (config?.admin && config.admin?.useAsTitle && config.admin.useAsTitle !== 'id') {
-    const fields = flattenFields({ fields: config.fields })
+    const fields = flattenFields(config.fields)
     const useAsTitleField = fields.find((field) => {
       if (fieldAffectsData(field) && config.admin) {
         return field.name === config.admin.useAsTitle

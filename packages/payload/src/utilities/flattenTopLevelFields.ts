@@ -25,14 +25,6 @@ type FlattenedField<TField> = TField extends ClientField
 
 type TabType<TField> = TField extends ClientField ? ClientTab : Tab
 
-type FlattenFieldsArgs<TField extends ClientField | Field> = {
-  fields: TField[]
-  i18n?: I18nClient
-  keepPresentationalFields?: boolean
-  labelPrefix?: string
-  pathPrefix?: string
-}
-
 /**
  * Flattens a collection's fields into a single array of fields, as long
  * as the fields do not affect data.
@@ -40,13 +32,22 @@ type FlattenFieldsArgs<TField extends ClientField | Field> = {
  * @param fields
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
-function flattenFields<TField extends ClientField | Field>({
-  fields,
-  i18n,
-  keepPresentationalFields,
-  labelPrefix,
-  pathPrefix,
-}: FlattenFieldsArgs<TField>): FlattenedField<TField>[] {
+function flattenFields<TField extends ClientField | Field>(
+  fields: TField[],
+  options?:
+    | {
+        i18n?: I18nClient
+        keepPresentationalFields?: boolean
+        labelPrefix?: string
+        pathPrefix?: string
+      }
+    | boolean,
+): FlattenedField<TField>[] {
+  const normalizedOptions =
+    typeof options === 'boolean' ? { keepPresentationalFields: options } : (options ?? {})
+
+  const { i18n, keepPresentationalFields, labelPrefix, pathPrefix } = normalizedOptions
+
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     if ('fields' in field && field.type !== 'array') {
       const translatedLabel =
@@ -66,8 +67,7 @@ function flattenFields<TField extends ClientField | Field>({
           : pathPrefix
 
       acc.push(
-        ...flattenFields<TField>({
-          fields: 'fields' in field ? (field.fields as TField[]) : [],
+        ...flattenFields<TField>('fields' in field ? (field.fields as TField[]) : [], {
           i18n,
           keepPresentationalFields,
           labelPrefix: labelWithPrefix,
@@ -88,12 +88,11 @@ function flattenFields<TField extends ClientField | Field>({
 
       const labelWithPrefix = labelPrefix
         ? translatedLabel
-          ? labelPrefix + ' > ' + translatedLabel
+          ? `${labelPrefix} > ${translatedLabel}`
           : labelPrefix
         : undefined
 
       const name = 'name' in field ? field.name : undefined
-
       const accessor = pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? '')
 
       acc.push({
@@ -118,8 +117,7 @@ function flattenFields<TField extends ClientField | Field>({
           } else {
             return [
               ...tabFields,
-              ...flattenFields<TField>({
-                fields: tab.fields as TField[],
+              ...flattenFields<TField>(tab.fields as TField[], {
                 i18n,
                 keepPresentationalFields,
                 labelPrefix,

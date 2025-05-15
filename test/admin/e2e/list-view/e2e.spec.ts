@@ -11,6 +11,7 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
+  openColumnControls,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -954,15 +955,10 @@ describe('List View', () => {
       expect(page.url()).not.toMatch(/columns=/)
     })
 
-    const openColumnControls = async () => {
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-    }
-
     test('should render field in group as column', async () => {
       await createPost({ group: { nestedTitle: 'nested group title 1' } })
       await page.goto(postsUrl.list)
-      await openColumnControls()
+      await openColumnControls(page)
       await page
         .locator('.column-selector .column-selector__column', {
           hasText: exactText('Group > Nested Title'),
@@ -1302,14 +1298,9 @@ describe('List View', () => {
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
     })
 
-    const openColumnControls = async () => {
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-    }
-
     test('should allow sorting by nested field within group in separate column', async () => {
       await page.goto(postsUrl.list)
-      await openColumnControls()
+      await openColumnControls(page)
       await page
         .locator('.column-selector .column-selector__column', {
           hasText: exactText('Group > Nested Title'),
