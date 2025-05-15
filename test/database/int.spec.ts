@@ -2487,7 +2487,7 @@ describe('database', () => {
 
   it('can have localized and non localized blocks', async () => {
     const res = await payload.create({
-      collection: 'blocks',
+      collection: 'blocks-docs',
       data: {
         testBlocks: [{ blockType: 'cta', text: 'text' }],
         testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],

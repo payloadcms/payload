@@ -699,7 +699,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'blocks',
+      slug: 'blocks-docs',
       fields: [
         {
           type: 'blocks',

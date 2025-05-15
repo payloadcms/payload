@@ -83,7 +83,7 @@ export interface Config {
     'relationships-migration': RelationshipsMigration;
     'compound-indexes': CompoundIndex;
     aliases: Alias;
-    blocks: Block;
+    'blocks-docs': BlocksDoc;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -107,7 +107,7 @@ export interface Config {
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
     aliases: AliasesSelect<false> | AliasesSelect<true>;
-    blocks: BlocksSelect<false> | BlocksSelect<true>;
+    'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -498,9 +498,9 @@ export interface Alias {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blocks".
+ * via the `definition` "blocks-docs".
  */
-export interface Block {
+export interface BlocksDoc {
   id: string;
   testBlocksLocalized?:
     | {
@@ -610,8 +610,8 @@ export interface PayloadLockedDocument {
         value: string | Alias;
       } | null)
     | ({
-        relationTo: 'blocks';
-        value: string | Block;
+        relationTo: 'blocks-docs';
+        value: string | BlocksDoc;
       } | null)
     | ({
         relationTo: 'users';
@@ -963,9 +963,9 @@ export interface AliasesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blocks_select".
+ * via the `definition` "blocks-docs_select".
  */
-export interface BlocksSelect<T extends boolean = true> {
+export interface BlocksDocsSelect<T extends boolean = true> {
   testBlocksLocalized?:
     | T
     | {
