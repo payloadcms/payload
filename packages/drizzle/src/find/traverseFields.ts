@@ -22,6 +22,7 @@ import type { Result } from './buildFindManyArgs.js'
 import buildQuery from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { operatorMap } from '../queries/operatorMap.js'
+import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
@@ -196,7 +197,12 @@ export const traverseFields = ({
           }
         }
 
-        const relationName = field.dbName ? `_${arrayTableName}` : `${path}${field.name}`
+        const relationName = getArrayRelationName({
+          field,
+          path: `${path}${field.name}`,
+          tableName: arrayTableName,
+        })
+
         currentArgs.with[relationName] = withArray
 
         traverseFields({

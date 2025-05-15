@@ -8,7 +8,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config } from './payload-types.js'
+import type { Config, PayloadQueryPreset } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -39,6 +39,13 @@ let serverURL: string
 let everyoneID: string | undefined
 let context: BrowserContext
 let user: any
+let ownerUser: any
+
+let seededData: {
+  everyone: PayloadQueryPreset
+  onlyMe: PayloadQueryPreset
+  specificUsers: PayloadQueryPreset
+}
 
 describe('Query Presets', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -59,6 +66,19 @@ describe('Query Presets', () => {
         },
       })
       ?.then((res) => res.user) // TODO: this type is wrong
+
+    ownerUser = await payload
+      .find({
+        collection: 'users',
+        where: {
+          name: {
+            equals: 'Owner',
+          },
+        },
+        limit: 1,
+        depth: 0,
+      })
+      ?.then((res) => res.docs[0])
 
     initPageConsoleErrorCatch(page)
 
@@ -83,7 +103,7 @@ describe('Query Presets', () => {
         },
       })
 
-      const [, everyone] = await Promise.all([
+      const [, everyone, onlyMe, specificUsers] = await Promise.all([
         payload.delete({
           collection: 'payload-preferences',
           where: {
@@ -106,17 +126,23 @@ describe('Query Presets', () => {
         }),
         payload.create({
           collection: 'payload-query-presets',
-          data: seedData.everyone,
+          data: seedData.everyone({ ownerUserID: ownerUser?.id || '' }),
         }),
         payload.create({
           collection: 'payload-query-presets',
-          data: seedData.onlyMe,
+          data: seedData.onlyMe({ ownerUserID: ownerUser?.id || '' }),
         }),
         payload.create({
           collection: 'payload-query-presets',
-          data: seedData.specificUsers({ userID: user?.id || '' }),
+          data: seedData.specificUsers({ ownerUserID: ownerUser?.id || '', adminUserID: user.id }),
         }),
       ])
+
+      seededData = {
+        everyone,
+        onlyMe,
+        specificUsers,
+      }
 
       everyoneID = everyone.id
     } catch (error) {
@@ -126,12 +152,12 @@ describe('Query Presets', () => {
 
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await assertURLParams({
       page,
-      columns: seedData.everyone.columns,
-      where: seedData.everyone.where,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
       presetID: everyoneID,
     })
 
@@ -140,14 +166,14 @@ describe('Query Presets', () => {
 
   test('should clear selected preset and reset filters', async () => {
     await page.goto(pagesUrl.list)
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
     await clearSelectedPreset({ page })
     expect(true).toBe(true)
   })
 
   test('should delete a preset, clear selection, and reset changes', async () => {
     await page.goto(pagesUrl.list)
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
     await openListMenu({ page })
 
     await clickListMenuItem({ page, menuItemLabel: 'Delete' })
@@ -172,21 +198,21 @@ describe('Query Presets', () => {
 
     await expect(
       modal.locator('tbody tr td button', {
-        hasText: exactText(seedData.everyone.title),
+        hasText: exactText(seededData.everyone.title),
       }),
     ).toBeHidden()
   })
 
   test('should save last used preset to preferences and load on initial render', async () => {
     await page.goto(pagesUrl.list)
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await page.reload()
 
     await assertURLParams({
       page,
-      columns: seedData.everyone.columns,
-      where: seedData.everyone.where,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
       // presetID: everyoneID,
     })
 
@@ -209,7 +235,7 @@ describe('Query Presets', () => {
       }),
     ).toBeHidden()
 
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await openListMenu({ page })
 
@@ -249,7 +275,7 @@ describe('Query Presets', () => {
       }),
     ).toBeHidden()
 
-    await selectPreset({ page, presetTitle: seedData.onlyMe.title })
+    await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
@@ -271,7 +297,7 @@ describe('Query Presets', () => {
   test('should conditionally render "update for everyone" label based on if preset is shared', async () => {
     await page.goto(pagesUrl.list)
 
-    await selectPreset({ page, presetTitle: seedData.onlyMe.title })
+    await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
@@ -284,7 +310,7 @@ describe('Query Presets', () => {
       }),
     ).toBeVisible()
 
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
@@ -300,7 +326,7 @@ describe('Query Presets', () => {
 
   test('should reset active changes', async () => {
     await page.goto(pagesUrl.list)
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
@@ -318,7 +344,7 @@ describe('Query Presets', () => {
   test('should only enter modified state when changes are made to an active preset', async () => {
     await page.goto(pagesUrl.list)
     await expect(page.locator('.list-controls__modified')).toBeHidden()
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await toggleColumn(page, { columnLabel: 'ID' })
     await expect(page.locator('.list-controls__modified')).toBeVisible()
@@ -337,14 +363,14 @@ describe('Query Presets', () => {
 
     await page.goto(pagesUrl.list)
 
-    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
     await clickListMenuItem({ page, menuItemLabel: 'Edit' })
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     const titleValue = drawer.locator('input[name="title"]')
-    await expect(titleValue).toHaveValue(seedData.everyone.title)
+    await expect(titleValue).toHaveValue(seededData.everyone.title)
 
-    const newTitle = `${seedData.everyone.title} (Updated)`
+    const newTitle = `${seededData.everyone.title} (Updated)`
     await drawer.locator('input[name="title"]').fill(newTitle)
 
     await saveDocAndAssert(page)
@@ -391,9 +417,9 @@ describe('Query Presets', () => {
   })
 
   test('only shows query presets related to the underlying collection', async () => {
-    // no results on `users` collection
-    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
-    await page.goto(postsUrl.list)
+    // no results on `posts` collection
+    const postsURL = new AdminUrlUtil(serverURL, 'posts')
+    await page.goto(postsURL.list)
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
     await expect(drawer.locator('.collection-list__no-results')).toBeVisible()

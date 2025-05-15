@@ -115,6 +115,16 @@ const DateFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'array',
+      name: 'array',
+      fields: [
+        {
+          name: 'date',
+          type: 'date',
+        },
+      ],
+    },
   ],
 }
 

@@ -228,6 +228,12 @@ describe('Form State', () => {
       collection: postsSlug,
       data: {
         title: 'Test Post',
+        blocks: [
+          {
+            blockType: 'text',
+            text: 'Test block',
+          },
+        ],
       },
     })
 
@@ -248,6 +254,7 @@ describe('Form State', () => {
     })
 
     expect(state.title?.addedByServer).toBe(true)
+    expect(state['blocks.0.blockType']?.addedByServer).toBe(true)
 
     // Ensure that `addedByServer` is removed after being received by the client
     const newState = mergeServerFormState({

@@ -24,5 +24,8 @@
     "runtimeArgs": ["--no-deprecation"]
   },
   // Essentially disables bun test buttons
-  "bun.test.filePattern": "bun.test.ts"
+  "bun.test.filePattern": "bun.test.ts",
+  "playwright.env": {
+    "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
+  }
 }
