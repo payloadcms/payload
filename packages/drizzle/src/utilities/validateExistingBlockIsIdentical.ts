@@ -82,11 +82,13 @@ const getFlattenedFieldNames = (args: {
   }, [])
 }
 
+/**
+ * returns true if all the fields in a block are identical to the existing table
+ */
 export const validateExistingBlockIsIdentical = ({
   block,
   localized,
   parentIsLocalized,
-  rootTableName,
   table,
   tableLocales,
 }: Args): boolean => {
@@ -109,20 +111,10 @@ export const validateExistingBlockIsIdentical = ({
     })
 
   if (missingField) {
-    // `The table ${rootTableName} has multiple blocks with slug ${
-    // block.slug
-    //    }, but the schemas do not match. One block includes the field ${
-    //    typeof missingField === 'string' ? missingField : missingField.name
-    //  }, while the other block does not.`,
     return false
   }
 
-  if (Boolean(localized) !== Boolean(table.columns._locale)) {
-    // The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not.
-    return false
-  }
-
-  return true
+  return Boolean(localized) === Boolean(table.columns._locale)
 }
 
 export const InternalBlockTableNameIndex = Symbol('InternalBlockTableNameIndex')

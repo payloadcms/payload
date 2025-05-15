@@ -1,8 +1,7 @@
-import type { CompoundIndex, FlattenedField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {
-  array,
   fieldAffectsData,
   fieldIsVirtual,
   fieldShouldBeLocalized,
