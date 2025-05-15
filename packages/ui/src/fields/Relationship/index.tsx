@@ -70,7 +70,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const handleChangeHasMulti = useCallback(
     (newValue: ValueWithRelation[]) => {
       if (!newValue) {
-        setValue(null, newValue !== value)
+        setValue(null, newValue === value)
         return
       }
 
@@ -99,7 +99,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const handleChangeSingle = useCallback(
     (newValue: ValueWithRelation) => {
       if (!newValue) {
-        setValue(null, newValue !== value)
+        setValue(null, newValue === value)
         return
       }
 
