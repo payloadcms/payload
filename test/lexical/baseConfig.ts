@@ -11,6 +11,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
+import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
@@ -28,6 +29,7 @@ export const baseConfig: Partial<Config> = {
   // ...extend config here
   collections: [
     LexicalFullyFeatured,
+    LexicalLinkFeature,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
       inlineBlocks: lexicalInlineBlocks,

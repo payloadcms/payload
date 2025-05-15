@@ -23,6 +23,7 @@ import type {
 
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import {
   InternalBlockTableNameIndex,
@@ -295,7 +296,11 @@ export const traverseFields = ({
           }
         }
 
-        const relationName = field.dbName ? `_${arrayTableName}` : fieldName
+        const relationName = getArrayRelationName({
+          field,
+          path: fieldName,
+          tableName: arrayTableName,
+        })
 
         relationsToBuild.set(relationName, {
           type: 'many',
