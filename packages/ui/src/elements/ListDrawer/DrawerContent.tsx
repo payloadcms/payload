@@ -86,7 +86,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
 
         if (slug) {
-          const result: { List: React.ReactNode } = await serverFunction({
+          const result: { List: React.ReactNode } = (await serverFunction({
             name: 'render-list',
             args: {
               allowCreate,
@@ -99,7 +99,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               overrideEntityVisibility,
               query: newQuery,
             },
-          })
+          })) as { List: React.ReactNode }
 
           setListView(result?.List || null)
         } else {
