@@ -68,3 +68,26 @@ Here's a quick overview:
 - Workflows are groupings of specific tasks which should be run in-order, and can be retried from a specific point of failure
 - A Job is an instance of a single task or workflow which will be executed
 - A Queue is a way to segment your jobs into different "groups" - for example, some to run nightly, and others to run every 10 minutes
+
+### Visualizing Jobs in the Admin UI
+
+By default, the internal `payload-jobs` collection is hidden from the Payload Admin Panel. To make this collection visible for debugging or inspection purposes, you can override its configuration using `jobsCollectionOverrides`.
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ... other config
+  jobs: {
+    // ... other job settings
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
+      if (!defaultJobsCollection.admin) {
+        defaultJobsCollection.admin = {}
+      }
+
+      defaultJobsCollection.admin.hidden = false
+      return defaultJobsCollection
+    },
+  },
+})
+```
