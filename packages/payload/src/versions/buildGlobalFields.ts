@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'

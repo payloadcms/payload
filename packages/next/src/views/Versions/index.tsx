@@ -1,11 +1,6 @@
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import {
-  type EditViewComponent,
-  logError,
-  type PaginatedDocs,
-  type PayloadServerReactComponent,
-} from 'payload'
+import { type DocumentViewServerProps, logError, type PaginatedDocs } from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
@@ -16,7 +11,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function VersionsView(props: DocumentViewServerProps) {
   const { initPageResult, searchParams } = props
 
   const {
@@ -90,13 +85,34 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
           payload,
           status: 'draft',
         })
-        latestPublishedVersion = await getLatestVersion({
-          slug: collectionSlug,
-          type: 'collection',
-          parentID: id,
-          payload,
-          status: 'published',
+        const publishedDoc = await payload.count({
+          collection: collectionSlug,
+          depth: 0,
+          overrideAccess: true,
+          req,
+          where: {
+            id: {
+              equals: id,
+            },
+            _status: {
+              equals: 'published',
+            },
+          },
         })
+
+        // If we pass a latestPublishedVersion to buildVersionColumns,
+        // this will be used to display it as the "current published version".
+        // However, the latest published version might have been unpublished in the meantime.
+        // Hence, we should only pass the latest published version if there is a published document.
+        latestPublishedVersion =
+          publishedDoc.totalDocs > 0 &&
+          (await getLatestVersion({
+            slug: collectionSlug,
+            type: 'collection',
+            parentID: id,
+            payload,
+            status: 'published',
+          }))
       }
     } catch (err) {
       logError({ err, payload })
@@ -177,7 +193,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
 
   const pluralLabel = collectionConfig?.labels?.plural
     ? typeof collectionConfig.labels.plural === 'function'
-      ? collectionConfig.labels.plural({ t })
+      ? collectionConfig.labels.plural({ i18n, t })
       : collectionConfig.labels.plural
     : globalConfig?.label
 
@@ -198,6 +214,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
             defaultLimit={limitToUse}
             defaultSort={sort as string}
             modifySearchParams
+            orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
           >
             <VersionsViewClient
               baseClass={baseClass}

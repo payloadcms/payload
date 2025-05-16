@@ -1,22 +1,24 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  BaseVersionField,
-  ClientField,
-  ClientFieldSchemaMap,
-  Field,
-  FieldDiffClientProps,
-  FieldDiffServerProps,
-  FieldTypes,
-  PayloadComponent,
-  PayloadRequest,
-  SanitizedFieldPermissions,
-  VersionField,
-} from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
-import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
+import {
+  type BaseVersionField,
+  type ClientField,
+  type ClientFieldSchemaMap,
+  type Field,
+  type FieldDiffClientProps,
+  type FieldDiffServerProps,
+  type FieldTypes,
+  type FlattenedBlock,
+  MissingEditorProp,
+  type PayloadComponent,
+  type PayloadRequest,
+  type SanitizedFieldPermissions,
+  type VersionField,
+} from 'payload'
+import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
 
 import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
@@ -38,6 +40,7 @@ export type BuildVersionFieldsArgs = {
   i18n: I18nClient
   modifiedOnly: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -62,6 +65,7 @@ export const buildVersionFields = ({
   i18n,
   modifiedOnly,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -72,8 +76,10 @@ export const buildVersionFields = ({
 } => {
   const versionFields: VersionField[] = []
   let fieldIndex = -1
+
   for (const field of fields) {
     fieldIndex++
+
     if (fieldIsID(field)) {
       continue
     }
@@ -81,7 +87,7 @@ export const buildVersionFields = ({
     const { indexPath, path, schemaPath } = getFieldPathsModified({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
       parentSchemaPath,
     })
@@ -102,7 +108,8 @@ export const buildVersionFields = ({
     }
 
     const versionField: VersionField = {}
-    const isLocalized = 'localized' in field && field.localized
+    const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
+
     const fieldName: null | string = 'name' in field ? field.name : null
 
     const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData
@@ -125,6 +132,7 @@ export const buildVersionFields = ({
           indexPath,
           locale,
           modifiedOnly,
+          parentIsLocalized: true,
           parentPath,
           parentSchemaPath,
           path,
@@ -149,6 +157,7 @@ export const buildVersionFields = ({
         i18n,
         indexPath,
         modifiedOnly,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath,
         parentSchemaPath,
         path,
@@ -183,6 +192,7 @@ const buildVersionField = ({
   indexPath,
   locale,
   modifiedOnly,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   path,
@@ -197,6 +207,7 @@ const buildVersionField = ({
   indexPath: string
   locale?: string
   modifiedOnly?: boolean
+  parentIsLocalized: boolean
   path: string
   schemaPath: string
   versionValue: unknown
@@ -228,7 +239,24 @@ const buildVersionField = ({
     return null
   }
 
-  const CustomComponent = field?.admin?.components?.Diff ?? customDiffComponents?.[field.type]
+  let CustomComponent = customDiffComponents?.[field.type]
+  if (field?.type === 'richText') {
+    if (!field?.editor) {
+      throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+    }
+
+    if (typeof field?.editor === 'function') {
+      throw new Error('Attempted to access unsanitized rich text editor.')
+    }
+
+    if (field.editor.CellComponent) {
+      CustomComponent = field.editor.DiffComponent
+    }
+  }
+  if (field?.admin?.components?.Diff) {
+    CustomComponent = field.admin.components.Diff
+  }
+
   const DefaultComponent = diffComponents?.[field.type]
 
   const baseVersionField: BaseVersionField = {
@@ -245,15 +273,14 @@ const buildVersionField = ({
       tabIndex++
       const isNamedTab = tabHasName(tab)
 
+      const tabAsField = { ...tab, type: 'tab' }
+
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
       } = getFieldPathsModified({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+        field: tabAsField,
         index: tabIndex,
         parentIndexPath: indexPath,
         parentPath,
@@ -271,8 +298,9 @@ const buildVersionField = ({
           i18n,
           modifiedOnly,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
-          parentPath: tabPath,
-          parentSchemaPath: tabSchemaPath,
+          parentIsLocalized: parentIsLocalized || tab.localized,
+          parentPath: isNamedTab ? tabPath : path,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
           selectedLocales,
           versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
@@ -280,7 +308,7 @@ const buildVersionField = ({
         label: tab.label,
       })
     }
-  } // At this point, we are dealing with a `row`, etc
+  } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
     if (field.type === 'array' && versionValue) {
       const arrayValue = Array.isArray(versionValue) ? versionValue : []
@@ -299,6 +327,7 @@ const buildVersionField = ({
           i18n,
           modifiedOnly,
           parentIndexPath: 'name' in field ? '' : indexPath,
+          parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: path + '.' + i,
           parentSchemaPath: schemaPath,
           req,
@@ -317,8 +346,9 @@ const buildVersionField = ({
         i18n,
         modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
+        parentPath: 'name' in field ? path : parentPath,
+        parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
         req,
         selectedLocales,
         versionSiblingData: versionValue as object,
@@ -332,14 +362,27 @@ const buildVersionField = ({
     for (let i = 0; i < blocksValue.length; i++) {
       const comparisonRow = comparisonValue?.[i] || {}
       const versionRow = blocksValue[i] || {}
-      const versionBlock = field.blocks.find((block) => block.slug === versionRow.blockType)
+
+      const blockSlugToMatch: string = versionRow.blockType
+      const versionBlock =
+        req.payload.blocks[blockSlugToMatch] ??
+        ((field.blockReferences ?? field.blocks).find(
+          (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
+        ) as FlattenedBlock | undefined)
 
       let fields = []
 
       if (versionRow.blockType === comparisonRow.blockType) {
         fields = versionBlock.fields
       } else {
-        const comparisonBlock = field.blocks.find((block) => block.slug === comparisonRow.blockType)
+        const comparisonBlockSlugToMatch: string = versionRow.blockType
+
+        const comparisonBlock =
+          req.payload.blocks[comparisonBlockSlugToMatch] ??
+          ((field.blockReferences ?? field.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
+          ) as FlattenedBlock | undefined)
+
         if (comparisonBlock) {
           fields = getUniqueListBy<Field>(
             [...versionBlock.fields, ...comparisonBlock.fields],
@@ -360,6 +403,7 @@ const buildVersionField = ({
         i18n,
         modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: path + '.' + i,
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,
         req,
@@ -378,6 +422,7 @@ const buildVersionField = ({
     diffMethod,
     field: clientField,
     fieldPermissions: subFieldPermissions,
+    parentIsLocalized,
     versionValue,
   }
 

@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -39,6 +39,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     field: {
       name,
       admin: { className, description, isSortable = true } = {},
+      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -47,21 +48,23 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
+    config,
   } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
@@ -74,7 +77,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -95,15 +98,17 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
+    path,
     rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -137,23 +142,19 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({
-        type: 'REMOVE_ROW',
+      removeFieldRow({
         path,
         rowIndex,
       })
-
-      setModified(true)
     },
-    [path, dispatchFields, setModified],
+    [path, removeFieldRow],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({ moveFromIndex, moveToIndex, path })
     },
-    [dispatchFields, path, setModified],
+    [moveFieldRow, path],
   )
 
   const toggleCollapseAll = useCallback(
@@ -162,6 +163,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         collapsed,
         rows,
       })
+
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -175,6 +177,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         rowID,
         rows,
       })
+
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
@@ -260,7 +263,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
-            const blockConfig = blocks.find((block) => block.slug === blockType)
+            const blockConfig: ClientBlock =
+              config.blocksMap[blockType] ??
+              ((blockReferences ?? blocks).find(
+                (block) => typeof block !== 'string' && block.slug === blockType,
+              ) as ClientBlock)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`
@@ -270,26 +277,30 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               ).length
 
               return (
-                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disabled || !isSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      blocks={blocks}
+                      blocks={blockReferences ?? blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={RowLabels?.[i]}
+                      Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
                       path={rowPath}
                       permissions={permissions}
-                      readOnly={readOnly}
+                      readOnly={readOnly || disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -329,12 +340,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="icon-label"
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               el="span"
               icon="plus"
               iconPosition="left"
@@ -346,7 +357,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blocks}
+            blocks={blockReferences ?? blocks}
             drawerSlug={drawerSlug}
             labels={labels}
           />

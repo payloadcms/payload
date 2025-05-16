@@ -1,4 +1,6 @@
+// @ts-strict-ignore
 import type { User } from '../../auth/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
@@ -86,11 +88,15 @@ export const getSchedulePublishTask = ({
         name: 'locale',
         type: 'text',
       },
-      {
-        name: 'doc',
-        type: 'relationship',
-        relationTo: collections,
-      },
+      ...(collections.length > 0
+        ? [
+            {
+              name: 'doc',
+              type: 'relationship',
+              relationTo: collections,
+            } satisfies Field,
+          ]
+        : []),
       {
         name: 'global',
         type: 'select',

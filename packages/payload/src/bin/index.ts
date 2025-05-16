@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
@@ -75,8 +76,18 @@ export const bin = async () => {
 
   if (userBinScript) {
     try {
-      const script: BinScript = await import(pathToFileURL(userBinScript.scriptPath).toString())
-      await script(config)
+      const module = await import(pathToFileURL(userBinScript.scriptPath).toString())
+
+      if (!module.script || typeof module.script !== 'function') {
+        console.error(
+          `Could not find "script" function export for script ${userBinScript.key} in ${userBinScript.scriptPath}`,
+        )
+      } else {
+        await module.script(config).catch((err: unknown) => {
+          console.log(`Script ${userBinScript.key} failed, details:`)
+          console.error(err)
+        })
+      }
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
       console.error(err)

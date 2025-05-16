@@ -70,7 +70,7 @@ export default buildConfig({
 
 ## Resolver function
 
-In your resolver, make sure you set `depth: 0` if you're returning data directly from the local API so that GraphQL can correctly resolve queries to nested values such as relationship data.
+In your resolver, make sure you set `depth: 0` if you're returning data directly from the Local API so that GraphQL can correctly resolve queries to nested values such as relationship data.
 
 Your function will receive four arguments you can make use of:
 
@@ -115,9 +115,9 @@ import { GraphQL } from '@payloadcms/graphql/types'
 ```
 
 <Banner type="warning">
-  For queries, mutations and handlers make sure you use the `GraphQL` and `payload` instances provided via arguments.
+  For queries, mutations and handlers make sure you use the `GraphQL` and
+  `payload` instances provided via arguments.
 </Banner>
-
 
 **`buildPaginatedListType`**
 
@@ -134,7 +134,10 @@ export const getMyPosts = (GraphQL, payload) => {
     args: {},
     resolve: Resolver,
     // The name of your new type has to be unique
-    type: buildPaginatedListType('AuthorPosts', payload.collections['posts'].graphQL?.type),
+    type: buildPaginatedListType(
+      'AuthorPosts',
+      payload.collections['posts'].graphQL?.type,
+    ),
   }
 }
 ```

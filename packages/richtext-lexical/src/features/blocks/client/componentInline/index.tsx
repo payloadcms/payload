@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient, Data, FormState } from 'payload'
+import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
@@ -16,6 +16,7 @@ import {
   FormSubmit,
   RenderFields,
   ShimmerEffect,
+  useConfig,
   useDocumentForm,
   useDocumentInfo,
   useEditDepth,
@@ -27,7 +28,7 @@ import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
@@ -60,7 +61,7 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
   initialState: false,
 })
 
-export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
+export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { cacheBuster, formData, nodeKey } = props
@@ -86,11 +87,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const firstTimeDrawer = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState,
+    () => initialLexicalFormState?.[formData.id]?.formState,
   )
 
+  const hasMounted = useRef(false)
+  const prevCacheBuster = useRef(cacheBuster)
   useEffect(() => {
-    setInitialState(false)
+    if (hasMounted.current) {
+      if (prevCacheBuster.current !== cacheBuster) {
+        setInitialState(false)
+      }
+      prevCacheBuster.current = cacheBuster
+    } else {
+      hasMounted.current = true
+    }
   }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
@@ -111,6 +121,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { config } = useConfig()
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
 
@@ -120,7 +131,11 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
 
   const clientBlockFields = clientBlock?.fields ?? []
 
@@ -176,6 +191,22 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       })
 
       if (state) {
+        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state),
+          true,
+        ) as InlineBlockFields
+
+        // Things like default values may come back from the server => update the node with the new data
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isInlineBlockNode(node)) {
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
+
+            node.setFields(newData, true)
+          }
+        })
+
         setInitialState(state)
         setCustomLabel(state['_components']?.customComponents?.BlockLabel)
         setCustomBlock(state['_components']?.customComponents?.Block)
@@ -191,6 +222,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [
     getFormState,
+    editor,
+    nodeKey,
     schemaFieldsPath,
     id,
     formData,
@@ -251,10 +284,22 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   )
   // cleanup effect
   useEffect(() => {
+    const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
+      return Object.keys(initialState).some(
+        (key) => initialState[key] && formData[key] !== initialState[key].value,
+      )
+    }
+
     return () => {
+      // If the component is unmounted (either via removeInlineBlock or via lexical itself) and the form state got changed before,
+      // we need to reset the initial state to force a re-fetch of the initial state when it gets mounted again (e.g. via lexical history undo).
+      // Otherwise it would use an outdated initial state.
+      if (initialState && isStateOutOfSync(formData, initialState)) {
+        setInitialState(false)
+      }
       abortAndIgnore(onChangeAbortControllerRef.current)
     }
-  }, [])
+  }, [formData, initialState])
 
   /**
    * HANDLE FORM SUBMIT
@@ -358,6 +403,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
+      el="div"
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
@@ -383,7 +429,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
-                permissions={permissions}
+                permissions={true}
                 readOnly={false}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
@@ -392,7 +438,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
-        <InlineBlockComponentContext.Provider
+        <InlineBlockComponentContext
           value={{
             EditButton,
             initialState,
@@ -403,7 +449,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           }}
         >
           {CustomBlock}
-        </InlineBlockComponentContext.Provider>
+        </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}

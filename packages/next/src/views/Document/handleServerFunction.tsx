@@ -28,6 +28,7 @@ export const renderDocumentHandler = async (args: {
   initialState?: FormState
   locale?: Locale
   overrideEntityVisibility?: boolean
+  redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -40,6 +41,7 @@ export const renderDocumentHandler = async (args: {
     initialData,
     locale,
     overrideEntityVisibility,
+    redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -145,6 +147,7 @@ export const renderDocumentHandler = async (args: {
     disableActions,
     documentSubViewType: 'default',
     drawerSlug,
+    i18n,
     importMap: payload.importMap,
     initialData,
     initPageResult: {
@@ -163,6 +166,8 @@ export const renderDocumentHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug, docID],
     },
+    payload,
+    redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},

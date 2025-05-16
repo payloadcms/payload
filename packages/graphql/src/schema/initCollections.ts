@@ -111,6 +111,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     collection.graphQL.type = buildObjectType({
       name: singularName,
       baseFields,
+      collectionSlug: collectionConfig.slug,
       config,
       fields,
       forceNullable: forceNullableObjectType,
@@ -145,11 +146,27 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       })
     }
 
+    let mutationCreateInputFields = mutationInputFields
+
+    if (
+      config.db.allowIDOnCreate &&
+      !collectionConfig.flattenedFields.some((field) => field.name === 'id')
+    ) {
+      mutationCreateInputFields = [
+        ...mutationCreateInputFields,
+        {
+          name: 'id',
+          type: config.db.defaultIDType,
+        } as Field,
+      ]
+    }
+
     const createMutationInputType = buildMutationInputType({
       name: singularName,
       config,
-      fields: mutationInputFields,
+      fields: mutationCreateInputFields,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: singularName,
     })
     if (createMutationInputType) {
@@ -164,6 +181,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       ),
       forceNullable: true,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: `${singularName}Update`,
     })
     if (updateMutationInputType) {
@@ -322,6 +340,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
       collection.graphQL.versionType = buildObjectType({
         name: `${singularName}Version`,
+        collectionSlug: collectionConfig.slug,
         config,
         fields: versionCollectionFields,
         forceNullable: forceNullableObjectType,

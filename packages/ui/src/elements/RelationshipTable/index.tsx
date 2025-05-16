@@ -1,30 +1,37 @@
 'use client'
-import type { JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
+import {
+  type CollectionSlug,
+  type Column,
+  type JoinFieldClient,
+  type ListQuery,
+  type PaginatedDocs,
+  type Where,
+} from 'payload'
+import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
-import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import './index.scss'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { Popup, PopupList } from '../Popup/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -38,7 +45,12 @@ type RelationshipTableComponentProps = {
   readonly initialData?: PaginatedDocs
   readonly initialDrawerData?: DocumentDrawerProps['initialData']
   readonly Label?: React.ReactNode
-  readonly relationTo: string
+  readonly parent?: {
+    collectionSlug: CollectionSlug
+    id: number | string
+    joinPath: string
+  }
+  readonly relationTo: string | string[]
 }
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
@@ -52,10 +64,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     initialData: initialDataFromProps,
     initialDrawerData,
     Label,
+    parent,
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
 
@@ -87,6 +100,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
+  const [selectedCollection, setSelectedCollection] = useState(
+    Array.isArray(relationTo) ? undefined : relationTo,
+  )
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
   const [columnState, setColumnState] = useState<Column[]>()
@@ -96,8 +112,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
       const newQuery: ListQuery = {
-        limit: String(field.defaultLimit || collectionConfig.admin.pagination.defaultLimit),
-        sort: field.defaultSort || collectionConfig.defaultSort,
+        limit: String(field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit),
+        sort: field.defaultSort || collectionConfig?.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },
       }
@@ -120,9 +136,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
-        columns: defaultColumns,
+        columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         docs,
         enableRowSelections: false,
+        orderableFieldName:
+          !field.orderable || Array.isArray(field.collection)
+            ? undefined
+            : `_${field.collection}_${field.name}_order`,
+        parent,
         query: newQuery,
         renderRowTypes: true,
         tableAppearance: 'condensed',
@@ -137,12 +158,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       field.defaultLimit,
       field.defaultSort,
       field.admin.defaultColumns,
-      collectionConfig.admin.pagination.defaultLimit,
-      collectionConfig.defaultSort,
+      field.collection,
+      field.name,
+      field.orderable,
+      collectionConfig?.admin?.pagination?.defaultLimit,
+      collectionConfig?.defaultSort,
       query,
       filterOptions,
       getTableState,
       relationTo,
+      parent,
     ],
   )
 
@@ -156,9 +181,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
-    collectionSlug: relationTo,
-  })
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] =
+    useDocumentDrawer({
+      collectionSlug: selectedCollection,
+    })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -175,12 +201,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
       void renderTable(withNewOrUpdatedDoc)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
   const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       closeDrawer()
+
       void onDrawerSave(args)
     },
     [closeDrawer, onDrawerSave],
@@ -191,22 +218,77 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
       void renderTable(newDocs)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
-  const preferenceKey = `${relationTo}-list`
+  const canCreate =
+    allowCreate !== false &&
+    permissions?.collections?.[Array.isArray(relationTo) ? relationTo[0] : relationTo]?.create
 
-  const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
+  useEffect(() => {
+    if (Array.isArray(relationTo) && selectedCollection) {
+      openDrawer()
+    }
+  }, [selectedCollection, openDrawer, relationTo])
+
+  useEffect(() => {
+    if (Array.isArray(relationTo) && !isDrawerOpen && selectedCollection) {
+      setSelectedCollection(undefined)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDrawerOpen])
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {canCreate && (
+          {!Array.isArray(relationTo) && canCreate && (
             <DocumentDrawerToggler className={`${baseClass}__add-new`}>
               {i18n.t('fields:addNew')}
             </DocumentDrawerToggler>
+          )}
+
+          {Array.isArray(relationTo) && (
+            <Fragment>
+              <Popup
+                button={
+                  <Button buttonStyle="none" className={`${baseClass}__add-new-polymorphic`}>
+                    {i18n.t('fields:addNew')}
+                    <PlusIcon />
+                  </Button>
+                }
+                buttonType="custom"
+                horizontalAlign="center"
+                render={({ close: closePopup }) => (
+                  <PopupList.ButtonGroup>
+                    {relationTo.map((relatedCollection) => {
+                      if (permissions.collections[relatedCollection].create) {
+                        return (
+                          <PopupList.Button
+                            className={`${baseClass}__relation-button--${relatedCollection}`}
+                            key={relatedCollection}
+                            onClick={() => {
+                              closePopup()
+                              setSelectedCollection(relatedCollection)
+                            }}
+                          >
+                            {getTranslation(
+                              config.collections.find((each) => each.slug === relatedCollection)
+                                .labels.singular,
+                              i18n,
+                            )}
+                          </PopupList.Button>
+                        )
+                      }
+
+                      return null
+                    })}
+                  </PopupList.ButtonGroup>
+                )}
+                size="medium"
+              />
+            </Fragment>
           )}
           <Pill
             aria-controls={`${baseClass}-columns`}
@@ -227,11 +309,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         <p>{t('general:loading')}</p>
       ) : (
         <Fragment>
-          {data.docs && data.docs.length === 0 && (
+          {data?.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
               <p>
                 {i18n.t('general:noResults', {
-                  label: getTranslation(collectionConfig?.labels?.plural, i18n),
+                  label: Array.isArray(relationTo)
+                    ? i18n.t('general:documents')
+                    : getTranslation(collectionConfig?.labels?.plural, i18n),
                 })}
               </p>
               {canCreate && (
@@ -243,30 +327,29 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               )}
             </div>
           )}
-          {data.docs && data.docs.length > 0 && (
+          {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
+                columns={transformColumnsToPreferences(columnState)}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
+                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
+                orderableFieldName={
+                  !field.orderable || Array.isArray(field.collection)
+                    ? undefined
+                    : `_${field.collection}_${field.name}_order`
+                }
               >
                 <TableColumnsProvider
-                  collectionSlug={relationTo}
+                  collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
                   columnState={columnState}
-                  docs={data.docs}
                   LinkedCellOverride={
                     <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
                   }
-                  preferenceKey={preferenceKey}
-                  renderRowTypes
-                  setTable={setTable}
-                  sortColumnProps={{
-                    appearance: 'condensed',
-                  }}
-                  tableAppearance="condensed"
                 >
                   <AnimateHeight
                     className={`${baseClass}__columns`}
@@ -274,7 +357,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     id={`${baseClass}-columns`}
                   >
                     <div className={`${baseClass}__columns-inner`}>
-                      <ColumnSelector collectionSlug={collectionConfig.slug} />
+                      {collectionConfig && (
+                        <ColumnSelector collectionSlug={collectionConfig.slug} />
+                      )}
                     </div>
                   </AnimateHeight>
                   {Table}

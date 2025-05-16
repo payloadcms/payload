@@ -533,6 +533,106 @@ describe('Queues', () => {
     payload.config.jobs.deleteJobOnComplete = true
   })
 
+  it('ensure jobs run in FIFO order by default', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 1')
+    expect(allSimples.docs?.[1]?.title).toBe('task 2')
+  })
+
+  it('ensure jobs can run LIFO if processingOrder is passed', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+      processingOrder: '-createdAt',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 2')
+    expect(allSimples.docs?.[1]?.title).toBe('task 1')
+  })
+
+  it('ensure job config processingOrder using queues object is respected', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      queue: 'lifo',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      queue: 'lifo',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+      queue: 'lifo',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 2')
+    expect(allSimples.docs?.[1]?.title).toBe('task 1')
+  })
+
   it('can create new inline jobs', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
@@ -1127,5 +1227,178 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask2Retried).toBe(3)
     // @ts-expect-error
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
+  })
+
+  it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'longRunning',
+      input: {},
+    })
+    void payload.jobs.run().catch((_ignored) => {})
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Should be in processing - cancel job
+    await payload.jobs.cancelByID({
+      id: job.id,
+    })
+
+    // Wait 4 seconds. This ensures that the job has enough time to finish
+    // if it hadn't been cancelled. That way we can be sure that the job was
+    // actually cancelled.
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+
+    // Ensure job is not completed and cancelled
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+      depth: 0,
+    })
+
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(true)
+    // @ts-expect-error error is not typed
+    expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+
+  it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'longRunning',
+      input: {},
+    })
+    void payload.jobs.run().catch((_ignored) => {})
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Cancel all jobs
+    await payload.jobs.cancel({
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+
+    // Wait 4 seconds. This ensures that the job has enough time to finish
+    // if it hadn't been cancelled. That way we can be sure that the job was
+    // actually cancelled.
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+
+    // Ensure job is not completed and cancelled
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+      depth: 0,
+    })
+
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(true)
+    // @ts-expect-error error is not typed
+    expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+
+  it('can tasks throw error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ThrowError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error with custom error message', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnCustomError',
+      input: {
+        errorMessage: 'custom error message',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('custom error message')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can reliably run workflows with parallel tasks', async () => {
+    const amount = 500
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'parallelTask',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(amount)
+
+    const simpleDocs = await payload.find({
+      collection: 'simple',
+      limit: amount,
+      depth: 0,
+    })
+    expect(simpleDocs.docs).toHaveLength(amount)
+
+    // Ensure all docs are created (= all tasks are run once)
+    for (let i = 1; i <= simpleDocs.docs.length; i++) {
+      const simpleDoc = simpleDocs.docs.find((doc) => doc.title === `parallel task ${i}`)
+      const logEntry = jobAfterRun?.log?.find((log) => log.taskID === `parallel task ${i}`)
+      expect(simpleDoc).toBeDefined()
+      expect(logEntry).toBeDefined()
+      expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
+    }
   })
 })

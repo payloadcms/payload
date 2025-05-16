@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
-import fs from 'fs'
+import fs from 'fs/promises'
 import sanitize from 'sanitize-filename'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
@@ -359,6 +360,7 @@ export async function resizeAndTransformImageSizes({
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
+          fastShrinkOnLoad: false,
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
         })
@@ -476,7 +478,7 @@ export async function resizeAndTransformImageSizes({
 
       if (await fileExists(imagePath)) {
         try {
-          fs.unlinkSync(imagePath)
+          await fs.unlink(imagePath)
         } catch {
           // Ignore unlink errors
         }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
@@ -43,7 +43,6 @@ export const Auth: React.FC<Props> = (props) => {
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
   const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
-
   const {
     config: {
       routes: { api },
@@ -51,15 +50,11 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  const hasPermissionToUnlock: boolean = useMemo(() => {
-    const collection = permissions?.collections?.[collectionSlug]
+  const enableFields =
+    !disableLocalStrategy ||
+    (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)
 
-    if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
-    }
-
-    return false
-  }, [permissions, collectionSlug])
+  const disabled = readOnly || isInitializing
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
@@ -73,7 +68,16 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
 
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
-  const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
+
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    }
+
+    return false
+  }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
@@ -130,15 +134,13 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy && !useAPIKey) {
+  if (disableLocalStrategy && !enableFields && !useAPIKey) {
     return null
   }
 
-  const disabled = readOnly || isInitializing
-
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {!disableLocalStrategy && (
+      {enableFields && (
         <React.Fragment>
           <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
@@ -147,7 +149,7 @@ export const Auth: React.FC<Props> = (props) => {
             readOnly={readOnly}
             t={t}
           />
-          {(changingPassword || requirePassword) && (
+          {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
                 autoComplete="new-password"
@@ -176,7 +178,7 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && (
+            {!changingPassword && !requirePassword && !disableLocalStrategy && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -202,18 +204,20 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          {canReadEnableAPIKey && (
-            <CheckboxField
-              field={{
-                name: 'enableAPIKey',
-                admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                label: t('authentication:enableAPIKey'),
-              }}
-              path="enableAPIKey"
-              schemaPath={`${collectionSlug}.enableAPIKey`}
-            />
+          {canReadApiKey && (
+            <Fragment>
+              <CheckboxField
+                field={{
+                  name: 'enableAPIKey',
+                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                  label: t('authentication:enableAPIKey'),
+                }}
+                path="enableAPIKey"
+                schemaPath={`${collectionSlug}.enableAPIKey`}
+              />
+              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+            </Fragment>
           )}
-          {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
       {verify && isEditing && (

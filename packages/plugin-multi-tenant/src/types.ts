@@ -1,6 +1,15 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
+  /**
+   * Base path for your application
+   *
+   * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
+   *
+   * @default undefined
+   */
+  basePath?: string
   /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
@@ -108,6 +117,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         tenantFieldAccess?: never
       }
   /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
+  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'
@@ -125,6 +144,14 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
 }
 
 export type Tenant<IDType = number | string> = {
@@ -133,7 +160,9 @@ export type Tenant<IDType = number | string> = {
 }
 
 export type UserWithTenantsField = {
-  tenants: {
-    tenant: number | string | Tenant
-  }[]
+  tenants?:
+    | {
+        tenant: number | string | Tenant
+      }[]
+    | null
 } & User

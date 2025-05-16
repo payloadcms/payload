@@ -22,7 +22,6 @@ type ResaveArgs = {
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
   if (draft) {
     // If the parent is a draft, don't resave children
@@ -58,9 +57,11 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       },
     })
 
-    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce<
+      Record<string, JsonObject[]>
+    >((acc, child) => {
       acc[child.id] = acc[child.id] || []
-      acc[child.id].push(child)
+      acc[child.id]!.push(child)
       return acc
     }, {})
 
@@ -81,10 +82,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
-            data: {
-              ...child,
-              [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
-            },
+            data: populateBreadcrumbs(req, pluginConfig, collection, child),
             depth: 0,
             draft: isDraft,
             locale: req.locale,

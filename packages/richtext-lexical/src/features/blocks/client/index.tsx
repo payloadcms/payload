@@ -20,7 +20,7 @@ import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 export const BlocksFeatureClient = createClientFeature(
-  ({ featureClientSchemaMap, props, schemaPath }) => {
+  ({ config, featureClientSchemaMap, props, schemaPath }) => {
     const schemaMapRenderedBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
     const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
     const clientSchema = featureClientSchemaMap['blocks']
@@ -47,13 +47,21 @@ export const BlocksFeatureClient = createClientFeature(
 
     const clientBlocks: ClientBlock[] = blocksFields
       .map((field) => {
-        return field.blocks[0]
+        return field.blockReferences
+          ? typeof field.blockReferences[0] === 'string'
+            ? config.blocksMap[field.blockReferences[0]]
+            : field.blockReferences[0]
+          : field.blocks[0]
       })
       .filter((block) => block !== undefined)
 
     const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
       .map((field) => {
-        return field.blocks[0]
+        return field.blockReferences
+          ? typeof field.blockReferences[0] === 'string'
+            ? config.blocksMap[field.blockReferences[0]]
+            : field.blockReferences[0]
+          : field.blocks[0]
       })
       .filter((block) => block !== undefined)
 

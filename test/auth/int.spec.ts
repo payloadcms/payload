@@ -1,7 +1,15 @@
-import type { FieldAffectingData, Payload, User } from 'payload'
+import type {
+  BasePayload,
+  EmailFieldValidation,
+  FieldAffectingData,
+  Payload,
+  SanitizedConfig,
+  User,
+} from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -12,7 +20,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
-  partialDisableLocaleStrategiesSlug,
+  partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -720,7 +728,7 @@ describe('Auth', () => {
     it('should allow create of a user with disableLocalStrategy', async () => {
       const email = 'test@example.com'
       const user = await payload.create({
-        collection: partialDisableLocaleStrategiesSlug,
+        collection: partialDisableLocalStrategiesSlug,
         data: {
           email,
           // password is not required
@@ -730,7 +738,7 @@ describe('Auth', () => {
     })
 
     it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
-      const authFields = payload.collections[partialDisableLocaleStrategiesSlug].config.fields
+      const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
         // eslint-disable-next-line jest/no-conditional-in-test
         .filter((field) => 'name' in field && field.name)
         .map((field) => (field as FieldAffectingData).name)
@@ -750,7 +758,7 @@ describe('Auth', () => {
 
     it('should prevent login of user with disableLocalStrategy.', async () => {
       await payload.create({
-        collection: partialDisableLocaleStrategiesSlug,
+        collection: partialDisableLocalStrategiesSlug,
         data: {
           email: devUser.email,
           password: devUser.password,
@@ -759,7 +767,7 @@ describe('Auth', () => {
 
       await expect(async () => {
         await payload.login({
-          collection: partialDisableLocaleStrategiesSlug,
+          collection: partialDisableLocalStrategiesSlug,
           data: {
             email: devUser.email,
             password: devUser.password,
@@ -769,7 +777,7 @@ describe('Auth', () => {
     })
 
     it('rest - should prevent login', async () => {
-      const response = await restClient.POST(`/${partialDisableLocaleStrategiesSlug}/login`, {
+      const response = await restClient.POST(`/${partialDisableLocalStrategiesSlug}/login`, {
         body: JSON.stringify({
           email,
           password,
@@ -777,6 +785,20 @@ describe('Auth', () => {
       })
 
       expect(response.status).toBe(403)
+    })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
     })
   })
 
@@ -967,6 +989,68 @@ describe('Auth', () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('Email - format validation', () => {
+    const mockT = jest.fn((key) => key) // Mocks translation function
+
+    const mockContext: Parameters<EmailFieldValidation>[1] = {
+      // @ts-expect-error: Mocking context for email validation
+      req: {
+        payload: {
+          collections: {} as Record<string, never>,
+          config: {} as SanitizedConfig,
+        } as unknown as BasePayload,
+        t: mockT,
+      },
+      required: true,
+      siblingData: {},
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
+    }
+    it('should allow standard formatted emails', () => {
+      expect(emailValidation('user@example.com', mockContext)).toBe(true)
+      expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
+      expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
+      expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
+    })
+
+    it('should not allow emails with double quotes', () => {
+      expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with spaces', () => {
+      expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with consecutive dots', () => {
+      expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with invalid domains', () => {
+      expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow domains starting or ending with a hyphen', () => {
+      expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 })

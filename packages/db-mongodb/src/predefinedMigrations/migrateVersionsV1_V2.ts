@@ -3,18 +3,20 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { getCollection, getGlobal } from '../utilities/getEntity.js'
 import { getSession } from '../utilities/getSession.js'
 
 export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
   const { payload } = req
 
-  const session = await getSession(payload.db as MongooseAdapter, req)
+  const adapter = payload.db as MongooseAdapter
+  const session = await getSession(adapter, req)
 
   // For each collection
 
   for (const { slug, versions } of payload.config.collections) {
     if (versions?.drafts) {
-      await migrateCollectionDocs({ slug, payload, session })
+      await migrateCollectionDocs({ slug, adapter, payload, session })
 
       payload.logger.info(`Migrated the "${slug}" collection.`)
     }
@@ -23,9 +25,13 @@ export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
   // For each global
   for (const { slug, versions } of payload.config.globals) {
     if (versions) {
-      const VersionsModel = payload.db.versions[slug]
+      const { Model } = getGlobal({
+        adapter,
+        globalSlug: slug,
+        versions: true,
+      })
 
-      await VersionsModel.findOneAndUpdate(
+      await Model.findOneAndUpdate(
         {},
         { latest: true },
         {
@@ -41,17 +47,23 @@ export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
 
 async function migrateCollectionDocs({
   slug,
+  adapter,
   docsAtATime = 100,
   payload,
   session,
 }: {
+  adapter: MongooseAdapter
   docsAtATime?: number
   payload: Payload
-  session: ClientSession
+  session?: ClientSession
   slug: string
 }) {
-  const VersionsModel = payload.db.versions[slug]
-  const remainingDocs = await VersionsModel.aggregate(
+  const { Model } = getCollection({
+    adapter,
+    collectionSlug: slug,
+    versions: true,
+  })
+  const remainingDocs = await Model.aggregate(
     [
       // Sort so that newest are first
       {
@@ -87,7 +99,7 @@ async function migrateCollectionDocs({
   ).exec()
 
   if (!remainingDocs || remainingDocs.length === 0) {
-    const newVersions = await VersionsModel.find(
+    const newVersions = await Model.find(
       {
         latest: {
           $eq: true,
@@ -108,7 +120,7 @@ async function migrateCollectionDocs({
 
   const remainingDocIDs = remainingDocs.map((doc) => doc._versionID)
 
-  await VersionsModel.updateMany(
+  await Model.updateMany(
     {
       _id: {
         $in: remainingDocIDs,
@@ -122,5 +134,5 @@ async function migrateCollectionDocs({
     },
   )
 
-  await migrateCollectionDocs({ slug, payload, session })
+  await migrateCollectionDocs({ slug, adapter, payload, session })
 }

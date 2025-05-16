@@ -1,5 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  DocumentTabClientProps,
+  DocumentTabServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -64,6 +66,7 @@ export const DocumentTabs: React.FC<{
                   return (
                     <DocumentTab
                       key={`tab-${index}`}
+                      path={viewConfig && 'path' in viewConfig ? viewConfig.path : ''}
                       {...{
                         ...props,
                         ...(tab || {}),
@@ -83,7 +86,7 @@ export const DocumentTabs: React.FC<{
                   return RenderServerComponent({
                     clientProps: {
                       path,
-                    },
+                    } satisfies DocumentTabClientProps,
                     Component: tab.Component,
                     importMap: payload.importMap,
                     key: `tab-custom-${index}`,
@@ -93,13 +96,14 @@ export const DocumentTabs: React.FC<{
                       i18n,
                       payload,
                       permissions,
-                    },
+                    } satisfies DocumentTabServerPropsOnly,
                   })
                 }
 
                 return (
                   <DocumentTab
                     key={`tab-custom-${index}`}
+                    path={path}
                     {...{
                       ...props,
                       ...tab,

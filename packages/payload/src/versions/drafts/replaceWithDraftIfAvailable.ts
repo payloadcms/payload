@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
@@ -7,7 +8,6 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
-import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'

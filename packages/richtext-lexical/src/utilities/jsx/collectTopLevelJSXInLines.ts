@@ -64,7 +64,8 @@ export function collectTopLevelJSXInLines(
   const linesLength = lines.length
 
   for (let i = 0; i < linesLength; i++) {
-    const startMatch = lines[i].match(regex.regExpStart)
+    const line = lines[i]!
+    const startMatch = line.match(regex.regExpStart)
     if (!startMatch) {
       continue // Try next transformer
     }

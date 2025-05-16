@@ -8,6 +8,7 @@ import type { StepNavItem } from './types.js'
 import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Link } from '../Link/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.scss'
@@ -19,8 +20,13 @@ const baseClass = 'step-nav'
 const StepNav: React.FC<{
   readonly className?: string
   readonly CustomIcon?: React.ReactNode
+  /**
+   * @deprecated
+   * This prop is deprecated and will be removed in the next major version.
+   * Components now import their own `Link` directly from `next/link`.
+   */
   readonly Link?: React.ComponentType
-}> = ({ className, CustomIcon, Link }) => {
+}> = ({ className, CustomIcon }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()
@@ -33,26 +39,15 @@ const StepNav: React.FC<{
 
   const { t } = useTranslation()
 
-  const LinkElement = Link || 'a'
-
-  const baseLinkProps = {
-    prefetch: Link ? false : undefined,
-  }
-
   return (
     <Fragment>
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
-          <LinkElement
-            className={`${baseClass}__home`}
-            href={admin}
-            tabIndex={0}
-            {...baseLinkProps}
-          >
+          <Link className={`${baseClass}__home`} href={admin} prefetch={false} tabIndex={0}>
             <span title={t('general:dashboard')}>
               <RenderCustomComponent CustomComponent={CustomIcon} Fallback={<PayloadIcon />} />
             </span>
-          </LinkElement>
+          </Link>
           <span>/</span>
           {stepNav.map((item, i) => {
             const StepLabel = getTranslation(item.label, i18n)
@@ -65,9 +60,9 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <LinkElement href={item.url} {...baseLinkProps}>
+                  <Link href={item.url} prefetch={false}>
                     <span key={i}>{StepLabel}</span>
-                  </LinkElement>
+                  </Link>
                 ) : (
                   <span key={i}>{StepLabel}</span>
                 )}

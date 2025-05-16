@@ -6,7 +6,7 @@ desc: Context allows you to pass in extra data that can be shared between hooks
 keywords: hooks, context, payload context, payloadcontext, data, extra data, shared data, shared, extra
 ---
 
-The `context` object is used to share data across different Hooks. This persists throughout the entire lifecycle of a request and is available within every Hook. By setting properties to `req.context`, you can effectively logic across multiple Hooks.
+The `context` object is used to share data across different Hooks. This persists throughout the entire lifecycle of a request and is available within every Hook. By setting properties to `req.context`, you can effectively share logic across multiple Hooks.
 
 ## When To Use Context
 
@@ -14,7 +14,7 @@ Context gives you a way forward on otherwise difficult problems such as:
 
 1. **Passing data between Hooks**: Needing data in multiple Hooks from a 3rd party API, it could be retrieved and used in `beforeChange` and later used again in an `afterChange` hook without having to fetch it twice.
 2. **Preventing infinite loops**: Calling `payload.update()` on the same document that triggered an `afterChange` hook will create an infinite loop, control the flow by assigning a no-op condition to context
-3. **Passing data to local API**: Setting values on the `req.context` and pass it to `payload.create()` you can provide additional data to hooks without adding extraneous fields.
+3. **Passing data to Local API**: Setting values on the `req.context` and pass it to `payload.create()` you can provide additional data to hooks without adding extraneous fields.
 4. **Passing data between hooks and middleware or custom endpoints**: Hooks could set context across multiple collections and then be used in a final `postMiddleware`.
 
 ## How To Use Context

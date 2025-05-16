@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Modal, useModal } from '../Modal/index.js'
@@ -17,6 +18,7 @@ export const DocumentTakeOver: React.FC<{
 }> = ({ handleBackToDashboard, isActive, onReadOnly }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+  const { startRouteTransition } = useRouteTransition()
 
   useEffect(() => {
     if (isActive) {
@@ -37,7 +39,9 @@ export const DocumentTakeOver: React.FC<{
           <Button
             buttonStyle="primary"
             id={`${modalSlug}-back-to-dashboard`}
-            onClick={handleBackToDashboard}
+            onClick={() => {
+              startRouteTransition(() => handleBackToDashboard())
+            }}
             size="large"
           >
             {t('general:backToDashboard')}

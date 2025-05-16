@@ -1,11 +1,11 @@
-import type { EditViewComponent, LivePreviewConfig, PayloadServerReactComponent } from 'payload'
+import type { DocumentViewServerProps, LivePreviewConfig } from 'payload'
 
 import React from 'react'
 
 import './index.scss'
 import { LivePreviewClient } from './index.client.js'
 
-export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function LivePreviewView(props: DocumentViewServerProps) {
   const { doc, initPageResult } = props
 
   const { collectionConfig, globalConfig, locale, req } = initPageResult

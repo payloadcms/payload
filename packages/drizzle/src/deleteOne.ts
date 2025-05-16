@@ -13,7 +13,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req, select, where: whereArg },
+  { collection: collectionSlug, req, returning, select, where: whereArg },
 ) {
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
@@ -32,9 +32,9 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: [{ args: [1], method: 'limit' }],
     db,
     joins,
+    query: ({ query }) => query.limit(1),
     selectFields,
     tableName,
     where,
@@ -59,13 +59,21 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await db.query[tableName].findFirst(findManyArgs)
   }
 
-  const result = transform({
-    adapter: this,
-    config: this.payload.config,
-    data: docToDelete,
-    fields: collection.flattenedFields,
-    joinQuery: false,
-  })
+  if (!docToDelete) {
+    return null
+  }
+
+  const result =
+    returning === false
+      ? null
+      : transform({
+          adapter: this,
+          config: this.payload.config,
+          data: docToDelete,
+          fields: collection.flattenedFields,
+          joinQuery: false,
+          tableName,
+        })
 
   await this.deleteWhere({
     db,

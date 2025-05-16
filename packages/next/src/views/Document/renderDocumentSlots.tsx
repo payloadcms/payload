@@ -1,12 +1,19 @@
 import type {
+  BeforeDocumentControlsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
   PayloadRequest,
+  PreviewButtonServerPropsOnly,
+  PublishButtonServerPropsOnly,
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
+  SaveButtonServerPropsOnly,
+  SaveDraftButtonServerPropsOnly,
   ServerProps,
   StaticDescription,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerPropsOnly,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
@@ -36,6 +43,18 @@ export const renderDocumentSlots: (args: {
     // TODO: Add remaining serverProps
   }
 
+  const BeforeDocumentControls =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
+    globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+  if (BeforeDocumentControls) {
+    components.BeforeDocumentControls = RenderServerComponent({
+      Component: BeforeDocumentControls,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
+  }
+
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
@@ -44,7 +63,7 @@ export const renderDocumentSlots: (args: {
     components.PreviewButton = RenderServerComponent({
       Component: CustomPreviewButton,
       importMap: req.payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
     })
   }
 
@@ -64,11 +83,14 @@ export const renderDocumentSlots: (args: {
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription },
+      clientProps: {
+        collectionSlug: collectionConfig?.slug,
+        description: staticDescription,
+      } satisfies ViewDescriptionClientProps,
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
 
@@ -82,9 +104,10 @@ export const renderDocumentSlots: (args: {
         components.PublishButton = RenderServerComponent({
           Component: CustomPublishButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies PublishButtonServerPropsOnly,
         })
       }
+
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
         globalConfig?.admin?.components?.elements?.SaveDraftButton
@@ -97,7 +120,7 @@ export const renderDocumentSlots: (args: {
         components.SaveDraftButton = RenderServerComponent({
           Component: CustomSaveDraftButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies SaveDraftButtonServerPropsOnly,
         })
       }
     } else {
@@ -109,7 +132,7 @@ export const renderDocumentSlots: (args: {
         components.SaveButton = RenderServerComponent({
           Component: CustomSaveButton,
           importMap: req.payload.importMap,
-          serverProps,
+          serverProps: serverProps satisfies SaveButtonServerPropsOnly,
         })
       }
     }

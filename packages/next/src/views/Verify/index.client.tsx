@@ -1,5 +1,5 @@
 'use client'
-import { toast } from '@payloadcms/ui'
+import { toast, useRouteTransition } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useEffect } from 'react'
 
@@ -9,15 +9,17 @@ type Props = {
 }
 export function ToastAndRedirect({ message, redirectTo }: Props) {
   const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
   const hasToastedRef = React.useRef(false)
 
   useEffect(() => {
     let timeoutID
+
     if (toast) {
       timeoutID = setTimeout(() => {
         toast.success(message)
         hasToastedRef.current = true
-        router.push(redirectTo)
+        startRouteTransition(() => router.push(redirectTo))
       }, 100)
     }
 
@@ -26,7 +28,7 @@ export function ToastAndRedirect({ message, redirectTo }: Props) {
         clearTimeout(timeoutID)
       }
     }
-  }, [router, redirectTo, message])
+  }, [router, redirectTo, message, startRouteTransition])
 
   return null
 }

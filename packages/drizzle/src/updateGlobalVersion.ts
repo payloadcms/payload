@@ -16,7 +16,16 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
-  { id, global, locale, req, select, versionData, where: whereArg }: UpdateGlobalVersionArgs<T>,
+  {
+    id,
+    global,
+    locale,
+    req,
+    select,
+    versionData,
+    where: whereArg,
+    returning,
+  }: UpdateGlobalVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
@@ -49,7 +58,12 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     select,
     tableName,
     where,
+    ignoreResult: returning === false,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

@@ -1,15 +1,21 @@
+// @ts-strict-ignore
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
-import type { FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type {
+  FieldAffectingData,
+  RichTextField,
+  RichTextFieldClient,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
-import type { RichTextFieldClientProps } from './fields/RichText.js'
-import type { FieldSchemaMap } from './types.js'
+import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
+import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -59,6 +65,7 @@ export type AfterChangeRichTextHookArgs<
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
+
 export type BeforeValidateRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
@@ -86,10 +93,17 @@ export type BeforeChangeRichTextHookArgs<
   duplicate?: boolean
 
   errors?: ValidationFieldError[]
+  /**
+   * Built up field label
+   *
+   * @example "Group Field > Tab Field > Rich Text Field"
+   */
+  fieldLabelPath: string
   /** Only available in `beforeChange` field hooks */
-  mergeLocaleActions?: (() => Promise<void>)[]
+  mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
@@ -98,7 +112,6 @@ export type BeforeChangeRichTextHookArgs<
    * The original siblingData with locales (not modified by any hooks).
    */
   siblingDocWithLocales?: JsonObject
-
   skipValidation?: boolean
 }
 
@@ -119,11 +132,11 @@ export type BaseRichTextHookArgs<
   indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
+  parentIsLocalized: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]
-
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /**
@@ -178,6 +191,7 @@ export type RichTextHooks = {
   beforeChange?: BeforeChangeRichTextHook[]
   beforeValidate?: BeforeValidateRichTextHook[]
 }
+
 type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
@@ -207,6 +221,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    parentIsLocalized: boolean
     populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest
@@ -240,7 +255,15 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<never, RichTextFieldClientProps>
+  /**
+   * Component that will be displayed in the version diff view.
+   * If not provided, richtext content will be diffed as JSON.
+   */
+  DiffComponent?: PayloadComponent<
+    FieldDiffServerProps<RichTextField, RichTextFieldClient>,
+    FieldDiffClientProps<RichTextFieldClient>
+  >
+  FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

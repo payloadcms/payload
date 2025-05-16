@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -7,6 +8,7 @@ import type { JsonObject, Operation, PayloadRequest } from '../../../types/index
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
+
 export type Args<T extends JsonObject> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
@@ -16,6 +18,7 @@ export type Args<T extends JsonObject> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
+  overrideAccess?: boolean
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -38,6 +41,7 @@ export const beforeChange = async <T extends JsonObject>({
   docWithLocales,
   global,
   operation,
+  overrideAccess,
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
@@ -53,11 +57,14 @@ export const beforeChange = async <T extends JsonObject>({
     doc,
     docWithLocales,
     errors,
+    fieldLabelPath: '',
     fields: collection?.fields || global?.fields,
     global,
     mergeLocaleActions,
     operation,
+    overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,
@@ -74,15 +81,15 @@ export const beforeChange = async <T extends JsonObject>({
         collection: collection?.slug,
         errors,
         global: global?.slug,
+        req,
       },
       req.t,
     )
   }
 
-  await mergeLocaleActions.reduce(async (priorAction, action) => {
-    await priorAction
+  for (const action of mergeLocaleActions) {
     await action()
-  }, Promise.resolve())
+  }
 
   return data
 }

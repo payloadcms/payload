@@ -19,6 +19,7 @@ const baseClass = 'date-time-picker'
 
 const DatePicker: React.FC<Props> = (props) => {
   const {
+    id,
     displayFormat: customDisplayFormat,
     maxDate,
     maxTime,
@@ -113,7 +114,7 @@ const DatePicker: React.FC<Props> = (props) => {
   }, [i18n.language, i18n.dateFNS])
 
   return (
-    <div className={classes}>
+    <div className={classes} id={id}>
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button

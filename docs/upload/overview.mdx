@@ -7,8 +7,9 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 ---
 
 <Banner>
-  Payload provides everything you need to enable file upload, storage, and management directly
-  on your server—including extremely powerful file [access control](#access-control).
+  Payload provides everything you need to enable file upload, storage, and
+  management directly on your server—including extremely powerful file [access
+  control](#access-control).
 </Banner>
 
 <LightDarkImage
@@ -38,7 +39,8 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 <Banner type="success">
   **Tip:**
 
-  A common pattern is to create a **"media"** collection and enable **upload** on that collection.
+A common pattern is to create a **"media"** collection and enable **upload** on that collection.
+
 </Banner>
 
 ```ts
@@ -108,12 +110,30 @@ _An asterisk denotes that an option is required._
 | **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                    |
 | **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                             |
 | **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                 |
-| **`withMetadata`**             | If specified, appends metadata to the output image file.  Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                 |
-
+| **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                  |
+| **`hideFileInputOnCreate`**    | Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.                                                                                                                  |
+| **`hideRemoveFile`**           | Set to `true` to prevent the admin UI having a way to remove an existing file while editing.                                                                                                                                                       |
 
 ### Payload-wide Upload Options
 
-Upload options are specifiable on a Collection by Collection basis, you can also control app wide options by passing your base Payload Config an `upload` property containing an object supportive of all `Busboy` configuration options. [Click here](https://github.com/mscdex/busboy#api) for more documentation about what you can control.
+Upload options are specifiable on a Collection by Collection basis, you can also control app wide options by passing your base Payload Config an `upload` property containing an object supportive of all `Busboy` configuration options.
+
+| Option                   | Description                                                                                                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`abortOnLimit`**       | A boolean that, if `true`, returns HTTP 413 if a file exceeds the file size limit. If `false`, the file is truncated. Defaults to `false`.                                         |
+| **`createParentPath`**   | Set to `true` to automatically create a directory path when moving files from a temporary directory or buffer. Defaults to `false`.                                                |
+| **`debug`**              | A boolean that turns upload process logging on if `true`, or off if `false`. Useful for troubleshooting. Defaults to `false`.                                                      |
+| **`limitHandler`**       | A function which is invoked if the file is greater than configured limits.                                                                                                         |
+| **`parseNested`**        | Set to `true` to turn `req.body` and `req.files` into nested structures. By default `req.body` and `req.files` are flat objects. Defaults to `false`.                              |
+| **`preserveExtension`**  | Preserves file extensions with the `safeFileNames` option. Limits file names to 3 characters if `true` or a custom length if a `number`, trimming from the start of the extension. |
+| **`responseOnLimit`**    | A `string` that is sent in the Response to a client if the file size limit is exceeded when used with `abortOnLimit`.                                                              |
+| **`safeFileNames`**      | Set to `true` to strip non-alphanumeric characters except dashes and underscores. Can also be set to a regex to determine what to strip. Defaults to `false`.                      |
+| **`tempFileDir`**        | A `string` path to store temporary files used when the `useTempFiles` option is set to `true`. Defaults to `'./tmp'`.                                                              |
+| **`uploadTimeout`**      | A `number` that defines how long to wait for data before aborting, specified in milliseconds. Set to `0` to disable timeout checks. Defaults to `60000`.                           |
+| **`uriDecodeFileNames`** | Set to `true` to apply uri decoding to file names. Defaults to `false`.                                                                                                            |
+| **`useTempFiles`**       | Set to `true` to store files to a temporary directory instead of in RAM, reducing memory usage for large files or many files.                                                      |
+
+[Click here](https://github.com/mscdex/busboy#api) for more documentation about what you can control with `Busboy`.
 
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
@@ -166,6 +186,8 @@ The [Admin Panel](../admin/overview) will also automatically display all availab
 
 Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/api-resize#resize) to perform its image resizing. You can specify additional options for `sharp` to use while resizing your images.
 
+Note that for image resizing to work, `sharp` must be specified in your [Payload Config](../configuration/overview). This is configured by default if you created your Payload project with `create-payload-app`. See `sharp` in [Config Options](../configuration/overview#config-options).
+
 #### Accessing the resized images in hooks
 
 All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
@@ -185,8 +207,9 @@ When an uploaded image is smaller than the defined image size, we have 3 options
 <Banner type="error">
   **Note:**
 
-  By default, the image size will return NULL when the uploaded image is smaller than the defined
-  image size. Use the `withoutEnlargement` prop to change this.
+By default, the image size will return NULL when the uploaded image is smaller than the defined
+image size. Use the `withoutEnlargement` prop to change this.
+
 </Banner>
 
 #### Custom file name per size
@@ -222,10 +245,11 @@ If you are using a plugin to send your files off to a third-party file storage h
 <Banner type="warning">
   **Note:**
 
-  This is a fairly advanced feature. If you do disable local file storage, by default, your admin
-  panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
-  to use either a plugin or your own hooks to store your files in a permanent manner, as well as
-  provide your own admin thumbnail using **upload.adminThumbnail**.
+This is a fairly advanced feature. If you do disable local file storage, by default, your admin
+panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
+to use either a plugin or your own hooks to store your files in a permanent manner, as well as
+provide your own admin thumbnail using **upload.adminThumbnail**.
+
 </Banner>
 
 ## Admin Thumbnails
@@ -255,9 +279,9 @@ export const Media: CollectionConfig = {
         fit: 'cover',
         height: 600,
         width: 1800,
-      }
-    ]
-  }
+      },
+    ],
+  },
 }
 ```
 
@@ -270,9 +294,10 @@ export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     // highlight-start
-    adminThumbnail: ({ doc }) => `https://google.com/custom-path-to-file/${doc.filename}`,
+    adminThumbnail: ({ doc }) =>
+      `https://google.com/custom-path-to-file/${doc.filename}`,
     // highlight-end
-  }
+  },
 }
 ```
 
@@ -300,19 +325,36 @@ export const Media: CollectionConfig = {
 <Banner type="warning">
   **Important:**
 
-  Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
-  works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
+works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+
 </Banner>
 
 To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.
 
 Send your request as a `multipart/form-data` request, using [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) if possible.
 
-```ts
-const fileInput = document.querySelector('#your-file-input') ;
-const formData = new FormData();
+<Banner type="info">
+  **Note:** To include any additional fields (like `title`, `alt`, etc.), append
+  a `_payload` field containing a JSON-stringified object of the required
+  values. These values must match the schema of your upload-enabled collection.
+</Banner>
 
-formData.append('file', fileInput.files[0]);
+```ts
+const fileInput = document.querySelector('#your-file-input')
+const formData = new FormData()
+
+formData.append('file', fileInput.files[0])
+
+// Replace with the fields defined in your upload-enabled collection.
+// The example below includes an optional field like 'title'.
+formData.append(
+  '_payload',
+  JSON.stringify({
+    title: 'Example Title',
+    description: 'An optional description for the file',
+  }),
+)
 
 fetch('api/:upload-slug', {
   method: 'POST',
@@ -327,6 +369,33 @@ fetch('api/:upload-slug', {
    */
 })
 ```
+
+## Uploading Files stored locally
+
+If you want to upload a file stored on your machine directly using the `payload.create` method, for example, during a seed script,
+you can use the `filePath` property to specify the local path of the file.
+
+```ts
+const localFilePath = path.resolve(__dirname, filename)
+
+await payload.create({
+  collection: 'media',
+  data: {
+    alt,
+  },
+  filePath: localFilePath,
+})
+```
+
+The `data` property should still include all the required fields of your `media` collection.
+
+<Banner type="warning">
+  **Important:**
+
+Remember that all custom hooks attached to the `media` collection will still trigger.
+Ensure that files match the specified mimeTypes or sizes defined in the collection's `formatOptions` or custom `hooks`.
+
+</Banner>
 
 ## Uploading Files from Remote URLs
 
@@ -377,14 +446,13 @@ export const Media: CollectionConfig = {
 
 _An asterisk denotes that an option is required._
 
-| Option           | Description                                                                                          | Example       |
-| ---------------- | ---------------------------------------------------------------------------------------------------- | ------------- |
-| **`hostname`** * | The hostname of the allowed URL. This is required to ensure the URL is coming from a trusted source. | `example.com` |
-| **`pathname`**   | The path portion of the URL. Supports wildcards to match multiple paths.                             | `/images/*`   |
-| **`port`**       | The port number of the URL. If not specified, the default port for the protocol will be used.        | `3000`        |
-| **`protocol`**   | The protocol to match. Must be either `http` or `https`. Defaults to `https`.                        | `https`       |
-| **`search`**     | The query string of the URL. If specified, the URL must match this exact query string.               | `?version=1`  |
-
+| Option            | Description                                                                                          | Example       |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | ------------- |
+| **`hostname`** \* | The hostname of the allowed URL. This is required to ensure the URL is coming from a trusted source. | `example.com` |
+| **`pathname`**    | The path portion of the URL. Supports wildcards to match multiple paths.                             | `/images/*`   |
+| **`port`**        | The port number of the URL. If not specified, the default port for the protocol will be used.        | `3000`        |
+| **`protocol`**    | The protocol to match. Must be either `http` or `https`. Defaults to `https`.                        | `https`       |
+| **`search`**      | The query string of the URL. If specified, the URL must match this exact query string.               | `?version=1`  |
 
 ## Access Control
 

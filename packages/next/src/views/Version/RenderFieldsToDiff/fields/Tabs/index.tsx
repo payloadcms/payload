@@ -79,7 +79,14 @@ type TabProps = {
   tab: VersionTab
 } & FieldDiffClientProps<TabsFieldClient>
 
-const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versionValue }) => {
+const Tab: React.FC<TabProps> = ({
+  comparisonValue,
+  fieldTab,
+  locale,
+  parentIsLocalized,
+  tab,
+  versionValue,
+}) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
 
@@ -102,6 +109,7 @@ const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versi
         )
       }
       locales={selectedLocales}
+      parentIsLocalized={parentIsLocalized || fieldTab.localized}
       version={versionValue}
     >
       <RenderVersionFieldsToDiff versionFields={tab.fields} />

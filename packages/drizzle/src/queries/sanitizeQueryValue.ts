@@ -87,9 +87,11 @@ export const sanitizeQueryValue = ({
       if (field.type === 'number') {
         formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
       }
+    } else if (typeof formattedValue === 'number') {
+      formattedValue = [formattedValue]
     }
 
-    if (!Array.isArray(formattedValue) || formattedValue.length === 0) {
+    if (!Array.isArray(formattedValue)) {
       return null
     }
   }

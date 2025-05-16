@@ -1,21 +1,17 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { Button } from '@payloadcms/ui'
-import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
+import { Button, Link } from '@payloadcms/ui'
+import { Translation } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
-import './index.scss'
 import { ResetPasswordForm } from './ResetPasswordForm/index.js'
+import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
-
-export { generateResetPasswordMetadata } from './meta.js'
-
-export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
+export function ResetPassword({ initPageResult, params }: AdminViewServerProps) {
   const { req } = initPageResult
 
   const {
@@ -60,7 +56,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
+        <Button buttonStyle="secondary" el="link" size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </div>

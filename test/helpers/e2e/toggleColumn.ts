@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -12,14 +12,23 @@ export const toggleColumn = async (
     columnContainerSelector,
     columnLabel,
     targetState: targetStateFromArgs,
+    columnName,
+    expectURLChange = true,
   }: {
     columnContainerSelector?: string
     columnLabel: string
+    columnName?: string
+    expectURLChange?: boolean
     targetState?: 'off' | 'on'
     togglerSelector?: string
   },
-): Promise<any> => {
-  const columnContainer = await openListColumns(page, { togglerSelector, columnContainerSelector })
+): Promise<{
+  columnContainer: Locator
+}> => {
+  const { columnContainer } = await openListColumns(page, {
+    togglerSelector,
+    columnContainerSelector,
+  })
 
   const column = columnContainer.locator(`.column-selector .column-selector__column`, {
     hasText: exactText(columnLabel),
@@ -34,10 +43,10 @@ export const toggleColumn = async (
 
   await expect(column).toBeVisible()
 
-  if (
-    (isActiveBeforeClick && targetState === 'off') ||
-    (!isActiveBeforeClick && targetState === 'on')
-  ) {
+  const requiresToggle =
+    (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
+
+  if (requiresToggle) {
     await column.click()
   }
 
@@ -49,5 +58,30 @@ export const toggleColumn = async (
     await expect(column).toHaveClass(/column-selector__column--active/)
   }
 
-  return column
+  if (expectURLChange && columnName && requiresToggle) {
+    await waitForColumnInURL({ page, columnName, state: targetState })
+  }
+
+  return { columnContainer }
+}
+
+export const waitForColumnInURL = async ({
+  page,
+  columnName,
+  state,
+}: {
+  columnName: string
+  page: Page
+  state: 'off' | 'on'
+}): Promise<void> => {
+  await page.waitForURL(/.*\?.*/)
+
+  const identifier = `${state === 'off' ? '-' : ''}${columnName}`
+
+  // Test that the identifier is in the URL
+  // It must appear in the `columns` query parameter, i.e. after `columns=...` and before the next `&`
+  // It must also appear in it entirety to prevent partially matching other values, i.e. between quotation marks
+  const regex = new RegExp(`columns=([^&]*${encodeURIComponent(`"${identifier}"`)}[^&]*)`)
+
+  await page.waitForURL(regex)
 }

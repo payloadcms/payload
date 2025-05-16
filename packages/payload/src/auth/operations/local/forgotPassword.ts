@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../forgotPassword.js'

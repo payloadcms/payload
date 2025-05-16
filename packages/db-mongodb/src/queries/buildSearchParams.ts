@@ -1,11 +1,14 @@
+import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
-import { getLocalizedPaths } from 'payload'
+import { APIError, getFieldByPath, getLocalizedPaths } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
+import type { OperatorMapKey } from './operatorMap.js'
 
+import { getCollection } from '../utilities/getEntity.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -30,6 +33,7 @@ export async function buildSearchParam({
   incomingPath,
   locale,
   operator,
+  parentIsLocalized,
   payload,
   val,
 }: {
@@ -39,9 +43,10 @@ export async function buildSearchParam({
   incomingPath: string
   locale?: string
   operator: string
+  parentIsLocalized: boolean
   payload: Payload
   val: unknown
-}): Promise<SearchParam> {
+}): Promise<SearchParam | undefined> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/g, '.')
   if (sanitizedPath === 'id') {
@@ -53,7 +58,9 @@ export async function buildSearchParam({
   let hasCustomID = false
 
   if (sanitizedPath === '_id') {
-    const customIDFieldType = payload.collections[collectionSlug]?.customIDType
+    const customIDFieldType = collectionSlug
+      ? payload.collections[collectionSlug]?.customIDType
+      : undefined
 
     let idFieldType: 'number' | 'text' = 'text'
 
@@ -69,6 +76,7 @@ export async function buildSearchParam({
         name: 'id',
         type: idFieldType,
       } as FlattenedField,
+      parentIsLocalized: parentIsLocalized ?? false,
       path: '_id',
     })
   } else {
@@ -78,8 +86,13 @@ export async function buildSearchParam({
       globalSlug,
       incomingPath: sanitizedPath,
       locale,
+      parentIsLocalized,
       payload,
     })
+  }
+
+  if (!paths[0]) {
+    return undefined
   }
 
   const [{ field, path }] = paths
@@ -89,6 +102,7 @@ export async function buildSearchParam({
       hasCustomID,
       locale,
       operator,
+      parentIsLocalized,
       path,
       payload,
       val,
@@ -104,6 +118,10 @@ export async function buildSearchParam({
       return { value: rawQuery }
     }
 
+    if (!formattedOperator) {
+      return undefined
+    }
+
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
     if (paths.length > 1) {
@@ -111,84 +129,136 @@ export async function buildSearchParam({
       // to work backwards from top
       const pathsToQuery = paths.slice(1).reverse()
 
-      const initialRelationshipQuery = {
+      let relationshipQuery: SearchParam = {
         value: {},
-      } as SearchParam
+      }
 
-      const relationshipQuery = await pathsToQuery.reduce(
-        async (priorQuery, { collectionSlug: slug, path: subPath }, i) => {
-          const priorQueryResult = await priorQuery
+      for (const [i, { collectionSlug, path: subPath }] of pathsToQuery.entries()) {
+        if (!collectionSlug) {
+          throw new APIError(`Collection with the slug ${collectionSlug} was not found.`)
+        }
 
-          const SubModel = (payload.db as MongooseAdapter).collections[slug]
+        const { collectionConfig, Model: SubModel } = getCollection({
+          adapter: payload.db as MongooseAdapter,
+          collectionSlug,
+        })
 
-          // On the "deepest" collection,
-          // Search on the value passed through the query
-          if (i === 0) {
-            const subQuery = await SubModel.buildQuery({
-              locale,
-              payload,
-              where: {
-                [subPath]: {
-                  [formattedOperator]: val,
-                },
+        if (i === 0) {
+          const subQuery = await SubModel.buildQuery({
+            locale,
+            payload,
+            where: {
+              [subPath]: {
+                [formattedOperator]: val,
               },
+            },
+          })
+
+          const field = paths[0].field
+
+          const select: Record<string, boolean> = {
+            _id: true,
+          }
+
+          let joinPath: null | string = null
+
+          if (field.type === 'join') {
+            const relationshipField = getFieldByPath({
+              fields: collectionConfig.flattenedFields,
+              path: field.on,
             })
+            if (!relationshipField) {
+              throw new APIError('Relationship field was not found')
+            }
 
-            const result = await SubModel.find(subQuery, subQueryOptions)
+            let path = relationshipField.localizedPath
+            if (relationshipField.pathHasLocalized && payload.config.localization) {
+              path = path.replace('<locale>', locale || payload.config.localization.defaultLocale)
+            }
+            select[path] = true
 
-            const $in: unknown[] = []
+            joinPath = path
+          }
 
-            result.forEach((doc) => {
+          if (joinPath) {
+            select[joinPath] = true
+          }
+
+          const result = await SubModel.find(subQuery).lean().limit(50).select(select)
+
+          const $in: unknown[] = []
+
+          result.forEach((doc: any) => {
+            if (joinPath) {
+              let ref = doc
+
+              for (const segment of joinPath.split('.')) {
+                if (typeof ref === 'object' && ref) {
+                  ref = ref[segment]
+                }
+              }
+
+              if (Array.isArray(ref)) {
+                for (const item of ref) {
+                  if (item instanceof Types.ObjectId) {
+                    $in.push(item)
+                  }
+                }
+              } else if (ref instanceof Types.ObjectId) {
+                $in.push(ref)
+              }
+            } else {
               const stringID = doc._id.toString()
               $in.push(stringID)
 
               if (Types.ObjectId.isValid(stringID)) {
                 $in.push(doc._id)
               }
-            })
-
-            if (pathsToQuery.length === 1) {
-              return {
-                path,
-                value: { $in },
-              }
             }
+          })
 
-            const nextSubPath = pathsToQuery[i + 1].path
-
+          if (pathsToQuery.length === 1) {
             return {
-              value: { [nextSubPath]: { $in } },
-            }
-          }
-
-          const subQuery = priorQueryResult.value
-          const result = await SubModel.find(subQuery, subQueryOptions)
-
-          const $in = result.map((doc) => doc._id)
-
-          // If it is the last recursion
-          // then pass through the search param
-          if (i + 1 === pathsToQuery.length) {
-            return {
-              path,
+              path: joinPath ? '_id' : path,
               value: { $in },
             }
           }
 
-          return {
+          const nextSubPath = pathsToQuery[i + 1]?.path
+
+          if (nextSubPath) {
+            relationshipQuery = { value: { [nextSubPath]: $in } }
+          }
+
+          continue
+        }
+
+        const subQuery = relationshipQuery.value as FilterQuery<any>
+        const result = await SubModel.find(subQuery, subQueryOptions)
+
+        const $in = result.map((doc) => doc._id)
+
+        // If it is the last recursion
+        // then pass through the search param
+        if (i + 1 === pathsToQuery.length) {
+          relationshipQuery = {
+            path,
+            value: { $in },
+          }
+        } else {
+          relationshipQuery = {
             value: {
               _id: { $in },
             },
           }
-        },
-        Promise.resolve(initialRelationshipQuery),
-      )
+        }
+      }
 
       return relationshipQuery
     }
 
     if (formattedOperator && validOperatorSet.has(formattedOperator as Operator)) {
-      const operatorKey = operatorMap[formattedOperator]
+      const operatorKey = operatorMap[formattedOperator as OperatorMapKey]
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
@@ -205,7 +275,7 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (Types.ObjectId.isValid(formattedValue)) {
-            result.value[multiIDCondition].push({
+            result.value[multiIDCondition]?.push({
               [path]: { [operatorKey]: new Types.ObjectId(formattedValue) },
             })
           } else {
@@ -221,14 +291,16 @@ export async function buildSearchParam({
             )
 
             if (hasNumberIDRelation) {
-              result.value[multiIDCondition].push({
+              result.value[multiIDCondition]?.push({
                 [path]: { [operatorKey]: parseFloat(formattedValue) },
               })
             }
           }
         }
 
-        if (result.value[multiIDCondition].length > 1) {
+        const length = result.value[multiIDCondition]?.length
+
+        if (typeof length === 'number' && length > 1) {
           return result
         }
       }
@@ -242,6 +314,25 @@ export async function buildSearchParam({
               [path]: {
                 $options: 'i',
                 $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+              },
+            })),
+          },
+        }
+
+        return result
+      }
+
+      if (formattedOperator === 'not_like' && typeof formattedValue === 'string') {
+        const words = formattedValue.split(' ')
+
+        const result = {
+          value: {
+            $and: words.map((word) => ({
+              [path]: {
+                $not: {
+                  $options: 'i',
+                  $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                },
               },
             })),
           },

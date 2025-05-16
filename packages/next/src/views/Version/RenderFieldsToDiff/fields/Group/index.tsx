@@ -19,6 +19,7 @@ export const Group: GroupFieldDiffClientComponent = ({
   comparisonValue,
   field,
   locale,
+  parentIsLocalized,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -40,6 +41,7 @@ export const Group: GroupFieldDiffClientComponent = ({
           )
         }
         locales={selectedLocales}
+        parentIsLocalized={parentIsLocalized || field.localized}
         version={versionValue}
       >
         <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />

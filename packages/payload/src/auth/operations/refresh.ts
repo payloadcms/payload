@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import url from 'url'
 
-import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
+import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -15,6 +16,12 @@ export type Result = {
   exp: number
   refreshedToken: string
   setCookie?: boolean
+  /** @deprecated
+   * use:
+   * ```ts
+   * user._strategy
+   * ```
+   */
   strategy?: string
   user: Document
 }
@@ -34,10 +41,8 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -46,9 +51,8 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
             operation: 'refresh',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // Refresh
@@ -78,6 +82,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     if (user) {
       user.collection = args.req.user.collection
+      user._strategy = args.req.user._strategy
     }
 
     let result: Result
@@ -112,6 +117,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         exp,
         refreshedToken,
         setCookie: true,
+        /** @deprecated
+         * use:
+         * ```ts
+         * user._strategy
+         * ```
+         */
         strategy: args.req.user._strategy,
         user,
       }
@@ -121,18 +132,18 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // After Refresh - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: args.collection?.config,
-          context: args.req.context,
-          exp: result.exp,
-          req: args.req,
-          token: result.refreshedToken,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRefresh?.length) {
+      for (const hook of collectionConfig.hooks.afterRefresh) {
+        result =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            exp: result.exp,
+            req: args.req,
+            token: result.refreshedToken,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PayloadRequest, PopulateType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
@@ -142,17 +143,17 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // afterRead - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result,
-          global: globalConfig,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterRead?.length) {
+      for (const hook of globalConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result,
+            global: globalConfig,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -173,18 +174,18 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // afterChange - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result,
-          global: globalConfig,
-          previousDoc,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterChange?.length) {
+      for (const hook of globalConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result,
+            global: globalConfig,
+            previousDoc,
+            req,
+          })) || result
+      }
+    }
 
     if (shouldCommit) {
       await commitTransaction(req)

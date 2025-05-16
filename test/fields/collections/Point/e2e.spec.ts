@@ -113,7 +113,6 @@ describe('Point', () => {
 
   test('should update point', async () => {
     await page.goto(url.edit(emptyGroupPoint.id))
-    await page.waitForURL(`**/${emptyGroupPoint.id}`)
     const longField = page.locator('#field-longitude-point')
     await longField.fill('9')
 
@@ -144,7 +143,6 @@ describe('Point', () => {
 
   test('should be able to clear a value point', async () => {
     await page.goto(url.edit(filledGroupPoint.id))
-    await page.waitForURL(`**/${filledGroupPoint.id}`)
 
     const groupLongitude = page.locator('#field-longitude-group__point')
     await groupLongitude.fill('')

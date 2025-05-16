@@ -6,8 +6,13 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { titleToDelete } from './shared.js'
-import { diffCollectionSlug, draftCollectionSlug, mediaCollectionSlug } from './slugs.js'
+import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
+import {
+  autosaveWithValidateCollectionSlug,
+  diffCollectionSlug,
+  draftCollectionSlug,
+  mediaCollectionSlug,
+} from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -109,15 +114,24 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: draftCollectionSlug,
+    collection: autosaveWithValidateCollectionSlug,
     data: {
-      blocksField,
-      description: 'Description',
-      title: titleToDelete,
+      title: 'Initial seeded title',
     },
-    depth: 0,
-    overrideAccess: true,
-    draft: true,
+  })
+
+  const { id: doc1ID } = await _payload.create({
+    collection: 'text',
+    data: {
+      text: 'Document 1',
+    },
+  })
+
+  const { id: doc2ID } = await _payload.create({
+    collection: 'text',
+    data: {
+      text: 'Document 2',
+    },
   })
 
   const diffDoc = await _payload.create({
@@ -139,6 +153,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock',
         },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
+        },
       ],
       checkbox: true,
       code: 'code',
@@ -154,7 +180,11 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       point: [1, 2],
       radio: 'option1',
       relationship: manyDraftsID,
-      richtext: textToLexicalJSON({ text: 'richtext' }),
+      richtext: generateLexicalData({
+        mediaID: uploadedImage,
+        textID: doc1ID,
+        updated: false,
+      }) as any,
       richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff' }),
       select: 'option1',
       text: 'text',
@@ -187,6 +217,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock2',
         },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock2',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock2',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
+        },
       ],
       checkbox: false,
       code: 'code2',
@@ -202,7 +244,11 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,
-      richtext: textToLexicalJSON({ text: 'richtext2' }),
+      richtext: generateLexicalData({
+        mediaID: uploadedImage2,
+        textID: doc2ID,
+        updated: true,
+      }) as any,
       richtextWithCustomDiff: textToLexicalJSON({ text: 'richtextWithCustomDiff2' }),
       select: 'option2',
       text: 'text2',

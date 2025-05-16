@@ -80,6 +80,15 @@ test.describe('Admin Panel (Root)', () => {
     await expect(firstRow).toBeVisible()
   })
 
+  test('collection - should hide Copy To Locale button when localization is false', async () => {
+    await page.goto(url.create)
+    const textField = page.locator('#field-text')
+    await textField.fill('test')
+    await saveDocAndAssert(page)
+    await page.locator('.doc-controls__popup >> .popup-button').click()
+    await expect(page.locator('#copy-locale-data__button')).toBeHidden()
+  })
+
   test('global — navigates to edit view', async () => {
     await page.goto(url.global('menu'))
     const pageURL = page.url()

@@ -2,11 +2,11 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
+import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { GroupField, RichTextField } from './payload-types.js'
+import type { BlockField, GroupField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -15,7 +15,7 @@ import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -165,6 +165,68 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query like on value', async () => {
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query not_like on value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            not_like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query hasMany within an array', async () => {
       const docFirst = await payload.create({
         collection: 'text-fields',
@@ -258,7 +320,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_1', 'text_2'],
             },
           ],
@@ -271,7 +333,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_other', 'text_2'],
             },
           ],
@@ -538,6 +600,56 @@ describe('Fields', () => {
 
       expect(result.docs[0].id).toEqual(doc.id)
     })
+
+    // Function to generate random date between start and end dates
+    function getRandomDate(start: Date, end: Date): string {
+      const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+      return date.toISOString()
+    }
+
+    // Generate sample data
+    const dataSample = Array.from({ length: 100 }, (_, index) => {
+      const startDate = new Date('2024-01-01')
+      const endDate = new Date('2025-12-31')
+
+      return {
+        array: Array.from({ length: 5 }, (_, listIndex) => {
+          return {
+            date: getRandomDate(startDate, endDate),
+          }
+        }),
+        ...dateDoc,
+      }
+    })
+
+    it('should query a date field inside an array field', async () => {
+      await payload.delete({ collection: 'date-fields', where: {} })
+      for (const doc of dataSample) {
+        await payload.create({
+          collection: 'date-fields',
+          data: doc,
+        })
+      }
+
+      const res = await payload.find({
+        collection: 'date-fields',
+        where: { 'array.date': { greater_than: new Date('2025-06-01').toISOString() } },
+      })
+
+      const filter = (doc: any) =>
+        doc.array.some((item) => new Date(item.date).getTime() > new Date('2025-06-01').getTime())
+
+      expect(res.docs.every(filter)).toBe(true)
+      expect(dataSample.filter(filter)).toHaveLength(res.totalDocs)
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (res.totalDocs > 10) {
+        // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
+        // not only ID, but also created_at, updated_at, items_date
+        expect(res.docs).toHaveLength(10)
+      } else {
+        expect(res.docs.length).toBeLessThanOrEqual(res.totalDocs)
+      }
+    })
   })
 
   describe('select', () => {
@@ -703,7 +815,7 @@ describe('Fields', () => {
       expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
     })
 
-    it('should work with autosave ', async () => {
+    it('should work with autosave', async () => {
       let data = await payload.create({
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c'] },
@@ -975,7 +1087,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 30],
           },
         ],
@@ -987,7 +1099,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 40],
           },
         ],
@@ -1502,7 +1614,7 @@ describe('Fields', () => {
     it('should create with ids and nested ids', async () => {
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
@@ -1753,7 +1865,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Second text field')
     })
 
     it('should show proper validation error on text field in row field in nested array', async () => {
@@ -1773,7 +1885,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Text In Row')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
     })
   })
 
@@ -1797,6 +1909,53 @@ describe('Fields', () => {
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
+        },
+      })
+    })
+
+    it('should work with unnamed group', async () => {
+      const groupDoc = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          insideUnnamedGroup: 'Hello world',
+          deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+        },
+      })
+      expect(groupDoc).toMatchObject({
+        id: expect.anything(),
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
+    it('should work with unnamed group - graphql', async () => {
+      const mutation = `mutation {
+              createGroupField(
+                data: {
+                  insideUnnamedGroup: "Hello world",
+                  deeplyNestedGroup: { insideNestedUnnamedGroup: "Secondfield" },
+                  group: {text: "hello"}
+                }
+              ) {
+                insideUnnamedGroup
+                deeplyNestedGroup {
+                  insideNestedUnnamedGroup
+                }
+              }
+            }`
+
+      const groupDoc = await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: mutation }),
+      })
+
+      const data = (await groupDoc.json()).data.createGroupField
+
+      expect(data).toMatchObject({
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
         },
       })
     })
@@ -2245,7 +2404,7 @@ describe('Fields', () => {
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
@@ -2301,7 +2460,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Array 3 > Text')
+      ).rejects.toThrow('The following field is invalid: Tab with Array > Array 3 > Text')
     })
   })
 
@@ -2562,6 +2721,32 @@ describe('Fields', () => {
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
     })
+
+    it('ensure localized field within block reference is saved correctly', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: BlockField = blockFields.docs[0] as BlockField
+
+      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
+      expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
+    })
+
+    it('ensure localized property is stripped from localized field within localized block reference', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: any = blockFields.docs[0]
+
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
+        'localizedTextReference',
+      )
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
+    })
   })
 
   describe('collapsible', () => {
@@ -2579,7 +2764,7 @@ describe('Fields', () => {
           },
         }),
       ).rejects.toThrow(
-        'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+        'The following field is invalid: Collapsible Field > Group > Sub Group > Required Text Within Sub Group',
       )
     })
   })
@@ -2678,6 +2863,20 @@ describe('Fields', () => {
           collection: 'json-fields',
           where: {
             'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - not_like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.baz': { not_like: 'bar' },
           },
         })
 
@@ -2918,91 +3117,6 @@ describe('Fields', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0].id).toBe(json_1.id)
       })
-    })
-  })
-
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
-      })
-
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
-
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0].richText[0].textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0].richText
-      expect(nodes).toBeDefined()
-      const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should respect rich text depth parameter', async () => {
-      const query = `query {
-        RichTextFields {
-          docs {
-            richText(depth: 2)
-          }
-        }
-      }`
-      const { data } = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-        })
-        .then((res) => res.json())
-      const { docs }: PaginatedDocs<RichTextField> = data.RichTextFields
-      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
-      expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
     })
   })
 

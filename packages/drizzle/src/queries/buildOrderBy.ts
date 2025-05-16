@@ -15,6 +15,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   sort?: Sort
   tableName: string
@@ -29,6 +30,7 @@ export const buildOrderBy = ({
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   sort,
   tableName,
@@ -65,6 +67,7 @@ export const buildOrderBy = ({
         fields,
         joins,
         locale,
+        parentIsLocalized,
         pathSegments: sortProperty.replace(/__/g, '.').split('.'),
         selectFields,
         tableName,

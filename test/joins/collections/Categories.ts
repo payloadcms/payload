@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { ValidationError } from 'payload'
+
 import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
 
@@ -159,6 +161,40 @@ export const Categories: CollectionConfig = {
       where: {
         isFiltered: { not_equals: true },
       },
+    },
+    {
+      name: 'inTab',
+      type: 'join',
+      collection: postsSlug,
+      on: 'tab.category',
+    },
+    {
+      name: 'joinWithError',
+      type: 'join',
+      collection: postsSlug,
+      on: 'category',
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            if (data?.enableErrorOnJoin) {
+              throw new ValidationError({
+                collection: 'categories',
+                errors: [
+                  {
+                    message: 'enableErrorOnJoin is true',
+                    path: 'joinWithError',
+                  },
+                ],
+              })
+            }
+          },
+        ],
+      },
+    },
+    {
+      name: 'enableErrorOnJoin',
+      type: 'checkbox',
+      defaultValue: false,
     },
   ],
 }

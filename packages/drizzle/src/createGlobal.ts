@@ -9,7 +9,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
-  { slug, data, req }: CreateGlobalArgs,
+  { slug, data, req, returning }: CreateGlobalArgs,
 ): Promise<T> {
   const db = await getTransaction(this, req)
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -26,7 +26,12 @@ export async function createGlobal<T extends Record<string, unknown>>(
     operation: 'create',
     req,
     tableName,
+    ignoreResult: returning === false,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   result.globalType = slug
 

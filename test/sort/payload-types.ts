@@ -6,26 +6,92 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     drafts: Draft;
     'default-sort': DefaultSort;
     localized: Localized;
+    orderable: Orderable;
+    'orderable-join': OrderableJoin;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'orderable-join': {
+      orderableJoinField1: 'orderable';
+      orderableJoinField2: 'orderable';
+      nonOrderableJoinField: 'orderable';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -121,6 +187,45 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _orderable_orderableJoinField2_order?: string;
+  _orderable_orderableJoinField1_order?: string;
+  _order?: string;
+  title?: string | null;
+  orderableField?: (string | null) | OrderableJoin;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join".
+ */
+export interface OrderableJoin {
+  id: string;
+  title?: string | null;
+  orderableJoinField1?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  orderableJoinField2?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  nonOrderableJoinField?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -158,6 +263,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-join';
+        value: string | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
@@ -258,6 +371,31 @@ export interface LocalizedSelect<T extends boolean = true> {
         text?: T;
         number?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _orderable_orderableJoinField2_order?: T;
+  _orderable_orderableJoinField1_order?: T;
+  _order?: T;
+  title?: T;
+  orderableField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join_select".
+ */
+export interface OrderableJoinSelect<T extends boolean = true> {
+  title?: T;
+  orderableJoinField1?: T;
+  orderableJoinField2?: T;
+  nonOrderableJoinField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

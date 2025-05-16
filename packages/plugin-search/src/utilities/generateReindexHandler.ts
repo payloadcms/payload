@@ -9,7 +9,7 @@ import {
   killTransaction,
 } from 'payload'
 
-import type { SearchPluginConfigWithLocales } from '../types.js'
+import type { SanitizedSearchPluginConfig } from '../types.js'
 
 import { syncDocAsSearchIndex } from './syncDocAsSearchIndex.js'
 
@@ -19,19 +19,29 @@ type ValidationResult = {
 }
 
 export const generateReindexHandler =
-  (pluginConfig: SearchPluginConfigWithLocales): PayloadHandler =>
+  (pluginConfig: SanitizedSearchPluginConfig): PayloadHandler =>
   async (req) => {
     addLocalesToRequestFromData(req)
+    if (!req.json) {
+      return new Response('Req.json is undefined', { status: 400 })
+    }
     const { collections = [] } = (await req.json()) as { collections: string[] }
     const t = req.t
 
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
-    const reindexLocales = pluginConfig?.locales?.length ? pluginConfig.locales : [req.locale]
+    const reindexLocales = pluginConfig?.locales?.length
+      ? pluginConfig.locales
+      : req.locale
+        ? [req.locale]
+        : []
 
     const validatePermissions = async (): Promise<ValidationResult> => {
       const accessResults = await getAccessResults({ req })
-      const searchAccessResults = accessResults.collections[searchSlug]
+      const searchAccessResults = accessResults.collections?.[searchSlug]
+      if (!searchAccessResults) {
+        return { isValid: false, message: t('error:notAllowedToPerformAction') }
+      }
 
       const permissions = [searchAccessResults.delete, searchAccessResults.update]
       // plugin doesn't allow create by default:
@@ -114,14 +124,15 @@ export const generateReindexHandler =
         for (let i = 0; i < totalBatches; i++) {
           const { docs } = await payload.find({
             collection,
+            depth: 0,
             limit: batchSize,
             locale: localeToSync,
             page: i + 1,
             ...defaultLocalApiProps,
           })
 
-          const promises = docs.map((doc) =>
-            syncDocAsSearchIndex({
+          for (const doc of docs) {
+            await syncDocAsSearchIndex({
               collection,
               doc,
               locale: localeToSync,
@@ -129,12 +140,7 @@ export const generateReindexHandler =
               operation,
               pluginConfig,
               req,
-            }),
-          )
-
-          // Sequentially await promises to avoid transaction issues
-          for (const promise of promises) {
-            await promise
+            })
           }
         }
       }

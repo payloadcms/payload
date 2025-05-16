@@ -1,8 +1,8 @@
 import type {
   Document,
-  EditViewComponent,
+  DocumentViewServerProps,
+  Locale,
   OptionObject,
-  PayloadServerReactComponent,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
 } from 'payload'
@@ -17,7 +17,7 @@ import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
-export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function VersionView(props: DocumentViewServerProps) {
   const { i18n, initPageResult, routeSegments, searchParams } = props
 
   const {
@@ -37,9 +37,10 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
   const localeCodesFromParams = searchParams.localeCodes
     ? JSON.parse(searchParams.localeCodes as string)
     : null
+
   const comparisonVersionIDFromParams: string = searchParams.compareValue as string
 
-  const modifiedOnly: boolean = searchParams.modifiedOnly === 'true'
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
   const { localization } = config
 
@@ -88,7 +89,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }
@@ -129,7 +130,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
           status: 'published',
         })
       }
-    } catch (error) {
+    } catch (_err) {
       return notFound()
     }
   }
@@ -143,26 +144,29 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
-  const selectedLocales: OptionObject[] = []
+  let selectedLocales: OptionObject[] = []
   if (localization) {
+    let locales: Locale[] = []
     if (localeCodesFromParams) {
       for (const code of localeCodesFromParams) {
         const locale = localization.locales.find((locale) => locale.code === code)
-        if (locale) {
-          selectedLocales.push({
-            label: locale.label,
-            value: locale.code,
-          })
+        if (!locale) {
+          continue
         }
+        locales.push(locale)
       }
     } else {
-      for (const { code, label } of localization.locales) {
-        selectedLocales.push({
-          label,
-          value: code,
-        })
-      }
+      locales = localization.locales
     }
+
+    if (localization.filterAvailableLocales) {
+      locales = (await localization.filterAvailableLocales({ locales, req })) || []
+    }
+
+    selectedLocales = locales.map((locale) => ({
+      label: locale.label,
+      value: locale.code,
+    }))
   }
 
   const latestVersion =
@@ -229,6 +233,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     i18n,
     modifiedOnly,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,

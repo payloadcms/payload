@@ -108,7 +108,7 @@ export const traverseRichText = ({
             populationsByCollection[incomingData.relationTo] = []
           }
 
-          populationsByCollection[incomingData.relationTo].push({
+          populationsByCollection[incomingData.relationTo]?.push({
             id:
               incomingData[key] && typeof incomingData[key] === 'object'
                 ? incomingData[key].id

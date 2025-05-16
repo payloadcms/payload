@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
@@ -27,18 +28,18 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'countVersions',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'countVersions',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },

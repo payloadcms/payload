@@ -223,6 +223,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'movies',
+      versions: { drafts: true },
       fields: [
         {
           name: 'name',
@@ -243,9 +244,20 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
           name: 'movies',
           type: 'relationship',
           relationTo: 'movies',
+          hasMany: true,
+        },
+        {
+          name: 'directors',
+          type: 'relationship',
+          relationTo: 'directors',
           hasMany: true,
         },
       ],
@@ -451,6 +463,27 @@ export default buildConfigWithDefaults({
           on: 'item',
           collection: 'relations',
           name: 'relation',
+        },
+      ],
+    },
+    {
+      slug: 'blocks',
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'some',
+              fields: [
+                {
+                  type: 'relationship',
+                  relationTo: 'directors',
+                  name: 'director',
+                },
+              ],
+            },
+          ],
         },
       ],
     },

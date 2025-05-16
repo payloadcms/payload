@@ -15,19 +15,20 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { Pages } from './collections/Pages.js'
+import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields)
+const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
 
 let payload: Payload
 let restClient: NextRESTClient
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-function collectionPopulationRequestHandler({ endpoint }: { endpoint: string }) {
+function requestHandler({ endpoint }: { endpoint: string }) {
   return restClient.GET(`/${endpoint}`)
 }
 
@@ -169,7 +170,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
@@ -197,7 +198,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(mergedData.arrayOfRelationships).toEqual([])
@@ -216,7 +217,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(mergedData2.arrayOfRelationships).toEqual([])
@@ -242,7 +243,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
@@ -261,7 +262,7 @@ describe('Collections - Live Preview', () => {
       },
       initialData: mergedData,
       serverURL,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
@@ -289,7 +290,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1.richTextSlate).toHaveLength(1)
@@ -316,7 +317,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2.richTextSlate).toHaveLength(1)
@@ -376,7 +377,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1.richTextLexical.root.children).toHaveLength(2)
@@ -422,7 +423,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2.richTextLexical.root.children).toHaveLength(1)
@@ -445,7 +446,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -467,7 +468,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -489,7 +490,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -514,7 +515,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -544,7 +545,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2._numberOfRequests).toEqual(0)
@@ -570,7 +571,7 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1.tab.relationshipInTab).toMatchObject(testPost)
@@ -607,7 +608,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -664,7 +665,7 @@ describe('Collections - Live Preview', () => {
       initialData: merge1,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2._numberOfRequests).toEqual(1)
@@ -740,7 +741,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(2)
@@ -803,7 +804,7 @@ describe('Collections - Live Preview', () => {
       initialData: merge1,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2._numberOfRequests).toEqual(1)
@@ -869,7 +870,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(2)
@@ -936,7 +937,7 @@ describe('Collections - Live Preview', () => {
       initialData: merge1,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2._numberOfRequests).toEqual(1)
@@ -990,7 +991,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(0)
@@ -1050,7 +1051,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     // Check that the relationship on the first has been removed
@@ -1079,7 +1080,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
@@ -1125,7 +1126,7 @@ describe('Collections - Live Preview', () => {
       externallyUpdatedRelationship,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     expect(merge2._numberOfRequests).toEqual(1)
@@ -1182,7 +1183,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
       locale: 'es',
     })
 
@@ -1331,7 +1332,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     // Check that the blocks have been reordered
@@ -1364,7 +1365,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     // Check that the block has been removed
@@ -1384,7 +1385,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler,
+      requestHandler,
     })
 
     // Check that the block has been removed
@@ -1444,7 +1445,7 @@ describe('Collections - Live Preview', () => {
       initialData,
       serverURL,
       returnNumberOfRequests: true,
-      collectionPopulationRequestHandler: customRequestHandler,
+      requestHandler: customRequestHandler,
     })
 
     expect(mergedData.relationshipPolyHasMany).toMatchObject([

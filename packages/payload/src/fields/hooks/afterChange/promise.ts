@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -24,6 +25,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -31,6 +33,7 @@ type Args = {
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 // This function is responsible for the following actions, in order:
@@ -47,6 +50,7 @@ export const promise = async ({
   global,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   previousDoc,
@@ -54,6 +58,7 @@ export const promise = async ({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -70,10 +75,8 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterChange) {
-      await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.afterChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -90,13 +93,14 @@ export const promise = async ({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
+          siblingFields,
           value: siblingDoc[field.name],
         })
 
         if (hookedValue !== undefined) {
           siblingDoc[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
   }
 
@@ -119,6 +123,7 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
@@ -142,9 +147,13 @@ export const promise = async ({
         const promises = []
 
         rows.forEach((row, rowIndex) => {
-          const block = field.blocks.find(
-            (blockType) => blockType.slug === (row as JsonObject).blockType,
-          )
+          const blockTypeToMatch = (row as JsonObject).blockType
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             promises.push(
@@ -158,6 +167,7 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
@@ -188,6 +198,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -201,24 +212,47 @@ export const promise = async ({
     }
 
     case 'group': {
-      await traverseFields({
-        blockData,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        parentIndexPath: '',
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
+      if (fieldAffectsData(field)) {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: previousDoc[field.name] as JsonObject,
+          req,
+          siblingData: (siblingData?.[field.name] as JsonObject) || {},
+          siblingDoc: siblingDoc[field.name] as JsonObject,
+        })
+      } else {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...previousSiblingDoc },
+          req,
+          siblingData: siblingData || {},
+          siblingDoc: { ...siblingDoc },
+        })
+      }
 
       break
     }
@@ -228,17 +262,15 @@ export const promise = async ({
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof field?.editor === 'function') {
+      if (typeof field.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
-      const editor: RichTextAdapter = field?.editor
+      const editor: RichTextAdapter = field.editor
 
       if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.afterChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -247,6 +279,7 @@ export const promise = async ({
             indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
@@ -260,7 +293,7 @@ export const promise = async ({
           if (hookedValue !== undefined) {
             siblingDoc[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -288,6 +321,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -311,6 +345,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,

@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 import fs from 'fs'
 
-export function copyFile(source, destination) {
+export function copyFile(source: string, destination: string) {
   fs.copyFile(source, destination, (err) => {
     if (err) {
       // Handle error

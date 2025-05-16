@@ -1,4 +1,5 @@
-import { promises as fsPromises } from 'fs'
+// @ts-strict-ignore
+import fs from 'fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { v4 as uuid } from 'uuid'
@@ -7,7 +8,7 @@ async function runTask(temporaryPath: string, callback) {
   try {
     return await callback(temporaryPath)
   } finally {
-    await fsPromises.rm(temporaryPath, { force: true, maxRetries: 2, recursive: true })
+    await fs.rm(temporaryPath, { force: true, maxRetries: 2, recursive: true })
   }
 }
 
@@ -40,11 +41,11 @@ async function temporaryFile(options: Options) {
 
 async function temporaryDirectory({ prefix = '' } = {}) {
   const directory = await getPath(prefix)
-  await fsPromises.mkdir(directory)
+  await fs.mkdir(directory)
   return directory
 }
 
 async function getPath(prefix = ''): Promise<string> {
-  const temporaryDirectory = await fsPromises.realpath(os.tmpdir())
+  const temporaryDirectory = await fs.realpath(os.tmpdir())
   return path.join(temporaryDirectory, prefix + uuid())
 }

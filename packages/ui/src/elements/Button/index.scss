@@ -6,7 +6,7 @@
   }
 
   .btn--withPopup {
-    margin-block: 24px;
+    margin-block: 4px;
     .btn {
       margin: 0;
     }
@@ -68,10 +68,19 @@
       background-color: var(--bg-color);
       box-shadow: var(--box-shadow);
       border-radius: $style-radius-m;
-      border-left: 1px solid var(--theme-bg);
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
       align-items: center;
+
+      html:not([dir='RTL']) & {
+        border-left: 1px solid var(--theme-bg);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      html[dir='RTL'] & {
+        border-right: 1px solid var(--theme-bg);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
 
       &:hover,
       &:focus-visible,
@@ -236,8 +245,15 @@
     }
 
     &--withPopup .btn {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
+      html:not([dir='RTL']) & {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      html[dir='RTL'] & {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
     }
 
     &--style-icon-label,

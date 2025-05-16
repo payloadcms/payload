@@ -106,6 +106,47 @@
       text-decoration: underline line-through;
     }
 
+    &__tabNode {
+      position: relative;
+      text-decoration: none;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderline::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.15em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textStrikethrough::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before,
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before {
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      bottom: 0.05em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
     &__textSubscript {
       font-size: 0.8em;
       vertical-align: sub !important;
@@ -141,6 +182,27 @@
       color: var(--theme-success-750);
       text-decoration: none;
       border-bottom: 1px dotted;
+    }
+
+    // Renders cursor when native browser does not. See https://github.com/facebook/lexical/issues/3417
+    &__blockCursor {
+      display: block;
+      pointer-events: none;
+      position: absolute;
+    }
+    &__blockCursor:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -2px;
+      width: 20px;
+      border-top: 1px solid var(--theme-text);
+      animation: CursorBlink 1.1s steps(2, start) infinite;
+    }
+    @keyframes CursorBlink {
+      to {
+        visibility: hidden;
+      }
     }
 
     &__code {
@@ -223,6 +285,15 @@
     &__listItem {
       font-size: base(0.8);
       margin: 0 0 0.4em 40px;
+    }
+
+    &__listItem::marker {
+      // See https://github.com/facebook/lexical/pull/7325/files#diff-915a0be0588ee3ceb38aca4ae182f51291c8885e7af5f8dca2a91f8d92a95e0c
+      // These are applied by the ListItemNode
+      color: var(--listitem-marker-color);
+      background-color: var(--listitem-marker-background-color);
+      font-family: var(--listitem-marker-font-family);
+      font-size: var(--listitem-marker-font-size);
     }
 
     &__listItem[dir='rtl'] {

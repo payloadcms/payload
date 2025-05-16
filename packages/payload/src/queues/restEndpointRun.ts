@@ -7,10 +7,10 @@ const configHasJobs = (config: SanitizedConfig): boolean => {
     return false
   }
 
-  if (config.jobs.tasks.length > 0) {
+  if (config.jobs.tasks?.length > 0) {
     return true
   }
-  if (Array.isArray(config.jobs.workflows) && config.jobs.workflows.length > 0) {
+  if (config.jobs.workflows?.length > 0) {
     return true
   }
 
@@ -60,7 +60,7 @@ export const runJobsEndpoint: Endpoint = {
     let remainingJobsFromQueried = 0
     try {
       const result = await runJobs(runJobsArgs)
-      noJobsRemaining = result.noJobsRemaining
+      noJobsRemaining = !!result.noJobsRemaining
       remainingJobsFromQueried = result.remainingJobsFromQueried
     } catch (err) {
       req.payload.logger.error({

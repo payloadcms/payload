@@ -1,21 +1,12 @@
 'use client'
 
-import type { ClientField } from 'payload'
+import type { Column } from 'payload'
 
 import React from 'react'
 
 import './index.scss'
 
 const baseClass = 'table'
-
-export type Column = {
-  readonly accessor: string
-  readonly active: boolean
-  readonly CustomLabel?: React.ReactNode
-  readonly field: ClientField
-  readonly Heading: React.ReactNode
-  readonly renderedCells: React.ReactNode[]
-}
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
@@ -49,7 +40,14 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         <tbody>
           {data &&
             data.map((row, rowIndex) => (
-              <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
+              <tr
+                className={`row-${rowIndex + 1}`}
+                key={
+                  typeof row.id === 'string' || typeof row.id === 'number'
+                    ? String(row.id)
+                    : rowIndex
+                }
+              >
                 {activeColumns.map((col, colIndex) => {
                   const { accessor } = col
 

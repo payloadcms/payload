@@ -1,18 +1,16 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, ServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
+import { getSafeRedirect } from '../../utilities/getSafeRedirect.js'
 import { LoginForm } from './LoginForm/index.js'
-
-export { generateLoginMetadata } from './meta.js'
-
+import './index.scss'
 export const loginBaseClass = 'login'
 
-export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { locale, permissions, req } = initPageResult
 
   const {
@@ -24,12 +22,13 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    collections,
     routes: { admin },
   } = config
 
+  const redirectUrl = getSafeRedirect(searchParams.redirect, admin)
+
   if (user) {
-    redirect((searchParams.redirect as string) || admin)
+    redirect(redirectUrl)
   }
 
   const collectionConfig = payload?.collections?.[userSlug]?.config
@@ -76,9 +75,8 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
-
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -98,7 +96,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
     </Fragment>
   )

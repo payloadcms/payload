@@ -6,6 +6,11 @@ export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/ba
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
+export {
+  INSERT_BLOCK_COMMAND,
+  INSERT_INLINE_BLOCK_COMMAND,
+} from '../../features/blocks/client/plugin/commands.js'
+
 export { TestRecorderFeatureClient } from '../../features/debug/testRecorder/client/index.js'
 export { TreeViewFeatureClient } from '../../features/debug/treeView/client/index.js'
 export { BoldFeatureClient } from '../../features/format/bold/feature.client.js'
@@ -25,6 +30,7 @@ export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/c
 export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
 export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
+export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
 
 export { RelationshipFeatureClient } from '../../features/relationship/client/index.js'
 
@@ -38,7 +44,7 @@ export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/inde
 export { TableFeatureClient } from '../../features/experimental_table/client/index.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
-export { UploadFeatureClient } from '../../features/upload/client/feature.client.js'
+export { UploadFeatureClient } from '../../features/upload/client/index.js'
 
 export { RichTextField } from '../../field/index.js'
 export {
@@ -141,3 +147,4 @@ export { BlockCollapsible } from '../../features/blocks/client/component/compone
 export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
 export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'
 export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
+export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'

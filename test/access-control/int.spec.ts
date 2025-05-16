@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { Forbidden } from 'payload'
+import { Forbidden, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { FullyRestricted, Post } from './payload-types.js'
@@ -21,6 +21,7 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  hooksSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
@@ -58,115 +59,181 @@ describe('Access Control', () => {
     }
   })
 
-  it('should not affect hidden fields when patching data', async () => {
-    const doc = await payload.create({
-      collection: hiddenFieldsSlug,
-      data: {
-        partiallyHiddenArray: [
-          {
+  describe('Fields', () => {
+    it('should not affect hidden fields when patching data', async () => {
+      const doc = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          partiallyHiddenArray: [
+            {
+              name: 'public_name',
+              value: 'private_value',
+            },
+          ],
+          partiallyHiddenGroup: {
             name: 'public_name',
             value: 'private_value',
           },
-        ],
-        partiallyHiddenGroup: {
-          name: 'public_name',
-          value: 'private_value',
         },
-      },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Doc Title',
+        },
+      })
+
+      const updatedDoc = await payload.findByID({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        showHiddenFields: true,
+      })
+
+      expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
+      expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    await payload.update({
-      id: doc.id,
-      collection: hiddenFieldsSlug,
-      data: {
-        title: 'Doc Title',
-      },
-    })
-
-    const updatedDoc = await payload.findByID({
-      id: doc.id,
-      collection: hiddenFieldsSlug,
-      showHiddenFields: true,
-    })
-
-    expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
-    expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
-  })
-
-  it('should not affect hidden fields when patching data - update many', async () => {
-    const docsMany = await payload.create({
-      collection: hiddenFieldsSlug,
-      data: {
-        partiallyHiddenArray: [
-          {
+    it('should not affect hidden fields when patching data - update many', async () => {
+      const docsMany = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          partiallyHiddenArray: [
+            {
+              name: 'public_name',
+              value: 'private_value',
+            },
+          ],
+          partiallyHiddenGroup: {
             name: 'public_name',
             value: 'private_value',
           },
-        ],
-        partiallyHiddenGroup: {
-          name: 'public_name',
-          value: 'private_value',
         },
-      },
+      })
+
+      await payload.update({
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Doc Title',
+        },
+        where: {
+          id: { equals: docsMany.id },
+        },
+      })
+
+      const updatedMany = await payload.findByID({
+        id: docsMany.id,
+        collection: hiddenFieldsSlug,
+        showHiddenFields: true,
+      })
+
+      expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
+      expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    await payload.update({
-      collection: hiddenFieldsSlug,
-      data: {
-        title: 'Doc Title',
-      },
-      where: {
-        id: { equals: docsMany.id },
-      },
+    it('should be able to restrict access based upon siblingData', async () => {
+      const { id } = await payload.create({
+        collection: siblingDataSlug,
+        data: {
+          array: [
+            {
+              allowPublicReadability: true,
+              text: firstArrayText,
+            },
+            {
+              allowPublicReadability: false,
+              text: secondArrayText,
+            },
+          ],
+        },
+      })
+
+      const doc = await payload.findByID({
+        id,
+        collection: siblingDataSlug,
+        overrideAccess: false,
+      })
+
+      expect(doc.array?.[0].text).toBe(firstArrayText)
+      // Should respect PublicReadabilityAccess function and not be sent
+      expect(doc.array?.[1].text).toBeUndefined()
+
+      // Retrieve with default of overriding access
+      const docOverride = await payload.findByID({
+        id,
+        collection: siblingDataSlug,
+      })
+
+      expect(docOverride.array?.[0].text).toBe(firstArrayText)
+      expect(docOverride.array?.[1].text).toBe(secondArrayText)
     })
 
-    const updatedMany = await payload.findByID({
-      id: docsMany.id,
-      collection: hiddenFieldsSlug,
-      showHiddenFields: true,
+    it('should use fallback value when trying to update a field without permission', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'original',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          cannotMutateRequired: 'new',
+          canMutate: 'canMutate',
+        },
+      })
+
+      expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
-    expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
+    it('should use fallback value when required data is missing', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'original',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          canMutate: 'canMutate',
+        },
+      })
+
+      // should fallback to original data and not throw validation error
+      expect(updatedDoc.cannotMutateRequired).toBe('original')
+    })
+
+    it('should pass fallback value through to beforeChange hook when access returns false', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'cannotMutateRequired',
+          cannotMutateNotRequired: 'cannotMutateNotRequired',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          cannotMutateNotRequired: 'updated',
+        },
+      })
+
+      // should fallback to original data and not throw validation error
+      expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
+      expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
+    })
   })
-
-  it('should be able to restrict access based upon siblingData', async () => {
-    const { id } = await payload.create({
-      collection: siblingDataSlug,
-      data: {
-        array: [
-          {
-            allowPublicReadability: true,
-            text: firstArrayText,
-          },
-          {
-            allowPublicReadability: false,
-            text: secondArrayText,
-          },
-        ],
-      },
-    })
-
-    const doc = await payload.findByID({
-      id,
-      collection: siblingDataSlug,
-      overrideAccess: false,
-    })
-
-    expect(doc.array?.[0].text).toBe(firstArrayText)
-    // Should respect PublicReadabilityAccess function and not be sent
-    expect(doc.array?.[1].text).toBeUndefined()
-
-    // Retrieve with default of overriding access
-    const docOverride = await payload.findByID({
-      id,
-      collection: siblingDataSlug,
-    })
-
-    expect(docOverride.array?.[0].text).toBe(firstArrayText)
-    expect(docOverride.array?.[1].text).toBe(secondArrayText)
-  })
-
   describe('Collections', () => {
     describe('restricted collection', () => {
       it('field without read access should not show', async () => {

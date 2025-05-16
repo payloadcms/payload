@@ -2,7 +2,7 @@ import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToForm
 import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { UploadFeatureProps } from './feature.server.js'
+import type { UploadFeatureProps } from './index.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
 export const uploadValidation = (
@@ -21,8 +21,8 @@ export const uploadValidation = (
       },
     },
   }) => {
-    const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
-    // @ts-expect-error
+    const idType = payload.collections[node.relationTo]?.customIDType || payload.db.defaultIDType
+    // @ts-expect-error - Fix in Payload v4
     const nodeID = node?.value?.id || node?.value // for backwards-compatibility
 
     if (!isValidID(nodeID, idType)) {
@@ -46,7 +46,6 @@ export const uploadValidation = (
     const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
-
       data: node?.fields ?? {},
       documentData: data,
       fields: collection.fields,
@@ -62,8 +61,9 @@ export const uploadValidation = (
 
     const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths?.length) {
-        for (const errorPath of result[fieldKey].errorPaths) {
+      const fieldState = result[fieldKey]
+      if (fieldState?.errorPaths?.length) {
+        for (const errorPath of fieldState.errorPaths) {
           errorPathsSet.add(errorPath)
         }
       }

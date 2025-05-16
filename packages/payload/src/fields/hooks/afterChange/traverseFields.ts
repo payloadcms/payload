@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -19,6 +20,10 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -26,6 +31,7 @@ type Args = {
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const traverseFields = async ({
@@ -38,6 +44,7 @@ export const traverseFields = async ({
   global,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   previousDoc,
@@ -45,6 +52,7 @@ export const traverseFields = async ({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -61,6 +69,7 @@ export const traverseFields = async ({
         global,
         operation,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         previousDoc,
@@ -68,6 +77,7 @@ export const traverseFields = async ({
         req,
         siblingData,
         siblingDoc,
+        siblingFields,
       }),
     )
   })

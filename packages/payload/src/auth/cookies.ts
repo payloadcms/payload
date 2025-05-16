@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from './../collections/config/types.js'
 
 type CookieOptions = {

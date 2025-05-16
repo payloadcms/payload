@@ -54,6 +54,13 @@ export interface PayloadCloudEmailOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * Enable additional debug logging
+   *
+   * @default false
+   */
+  debug?: boolean
+
   /** Payload Cloud Email
    * @default true
    */

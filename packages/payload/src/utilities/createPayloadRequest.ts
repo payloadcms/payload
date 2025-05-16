@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
@@ -10,7 +11,6 @@ import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
-import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
@@ -65,18 +65,13 @@ export const createPayloadRequest = async ({
     : {}
 
   if (localization) {
-    fallbackLocale = sanitizeFallbackLocale({
-      fallbackLocale,
-      locale,
-      localization,
-    })
-
     const locales = sanitizeLocales({
       fallbackLocale,
       locale,
       localization,
     })
 
+    fallbackLocale = locales.fallbackLocale
     locale = locales.locale
   }
 

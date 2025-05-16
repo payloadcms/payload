@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'

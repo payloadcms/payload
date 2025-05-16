@@ -10,10 +10,10 @@ export default async ({ params: paramsPromise }: { params: Promise<{ slug: strin
       <p>When you visit a tenant by domain, the domain is used to determine the tenant.</p>
       <p>
         For example, visiting{' '}
-        <a href="http://gold.test:3000/tenant-domains/login">
-          http://gold.test:3000/tenant-domains/login
+        <a href="http://gold.localhost:3000/tenant-domains/login">
+          http://gold.localhost:3000/tenant-domains/login
         </a>{' '}
-        will show the tenant with the domain "gold.test".
+        will show the tenant with the domain "gold.localhost".
       </p>
 
       <h2>Slugs</h2>

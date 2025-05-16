@@ -1,5 +1,5 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -14,12 +14,16 @@ import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
+export type QueryContext = { sort: Sort }
+
 type Args = {
   adapter: DrizzleAdapter
   aliasTable?: Table
+  context: QueryContext
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
-  locale: string
+  locale?: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -29,9 +33,11 @@ type Args = {
 export function parseParams({
   adapter,
   aliasTable,
+  context,
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -55,9 +61,11 @@ export function parseParams({
           const builtConditions = buildAndOrConditions({
             adapter,
             aliasTable,
+            context,
             fields,
             joins,
             locale,
+            parentIsLocalized,
             selectFields,
             selectLocale,
             tableName,
@@ -92,6 +100,7 @@ export function parseParams({
                   fields,
                   joins,
                   locale,
+                  parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   selectLocale,
@@ -157,6 +166,7 @@ export function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                     not_in: { operator: 'not in', wildcard: '' },
+                    not_like: { operator: 'not like', wildcard: '%' },
                   }
 
                   let formattedValue = val
@@ -171,11 +181,15 @@ export function parseParams({
                     formattedValue = ''
                   }
 
-                  constraints.push(
-                    sql.raw(
-                      `${table[columnName].name}${jsonQuery} ${operatorKeys[operator].operator} ${formattedValue}`,
-                    ),
-                  )
+                  let jsonQuerySelector = `${table[columnName].name}${jsonQuery}`
+
+                  if (adapter.name === 'sqlite' && operator === 'not_like') {
+                    jsonQuerySelector = `COALESCE(${table[columnName].name}${jsonQuery}, '')`
+                  }
+
+                  const rawSQLQuery = `${jsonQuerySelector} ${operatorKeys[operator].operator} ${formattedValue}`
+
+                  constraints.push(sql.raw(rawSQLQuery))
 
                   break
                 }
@@ -333,6 +347,7 @@ export function parseParams({
                         )
                       }
                       if (geoConstraints.length) {
+                        context.sort = relationOrPath
                         constraints.push(and(...geoConstraints))
                       }
                       break

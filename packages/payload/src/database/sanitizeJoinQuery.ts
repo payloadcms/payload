@@ -1,9 +1,10 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+// @ts-strict-ignore
+import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
+import type { FlattenedField } from '../fields/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
-import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 
@@ -12,6 +13,71 @@ type Args = {
   joins?: JoinQuery
   overrideAccess: boolean
   req: PayloadRequest
+}
+
+const sanitizeJoinFieldQuery = async ({
+  collectionSlug,
+  errors,
+  join,
+  joinsQuery,
+  overrideAccess,
+  promises,
+  req,
+}: {
+  collectionSlug: string
+  errors: { path: string }[]
+  join: SanitizedJoin
+  joinsQuery: JoinQuery
+  overrideAccess: boolean
+  promises: Promise<void>[]
+  req: PayloadRequest
+}) => {
+  const { joinPath } = join
+
+  if (joinsQuery[joinPath] === false) {
+    return
+  }
+
+  const joinCollectionConfig = req.payload.collections[collectionSlug].config
+
+  const accessResult = !overrideAccess
+    ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
+    : true
+
+  if (accessResult === false) {
+    joinsQuery[joinPath] = false
+    return
+  }
+
+  if (!joinsQuery[joinPath]) {
+    joinsQuery[joinPath] = {}
+  }
+
+  const joinQuery = joinsQuery[joinPath]
+
+  if (!joinQuery.where) {
+    joinQuery.where = {}
+  }
+
+  if (join.field.where) {
+    joinQuery.where = combineQueries(joinQuery.where, join.field.where)
+  }
+
+  promises.push(
+    validateQueryPaths({
+      collectionConfig: joinCollectionConfig,
+      errors,
+      overrideAccess,
+      polymorphicJoin: Array.isArray(join.field.collection),
+      req,
+      // incoming where input, but we shouldn't validate generated from the access control.
+      where: joinQuery.where,
+    }),
+  )
+
+  if (typeof accessResult === 'object') {
+    joinQuery.where = combineQueries(joinQuery.where, accessResult)
+  }
 }
 
 /**
@@ -37,50 +103,30 @@ export const sanitizeJoinQuery = async ({
   const promises: Promise<void>[] = []
 
   for (const collectionSlug in collectionConfig.joins) {
-    for (const { field, joinPath } of collectionConfig.joins[collectionSlug]) {
-      if (joinsQuery[joinPath] === false) {
-        continue
-      }
+    for (const join of collectionConfig.joins[collectionSlug]) {
+      await sanitizeJoinFieldQuery({
+        collectionSlug,
+        errors,
+        join,
+        joinsQuery,
+        overrideAccess,
+        promises,
+        req,
+      })
+    }
+  }
 
-      const joinCollectionConfig = req.payload.collections[collectionSlug].config
-
-      const accessResult = !overrideAccess
-        ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
-        : true
-
-      if (accessResult === false) {
-        joinsQuery[joinPath] = false
-        continue
-      }
-
-      if (!joinsQuery[joinPath]) {
-        joinsQuery[joinPath] = {}
-      }
-
-      const joinQuery = joinsQuery[joinPath]
-
-      if (!joinQuery.where) {
-        joinQuery.where = {}
-      }
-
-      if (field.where) {
-        joinQuery.where = combineQueries(joinQuery.where, field.where)
-      }
-
-      promises.push(
-        validateQueryPaths({
-          collectionConfig: joinCollectionConfig,
-          errors,
-          overrideAccess,
-          req,
-          // incoming where input, but we shouldn't validate generated from the access control.
-          where: joinQuery.where,
-        }),
-      )
-
-      if (typeof accessResult === 'object') {
-        joinQuery.where = combineQueries(joinQuery.where, accessResult)
-      }
+  for (const join of collectionConfig.polymorphicJoins) {
+    for (const collectionSlug of join.field.collection) {
+      await sanitizeJoinFieldQuery({
+        collectionSlug,
+        errors,
+        join,
+        joinsQuery,
+        overrideAccess,
+        promises,
+        req,
+      })
     }
   }
 

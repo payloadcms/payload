@@ -8,11 +8,11 @@ keywords: query, documents, pagination, documentation, Content Management System
 
 Documents in Payload can be easily sorted by a specific [Field](../fields/overview). When querying Documents, you can pass the name of any top-level field, and the response will sort the Documents by that field in _ascending_ order. If prefixed with a minus symbol ("-"), they will be sorted in _descending_ order. In Local API multiple fields can be specified by using an array of strings. In REST API multiple fields can be specified by separating fields with comma. The minus symbol can be in front of individual fields.
 
-Because sorting is handled by the database, the field cannot be a [Virtual Field](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges). It must be stored in the database to be searchable.
+Because sorting is handled by the database, the field cannot be a [Virtual Field](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) unless it's [linked with a relationship field](/docs/fields/relationship#linking-virtual-fields-with-relationships). It must be stored in the database to be searchable.
 
 <Banner type="success">
-  **Tip:**
-  For performance reasons, it is recommended to enable `index: true` for the fields that will be sorted upon. [More details](../fields/overview).
+  **Tip:** For performance reasons, it is recommended to enable `index: true`
+  for the fields that will be sorted upon. [More details](../fields/overview).
 </Banner>
 
 ## Local API

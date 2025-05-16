@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CheckboxField, Field } from '../fields/config/types.js'
 
 export const statuses = [

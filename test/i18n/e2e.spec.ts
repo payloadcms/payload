@@ -49,7 +49,6 @@ describe('i18n', () => {
 
   test('ensure i18n labels and useTranslation hooks display correct translation', async () => {
     await page.goto(serverURL + '/admin')
-    await page.waitForURL(serverURL + '/admin')
 
     await expect(
       page.locator('.componentWithDefaultI18n .componentWithDefaultI18nValidT'),
@@ -82,5 +81,28 @@ describe('i18n', () => {
     await expect(
       page.locator('.componentWithCustomI18n .componentWithCustomI18nCustomValidI18nT'),
     ).toHaveText('My custom translation')
+  })
+
+  test('ensure translations update correctly when switching language', async () => {
+    await page.goto(serverURL + '/admin/account')
+
+    await page.locator('div.rs__control').click()
+    await page.locator('div.rs__option').filter({ hasText: 'English' }).click()
+    await expect(page.locator('div.payload-settings h3')).toHaveText('Payload Settings')
+
+    await page.goto(serverURL + '/admin/collections/collection1/create')
+    await expect(page.locator('label[for="field-fieldDefaultI18nValid"]')).toHaveText(
+      'Add {{label}}',
+    )
+
+    await page.goto(serverURL + '/admin/account')
+    await page.locator('div.rs__control').click()
+    await page.locator('div.rs__option').filter({ hasText: 'Español' }).click()
+    await expect(page.locator('div.payload-settings h3')).toHaveText('Configuración de la carga')
+
+    await page.goto(serverURL + '/admin/collections/collection1/create')
+    await expect(page.locator('label[for="field-fieldDefaultI18nValid"]')).toHaveText(
+      'Añadir {{label}}',
+    )
   })
 })

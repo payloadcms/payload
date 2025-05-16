@@ -46,7 +46,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
@@ -58,7 +58,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, moveFieldRow, removeFieldRow, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -69,7 +69,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -110,15 +110,17 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     errorPaths,
-    rows: rowsData = [],
+    path,
+    rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -152,30 +154,32 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
-      setModified(true)
+      removeFieldRow({ path, rowIndex })
     },
-    [dispatchFields, path, setModified],
+    [removeFieldRow, path],
   )
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
-      setModified(true)
+      moveFieldRow({
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
     },
-    [dispatchFields, path, setModified],
+    [path, moveFieldRow],
   )
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
       const { collapsedIDs, updatedRows } = toggleAllRows({
         collapsed,
-        rows: rowsData,
+        rows,
       })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
     },
-    [dispatchFields, path, rowsData, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
@@ -183,22 +187,22 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       const { collapsedIDs, updatedRows } = extractRowsAndCollapsedIDs({
         collapsed,
         rowID,
-        rows: rowsData,
+        rows,
       })
 
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
       setDocFieldPreferences(path, { collapsed: collapsedIDs })
     },
-    [dispatchFields, path, rowsData, setDocFieldPreferences],
+    [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
-  const hasMaxRows = maxRows && rowsData.length >= maxRows
+  const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rowsData.length === 0
-  const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
+  const showRequired = (readOnly || disabled) && rows.length === 0
+  const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
 
   return (
     <div
@@ -239,7 +243,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rowsData?.length > 0 && (
+          {rows?.length > 0 && (
             <ul className={`${baseClass}__header-actions`}>
               <li>
                 <button
@@ -269,13 +273,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {BeforeInput}
-      {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
+      {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
-          ids={rowsData.map((row) => row.id)}
+          ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {rowsData.map((rowData, i) => {
+          {rows.map((rowData, i) => {
             const { id: rowID, isLoading } = rowData
 
             const rowPath = `${path}.${i}`
@@ -285,12 +289,16 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
-                    CustomRowLabel={RowLabels?.[i]}
+                    CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
@@ -303,10 +311,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     parentPath={path}
                     path={rowPath}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
                     row={rowData}
-                    rowCount={rowsData?.length}
+                    rowCount={rows?.length}
                     rowIndex={i}
                     schemaPath={schemaPath}
                     setCollapse={setCollapse}
@@ -336,11 +344,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          disabled={readOnly}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"

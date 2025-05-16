@@ -8,8 +8,9 @@ import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { textToLexicalJSON } from '../fields/collections/LexicalLocalized/textToLexicalJSON.js'
+import { textToLexicalJSON } from '../lexical/collections/LexicalLocalized/textToLexicalJSON.js'
 import { Disabled } from './collections/Disabled/index.js'
+import { Hooks } from './collections/hooks/index.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
@@ -22,14 +23,13 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   nonAdminEmail,
-  nonAdminUserEmail,
-  nonAdminUserSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
+  restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
@@ -325,6 +325,35 @@ export default buildConfigWithDefaults(
         versions: true,
       },
       {
+        slug: restrictedVersionsAdminPanelSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+            return false
+          },
+          readVersions: () => {
+            return {
+              'version.hidden': {
+                not_equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
+          },
+        ],
+        versions: true,
+      },
+      {
         slug: siblingDataSlug,
         access: openAccess,
         fields: [
@@ -539,6 +568,7 @@ export default buildConfigWithDefaults(
       RichText,
       Regression1,
       Regression2,
+      Hooks,
     ],
     globals: [
       {

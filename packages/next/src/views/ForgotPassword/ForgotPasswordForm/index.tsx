@@ -94,6 +94,7 @@ export const ForgotPasswordForm: React.FC = () => {
               blockData: {},
               data: {},
               event: 'onChange',
+              path: ['username'],
               preferences: { fields: {} },
               req: {
                 payload: {
@@ -124,6 +125,7 @@ export const ForgotPasswordForm: React.FC = () => {
               blockData: {},
               data: {},
               event: 'onChange',
+              path: ['email'],
               preferences: { fields: {} },
               req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,

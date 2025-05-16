@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import path from 'path'
 
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'

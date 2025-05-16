@@ -18,17 +18,33 @@ export { useIntersect } from '../../hooks/useIntersect.js'
 export { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
+export { useEffectEvent } from '../../hooks/useEffectEvent.js'
+
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+export { SortHeader } from '../../elements/SortHeader/index.js'
+export { SortRow } from '../../elements/SortRow/index.js'
+export { OrderableTable } from '../../elements/Table/OrderableTable.js'
+
+// query preset elements
+export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
+export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
+export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
+export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
+export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
+
 // elements
+export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
+export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
+export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-export { TableColumnsProvider, useTableColumns } from '../../elements/TableColumns/index.js'
+export { TableColumnsProvider, useTableColumns } from '../../providers/TableColumns/index.js'
 export {
   RenderDefaultCell,
   useCellProps,
-} from '../../elements/TableColumns/RenderDefaultCell/index.js'
+} from '../../providers/TableColumns/RenderDefaultCell/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -111,7 +127,15 @@ export {
   RelationshipProvider,
   useListRelationships,
 } from '../../elements/Table/RelationshipProvider/index.js'
-export { type Column, Table } from '../../elements/Table/index.js'
+export { Table } from '../../elements/Table/index.js'
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import { Column } from 'payload'` instead.
+   */
+  Column,
+} from 'payload'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -125,6 +149,7 @@ export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
 export { PreviewButton } from '../../elements/PreviewButton/index.js'
 export { RelationshipTable } from '../../elements/RelationshipTable/index.js'
+export { TimezonePicker } from '../../elements/TimezonePicker/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
@@ -178,6 +203,7 @@ export {
   useAllFormFields,
   useDocumentForm,
   useForm,
+  useFormBackgroundProcessing,
   useFormFields,
   useFormInitializing,
   useFormModified,
@@ -243,6 +269,11 @@ export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
+export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
+export {
+  RouteTransitionProvider,
+  useRouteTransition,
+} from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -271,6 +302,8 @@ export {
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
 export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
+export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
+export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
@@ -284,20 +317,52 @@ export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
-export {
-  DefaultListView,
-  type ListViewClientProps,
-  type ListViewSlots,
-} from '../../views/List/index.js'
+export { DefaultListView } from '../../views/List/index.js'
 
-export type { ListComponentClientProps, ListComponentServerProps } from '../../views/List/types.js'
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import type { ListViewSlots } from 'payload'` instead.
+   */
+  ListViewSlots,
+} from 'payload'
 
-/*
-  @deprecated
-  This export will be removed in the next major version.
-  Use `import { ListPreferences } from 'payload'` instead.
-*/
-export type { ListPreferences } from 'payload'
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import type { ListViewClientProps } from 'payload'` instead.
+   */
+  ListViewClientProps,
+} from 'payload'
+
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import type { ListViewClientProps } from 'payload'` instead.
+   */
+  ListViewClientProps as ListComponentClientProps,
+} from 'payload'
+
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import type { ListViewServerProps } from 'payload'` instead.
+   */
+  ListViewServerProps as ListComponentServerProps,
+} from 'payload'
+
+export type {
+  /**
+   * @deprecated
+   * This export will be removed in the next major version.
+   * Use `import type { ListPreferences } from 'payload'` instead.
+   */
+  ListPreferences,
+} from 'payload'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
@@ -306,3 +371,4 @@ export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'

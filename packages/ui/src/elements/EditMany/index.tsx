@@ -1,15 +1,18 @@
 'use client'
-import type { ClientCollectionConfig, FieldWithPathClient } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
+
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
+import './index.scss'
 
 export const baseClass = 'edit-many'
 
@@ -23,38 +26,41 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   } = props
 
   const { permissions } = useAuth()
+  const { openModal } = useModal()
 
   const { selectAll } = useSelection()
   const { t } = useTranslation()
-  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
+
+  const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${slug}`
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  if (selectAll === SelectAllStatus.None || !collectionPermissions?.update) {
     return null
   }
 
   return (
     <div className={baseClass}>
-      <DrawerToggler
+      <button
         aria-label={t('general:edit')}
         className={`${baseClass}__toggle`}
         onClick={() => {
-          setSelected([])
+          openModal(drawerSlug)
+          setSelectedFields([])
         }}
-        slug={drawerSlug}
+        type="button"
       >
         {t('general:edit')}
-      </DrawerToggler>
+      </button>
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <EditManyDrawerContent
             collection={props.collection}
             drawerSlug={drawerSlug}
-            selected={selected}
+            selectedFields={selectedFields}
+            setSelectedFields={setSelectedFields}
           />
         </Drawer>
       </EditDepthProvider>

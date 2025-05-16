@@ -6,15 +6,73 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
+    'localized-drafts': LocalizedDraft;
+    'localized-date-fields': LocalizedDateField;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -39,6 +97,8 @@ export interface Config {
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
+    'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
+    'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -68,7 +128,7 @@ export interface Config {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
-  locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };
@@ -263,10 +323,34 @@ export interface NestedFieldTable {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts".
+ */
+export interface LocalizedDraft {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields".
+ */
+export interface LocalizedDateField {
+  id: string;
+  localizedDate?: string | null;
+  date?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  name?: string | null;
   relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
@@ -640,6 +724,14 @@ export interface PayloadLockedDocument {
         value: string | NestedFieldTable;
       } | null)
     | ({
+        relationTo: 'localized-drafts';
+        value: string | LocalizedDraft;
+      } | null)
+    | ({
+        relationTo: 'localized-date-fields';
+        value: string | LocalizedDateField;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -870,9 +962,31 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts_select".
+ */
+export interface LocalizedDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields_select".
+ */
+export interface LocalizedDateFieldsSelect<T extends boolean = true> {
+  localizedDate?: T;
+  date?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   relation?: T;
   updatedAt?: T;
   createdAt?: T;
