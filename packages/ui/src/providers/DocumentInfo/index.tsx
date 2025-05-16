@@ -276,17 +276,21 @@ const DocumentInfo: React.FC<
     [],
   )
 
+  /**
+   * @todo: Remove this in v4
+   * Users should use the `DocumentTitleContext` instead.
+   */
   useEffect(() => {
-    // setDocumentTitle(
-    //   formatDocTitle({
-    //     collectionConfig,
-    //     data: { ...savedDocumentData, id },
-    //     dateFormat,
-    //     fallback: id?.toString(),
-    //     globalConfig,
-    //     i18n,
-    //   }),
-    // )
+    setDocumentTitle(
+      formatDocTitle({
+        collectionConfig,
+        data: { ...savedDocumentData, id },
+        dateFormat,
+        fallback: id?.toString(),
+        globalConfig,
+        i18n,
+      }),
+    )
   }, [collectionConfig, globalConfig, savedDocumentData, dateFormat, i18n, id])
 
   // clean on unmount

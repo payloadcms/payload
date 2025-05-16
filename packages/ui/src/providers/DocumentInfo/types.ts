@@ -67,6 +67,7 @@ export type DocumentInfoContext = {
    * This is for performance reasons. Use the `DocumentTitleContext` instead.
    * @example
    * ```tsx
+   * import { useDocumentTitle } from '@payloadcms/ui'
    * const { setDocumentTitle }  = useDocumentTitle()
    * ```
    */
@@ -81,6 +82,7 @@ export type DocumentInfoContext = {
    * This is for performance reasons. Use the `DocumentTitleContext` instead.
    * @example
    * ```tsx
+   * import { useDocumentTitle } from '@payloadcms/ui'
    * const { title }  = useDocumentTitle()
    * ```
    */
