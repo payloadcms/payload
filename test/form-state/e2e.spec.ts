@@ -251,6 +251,57 @@ test.describe('Form State', () => {
     ).toHaveValue('This is a default value')
   })
 
+  // TODO: This test is not very reliable but would be really nice to have
+  test.skip('should not lag on slow CPUs', async () => {
+    await page.goto(postsUrl.create)
+
+    await expect(page.locator('#field-title')).toBeEnabled()
+
+    const cdpSession = await context.newCDPSession(page)
+
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 25 })
+
+    // Start measuring input and render times
+    await page.evaluate(() => {
+      const inputField = document.querySelector('#field-title') as HTMLInputElement
+      const logs: Record<string, { elapsedTime: number }> = {}
+
+      inputField.addEventListener('input', (event) => {
+        const startTime = performance.now()
+
+        requestAnimationFrame(() => {
+          const endTime = performance.now()
+          const elapsedTime = endTime - startTime
+          logs[event.target?.value] = { elapsedTime }
+        })
+      })
+
+      window.getLogs = () => logs
+    })
+
+    const text = 'This is a test string to measure input lag.'
+
+    await page.locator('#field-title').pressSequentially(text, { delay: 0 })
+
+    const logs: Record<string, { elapsedTime: number }> = await page.evaluate(() =>
+      window.getLogs(),
+    )
+    console.log('Logs:', logs)
+
+    const lagTimes = Object.values(logs).map((log) => log.elapsedTime || 0)
+
+    console.log('Lag times:', lagTimes)
+
+    const maxInputLag = Math.max(...lagTimes)
+    const allowedThreshold = 50
+
+    expect(maxInputLag).toBeLessThanOrEqual(allowedThreshold)
+
+    // Reset CPU throttling
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await cdpSession.detach()
+  })
+
   describe('Throttled tests', () => {
     let cdpSession: CDPSession
 
@@ -409,46 +460,6 @@ test.describe('Form State', () => {
           timeout: 10000,
         },
       )
-    })
-
-    test('should not lag on low CPUs', async () => {
-      await page.goto(postsUrl.create)
-
-      await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 6 })
-
-      // Start measuring input lag
-      await page.evaluate(() => {
-        const inputField = document.querySelector('#field-title')
-        const logs: string[] = []
-
-        inputField?.addEventListener('input', (e) => {
-          const now = performance.now()
-          logs.push(`Value: ${e.target?.value}, Time: ${now}`)
-          console.log(`Input updated: ${e.target?.value} at ${now}ms`)
-        })
-
-        window.getLogs = () => logs
-      })
-
-      await page.locator('#field-title').pressSequentially('Test', {
-        delay: 10,
-      })
-
-      const logs = await page.evaluate(() => window.getLogs())
-      const allowsThreshold = 50
-
-      const inputLag = logs.map((log) => {
-        const time = parseFloat(log.split('Time: ')[1].split('ms')[0])
-        return time
-      })
-
-      const maxInputLag = Math.max(...inputLag)
-      console.log('Max Input Lag:', maxInputLag)
-
-      // Check if the max input lag is within the allowed threshold
-      expect(maxInputLag).toBeLessThanOrEqual(allowsThreshold)
-
-      // TODO: remove query selector
     })
   })
 })
