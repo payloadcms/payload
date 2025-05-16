@@ -1,11 +1,10 @@
 import type { Page } from '@playwright/test'
-import type { User as PayloadUser } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post, User } from '../../payload-types.js'
+import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -1103,6 +1102,58 @@ describe('List View', () => {
       await expect
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .toContain('columns=%5B%22id%22%2C%22title%22%5D')
+    })
+
+    test('should test setActiveColumns behavior preserves column order', async () => {
+      await page.goto(postsUrl.list)
+
+      // Get the initial column order and active state
+      const initialColumnOrder = await page.locator('table > thead > tr > th').allTextContents()
+
+      // First toggle multiple columns to different states
+      // Toggle ID column off
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+      // Toggle Title column off
+      await toggleColumn(page, {
+        columnLabel: 'Tab 1 > Title',
+        targetState: 'off',
+        columnName: 'title',
+      })
+      // Ensure Number column is on
+      await toggleColumn(page, { columnLabel: 'Number', targetState: 'on', columnName: 'number' })
+
+      // Verify ID column is now hidden
+      await expect(page.locator('#heading-id')).toBeHidden()
+      // Verify Title column is now hidden
+      await expect(page.locator('#heading-title')).toBeHidden()
+      // Verify Number column is visible
+      await expect(page.locator('#heading-number')).toBeVisible()
+
+      // Use the SetActiveColumns button to ONLY activate the ID column
+      // This should leave Number column active and Title column inactive
+      await page.locator('#set-active-columns-button').click()
+
+      // Wait for the ID column to reappear (since we activated it)
+      await expect(page.locator('#heading-id')).toBeVisible()
+
+      // Title should still be inactive (hidden) since it wasn't in the setActiveColumns call
+      await expect(page.locator('#heading-title')).toBeHidden()
+
+      // Number should still be active (visible) since it wasn't mentioned in the setActiveColumns call
+      await expect(page.locator('#heading-number')).toBeVisible()
+
+      // Get the new column order after using setActiveColumns
+      const newColumnOrder = await page.locator('table > thead > tr > th').allTextContents()
+
+      // Verify the column order remains the same
+      // (the number of columns might differ but the common columns should be in the same order)
+      const commonColumns = initialColumnOrder.filter((col) => newColumnOrder.includes(col))
+      const newOrderFiltered = newColumnOrder.filter((col) => initialColumnOrder.includes(col))
+
+      // Check if the order of common columns matches
+      for (let i = 0; i < commonColumns.length; i++) {
+        expect(commonColumns[i]).toEqual(newOrderFiltered[i])
+      }
     })
 
     test('should reset default columns', async () => {
