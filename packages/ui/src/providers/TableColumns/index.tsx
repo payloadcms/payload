@@ -71,19 +71,14 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const setActiveColumns = useCallback(
     async (columns: string[]) => {
-      // Make a copy of the current columns to preserve order
-      const newColumnState = [...currentQuery.columns]
+      const newColumnState = currentQuery.columns
 
       columns.forEach((colName) => {
-        // Find the column in the current state, whether it's active or inactive
-        const colIndex = newColumnState.findIndex((c) => {
-          const normalizedName = c.startsWith('-') ? c.slice(1) : c
-          return normalizedName === colName
-        })
+        const colIndex = newColumnState.findIndex((c) => colName === c)
 
-        // If found and it's currently inactive, make it active
-        if (colIndex !== -1 && newColumnState[colIndex].startsWith('-')) {
-          newColumnState[colIndex] = colName
+        // ensure the name does not begin with a `-` which denotes an inactive column
+        if (colIndex !== undefined && newColumnState[colIndex][0] === '-') {
+          newColumnState[colIndex] = colName.slice(1)
         }
       })
 
