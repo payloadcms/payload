@@ -19,7 +19,7 @@ export const useDocumentTitle = (): IDocumentTitleContext => use(DocumentTitleCo
 export const DocumentTitleProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const { id, docConfig, initialData } = useDocumentInfo()
+  const { id, collectionSlug, docConfig, globalSlug, initialData } = useDocumentInfo()
 
   const {
     config: {
@@ -31,11 +31,11 @@ export const DocumentTitleProvider: React.FC<{
 
   const [title, setDocumentTitle] = useState(() =>
     formatDocTitle({
-      collectionConfig: docConfig as ClientCollectionConfig,
+      collectionConfig: collectionSlug ? (docConfig as ClientCollectionConfig) : undefined,
       data: { ...(initialData || {}), id },
       dateFormat,
       fallback: id?.toString(),
-      globalConfig: docConfig as ClientGlobalConfig,
+      globalConfig: globalSlug ? (docConfig as ClientGlobalConfig) : undefined,
       i18n,
     }),
   )

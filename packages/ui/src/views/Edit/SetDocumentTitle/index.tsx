@@ -18,7 +18,7 @@ export const SetDocumentTitle: React.FC<{
 
   const useAsTitle = collectionConfig?.admin?.useAsTitle
 
-  const field = useFormFields(([fields]) => useAsTitle && fields && fields?.[useAsTitle])
+  const field = useFormFields(([fields]) => (useAsTitle && fields && fields?.[useAsTitle]) || null)
 
   const hasInitialized = useRef(false)
 
