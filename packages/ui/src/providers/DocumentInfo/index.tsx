@@ -8,15 +8,13 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
+import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
-import { initializeDocumentTitle, setDocumentTitle } from './title.js'
 import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
-
-export { useDocumentTitle } from './title.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -77,21 +75,20 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const initialTitle = useMemo(
-    () =>
-      formatDocTitle({
-        collectionConfig,
-        data: { ...(initialData || {}), id },
-        dateFormat,
-        fallback: id?.toString(),
-        globalConfig,
-        i18n,
-      }),
-    [collectionConfig, initialData, id, dateFormat, globalConfig, i18n],
+  /**
+   * @deprecated This state will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   */
+  const [title, setDocumentTitle] = useState(() =>
+    formatDocTitle({
+      collectionConfig,
+      data: { ...(initialData || {}), id },
+      dateFormat,
+      fallback: id?.toString(),
+      globalConfig,
+      i18n,
+    }),
   )
-
-  // Initialize the store with the computed title
-  initializeDocumentTitle(initialTitle)
 
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
@@ -280,16 +277,16 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
-    setDocumentTitle(
-      formatDocTitle({
-        collectionConfig,
-        data: { ...savedDocumentData, id },
-        dateFormat,
-        fallback: id?.toString(),
-        globalConfig,
-        i18n,
-      }),
-    )
+    // setDocumentTitle(
+    //   formatDocTitle({
+    //     collectionConfig,
+    //     data: { ...savedDocumentData, id },
+    //     dateFormat,
+    //     fallback: id?.toString(),
+    //     globalConfig,
+    //     i18n,
+    //   }),
+    // )
   }, [collectionConfig, globalConfig, savedDocumentData, dateFormat, i18n, id])
 
   // clean on unmount
@@ -350,7 +347,7 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: initialTitle,
+    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
@@ -359,10 +356,14 @@ const DocumentInfo: React.FC<
     versionCount,
   }
 
-  return <Context value={value}>{children}</Context>
+  return (
+    <Context value={value}>
+      <DocumentTitleProvider>{children}</DocumentTitleProvider>
+    </Context>
+  )
 }
 
-export const pnppnp: React.FC<
+export const DocumentInfoProvider: React.FC<
   {
     readonly children: React.ReactNode
   } & DocumentInfoProps

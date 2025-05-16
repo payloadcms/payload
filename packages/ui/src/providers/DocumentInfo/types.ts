@@ -61,7 +61,16 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
-  setDocumentTitle: (title: string) => void
+  /**
+   *
+   * @deprecated This property is deprecated and will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   * @example
+   * ```tsx
+   * const { setDocumentTitle }  = useDocumentTitle()
+   * ```
+   */
+  setDocumentTitle: React.Dispatch<React.SetStateAction<string>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
@@ -69,7 +78,7 @@ export type DocumentInfoContext = {
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   /**
    * @deprecated This property is deprecated and will be removed in v4.
-   * Use the `DocumentTitleContext` instead.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
    * @example
    * ```tsx
    * const { title }  = useDocumentTitle()

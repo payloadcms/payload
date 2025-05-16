@@ -1,7 +1,8 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { useDocumentInfo, useDocumentTitle } from '../../providers/DocumentInfo/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import './index.scss'
 
