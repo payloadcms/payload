@@ -2014,6 +2014,26 @@ describe('database', () => {
       expect(doc.postTitle).toBe('my-title-10')
     })
 
+    it('should respect hidden: true for virtual fields with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitleHidden).toBeUndefined()
+
+      const doc_show = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        showHiddenFields: true,
+      })
+      expect(doc_show.postTitleHidden).toBe('my-title-3')
+    })
+
     it('should allow virtual field as reference to ID', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
@@ -2452,6 +2472,17 @@ describe('database', () => {
     expect(res.docs[0].id).toBe(customID.id)
   })
 
+  it('deep nested arrays', async () => {
+    await payload.updateGlobal({
+      slug: 'header',
+      data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
+    })
+
+    const header = await payload.findGlobal({ slug: 'header' })
+
+    expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
+  })
+
   it('should count with a query that contains subqueries', async () => {
     const category = await payload.create({
       collection: 'categories',
@@ -2483,5 +2514,18 @@ describe('database', () => {
     })
 
     expect(result_2.totalDocs).toBe(0)
+  })
+
+  it('can have localized and non localized blocks', async () => {
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 })

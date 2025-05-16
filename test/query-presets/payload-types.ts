@@ -68,8 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     pages: Page;
-    users: User;
     posts: Post;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -78,8 +78,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -126,7 +126,16 @@ export interface Page {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -135,7 +144,7 @@ export interface Page {
 export interface User {
   id: string;
   name?: string | null;
-  roles?: ('admin' | 'user' | 'anonymous')[] | null;
+  roles?: ('admin' | 'editor' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -149,17 +158,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  text?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -170,12 +168,12 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -231,12 +229,12 @@ export interface PayloadQueryPreset {
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user' | 'anonymous')[] | null;
+      roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     update?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user' | 'anonymous')[] | null;
+      roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
@@ -262,6 +260,10 @@ export interface PayloadQueryPreset {
     | boolean
     | null;
   relatedCollection: 'pages' | 'posts';
+  /**
+   * This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -273,7 +275,15 @@ export interface PagesSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -291,16 +301,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  text?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -368,6 +368,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   where?: T;
   columns?: T;
   relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }
