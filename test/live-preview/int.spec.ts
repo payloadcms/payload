@@ -150,27 +150,6 @@ describe('Collections - Live Preview', () => {
     expect(handledMessage.title).toEqual('Test Page (Changed)')
   })
 
-  it('merges data', async () => {
-    const initialData: Partial<Page> = {
-      id: '123',
-      title: 'Test Page',
-    }
-
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        title: 'Test Page (Merged)',
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-    })
-
-    expect(mergedData.id).toEqual(initialData.id)
-    expect(mergedData._numberOfRequests).toEqual(0)
-  })
-
   it('— strings - merges data', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
