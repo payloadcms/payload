@@ -1123,20 +1123,35 @@ describe('List View', () => {
       // Get the new column order after using setActiveColumns
       const newColumnOrder = await page.locator('table > thead > tr > th').allTextContents()
 
-      // Instead of complex filtering that may lead to undefined errors,
-      // Let's just verify that the essential columns we care about maintain their relative positions
+      // Verify that important columns like ID and Number have been preserved in the right order
+      // Check if both ID and Number columns are visible
+      await expect(page.locator('#heading-id')).toBeVisible()
+      await expect(page.locator('#heading-number')).toBeVisible()
 
-      // We've already verified ID is visible and Description is hidden, now we just need to verify order
-      // A simple test to verify order isn't completely changed - just check relative positions of a few columns
-      const allColumns = await page.locator('table > thead > tr > th').allInnerTexts()
+      // Verify the order - find all column headers and check their positions
+      const headers = await page.locator('table > thead > tr > th').all()
+      const headerTexts = await Promise.all(
+        headers.map(async (header) => await header.textContent()),
+      )
 
-      // Find positions of key columns we know should be in the table
-      const selectIndex = allColumns.findIndex((text) => text.trim().includes('Select'))
-      const idIndex = allColumns.findIndex((text) => text.trim().includes('ID'))
+      // Find key columns
+      const idPosition = headerTexts.findIndex((text) => text?.includes('ID'))
+      const numberPosition = headerTexts.findIndex((text) => text?.includes('Number'))
 
-      // Verify relative positions (Select should appear before ID)
-      if (selectIndex !== -1 && idIndex !== -1) {
-        expect(selectIndex).toBeLessThan(idIndex)
+      // Verify both columns exist
+      expect(idPosition).toBeGreaterThan(-1)
+      expect(numberPosition).toBeGreaterThan(-1)
+
+      // Get the same columns from initial order to verify relative positions
+      const initialHeaders = initialColumnOrder.filter(Boolean)
+      const initialIdPosition = initialHeaders.findIndex((text) => text.includes('ID'))
+      const initialNumberPosition = initialHeaders.findIndex((text) => text.includes('Number'))
+
+      if (initialIdPosition !== -1 && initialNumberPosition !== -1) {
+        // If ID came before Number initially, it should still come before Number (or vice versa)
+        const initialOrder = initialIdPosition < initialNumberPosition
+        const newOrder = idPosition < numberPosition
+        expect(initialOrder).toEqual(newOrder)
       }
     })
 
