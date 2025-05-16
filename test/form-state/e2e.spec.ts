@@ -410,6 +410,46 @@ test.describe('Form State', () => {
         },
       )
     })
+
+    test('should not lag on low CPUs', async () => {
+      await page.goto(postsUrl.create)
+
+      await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+
+      // Start measuring input lag
+      await page.evaluate(() => {
+        const inputField = document.querySelector('#field-title')
+        const logs: string[] = []
+
+        inputField?.addEventListener('input', (e) => {
+          const now = performance.now()
+          logs.push(`Value: ${e.target?.value}, Time: ${now}`)
+          console.log(`Input updated: ${e.target?.value} at ${now}ms`)
+        })
+
+        window.getLogs = () => logs
+      })
+
+      await page.locator('#field-title').pressSequentially('Test', {
+        delay: 10,
+      })
+
+      const logs = await page.evaluate(() => window.getLogs())
+      const allowsThreshold = 50
+
+      const inputLag = logs.map((log) => {
+        const time = parseFloat(log.split('Time: ')[1].split('ms')[0])
+        return time
+      })
+
+      const maxInputLag = Math.max(...inputLag)
+      console.log('Max Input Lag:', maxInputLag)
+
+      // Check if the max input lag is within the allowed threshold
+      expect(maxInputLag).toBeLessThanOrEqual(allowsThreshold)
+
+      // TODO: remove query selector
+    })
   })
 })
 
