@@ -456,6 +456,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
+                if (addedByServer) {
+                  state[fieldKey].addedByServer = addedByServer
+                }
+
                 if (includeSchema) {
                   state[fieldKey].fieldSchema = block.fields.find(
                     (blockField) => 'name' in blockField && blockField.name === 'blockType',
@@ -730,7 +734,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
   } else if (fieldHasSubFields(field) && !fieldAffectsData(field)) {
-    // Handle field types that do not use names (row, collapsible, etc)
+    // Handle field types that do not use names (row, collapsible, unnamed group etc)
 
     if (!filter || filter(args)) {
       state[path] = {

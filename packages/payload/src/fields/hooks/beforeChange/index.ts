@@ -8,6 +8,7 @@ import type { JsonObject, Operation, PayloadRequest } from '../../../types/index
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
+
 export type Args<T extends JsonObject> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
@@ -17,6 +18,7 @@ export type Args<T extends JsonObject> = {
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
+  overrideAccess?: boolean
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -39,6 +41,7 @@ export const beforeChange = async <T extends JsonObject>({
   docWithLocales,
   global,
   operation,
+  overrideAccess,
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
@@ -59,6 +62,7 @@ export const beforeChange = async <T extends JsonObject>({
     global,
     mergeLocaleActions,
     operation,
+    overrideAccess,
     parentIndexPath: '',
     parentIsLocalized: false,
     parentPath: '',

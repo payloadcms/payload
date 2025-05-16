@@ -28,6 +28,9 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
     field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    indexPath,
+    parentPath,
+    parentSchemaPath,
     path,
     permissions,
     readOnly,
@@ -102,15 +105,28 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             </div>
           )}
           {BeforeInput}
-          <RenderFields
-            fields={fields}
-            margins="small"
-            parentIndexPath=""
-            parentPath={path}
-            parentSchemaPath={schemaPath}
-            permissions={permissions === true ? permissions : permissions?.fields}
-            readOnly={readOnly}
-          />
+          {/* Render an unnamed group differently */}
+          {name ? (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath=""
+              parentPath={path}
+              parentSchemaPath={schemaPath}
+              permissions={permissions === true ? permissions : permissions?.fields}
+              readOnly={readOnly}
+            />
+          ) : (
+            <RenderFields
+              fields={fields}
+              margins="small"
+              parentIndexPath={indexPath}
+              parentPath={parentPath}
+              parentSchemaPath={parentSchemaPath}
+              permissions={permissions}
+              readOnly={readOnly}
+            />
+          )}
         </div>
       </GroupProvider>
       {AfterInput}

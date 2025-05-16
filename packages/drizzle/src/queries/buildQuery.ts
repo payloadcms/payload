@@ -79,6 +79,7 @@ const buildQuery = function buildQuery({
     joins,
     locale,
     parentIsLocalized,
+    rawSort: context.rawSort,
     selectFields,
     sort: context.sort,
     tableName,

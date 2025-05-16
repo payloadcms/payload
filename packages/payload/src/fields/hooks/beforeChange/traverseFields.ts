@@ -36,6 +36,7 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
+  overrideAccess: boolean
   parentIndexPath: string
   /**
    * @todo make required in v4.0
@@ -78,6 +79,7 @@ export const traverseFields = async ({
   global,
   mergeLocaleActions,
   operation,
+  overrideAccess,
   parentIndexPath,
   parentIsLocalized,
   parentPath,
@@ -107,6 +109,7 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
+        overrideAccess,
         parentIndexPath,
         parentIsLocalized,
         parentPath,
