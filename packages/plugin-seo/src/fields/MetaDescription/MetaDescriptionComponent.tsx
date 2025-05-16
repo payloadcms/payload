@@ -8,6 +8,7 @@ import {
   TextareaInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -53,6 +54,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
@@ -85,7 +87,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -112,10 +114,10 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   return (

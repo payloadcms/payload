@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useDocumentInfo, useDocumentTitle } from '../../providers/DocumentInfo/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import './index.scss'
 
@@ -18,7 +18,8 @@ export type RenderTitleProps = {
 export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, title: titleFromProps } = props
 
-  const { id, isInitializing, title: titleFromContext } = useDocumentInfo()
+  const { id, isInitializing } = useDocumentInfo()
+  const { title: titleFromContext } = useDocumentTitle()
 
   const title = titleFromProps || titleFromContext || fallback
 

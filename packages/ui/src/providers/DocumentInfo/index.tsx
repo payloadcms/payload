@@ -4,8 +4,6 @@ import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } fr
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
-
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
@@ -14,7 +12,11 @@ import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
+import { initializeDocumentTitle, setDocumentTitle } from './title.js'
+import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
+
+export { useDocumentTitle } from './title.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -75,16 +77,21 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [documentTitle, setDocumentTitle] = useState(() =>
-    formatDocTitle({
-      collectionConfig,
-      data: { ...(initialData || {}), id },
-      dateFormat,
-      fallback: id?.toString(),
-      globalConfig,
-      i18n,
-    }),
+  const initialTitle = useMemo(
+    () =>
+      formatDocTitle({
+        collectionConfig,
+        data: { ...(initialData || {}), id },
+        dateFormat,
+        fallback: id?.toString(),
+        globalConfig,
+        i18n,
+      }),
+    [collectionConfig, initialData, id, dateFormat, globalConfig, i18n],
   )
+
+  // Initialize the store with the computed title
+  initializeDocumentTitle(initialTitle)
 
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
@@ -343,7 +350,7 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: documentTitle,
+    title: '', // TODO: make this the initial title only
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,

@@ -11,7 +11,8 @@ import type {
   SanitizedGlobalConfig,
   TypedUser,
 } from 'payload'
-import type React from 'react'
+
+import React from 'react'
 
 export type DocumentInfoProps = {
   readonly action?: string
@@ -66,6 +67,14 @@ export type DocumentInfoContext = {
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
+  /**
+   * @deprecated This property is deprecated and will be removed in v4.
+   * Use the `DocumentTitleContext` instead.
+   * @example
+   * ```tsx
+   * const { title }  = useDocumentTitle()
+   * ```
+   */
   title: string
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
@@ -74,3 +83,5 @@ export type DocumentInfoContext = {
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps
+
+export const DocumentTitleContext = React.createContext<string>('')

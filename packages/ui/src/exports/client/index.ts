@@ -276,7 +276,11 @@ export {
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
-export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+export {
+  DocumentInfoProvider,
+  useDocumentInfo,
+  useDocumentTitle,
+} from '../../providers/DocumentInfo/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'

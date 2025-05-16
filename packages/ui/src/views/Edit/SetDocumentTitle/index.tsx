@@ -1,10 +1,11 @@
 'use client'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, FieldState } from 'payload'
 
 import { useEffect, useRef } from 'react'
 
 import { useFormFields } from '../../../forms/Form/context.js'
-import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
+import { useDocumentInfo, useDocumentTitle } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatDocTitle } from '../../../utilities/formatDocTitle/index.js'
 
@@ -28,18 +29,22 @@ export const SetDocumentTitle: React.FC<{
 
   const dateFormatFromConfig = config?.admin?.dateFormat
 
-  const title = formatDocTitle({
-    collectionConfig,
-    data: { id: '' },
-    dateFormat: dateFormatFromConfig,
-    fallback:
-      typeof field === 'string'
-        ? field
-        : typeof field === 'number'
-          ? String(field)
-          : (field?.value as string) || fallback,
-    globalConfig,
-    i18n,
+  const doSet = useEffectEvent((field: FieldState) => {
+    setDocumentTitle(
+      formatDocTitle({
+        collectionConfig,
+        data: { id: '' },
+        dateFormat: dateFormatFromConfig,
+        fallback:
+          typeof field === 'string'
+            ? field
+            : typeof field === 'number'
+              ? String(field)
+              : (field?.value as string) || fallback,
+        globalConfig,
+        i18n,
+      }),
+    )
   })
 
   useEffect(() => {
@@ -48,8 +53,8 @@ export const SetDocumentTitle: React.FC<{
       return
     }
 
-    setDocumentTitle(title)
-  }, [setDocumentTitle, title])
+    doSet(field)
+  }, [field])
 
   return null
 }
