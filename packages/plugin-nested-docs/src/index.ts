@@ -47,6 +47,8 @@ export const nestedDocsPlugin =
           fields.push(createBreadcrumbsField(collection.slug))
         }
 
+        const collectionSlug = collection.slug
+
         return {
           ...collection,
           fields,
@@ -59,9 +61,9 @@ export const nestedDocsPlugin =
             ],
             beforeChange: [
               async ({ data, originalDoc, req }) => {
-                const collectionConfig = req.payload.collections[collection.slug]?.config
+                const collectionConfig = req.payload.collections[collectionSlug]?.config
                 if (!collectionConfig) {
-                  throw new Error(`Collection ${collection.slug} not found`)
+                  throw new Error(`Collection ${collectionSlug} not found`)
                 }
 
                 return populateBreadcrumbs(req, pluginConfig, collectionConfig, data, originalDoc)
