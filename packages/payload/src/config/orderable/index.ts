@@ -214,6 +214,8 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
           },
         },
       })
+      // We cannot update all documents in a single operation with `payload.update`,
+      // because they would all end up with the same order key (`a0`).
       for (const doc of docs) {
         await req.payload.update({
           id: doc.id,
