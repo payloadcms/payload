@@ -12,7 +12,7 @@ export const traverseRichText = ({
   populationsByCollection,
   result,
 }: {
-  blocksFieldSchema: FieldSchemaJSON
+  blocksFieldSchema?: FieldSchemaJSON
   externallyUpdatedRelationship?: DocumentEvent
   incomingData: any
   localeChanged: boolean
@@ -54,23 +54,25 @@ export const traverseRichText = ({
 
     // If the incoming data is a block, we need to handle it differently
     if (incomingData.type === 'block') {
-      result.type = 'block'
-      result.version = 2
-      result.format = ''
-      result.fields = {}
+      const incomingBlockJSON = blocksFieldSchema?.[incomingData.fields.blockType]
+      if (incomingBlockJSON?.fields) {
+        result.type = 'block'
+        result.version = 2
+        result.format = ''
+        result.fields = {}
 
-      const incomingBlockJSON = blocksFieldSchema[incomingData.fields.blockType]
-      traverseFields({
-        externallyUpdatedRelationship,
-        fieldSchema: incomingBlockJSON.fields,
-        incomingData: incomingData.fields,
-        localeChanged,
-        populationsByCollection,
-        result: result.fields,
-      })
+        traverseFields({
+          externallyUpdatedRelationship,
+          fieldSchema: incomingBlockJSON.fields,
+          incomingData: incomingData.fields,
+          localeChanged,
+          populationsByCollection,
+          result: result.fields,
+        })
 
-      result.fields.blockType = incomingData.fields.blockType
-      return result
+        result.fields.blockType = incomingData.fields.blockType
+        return result
+      }
     }
 
     // Iterate over the keys of `incomingData` and populate `result`

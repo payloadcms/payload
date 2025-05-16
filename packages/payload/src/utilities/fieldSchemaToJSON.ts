@@ -97,13 +97,16 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           type: field.type,
           blocks: field.blocks?.reduce((acc, block) => {
             acc[block.slug] = {
-              fields: fieldSchemaToJSON([
-                ...block.fields,
-                {
-                  name: 'id',
-                  type: 'text',
-                },
-              ]),
+              fields: fieldSchemaToJSON(
+                [
+                  ...block.fields,
+                  {
+                    name: 'id',
+                    type: 'text',
+                  },
+                ],
+                config,
+              ),
             }
 
             return acc
