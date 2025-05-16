@@ -44,6 +44,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       serverURL,
     },
   } = useConfig()
+
   const {
     docConfig,
     incrementVersionCount,

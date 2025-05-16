@@ -28,13 +28,16 @@ export const Status: React.FC = () => {
     setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
+
   const { toggleModal } = useModal()
+
   const {
     config: {
       routes: { api },
       serverURL,
     },
   } = useConfig()
+
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
