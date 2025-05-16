@@ -23,7 +23,7 @@ export const transformRelationship = ({ baseRow, data, field, relationships }: A
         relationRow[`${relation.relationTo}ID`] = relation.value
         relationships.push(relationRow)
       } else {
-        relationRow[`${field.relationTo}ID`] = relation
+        relationRow[`${field.relationTo.toString()}ID`] = relation
         if (relation) {
           relationships.push(relationRow)
         }
