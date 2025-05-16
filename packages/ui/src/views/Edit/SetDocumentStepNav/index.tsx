@@ -9,7 +9,8 @@ import type { StepNavItem } from '../../../elements/StepNav/index.js'
 
 import { useStepNav } from '../../../elements/StepNav/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { useDocumentInfo, useDocumentTitle } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 

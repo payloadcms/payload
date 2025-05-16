@@ -12,7 +12,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentTitle } from '../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
