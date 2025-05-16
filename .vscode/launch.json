@@ -64,6 +64,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts query-presets",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Query Presets",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm tsx --no-deprecation test/dev.ts login-with-username",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Login-With-Username",

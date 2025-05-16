@@ -99,6 +99,19 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
     },
     {
+      name: 'virtualRelationship',
+      type: 'text',
+      virtual: 'author.name',
+    },
+    {
+      name: 'virtual',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [() => 'virtual value'],
+      },
+    },
+    {
       name: 'hasManyNumber',
       type: 'number',
       hasMany: true,

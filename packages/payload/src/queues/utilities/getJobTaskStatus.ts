@@ -1,10 +1,8 @@
 // @ts-strict-ignore
-import type { TaskConfig, TaskType } from '../config/types/taskTypes.js'
 import type { BaseJob, JobTaskStatus } from '../config/types/workflowTypes.js'
 
 type Args = {
   jobLog: BaseJob['log']
-  tasksConfig: TaskConfig<TaskType>[]
 }
 
 export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {

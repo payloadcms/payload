@@ -447,16 +447,23 @@ export const promise = async <T>({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
+      let groupSiblingData = siblingData
+      let groupSiblingDoc = siblingDoc
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
+      const isNamedGroup = fieldAffectsData(field)
 
-      const groupData = siblingData[field.name] as Record<string, unknown>
-      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (isNamedGroup) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+
+        groupSiblingData = siblingData[field.name] as Record<string, unknown>
+        groupSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
+      }
 
       await traverseFields({
         id,
@@ -469,13 +476,13 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        parentIndexPath: '',
+        parentIndexPath: isNamedGroup ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
+        parentPath: isNamedGroup ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
-        siblingData: groupData as JsonObject,
-        siblingDoc: groupDoc as JsonObject,
+        siblingData: groupSiblingData,
+        siblingDoc: groupSiblingDoc,
       })
 
       break

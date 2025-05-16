@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type Config } from 'payload'
 
+import { LexicalFullyFeatured } from './collections/_LexicalFullyFeatured/index.js'
 import ArrayFields from './collections/Array/index.js'
 import {
   getLexicalFieldsCollection,
@@ -10,6 +11,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
+import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
@@ -26,6 +28,8 @@ const dirname = path.dirname(filename)
 export const baseConfig: Partial<Config> = {
   // ...extend config here
   collections: [
+    LexicalFullyFeatured,
+    LexicalLinkFeature,
     getLexicalFieldsCollection({
       blocks: lexicalBlocks,
       inlineBlocks: lexicalInlineBlocks,
@@ -42,9 +46,17 @@ export const baseConfig: Partial<Config> = {
     ArrayFields,
   ],
   globals: [TabsWithRichText],
+
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      beforeDashboard: [
+        {
+          path: './components/CollectionsExplained.tsx#CollectionsExplained',
+        },
+      ],
     },
   },
   onInit: async (payload) => {
