@@ -5,12 +5,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -177,11 +172,13 @@ describe('Live Preview', () => {
     await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
     const newTitleValue = 'SSR Home (Edited)'
+    // eslint-disable-next-line payload/no-wait-function
     await wait(1000)
 
     await titleField.clear()
     await titleField.pressSequentially(newTitleValue)
 
+    // eslint-disable-next-line payload/no-wait-function
     await wait(1000)
 
     await waitForAutoSaveToRunAndComplete(page)
@@ -222,11 +219,7 @@ describe('Live Preview', () => {
     })
   })
 
-  test('global — has route', async () => {
-    await goToGlobalLivePreview(page, 'header', serverURL)
-  })
-
-  test('global — renders iframe', async () => {
+  test('global — has route and renders iframe', async () => {
     await goToGlobalLivePreview(page, 'header', serverURL)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
