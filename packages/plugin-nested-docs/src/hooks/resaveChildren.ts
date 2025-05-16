@@ -112,10 +112,15 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 export const resaveChildren =
   (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
+    const isDraftsEnabled =
+      typeof collection.versions === 'object' ? !!collection.versions.drafts : !!collection.versions
+
     await resave({
       collection,
       doc,
-      draft: (!doc._status || doc._status === 'published') ? false : true,
+      // If drafts are enabled, only resave children if the parent is published.
+      // If drafts are not enabled, always resave children.
+      draft: isDraftsEnabled ? doc._status === 'published' : false,
       pluginConfig,
       req,
     })
