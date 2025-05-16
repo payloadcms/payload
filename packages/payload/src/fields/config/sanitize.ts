@@ -242,6 +242,7 @@ export const sanitizeFields = async ({
       if (!field.hooks) {
         field.hooks = {}
       }
+
       if (!field.access) {
         field.access = {}
       }
@@ -289,13 +290,25 @@ export const sanitizeFields = async ({
         throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
       }
 
+      const blockNames: string[] = []
+
       for (const block of field.blockReferences ?? field.blocks) {
+        const blockName = typeof block === 'string' ? block : block.slug
+
+        if (blockNames.includes(blockName)) {
+          throw new DuplicateFieldName(blockName)
+        }
+
+        blockNames.push(blockName)
+
         if (typeof block === 'string') {
           continue
         }
+
         if (block._sanitized === true) {
           continue
         }
+
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
