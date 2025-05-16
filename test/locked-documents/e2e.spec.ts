@@ -547,7 +547,7 @@ describe('Locked Documents', () => {
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('li[aria-label="API"] a').click()
+      await page.locator('a[aria-label="API"]').click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')

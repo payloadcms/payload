@@ -74,7 +74,7 @@ test.describe('Admin Panel (Root)', () => {
     await textField.fill('test')
     await saveDocAndAssert(page)
 
-    const versionsTab = page.locator('.doc-tab a[href$="/versions"]')
+    const versionsTab = page.locator('a.doc-tab[href$="/versions"]')
     await versionsTab.click()
     const firstRow = page.locator('tbody .row-1')
     await expect(firstRow).toBeVisible()

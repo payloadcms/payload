@@ -290,9 +290,9 @@ describe('Document View', () => {
 
       // wait for the update view to load
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
-      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
+      const editTab = page.locator(`.doc-tab:has-text("${customEditLabel}")`)
 
-      await expect(editTab).toContainText(customEditLabel)
+      await expect(editTab).toBeVisible()
     })
 
     test('collection — should render custom tab component', async () => {
@@ -300,7 +300,7 @@ describe('Document View', () => {
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
 
-      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
+      const customTab = page.locator(`a.doc-tab:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
     })
@@ -310,7 +310,7 @@ describe('Document View', () => {
 
       const title = page.locator('#custom-view-title')
 
-      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+      const docTab = page.locator('.doc-tab:has-text("Custom")')
 
       await expect(docTab).toBeVisible()
       await expect(title).toContainText('Custom Tab Label View')

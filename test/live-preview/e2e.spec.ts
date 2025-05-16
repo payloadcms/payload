@@ -75,13 +75,11 @@ describe('Live Preview', () => {
   test('collection — has tab', async () => {
     await navigateToDoc(page, pagesURLUtil)
 
-    const livePreviewTab = page.locator('.doc-tab', {
-      hasText: exactText('Live Preview'),
-    })
+    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
 
     await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-    const href = await livePreviewTab.locator('a').first().getAttribute('href')
+    const href = await livePreviewTab.getAttribute('href')
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
@@ -214,12 +212,10 @@ describe('Live Preview', () => {
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
-    const livePreviewTab = page.locator('.doc-tab', {
-      hasText: exactText('Live Preview'),
-    })
+    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
 
     await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const href = await livePreviewTab.locator('a').first().getAttribute('href')
+    const href = await livePreviewTab.getAttribute('href')
 
     await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
