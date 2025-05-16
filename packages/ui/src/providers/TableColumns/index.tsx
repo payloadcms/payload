@@ -69,53 +69,32 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     [columnState, refineListData, setOptimisticColumnState],
   )
 
-  const setColumns = useCallback(
-    async (columns: string[]) => {
-      await refineListData({ columns })
-    },
-    [refineListData],
-  )
-
-  /**
-   * Sets specified columns to active state while preserving important properties:
-   * 1. Maintains the original column order from the current query
-   * 2. Preserves the active state of columns not mentioned in the input array
-   * 3. Only changes the active state of columns specified in the input array
-   *
-   * This is different from `setColumns` which replaces the entire column list
-   * and changes both the order and active states.
-   *
-   * @deprecated Use setColumns instead if you want to replace all columns
-   */
   const setActiveColumns = useCallback(
     async (columns: string[]) => {
-      // Get current columns from the query
-      const currentColumns = currentQuery?.columns || []
+      // Make a copy of the current columns to preserve order
+      const newColumnState = [...currentQuery.columns]
 
-      // Create a new columns array based on the current column order
-      // but set specified columns to active
-      const updatedColumns = currentColumns.map((col) => {
-        const colName = col.startsWith('-') ? col.slice(1) : col
-        // Only modify active state if the column is in the input array
-        const shouldModify = columns.includes(colName)
+      columns.forEach((colName) => {
+        // Find the column in the current state, whether it's active or inactive
+        const colIndex = newColumnState.findIndex((c) => {
+          const normalizedName = c.startsWith('-') ? c.slice(1) : c
+          return normalizedName === colName
+        })
 
-        if (shouldModify) {
-          // Make active if in the input array
-          return colName
-        } else {
-          // Otherwise keep its current state
-          return col
+        // If found and it's currently inactive, make it active
+        if (colIndex !== -1 && newColumnState[colIndex].startsWith('-')) {
+          newColumnState[colIndex] = colName
         }
       })
 
-      await refineListData({ columns: updatedColumns })
+      await refineListData({ columns: newColumnState })
     },
     [currentQuery, refineListData],
   )
 
   const resetColumnsState = React.useCallback(async () => {
-    await setColumns(defaultColumns || [])
-  }, [defaultColumns, setColumns])
+    await refineListData({ columns: defaultColumns || [] })
+  }, [defaultColumns, refineListData])
 
   return (
     <TableColumnContext
@@ -125,7 +104,6 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         moveColumn,
         resetColumnsState,
         setActiveColumns,
-        setColumns,
         toggleColumn,
         ...contextRef.current,
       }}

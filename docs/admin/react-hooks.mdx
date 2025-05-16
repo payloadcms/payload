@@ -988,8 +988,7 @@ Returns properties and methods to manipulate table columns:
 | **`LinkedCellOverride`** | A component override for linked cells in the table |
 | **`moveColumn`** | A method to reorder columns. Accepts `{ fromIndex: number, toIndex: number }` as arguments |
 | **`resetColumnsState`** | A method to reset columns back to their default configuration as defined in the collection config |
-| **`setActiveColumns`** | A method to set specific columns to active state while preserving column order and the active state of columns not mentioned. Accepts an array of column names to activate |
-| **`setColumns`** | A method to completely replace the column configuration. Accepts an array of column names that will become the new column list |
+| **`setActiveColumns`** | A method to set specific columns to active state while preserving the existing column order. Accepts an array of column names to activate |
 | **`toggleColumn`** | A method to toggle a single column's visibility. Accepts a column name as string |
 
 ```tsx
@@ -998,12 +997,7 @@ import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const { setColumns, setActiveColumns, resetColumnsState } = useTableColumns()
-
-  const replaceAllColumns = () => {
-    // Completely replaces the column list with only id, createdAt, and updatedAt
-    setColumns(['id', 'createdAt', 'updatedAt'])
-  }
+  const { setActiveColumns, resetColumnsState } = useTableColumns()
 
   const activateSpecificColumns = () => {
     // Only activates the id and createdAt columns
@@ -1020,9 +1014,6 @@ const MyComponent: React.FC = () => {
 
   return (
     <div>
-      <button type="button" onClick={replaceAllColumns}>
-        Replace All Columns
-      </button>
       <button type="button" onClick={activateSpecificColumns}>
         Activate Specific Columns
       </button>
