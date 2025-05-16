@@ -350,7 +350,7 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: '', // TODO: make this the initial title only
+    title: initialTitle,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
@@ -362,7 +362,7 @@ const DocumentInfo: React.FC<
   return <Context value={value}>{children}</Context>
 }
 
-export const DocumentInfoProvider: React.FC<
+export const pnppnp: React.FC<
   {
     readonly children: React.ReactNode
   } & DocumentInfoProps
