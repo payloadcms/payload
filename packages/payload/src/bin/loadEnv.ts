@@ -13,7 +13,8 @@ export function loadEnv(path?: string) {
     return
   }
 
-  const { loadedEnvFiles } = loadEnvConfig(process.cwd(), true) // assuming this won't run in production
+  const dev = process.env.NODE_ENV !== 'production'
+  const { loadedEnvFiles } = loadEnvConfig(process.cwd(), dev)
 
   if (!loadedEnvFiles?.length) {
     // use findUp to find the env file. So, run loadEnvConfig for every directory upwards
