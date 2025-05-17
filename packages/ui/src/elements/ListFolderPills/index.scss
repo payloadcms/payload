@@ -1,0 +1,7 @@
+@layer payload-default {
+  .list-folder-pills {
+    display: flex;
+    gap: calc(var(--base) * 0.5);
+    margin-left: calc(var(--base) * 0.5);
+  }
+}

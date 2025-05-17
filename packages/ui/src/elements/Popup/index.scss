@@ -15,6 +15,7 @@
       display: flex;
       align-items: stretch;
       height: 100%;
+      cursor: pointer;
     }
 
     &__content {
@@ -30,6 +31,13 @@
       padding-left: var(--popup-padding);
       padding-right: var(--popup-padding);
       min-width: var(--popup-width, auto);
+    }
+
+    &__content,
+    &__scroll-content {
+      > .popup-list-group-label:first-child {
+        margin-top: calc(var(--base) * 0.25);
+      }
     }
 
     &__hide-scrollbar {

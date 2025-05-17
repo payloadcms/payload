@@ -21,7 +21,7 @@ export const WatchTenantCollection = () => {
   const [useAsTitleName] = React.useState(
     () => (getEntityConfig({ collectionSlug }) as ClientCollectionConfig).admin.useAsTitle,
   )
-  const titleField = useFormFields(([fields]) => fields[useAsTitleName])
+  const titleField = useFormFields(([fields]) => (useAsTitleName ? fields[useAsTitleName] : {}))
 
   const { updateTenants } = useTenantSelection()
 

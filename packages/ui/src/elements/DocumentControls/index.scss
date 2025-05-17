@@ -38,6 +38,14 @@
       flex-grow: 1;
       overflow: hidden;
       padding: base(0.8) 0;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__meta-icons {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.2);
+      flex-shrink: 0;
     }
 
     &__meta {
@@ -156,9 +164,11 @@
       // The timestamps and meta can scroll past
       // The same container needs to the sticky, though
       // So we use a static height with a negative top equal to the meta height plus top padding
-      top: base(-2.8);
-      padding-right: 0;
-      padding-left: 0;
+      &.gutter {
+        top: base(-2.8);
+        padding-right: 0;
+        padding-left: 0;
+      }
 
       &__wrapper {
         flex-direction: column;

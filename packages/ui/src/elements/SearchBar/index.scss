@@ -1,0 +1,26 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .search-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: var(--theme-elevation-50);
+    border-radius: var(--style-radius-m);
+    padding: calc(var(--base) * 0.6);
+    gap: calc(var(--base) * 0.6);
+
+    .search-filter {
+      flex-grow: 1;
+      input {
+        flex-grow: 1;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 4);
+    }
+  }
+}

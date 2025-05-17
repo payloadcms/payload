@@ -149,13 +149,16 @@ const DocumentInfo: React.FC<
           ? `where[globalSlug][equals]=${slug}`
           : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+          credentials: 'include',
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
           await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -180,11 +183,13 @@ const DocumentInfo: React.FC<
           : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+          credentials: 'include',
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
 
           const userData =
@@ -197,6 +202,7 @@ const DocumentInfo: React.FC<
             body: JSON.stringify({
               user: userData,
             }),
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },

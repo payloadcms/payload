@@ -27,7 +27,7 @@ export function ActionsBar({ collectionConfig }: Props) {
       <div className={`${baseClass}__navigation`}>
         <p className={`${baseClass}__locationText`}>
           <strong>{activeIndex + 1}</strong>
-          {' of '}
+          {` ${t('general:of')} `}
           <strong>{forms.length}</strong>
         </p>
 

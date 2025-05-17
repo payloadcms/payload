@@ -176,7 +176,34 @@ export const nlTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blok togglen',
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
+  folder: {
+    browseByFolder: 'Bladeren op Map',
+    byFolder: 'Op Map',
+    deleteFolder: 'Verwijder map',
+    folderName: 'Mapnaam',
+    folders: 'Mappen',
+    itemHasBeenMoved: '{{title}} is verplaatst naar {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} is verplaatst naar de hoofdmap',
+    itemsMovedToFolder: '{{title}} verplaatst naar {{folderName}}',
+    itemsMovedToRoot: '{{title}} verplaatst naar de hoofdmap',
+    moveFolder: 'Verplaats Map',
+    moveItemsToFolderConfirmation:
+      'U staat op het punt om <1>{{count}} {{label}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
+    moveItemsToRootConfirmation:
+      'U staat op het punt om <1>{{count}} {{label}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
+    moveItemToFolderConfirmation:
+      'U staat op het punt om <1>{{title}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
+    moveItemToRootConfirmation:
+      'U staat op het punt om <1>{{title}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
+    movingFromFolder: 'Verplaatsen van {{title}} uit {{folderName}}',
+    newFolder: 'Nieuwe Map',
+    noFolder: 'Geen Map',
+    renameFolder: 'Hernoem Map',
+    searchByNameInFolder: 'Zoeken op naam in {{folderName}}',
+    selectFolderForItem: 'Selecteer map voor {{title}}',
+  },
   general: {
+    name: 'Naam',
     aboutToDelete:
       'U staat op het punt om {{label}} <1>{{title}}</1> te verwijderen. Weet u het zeker?',
     aboutToDeleteCount_many: 'Je staat op het punt {{count}} {{label}} te verwijderen',
@@ -207,6 +234,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Bevestig kopie',
     confirmDeletion: 'Bevestig verwijdering',
     confirmDuplication: 'Bevestig duplicatie',
+    confirmMove: 'Bevestig verplaatsing',
     confirmReindex: 'Alle {{collections}} opnieuw indexeren?',
     confirmReindexAll: 'Alle collecties opnieuw indexeren?',
     confirmReindexDescription:
@@ -264,6 +292,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     globals: 'Globalen',
     goBack: 'Ga terug',
     isEditing: 'is aan het bewerken',
+    item: 'artikel',
+    items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
     leaveAnyway: 'Toch weggaan',
@@ -275,8 +305,14 @@ export const nlTranslations: DefaultTranslationsObject = {
     locales: 'Landinstellingen',
     menu: 'Menu',
     moreOptions: 'Meer opties',
+    move: 'Verplaatsen',
+    moveConfirm:
+      'U staat op het punt om {{count}} {{label}} te verplaatsen naar <1>{{destination}}</1>. Weet u het zeker?',
+    moveCount: 'Verplaats {{count}} {{label}}',
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',
+    moving: 'Verhuizen',
+    movingCount: 'Verplaatsen {{count}} {{label}}',
     newPassword: 'Nieuw wachtwoord',
     next: 'Volgende',
     noDateSelected: 'Geen datum geselecteerd',
@@ -304,6 +340,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     remove: 'Verwijderen',
+    rename: 'Hernoemen',
     reset: 'Resetten',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:
@@ -315,6 +352,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',
+    select: 'Selecteer',
     selectAll: 'Alles selecteren {{count}} {{label}}',
     selectAllRows: 'Selecteer alle rijen',
     selectedCount: '{{count}} {{label}} geselecteerd',

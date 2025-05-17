@@ -9,6 +9,6 @@ export const closeListDrawer = async ({
   drawerSelector?: string
   page: Page
 }): Promise<any> => {
-  await page.locator('[id^=list-drawer_1_] .list-drawer__header-close').click()
+  await page.locator('[id^=list-drawer_1_] .list-drawer__header .close-modal-button').click()
   await expect(page.locator(drawerSelector)).not.toBeVisible()
 }

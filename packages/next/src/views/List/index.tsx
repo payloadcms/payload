@@ -40,6 +40,12 @@ type RenderListViewArgs = {
   redirectAfterDuplicate?: boolean
 } & AdminViewServerProps
 
+/**
+ * This function is responsible for rendering
+ * the list view on the server for both:
+ *  - default list view
+ *  - list view within drawers
+ */
 export const renderListView = async (
   args: RenderListViewArgs,
 ): Promise<{

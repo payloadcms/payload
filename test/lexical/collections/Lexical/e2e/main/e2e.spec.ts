@@ -674,7 +674,7 @@ describe('lexicalMain', () => {
     await relationshipSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipListDrawer = page.locator('.list-drawer__header-text')
+    const relationshipListDrawer = page.locator('.list-header__title')
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 

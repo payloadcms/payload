@@ -119,6 +119,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm tsx --no-deprecation test/dev.ts folder-view",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Folder View",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm tsx --no-deprecation test/dev.ts localization",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Localization",
