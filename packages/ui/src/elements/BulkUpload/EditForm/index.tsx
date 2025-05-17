@@ -16,13 +16,14 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../../providers/UploadControls/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { BulkUploadProvider } from '../index.js'
 import './index.scss'
+import { BulkUploadProvider } from '../index.js'
 
 const baseClass = 'collection-edit'
 
@@ -148,41 +149,43 @@ export function EditForm({
 
   return (
     <OperationProvider operation="create">
-      <BulkUploadProvider>
-        <Form
-          action={action}
-          className={`${baseClass}__form`}
-          disabled={isInitializing || !hasSavePermission}
-          initialState={isInitializing ? undefined : initialState}
-          isInitializing={isInitializing}
-          method="POST"
-          onChange={[onChange]}
-          onSuccess={onSave}
-          submitted={submitted}
-        >
-          <DocumentFields
-            BeforeFields={
-              <React.Fragment>
-                {CustomUpload || (
-                  <Upload_v4
-                    collectionSlug={collectionConfig.slug}
-                    initialState={initialState}
-                    resetUploadEdits={resetUploadEdits}
-                    updateUploadEdits={updateUploadEdits}
-                    uploadConfig={collectionConfig.upload}
-                    uploadEdits={uploadEdits}
-                  />
-                )}
-              </React.Fragment>
-            }
-            docPermissions={docPermissions}
-            fields={collectionConfig.fields}
-            schemaPathSegments={[collectionConfig.slug]}
-          />
-          <ReportAllErrors />
-          <GetFieldProxy />
-        </Form>
-      </BulkUploadProvider>
+      <UploadControlsProvider collectionSlug={collectionSlug}>
+        <BulkUploadProvider>
+          <Form
+            action={action}
+            className={`${baseClass}__form`}
+            disabled={isInitializing || !hasSavePermission}
+            initialState={isInitializing ? undefined : initialState}
+            isInitializing={isInitializing}
+            method="POST"
+            onChange={[onChange]}
+            onSuccess={onSave}
+            submitted={submitted}
+          >
+            <DocumentFields
+              BeforeFields={
+                <React.Fragment>
+                  {CustomUpload || (
+                    <Upload_v4
+                      collectionSlug={collectionConfig.slug}
+                      initialState={initialState}
+                      resetUploadEdits={resetUploadEdits}
+                      updateUploadEdits={updateUploadEdits}
+                      uploadConfig={collectionConfig.upload}
+                      uploadEdits={uploadEdits}
+                    />
+                  )}
+                </React.Fragment>
+              }
+              docPermissions={docPermissions}
+              fields={collectionConfig.fields}
+              schemaPathSegments={[collectionConfig.slug]}
+            />
+            <ReportAllErrors />
+            <GetFieldProxy />
+          </Form>
+        </BulkUploadProvider>
+      </UploadControlsProvider>
     </OperationProvider>
   )
 }
