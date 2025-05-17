@@ -11,6 +11,7 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
+  openColumnControls,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -954,6 +955,20 @@ describe('List View', () => {
       expect(page.url()).not.toMatch(/columns=/)
     })
 
+    test('should render field in group as column', async () => {
+      await createPost({ group: { nestedTitle: 'nested group title 1' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Nested Title'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+    })
+
     test('should drag to reorder columns and save to preferences', async () => {
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
@@ -1261,7 +1276,7 @@ describe('List View', () => {
     beforeEach(async () => {
       // delete all posts created by the seed
       await deleteAllPosts()
-      await createPost({ number: 1 })
+      await createPost({ number: 1, group: { nestedTitle: 'nested group title 1' } })
       await createPost({ number: 2 })
     })
 
@@ -1281,6 +1296,34 @@ describe('List View', () => {
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
+    })
+
+    test('should allow sorting by nested field within group in separate column', async () => {
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Nested Title'),
+        })
+        .click()
+      const upChevron = page.locator('#heading-group-nestedTitle .sort-column__asc')
+      const downChevron = page.locator('#heading-group-nestedTitle .sort-column__desc')
+
+      await upChevron.click()
+      await page.waitForURL(/sort=group.nestedTitle/)
+
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText('<No Nested Title>')
+      await expect(page.locator('.row-2 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+
+      await downChevron.click()
+      await page.waitForURL(/sort=-group.nestedTitle/)
+
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+      await expect(page.locator('.row-2 .cell-group-nestedTitle')).toHaveText('<No Nested Title>')
     })
 
     test('should sort with existing filters', async () => {

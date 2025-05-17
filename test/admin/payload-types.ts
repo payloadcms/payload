@@ -237,6 +237,9 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  group?: {
+    nestedTitle?: string | null;
+  };
   relationship?: (string | null) | Post;
   users?: (string | null) | User;
   customCell?: string | null;
@@ -695,6 +698,11 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
+  group?:
+    | T
+    | {
+        nestedTitle?: T;
+      };
   relationship?: T;
   users?: T;
   customCell?: T;

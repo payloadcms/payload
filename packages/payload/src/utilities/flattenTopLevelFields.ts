@@ -1,4 +1,8 @@
 // @ts-strict-ignore
+import type { I18nClient } from '@payloadcms/translations'
+
+import { getTranslation } from '@payloadcms/translations'
+
 import type { ClientTab } from '../admin/fields/Tabs.js'
 import type { ClientField } from '../fields/config/client.js'
 import type {
@@ -10,16 +14,14 @@ import type {
   Tab,
 } from '../fields/config/types.js'
 
-import {
-  fieldAffectsData,
-  fieldHasSubFields,
-  fieldIsPresentationalOnly,
-  tabHasName,
-} from '../fields/config/types.js'
+import { fieldAffectsData, fieldIsPresentationalOnly, tabHasName } from '../fields/config/types.js'
 
 type FlattenedField<TField> = TField extends ClientField
-  ? FieldAffectingDataClient | FieldPresentationalOnlyClient
-  : FieldAffectingData | FieldPresentationalOnly
+  ? { accessor?: string; labelWithPrefix?: string } & (
+      | FieldAffectingDataClient
+      | FieldPresentationalOnlyClient
+    )
+  : { accessor?: string; labelWithPrefix?: string } & (FieldAffectingData | FieldPresentationalOnly)
 
 type TabType<TField> = TField extends ClientField ? ClientTab : Tab
 
@@ -32,23 +34,95 @@ type TabType<TField> = TField extends ClientField ? ClientTab : Tab
  */
 function flattenFields<TField extends ClientField | Field>(
   fields: TField[],
-  keepPresentationalFields?: boolean,
+  options?:
+    | {
+        i18n?: I18nClient
+        keepPresentationalFields?: boolean
+        labelPrefix?: string
+        pathPrefix?: string
+      }
+    | boolean,
 ): FlattenedField<TField>[] {
+  const normalizedOptions =
+    typeof options === 'boolean' ? { keepPresentationalFields: options } : (options ?? {})
+
+  const { i18n, keepPresentationalFields, labelPrefix, pathPrefix } = normalizedOptions
+
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
-    if (fieldAffectsData(field) || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
-      acc.push(field as FlattenedField<TField>)
-    } else if (fieldHasSubFields(field)) {
-      acc.push(...flattenFields(field.fields as TField[], keepPresentationalFields))
+    if ('fields' in field && field.type !== 'array') {
+      const translatedLabel =
+        'label' in field && field.label && i18n ? getTranslation(field.label, i18n) : undefined
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? `${labelPrefix} > ${translatedLabel}`
+          : labelPrefix
+        : translatedLabel
+
+      const nameWithPrefix =
+        'name' in field && field.name
+          ? pathPrefix
+            ? `${pathPrefix}-${field.name}`
+            : field.name
+          : pathPrefix
+
+      acc.push(
+        ...flattenFields<TField>('fields' in field ? (field.fields as TField[]) : [], {
+          i18n,
+          keepPresentationalFields,
+          labelPrefix: labelWithPrefix,
+          pathPrefix: nameWithPrefix,
+        }),
+      )
+    } else if (
+      fieldAffectsData(field) ||
+      (keepPresentationalFields && fieldIsPresentationalOnly(field))
+    ) {
+      // Ignore nested `id` fields
+      if (field.name === 'id' && labelPrefix !== undefined) {
+        return acc
+      }
+
+      const translatedLabel =
+        'label' in field && field.label && i18n ? getTranslation(field.label, i18n) : undefined
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? `${labelPrefix} > ${translatedLabel}`
+          : labelPrefix
+        : undefined
+
+      const name = 'name' in field ? field.name : undefined
+      const accessor = pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? '')
+
+      acc.push({
+        ...(field as FlattenedField<TField>),
+        name,
+        accessor,
+        labelWithPrefix,
+      })
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...acc,
         ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
           if (tabHasName(tab)) {
-            return [...tabFields, { ...tab, type: 'tab' } as unknown as FlattenedField<TField>]
+            return [
+              ...tabFields,
+              {
+                ...tab,
+                type: 'tab',
+                labelPrefix,
+              } as unknown as FlattenedField<TField>,
+            ]
           } else {
             return [
               ...tabFields,
-              ...flattenFields(tab.fields as TField[], keepPresentationalFields),
+              ...flattenFields<TField>(tab.fields as TField[], {
+                i18n,
+                keepPresentationalFields,
+                labelPrefix,
+                pathPrefix,
+              }),
             ]
           }
         }, []),

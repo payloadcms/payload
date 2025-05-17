@@ -380,6 +380,11 @@ export async function switchTab(page: Page, selector: string) {
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
 }
 
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+}
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
