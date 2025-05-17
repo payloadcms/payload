@@ -12,7 +12,7 @@ export const commitTransaction: CommitTransaction = async function commitTransac
 
   try {
     await this.sessions[id].resolve()
-  } catch (err: unknown) {
+  } catch (_) {
     await this.sessions[id].reject()
   }
 

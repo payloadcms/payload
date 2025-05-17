@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
-import { asc, desc, or } from 'drizzle-orm'
+import { asc, desc } from 'drizzle-orm'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
@@ -92,7 +92,7 @@ export const buildOrderBy = ({
 
         selectFields[sortTableColumnName] = sortTable[sortTableColumnName]
       }
-    } catch (err) {
+    } catch (_) {
       // continue
     }
   }

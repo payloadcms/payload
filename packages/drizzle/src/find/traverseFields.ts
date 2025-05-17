@@ -19,7 +19,7 @@ import toSnakeCase from 'to-snake-case'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { operatorMap } from '../queries/operatorMap.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'

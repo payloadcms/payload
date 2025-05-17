@@ -15,7 +15,6 @@ import {
   notInArray,
   or,
   type SQL,
-  type SQLWrapper,
 } from 'drizzle-orm'
 
 type OperatorKeys =
@@ -35,7 +34,7 @@ type OperatorKeys =
   | 'not_like'
   | 'or'
 
-export type Operators = Record<OperatorKeys, (column: Column, value: SQLWrapper | unknown) => SQL>
+export type Operators = Record<OperatorKeys, (column: Column, value: unknown) => SQL>
 
 export const operatorMap: Operators = {
   and,

@@ -46,7 +46,7 @@ export const insertArrays = async ({
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
-      arrayRows.forEach((arrayRow, i) => {
+      arrayRows.forEach((arrayRow) => {
         if (Object.keys(arrayRow.arrays).length > 0) {
           rowsByTable[tableName].arrays.push(arrayRow.arrays)
         }
