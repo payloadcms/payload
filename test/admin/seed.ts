@@ -5,6 +5,7 @@ import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
+  customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -72,6 +73,15 @@ export const seed = async (_payload) => {
           overrideAccess: true,
         })
       }),
+      () =>
+        _payload.create({
+          collection: customDocumentControlsSlug,
+          data: {
+            title: 'Custom Document Controls',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
       () =>
         _payload.create({
           collection: customViews1CollectionSlug,
