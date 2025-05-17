@@ -467,7 +467,7 @@ export const promise = async ({
           }
         })
       } else {
-        siblingDoc[field.name] = []
+        siblingDoc[field.name] = null
       }
       break
     }
@@ -570,7 +570,7 @@ export const promise = async ({
           }
         })
       } else {
-        siblingDoc[field.name] = []
+        siblingDoc[field.name] = null
       }
 
       break
