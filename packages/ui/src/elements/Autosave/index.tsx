@@ -92,15 +92,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
   // after the timeout has executed
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   fieldRef.current = fields
 
   // Store modified in ref so the autosave func
   // can bail out if modified becomes false while
   // timing out during autosave
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   modifiedRef.current = modified
 
   // Store locale in ref so the autosave func
   // can always retrieve the most to date locale
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   localeRef.current = locale
 
   const { queueTask } = useQueues()

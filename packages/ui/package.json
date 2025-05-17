@@ -153,7 +153,6 @@
     "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "payload": "workspace:*"
   },
   "peerDependencies": {

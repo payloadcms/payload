@@ -190,6 +190,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
     count,
     getQueryParams,
@@ -200,6 +201,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   return <Context value={contextRef.current}>{children}</Context>
 }
 

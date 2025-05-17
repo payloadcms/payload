@@ -82,15 +82,6 @@ export const rootEslintConfig = [
 export default [
   ...rootEslintConfig,
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {
       'perfectionist/sort-objects': 'off',

@@ -62,12 +62,6 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
-    # Follows same github's ci skip: [skip lint], [lint skip], [no lint]
-    if: >
-      github.event_name == 'pull_request' &&
-      !contains(github.event.pull_request.title, '[skip lint]') &&
-      !contains(github.event.pull_request.title, '[lint skip]') &&
-      !contains(github.event.pull_request.title, '[no lint]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +75,8 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Lint staged
-        run: |
-          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
-          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
+      - name: Lint
+        run: pnpm lint -- --quiet
 
   build:
     needs: changes
