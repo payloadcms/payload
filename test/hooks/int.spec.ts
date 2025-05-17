@@ -665,4 +665,20 @@ describe('Hooks', () => {
       expect(updateResult).toBeDefined()
     })
   })
+
+  it('plugins adding hooks should only affect targetted collection, regardless of hooks object reference', async () => {
+    const sharedHooks1: any = await payload.create({
+      collection: 'sharedHooks1',
+      data: {},
+    })
+    const sharedHooks2: any = await payload.create({
+      collection: 'sharedHooks2',
+      data: {},
+    })
+
+    expect(sharedHooks1.afterRead1).toBeTruthy()
+    expect(sharedHooks1.afterRead2).toBeTruthy()
+    expect(sharedHooks2.afterRead1).toBeTruthy()
+    expect(sharedHooks2.afterRead2).toBeUndefined()
+  })
 })
