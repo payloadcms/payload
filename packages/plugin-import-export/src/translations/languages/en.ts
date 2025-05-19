@@ -1,7 +1,5 @@
-import type { GenericTranslationsObject } from '@payloadcms/translations'
-
-export const en: GenericTranslationsObject = {
-  $schema: './translation-schema.json',
+import type { PluginLanguage } from '../types.js'
+export const enTranslations = {
   'plugin-import-export': {
     allLocales: 'All locales',
     download: 'Download',
@@ -26,4 +24,9 @@ export const en: GenericTranslationsObject = {
     totalDocumentsCount: '{{count}} total documents',
     yes: 'Yes',
   },
+}
+
+export const en: PluginLanguage = {
+  dateFNSKey: 'en-US',
+  translations: enTranslations,
 }

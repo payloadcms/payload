@@ -1,6 +1,6 @@
 import type { Language } from '@payloadcms/translations'
 
-import type { en } from './languages/en.js'
+import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-import-export': {
@@ -29,4 +29,4 @@ export type PluginLanguage = Language<{
   }
 }>
 
-export type PluginDefaultTranslationsObject = typeof en
+export type PluginDefaultTranslationsObject = typeof enTranslations
