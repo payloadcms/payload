@@ -4,7 +4,6 @@ import type { PgTable } from 'drizzle-orm/pg-core'
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 
-import { GenericTable } from '@payloadcms/drizzle/types'
 import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'

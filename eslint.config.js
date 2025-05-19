@@ -74,6 +74,7 @@ export const rootEslintConfig = [
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',
+      'payload/no-relative-monorepo-imports': 'off',
     },
   },
 ]
