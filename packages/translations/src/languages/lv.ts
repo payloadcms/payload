@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const lvTranslations = {
+export const lvTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konts',
     accountOfCurrentUser: 'Pašreizējā lietotāja konts',
@@ -27,11 +27,9 @@ export const lvTranslations = {
     forgotPassword: 'Aizmirsi paroli?',
     forgotPasswordEmailInstructions:
       'Lūdzu, ievadiet savu e-pastu zemāk. Saņemsiet ziņojumu ar norādījumiem paroles atiestatīšanai.',
+    forgotPasswordQuestion: 'Aizmirsi paroli?',
     forgotPasswordUsernameInstructions:
       'Lūdzu, ievadiet savu lietotājvārdu zemāk. Norādījumi paroles atiestatīšanai tiks nosūtīti uz e-pastu, kas saistīts ar jūsu lietotājvārdu.',
-    usernameNotValid: 'Norādītais lietotājvārds nav derīgs',
-
-    forgotPasswordQuestion: 'Aizmirsi paroli?',
     generate: 'Ģenerēt',
     generateNewAPIKey: 'Ģenerēt jaunu API atslēgu',
     generatingNewAPIKeyWillInvalidate:
@@ -68,6 +66,7 @@ export const lvTranslations = {
     tokenRefreshSuccessful: 'Tokens veiksmīgi atjaunots.',
     unableToVerify: 'Neizdevās verificēt',
     username: 'Lietotājvārds',
+    usernameNotValid: 'Norādītais lietotājvārds nav derīgs',
     verified: 'Verificēts',
     verifiedSuccessfully: 'Veiksmīgi verificēts',
     verify: 'Verificēt',
@@ -185,6 +184,7 @@ export const lvTranslations = {
     adminTheme: 'Administratora tēma',
     all: 'Visi',
     allCollections: 'Visas kolekcijas',
+    allLocales: 'Visi lokalizācijas variants',
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
@@ -253,6 +253,7 @@ export const lvTranslations = {
     enterAValue: 'Ievadiet vērtību',
     error: 'Kļūda',
     errors: 'Kļūdas',
+    export: 'Eksports',
     fallbackToDefaultLocale: 'Izmantot noklusēto lokalizāciju',
     false: 'Nepatiesi',
     filter: 'Filtrs',
@@ -260,6 +261,7 @@ export const lvTranslations = {
     filterWhere: 'Filtrēt {{label}} kur',
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
+    import: 'Imports',
     isEditing: 'redzē',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
@@ -276,6 +278,7 @@ export const lvTranslations = {
     moveUp: 'Pārvietot uz augšu',
     newPassword: 'Jauna parole',
     next: 'Nākamais',
+    no: 'Nē',
     noDateSelected: 'Datums nav izvēlēts',
     noFiltersSet: 'Nav uzstādīti filtri',
     noLabel: '<Nav {{label}}>',
@@ -354,6 +357,7 @@ export const lvTranslations = {
     value: 'Vērtība',
     viewReadOnly: 'Skatīt tikai lasāmu',
     welcome: 'Laipni lūdzam',
+    yes: 'Jā',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',
@@ -388,6 +392,7 @@ export const lvTranslations = {
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',
+    download: 'Lejupielādēt',
     dragAndDrop: 'Ievelciet un nometiet failu',
     dragAndDropHere: 'vai ievelciet un nometiet failu šeit',
     editImage: 'Rediģēt attēlu',

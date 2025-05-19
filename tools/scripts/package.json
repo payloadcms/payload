@@ -17,6 +17,7 @@
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
     "generateTranslations:core": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/core.ts",
+    "generateTranslations:plugin-import-export": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-import-export.ts",
     "generateTranslations:plugin-multi-tenant": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-multi-tenant.ts",
     "license-check": "pnpm runts src/license-check.ts",
     "lint": "eslint .",
@@ -38,6 +39,7 @@
     "payload": "workspace:*"
   },
   "devDependencies": {
+    "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/translations": "workspace:*"
