@@ -29,6 +29,7 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
+  customViewsTabsSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -64,6 +65,8 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
+  let customViewTabsURL: AdminUrlUtil
+  let collectionCustomViewPathId: string
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -79,6 +82,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
+    customViewTabsURL = new AdminUrlUtil(serverURL, customViewsTabsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -360,6 +364,65 @@ describe('Document View', () => {
 
       await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
     })
+
+    test('document drawer displays a link to document', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      // change the relationship to a document which is a different one than the current one
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option').nth(2).click()
+      await saveDocAndAssert(page)
+
+      // open relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      // modify the title to trigger the leave page modal
+      await page.locator('.drawer__content #field-title').fill('New Title')
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      await documentLink.click()
+
+      const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
+      await expect(leavePageModal).toBeVisible()
+
+      await leavePageModal.click()
+      await page.waitForURL(postsUrl.edit(documentId))
+    })
+
+    test('document can be opened in a new tab from within the drawer', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      const currentUrl = page.url()
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        documentLink.click({ modifiers: ['ControlOrMeta'] }),
+      ])
+
+      // Wait for navigation to complete in the new tab and ensure correct URL
+      await expect(newPage.locator('.doc-header')).toBeVisible()
+      // using contain here, because after load the lists view will add query params like "?limit=10"
+      expect(newPage.url()).toContain(postsUrl.edit(documentId))
+
+      // Ensure the original page did not change
+      expect(page.url()).toBe(currentUrl)
+    })
   })
 
   describe('descriptions', () => {
@@ -551,6 +614,45 @@ describe('Document View', () => {
       const customDraftButton = page.locator('#custom-draft-button')
 
       await expect(customDraftButton).toBeVisible()
+    })
+  })
+
+  describe('custom view paths', () => {
+    beforeAll(async () => {
+      await page.goto(customViewTabsURL.list)
+      const firstDoc = await page.locator('.collection-list .table a').first().getAttribute('href')
+      const id = firstDoc?.split('/').pop()
+      if (id) {
+        collectionCustomViewPathId = id
+      }
+    })
+
+    test('collection — should show live preview as first tab and default view', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const firstTab = tabs.first()
+      await expect(firstTab).toContainText('Live Preview')
+
+      const iframe = page.locator('.live-preview-iframe')
+      await expect(iframe).toBeVisible()
+    })
+
+    test('collection — should show edit as third tab', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(2)
+      await expect(secondTab).toContainText('Edit')
+    })
+
+    test('collection — should have `/edit` path', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(2)
+      await secondTab.click()
+      await expect(page).toHaveURL(/\/edit/)
     })
   })
 })
