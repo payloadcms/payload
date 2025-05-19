@@ -15,7 +15,12 @@ export const dissasociateAfterDelete = ({
         data: {
           [parentFolderFieldName]: null,
         },
+        depth: 0,
+        overrideAccess: false,
         req,
+        select: {
+          id: true,
+        },
         where: {
           [parentFolderFieldName]: {
             equals: id,

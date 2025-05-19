@@ -11,7 +11,10 @@ export const deleteSubfoldersAfterDelete = ({
   return async ({ id, req }) => {
     await req.payload.delete({
       collection: folderSlug,
+      depth: 0,
+      overrideAccess: false,
       req,
+      select: { id: true },
       where: {
         [parentFolderFieldName]: {
           equals: id,
