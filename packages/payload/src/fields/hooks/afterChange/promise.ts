@@ -74,7 +74,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterChange) {
+    if ('hooks' in field && field.hooks?.afterChange) {
       for (const hook of field.hooks.afterChange) {
         const hookedValue = await hook({
           blockData,
