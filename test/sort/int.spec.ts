@@ -145,26 +145,84 @@ describe('Sort', () => {
 
         const initialMap = posts.docs.map((post) => post.title)
 
-        const fetch1 = await payload.find({
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent when sorting - with limited pages', async () => {
+        const posts = await payload.find({
           collection: nonUniqueSortSlug,
           sort: 'order',
+          limit: 5,
+          page: 2,
         })
 
-        expect(fetch1.docs.map((post) => post.title)).toEqual(initialMap)
+        const initialMap = posts.docs.map((post) => post.title)
 
-        const fetch2 = await payload.find({
-          collection: nonUniqueSortSlug,
-          sort: 'order',
-        })
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              limit: 5,
+              page: 2,
+            }),
+          ),
+        )
 
-        expect(fetch2.docs.map((post) => post.title)).toEqual(initialMap)
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
 
-        const fetch3 = await payload.find({
-          collection: nonUniqueSortSlug,
-          sort: 'order',
-        })
+        expect(fetch1).toEqual(initialMap)
 
-        expect(fetch3.docs.map((post) => post.title)).toEqual(initialMap)
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should sort by createdAt as fallback', async () => {
+        // This is the (reverse - newest first) order that the posts are created in so this should remain consistent as the sort should fallback to '-createdAt'
+        const postsInOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        console.log({ fetch1, fetch2, fetch3 })
+
+        expect(fetch1).toEqual(postsInOrder)
+
+        expect(fetch2).toEqual(postsInOrder)
+
+        expect(fetch3).toEqual(postsInOrder)
       })
 
       it('should always be consistent without sort params in the query', async () => {
@@ -174,23 +232,53 @@ describe('Sort', () => {
 
         const initialMap = posts.docs.map((post) => post.title)
 
-        const fetch1 = await payload.find({
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent without sort params in the query - with limited pages', async () => {
+        const posts = await payload.find({
           collection: nonUniqueSortSlug,
+          page: 2,
+          limit: 4,
         })
 
-        expect(fetch1.docs.map((post) => post.title)).toEqual(initialMap)
+        const initialMap = posts.docs.map((post) => post.title)
 
-        const fetch2 = await payload.find({
-          collection: nonUniqueSortSlug,
-        })
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
 
-        expect(fetch2.docs.map((post) => post.title)).toEqual(initialMap)
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
 
-        const fetch3 = await payload.find({
-          collection: nonUniqueSortSlug,
-        })
+        expect(fetch1).toEqual(initialMap)
 
-        expect(fetch3.docs.map((post) => post.title)).toEqual(initialMap)
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
       })
     })
 

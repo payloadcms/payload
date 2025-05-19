@@ -109,7 +109,7 @@ async function seedSortable(payload: Payload) {
     })
 
     // Wait 2 seconds to guarantee that the createdAt date is different
-    await wait(2000)
+    // await wait(2000)
   }
 
   return new Response(JSON.stringify({ success: true }), {
