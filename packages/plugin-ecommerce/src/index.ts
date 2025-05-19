@@ -2,16 +2,16 @@ import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
-import type { EcommercePluginConfig, PaymentAdapter } from '../types.js'
+import type { EcommercePluginConfig, PaymentAdapter } from './types.js'
 
-import { USD } from '../currencies/index.js'
-import { ordersCollection } from '../orders/ordersCollection.js'
-import { productsCollection } from '../products/productsCollection.js'
-import { transactionsCollection } from '../transactions/transactionsCollection.js'
-import { translations } from '../translations/index.js'
-import { variantOptionsCollection } from '../variants/variantOptionsCollection.js'
-import { variantsCollection } from '../variants/variantsCollection/index.js'
-import { variantTypesCollection } from '../variants/variantTypesCollection.js'
+import { USD } from './currencies/index.js'
+import { ordersCollection } from './orders/ordersCollection.js'
+import { productsCollection } from './products/productsCollection.js'
+import { transactionsCollection } from './transactions/transactionsCollection.js'
+import { translations } from './translations/index.js'
+import { variantOptionsCollection } from './variants/variantOptionsCollection.js'
+import { variantsCollection } from './variants/variantsCollection/index.js'
+import { variantTypesCollection } from './variants/variantTypesCollection.js'
 
 export const ecommercePlugin =
   (pluginConfig?: EcommercePluginConfig) =>

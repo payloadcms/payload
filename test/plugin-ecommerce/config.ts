@@ -3,9 +3,9 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import { EUR, JPY, USD } from '@payloadcms/ecommerce/currencies'
-import { stripeAdapter } from '@payloadcms/ecommerce/payments/stripe'
-import { ecommercePlugin } from '@payloadcms/ecommerce/plugin'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { EUR, JPY, USD } from '@payloadcms/plugin-ecommerce/currencies'
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

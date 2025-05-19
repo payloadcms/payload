@@ -1,7 +1,7 @@
 {
-  "name": "@payloadcms/ecommerce",
+  "name": "@payloadcms/plugin-ecommerce",
   "version": "3.29.0",
-  "description": "Ecommerce for Payload",
+  "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
     "cms",
@@ -75,11 +75,6 @@
       "import": "./src/exports/orders.ts",
       "types": "./src/exports/orders.ts",
       "default": "./src/exports/orders.ts"
-    },
-    "./plugin": {
-      "import": "./src/exports/plugin.ts",
-      "types": "./src/exports/plugin.ts",
-      "default": "./src/exports/plugin.ts"
     },
     "./translations": {
       "import": "./src/exports/translations.ts",
@@ -175,11 +170,6 @@
         "import": "./dist/exports/orders.js",
         "types": "./dist/exports/orders.d.ts",
         "default": "./dist/exports/orders.js"
-      },
-      "./plugin": {
-        "import": "./dist/exports/plugin.js",
-        "types": "./dist/exports/plugin.d.ts",
-        "default": "./dist/exports/plugin.js"
       },
       "./client": {
         "import": "./dist/exports/client.js",
