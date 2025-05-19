@@ -8,6 +8,7 @@ import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { draftsSlug } from './collections/Drafts/index.js'
+import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
@@ -130,6 +131,66 @@ describe('Sort', () => {
           'Post 2',
           'Post 1',
         ])
+      })
+    })
+
+    describe('Non-unique sorting', () => {
+      // There are situations where the sort order is not guaranteed to be consistent, such as when sorting by a non-unique field in MongoDB which does not keep an internal order of items
+      // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
+      it('should always be consistent when sorting', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const fetch1 = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        expect(fetch1.docs.map((post) => post.title)).toEqual(initialMap)
+
+        const fetch2 = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        expect(fetch2.docs.map((post) => post.title)).toEqual(initialMap)
+
+        const fetch3 = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        expect(fetch3.docs.map((post) => post.title)).toEqual(initialMap)
+      })
+
+      it('should always be consistent without sort params in the query', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const fetch1 = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        expect(fetch1.docs.map((post) => post.title)).toEqual(initialMap)
+
+        const fetch2 = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        expect(fetch2.docs.map((post) => post.title)).toEqual(initialMap)
+
+        const fetch3 = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        expect(fetch3.docs.map((post) => post.title)).toEqual(initialMap)
       })
     })
 
