@@ -15,7 +15,7 @@ import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -599,6 +599,56 @@ describe('Fields', () => {
       })
 
       expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    // Function to generate random date between start and end dates
+    function getRandomDate(start: Date, end: Date): string {
+      const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+      return date.toISOString()
+    }
+
+    // Generate sample data
+    const dataSample = Array.from({ length: 100 }, (_, index) => {
+      const startDate = new Date('2024-01-01')
+      const endDate = new Date('2025-12-31')
+
+      return {
+        array: Array.from({ length: 5 }, (_, listIndex) => {
+          return {
+            date: getRandomDate(startDate, endDate),
+          }
+        }),
+        ...dateDoc,
+      }
+    })
+
+    it('should query a date field inside an array field', async () => {
+      await payload.delete({ collection: 'date-fields', where: {} })
+      for (const doc of dataSample) {
+        await payload.create({
+          collection: 'date-fields',
+          data: doc,
+        })
+      }
+
+      const res = await payload.find({
+        collection: 'date-fields',
+        where: { 'array.date': { greater_than: new Date('2025-06-01').toISOString() } },
+      })
+
+      const filter = (doc: any) =>
+        doc.array.some((item) => new Date(item.date).getTime() > new Date('2025-06-01').getTime())
+
+      expect(res.docs.every(filter)).toBe(true)
+      expect(dataSample.filter(filter)).toHaveLength(res.totalDocs)
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (res.totalDocs > 10) {
+        // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
+        // not only ID, but also created_at, updated_at, items_date
+        expect(res.docs).toHaveLength(10)
+      } else {
+        expect(res.docs.length).toBeLessThanOrEqual(res.totalDocs)
+      }
     })
   })
 
@@ -1564,7 +1614,7 @@ describe('Fields', () => {
     it('should create with ids and nested ids', async () => {
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
@@ -1859,6 +1909,53 @@ describe('Fields', () => {
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
+        },
+      })
+    })
+
+    it('should work with unnamed group', async () => {
+      const groupDoc = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          insideUnnamedGroup: 'Hello world',
+          deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+        },
+      })
+      expect(groupDoc).toMatchObject({
+        id: expect.anything(),
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
+    it('should work with unnamed group - graphql', async () => {
+      const mutation = `mutation {
+              createGroupField(
+                data: {
+                  insideUnnamedGroup: "Hello world",
+                  deeplyNestedGroup: { insideNestedUnnamedGroup: "Secondfield" },
+                  group: {text: "hello"}
+                }
+              ) {
+                insideUnnamedGroup
+                deeplyNestedGroup {
+                  insideNestedUnnamedGroup
+                }
+              }
+            }`
+
+      const groupDoc = await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: mutation }),
+      })
+
+      const data = (await groupDoc.json()).data.createGroupField
+
+      expect(data).toMatchObject({
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
         },
       })
     })
@@ -2307,7 +2404,7 @@ describe('Fields', () => {
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()

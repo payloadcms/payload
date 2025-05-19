@@ -46,7 +46,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    path,
+    path: pathFromProps,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
@@ -113,13 +113,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     errorPaths,
+    path,
     rows = [],
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

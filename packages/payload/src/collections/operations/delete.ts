@@ -5,7 +5,6 @@ import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
-  BeforeOperationHook,
   BulkOperationResult,
   Collection,
   DataFromCollectionSlug,
@@ -110,6 +109,7 @@ export const deleteOperation = async <
     const fullWhere = combineQueries(where, accessResult)
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

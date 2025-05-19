@@ -28,7 +28,7 @@ export type RowToInsert = {
     [tableName: string]: ArrayRowToInsert[]
   }
   blocks: {
-    [blockType: string]: BlockRowToInsert[]
+    [tableName: string]: BlockRowToInsert[]
   }
   blocksToDelete: Set<string>
   locales: {

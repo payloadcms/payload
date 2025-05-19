@@ -234,6 +234,7 @@ export const updateDocument = async <
     docWithLocales: undefined,
     global: null,
     operation: 'update',
+    overrideAccess,
     req,
     skipValidation:
       shouldSaveDraft &&

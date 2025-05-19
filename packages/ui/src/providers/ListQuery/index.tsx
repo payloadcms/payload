@@ -48,7 +48,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (modifySearchParams) {
       return searchParams
     } else {
-      return {}
+      return {
+        limit: String(defaultLimit),
+        sort: defaultSort,
+      }
     }
   })
 

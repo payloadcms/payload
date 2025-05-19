@@ -23,6 +23,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       serverURL,
     },
   } = useConfig()
+
   const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
     useDocumentInfo()
 

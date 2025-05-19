@@ -790,6 +790,7 @@ export interface ConditionalLogic {
   text: string;
   toggleField?: boolean | null;
   fieldWithCondition?: string | null;
+  fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
@@ -925,6 +926,12 @@ export interface DateField {
     | {
         dayAndTime?: string | null;
         dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
+  array?:
+    | {
+        date?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1072,6 +1079,10 @@ export interface GroupField {
           value: string | EmailField;
         }[]
       | null;
+  };
+  insideUnnamedGroup?: string | null;
+  deeplyNestedGroup?: {
+    insideNestedUnnamedGroup?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1312,6 +1323,35 @@ export interface RelationshipField {
     | null;
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
+  relationshipDrawer?: (string | null) | TextField;
+  relationshipDrawerReadOnly?: (string | null) | TextField;
+  polymorphicRelationshipDrawer?:
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string | ArrayField;
+      } | null);
+  relationshipDrawerHasMany?: (string | TextField)[] | null;
+  relationshipDrawerHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
+    | null;
+  relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
+  relationshipDrawerWithFilterOptions?: {
+    relationTo: 'text-fields';
+    value: string | TextField;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2341,6 +2381,7 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
   fieldWithCondition?: T;
+  fieldWithOperationCondition?: T;
   customFieldWithField?: T;
   customFieldWithHOC?: T;
   customClientFieldWithCondition?: T;
@@ -2465,6 +2506,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
     | {
         dayAndTime?: T;
         dayAndTime_tz?: T;
+        id?: T;
+      };
+  array?:
+    | T
+    | {
+        date?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -2633,6 +2680,12 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         email?: T;
       };
+  insideUnnamedGroup?: T;
+  deeplyNestedGroup?:
+    | T
+    | {
+        insideNestedUnnamedGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2786,6 +2839,13 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipWithMinRows?: T;
   relationToRow?: T;
   relationToRowMany?: T;
+  relationshipDrawer?: T;
+  relationshipDrawerReadOnly?: T;
+  polymorphicRelationshipDrawer?: T;
+  relationshipDrawerHasMany?: T;
+  relationshipDrawerHasManyPolymorphic?: T;
+  relationshipDrawerWithAllowCreateFalse?: T;
+  relationshipDrawerWithFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }

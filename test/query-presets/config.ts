@@ -23,10 +23,8 @@ export default buildConfigWithDefaults({
     //   plural: 'Reports',
     // },
     access: {
-      read: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
-      update: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
+      read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
+      update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
     constraints: {
       read: [
@@ -39,6 +37,11 @@ export default buildConfigWithDefaults({
               in: user?.roles || [],
             },
           }),
+        },
+        {
+          label: 'Noone',
+          value: 'noone',
+          access: () => false,
         },
       ],
       update: [
@@ -55,7 +58,7 @@ export default buildConfigWithDefaults({
       ],
     },
   },
-  collections: [Pages, Users, Posts],
+  collections: [Pages, Posts, Users],
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)

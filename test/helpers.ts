@@ -185,9 +185,20 @@ export async function login(args: LoginArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
-    admin: { routes: { createFirstUser, login: incomingLoginRoute } = {} },
+    admin: {
+      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
+    },
     routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
+
+  const logoutRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLogoutRoute,
+  })
+
+  await page.goto(logoutRoute)
+  await wait(500)
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
   const loginRoute = formatAdminURL({

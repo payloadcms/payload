@@ -5,6 +5,7 @@ import type { Field } from '../fields/config/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import { toWords } from '../utilities/formatLabels.js'
+import { preventLockout } from './preventLockout.js'
 import { operations, type QueryPresetConstraint } from './types.js'
 
 export const getConstraints = (config: Config): Field => ({
@@ -74,11 +75,11 @@ export const getConstraints = (config: Config): Field => ({
                 },
               ],
             },
-            relationTo: 'users',
+            relationTo: config.admin?.user ?? 'users', // TODO: remove this fallback when the args are properly typed as `SanitizedConfig`
           },
           ...(config?.queryPresets?.constraints?.[operation]?.reduce(
             (acc: Field[], option: QueryPresetConstraint) => {
-              option.fields.forEach((field, index) => {
+              option.fields?.forEach((field, index) => {
                 acc.push({ ...field })
 
                 if (fieldAffectsData(field)) {
@@ -101,4 +102,5 @@ export const getConstraints = (config: Config): Field => ({
     label: () => toWords(operation),
   })),
   label: 'Sharing settings',
+  validate: preventLockout,
 })

@@ -10,7 +10,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
@@ -68,7 +68,7 @@ const getInitialDrawerData = ({
 
   const nextSegments = segments.slice(1, segments.length)
 
-  if (field.type === 'tab' || field.type === 'group') {
+  if (field.type === 'tab' || (field.type === 'group' && fieldAffectsData(field))) {
     return {
       [field.name]: getInitialDrawerData({
         collectionSlug,
@@ -131,7 +131,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       on,
       required,
     },
-    path,
+    path: pathFromProps,
   } = props
 
   const { id: docID, docConfig } = useDocumentInfo()
@@ -140,10 +140,11 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    path,
     showError,
     value,
   } = useField<PaginatedDocs>({
-    path,
+    potentiallyStalePath: pathFromProps,
   })
 
   const filterOptions: null | Where = useMemo(() => {
