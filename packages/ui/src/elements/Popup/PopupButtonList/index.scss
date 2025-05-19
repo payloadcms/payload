@@ -3,10 +3,11 @@
 @layer payload-default {
   .popup-button-list {
     --list-button-padding: calc(var(--base) * 0.5);
+    --popup-button-list-gap: 3px;
     display: flex;
     flex-direction: column;
     text-align: left;
-    gap: 3px;
+    gap: var(--popup-button-list-gap);
     [dir='rtl'] &__text-align--left {
       text-align: right;
     }
