@@ -5,9 +5,7 @@ export const esTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Está a punto de cambiar la propiedad de <0>{{fromTenant}}</0> a <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Confirme el cambio de {{tenantLabel}}',
-    fields: {
-      tenantFieldLabel: 'Inquilino Asignado',
-    },
+    'field-assignedTentant-label': 'Inquilino Asignado',
   },
 }
 

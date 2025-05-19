@@ -5,9 +5,7 @@ export const rsTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Upravo ćete promeniti vlasništvo sa <0>{{fromTenant}}</0> na <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Potvrdi promena {{tenantLabel}}',
-    fields: {
-      tenantFieldLabel: 'Dodeljeni stanar',
-    },
+    'field-assignedTentant-label': 'Dodeljen stanar',
   },
 }
 

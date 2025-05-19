@@ -59,7 +59,7 @@ export const tenantField = ({
   },
   index: true,
   // @ts-expect-error translations are not typed for this plugin
-  label: ({ t }) => t('plugin-multi-tenant:fields:tenantFieldLabel'),
+  label: ({ t }) => t('plugin-multi-tenant:field-assignedTentant-label'),
   relationTo: tenantsCollectionSlug,
   unique,
 })
