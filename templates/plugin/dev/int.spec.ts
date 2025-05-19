@@ -1,52 +1,20 @@
 import type { Payload } from 'payload'
 
 import config from '@payload-config'
-import dotenv from 'dotenv'
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
-import path from 'path'
 import { createPayloadRequest, getPayload } from 'payload'
-import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
 import { getCustomEndpointHandler } from '../src/endpoints/getCustomEndpointHandler.js'
-const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 let payload: Payload
-let memoryDB: MongoMemoryReplSet | undefined
 
 afterAll(async () => {
   if (payload.db.destroy) {
     await payload.db.destroy()
   }
-
-  if (memoryDB) {
-    await memoryDB.stop()
-  }
 })
 
 beforeAll(async () => {
-  process.env.DISABLE_PAYLOAD_HMR = 'true'
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
-
-  dotenv.config({
-    path: path.resolve(dirname, './.env'),
-  })
-
-  if (!process.env.DATABASE_URI) {
-    console.log('Starting memory database')
-    memoryDB = await MongoMemoryReplSet.create({
-      replSet: {
-        count: 3,
-        dbName: 'payloadmemory',
-      },
-    })
-    console.log('Memory database started')
-
-    process.env.DATABASE_URI = `${memoryDB.getUri()}&retryWrites=true`
-  }
-
-  const { default: config } = await import('./payload.config.js')
-
   payload = await getPayload({ config })
 })
 
