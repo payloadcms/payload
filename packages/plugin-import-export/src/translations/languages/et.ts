@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const etTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Kõik kohalikud seaded',
-    exportDocumentLabel: 'Ekspordi {{silt}}',
+    exportDocumentLabel: 'Ekspordi {{label}}',
     exportOptions: 'Ekspordi valikud',
     'field-depth-label': 'Sügavus',
     'field-drafts-label': 'Kaasa arvatud mustandid',

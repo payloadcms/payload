@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const roTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Toate locațiile',
-    exportDocumentLabel: 'Export {{etichetă}}',
+    exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Opțiuni de export',
     'field-depth-label': 'Adâncime',
     'field-drafts-label': 'Includează schițe',

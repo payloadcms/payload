@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const azTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Bütün yerlər',
-    exportDocumentLabel: '{{Etiket}} ixrac edin',
+    exportDocumentLabel: '{{label}} ixrac edin',
     exportOptions: 'İxrac Variantları',
     'field-depth-label': 'Dərinlik',
     'field-drafts-label': 'Qaralamaları daxil etin',

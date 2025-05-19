@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const trTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tüm yerler',
-    exportDocumentLabel: '{{etiket}} dışa aktar',
+    exportDocumentLabel: '{{label}} dışa aktar',
     exportOptions: 'İhracat Seçenekleri',
     'field-depth-label': 'Derinlik',
     'field-drafts-label': 'Taslakları dahil et',

@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const deTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Alle Gebietsschemata',
-    exportDocumentLabel: 'Export {{Label}}',
+    exportDocumentLabel: 'Export {{label}}',
     exportOptions: 'Exportoptionen',
     'field-depth-label': 'Tiefe',
     'field-drafts-label': 'Fügen Sie Entwürfe hinzu',

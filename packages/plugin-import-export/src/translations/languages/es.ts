@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const esTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Todas las ubicaciones',
-    exportDocumentLabel: 'Exportar {{etiqueta}}',
+    exportDocumentLabel: 'Exportar {{label}}',
     exportOptions: 'Opciones de Exportación',
     'field-depth-label': 'Profundidad',
     'field-drafts-label': 'Incluir borradores',

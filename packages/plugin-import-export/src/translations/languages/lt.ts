@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const ltTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Visos vietovės',
-    exportDocumentLabel: 'Eksportuoti {{žymė}}',
+    exportDocumentLabel: 'Eksportuoti {{label}}',
     exportOptions: 'Eksporto parinktys',
     'field-depth-label': 'Gylis',
     'field-drafts-label': 'Įtraukite juodraščius',

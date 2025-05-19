@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const faTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'تمام مکان ها',
-    exportDocumentLabel: 'صادر کردن {{برچسب}}',
+    exportDocumentLabel: 'صادر کردن {{label}}',
     exportOptions: 'گزینه های صادرات',
     'field-depth-label': 'عمق',
     'field-drafts-label': 'شامل پیش نویس ها',

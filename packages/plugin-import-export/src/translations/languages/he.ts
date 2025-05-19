@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const heTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'כל המיקומים',
-    exportDocumentLabel: 'ייצוא {{תווית}}',
+    exportDocumentLabel: 'ייצוא {{label}}',
     exportOptions: 'אפשרויות ייצוא',
     'field-depth-label': 'עומק',
     'field-drafts-label': 'כלול טיוטות',

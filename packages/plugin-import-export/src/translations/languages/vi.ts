@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const viTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Tất cả địa điểm',
-    exportDocumentLabel: 'Xuất {{nhãn}}',
+    exportDocumentLabel: 'Xuất {{label}}',
     exportOptions: 'Tùy chọn xuất',
     'field-depth-label': 'Độ sâu',
     'field-drafts-label': 'Bao gồm bản thảo',

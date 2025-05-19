@@ -3,7 +3,7 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 export const hrTranslations: PluginDefaultTranslationsObject = {
   'plugin-import-export': {
     allLocales: 'Sve lokalne postavke',
-    exportDocumentLabel: 'Izvoz {{oznaka}}',
+    exportDocumentLabel: 'Izvoz {{label}}',
     exportOptions: 'Opcije izvoza',
     'field-depth-label': 'Dubina',
     'field-drafts-label': 'Uključite nacrte',
