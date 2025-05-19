@@ -5,6 +5,9 @@ export const etTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Te olete tegemas omandiõiguse muudatust <0>{{fromTenant}}</0>lt <0>{{toTenant}}</0>le.',
     'confirm-tenant-switch--heading': 'Kinnita {{tenantLabel}} muutus',
+    fields: {
+      tenantFieldLabel: 'Määratud üürnik',
+    },
   },
 }
 

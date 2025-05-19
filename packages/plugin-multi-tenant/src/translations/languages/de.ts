@@ -5,6 +5,9 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Sie sind dabei, den Besitz von <0>{{fromTenant}}</0> auf <0>{{toTenant}}</0> zu übertragen.',
     'confirm-tenant-switch--heading': 'Bestätigen Sie die Änderung von {{tenantLabel}}.',
+    fields: {
+      tenantFieldLabel: 'Zugewiesener Mieter',
+    },
   },
 }
 

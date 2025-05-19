@@ -5,6 +5,9 @@ export const caTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Estàs a punt de canviar la propietat de <0>{{fromTenant}}</0> a <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Confirmeu el canvi de {{tenantLabel}}',
+    fields: {
+      tenantFieldLabel: 'Inquilí Assignat',
+    },
   },
 }
 

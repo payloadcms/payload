@@ -5,6 +5,9 @@ export const myTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Anda akan mengubah pemilikan dari <0>{{fromTenant}}</0> ke <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Sahkan perubahan {{tenantLabel}}',
+    fields: {
+      tenantFieldLabel: 'ထိုးထားသော အငှားရှင်',
+    },
   },
 }
 

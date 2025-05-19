@@ -6,6 +6,9 @@ export type PluginLanguage = Language<{
   'plugin-multi-tenant': {
     'confirm-tenant-switch--body': string
     'confirm-tenant-switch--heading': string
+    fields: {
+      tenantFieldLabel: string
+    }
   }
 }>
 

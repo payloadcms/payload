@@ -5,6 +5,9 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Du är på väg att ändra ägare från <0>{{fromTenant}}</0> till <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Bekräfta ändring av {{tenantLabel}}',
+    fields: {
+      tenantFieldLabel: 'Tilldelad Hyresgäst',
+    },
   },
 }
 

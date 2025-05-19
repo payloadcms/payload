@@ -58,7 +58,8 @@ export const tenantField = ({
     ],
   },
   index: true,
-  label: 'Assigned Tenant',
+  // @ts-expect-error translations are not typed for this plugin
+  label: ({ t }) => t('plugin-multi-tenant:fields:tenantFieldLabel'),
   relationTo: tenantsCollectionSlug,
   unique,
 })

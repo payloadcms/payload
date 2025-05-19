@@ -5,6 +5,9 @@ export const zhTwTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       '您即將將所有權從 <0>{{fromTenant}}</0> 轉移至 <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': '確認{{tenantLabel}}更改',
+    fields: {
+      tenantFieldLabel: '指定租戶',
+    },
   },
 }
 

@@ -5,6 +5,9 @@ export const heTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'אתה עומד לשנות בעלות מ- <0>{{fromTenant}}</0> ל- <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'אשר שינוי {{tenantLabel}}',
+    fields: {
+      tenantFieldLabel: 'שוכר מוקצה',
+    },
   },
 }
 
