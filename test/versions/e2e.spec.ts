@@ -160,9 +160,9 @@ describe('Versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count')
+      const versionsPill = versionsTab.locator('.pill-version-count')
       await versionsPill.waitFor({ state: 'visible' })
-      const versionCount = versionsTab.locator('.doc-tab__count').first()
+      const versionCount = versionsTab.locator('.pill-version-count').first()
       await expect(versionCount).toHaveText('11')
     })
 
@@ -510,7 +510,7 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .doc-tab__count').textContent(),
+            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')
@@ -634,7 +634,7 @@ describe('Versions', () => {
 
       await page.goto(url.edit(createdDoc.id))
 
-      const versionsCountSelector = `.doc-tabs__tabs .doc-tab__count`
+      const versionsCountSelector = `.doc-tabs__tabs .pill-version-count`
       const initialCount = await page.locator(versionsCountSelector).textContent()
 
       const field = page.locator('#field-description')
