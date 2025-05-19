@@ -152,8 +152,8 @@ export interface Post {
  * via the `definition` "drafts".
  */
 export interface Draft {
-  id: number;
-  _order?: string;
+  id: string;
+  _order?: string | null;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -204,10 +204,10 @@ export interface Localized {
  * via the `definition` "orderable".
  */
 export interface Orderable {
-  id: number;
-  _orderable_orderableJoinField2_order?: string;
-  _orderable_orderableJoinField1_order?: string;
-  _order?: string;
+  id: string;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
   title?: string | null;
   orderableField?: (number | null) | OrderableJoin;
   updatedAt: string;
@@ -485,6 +485,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

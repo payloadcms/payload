@@ -615,6 +615,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
   	"relation_to" varchar,
+  	"category_i_d" varchar,
   	"title" varchar
   );
   

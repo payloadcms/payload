@@ -123,7 +123,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
               parentIndexPath={indexPath}
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}
-              permissions={permissions === true ? permissions : permissions?.fields}
+              permissions={permissions}
               readOnly={readOnly}
             />
           )}
