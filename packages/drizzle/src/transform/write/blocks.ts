@@ -6,6 +6,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlockRowToInsert, RelationshipToDelete } from './types.js'
 
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -66,10 +67,6 @@ export const transformBlocks = ({
     }
     const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockType]) {
-      blocks[blockType] = []
-    }
-
     const newRow: BlockRowToInsert = {
       arrays: {},
       locales: {},
@@ -86,7 +83,14 @@ export const transformBlocks = ({
       newRow.row._locale = withinArrayOrBlockLocale
     }
 
-    const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
+    const blockTableName = resolveBlockTableName(
+      matchedBlock,
+      adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`),
+    )
+
+    if (!blocks[blockTableName]) {
+      blocks[blockTableName] = []
+    }
 
     const hasUUID = adapter.tables[blockTableName]._uuid
 
@@ -124,6 +128,6 @@ export const transformBlocks = ({
       withinArrayOrBlockLocale,
     })
 
-    blocks[blockType].push(newRow)
+    blocks[blockTableName].push(newRow)
   })
 }

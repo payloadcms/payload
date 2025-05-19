@@ -72,6 +72,7 @@ export interface Config {
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     'localized-drafts': LocalizedDraft;
+    'localized-date-fields': LocalizedDateField;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -97,6 +98,7 @@ export interface Config {
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
+    'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -326,6 +328,18 @@ export interface NestedFieldTable {
 export interface LocalizedDraft {
   id: string;
   title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields".
+ */
+export interface LocalizedDateField {
+  id: string;
+  localizedDate?: string | null;
+  date?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -714,6 +728,10 @@ export interface PayloadLockedDocument {
         value: string | LocalizedDraft;
       } | null)
     | ({
+        relationTo: 'localized-date-fields';
+        value: string | LocalizedDateField;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -948,6 +966,17 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  */
 export interface LocalizedDraftsSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-date-fields_select".
+ */
+export interface LocalizedDateFieldsSelect<T extends boolean = true> {
+  localizedDate?: T;
+  date?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -929,6 +929,12 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  array?:
+    | {
+        date?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1073,6 +1079,10 @@ export interface GroupField {
           value: string | EmailField;
         }[]
       | null;
+  };
+  insideUnnamedGroup?: string | null;
+  deeplyNestedGroup?: {
+    insideNestedUnnamedGroup?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1326,10 +1336,16 @@ export interface RelationshipField {
       } | null);
   relationshipDrawerHasMany?: (string | TextField)[] | null;
   relationshipDrawerHasManyPolymorphic?:
-    | {
-        relationTo: 'text-fields';
-        value: string | TextField;
-      }[]
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string | TextField;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string | ArrayField;
+          }
+      )[]
     | null;
   relationshipDrawerWithAllowCreateFalse?: (string | null) | TextField;
   relationshipDrawerWithFilterOptions?: {
@@ -2492,6 +2508,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         dayAndTime_tz?: T;
         id?: T;
       };
+  array?:
+    | T
+    | {
+        date?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2657,6 +2679,12 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | T
     | {
         email?: T;
+      };
+  insideUnnamedGroup?: T;
+  deeplyNestedGroup?:
+    | T
+    | {
+        insideNestedUnnamedGroup?: T;
       };
   updatedAt?: T;
   createdAt?: T;

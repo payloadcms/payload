@@ -1,4 +1,4 @@
-import type { Table } from 'drizzle-orm'
+import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
@@ -16,6 +16,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale?: string
   parentIsLocalized: boolean
+  rawSort?: SQL
   selectFields: Record<string, GenericColumn>
   sort?: Sort
   tableName: string
@@ -31,6 +32,7 @@ export const buildOrderBy = ({
   joins,
   locale,
   parentIsLocalized,
+  rawSort,
   selectFields,
   sort,
   tableName,
@@ -74,17 +76,23 @@ export const buildOrderBy = ({
         value: sortProperty,
       })
       if (sortTable?.[sortTableColumnName]) {
+        let order = sortDirection === 'asc' ? asc : desc
+
+        if (rawSort) {
+          order = () => rawSort
+        }
+
         orderBy.push({
           column:
             aliasTable && tableName === getNameFromDrizzleTable(sortTable)
               ? aliasTable[sortTableColumnName]
               : sortTable[sortTableColumnName],
-          order: sortDirection === 'asc' ? asc : desc,
+          order,
         })
 
         selectFields[sortTableColumnName] = sortTable[sortTableColumnName]
       }
-    } catch (err) {
+    } catch (_) {
       // continue
     }
   }
