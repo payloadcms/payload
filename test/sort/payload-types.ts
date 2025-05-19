@@ -151,6 +151,7 @@ export interface Post {
  */
 export interface Draft {
   id: string;
+  _order?: string | null;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -191,9 +192,9 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _orderable_orderableJoinField2_order?: string;
-  _orderable_orderableJoinField1_order?: string;
-  _order?: string;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
   title?: string | null;
   orderableField?: (string | null) | OrderableJoin;
   updatedAt: string;
@@ -340,6 +341,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "drafts_select".
  */
 export interface DraftsSelect<T extends boolean = true> {
+  _order?: T;
   text?: T;
   number?: T;
   number2?: T;

@@ -128,10 +128,7 @@ export async function translateObject(props: {
 
     for (const missingKey of missingKeys) {
       const keys: string[] = missingKey.split('.')
-      const sourceText = keys.reduce(
-        (acc, key) => acc[key],
-        fromTranslationsObject,
-      )
+      const sourceText = keys.reduce((acc, key) => acc[key], fromTranslationsObject)
       if (!sourceText || typeof sourceText !== 'string') {
         throw new Error(
           `Missing key ${missingKey} or key not "leaf" in fromTranslationsObject for lang ${targetLang}. (2)`,

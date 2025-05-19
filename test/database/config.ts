@@ -467,6 +467,12 @@ export default buildConfigWithDefaults({
           virtual: 'post.title',
         },
         {
+          name: 'postTitleHidden',
+          type: 'text',
+          virtual: 'post.title',
+          hidden: true,
+        },
+        {
           name: 'postCategoryTitle',
           type: 'text',
           virtual: 'post.category.title',
@@ -695,6 +701,42 @@ export default buildConfigWithDefaults({
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      slug: 'blocks-docs',
+      fields: [
+        {
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocksLocalized',
+        },
+        {
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocks',
         },
       ],
     },
