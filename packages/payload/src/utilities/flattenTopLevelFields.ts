@@ -102,7 +102,7 @@ function flattenFields<TField extends ClientField | Field>(
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     if (fieldHasSubFields(field)) {
-      if (field.type == 'group') {
+      if (field.type === 'group') {
         if (extractFieldsToTopFromGroupFields && 'fields' in field) {
           const translatedLabel =
             'label' in field && isLabelType(field.label) && i18n
