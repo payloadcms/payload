@@ -1956,6 +1956,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/payload
     devDependencies:
+      '@payloadcms/plugin-import-export':
+        specifier: workspace:*
+        version: link:../../packages/plugin-import-export
       '@payloadcms/plugin-multi-tenant':
         specifier: workspace:*
         version: link:../../packages/plugin-multi-tenant
