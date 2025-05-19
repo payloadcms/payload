@@ -113,7 +113,6 @@ export const Preview = () => {
         <h3>
           <Translation i18nKey="version:preview" t={t} />
         </h3>
-        {resultCount && <span>{resultCount} total documents</span>}
         {resultCount && (
           <Translation
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
