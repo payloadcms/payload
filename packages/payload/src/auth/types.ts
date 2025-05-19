@@ -118,6 +118,7 @@ type BaseUser = {
   collection: string
   email?: string
   id: number | string
+  sessions?: Array<UserSession>
   username?: string
 }
 
@@ -133,6 +134,7 @@ export type ClientUser = {
   [key: string]: any
 } & BaseUser
 
+export type UserSession = { createdAt: Date; expiresAt: Date; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string

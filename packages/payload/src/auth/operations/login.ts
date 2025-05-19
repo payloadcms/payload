@@ -118,9 +118,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    let user:
-      | ({ sessions?: Array<{ createdAt: Date; expiresAt: Date; id: string }> } & User)
-      | null = null
+    let user: null | User = null
     const { email: unsanitizedEmail, password } = data
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
