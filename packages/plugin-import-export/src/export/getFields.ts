@@ -12,10 +12,11 @@ export const getFields = (config: Config): Field[] => {
         width: '33%',
       },
       defaultValue: 'all',
-      label: 'Locale',
+      // @ts-expect-error - this is not correctly typed in plugins right now
+      label: ({ t }) => t('plugin-import-export:field-locale-label'),
       options: [
         {
-          label: 'All Locales',
+          label: ({ t }) => t('general:allLocales'),
           value: 'all',
         },
         ...config.localization.locales.map((locale) => ({
@@ -34,7 +35,8 @@ export const getFields = (config: Config): Field[] => {
           name: 'name',
           type: 'text',
           defaultValue: () => getFilename(),
-          label: 'File Name',
+          // @ts-expect-error - this is not correctly typed in plugins right now
+          label: ({ t }) => t('plugin-import-export:field-name-label'),
         },
         {
           type: 'row',
@@ -46,7 +48,8 @@ export const getFields = (config: Config): Field[] => {
                 width: '33%',
               },
               defaultValue: 'csv',
-              label: 'Export Format',
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-format-label'),
               options: [
                 {
                   label: 'CSV',
@@ -66,6 +69,8 @@ export const getFields = (config: Config): Field[] => {
                 placeholder: 'No limit',
                 width: '33%',
               },
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-limit-label'),
             },
             {
               name: 'sort',
@@ -75,6 +80,8 @@ export const getFields = (config: Config): Field[] => {
                   Field: '@payloadcms/plugin-import-export/rsc#SortBy',
                 },
               },
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-sort-label'),
             },
           ],
         },
@@ -98,14 +105,15 @@ export const getFields = (config: Config): Field[] => {
                 width: '33%',
               },
               defaultValue: 'yes',
-              label: 'Drafts',
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:field-drafts-label'),
               options: [
                 {
-                  label: 'Yes',
+                  label: ({ t }) => t('general:yes'),
                   value: 'yes',
                 },
                 {
-                  label: 'No',
+                  label: ({ t }) => t('general:no'),
                   value: 'no',
                 },
               ],
@@ -113,6 +121,8 @@ export const getFields = (config: Config): Field[] => {
             // {
             //   name: 'depth',
             //   type: 'number',
+            //   // @ts-expect-error - this is not correctly typed in plugins right now
+            //   label: ({ t }) => t('plugin-import-export:field-depth-label'),
             //   admin: {
             //     width: '33%',
             //   },
@@ -126,17 +136,22 @@ export const getFields = (config: Config): Field[] => {
           name: 'selectionToUse',
           type: 'radio',
           defaultValue: 'all',
+          // @ts-expect-error - this is not correctly typed in plugins right now
+          label: ({ t }) => t('plugin-import-export:field-selectionToUse-label'),
           options: [
             {
-              label: 'Use current selection',
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-currentSelection'),
               value: 'currentSelection',
             },
             {
-              label: 'Use current filters',
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-currentFilters'),
               value: 'currentFilters',
             },
             {
-              label: 'Use all documents',
+              // @ts-expect-error - this is not correctly typed in plugins right now
+              label: ({ t }) => t('plugin-import-export:selectionToUse-allDocuments'),
               value: 'all',
             },
           ],
@@ -151,6 +166,8 @@ export const getFields = (config: Config): Field[] => {
             },
           },
           hasMany: true,
+          // @ts-expect-error - this is not correctly typed in plugins right now
+          label: ({ t }) => t('plugin-import-export:field-fields-label'),
         },
         {
           name: 'collectionSlug',
@@ -174,7 +191,8 @@ export const getFields = (config: Config): Field[] => {
           defaultValue: {},
         },
       ],
-      label: 'Export Options',
+      // @ts-expect-error - this is not correctly typed in plugins right now
+      label: ({ t }) => t('plugin-import-export:exportOptions'),
     },
     {
       name: 'preview',

@@ -5,6 +5,7 @@ export const hrTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Upravo ćete promijeniti vlasništvo sa <0>{{fromTenant}}</0> na <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Potvrdi promjenu {{tenantLabel}}',
+    'field-assignedTentant-label': 'Dodijeljeni stanar',
   },
 }
 

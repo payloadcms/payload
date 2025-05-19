@@ -5,6 +5,7 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Դուք պատրաստ եք փոխել գերեցդիմատնին ընկերությունը <0>{{fromTenant}}</0>-ից <0>{{toTenant}}</0>-ին',
     'confirm-tenant-switch--heading': 'Հաստատեք {{tenantLabel}} փոփոխությունը',
+    'field-assignedTentant-label': 'Հանձնարարված վարձակալ',
   },
 }
 
