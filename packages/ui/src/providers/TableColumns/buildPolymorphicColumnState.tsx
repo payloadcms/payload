@@ -67,11 +67,13 @@ export const buildPolymorphicColumnState = (args: Args): Column[] => {
 
   // clientFields contains the fake `id` column
   let sortedFieldMap = flattenTopLevelFields(filterFields(fields), {
+    extractFieldsToTopFromGroupFields: true,
     i18n,
     keepPresentationalFields: true,
   }) as ClientField[]
 
   let _sortedFieldMap = flattenTopLevelFields(filterFields(fields), {
+    extractFieldsToTopFromGroupFields: true,
     i18n,
     keepPresentationalFields: true,
   }) as Field[] // TODO: think of a way to avoid this additional flatten

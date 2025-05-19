@@ -13,7 +13,10 @@ export const useUseTitleField = (collection: ClientCollectionConfig): ClientFiel
 
   const { i18n } = useTranslation()
 
-  const topLevelFields = flattenTopLevelFields(fields, { i18n }) as ClientField[]
+  const topLevelFields = flattenTopLevelFields(fields, {
+    extractFieldsToTopFromGroupFields: true,
+    i18n,
+  }) as ClientField[]
 
   return topLevelFields?.find((field) => 'name' in field && field.name === useAsTitle)
 }

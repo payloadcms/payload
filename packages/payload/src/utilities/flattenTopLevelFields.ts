@@ -1,5 +1,6 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
+// @ts-strict-ignore
+import type { JSX } from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -14,7 +15,27 @@ import type {
   Tab,
 } from '../fields/config/types.js'
 
-import { fieldAffectsData, fieldIsPresentationalOnly, tabHasName } from '../fields/config/types.js'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldIsPresentationalOnly,
+  tabHasName,
+} from '../fields/config/types.js'
+
+type LabelType =
+  | (() => JSX.Element)
+  | ((args: { i18n: I18nClient; t: any }) => string)
+  | JSX.Element
+  | Record<string, string>
+  | string
+
+function isLabelType(value: unknown): value is LabelType {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'function' ||
+    (typeof value === 'object' && value !== null)
+  )
+}
 
 type FlattenedField<TField> = TField extends ClientField
   ? { accessor?: string; labelWithPrefix?: string } & (
@@ -26,59 +47,105 @@ type FlattenedField<TField> = TField extends ClientField
 type TabType<TField> = TField extends ClientField ? ClientTab : Tab
 
 /**
- * Flattens a collection's fields into a single array of fields, as long
- * as the fields do not affect data.
+ * Options to control how fields are flattened.
+ */
+type FlattenFieldsOptions = {
+  /**
+   * If true, nested fields inside `group` fields will be lifted to the top level
+   * and given contextual `accessor` and `labelWithPrefix` values.
+   * Default: false.
+   */
+  extractFieldsToTopFromGroupFields?: boolean
+  /**
+   * i18n context used for translating `label` values via `getTranslation`.
+   */
+  i18n?: I18nClient
+  /**
+   * If true, presentational-only fields (like UI fields) will be included
+   * in the output. Otherwise, they will be skipped.
+   * Default: false.
+   */
+  keepPresentationalFields?: boolean
+  /**
+   * A label prefix to prepend to translated labels when building `labelWithPrefix`.
+   * Used recursively when flattening nested fields.
+   */
+  labelPrefix?: string
+  /**
+   * A path prefix to prepend to field names when building the `accessor`.
+   * Used recursively when flattening nested fields.
+   */
+  pathPrefix?: string
+}
+
+/**
+ * Flattens a collection's fields into a single array of fields, optionally
+ * extracting nested fields in group fields.
  *
- * @param fields
- * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
+ * @param fields - Array of fields to flatten
+ * @param options - Options to control the flattening behavior
  */
 function flattenFields<TField extends ClientField | Field>(
   fields: TField[],
-  options?:
-    | {
-        i18n?: I18nClient
-        keepPresentationalFields?: boolean
-        labelPrefix?: string
-        pathPrefix?: string
-      }
-    | boolean,
+  options?: boolean | FlattenFieldsOptions,
 ): FlattenedField<TField>[] {
-  const normalizedOptions =
+  const normalizedOptions: FlattenFieldsOptions =
     typeof options === 'boolean' ? { keepPresentationalFields: options } : (options ?? {})
 
-  const { i18n, keepPresentationalFields, labelPrefix, pathPrefix } = normalizedOptions
+  const {
+    extractFieldsToTopFromGroupFields = false,
+    i18n,
+    keepPresentationalFields,
+    labelPrefix,
+    pathPrefix,
+  } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
-    if ('fields' in field && field.type !== 'array') {
-      const translatedLabel =
-        'label' in field && field.label && i18n ? getTranslation(field.label, i18n) : undefined
+    if (fieldHasSubFields(field)) {
+      if (field.type == 'group') {
+        if (extractFieldsToTopFromGroupFields && 'fields' in field) {
+          const translatedLabel =
+            'label' in field && isLabelType(field.label) && i18n
+              ? getTranslation(field.label, i18n)
+              : undefined
 
-      const labelWithPrefix = labelPrefix
-        ? translatedLabel
-          ? `${labelPrefix} > ${translatedLabel}`
-          : labelPrefix
-        : translatedLabel
+          const labelWithPrefix =
+            extractFieldsToTopFromGroupFields &&
+            labelPrefix &&
+            typeof translatedLabel === 'string' &&
+            translatedLabel
+              ? `${labelPrefix} > ${translatedLabel}`
+              : (labelPrefix ?? (typeof translatedLabel === 'string' ? translatedLabel : undefined))
 
-      const nameWithPrefix =
-        'name' in field && field.name
-          ? pathPrefix
-            ? `${pathPrefix}-${field.name}`
-            : field.name
-          : pathPrefix
+          const nameWithPrefix =
+            'name' in field && field.name
+              ? pathPrefix
+                ? `${pathPrefix}-${field.name as string}`
+                : (field.name as string)
+              : pathPrefix
 
-      acc.push(
-        ...flattenFields<TField>('fields' in field ? (field.fields as TField[]) : [], {
-          i18n,
-          keepPresentationalFields,
-          labelPrefix: labelWithPrefix,
-          pathPrefix: nameWithPrefix,
-        }),
-      )
+          acc.push(
+            ...flattenFields(field.fields as TField[], {
+              extractFieldsToTopFromGroupFields,
+              i18n,
+              keepPresentationalFields,
+              labelPrefix: labelWithPrefix,
+              pathPrefix: nameWithPrefix,
+            }),
+          )
+        } else {
+          // Don't recurse into group fields unless explicitly requested
+          return acc
+        }
+      } else {
+        // For rows, arrays, collapsible — recurse by default
+        acc.push(...flattenFields(field.fields as TField[], options))
+      }
     } else if (
       fieldAffectsData(field) ||
       (keepPresentationalFields && fieldIsPresentationalOnly(field))
     ) {
-      // Ignore nested `id` fields
+      // Ignore nested `id` fields when inside nested structure
       if (field.name === 'id' && labelPrefix !== undefined) {
         return acc
       }
@@ -86,20 +153,17 @@ function flattenFields<TField extends ClientField | Field>(
       const translatedLabel =
         'label' in field && field.label && i18n ? getTranslation(field.label, i18n) : undefined
 
-      const labelWithPrefix = labelPrefix
-        ? translatedLabel
-          ? `${labelPrefix} > ${translatedLabel}`
-          : labelPrefix
-        : undefined
-
       const name = 'name' in field ? field.name : undefined
-      const accessor = pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? '')
 
       acc.push({
         ...(field as FlattenedField<TField>),
-        name,
-        accessor,
-        labelWithPrefix,
+        ...(extractFieldsToTopFromGroupFields && {
+          accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
+          labelWithPrefix:
+            labelPrefix && translatedLabel
+              ? `${labelPrefix} > ${translatedLabel}`
+              : (labelPrefix ?? translatedLabel),
+        }),
       })
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
@@ -111,19 +175,11 @@ function flattenFields<TField extends ClientField | Field>(
               {
                 ...tab,
                 type: 'tab',
-                labelPrefix,
+                ...(extractFieldsToTopFromGroupFields && { labelPrefix }),
               } as unknown as FlattenedField<TField>,
             ]
           } else {
-            return [
-              ...tabFields,
-              ...flattenFields<TField>(tab.fields as TField[], {
-                i18n,
-                keepPresentationalFields,
-                labelPrefix,
-                pathPrefix,
-              }),
-            ]
+            return [...tabFields, ...flattenFields<TField>(tab.fields as TField[], options)]
           }
         }, []),
       ]

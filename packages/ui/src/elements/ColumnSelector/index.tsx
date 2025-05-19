@@ -60,17 +60,13 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               ? field.label
               : undefined
 
-        const rawKeyCandidate =
-          ('labelWithPrefix' in field &&
-            field.labelWithPrefix !== undefined &&
-            field.labelWithPrefix) ||
-          ('name' in field && field.name) ||
-          i
-
         const rawKey =
-          typeof rawKeyCandidate === 'string' || typeof rawKeyCandidate === 'number'
-            ? rawKeyCandidate
-            : ''
+          (typeof accessor === 'string' && accessor) ||
+          ('labelWithPrefix' in field &&
+            typeof field.labelWithPrefix === 'string' &&
+            field.labelWithPrefix) ||
+          ('name' in field && typeof field.name === 'string' && field.name) ||
+          i
 
         const labelKey = String(rawKey).replace(/\s+/g, '-')
 

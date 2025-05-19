@@ -118,9 +118,11 @@ export const renderTable = ({
 
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(fields, { i18n, keepPresentationalFields: true })?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
+          flattenTopLevelFields(fields, {
+            extractFieldsToTopFromGroupFields: true,
+            i18n,
+            keepPresentationalFields: true,
+          })?.some((field) => 'name' in field && field.name === column.accessor),
         )
       : getInitialColumns(fields, useAsTitle, [])
 
@@ -140,6 +142,7 @@ export const renderTable = ({
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
           flattenTopLevelFields(clientCollectionConfig.fields, {
+            extractFieldsToTopFromGroupFields: true,
             i18n,
             keepPresentationalFields: true,
           })?.some((field) => 'name' in field && field.name === column.accessor),
