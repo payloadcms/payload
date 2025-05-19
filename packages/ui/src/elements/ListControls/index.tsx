@@ -36,7 +36,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableQueryPresets = true,
+    disableQueryPresets,
     enableColumns = true,
     enableFilters = true,
     enableSort = false,
@@ -222,14 +222,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   className={`${baseClass}__popup`}
                   horizontalAlign="right"
                   id="list-menu"
-                  size="small"
+                  size="medium"
                   verticalAlign="bottom"
                 >
-                  <PopupList.ButtonGroup>
-                    {listMenuItems.map((item, i) => (
-                      <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-                    ))}
-                  </PopupList.ButtonGroup>
+                  {listMenuItems.map((item, i) => (
+                    <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                  ))}
                 </Popup>
               )}
             </div>
