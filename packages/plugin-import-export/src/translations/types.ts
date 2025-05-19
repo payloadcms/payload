@@ -4,9 +4,6 @@ import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-import-export': {
-    allLocales: string
-    download: string
-    export: string
     exportDocumentLabel: string
     exportOptions: string
     'field-depth-label': string
@@ -18,14 +15,10 @@ export type PluginLanguage = Language<{
     'field-name-label': string
     'field-selectionToUse-label': string
     'field-sort-label': string
-    import: string
-    no: string
-    preview: string
     'selectionToUse-allDocuments': string
     'selectionToUse-currentFilters': string
     'selectionToUse-currentSelection': string
     totalDocumentsCount: string
-    yes: string
   }
 }>
 

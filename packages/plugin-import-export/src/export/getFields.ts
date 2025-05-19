@@ -16,8 +16,7 @@ export const getFields = (config: Config): Field[] => {
       label: ({ t }) => t('plugin-import-export:field-locale-label'),
       options: [
         {
-          // @ts-expect-error - this is not correctly typed in plugins right now
-          label: ({ t }) => t('plugin-import-export:allLocales'),
+          label: ({ t }) => t('general:allLocales'),
           value: 'all',
         },
         ...config.localization.locales.map((locale) => ({
@@ -110,13 +109,11 @@ export const getFields = (config: Config): Field[] => {
               label: ({ t }) => t('plugin-import-export:field-drafts-label'),
               options: [
                 {
-                  // @ts-expect-error - this is not correctly typed in plugins right now
-                  label: ({ t }) => t('plugin-import-export:yes'),
+                  label: ({ t }) => t('general:yes'),
                   value: 'yes',
                 },
                 {
-                  // @ts-expect-error - this is not correctly typed in plugins right now
-                  label: ({ t }) => t('plugin-import-export:no'),
+                  label: ({ t }) => t('general:no'),
                   value: 'no',
                 },
               ],

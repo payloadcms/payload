@@ -70,12 +70,7 @@ export const ExportSaveButton: React.FC = () => {
     <React.Fragment>
       <SaveButton label={label}></SaveButton>
       <Button onClick={handleDownload} size="medium" type="button">
-        <Translation
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          i18nKey="plugin-import-export:download"
-          t={t}
-        />
+        <Translation i18nKey="upload:download" t={t} />
       </Button>
     </React.Fragment>
   )

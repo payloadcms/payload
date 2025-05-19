@@ -111,12 +111,7 @@ export const Preview = () => {
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         <h3>
-          <Translation
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            i18nKey="plugin-import-export:preview"
-            t={t}
-          />
+          <Translation i18nKey="version:preview" t={t} />
         </h3>
         {resultCount && <span>{resultCount} total documents</span>}
         {resultCount && (
