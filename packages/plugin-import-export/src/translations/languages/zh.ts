@@ -22,6 +22,6 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const zh: PluginLanguage = {
-  dateFNSKey: 'zh',
+  dateFNSKey: 'zh-CN',
   translations: zhTranslations,
 }

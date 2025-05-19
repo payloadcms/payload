@@ -22,6 +22,6 @@ export const rsLatinTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const rsLatin: PluginLanguage = {
-  dateFNSKey: 'rs-latin',
+  dateFNSKey: 'rs-Latin',
   translations: rsLatinTranslations,
 }

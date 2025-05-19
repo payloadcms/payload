@@ -22,6 +22,6 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const hy: PluginLanguage = {
-  dateFNSKey: 'hy',
+  dateFNSKey: 'hy-AM',
   translations: hyTranslations,
 }

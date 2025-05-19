@@ -22,6 +22,6 @@ export const faTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const fa: PluginLanguage = {
-  dateFNSKey: 'fa',
+  dateFNSKey: 'fa-IR',
   translations: faTranslations,
 }

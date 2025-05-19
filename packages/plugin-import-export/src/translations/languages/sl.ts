@@ -22,6 +22,6 @@ export const slTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const sl: PluginLanguage = {
-  dateFNSKey: 'sl',
+  dateFNSKey: 'sl-SI',
   translations: slTranslations,
 }

@@ -22,6 +22,6 @@ export const myTranslations: PluginDefaultTranslationsObject = {
 }
 
 export const my: PluginLanguage = {
-  dateFNSKey: 'my',
+  dateFNSKey: 'en-US',
   translations: myTranslations,
 }
