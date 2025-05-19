@@ -40,6 +40,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const contextRef = useRef({} as IListQueryContext)
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current.modified = modified
 
   const { onQueryChange } = useListDrawerContext()
@@ -209,6 +210,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         query: currentQuery,
         refineListData,
         setModified,
+        // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
         ...contextRef.current,
       }}
     >

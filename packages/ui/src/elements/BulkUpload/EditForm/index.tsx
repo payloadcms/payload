@@ -206,6 +206,7 @@ function GetFieldProxy() {
   const { getFormDataRef } = useFormsManager()
 
   useEffect(() => {
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
   }, [getFields, getFormDataRef])
 

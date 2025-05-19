@@ -159,6 +159,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           <SearchFilter
             handleChange={handleSearchChange}
             key={collectionSlug}
+            // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
             label={searchLabelTranslated.current}
             searchQueryParam={query?.search}
           />

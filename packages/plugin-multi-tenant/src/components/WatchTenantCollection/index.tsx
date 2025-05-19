@@ -2,13 +2,21 @@
 
 import type { ClientCollectionConfig } from 'payload'
 
-import { useConfig, useDocumentInfo, useEffectEvent, useFormFields } from '@payloadcms/ui'
+import {
+  useConfig,
+  useDocumentInfo,
+  useDocumentTitle,
+  useEffectEvent,
+  useFormFields,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
 export const WatchTenantCollection = () => {
-  const { id, collectionSlug, title } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
+  const { title } = useDocumentTitle()
+
   const { getEntityConfig } = useConfig()
   const [useAsTitleName] = React.useState(
     () => (getEntityConfig({ collectionSlug }) as ClientCollectionConfig).admin.useAsTitle,

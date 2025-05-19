@@ -43,6 +43,7 @@ export const Auth: React.FC<Props> = (props) => {
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
   const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
+
   const {
     config: {
       routes: { api },
