@@ -5,6 +5,7 @@ export const ltTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Jūs ketinate pakeisti nuosavybės teisę iš <0>{{fromTenant}}</0> į <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Patvirtinkite {{tenantLabel}} pakeitimą',
+    'field-assignedTentant-label': 'Paskirtas nuomininkas',
   },
 }
 
