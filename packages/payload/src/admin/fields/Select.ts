@@ -22,6 +22,7 @@ import type {
 type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 
 type SelectFieldBaseClientProps = {
+  readonly filterOption?: () => boolean
   readonly onChange?: (e: string | string[]) => void
   readonly path: string
   readonly validate?: SelectFieldValidation

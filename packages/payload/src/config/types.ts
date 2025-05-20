@@ -49,7 +49,11 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
+import type {
+  EnableQueryPresetConstraints,
+  QueryPreset,
+  QueryPresetConstraints,
+} from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -1114,6 +1118,7 @@ export type Config = {
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
+    allowedConstraints?: EnableQueryPresetConstraints
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints

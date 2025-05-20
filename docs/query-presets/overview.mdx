@@ -50,6 +50,7 @@ The following options are available for Query Presets:
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
 | `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
+| `hooks`       | Used to add custom hooks to the query presets collection. [More details](#hooks).                                               |
 | `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
@@ -59,7 +60,7 @@ Query Presets are subject to the same [Access Control](../access-control/overvie
 Access Control for Query Presets can be customized in two ways:
 
 1. [Collection Access Control](#collection-access-control): Applies to all presets. These rules are not controllable by the user and are statically defined in the config.
-2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are saved to the document.
+2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are dynamically defined on each record in the database.
 
 ### Collection Access Control
 
@@ -97,7 +98,7 @@ This example restricts all Query Presets to users with the role of `admin`.
 
 ### Document Access Control
 
-You can also define access control rules that apply to each specific preset. Users have the ability to define and modify these rules on the fly as they manage presets. These are saved dynamically in the database on each document.
+You can also define access control rules that apply to each specific preset. Users have the ability to define and modify these rules on the fly as they manage presets. These are saved dynamically in the database on each record.
 
 When a user manages a preset, document-level access control options will be available to them in the Admin Panel for each operation.
 
@@ -150,8 +151,8 @@ const config = buildConfig({
           }),
         },
       ],
-      // highlight-end
     },
+    // highlight-end
   },
 })
 ```
@@ -171,3 +172,65 @@ The following options are available for each constraint:
 | `value`  | The value to store in the database when this constraint is selected.     |
 | `fields` | An array of fields to render when this constraint is selected.           |
 | `access` | A function that determines the access control rules for this constraint. |
+
+## Hooks
+
+You can attach your own [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
+
+For example, you may want to add additional access control rules that prevent certain users from creating or updating presets in a certain way.
+
+To do this, you can use the `hooks` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  queryPresets: {
+    // ...
+    // highlight-start
+    hooks: {
+      beforeValidate: [
+        // this is a custom `beforeValidate` hook that runs before the preset is validated
+        // it ensures that only admins can add or remove the "admin" role from a preset
+        ({ data, req, originalDoc }) => {
+          const adminRoleChanged = (current, original) => {
+            const currentHasAdmin = current?.roles?.includes('admin') ?? false
+            const originalHasAdmin = original?.roles?.includes('admin') ?? false
+            return currentHasAdmin !== originalHasAdmin
+          }
+
+          const readChanged =
+            data?.access?.read?.constraint === 'specificRoles' &&
+            adminRoleChanged(
+              data?.access?.read,
+              originalDoc?.access?.read || {},
+            )
+
+          const updateChanged =
+            data?.access?.update?.constraint === 'specificRoles' &&
+            adminRoleChanged(
+              data?.access?.update,
+              originalDoc?.access?.update || {},
+            )
+
+          if (
+            (readChanged || updateChanged) &&
+            !req.user?.roles?.includes('admin')
+          ) {
+            throw new APIError(
+              'You must be an admin to add or remove the admin role from a preset',
+              403,
+              {},
+              true,
+            )
+          }
+
+          return data
+        },
+      ],
+    },
+    // highlight-end
+  },
+})
+```

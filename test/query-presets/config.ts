@@ -11,6 +11,7 @@ import { seed } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -25,6 +26,13 @@ export default buildConfigWithDefaults({
     access: {
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
+    },
+    allowedConstraints: ({ req, allConstraints }) => {
+      if (!req.user?.roles?.includes('admin')) {
+        return allConstraints.filter((constraint) => constraint !== 'everyone')
+      }
+
+      return allConstraints
     },
     constraints: {
       read: [

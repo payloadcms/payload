@@ -46,6 +46,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       options: optionsFromProps = [],
       required,
     },
+    filterOption,
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly,
@@ -109,6 +110,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={filterOption}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
