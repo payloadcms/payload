@@ -31,7 +31,12 @@ export default buildConfigWithDefaults({
       beforeValidate: [
         // this is a custom `beforeValidate` hook that runs before the preset is validated
         // it ensures that only admins can add or remove the "admin" role from a preset
-        ({ data, req, originalDoc }) => {
+        ({ data, req, originalDoc, context }) => {
+          if (context.overrideAccess) {
+            // TODO: this is temporary, remove when `overrideAccess` becomes an arg to hooks
+            return data
+          }
+
           const adminRoleChanged = (current, original) => {
             const currentHasAdmin = current?.roles?.includes('admin') ?? false
             const originalHasAdmin = original?.roles?.includes('admin') ?? false
