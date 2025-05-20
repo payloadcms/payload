@@ -218,7 +218,9 @@ export function FolderProvider({
   const [subfolders, setSubfolders] = React.useState<FolderContextValue['subfolders']>(() => {
     return filterOutItems({
       items: allSubfolders,
-      relationTo: [folderCollectionSlug],
+      relationTo: visibleCollectionSlugs.includes(folderCollectionSlug)
+        ? [folderCollectionSlug]
+        : [],
       search: _searchFromProps,
     })
   })
@@ -557,7 +559,7 @@ export function FolderProvider({
 
   const filterItems: FolderContextValue['filterItems'] = React.useCallback(
     async ({ relationTo: _relationTo, search: _search }) => {
-      const relationTo = collectionSlug ? undefined : _relationTo || visibleCollectionSlugs
+      const relationTo = Array.isArray(_relationTo) ? _relationTo : visibleCollectionSlugs
       const searchFilter = ((typeof _search === 'string' ? _search : search) || '').trim()
 
       let filteredDocuments: FolderOrDocument[] = allDocuments
@@ -587,8 +589,14 @@ export function FolderProvider({
         })
         filteredSubfolders = filterOutItems({
           items: allSubfolders,
-          relationTo: [folderCollectionSlug],
+          relationTo: relationTo.includes(folderCollectionSlug) ? [folderCollectionSlug] : [],
           search: searchFilter,
+        })
+        console.log('here', {
+          filteredDocuments,
+          filteredSubfolders,
+          folderCollectionSlug,
+          searchFilter,
         })
       }
 
@@ -823,11 +831,19 @@ export function FolderProvider({
         subfoldersToSort,
       })
 
+      const { sortedDocuments: sortedAllDocuments, sortedSubfolders: sortedAllSubfolders } =
+        sortItems({
+          documentsToSort,
+          subfoldersToSort,
+        })
+
       if (sortedDocuments) {
         setDocuments(sortedDocuments)
+        setAllDocuments(sortedAllDocuments)
       }
       if (sortedSubfolders) {
         setSubfolders(sortedSubfolders)
+        setAllSubfolders(sortedAllSubfolders)
       }
     },
     [documents, separateItems, sortItems, subfolders],
