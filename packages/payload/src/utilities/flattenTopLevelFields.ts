@@ -1,6 +1,5 @@
-import type { I18nClient } from '@payloadcms/translations'
 // @ts-strict-ignore
-import type { JSX } from 'react'
+import type { I18nClient } from '@payloadcms/translations'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -21,21 +20,6 @@ import {
   fieldIsPresentationalOnly,
   tabHasName,
 } from '../fields/config/types.js'
-
-type LabelType =
-  | (() => JSX.Element)
-  | ((args: { i18n: I18nClient; t: any }) => string)
-  | JSX.Element
-  | Record<string, string>
-  | string
-
-function isLabelType(value: unknown): value is LabelType {
-  return (
-    typeof value === 'string' ||
-    typeof value === 'function' ||
-    (typeof value === 'object' && value !== null)
-  )
-}
 
 type FlattenedField<TField> = TField extends ClientField
   ? { accessor?: string; labelWithPrefix?: string } & (
@@ -105,17 +89,14 @@ function flattenFields<TField extends ClientField | Field>(
       if (field.type === 'group') {
         if (extractFieldsToTopFromGroupFields && 'fields' in field) {
           const translatedLabel =
-            'label' in field && isLabelType(field.label) && i18n
-              ? getTranslation(field.label, i18n)
+            'label' in field && field.label && i18n
+              ? getTranslation(field.label as string, i18n)
               : undefined
 
           const labelWithPrefix =
-            extractFieldsToTopFromGroupFields &&
-            labelPrefix &&
-            typeof translatedLabel === 'string' &&
-            translatedLabel
+            labelPrefix && translatedLabel
               ? `${labelPrefix} > ${translatedLabel}`
-              : (labelPrefix ?? (typeof translatedLabel === 'string' ? translatedLabel : undefined))
+              : (labelPrefix ?? translatedLabel)
 
           const nameWithPrefix =
             'name' in field && field.name
@@ -137,11 +118,12 @@ function flattenFields<TField extends ClientField | Field>(
           // Don't recurse into group fields unless explicitly requested
           return acc
         }
+      } else if (['collapsible', 'row'].includes(field.type)) {
+        // Recurse into row and collapsible
+        acc.push(...flattenFields(field.fields as TField[], options))
       } else {
-        // Recurse into subfields, but do NOT hoist them
-        acc.push({
-          ...(field as FlattenedField<TField>),
-        })
+        // Do not hoist fields from arrays & blocks
+        acc.push(field as FlattenedField<TField>)
       }
     } else if (
       fieldAffectsData(field) ||
