@@ -34,7 +34,7 @@ describe('folders', () => {
       },
     })
     await payload.delete({
-      collection: '_folders',
+      collection: 'payload-folders',
       depth: 0,
       where: {
         id: {
@@ -47,7 +47,7 @@ describe('folders', () => {
   describe('folder > subfolder querying', () => {
     it('should populate subfolders for folder by ID', async () => {
       const parentFolder = await payload.create({
-        collection: '_folders',
+        collection: 'payload-folders',
         data: {
           name: 'Parent Folder',
         },
@@ -55,23 +55,23 @@ describe('folders', () => {
       const folderIDFromParams = parentFolder.id
 
       await payload.create({
-        collection: '_folders',
+        collection: 'payload-folders',
         data: {
           name: 'Nested 1',
-          _folder: folderIDFromParams,
+          folder: folderIDFromParams,
         },
       })
 
       await payload.create({
-        collection: '_folders',
+        collection: 'payload-folders',
         data: {
           name: 'Nested 2',
-          _folder: folderIDFromParams,
+          folder: folderIDFromParams,
         },
       })
 
       const parentFolderQuery = await payload.findByID({
-        collection: '_folders',
+        collection: 'payload-folders',
         id: folderIDFromParams,
       })
 
@@ -82,7 +82,7 @@ describe('folders', () => {
   describe('folder > file querying', () => {
     it('should populate files for folder by ID', async () => {
       const parentFolder = await payload.create({
-        collection: '_folders',
+        collection: 'payload-folders',
         data: {
           name: 'Parent Folder',
         },
@@ -93,7 +93,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 1',
-          _folder: folderIDFromParams,
+          folder: folderIDFromParams,
         },
       })
 
@@ -101,12 +101,12 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 2',
-          _folder: folderIDFromParams,
+          folder: folderIDFromParams,
         },
       })
 
       const parentFolderQuery = await payload.findByID({
-        collection: '_folders',
+        collection: 'payload-folders',
         id: folderIDFromParams,
       })
 
