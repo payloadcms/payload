@@ -192,19 +192,34 @@ const config = buildConfig({
     hooks: {
       beforeValidate: [
         // this is a custom `beforeValidate` hook that runs before the preset is validated
-        // it ensures that if the user is trying to change a constraint to "everyone", they must be an admin
+        // it ensures that only admins can add or remove the "admin" role from a preset
         ({ data, req, originalDoc }) => {
-          const isSharingWithEveryone =
-            (data?.access?.read?.constraint === 'everyone' &&
-              (!originalDoc ||
-                originalDoc?.access?.read?.constraint !== 'everyone')) ||
-            (data?.access?.update?.constraint === 'everyone' &&
-              (!originalDoc ||
-                originalDoc?.access?.update?.constraint !== 'everyone'))
+          const adminRoleChanged = (current, original) => {
+            const currentHasAdmin = current?.roles?.includes('admin') ?? false
+            const originalHasAdmin = original?.roles?.includes('admin') ?? false
+            return currentHasAdmin !== originalHasAdmin
+          }
 
-          if (isSharingWithEveryone && !req.user?.roles?.includes('admin')) {
+          const readChanged =
+            data?.access?.read?.constraint === 'specificRoles' &&
+            adminRoleChanged(
+              data?.access?.read,
+              originalDoc?.access?.read || {},
+            )
+
+          const updateChanged =
+            data?.access?.update?.constraint === 'specificRoles' &&
+            adminRoleChanged(
+              data?.access?.update,
+              originalDoc?.access?.update || {},
+            )
+
+          if (
+            (readChanged || updateChanged) &&
+            !req.user?.roles?.includes('admin')
+          ) {
             throw new APIError(
-              'You must be an admin to share this preset with everyone.',
+              'You must be an admin to add or remove the admin role from a preset',
               403,
               {},
               true,

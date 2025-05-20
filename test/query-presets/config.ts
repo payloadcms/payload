@@ -30,17 +30,25 @@ export default buildConfigWithDefaults({
     hooks: {
       beforeValidate: [
         // this is a custom `beforeValidate` hook that runs before the preset is validated
-        // it ensures that if the user is trying to change a constraint to "onlyAdmins", they must be an admin themselves
+        // it ensures that only admins can add or remove the "admin" role from a preset
         ({ data, req, originalDoc }) => {
-          const isSharingWithAdmins =
-            (data?.access?.read?.constraint === 'onlyAdmins' &&
-              (!originalDoc || originalDoc?.access?.read?.constraint !== 'onlyAdmins')) ||
-            (data?.access?.update?.constraint === 'onlyAdmins' &&
-              (!originalDoc || originalDoc?.access?.update?.constraint !== 'onlyAdmins'))
+          const adminRoleChanged = (current, original) => {
+            const currentHasAdmin = current?.roles?.includes('admin') ?? false
+            const originalHasAdmin = original?.roles?.includes('admin') ?? false
+            return currentHasAdmin !== originalHasAdmin
+          }
 
-          if (isSharingWithAdmins && !req.user?.roles?.includes('admin')) {
+          const readRoleChanged =
+            data?.access?.read?.constraint === 'specificRoles' &&
+            adminRoleChanged(data?.access?.read, originalDoc?.access?.read || {})
+
+          const updateRoleChanged =
+            data?.access?.update?.constraint === 'specificRoles' &&
+            adminRoleChanged(data?.access?.update, originalDoc?.access?.update || {})
+
+          if ((readRoleChanged || updateRoleChanged) && !req.user?.roles?.includes('admin')) {
             throw new APIError(
-              'You must be an admin to share this preset with admins.',
+              'You must be an admin to add or remove the "admin" role from a preset.',
               403,
               {},
               true,
@@ -68,11 +76,6 @@ export default buildConfigWithDefaults({
           value: 'noone',
           access: () => false,
         },
-        {
-          label: 'Only Admins',
-          value: 'onlyAdmins',
-          access: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
-        },
       ],
       update: [
         {
@@ -84,11 +87,6 @@ export default buildConfigWithDefaults({
               in: user?.roles || [],
             },
           }),
-        },
-        {
-          label: 'Only Admins',
-          value: 'onlyAdmins',
-          access: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
         },
       ],
     },
