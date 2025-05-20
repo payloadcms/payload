@@ -2151,8 +2151,6 @@ describe('database', () => {
       expect(descDocs[0]?.id).toBe(doc_2.id)
     })
 
-    it.todo('should allow to sort by a virtual field with reference')
-
     it('should allow virtual field 2x deep', async () => {
       const category = await payload.create({
         collection: 'categories',
@@ -2212,6 +2210,77 @@ describe('database', () => {
         depth: 0,
       })
       expect(globalData.postTitle).toBe('post')
+    })
+
+    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1 },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2 },
+      })
+
+      const queryDesc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "-postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlDesc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryDesc }) })
+        .then((res) => res.json())
+
+      const { docs: localDesc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlDesc[0].id).toBe(doc_2.id)
+      expect(graphqlDesc[1].id).toBe(doc_1.id)
+      expect(localDesc[0].id).toBe(doc_2.id)
+      expect(localDesc[1].id).toBe(doc_1.id)
+
+      const queryAsc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlAsc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryAsc }) })
+        .then((res) => res.json())
+
+      const { docs: localAsc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlAsc[1].id).toBe(doc_2.id)
+      expect(graphqlAsc[0].id).toBe(doc_1.id)
+      expect(localAsc[1].id).toBe(doc_2.id)
+      expect(localAsc[0].id).toBe(doc_1.id)
     })
   })
 
