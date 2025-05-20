@@ -71,6 +71,10 @@ export const getConstraints = (config: Config): Field => ({
                     }
                   }
 
+                  if (data?.access?.[operation]?.constraint === 'specificUsers') {
+                    return [...(data?.access?.[operation]?.users || []), req.user.id]
+                  }
+
                   return data?.access?.[operation]?.users
                 },
               ],
