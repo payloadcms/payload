@@ -50,7 +50,7 @@ The following options are available for Query Presets:
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
 | `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
-| `hooks`       | Used to define custom hooks that run when a preset is created, updated, or deleted. [More details](#hooks                       |
+| `hooks`       | Used to add custom hooks to the query presets collection. [More details](#hooks).                                               |
 | `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
@@ -175,7 +175,7 @@ The following options are available for each constraint:
 
 ## Hooks
 
-You may also find it useful to attach your own [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
+You can attach your own [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
 
 For example, you may want to add additional access control rules that prevent certain users from creating or updating presets in a certain way.
 
