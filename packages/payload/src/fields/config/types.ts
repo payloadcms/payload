@@ -1960,6 +1960,12 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
   return 'name' in tab
 }
 
+export function groupHasName(
+  group: Partial<NamedGroupFieldClient>,
+): group is NamedGroupFieldClient {
+  return 'name' in group
+}
+
 /**
  * Check if a field has localized: true set. This does not check if a field *should*
  * be localized. To check if a field should be localized, use `fieldShouldBeLocalized`.
