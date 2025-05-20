@@ -122,7 +122,11 @@ export const renderTable = ({
             extractFieldsToTopFromGroupFields: true,
             i18n,
             keepPresentationalFields: true,
-          })?.some((field) => 'name' in field && field.name === column.accessor),
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(fields, useAsTitle, [])
 
@@ -145,7 +149,11 @@ export const renderTable = ({
             extractFieldsToTopFromGroupFields: true,
             i18n,
             keepPresentationalFields: true,
-          })?.some((field) => 'name' in field && field.name === column.accessor),
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(
           filterFields(clientCollectionConfig.fields),

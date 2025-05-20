@@ -2,7 +2,7 @@
 import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
-import React, { useMemo } from 'react'
+import React, { useId, useMemo } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -22,6 +22,7 @@ export type Props = {
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
+  const uuid = useId()
   const editDepth = useEditDepth()
 
   const filteredColumns = useMemo(
@@ -53,23 +54,13 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
         const { accessor, active, field } = col
 
         const label =
-          field && 'labelWithPrefix' in field && field.labelWithPrefix !== undefined
+          'labelWithPrefix' in field && field.labelWithPrefix !== undefined
             ? field.labelWithPrefix
-            : 'label' in field
+            : 'label' in field && field.label !== undefined
               ? field.label
-              : undefined
-
-        const rawKey =
-          (typeof accessor === 'string' && accessor) ||
-          ('labelWithPrefix' in field &&
-            typeof field.labelWithPrefix === 'string' &&
-            field.labelWithPrefix) ||
-          ('name' in field && typeof field.name === 'string' && field.name) ||
-          i
-
-        const labelKey = String(rawKey)
-          .replace(/\s+/g, '-')
-          .replace(/[^\w-]/g, '')
+              : 'name' in field && field.name !== undefined
+                ? field.name
+                : undefined
 
         return (
           <Pill
@@ -81,7 +72,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             draggable
             icon={active ? <XIcon /> : <PlusIcon />}
             id={accessor}
-            key={`${collectionSlug}-${labelKey}-${i}-${editDepth ?? 0}`}
+            key={`${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               void toggleColumn(accessor)
             }}

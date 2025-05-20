@@ -138,8 +138,10 @@ function flattenFields<TField extends ClientField | Field>(
           return acc
         }
       } else {
-        // For rows, arrays, collapsible — recurse by default
-        acc.push(...flattenFields(field.fields as TField[], options))
+        // Recurse into subfields, but do NOT hoist them
+        acc.push({
+          ...(field as FlattenedField<TField>),
+        })
       }
     } else if (
       fieldAffectsData(field) ||
