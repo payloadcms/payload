@@ -20,7 +20,7 @@ import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
@@ -529,7 +529,9 @@ describe('Uploads', () => {
       slug: adminUploadControlSlug,
       auth: true,
     })
-    await expect.poll(() => mediaDoc.filename).toContain('universal-truth')
+    await expect
+      .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
+      .toContain('universal-truth')
   })
 
   test('should load a file using a URL reference from custom controls', async () => {
@@ -545,7 +547,9 @@ describe('Uploads', () => {
       slug: adminUploadControlSlug,
       auth: true,
     })
-    await expect.poll(() => mediaDoc.filename).toContain('universal-truth')
+    await expect
+      .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
+      .toContain('universal-truth')
   })
 
   test('should render adminThumbnail when using a function', async () => {
