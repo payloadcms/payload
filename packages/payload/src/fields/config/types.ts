@@ -770,7 +770,7 @@ export type NamedGroupFieldClient = {
 export type UnnamedGroupFieldClient = {
   admin?: AdminClient & Pick<UnnamedGroupField['admin'], 'hideGutter'>
   fields: ClientField[]
-} & Omit<FieldBaseClient, 'required'> &
+} & Omit<FieldBaseClient, 'name' | 'required'> &
   Pick<UnnamedGroupField, 'label' | 'type'>
 
 export type GroupFieldClient = NamedGroupFieldClient | UnnamedGroupFieldClient

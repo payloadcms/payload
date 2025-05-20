@@ -88,18 +88,20 @@ function flattenFields<TField extends ClientField | Field>(
     if (fieldHasSubFields(field)) {
       if (field.type === 'group') {
         if (extractFieldsToTopFromGroupFields && 'fields' in field) {
+          const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
+
           const translatedLabel =
             'label' in field && field.label && i18n
               ? getTranslation(field.label as string, i18n)
               : undefined
 
           const labelWithPrefix =
-            labelPrefix && translatedLabel
+            isNamedGroup && labelPrefix && translatedLabel
               ? `${labelPrefix} > ${translatedLabel}`
               : (labelPrefix ?? translatedLabel)
 
           const nameWithPrefix =
-            'name' in field && field.name
+            isNamedGroup && field.name
               ? pathPrefix
                 ? `${pathPrefix}-${field.name as string}`
                 : (field.name as string)
@@ -110,13 +112,13 @@ function flattenFields<TField extends ClientField | Field>(
               extractFieldsToTopFromGroupFields,
               i18n,
               keepPresentationalFields,
-              labelPrefix: labelWithPrefix,
-              pathPrefix: nameWithPrefix,
+              labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
+              pathPrefix: isNamedGroup ? nameWithPrefix : pathPrefix,
             }),
           )
         } else {
-          // Don't recurse into group fields unless explicitly requested
-          return acc
+          // Just keep the group as-is
+          acc.push(field as FlattenedField<TField>)
         }
       } else if (['collapsible', 'row'].includes(field.type)) {
         // Recurse into row and collapsible
@@ -139,15 +141,18 @@ function flattenFields<TField extends ClientField | Field>(
 
       const name = 'name' in field ? field.name : undefined
 
+      const isHoistingFromGroup = pathPrefix !== undefined || labelPrefix !== undefined
+
       acc.push({
         ...(field as FlattenedField<TField>),
-        ...(extractFieldsToTopFromGroupFields && {
-          accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
-          labelWithPrefix:
-            labelPrefix && translatedLabel
-              ? `${labelPrefix} > ${translatedLabel}`
-              : (labelPrefix ?? translatedLabel),
-        }),
+        ...(extractFieldsToTopFromGroupFields &&
+          isHoistingFromGroup && {
+            accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
+            labelWithPrefix:
+              labelPrefix && translatedLabel
+                ? `${labelPrefix} > ${translatedLabel}`
+                : (labelPrefix ?? translatedLabel),
+          }),
       })
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
