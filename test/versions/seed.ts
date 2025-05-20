@@ -216,6 +216,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      relationshipPolymorphic: {
+        relationTo: 'text',
+        value: doc1ID,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+      ],
       upload: uploadedImage,
       uploadHasMany: [uploadedImage],
     },
@@ -313,7 +323,20 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       radio: 'option2',
       relationship: draft2.id,
       relationshipHasMany: [manyDraftsID, draft2.id],
-
+      relationshipPolymorphic: {
+        relationTo: draftCollectionSlug,
+        value: draft2.id,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+        {
+          relationTo: draftCollectionSlug,
+          value: draft2.id,
+        },
+      ],
       richtext: generateLexicalData({
         mediaID: uploadedImage2,
         textID: doc2ID,

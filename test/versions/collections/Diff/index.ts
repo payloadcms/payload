@@ -173,6 +173,17 @@ export const Diff: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
     {
+      type: 'relationship',
+      name: 'relationshipPolymorphic',
+      relationTo: [draftCollectionSlug, 'text'],
+    },
+    {
+      type: 'relationship',
+      name: 'relationshipHasManyPolymorphic',
+      hasMany: true,
+      relationTo: [draftCollectionSlug, 'text'],
+    },
+    {
       name: 'richtext',
       type: 'richText',
     },

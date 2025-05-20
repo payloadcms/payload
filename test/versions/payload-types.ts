@@ -383,6 +383,27 @@ export interface Diff {
   radio?: ('option1' | 'option2') | null;
   relationship?: (string | null) | DraftPost;
   relationshipHasMany?: (string | DraftPost)[] | null;
+  relationshipPolymorphic?:
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'text';
+        value: string | Text;
+      } | null);
+  relationshipHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
   richtext?: {
     root: {
       type: string;
@@ -422,11 +443,20 @@ export interface Diff {
   text?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
-  uploadPolymorphic?: (string | null) | Media;
   uploadHasMany?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text".
+ */
+export interface Text {
+  id: string;
+  text: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -445,16 +475,6 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text".
- */
-export interface Text {
-  id: string;
-  text: string;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -910,6 +930,8 @@ export interface DiffSelect<T extends boolean = true> {
   radio?: T;
   relationship?: T;
   relationshipHasMany?: T;
+  relationshipPolymorphic?: T;
+  relationshipHasManyPolymorphic?: T;
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
@@ -923,7 +945,6 @@ export interface DiffSelect<T extends boolean = true> {
   text?: T;
   textArea?: T;
   upload?: T;
-  uploadPolymorphic?: T;
   uploadHasMany?: T;
   updatedAt?: T;
   createdAt?: T;
