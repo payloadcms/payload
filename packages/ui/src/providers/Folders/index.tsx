@@ -592,12 +592,6 @@ export function FolderProvider({
           relationTo: relationTo.includes(folderCollectionSlug) ? [folderCollectionSlug] : [],
           search: searchFilter,
         })
-        console.log('here', {
-          filteredDocuments,
-          filteredSubfolders,
-          folderCollectionSlug,
-          searchFilter,
-        })
       }
 
       setDocuments(filteredDocuments)
