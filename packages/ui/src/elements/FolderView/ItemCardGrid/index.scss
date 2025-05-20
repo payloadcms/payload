@@ -20,7 +20,8 @@
     --gap: var(--base);
     gap: var(--gap);
     display: grid;
-    grid-template-columns: repeat(var(--cols), 1fr);
+    // grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     margin-bottom: var(--base);
 
     @include mid-break {
