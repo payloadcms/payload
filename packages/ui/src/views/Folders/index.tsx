@@ -228,17 +228,7 @@ export function DefaultFolderView(
         }),
       ])
     }
-  }, [
-    setStepNav,
-    drawerDepth,
-    i18n,
-    breadcrumbs,
-    setFolderID,
-    config.routes.admin,
-    config.admin.routes.folders,
-    config.serverURL,
-    t,
-  ])
+  }, [setStepNav, drawerDepth, i18n, breadcrumbs, setFolderID, t])
 
   return (
     <Fragment>

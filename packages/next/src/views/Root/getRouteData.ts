@@ -51,8 +51,8 @@ export type ViewFromConfig = {
 
 const oneSegmentViews: OneSegmentViews = {
   account: Account,
+  browseByFolder: FolderView,
   createFirstUser: CreateFirstUserView,
-  folders: FolderView,
   forgot: ForgotPasswordView,
   inactivity: LogoutInactivity,
   login: LoginView,
@@ -125,7 +125,7 @@ export const getRouteData = ({
     matchedGlobal = config.globals.find(({ slug }) => slug === segmentTwo)
     serverProps.globalConfig = matchedGlobal
   }
-
+  console.log('HJERE?', segmentOne)
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {
@@ -157,10 +157,12 @@ export const getRouteData = ({
         }
       }
 
+      console.log('viewKey', viewKey)
+
       if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
-        // --> /folders
+        // --> /browse-by-folder
         // --> /forgot
         // --> /login
         // --> /logout
@@ -174,14 +176,14 @@ export const getRouteData = ({
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
-        if (isFolderViewEnabled && viewKey === 'folders') {
-          templateType = 'default'
-          viewType = 'folders'
-        }
-
         if (viewKey === 'account') {
           templateType = 'default'
           viewType = 'account'
+        }
+
+        if (isFolderViewEnabled && viewKey === 'browseByFolder') {
+          templateType = 'default'
+          viewType = 'folders'
         }
       }
       break
@@ -195,17 +197,15 @@ export const getRouteData = ({
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
         viewType = 'reset'
-      } else if (`/${segmentOne}` === config.admin.routes.folders) {
-        if (isFolderViewEnabled) {
-          // --> /folders/:folderID
-          ViewToRender = {
-            Component: oneSegmentViews.folders,
-          }
-          templateClassName = baseClasses.folders
-          templateType = 'default'
-          viewType = 'folders'
-          folderID = segmentTwo
+      } else if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+        // --> /browse-by-folder/:folderID
+        ViewToRender = {
+          Component: oneSegmentViews.browseByFolder,
         }
+        templateClassName = baseClasses.folders
+        templateType = 'default'
+        viewType = 'folders'
+        folderID = segmentTwo
       } else if (isCollection && matchedCollection) {
         // --> /collections/:collectionSlug
 
@@ -251,23 +251,22 @@ export const getRouteData = ({
         templateType = 'minimal'
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
-        if (segmentThree === 'folders') {
-          if (
-            isFolderViewEnabled &&
-            Object.keys(config.folders.collections).includes(matchedCollection.slug)
-          ) {
-            // Collection Folder Views
-            // --> /collections/:collectionSlug/folders
-            // --> /collections/:collectionSlug/folders/:folderID
-            ViewToRender = {
-              Component: CollectionFolderView,
-            }
-
-            templateClassName = `collection-folders`
-            templateType = 'default'
-            viewType = 'collection-folders'
-            folderID = segmentFour
+        if (
+          isFolderViewEnabled &&
+          segmentThree === config.folders.slug &&
+          Object.keys(config.folders.collections).includes(matchedCollection.slug)
+        ) {
+          // Collection Folder Views
+          // --> /collections/:collectionSlug/:folderCollectionSlug
+          // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
+          ViewToRender = {
+            Component: CollectionFolderView,
           }
+
+          templateClassName = `collection-folders`
+          templateType = 'default'
+          viewType = 'collection-folders'
+          folderID = segmentFour
         } else {
           // Collection Edit Views
           // --> /collections/:collectionSlug/:id

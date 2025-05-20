@@ -847,16 +847,16 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
+      /** The route for the browse by folder view.
+       *
+       * @default '/browse-by-folder'
+       */
+      browseByFolder: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
        */
       createFirstUser?: `/${string}`
-      /** The route for folder view.
-       *
-       * @default '/folders'
-       */
-      folders: `/${string}`
       /** The route for the forgot password page.
        *
        * @default '/forgot'

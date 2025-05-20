@@ -21,7 +21,7 @@ export const DefaultNavClient: React.FC<{
   const {
     config: {
       admin: {
-        routes: { folders: foldersRoute },
+        routes: { browseByFolder: foldersRoute },
       },
       folders: { collections: folderCollections = {}, enabled } = {},
       routes: { admin: adminRoute },

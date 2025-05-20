@@ -93,7 +93,7 @@ export const buildFolderView = async (
     return redirect(
       formatAdminURL({
         adminRoute,
-        path: config.admin.routes.folders,
+        path: config.admin.routes.browseByFolder,
         serverURL: config.serverURL,
       }),
     )

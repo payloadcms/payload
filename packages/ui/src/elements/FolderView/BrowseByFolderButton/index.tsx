@@ -14,7 +14,7 @@ export function BrowseByFolderButton({ active }) {
   const { config } = useConfig()
   const {
     admin: {
-      routes: { folders: foldersRoute },
+      routes: { browseByFolder: foldersRoute },
     },
     routes: { admin: adminRoute },
   } = config

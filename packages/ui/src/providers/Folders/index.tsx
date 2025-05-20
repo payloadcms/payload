@@ -233,9 +233,9 @@ export function FolderProvider({
   const [search, setSearch] = React.useState<string | undefined>(_searchFromProps)
   const [baseFolderPath] = React.useState<`/${string}`>(() => {
     if (collectionSlug) {
-      return `/collections/${collectionSlug}/folders`
+      return `/collections/${collectionSlug}/${folderCollectionSlug}`
     } else {
-      return config.admin.routes.folders
+      return config.admin.routes.browseByFolder
     }
   })
   const [sortDirection, setSortDirection] = React.useState<SortDirection>(() => {

@@ -69,25 +69,29 @@ export const generatePageMetadata = async ({
   const globalConfig =
     isGlobal && segments.length > 1 && config?.globals?.find((global) => global.slug === segmentTwo)
 
+  const isFolderViewEnabled = config.folders.enabled
+
   switch (segments.length) {
     case 0: {
       meta = await generateDashboardViewMetadata({ config, i18n })
       break
     }
     case 1: {
-      if (oneSegmentMeta[segmentOne] && segmentOne !== 'account') {
+      if (isFolderViewEnabled && segmentOne === config.admin.routes.browseByFolder) {
+        // --> /:folderCollectionSlug
+        meta = await oneSegmentMeta.folders({ config, i18n })
+      } else if (segmentOne === 'account') {
+        // --> /account
+        meta = await generateAccountViewMetadata({ config, i18n })
+        break
+      } else if (oneSegmentMeta[segmentOne]) {
         // --> /create-first-user
         // --> /forgot
-        // --> /folders
         // --> /login
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
         meta = await oneSegmentMeta[segmentOne]({ config, i18n })
-        break
-      } else if (segmentOne === 'account') {
-        // --> /account
-        meta = await generateAccountViewMetadata({ config, i18n })
         break
       }
       break
@@ -96,8 +100,8 @@ export const generatePageMetadata = async ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordViewMetadata({ config, i18n })
-      } else if (`/${segmentOne}` === config.admin.routes.folders) {
-        // --> /folders/:folderID
+      } else if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+        // --> /browse-by-folder/:folderID
         meta = await generateBrowseByFolderMetadata({ config, i18n })
       } else if (isCollection) {
         // --> /collections/:collectionSlug
@@ -118,11 +122,11 @@ export const generatePageMetadata = async ({
         // --> /:collectionSlug/verify/:token
         meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
-        if (segmentThree === 'folders') {
+        if (segmentThree === config.folders.slug) {
           if (Object.keys(config.folders.collections).includes(collectionConfig.slug)) {
             // Collection Folder Views
-            // --> /collections/:collectionSlug/folders
-            // --> /collections/:collectionSlug/folders/:id
+            // --> /collections/:collectionSlug/:folderCollectionSlug
+            // --> /collections/:collectionSlug/:folderCollectionSlug/:id
             meta = await generateCollectionFolderMetadata({
               collectionConfig,
               config,

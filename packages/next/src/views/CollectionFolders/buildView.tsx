@@ -126,7 +126,7 @@ export const buildCollectionFolderView = async (
       return redirect(
         formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/folders`,
+          path: `/collections/${collectionSlug}/${config.folders.slug}`,
           serverURL: config.serverURL,
         }),
       )

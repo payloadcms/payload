@@ -34,7 +34,7 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
         el={viewType === 'list' ? 'link' : 'div'}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
-          path: `/collections/${collectionConfig.slug}/folders`,
+          path: `/collections/${collectionConfig.slug}/${config.folders.slug}`,
           serverURL: config.serverURL,
         })}
       >
