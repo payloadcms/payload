@@ -466,8 +466,10 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (shouldHoistLocalizedValue) {
         siblingDoc[field.name] = null
+      } else {
+        siblingDoc[field.name] = []
       }
       break
     }
@@ -569,8 +571,10 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (shouldHoistLocalizedValue) {
         siblingDoc[field.name] = null
+      } else {
+        siblingDoc[field.name] = []
       }
 
       break
