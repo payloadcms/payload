@@ -333,7 +333,7 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
-export { DefaultFolderView } from '../../views/Folders/index.js'
+export { DefaultBrowseByFolderView } from '../../views/Folders/index.js'
 
 export type {
   /**

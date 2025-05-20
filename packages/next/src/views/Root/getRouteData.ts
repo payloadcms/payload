@@ -125,7 +125,7 @@ export const getRouteData = ({
     matchedGlobal = config.globals.find(({ slug }) => slug === segmentTwo)
     serverProps.globalConfig = matchedGlobal
   }
-  console.log('HJERE?', segmentOne)
+
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {

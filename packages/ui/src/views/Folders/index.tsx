@@ -35,7 +35,7 @@ import './index.scss'
 
 const baseClass = 'folder-list'
 
-export function DefaultFolderView(
+export function DefaultBrowseByFolderView(
   props: {
     hasCreatePermissionCollectionSlugs?: string[]
     selectedCollectionSlugs?: string[]
@@ -260,7 +260,7 @@ export function DefaultFolderView(
           <SearchBar
             Actions={[
               <SortByPill key="sort-by-pill" />,
-              <CollectionTypePill key="collection-type" />,
+              folderID && <CollectionTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"

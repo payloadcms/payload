@@ -5,7 +5,7 @@ import type {
   ListQuery,
 } from 'payload'
 
-import { DefaultFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DefaultBrowseByFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
@@ -152,7 +152,7 @@ export const buildBrowseByFolderView = async (
             viewPreference: browseByFolderPreferences?.value?.viewPreference,
           },
           // Component:config.folders?.components?.views?.list?.Component,
-          Fallback: DefaultFolderView,
+          Fallback: DefaultBrowseByFolderView,
           importMap: payload.importMap,
           serverProps,
         })}
