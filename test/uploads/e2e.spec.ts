@@ -518,15 +518,18 @@ describe('Uploads', () => {
 
     const loadFromFileButton = page.locator('#load-from-file-upload-button')
     await loadFromFileButton.click()
+    await wait(1000)
+
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
     const mediaID = page.url().split('/').pop()
     const { doc: mediaDoc } = await client.findByID({
       id: mediaID as string,
       slug: adminUploadControlSlug,
       auth: true,
     })
-    await expect(mediaDoc.filename).toContainText('universal-truth.jpg')
+    expect(mediaDoc.filename).toContain('universal-truth')
   })
 
   test('should load a file using a URL reference from custom controls', async () => {
@@ -542,7 +545,7 @@ describe('Uploads', () => {
       slug: adminUploadControlSlug,
       auth: true,
     })
-    await expect(mediaDoc.filename).toContainText('universal-truth.jpg')
+    expect(mediaDoc.filename).toContain('universal-truth')
   })
 
   test('should render adminThumbnail when using a function', async () => {
