@@ -252,39 +252,37 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       })
     }
 
-    // Add session to user
-    const newSessionID = uuid()
-    const now = new Date()
-    const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-    const expiresAt = new Date(now.getTime() + tokenExpInMs)
-
-    req.payload.logger.info({
-      createdAt: now,
-      expiresAt,
-      msg: 'DEBUG: loginOperation - Adding session to user',
-      newSessionID,
-      tokenExpiration: collectionConfig.auth.tokenExpiration,
-    })
-
-    const session = { id: newSessionID, createdAt: now, expiresAt }
-    if (!user.sessions?.length) {
-      user.sessions = [session]
-    } else {
-      user.sessions.push(session)
-    }
-
-    const fieldsToSign = getFieldsToSign({
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: sanitizedEmail,
-      sid: newSessionID,
       user,
-    })
+    }
 
-    console.log({
-      msg: `User ${user.id} logged in`,
-      newSessionID,
-      user,
-    })
+    if (collectionConfig.auth.useSessions) {
+      // Add session to user
+      const newSessionID = uuid()
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      const expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      req.payload.logger.info({
+        createdAt: now,
+        expiresAt,
+        msg: 'DEBUG: loginOperation - Adding session to user',
+        newSessionID,
+        tokenExpiration: collectionConfig.auth.tokenExpiration,
+      })
+      const session = { id: newSessionID, createdAt: now, expiresAt }
+      if (!user.sessions?.length) {
+        user.sessions = [session]
+      } else {
+        user.sessions.push(session)
+      }
+
+      fieldsToSignArgs.sid = newSessionID
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     // /////////////////////////////////////
     // beforeLogin - Collection
@@ -378,19 +376,20 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       result,
     })
 
-    // TODO: only do this if sessions are enabled
-    if (user.sessions?.length) {
-      req.payload.logger.info({
-        msg: 'DEBUG: loginOperation - Updating user sessions',
-        user,
-      })
-      await payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: user,
-        req,
-        returning: false,
-      })
+    if (args.collection.config.auth.useSessions) {
+      if (user.sessions?.length) {
+        req.payload.logger.info({
+          msg: 'DEBUG: loginOperation - Updating user sessions',
+          user,
+        })
+        await payload.db.updateOne({
+          id: user.id,
+          collection: collectionConfig.slug,
+          data: user,
+          req,
+          returning: false,
+        })
+      }
     }
 
     // /////////////////////////////////////

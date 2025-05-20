@@ -173,21 +173,22 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // Return results
     // /////////////////////////////////////
 
-    // TODO: only do this if sessions are enabled
-    if (user.sessions?.length) {
-      req.payload.logger.info({
-        msg: 'DEBUG: refreshOperation - Updating user sessions',
-        user,
-      })
+    if (args.collection.config.auth.useSessions) {
+      if (user.sessions?.length) {
+        req.payload.logger.info({
+          msg: 'DEBUG: refreshOperation - Updating user sessions',
+          user,
+        })
 
-      // Q: Should we prune the sessions array to remove old sessions here?
-      await req.payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: user,
-        req,
-        returning: false,
-      })
+        // Q: Should we prune the sessions array to remove old sessions here?
+        await req.payload.db.updateOne({
+          id: user.id,
+          collection: collectionConfig.slug,
+          data: user,
+          req,
+          returning: false,
+        })
+      }
     }
 
     if (shouldCommit) {

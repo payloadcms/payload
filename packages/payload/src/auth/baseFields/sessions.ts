@@ -13,11 +13,17 @@ export const sessionsFieldConfig: ArrayField = {
     {
       name: 'createdAt',
       type: 'date',
+      access: {
+        update: () => false,
+      },
       defaultValue: () => new Date(),
     },
     {
       name: 'expiresAt',
       type: 'date',
+      access: {
+        update: () => false,
+      },
       required: true,
     },
   ],
