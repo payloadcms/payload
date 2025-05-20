@@ -156,6 +156,7 @@ function Content({
     breadcrumbs,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderFieldName,
     getSelectedItems,
     setFolderID,
     subfolders,
@@ -187,9 +188,9 @@ function Content({
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
       const itemValue: FolderOrDocument['value'] = {
         id: doc?.id,
-        _folder: doc?._folder,
         _folderOrDocumentTitle: doc?.[folderCollectionConfig.admin.useAsTitle ?? 'id'],
         createdAt: doc?.createdAt,
+        folderID: doc?.[folderFieldName],
         updatedAt: doc?.updatedAt,
       }
 

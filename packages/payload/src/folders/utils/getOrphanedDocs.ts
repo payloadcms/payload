@@ -18,12 +18,12 @@ export async function getOrphanedDocs({
   let whereConstraints: Where = {
     or: [
       {
-        _folder: {
+        [payload.config.folders.fieldName]: {
           exists: false,
         },
       },
       {
-        _folder: {
+        [payload.config.folders.fieldName]: {
           equals: null,
         },
       },
@@ -50,6 +50,7 @@ export async function getOrphanedDocs({
   return (
     orphanedFolders?.docs.map((doc) =>
       formatFolderOrDocumentItem({
+        folderFieldName: payload.config.folders.fieldName,
         isUpload: Boolean(payload.collections[collectionSlug].config.upload),
         relationTo: collectionSlug,
         useAsTitle: payload.collections[collectionSlug].config.admin.useAsTitle,

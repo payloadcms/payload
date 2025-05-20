@@ -2,22 +2,22 @@ import type { CollectionAfterDeleteHook } from '../../index.js'
 
 type Args = {
   collectionSlugs: string[]
-  parentFolderFieldName: string
+  folderFieldName: string
 }
 export const dissasociateAfterDelete = ({
   collectionSlugs,
-  parentFolderFieldName,
+  folderFieldName,
 }: Args): CollectionAfterDeleteHook => {
   return async ({ id, req }) => {
     for (const collectionSlug of collectionSlugs) {
       await req.payload.update({
         collection: collectionSlug,
         data: {
-          [parentFolderFieldName]: null,
+          [folderFieldName]: null,
         },
         req,
         where: {
-          [parentFolderFieldName]: {
+          [folderFieldName]: {
             equals: id,
           },
         },

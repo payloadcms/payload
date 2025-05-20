@@ -37,6 +37,7 @@ export type FolderContextValue = {
   focusedRowIndex: number
   folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
+  folderFieldName: string
   folderID?: number | string
   getSelectedItems?: () => FolderOrDocument[]
   isDragging: boolean
@@ -85,6 +86,7 @@ const Context = React.createContext<FolderContextValue>({
   focusedRowIndex: -1,
   folderCollectionConfig: null,
   folderCollectionSlug: '',
+  folderFieldName: 'folder',
   folderID: undefined,
   getSelectedItems: () => [],
   isDragging: false,
@@ -189,6 +191,7 @@ export function FolderProvider({
   subfolders: subfoldersFromProps = [],
 }: FolderProviderProps) {
   const { config, getEntityConfig } = useConfig()
+  const folderFieldName = config.folders.fieldName
   const { routes, serverURL } = config
   const drawerDepth = useDrawerDepth()
   const { t } = useTranslation()
@@ -851,7 +854,7 @@ export function FolderProvider({
         const req = await fetch(
           `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}`,
           {
-            body: JSON.stringify({ _folder: toFolderID || null }),
+            body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
             credentials: 'include',
             headers: {
               'content-type': 'application/json',
@@ -904,7 +907,7 @@ export function FolderProvider({
           )
           try {
             const res = await fetch(`${serverURL}${routes.api}/${collectionSlug}${query}`, {
-              body: JSON.stringify({ _folder: toFolderID || null }),
+              body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
               credentials: 'include',
               headers: {
                 'content-type': 'application/json',
@@ -917,6 +920,7 @@ export function FolderProvider({
               const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>(
                 (doc: Document) =>
                   formatFolderOrDocumentItem({
+                    folderFieldName: config.folders.fieldName,
                     isUpload: Boolean(collectionConfig.upload),
                     relationTo: collectionSlug,
                     useAsTitle: collectionConfig.admin.useAsTitle,
@@ -1056,8 +1060,8 @@ export function FolderProvider({
               relationTo: folderCollectionSlug,
               value: {
                 id: activeFolderID,
-                _folder: breadcrumbs[breadcrumbs.length - 2]?.id || null,
                 _folderOrDocumentTitle: breadcrumbs[breadcrumbs.length - 1]?.name,
+                folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null,
               },
             }
           : null,
@@ -1066,6 +1070,7 @@ export function FolderProvider({
         focusedRowIndex,
         folderCollectionConfig,
         folderCollectionSlug,
+        folderFieldName,
         folderID: activeFolderID,
         getSelectedItems,
         isDragging,

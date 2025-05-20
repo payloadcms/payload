@@ -3,8 +3,8 @@ import type { CollectionAfterChangeHook, Payload } from '../../index.js'
 import { extractID } from '../../utilities/extractID.js'
 
 type Args = {
+  folderFieldName: string
   folderID: number | string
-  parentFolderFieldName: string
   parentIDToFind: number | string
   payload: Payload
 }
@@ -14,8 +14,8 @@ type Args = {
  * recursively checking upwards through the folder hierarchy.
  */
 async function isChildOfFolder({
+  folderFieldName,
   folderID,
-  parentFolderFieldName,
   parentIDToFind,
   payload,
 }: Args): Promise<boolean> {
@@ -24,8 +24,8 @@ async function isChildOfFolder({
     collection: payload.config.folders.slug,
   })
 
-  const parentFolderID = parentFolder[parentFolderFieldName]
-    ? extractID(parentFolder[parentFolderFieldName])
+  const parentFolderID = parentFolder[folderFieldName]
+    ? extractID(parentFolder[folderFieldName])
     : undefined
 
   if (!parentFolderID) {
@@ -39,8 +39,8 @@ async function isChildOfFolder({
   }
 
   return isChildOfFolder({
+    folderFieldName,
     folderID: parentFolderID,
-    parentFolderFieldName,
     parentIDToFind,
     payload,
   })
@@ -66,20 +66,17 @@ async function isChildOfFolder({
   ```
  */
 export const reparentChildFolder = ({
-  parentFolderFieldName,
+  folderFieldName,
 }: {
-  parentFolderFieldName: string
+  folderFieldName: string
 }): CollectionAfterChangeHook => {
   return async ({ doc, previousDoc, req }) => {
-    if (
-      previousDoc[parentFolderFieldName] !== doc[parentFolderFieldName] &&
-      doc[parentFolderFieldName]
-    ) {
-      const newParentFolderID = extractID(doc[parentFolderFieldName])
+    if (previousDoc[folderFieldName] !== doc[folderFieldName] && doc[folderFieldName]) {
+      const newParentFolderID = extractID(doc[folderFieldName])
       const isMovingToChild = newParentFolderID
         ? await isChildOfFolder({
+            folderFieldName,
             folderID: newParentFolderID,
-            parentFolderFieldName,
             parentIDToFind: doc.id,
             payload: req.payload,
           })
@@ -92,8 +89,8 @@ export const reparentChildFolder = ({
           id: newParentFolderID,
           collection: req.payload.config.folders.slug,
           data: {
-            [parentFolderFieldName]: previousDoc[parentFolderFieldName]
-              ? extractID(previousDoc[parentFolderFieldName])
+            [folderFieldName]: previousDoc[folderFieldName]
+              ? extractID(previousDoc[folderFieldName])
               : null,
           },
           req,

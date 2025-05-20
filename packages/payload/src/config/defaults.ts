@@ -2,6 +2,7 @@ import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import defaultAccess from '../auth/defaultAccess.js'
+import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -112,9 +113,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
   }
 
   config.folders = {
+    slug: foldersSlug,
     collections: {},
     debug: false,
     enabled: false,
+    fieldName: parentFolderFieldName,
     ...(config.folders || {}),
   }
 

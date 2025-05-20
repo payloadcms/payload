@@ -172,7 +172,7 @@ export const DocumentControls: React.FC<{
               {showLockedMetaIcon && (
                 <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {showFolderMetaIcon && <MoveDocToFolder />}
+              {showFolderMetaIcon && <MoveDocToFolder folderFieldName={config.folders.fieldName} />}
             </div>
           ) : null}
 

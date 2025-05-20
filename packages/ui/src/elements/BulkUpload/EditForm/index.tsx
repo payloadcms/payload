@@ -176,6 +176,7 @@ export function EditForm({
                               buttonStyle: 'pill',
                               size: 'small',
                             }}
+                            folderFieldName={folders.fieldName}
                             key="move-doc-to-folder"
                           />
                         ),

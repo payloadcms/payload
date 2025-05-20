@@ -27,13 +27,17 @@ const baseClass = 'move-doc-to-folder'
 export function MoveDocToFolder({
   buttonProps,
   className = '',
+  folderFieldName,
 }: {
   buttonProps?: Partial<ButtonProps>
   className?: string
+  folderFieldName: string
 }) {
   const { t } = useTranslation()
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
-  const currentParentFolder = useFormFields(([fields]) => (fields && fields?._folder) || null)
+  const currentParentFolder = useFormFields(
+    ([fields]) => (fields && fields?.[folderFieldName]) || null,
+  )
   const fromFolderID = currentParentFolder?.value
   const { id, collectionSlug, initialData, title } = useDocumentInfo()
   const { setModified } = useForm()
@@ -71,7 +75,7 @@ export function MoveDocToFolder({
         if (currentParentFolder.value !== id) {
           dispatchField({
             type: 'UPDATE',
-            path: '_folder',
+            path: folderFieldName,
             value: id,
           })
           setModified(true)

@@ -112,7 +112,7 @@ export function ListCreateNewDocInFolderButton({
           collectionSlug={createCollectionSlug}
           drawerSlug="create-new-document-with-folder"
           initialData={{
-            _folder: folderID,
+            [config.folders.fieldName]: folderID,
           }}
           onSave={({ doc, operation }) => {
             if (operation === 'create') {

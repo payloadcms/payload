@@ -25,7 +25,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
   const { routes, serverURL } = config
   const { closeModal } = useModal()
   const { t } = useTranslation()
-  const { folderCollectionSlug, folderID } = useFolder()
+  const { folderCollectionSlug, folderFieldName, folderID } = useFolder()
 
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
@@ -56,7 +56,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
             },
             value: '',
           },
-          _folder: {
+          [folderFieldName]: {
             initialValue: '',
             valid: true,
             value: '',
@@ -87,7 +87,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
               return true
             }}
           />
-          <HiddenField key={folderID} path="_folder" value={folderID} />
+          <HiddenField key={folderID} path={folderFieldName} value={folderID} />
         </DrawerContentContainer>
       </Form>
     </Drawer>

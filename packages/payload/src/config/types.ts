@@ -1015,6 +1015,10 @@ export type Config = {
      */
     enabled?: boolean
     /**
+     * The Folder field name
+     */
+    fieldName?: string
+    /**
      * Slug for the folder collection
      *
      * @default "_folders"

@@ -1,6 +1,5 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
-import { parentFolderFieldName } from './constants.js'
 import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
 import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
@@ -9,12 +8,14 @@ import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 type CreateFolderCollectionArgs = {
   collectionSlugs: string[]
   debug?: boolean
+  folderFieldName: string
   slug: string
 }
 export const createFolderCollection = ({
   slug,
   collectionSlugs,
   debug,
+  folderFieldName,
 }: CreateFolderCollectionArgs): CollectionConfig => ({
   slug,
   admin: {
@@ -30,7 +31,7 @@ export const createFolderCollection = ({
       required: true,
     },
     {
-      name: parentFolderFieldName,
+      name: folderFieldName,
       type: 'relationship',
       admin: {
         hidden: !debug,
@@ -46,21 +47,21 @@ export const createFolderCollection = ({
       },
       collection: [slug, ...collectionSlugs],
       hasMany: true,
-      on: parentFolderFieldName,
+      on: folderFieldName,
     },
   ],
   hooks: {
     afterChange: [
       reparentChildFolder({
-        parentFolderFieldName,
+        folderFieldName,
       }),
     ],
     afterDelete: [
       dissasociateAfterDelete({
         collectionSlugs,
-        parentFolderFieldName,
+        folderFieldName,
       }),
-      deleteSubfoldersAfterDelete({ folderSlug: slug, parentFolderFieldName }),
+      deleteSubfoldersAfterDelete({ folderFieldName, folderSlug: slug }),
     ],
   },
   labels: {

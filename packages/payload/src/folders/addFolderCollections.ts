@@ -1,7 +1,6 @@
 import type { Config } from '../config/types.js'
 import type { CollectionSlug } from '../index.js'
 
-import { foldersSlug, parentFolderFieldName } from './constants.js'
 import { createFolderCollection } from './createFolderCollection.js'
 
 export async function addFolderCollections(config: NonNullable<Config>): Promise<void> {
@@ -12,14 +11,15 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
   if (config.folders?.enabled) {
     const enabledCollectionSlugs: CollectionSlug[] = []
     const debug = Boolean(config.folders?.debug)
-    config.folders.slug = config.folders.slug || foldersSlug
+    const folderFieldName = config.folders.fieldName as unknown as string
+    const folderSlug = config.folders.slug as unknown as CollectionSlug
 
     for (let i = 0; i < config.collections.length; i++) {
       const collection = config.collections[i]
       if (config.folders.collections[collection.slug]) {
         if (collection) {
           collection.fields.push({
-            name: parentFolderFieldName,
+            name: folderFieldName,
             type: 'relationship',
             admin: {
               allowCreate: false,
@@ -31,7 +31,7 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
             },
             index: true,
             label: 'Folder',
-            relationTo: config.folders.slug,
+            relationTo: folderSlug,
           })
           enabledCollectionSlugs.push(collection.slug)
         }
@@ -40,9 +40,10 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
 
     if (enabledCollectionSlugs.length) {
       let folderCollection = createFolderCollection({
-        slug: config.folders.slug,
+        slug: folderSlug,
         collectionSlugs: enabledCollectionSlugs,
         debug,
+        folderFieldName,
       })
 
       if (
