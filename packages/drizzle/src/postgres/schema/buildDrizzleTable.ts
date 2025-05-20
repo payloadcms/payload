@@ -3,11 +3,13 @@ import type { ForeignKeyBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
 import {
   boolean,
   foreignKey,
+  halfvec,
   index,
   integer,
   jsonb,
   numeric,
   serial,
+  sparsevec,
   text,
   timestamp,
   uniqueIndex,
@@ -55,6 +57,14 @@ export const buildDrizzleTable = ({
           columns[key] = adapter.enums[column.enumName](column.name)
         }
         break
+
+      case 'halfvec': {
+        const builder = halfvec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
 
       case 'timestamp': {
         let builder = timestamp(column.name, {

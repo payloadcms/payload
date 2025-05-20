@@ -281,11 +281,17 @@ export type VectorRawColumn = {
   type: 'vector'
 } & BaseRawColumn
 
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
   | EnumRawColumn
+  | HalfVecRawColumn
   | IntegerRawColumn
   | TimestampRawColumn
   | UUIDRawColumn

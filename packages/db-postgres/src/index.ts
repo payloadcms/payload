@@ -128,7 +128,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
-      logger: args.logger,
+      logger: true,
       operators: operatorMap,
       pgSchema: adapterSchema,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
