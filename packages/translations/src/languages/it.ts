@@ -215,6 +215,7 @@ export const itTranslations: DefaultTranslationsObject = {
     adminTheme: 'Tema Admin',
     all: 'Tutto',
     allCollections: 'Tutte le collezioni',
+    allLocales: 'Tutte le località',
     and: 'E',
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:
@@ -284,6 +285,7 @@ export const itTranslations: DefaultTranslationsObject = {
     enterAValue: 'Inserisci un valore',
     error: 'Errore',
     errors: 'Errori',
+    export: 'Esportazione',
     fallbackToDefaultLocale: 'Fallback al locale predefinito',
     false: 'Falso',
     filter: 'Filtro',
@@ -291,6 +293,7 @@ export const itTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtra {{label}} se',
     globals: 'Globali',
     goBack: 'Torna indietro',
+    import: 'Importare',
     isEditing: 'sta modificando',
     item: 'articolo',
     items: 'articoli',
@@ -314,6 +317,7 @@ export const itTranslations: DefaultTranslationsObject = {
     movingCount: 'Spostando {{count}} {{label}}',
     newPassword: 'Nuova Password',
     next: 'Successivo',
+    no: 'No',
     noDateSelected: 'Nessuna data selezionata',
     noFiltersSet: 'Nessun filtro impostato',
     noLabel: '<No {{label}}>',
@@ -395,6 +399,7 @@ export const itTranslations: DefaultTranslationsObject = {
     value: 'Valore',
     viewReadOnly: 'Visualizza solo lettura',
     welcome: 'Benvenuto',
+    yes: 'Sì',
   },
   localization: {
     cannotCopySameLocale: 'Non è possibile copiare nella stessa posizione',
@@ -429,6 +434,7 @@ export const itTranslations: DefaultTranslationsObject = {
     crop: 'Raccolto',
     cropToolDescription:
       "Trascina gli angoli dell'area selezionata, disegna una nuova area o regola i valori qui sotto.",
+    download: 'Scarica',
     dragAndDrop: 'Trascina e rilascia un file',
     dragAndDropHere: 'oppure trascina e rilascia un file qui',
     editImage: 'Modifica immagine',
