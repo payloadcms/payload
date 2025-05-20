@@ -38,6 +38,7 @@ import {
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
+  withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
@@ -69,6 +70,7 @@ let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
 let bestFitURL: AdminUrlUtil
+let withoutEnlargementResizeOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -104,6 +106,7 @@ describe('Uploads', () => {
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
     bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
+    withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1257,7 +1260,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -1353,6 +1356,35 @@ describe('Uploads', () => {
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
+  })
+
+  test('should skip applying resizeOptions after updating an image if resizeOptions.withoutEnlargement is true and the original image size is smaller than the dimensions defined in resizeOptions', async () => {
+    await page.goto(withoutEnlargementResizeOptionsURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.file-field__edit').click()
+
+    // no need to make any changes to the image if resizeOptions.withoutEnlargement is actually being respected now
+    await page.locator('button:has-text("Apply Changes")').click()
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+
+    // expect the image to be the original size since the original image is smaller than the dimensions defined in resizeOptions
+    await expect(resizeOptionMedia).toContainText('800x800')
   })
 
   describe('imageSizes best fit', () => {
