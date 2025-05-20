@@ -229,7 +229,7 @@ function Content({
           <DrawerHeading
             action={props.action}
             count={count}
-            fromFolderName={fromFolderName}
+            fromFolderName={props.fromFolderID ? fromFolderName : undefined}
             title={props.action === 'moveItemToFolder' ? props.title : undefined}
           />
         }

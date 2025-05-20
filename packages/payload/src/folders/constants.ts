@@ -1,2 +1,2 @@
-export const foldersSlug = '_folders'
-export const parentFolderFieldName = '_folder'
+export const foldersSlug = 'payload-folders'
+export const parentFolderFieldName = 'folder'

@@ -12,6 +12,8 @@ import { redirect } from 'next/navigation.js'
 import { getFolderData } from 'payload'
 import React from 'react'
 
+import { getPreferences } from '../../utilities/getPreferences.js'
+
 export type BuildFolderViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
@@ -97,6 +99,13 @@ export const buildFolderView = async (
     )
   }
 
+  const browseByFolderPreferences = await getPreferences<{ viewPreference: string }>(
+    'browse-by-folder',
+    payload,
+    user.id,
+    user.collection,
+  )
+
   const serverProps: Omit<FolderListViewServerPropsOnly, 'collectionConfig' | 'listPreferences'> = {
     documents,
     i18n,
@@ -140,6 +149,7 @@ export const buildFolderView = async (
             enableRowSelections,
             hasCreatePermissionCollectionSlugs,
             selectedCollectionSlugs,
+            viewPreference: browseByFolderPreferences?.value?.viewPreference,
           },
           // Component:config.folders?.components?.views?.list?.Component,
           Fallback: DefaultFolderView,

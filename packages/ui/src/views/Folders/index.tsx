@@ -26,6 +26,7 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useFolder } from '../../providers/Folders/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -49,6 +50,7 @@ export function DefaultFolderView(
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermissionCollectionSlugs,
+    viewPreference,
   } = props
 
   const { config, getEntityConfig } = useConfig()
@@ -59,6 +61,7 @@ export function DefaultFolderView(
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+  const { setPreference } = usePreferences()
   const {
     addItems,
     breadcrumbs,
@@ -81,7 +84,7 @@ export function DefaultFolderView(
     visibleCollectionSlugs,
   } = useFolder()
 
-  const [activeView, setActiveView] = React.useState<'grid' | 'list'>('list')
+  const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
   const [searchPlaceholder] = React.useState(() => {
     const locationLabel =
       breadcrumbs.length === 0
@@ -164,6 +167,13 @@ export function DefaultFolderView(
       }, []),
     )
   }, [getSelectedItems])
+
+  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
+    void setPreference('browse-by-folder', {
+      viewPreference: view,
+    })
+    setActiveView(view)
+  }, [])
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -264,7 +274,7 @@ export function DefaultFolderView(
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"
-                setActiveView={setActiveView}
+                setActiveView={handleSetViewType}
               />,
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}

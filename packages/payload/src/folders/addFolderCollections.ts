@@ -26,7 +26,7 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
               allowEdit: false,
               components: {
                 Cell: '@payloadcms/ui/rsc#FolderTableCell',
-                Field: '@payloadcms/ui#FolderEditField',
+                Field: '@payloadcms/ui/rsc#FolderEditField',
               },
             },
             index: true,

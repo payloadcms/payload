@@ -29,6 +29,7 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useFolder } from '../../providers/Folders/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
@@ -47,12 +48,14 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     hasCreatePermission,
+    viewPreference,
   } = props
 
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
+  const { setPreference } = usePreferences()
   const {
     addItems,
     breadcrumbs,
@@ -73,7 +76,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     subfolders,
   } = useFolder()
 
-  const [activeView, setActiveView] = React.useState<'grid' | 'list'>('list')
+  const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -141,6 +144,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
       }, []),
     )
   }, [getSelectedItems])
+
+  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
+    void setPreference(`${collectionSlug}-collection-folder`, {
+      viewPreference: view,
+    })
+    setActiveView(view)
+  }, [])
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -245,7 +255,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"
-                setActiveView={setActiveView}
+                setActiveView={handleSetViewType}
               />,
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}

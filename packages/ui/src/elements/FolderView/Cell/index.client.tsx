@@ -59,16 +59,18 @@ export const FolderTableCellClient = ({
   useEffect(() => {
     const loadFolderName = async () => {
       try {
-        const req = await fetch(`${config.routes.api}/${config.folders.slug}/${folderID}`, {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
+        const req = await fetch(
+          `${config.routes.api}/${config.folders.slug}${folderID ? `/${folderID}` : ''}`,
+          {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'GET',
           },
-          method: 'GET',
-        })
+        )
 
         const res = await req.json()
-        console.log(res)
         setFromFolderName(res?.name || t('folder:noFolder'))
       } catch (error) {
         // eslint-disable-next-line no-console

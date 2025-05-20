@@ -27,6 +27,7 @@ export type FolderListViewClientProps = {
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   newDocumentURL: string
+  viewPreference: 'grid' | 'list'
 } & FolderListViewSlots
 
 export type FolderListViewSlotSharedClientProps = {

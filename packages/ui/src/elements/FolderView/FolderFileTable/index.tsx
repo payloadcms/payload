@@ -9,6 +9,7 @@ import type { FormatDateArgs } from '../../../utilities/formatDocTitle/formatDat
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
@@ -53,6 +54,7 @@ export function FolderFileTable({
   subfolders,
 }: Props) {
   const { config } = useConfig()
+  const { t } = useTranslation()
 
   const [relationToMap] = React.useState(() => {
     const map: Record<string, string> = {}
@@ -66,22 +68,22 @@ export function FolderFileTable({
     const columnsToShow = [
       {
         name: 'name',
-        label: 'Name',
+        label: t('general:name'),
       },
       {
         name: 'createdAt',
-        label: 'Created At',
+        label: t('general:createdAt'),
       },
       {
         name: 'updatedAt',
-        label: 'Updated At',
+        label: t('general:updatedAt'),
       },
     ]
 
     if (showRelationCell) {
       columnsToShow.push({
-        name: 'relationTo',
-        label: 'Relation To',
+        name: 'type',
+        label: t('version:type'),
       })
     }
 
@@ -110,7 +112,7 @@ export function FolderFileTable({
                   cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
                 }
 
-                if (name === 'relationTo') {
+                if (name === 'type') {
                   cellValue = relationToMap[relationTo] || relationTo
                 }
 
@@ -174,7 +176,7 @@ export function FolderFileTable({
                   cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
                 }
 
-                if (name === 'relationTo') {
+                if (name === 'type') {
                   cellValue = relationToMap[relationTo] || relationTo
                 }
 

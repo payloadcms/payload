@@ -13,6 +13,8 @@ import { redirect } from 'next/navigation.js'
 import { getFolderData, parseDocumentID } from 'payload'
 import React from 'react'
 
+import { getPreferences } from '../../utilities/getPreferences.js'
+
 // import { renderFolderViewSlots } from './renderFolderViewSlots.js'
 
 export type BuildCollectionFolderViewStateArgs = {
@@ -66,12 +68,12 @@ export const buildCollectionFolderView = async (
   if (collectionConfig) {
     const query = queryFromArgs || queryFromReq
 
-    // const collectionFolderPreferences = await upsertPreferences<ListPreferences>({
-    //   key: `${collectionSlug}-collection-folder`,
-    //   req,
-    //   value: {
-    //   },
-    // })
+    const collectionFolderPreferences = await getPreferences<{ viewPreference: string }>(
+      `${collectionSlug}-collection-folder`,
+      payload,
+      user.id,
+      user.collection,
+    )
 
     const {
       routes: { admin: adminRoute },
@@ -187,6 +189,7 @@ export const buildCollectionFolderView = async (
               enableRowSelections,
               hasCreatePermission,
               newDocumentURL,
+              viewPreference: collectionFolderPreferences?.value?.viewPreference,
             },
             Component: collectionConfig?.admin?.components?.views?.list?.Component,
             Fallback: DefaultCollectionFolderView,
