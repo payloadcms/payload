@@ -65,13 +65,11 @@ export const getConstraints = (config: Config): Field => ({
             hooks: {
               beforeChange: [
                 ({ data, req }) => {
-                  if (data?.access?.[operation]?.constraint === 'onlyMe') {
-                    if (req.user) {
-                      return [req.user.id]
-                    }
+                  if (data?.access?.[operation]?.constraint === 'onlyMe' && req.user) {
+                    return [req.user.id]
                   }
 
-                  if (data?.access?.[operation]?.constraint === 'specificUsers') {
+                  if (data?.access?.[operation]?.constraint === 'specificUsers' && req.user) {
                     return [...(data?.access?.[operation]?.users || []), req.user.id]
                   }
 
