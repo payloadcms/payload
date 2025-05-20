@@ -30,13 +30,13 @@ export default buildConfigWithDefaults({
     hooks: {
       beforeValidate: [
         // this is a custom `beforeValidate` hook that runs before the preset is validated
-        // it ensures that if the user is trying to change a constraint to "admins", they must be an admin themselves
+        // it ensures that if the user is trying to change a constraint to "onlyAdmins", they must be an admin themselves
         ({ data, req, originalDoc }) => {
           const isSharingWithAdmins =
-            (data?.access?.read?.constraint === 'admins' &&
-              (!originalDoc || originalDoc?.access?.read?.constraint !== 'admins')) ||
-            (data?.access?.update?.constraint === 'admins' &&
-              (!originalDoc || originalDoc?.access?.update?.constraint !== 'admins'))
+            (data?.access?.read?.constraint === 'onlyAdmins' &&
+              (!originalDoc || originalDoc?.access?.read?.constraint !== 'onlyAdmins')) ||
+            (data?.access?.update?.constraint === 'onlyAdmins' &&
+              (!originalDoc || originalDoc?.access?.update?.constraint !== 'onlyAdmins'))
 
           if (isSharingWithAdmins && !req.user?.roles?.includes('admin')) {
             throw new APIError(
@@ -69,8 +69,8 @@ export default buildConfigWithDefaults({
           access: () => false,
         },
         {
-          label: 'Admins',
-          value: 'admins',
+          label: 'Only Admins',
+          value: 'onlyAdmins',
           access: () => ({
             'access.read.roles': {
               in: ['admin'],
@@ -90,8 +90,8 @@ export default buildConfigWithDefaults({
           }),
         },
         {
-          label: 'Admins',
-          value: 'admins',
+          label: 'Only Admins',
+          value: 'onlyAdmins',
           access: () => ({
             'access.read.roles': {
               in: ['admin'],

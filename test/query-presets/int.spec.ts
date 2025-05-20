@@ -532,10 +532,10 @@ describe('Query Presets', () => {
             },
             access: {
               read: {
-                constraint: 'admins',
+                constraint: 'onlyAdmins',
               },
               update: {
-                constraint: 'admins',
+                constraint: 'onlyAdmins',
               },
             },
             relatedCollection: 'pages',
@@ -586,10 +586,10 @@ describe('Query Presets', () => {
             title: 'Everyone (Now Admins)',
             access: {
               read: {
-                constraint: 'admins',
+                constraint: 'onlyAdmins',
               },
               update: {
-                constraint: 'admins',
+                constraint: 'onlyAdmins',
               },
             },
           },
@@ -611,10 +611,10 @@ describe('Query Presets', () => {
           title: 'Everyone (Now Admins)',
           access: {
             read: {
-              constraint: 'admins',
+              constraint: 'onlyAdmins',
             },
             update: {
-              constraint: 'admins',
+              constraint: 'onlyAdmins',
             },
           },
         },

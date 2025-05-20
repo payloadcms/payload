@@ -60,7 +60,7 @@ Query Presets are subject to the same [Access Control](../access-control/overvie
 Access Control for Query Presets can be customized in two ways:
 
 1. [Collection Access Control](#collection-access-control): Applies to all presets. These rules are not controllable by the user and are statically defined in the config.
-2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are dynamically defined each record in the database.
+2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are dynamically defined on each record in the database.
 
 ### Collection Access Control
 
@@ -175,7 +175,7 @@ The following options are available for each constraint:
 
 ## Hooks
 
-You may also find it useful to attach [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
+You may also find it useful to attach your own [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
 
 For example, you may want to add additional access control rules that prevent certain users from creating or updating presets in a certain way.
 
