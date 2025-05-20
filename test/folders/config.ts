@@ -7,6 +7,7 @@ import { Autosave } from './collections/Autosave/index.js'
 import { Drafts } from './collections/Drafts/index.js'
 import { Media } from './collections/Media/index.js'
 import { Posts } from './collections/Posts/index.js'
+import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
   admin: {
