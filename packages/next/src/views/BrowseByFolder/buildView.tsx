@@ -25,7 +25,7 @@ export type BuildFolderViewArgs = {
   query: ListQuery
 } & AdminViewServerProps
 
-export const buildFolderView = async (
+export const buildBrowseByFolderView = async (
   args: BuildFolderViewArgs,
 ): Promise<BuildCollectionFolderViewResult> => {
   const {

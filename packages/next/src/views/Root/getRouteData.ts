@@ -14,11 +14,11 @@ import { formatAdminURL } from 'payload/shared'
 import type { initPage } from '../../utilities/initPage/index.js'
 
 import { Account } from '../Account/index.js'
+import { BrowseByFolder } from '../BrowseByFolder/index.js'
 import { CollectionFolderView } from '../CollectionFolders/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
-import { FolderView } from '../Folders/index.js'
 import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
@@ -51,7 +51,7 @@ export type ViewFromConfig = {
 
 const oneSegmentViews: OneSegmentViews = {
   account: Account,
-  browseByFolder: FolderView,
+  browseByFolder: BrowseByFolder,
   createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
   inactivity: LogoutInactivity,
