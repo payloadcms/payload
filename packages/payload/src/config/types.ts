@@ -1120,6 +1120,7 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    hooks: CollectionConfig['hooks']
     labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */

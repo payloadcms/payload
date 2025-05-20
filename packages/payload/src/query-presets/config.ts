@@ -125,7 +125,9 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     },
   ],
   hooks: {
+    ...(config.queryPresets?.hooks || {}),
     beforeValidate: [
+      ...(config.queryPresets?.hooks?.beforeValidate || []),
       ({ data, operation, req }) => {
         // TODO: type this
         const typedData = data as any

@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Pages } from './collections/Pages/index.js'
@@ -26,6 +27,30 @@ export default buildConfigWithDefaults({
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
+    hooks: {
+      beforeValidate: [
+        // this is a custom `beforeValidate` hook that runs before the preset is validated
+        // it ensures that if the user is trying to change a constraint to "admins", they must be an admin themselves
+        ({ data, req, originalDoc }) => {
+          const isSharingWithAdmins =
+            (data?.access?.read?.constraint === 'admins' &&
+              (!originalDoc || originalDoc?.access?.read?.constraint !== 'admins')) ||
+            (data?.access?.update?.constraint === 'admins' &&
+              (!originalDoc || originalDoc?.access?.update?.constraint !== 'admins'))
+
+          if (isSharingWithAdmins && !req.user?.roles?.includes('admin')) {
+            throw new APIError(
+              'You must be an admin to share this preset with admins.',
+              403,
+              {},
+              true,
+            )
+          }
+
+          return data
+        },
+      ],
+    },
     constraints: {
       read: [
         {
@@ -43,6 +68,15 @@ export default buildConfigWithDefaults({
           value: 'noone',
           access: () => false,
         },
+        {
+          label: 'Admins',
+          value: 'admins',
+          access: () => ({
+            'access.read.roles': {
+              in: ['admin'],
+            },
+          }),
+        },
       ],
       update: [
         {
@@ -52,6 +86,15 @@ export default buildConfigWithDefaults({
           access: ({ req: { user } }) => ({
             'access.update.roles': {
               in: user?.roles || [],
+            },
+          }),
+        },
+        {
+          label: 'Admins',
+          value: 'admins',
+          access: () => ({
+            'access.read.roles': {
+              in: ['admin'],
             },
           }),
         },
