@@ -5,6 +5,7 @@ export const azTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Siz <0>{{fromTenant}}</0> mülkiyyətini <0>{{toTenant}}</0> mülkiyyətinə dəyişdirəcəksiniz.',
     'confirm-tenant-switch--heading': '{{tenantLabel}} dəyişikliyini təsdiqləyin',
+    'field-assignedTentant-label': 'Təyin edilmiş İcarəçi',
   },
 }
 

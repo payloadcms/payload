@@ -77,6 +77,7 @@ export const TenantSelectionProviderClient = ({
   }, [])
 
   const deleteCookie = React.useCallback(() => {
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     document.cookie = 'payload-tenant=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
   }, [])
 
