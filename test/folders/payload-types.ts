@@ -360,6 +360,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Global {
   id: string;
+  title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -368,6 +369,7 @@ export interface Global {
  * via the `definition` "global_select".
  */
 export interface GlobalSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
