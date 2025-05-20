@@ -71,11 +71,7 @@ export default buildConfigWithDefaults({
         {
           label: 'Only Admins',
           value: 'onlyAdmins',
-          access: () => ({
-            'access.read.roles': {
-              in: ['admin'],
-            },
-          }),
+          access: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
         },
       ],
       update: [
@@ -92,11 +88,7 @@ export default buildConfigWithDefaults({
         {
           label: 'Only Admins',
           value: 'onlyAdmins',
-          access: () => ({
-            'access.read.roles': {
-              in: ['admin'],
-            },
-          }),
+          access: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
         },
       ],
     },

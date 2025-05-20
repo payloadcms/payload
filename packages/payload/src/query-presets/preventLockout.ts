@@ -57,6 +57,7 @@ export const preventLockout: Validate = async (
         req,
         user: req.user,
       })
+      console.log('tempPreset', tempPreset)
 
       canRead = true
 
