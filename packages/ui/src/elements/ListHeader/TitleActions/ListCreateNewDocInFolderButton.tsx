@@ -114,14 +114,12 @@ export function ListCreateNewDocInFolderButton({
           initialData={{
             [config.folders.fieldName]: folderID,
           }}
-          onSave={({ doc, operation }) => {
-            if (operation === 'create') {
-              closeModal(newDocInFolderDrawerSlug)
-              void onCreateSuccess({
-                collectionSlug: createCollectionSlug,
-                doc,
-              })
-            }
+          onSave={({ doc }) => {
+            closeModal(newDocInFolderDrawerSlug)
+            void onCreateSuccess({
+              collectionSlug: createCollectionSlug,
+              doc,
+            })
           }}
           redirectAfterCreate={false}
         />

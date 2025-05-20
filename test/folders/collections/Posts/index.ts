@@ -15,5 +15,10 @@ export const Posts: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
     },
+    {
+      name: 'relatedAutosave',
+      type: 'relationship',
+      relationTo: 'autosave',
+    },
   ],
 }
