@@ -43,18 +43,14 @@ export const generatePageMetadata = async ({
   params: paramsPromise,
 }: Args) => {
   const config = await configPromise
-
   const params = await paramsPromise
 
-  const isFolderViewEnabled = config.folders.enabled
-  const folderCollectionSlugs = isFolderViewEnabled
-    ? config.collections.reduce((acc, { slug, admin }) => {
-        if (admin?.folders) {
-          return [...acc, slug]
-        }
-        return acc
-      }, [])
-    : []
+  const folderCollectionSlugs = config.collections.reduce((acc, { slug, admin }) => {
+    if (admin?.folders) {
+      return [...acc, slug]
+    }
+    return acc
+  }, [])
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const currentRoute = `/${segments.join('/')}`
@@ -85,7 +81,7 @@ export const generatePageMetadata = async ({
       break
     }
     case 1: {
-      if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+      if (folderCollectionSlugs.length && `/${segmentOne}` === config.admin.routes.browseByFolder) {
         // --> /:folderCollectionSlug
         meta = await oneSegmentMeta.folders({ config, i18n })
       } else if (segmentOne === 'account') {
@@ -108,7 +104,10 @@ export const generatePageMetadata = async ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordViewMetadata({ config, i18n })
-      } else if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+      } else if (
+        folderCollectionSlugs.length &&
+        `/${segmentOne}` === config.admin.routes.browseByFolder
+      ) {
         // --> /browse-by-folder/:folderID
         meta = await generateBrowseByFolderMetadata({ config, i18n })
       } else if (isCollection) {

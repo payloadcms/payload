@@ -169,7 +169,7 @@ export function EditForm({
                   <Upload_v4
                     collectionSlug={collectionConfig.slug}
                     customActions={[
-                      folders.enabled && collectionConfig.admin.folders && (
+                      collectionConfig.admin.folders && (
                         <MoveDocToFolder
                           buttonProps={{
                             buttonStyle: 'pill',

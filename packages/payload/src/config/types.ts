@@ -1003,12 +1003,6 @@ export type Config = {
      */
     debug?: boolean
     /**
-     * Enable folders in the admin panel
-     *
-     * @default false
-     */
-    enabled?: boolean
-    /**
      * The Folder field name
      *
      * @default "folder"

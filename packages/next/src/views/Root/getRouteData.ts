@@ -112,16 +112,13 @@ export const getRouteData = ({
   const isCollection = segmentOne === 'collections'
   let matchedCollection: SanitizedConfig['collections'][number] = undefined
   let matchedGlobal: SanitizedConfig['globals'][number] = undefined
-  const isFolderViewEnabled = config.folders?.enabled
 
-  const folderCollectionSlugs = isFolderViewEnabled
-    ? config.collections.reduce((acc, { slug, admin }) => {
-        if (admin?.folders) {
-          return [...acc, slug]
-        }
-        return acc
-      }, [])
-    : []
+  const folderCollectionSlugs = config.collections.reduce((acc, { slug, admin }) => {
+    if (admin?.folders) {
+      return [...acc, slug]
+    }
+    return acc
+  }, [])
 
   const serverProps: ServerPropsFromView = {
     viewActions: config?.admin?.components?.actions || [],
@@ -190,7 +187,7 @@ export const getRouteData = ({
           viewType = 'account'
         }
 
-        if (isFolderViewEnabled && viewKey === 'browseByFolder') {
+        if (folderCollectionSlugs.length && viewKey === 'browseByFolder') {
           templateType = 'default'
           viewType = 'folders'
         }
@@ -206,7 +203,10 @@ export const getRouteData = ({
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
         viewType = 'reset'
-      } else if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+      } else if (
+        folderCollectionSlugs.length &&
+        `/${segmentOne}` === config.admin.routes.browseByFolder
+      ) {
         // --> /browse-by-folder/:folderID
         ViewToRender = {
           Component: oneSegmentViews.browseByFolder,
@@ -261,7 +261,6 @@ export const getRouteData = ({
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
         if (
-          isFolderViewEnabled &&
           segmentThree === config.folders.slug &&
           folderCollectionSlugs.includes(matchedCollection.slug)
         ) {
