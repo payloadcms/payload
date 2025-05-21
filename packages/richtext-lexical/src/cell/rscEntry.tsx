@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
+import type { Payload, RowData, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
@@ -34,6 +34,11 @@ export const RscEntryLexicalCell: React.FC<
   {
     admin: LexicalFieldAdminProps
     i18n: I18nClient
+    onClick?: (args: {
+      cellData: unknown
+      collectionSlug: SanitizedCollectionConfig['slug']
+      rowData: RowData
+    }) => void
     payload: Payload
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & LexicalRichTextCellProps
@@ -49,7 +54,6 @@ export const RscEntryLexicalCell: React.FC<
     onClick: onClickFromProps,
     payload,
     rowData,
-    sanitizedEditorConfig,
   } = props
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined

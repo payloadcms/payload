@@ -219,15 +219,12 @@ export const buildPolymorphicColumnState = (args: Args): Column[] => {
 
             const cellServerProps: DefaultServerCellComponentProps = {
               cellData: cellClientProps.cellData,
-              className: baseCellClientProps.className,
               collectionConfig: payload.collections[collectionSlug].config,
               collectionSlug,
-              columnIndex: baseCellClientProps.columnIndex,
               customCellProps: baseCellClientProps.customCellProps,
               field: _field,
               i18n,
               link: cellClientProps.link,
-              onClick: baseCellClientProps.onClick,
               payload,
               rowData: doc,
             }

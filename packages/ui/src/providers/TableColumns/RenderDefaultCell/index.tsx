@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps, RowData, SanitizedCollectionConfig } from 'payload'
 
 import React from 'react'
 
@@ -23,7 +23,13 @@ export const RenderDefaultCell: React.FC<{
   const { drawerSlug, onSelect } = useListDrawerContext()
   const { LinkedCellOverride } = useTableColumns()
 
-  const propsToPass: DefaultCellComponentProps = {
+  const propsToPass: {
+    onClick?: (args: {
+      cellData: unknown
+      collectionSlug: SanitizedCollectionConfig['slug']
+      rowData: RowData
+    }) => void
+  } & DefaultCellComponentProps = {
     ...clientProps,
     columnIndex,
   }

@@ -50,7 +50,11 @@ export type {
    */
   CustomComponent as CustomSaveDraftButton,
 } from '../config/types.js'
-export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
+export type {
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
+  RowData,
+} from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
