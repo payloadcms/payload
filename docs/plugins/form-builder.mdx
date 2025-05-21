@@ -440,12 +440,14 @@ You can custommise the default value of the date field and any other aspects of 
 Note that the end submission source will be responsible for the timezone of the date. Payload only stores the date in UTC format.
 
 ```ts
+import { fields as formFields } from '@payloadcms/plugin-form-builder'
+
 // payload.config.ts
 formBuilderPlugin({
   fields: {
     // date: true, // just enable it without any customizations
     date: {
-      ...fields.date,
+      ...formFields.date,
       fields: [
         ...(formFields.date && 'fields' in formFields.date
           ? formFields.date.fields.map((field) => {
