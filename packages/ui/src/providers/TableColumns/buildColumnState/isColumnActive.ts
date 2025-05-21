@@ -14,9 +14,8 @@ export function isColumnActive({
   if (columnPreference) {
     return columnPreference.active
   } else if (columns && Array.isArray(columns) && columns.length > 0) {
-    return Boolean(
-      columns.find((column) => field && 'name' in field && column.accessor === field.name)?.active,
-    )
+    const accessor = (field as any).accessor ?? ('name' in field ? field.name : undefined)
+    return Boolean(columns.find((column) => column.accessor === accessor)?.active)
   } else if (activeColumnsIndices.length < 4) {
     return true
   }

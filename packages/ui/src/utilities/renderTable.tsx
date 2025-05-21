@@ -135,9 +135,15 @@ export const renderTable = ({
 
   const columnPreferences2: ColumnPreference[] = columnsFromArgs
     ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientFields, true)?.some(
-          (field) => 'name' in field && field.name === column.accessor,
-        ),
+        flattenTopLevelFields(clientFields, {
+          i18n,
+          keepPresentationalFields: true,
+          moveSubFieldsToTop: true,
+        })?.some((field) => {
+          const accessor =
+            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+          return accessor === column.accessor
+        }),
       )
     : getInitialColumns(
         isPolymorphic ? clientFields : filterFields(clientFields),
