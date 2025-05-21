@@ -848,6 +848,32 @@ describe('Fields', () => {
       })
       expect(data.hasMany).toStrictEqual(['a'])
     })
+
+    it('should prevent against saving a value outside of reduceOptions', async () => {
+      try {
+        const result = await payload.create({
+          collection: 'select-fields',
+          data: {
+            selectWithReducedOptions: 'one',
+          },
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error) {
+        expect((error as Error).message).toBe(
+          'The following field is invalid: Select with reduced options',
+        )
+      }
+
+      const result = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectWithReducedOptions: 'two',
+        },
+      })
+
+      expect(result).toBeTruthy()
+    })
   })
 
   describe('number', () => {
