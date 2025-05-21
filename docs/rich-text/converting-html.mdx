@@ -13,7 +13,7 @@ There are two main approaches to convert your Lexical-based rich text to HTML:
 1. **Generate HTML on-demand (Recommended)**: Convert JSON to HTML wherever you need it, on-demand.
 2. **Generate HTML within your Collection**: Create a new field that automatically converts your saved JSON content to HTML. This is not recommended because it adds overhead to the Payload API and may not work well with live preview.
 
-### On-demand (Recommended)
+### On-demand
 
 To convert JSON to HTML on-demand, use the `convertLexicalToHTML` function from `@payloadcms/richtext-lexical/html`. Here's an example of how to use it in a React component in your frontend:
 
@@ -27,58 +27,6 @@ import React from 'react'
 
 export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const html = convertLexicalToHTML({ data })
-
-  return <div dangerouslySetInnerHTML={{ __html: html }} />
-}
-```
-
-#### Lexical Blocks
-
-If your rich text includes Lexical blocks, you need to provide a way to convert them to HTML. For example:
-
-```tsx
-'use client'
-
-import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
-import type {
-  DefaultNodeTypes,
-  SerializedBlockNode,
-  SerializedInlineBlockNode,
-} from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import {
-  convertLexicalToHTML,
-  type HTMLConvertersFunction,
-} from '@payloadcms/richtext-lexical/html'
-import React from 'react'
-
-type NodeTypes =
-  | DefaultNodeTypes
-  | SerializedBlockNode<MyTextBlock>
-  | SerializedInlineBlockNode<MyInlineBlock>
-
-const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
-  defaultConverters,
-}) => ({
-  ...defaultConverters,
-  blocks: {
-    // Each key should match your block's slug
-    myTextBlock: ({ node, providedCSSString }) =>
-      `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
-  },
-  inlineBlocks: {
-    // Each key should match your inline block's slug
-    myInlineBlock: ({ node, providedStyleTag }) =>
-      `<span${providedStyleTag}>${node.fields.text}</span$>`,
-  },
-})
-
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
-  const html = convertLexicalToHTML({
-    converters: htmlConverters,
-    data,
-  })
 
   return <div dangerouslySetInnerHTML={{ __html: html }} />
 }
@@ -223,6 +171,58 @@ const Pages: CollectionConfig = {
       >,
     }),
   ],
+}
+```
+
+## Blocks to HTML
+
+If your rich text includes Lexical blocks, you need to provide a way to convert them to HTML. For example:
+
+```tsx
+'use client'
+
+import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  convertLexicalToHTML,
+  type HTMLConvertersFunction,
+} from '@payloadcms/richtext-lexical/html'
+import React from 'react'
+
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<MyTextBlock>
+  | SerializedInlineBlockNode<MyInlineBlock>
+
+const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  blocks: {
+    // Each key should match your block's slug
+    myTextBlock: ({ node, providedCSSString }) =>
+      `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
+  },
+  inlineBlocks: {
+    // Each key should match your inline block's slug
+    myInlineBlock: ({ node, providedStyleTag }) =>
+      `<span${providedStyleTag}>${node.fields.text}</span$>`,
+  },
+})
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const html = convertLexicalToHTML({
+    converters: htmlConverters,
+    data,
+  })
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
 }
 ```
 
