@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -29,6 +30,11 @@ test.describe('Folders', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
+
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'foldersTest',
+    })
   })
 
   test.describe('No folders', () => {
@@ -148,7 +154,7 @@ test.describe('Folders', () => {
         .getByRole('button', { name: 'Move' })
       await confirmMoveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      const movedFolderCard = page.locator('.folder-file-card__name', {
+      const movedFolderCard = page.locator('.folder-list--folders .folder-file-card__name', {
         hasText: 'Move Me',
       })
       await expect(movedFolderCard).toBeHidden()
@@ -170,7 +176,7 @@ test.describe('Folders', () => {
       await expect(postButton).toBeVisible()
       await postButton.click()
 
-      const drawer = page.locator('dialog#create-new-document-with-folder')
+      const drawer = page.locator('dialog#create-document--no-results-new-doc-in-folder-drawer')
       const titleInput = drawer.locator('input[name="title"]')
       await titleInput.fill('Document Created From Folder')
       await drawer.getByRole('button', { name: 'Save', exact: true }).click()
@@ -197,25 +203,23 @@ test.describe('Folders', () => {
       await createFolderButton.click()
 
       const drawerHeader = page.locator(
-        'dialog#empty-state-create-folder-create-new-folder h1.drawerHeader__title',
+        'dialog#create-folder--no-results-new-folder-drawer h1.drawerHeader__title',
       )
       await expect(drawerHeader).toHaveText('New Folder')
 
       const titleField = page.locator(
-        'dialog#empty-state-create-folder-create-new-folder input[id="field-name"]',
+        'dialog#create-folder--no-results-new-folder-drawer input[id="field-name"]',
       )
       await titleField.fill('Nested Folder')
       const createButton = page
         .locator(
-          'dialog#empty-state-create-folder-create-new-folder button[aria-label="Apply Changes"]',
+          'dialog#create-folder--no-results-new-folder-drawer button[aria-label="Apply Changes"]',
         )
         .filter({ hasText: 'Create' })
         .first()
       await createButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect(
-        page.locator('dialog#empty-state-create-folder-create-new-folder'),
-      ).toBeHidden()
+      await expect(page.locator('dialog#create-folder--no-results-new-folder-drawer')).toBeHidden()
     })
   })
 
@@ -314,7 +318,7 @@ test.describe('Folders', () => {
     await createFolderButton.click()
 
     const folderNameInput = page.locator(
-      'dialog#from-pill-create-new-folder div.drawer-content-container input#field-name',
+      'dialog#create-document--header-pill-new-folder-drawer div.drawer-content-container input#field-name',
     )
 
     await folderNameInput.fill(folderName)

@@ -254,7 +254,7 @@ export function DefaultBrowseByFolderView(
                 collectionSlugs={hasCreatePermissionCollectionSlugs}
                 key="create-new-button"
                 onCreateSuccess={onCreateSuccess}
-                slugPrefix="from-pill"
+                slugPrefix="create-document--header-pill"
               />,
             ].filter(Boolean)}
           />
@@ -324,7 +324,7 @@ export function DefaultBrowseByFolderView(
                   collectionSlugs={[folderCollectionConfig.slug]}
                   key="create-folder"
                   onCreateSuccess={onCreateSuccess}
-                  slugPrefix="empty-state-create-folder"
+                  slugPrefix="create-folder--no-results"
                 />,
                 folderID && (
                   <ListCreateNewDocInFolderButton
@@ -333,7 +333,8 @@ export function DefaultBrowseByFolderView(
                       (slug) => slug !== folderCollectionConfig.slug,
                     )}
                     key="create-document"
-                    slugPrefix="empty-state-create-doc"
+                    onCreateSuccess={onCreateSuccess}
+                    slugPrefix="create-document--no-results"
                   />
                 ),
               ].filter(Boolean)}

@@ -27,7 +27,7 @@ async function createFolder(
   })
 }
 
-export const seed: Config['onInit'] = async (payload) => {
+export const seed: NonNullable<Config['onInit']> = async (payload) => {
   await payload.create({
     collection: 'users',
     data: {

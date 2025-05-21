@@ -239,6 +239,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   collectionSlugs={[folderCollectionConfig.slug, collectionSlug]}
                   key="create-new-button"
                   onCreateSuccess={onCreateSuccess}
+                  slugPrefix="create-document--header-pill"
                 />
               ),
               <ListBulkUploadButton
@@ -317,11 +318,13 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   collectionSlugs={[folderCollectionConfig.slug]}
                   key="create-folder"
                   onCreateSuccess={onCreateSuccess}
+                  slugPrefix="create-folder--no-results"
                 />,
                 <ListCreateNewDocInFolderButton
                   buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                   collectionSlugs={[collectionSlug]}
                   key="create-document"
+                  slugPrefix="create-document--no-results"
                 />,
               ].filter(Boolean)}
               Message={
