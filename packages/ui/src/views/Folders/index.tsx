@@ -331,6 +331,7 @@ export function DefaultBrowseByFolderView(
                       (slug) => slug !== folderCollectionConfig.slug,
                     )}
                     key="create-document"
+                    onCreateSuccess={onCreateSuccess}
                   />
                 ),
               ].filter(Boolean)}

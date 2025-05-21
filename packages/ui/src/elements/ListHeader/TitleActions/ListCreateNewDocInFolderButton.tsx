@@ -25,7 +25,7 @@ export function ListCreateNewDocInFolderButton({
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
-  onCreateSuccess?: (args: {
+  onCreateSuccess: (args: {
     collectionSlug: CollectionSlug
     doc: Record<string, unknown>
   }) => Promise<void> | void
