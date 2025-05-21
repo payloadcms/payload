@@ -151,6 +151,7 @@ export const iterateFields = async ({
             ? Boolean(
                 field.admin.condition(fullData || {}, data || {}, {
                   blockData,
+                  operation,
                   path: pathSegments,
                   user: req.user,
                 }),

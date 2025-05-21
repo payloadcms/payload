@@ -71,7 +71,17 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
 
                     return {
                       and: [
-                        ...(typeof constraintAccess === 'object' ? [constraintAccess] : []),
+                        ...(typeof constraintAccess === 'object'
+                          ? [constraintAccess]
+                          : constraintAccess === false
+                            ? [
+                                {
+                                  id: {
+                                    equals: null,
+                                  },
+                                },
+                              ]
+                            : []),
                         {
                           [`access.${operation}.constraint`]: {
                             equals: constraint.value,

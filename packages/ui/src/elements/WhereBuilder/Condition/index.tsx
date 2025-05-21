@@ -141,6 +141,11 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               disabled={disabled}
+              filterOption={(option, inputValue) =>
+                ((option?.data?.plainTextLabel as string) || option.label)
+                  .toLowerCase()
+                  .includes(inputValue.toLowerCase())
+              }
               isClearable={false}
               onChange={handleFieldChange}
               options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}

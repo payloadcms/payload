@@ -163,6 +163,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             // @ts-expect-error @todo: fix types
             initialParams={query}
             key={collectionSlug}
+            // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
             label={searchLabelTranslated.current}
           />
           {activePreset && hasModifiedPreset ? (

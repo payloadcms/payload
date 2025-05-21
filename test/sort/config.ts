@@ -2,12 +2,14 @@ import type { CollectionSlug, Payload } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { wait } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { DefaultSortCollection } from './collections/DefaultSort/index.js'
 import { DraftsCollection } from './collections/Drafts/index.js'
 import { LocalizedCollection } from './collections/Localized/index.js'
+import { NonUniqueSortCollection, nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { OrderableCollection } from './collections/Orderable/index.js'
 import { OrderableJoinCollection } from './collections/OrderableJoin/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
@@ -19,6 +21,7 @@ export default buildConfigWithDefaults({
     PostsCollection,
     DraftsCollection,
     DefaultSortCollection,
+    NonUniqueSortCollection,
     LocalizedCollection,
     OrderableCollection,
     OrderableJoinCollection,
@@ -86,6 +89,28 @@ async function seedSortable(payload: Payload) {
   ])
 
   await payload.create({ collection: 'orderable-join', data: { title: 'Join B' } })
+
+  // Create 10 items to be sorted by non-unique field
+  for (const i of Array.from({ length: 10 }, (_, index) => index)) {
+    let order = 1
+
+    if (i > 3) {
+      order = 2
+    } else if (i > 6) {
+      order = 3
+    }
+
+    await payload.create({
+      collection: nonUniqueSortSlug,
+      data: {
+        title: `Post ${i}`,
+        order,
+      },
+    })
+
+    // Wait 2 seconds to guarantee that the createdAt date is different
+    // await wait(2000)
+  }
 
   return new Response(JSON.stringify({ success: true }), {
     headers: { 'Content-Type': 'application/json' },

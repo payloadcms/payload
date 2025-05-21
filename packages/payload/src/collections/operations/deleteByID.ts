@@ -6,7 +6,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
-import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -168,6 +168,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     }
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

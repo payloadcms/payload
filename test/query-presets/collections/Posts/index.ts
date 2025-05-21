@@ -15,7 +15,4 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
   ],
-  versions: {
-    drafts: true,
-  },
 }

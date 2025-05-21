@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.34.0",
+  "version": "3.38.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -36,6 +36,11 @@
       "import": "./src/exports/routes.ts",
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
+    },
+    "./auth": {
+      "import": "./src/exports/auth.ts",
+      "types": "./src/exports/auth.ts",
+      "default": "./src/exports/auth.ts"
     },
     "./templates": {
       "import": "./src/exports/templates.ts",
@@ -113,7 +118,6 @@
     "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "3.1.0"
   },
@@ -150,6 +154,11 @@
         "import": "./dist/exports/templates.js",
         "types": "./dist/exports/templates.d.ts",
         "default": "./dist/exports/templates.js"
+      },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
       },
       "./utilities": {
         "import": "./dist/exports/utilities.js",

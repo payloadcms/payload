@@ -4,9 +4,10 @@ import { inArray } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
@@ -46,6 +47,7 @@ export const findMany = async function find({
   const offset = skip || (page - 1) * limit
 
   if (limit === 0) {
+    pagination = false
     limit = undefined
   }
 
@@ -74,6 +76,26 @@ export const findMany = async function find({
     tableName,
     versions,
   })
+
+  if (orderBy) {
+    for (const key in selectFields) {
+      const column = selectFields[key]
+      if (column.primary) {
+        continue
+      }
+
+      if (
+        !orderBy.some(
+          (col) =>
+            col.column.name === column.name &&
+            getNameFromDrizzleTable(col.column.table) === getNameFromDrizzleTable(column.table),
+        )
+      ) {
+        delete selectFields[key]
+      }
+    }
+  }
+
   const selectDistinctResult = await selectDistinct({
     adapter,
     db,

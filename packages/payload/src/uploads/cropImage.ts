@@ -43,6 +43,33 @@ export async function cropImage({
       sharpOptions.animated = true
     }
 
+    const { height: originalHeight, width: originalWidth } = dimensions
+    const newWidth = Number(widthInPixels)
+    const newHeight = Number(heightInPixels)
+
+    const dimensionsChanged = originalWidth !== newWidth || originalHeight !== newHeight
+
+    if (!dimensionsChanged) {
+      let adjustedHeight = originalHeight
+
+      if (fileIsAnimatedType) {
+        const animatedMetadata = await sharp(
+          file.tempFilePath || file.data,
+          sharpOptions,
+        ).metadata()
+        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height : originalHeight
+      }
+
+      return {
+        data: file.data,
+        info: {
+          height: adjustedHeight,
+          size: file.size,
+          width: originalWidth,
+        },
+      }
+    }
+
     const formattedCropData = {
       height: Number(heightInPixels),
       left: percentToPixel(x, dimensions.width),

@@ -3,7 +3,8 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 import type { ReducedField } from './types.js'
 
@@ -108,6 +109,45 @@ export const reduceFields = ({
           : labelPrefix
         : translatedLabel
 
+      if (fieldAffectsData(field)) {
+        // Make sure we handle deeply nested groups
+        const pathWithPrefix = field.name
+          ? pathPrefix
+            ? pathPrefix + '.' + field.name
+            : field.name
+          : pathPrefix
+
+        reduced.push(
+          ...reduceFields({
+            fields: field.fields,
+            i18n,
+            labelPrefix: labelWithPrefix,
+            pathPrefix: pathWithPrefix,
+          }),
+        )
+      } else {
+        reduced.push(
+          ...reduceFields({
+            fields: field.fields,
+            i18n,
+            labelPrefix: labelWithPrefix,
+            pathPrefix,
+          }),
+        )
+      }
+
+      return reduced
+    }
+
+    if (field.type === 'array' && 'fields' in field) {
+      const translatedLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
+
       // Make sure we handle deeply nested groups
       const pathWithPrefix = field.name
         ? pathPrefix
@@ -152,10 +192,15 @@ export const reduceFields = ({
           })
         : localizedLabel
 
+      // React elements in filter options are not searchable in React Select
+      // Extract plain text to make them filterable in dropdowns
+      const textFromLabel = extractTextFromReactNode(formattedLabel)
+
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
       const formattedField: ReducedField = {
         label: formattedLabel,
+        plainTextLabel: textFromLabel,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,
@@ -167,4 +212,30 @@ export const reduceFields = ({
     }
     return reduced
   }, [])
+}
+
+/**
+ * Extracts plain text content from a React node by removing HTML tags.
+ * Used to make React elements searchable in filter dropdowns.
+ */
+const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
+  if (!reactNode) {
+    return ''
+  }
+  if (typeof reactNode === 'string') {
+    return reactNode
+  }
+
+  const html = renderToStaticMarkup(reactNode)
+
+  // Handle different environments (server vs browser)
+  if (typeof document !== 'undefined') {
+    // Browser environment - use actual DOM
+    const div = document.createElement('div')
+    div.innerHTML = html
+    return div.textContent || ''
+  } else {
+    // Server environment - use regex to strip HTML tags
+    return html.replace(/<[^>]*>/g, '')
+  }
 }

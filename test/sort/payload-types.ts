@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     drafts: Draft;
     'default-sort': DefaultSort;
+    'non-unique-sort': NonUniqueSort;
     localized: Localized;
     orderable: Orderable;
     'orderable-join': OrderableJoin;
@@ -89,6 +90,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
+    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
@@ -98,7 +100,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   globalsSelect: {};
@@ -134,7 +136,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -151,6 +153,7 @@ export interface Post {
  */
 export interface Draft {
   id: string;
+  _order?: string | null;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -163,9 +166,20 @@ export interface Draft {
  * via the `definition` "default-sort".
  */
 export interface DefaultSort {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort".
+ */
+export interface NonUniqueSort {
+  id: number;
+  title?: string | null;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -174,7 +188,7 @@ export interface DefaultSort {
  * via the `definition` "localized".
  */
 export interface Localized {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -191,11 +205,11 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _orderable_orderableJoinField2_order?: string;
-  _orderable_orderableJoinField1_order?: string;
-  _order?: string;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
   title?: string | null;
-  orderableField?: (string | null) | OrderableJoin;
+  orderableField?: (number | null) | OrderableJoin;
   updatedAt: string;
   createdAt: string;
 }
@@ -204,20 +218,20 @@ export interface Orderable {
  * via the `definition` "orderable-join".
  */
 export interface OrderableJoin {
-  id: string;
+  id: number;
   title?: string | null;
   orderableJoinField1?: {
-    docs?: (string | Orderable)[];
+    docs?: (number | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   orderableJoinField2?: {
-    docs?: (string | Orderable)[];
+    docs?: (number | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   nonOrderableJoinField?: {
-    docs?: (string | Orderable)[];
+    docs?: (number | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -229,7 +243,7 @@ export interface OrderableJoin {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -246,40 +260,44 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'drafts';
-        value: string | Draft;
+        value: number | Draft;
       } | null)
     | ({
         relationTo: 'default-sort';
-        value: string | DefaultSort;
+        value: number | DefaultSort;
+      } | null)
+    | ({
+        relationTo: 'non-unique-sort';
+        value: number | NonUniqueSort;
       } | null)
     | ({
         relationTo: 'localized';
-        value: string | Localized;
+        value: number | Localized;
       } | null)
     | ({
         relationTo: 'orderable';
-        value: string | Orderable;
+        value: number | Orderable;
       } | null)
     | ({
         relationTo: 'orderable-join';
-        value: string | OrderableJoin;
+        value: number | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -289,10 +307,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -312,7 +330,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -340,6 +358,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "drafts_select".
  */
 export interface DraftsSelect<T extends boolean = true> {
+  _order?: T;
   text?: T;
   number?: T;
   number2?: T;
@@ -354,6 +373,16 @@ export interface DraftsSelect<T extends boolean = true> {
 export interface DefaultSortSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort_select".
+ */
+export interface NonUniqueSortSelect<T extends boolean = true> {
+  title?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -456,6 +485,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

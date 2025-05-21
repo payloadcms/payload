@@ -20,12 +20,12 @@ const baseClass = 'sort-by-fields'
 
 export const SortBy: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { path } = props
-  const { setValue, value } = useField<string>({ path })
+  const { setValue, value } = useField<string>()
   const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { query } = useListQuery()
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
+
   const [displayedValue, setDisplayedValue] = useState<{
     id: string
     label: ReactNode
@@ -72,11 +72,12 @@ export const SortBy: SelectFieldClientComponent = (props) => {
 
   return (
     <div className={baseClass} style={{ '--field-width': '33%' } as React.CSSProperties}>
-      <FieldLabel label="Sort By" />
+      <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={baseClass}
         disabled={props.readOnly}
         getOptionValue={(option) => String(option.value)}
+        inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={true}
         isSortable={true}
         // @ts-expect-error react select option

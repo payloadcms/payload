@@ -269,6 +269,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    operation,
     path,
     user,
   }: {
@@ -276,6 +277,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * A string relating to which operation the field type is currently executing within.
+     */
+    operation: Operation
     /**
      * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
      */
@@ -400,7 +405,6 @@ export type LabelsClient = {
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   /**
-  /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
   blockData: Partial<TData>
@@ -409,6 +413,10 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
+  /**
+   * The `overrideAccess` flag that was attached to the request. This is used to bypass access control checks for fields.
+   */
+  overrideAccess?: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
@@ -509,9 +517,9 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
-   * A virtual field cannot be used in `admin.useAsTitle`
+   * A virtual field can be used in `admin.useAsTitle` only when linked to a relationship.
    */
-  virtual?: boolean
+  virtual?: boolean | string
 }
 
 export interface FieldBaseClient {
@@ -711,7 +719,7 @@ export type DateFieldClient = {
 } & FieldBaseClient &
   Pick<DateField, 'timezone' | 'type'>
 
-export type GroupField = {
+export type GroupBase = {
   admin?: {
     components?: {
       afterInput?: CustomComponent[]
@@ -721,6 +729,11 @@ export type GroupField = {
     hideGutter?: boolean
   } & Admin
   fields: Field[]
+  type: 'group'
+  validate?: Validate<unknown, unknown, unknown, GroupField>
+} & Omit<FieldBase, 'validate'>
+
+export type NamedGroupField = {
   /** Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
    *
@@ -728,15 +741,39 @@ export type GroupField = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
-  type: 'group'
-  validate?: Validate<unknown, unknown, unknown, GroupField>
-} & Omit<FieldBase, 'required' | 'validate'>
+} & GroupBase
 
-export type GroupFieldClient = {
-  admin?: AdminClient & Pick<GroupField['admin'], 'hideGutter'>
+export type UnnamedGroupField = {
+  interfaceName?: never
+  /**
+   * Can be either:
+   * - A string, which will be used as the tab's label.
+   * - An object, where the key is the language code and the value is the label.
+   */
+  label:
+    | {
+        [selectedLanguage: string]: string
+      }
+    | LabelFunction
+    | string
+  localized?: never
+} & Omit<GroupBase, 'name' | 'virtual'>
+
+export type GroupField = NamedGroupField | UnnamedGroupField
+
+export type NamedGroupFieldClient = {
+  admin?: AdminClient & Pick<NamedGroupField['admin'], 'hideGutter'>
   fields: ClientField[]
 } & Omit<FieldBaseClient, 'required'> &
-  Pick<GroupField, 'interfaceName' | 'type'>
+  Pick<NamedGroupField, 'interfaceName' | 'type'>
+
+export type UnnamedGroupFieldClient = {
+  admin?: AdminClient & Pick<UnnamedGroupField['admin'], 'hideGutter'>
+  fields: ClientField[]
+} & Omit<FieldBaseClient, 'required'> &
+  Pick<UnnamedGroupField, 'label' | 'type'>
+
+export type GroupFieldClient = NamedGroupFieldClient | UnnamedGroupFieldClient
 
 export type RowField = {
   admin?: Omit<Admin, 'description'>
@@ -1056,6 +1093,7 @@ export type SelectField = {
     } & Admin['components']
     isClearable?: boolean
     isSortable?: boolean
+    placeholder?: LabelFunction | string
   } & Admin
   /**
    * Customize the SQL table name
@@ -1088,7 +1126,7 @@ export type SelectField = {
   Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
-  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
+  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable' | 'placeholder'>
 } & FieldBaseClient &
   Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
@@ -1143,6 +1181,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
+  appearance?: 'drawer' | 'select'
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
@@ -1154,10 +1193,11 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  placeholder?: LabelFunction | string
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable' | 'placeholder'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
@@ -1168,7 +1208,7 @@ export type PolymorphicRelationshipField = {
 
 export type PolymorphicRelationshipFieldClient = {
   admin?: {
-    sortOptions?: Pick<PolymorphicRelationshipField['admin'], 'sortOptions'>
+    sortOptions?: PolymorphicRelationshipField['admin']['sortOptions']
   } & RelationshipAdminClient
 } & Pick<PolymorphicRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
@@ -1600,6 +1640,7 @@ export type FlattenedBlocksField = {
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
+  name: string
 } & GroupField
 
 export type FlattenedArrayField = {
@@ -1717,9 +1758,9 @@ export type FieldAffectingData =
   | CodeField
   | DateField
   | EmailField
-  | GroupField
   | JoinField
   | JSONField
+  | NamedGroupField
   | NumberField
   | PointField
   | RadioField
@@ -1738,9 +1779,9 @@ export type FieldAffectingDataClient =
   | CodeFieldClient
   | DateFieldClient
   | EmailFieldClient
-  | GroupFieldClient
   | JoinFieldClient
   | JSONFieldClient
+  | NamedGroupFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1760,8 +1801,8 @@ export type NonPresentationalField =
   | CollapsibleField
   | DateField
   | EmailField
-  | GroupField
   | JSONField
+  | NamedGroupField
   | NumberField
   | PointField
   | RadioField
@@ -1782,8 +1823,8 @@ export type NonPresentationalFieldClient =
   | CollapsibleFieldClient
   | DateFieldClient
   | EmailFieldClient
-  | GroupFieldClient
   | JSONFieldClient
+  | NamedGroupFieldClient
   | NumberFieldClient
   | PointFieldClient
   | RadioFieldClient
@@ -1949,7 +1990,7 @@ export function fieldShouldBeLocalized({
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {
-  return 'virtual' in field && field.virtual
+  return 'virtual' in field && Boolean(field.virtual)
 }
 
 export type HookName =

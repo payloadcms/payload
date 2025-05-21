@@ -101,6 +101,10 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
 const availablePort = await findOpenPort(port)
 
+// Assign the available port to process.env.PORT so that the next and our HMR server uses it
+// @ts-expect-error - PORT is a string from somewhere
+process.env.PORT = availablePort
+
 // @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
