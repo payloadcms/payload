@@ -70,7 +70,7 @@ const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
   inlineBlocks: {
     // Each key should match your inline block's slug
     myInlineBlock: ({ node, providedStyleTag }) =>
-      `<span${providedStyleTag}>${node.fields.text}</span$>`,
+      `<span${providedStyleTag}>${node.fields.text}</span>`,
   },
 })
 
