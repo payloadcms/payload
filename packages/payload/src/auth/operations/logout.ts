@@ -1,11 +1,9 @@
 import { status as httpStatus } from 'http-status'
-import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
-import { extractJWT } from '../extractJWT.js'
 
 export type Arguments = {
   allSessions?: boolean
@@ -40,12 +38,6 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     }
   }
 
-  const token = extractJWT(req)
-  const decodedToken = token ? decodeJwt(token) : undefined
-  if (!decodedToken) {
-    throw new APIError('Invalid token', httpStatus.INTERNAL_SERVER_ERROR)
-  }
-
   if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
     const userWithSessions = await req.payload.db.findOne<{
       id: number | string
@@ -64,7 +56,7 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       userWithSessions.sessions = []
     } else {
       const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
-        (s) => s.id !== decodedToken.sid,
+        (s) => s.id !== req.user._sid,
       )
 
       userWithSessions.sessions = sessionsAfterLogout
