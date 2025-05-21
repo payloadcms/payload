@@ -770,7 +770,7 @@ export type NamedGroupFieldClient = {
 export type UnnamedGroupFieldClient = {
   admin?: AdminClient & Pick<UnnamedGroupField['admin'], 'hideGutter'>
   fields: ClientField[]
-} & Omit<FieldBaseClient, 'required'> &
+} & Omit<FieldBaseClient, 'name' | 'required'> &
   Pick<UnnamedGroupField, 'label' | 'type'>
 
 export type GroupFieldClient = NamedGroupFieldClient | UnnamedGroupFieldClient
@@ -1958,6 +1958,12 @@ export function fieldAffectsData<
 
 export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is NamedTab & TField {
   return 'name' in tab
+}
+
+export function groupHasName(
+  group: Partial<NamedGroupFieldClient>,
+): group is NamedGroupFieldClient {
+  return 'name' in group
 }
 
 /**

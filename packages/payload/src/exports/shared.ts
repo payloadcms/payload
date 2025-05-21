@@ -29,6 +29,7 @@ export {
   fieldIsVirtual,
   fieldShouldBeLocalized,
   fieldSupportsMany,
+  groupHasName,
   optionIsObject,
   optionIsValue,
   optionsAreObjects,

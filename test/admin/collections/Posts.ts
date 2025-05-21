@@ -129,6 +129,16 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'relationship',
       type: 'relationship',
       admin: {
