@@ -175,9 +175,9 @@ The following options are available for each constraint:
 
 ### Constraint Access Control
 
-You can also define access control to control exactly who can make changes to the specific constraints of a preset. This is useful in restricting the ability to set a specific constraint to only certain users.
+You can also specify exactly who can change the constraints within a preset. This is useful to grant or restrict access to certain constraints based on any given user criteria. For example, you want to ensure that only "admins" are allowed to make a preset available to "everyone".
 
-For example, you want to ensure that only admins are allowed to make a preset available to everyone. When a user lacks the permission to set a constraint, the option will either be hidden from them or disabled if it is already set.
+When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already set.
 
 To do this, you can use the `allowedConstraints` property in your [Payload Config](../configuration/overview):
 
