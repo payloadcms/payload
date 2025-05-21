@@ -312,6 +312,7 @@ function Content({
                 collectionSlugs={[folderCollectionSlug]}
                 key="create-folder"
                 onCreateSuccess={onCreateSuccess}
+                slugPrefix="create-new-folder-from-drawer--no-results"
               />,
             ]}
             Message={
