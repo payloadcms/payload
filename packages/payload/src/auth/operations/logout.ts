@@ -52,6 +52,10 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       },
     })
 
+    if (!userWithSessions) {
+      throw new APIError('No User', httpStatus.BAD_REQUEST)
+    }
+
     if (allSessions) {
       userWithSessions.sessions = []
     } else {
