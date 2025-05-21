@@ -41,7 +41,7 @@ export type AdminViewServerPropsOnly = {
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
-  readonly folderID?: string
+  readonly folderID?: number | string
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult

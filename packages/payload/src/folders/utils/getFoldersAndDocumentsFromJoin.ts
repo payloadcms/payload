@@ -41,7 +41,7 @@ export async function queryDocumentsAndFoldersFromJoin({
       },
     },
     limit: 1,
-    // overrideAccess: false, // @todo: bug in core, throws "QueryError: The following paths cannot be queried: relationTo"
+    overrideAccess: false,
     user,
     where: {
       id: {

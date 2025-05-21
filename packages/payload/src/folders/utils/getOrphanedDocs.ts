@@ -41,7 +41,7 @@ export async function getOrphanedDocs({
   const orphanedFolders = await payload.find({
     collection: collectionSlug,
     limit: 0,
-    // overrideAccess: false, // @todo: bug in core, throws "QueryError: The following paths cannot be queried: _folder"
+    overrideAccess: false,
     sort: payload.collections[collectionSlug].config.admin.useAsTitle,
     user,
     where: whereConstraints,

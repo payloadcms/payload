@@ -1,15 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewClientProps,
-  AdminViewServerPropsOnly,
-  ImportMap,
-  SanitizedConfig,
-} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import {
+  type AdminViewClientProps,
+  type AdminViewServerPropsOnly,
+  type ImportMap,
+  parseDocumentID,
+  type SanitizedConfig,
+} from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -64,7 +65,7 @@ export const RootPage = async ({
   const {
     DefaultView,
     documentSubViewType,
-    folderID,
+    folderID: folderIDParam,
     initPageOptions,
     serverProps,
     templateClassName,
@@ -135,6 +136,14 @@ export const RootPage = async ({
     config,
     i18n: initPageResult?.req.i18n,
     importMap,
+  })
+
+  const payload = initPageResult?.req.payload
+
+  const folderID = parseDocumentID({
+    id: folderIDParam,
+    collectionSlug: payload.config.folders.slug,
+    payload,
   })
 
   const RenderedView = RenderServerComponent({

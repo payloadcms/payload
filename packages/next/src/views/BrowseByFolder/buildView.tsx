@@ -87,7 +87,7 @@ export const buildBrowseByFolderView = async (
 
   if (
     !isInDrawer &&
-    ((resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
+    ((resolvedFolderID && folderID && folderID !== resolvedFolderID) ||
       (folderID && !resolvedFolderID))
   ) {
     return redirect(

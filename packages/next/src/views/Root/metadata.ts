@@ -77,7 +77,7 @@ export const generatePageMetadata = async ({
       break
     }
     case 1: {
-      if (isFolderViewEnabled && segmentOne === config.admin.routes.browseByFolder) {
+      if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
         // --> /:folderCollectionSlug
         meta = await oneSegmentMeta.folders({ config, i18n })
       } else if (segmentOne === 'account') {

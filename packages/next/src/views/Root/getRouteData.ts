@@ -157,8 +157,6 @@ export const getRouteData = ({
         }
       }
 
-      console.log('viewKey', viewKey)
-
       if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
