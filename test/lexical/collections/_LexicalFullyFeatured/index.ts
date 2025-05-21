@@ -4,9 +4,9 @@ import {
   BlocksFeature,
   defaultColors,
   EXPERIMENTAL_TableFeature,
-  EXPERIMENTAL_TextStateFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TextStateFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -29,7 +29,7 @@ export const LexicalFullyFeatured: CollectionConfig = {
           TreeViewFeature(),
           FixedToolbarFeature(),
           EXPERIMENTAL_TableFeature(),
-          EXPERIMENTAL_TextStateFeature({
+          TextStateFeature({
             state: {
               color: { ...defaultColors.background, ...defaultColors.text },
             },
