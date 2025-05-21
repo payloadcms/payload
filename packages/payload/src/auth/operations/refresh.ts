@@ -12,6 +12,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { removeExpiredSessions } from '../removeExpiredSessions.js'
 
 export type Result = {
   exp: number
@@ -81,6 +82,30 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       req: args.req,
     })
 
+    const sid = args.req.user._sid
+
+    if (collectionConfig.auth.useSessions && !collectionConfig.auth.disableLocalStrategy) {
+      if (!Array.isArray(user.sessions) || !sid) {
+        throw new Forbidden(args.req.t)
+      }
+
+      const existingSession = user.sessions.find(({ id }) => id === sid)
+
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      await req.payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: {
+          sessions: removeExpiredSessions(user.sessions),
+        },
+        req,
+        returning: false,
+      })
+    }
+
     if (user) {
       user.collection = args.req.user.collection
       user._strategy = args.req.user._strategy
@@ -102,21 +127,10 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     }
 
     if (!result) {
-      // Q: Should we update the existing session's expiresAt or create a new one?
-
-      const newSessionID = uuid()
-
-      // Add session to user
-      if (!user.sessions?.length) {
-        user.sessions = [{ id: newSessionID, createdAt: new Date() }]
-      } else {
-        user.sessions.push({ id: newSessionID, createdAt: new Date() })
-      }
-
       const fieldsToSign = getFieldsToSign({
         collectionConfig,
         email: user?.email as string,
-        sid: newSessionID,
+        sid,
         user: args?.req?.user,
       })
 
@@ -172,24 +186,6 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    if (args.collection.config.auth.useSessions) {
-      if (user.sessions?.length) {
-        req.payload.logger.info({
-          msg: 'DEBUG: refreshOperation - Updating user sessions',
-          user,
-        })
-
-        // Q: Should we prune the sessions array to remove old sessions here?
-        await req.payload.db.updateOne({
-          id: user.id,
-          collection: collectionConfig.slug,
-          data: user,
-          req,
-          returning: false,
-        })
-      }
-    }
 
     if (shouldCommit) {
       await commitTransaction(req)

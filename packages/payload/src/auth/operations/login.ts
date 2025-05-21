@@ -27,6 +27,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
+import { removeExpiredSessions } from '../removeExpiredSessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -265,19 +266,22 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
       const expiresAt = new Date(now.getTime() + tokenExpInMs)
 
-      req.payload.logger.info({
-        createdAt: now,
-        expiresAt,
-        msg: 'DEBUG: loginOperation - Adding session to user',
-        newSessionID,
-        tokenExpiration: collectionConfig.auth.tokenExpiration,
-      })
       const session = { id: newSessionID, createdAt: now, expiresAt }
+
       if (!user.sessions?.length) {
         user.sessions = [session]
       } else {
+        user.sessions = removeExpiredSessions(user.sessions)
         user.sessions.push(session)
       }
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: user,
+        req,
+        returning: false,
+      })
 
       fieldsToSignArgs.sid = newSessionID
     }
@@ -375,22 +379,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       operation: 'login',
       result,
     })
-
-    if (args.collection.config.auth.useSessions) {
-      if (user.sessions?.length) {
-        req.payload.logger.info({
-          msg: 'DEBUG: loginOperation - Updating user sessions',
-          user,
-        })
-        await payload.db.updateOne({
-          id: user.id,
-          collection: collectionConfig.slug,
-          data: user,
-          req,
-          returning: false,
-        })
-      }
-    }
 
     // /////////////////////////////////////
     // Return results

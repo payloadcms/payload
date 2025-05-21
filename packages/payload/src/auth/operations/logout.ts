@@ -8,6 +8,7 @@ import { APIError } from '../../errors/index.js'
 import { extractJWT } from '../extractJWT.js'
 
 export type Arguments = {
+  allSessions?: boolean
   collection: Collection
   req: PayloadRequest
 }
@@ -15,6 +16,7 @@ export type Arguments = {
 export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
   let args = incomingArgs
   const {
+    allSessions,
     collection: { config: collectionConfig },
     req: { user },
     req,
@@ -44,28 +46,36 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     throw new APIError('Invalid token', httpStatus.INTERNAL_SERVER_ERROR)
   }
 
-  const sessionsAfterLogout = ((user.sessions || []) as Array<{ id: string }>).filter(
-    (s) => s.id !== decodedToken.sid,
-  )
-  req.payload.logger.info({
-    allSessions: user.sessions,
-    msg: 'Logging out and updating user',
-    sessionIDFromToken: decodedToken.sid,
-    sessionsAfterLogout,
-  })
+  if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
+    const userWithSessions = await req.payload.db.findOne<{
+      id: number | string
+      sessions: { id: string }[]
+    }>({
+      collection: collectionConfig.slug,
+      req,
+      where: {
+        id: {
+          equals: user.id,
+        },
+      },
+    })
 
-  const updatedUser = await req.payload.update({
-    id: user.id,
-    collection: collectionConfig.slug,
-    data: {
-      sessions: sessionsAfterLogout,
-    },
-  })
+    if (allSessions) {
+      userWithSessions.sessions = []
+    } else {
+      const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
+        (s) => s.id !== decodedToken.sid,
+      )
 
-  req.payload.logger.info({
-    msg: `Removed session ${decodedToken.sid as string} from user ${user.id}`,
-    user: updatedUser,
-  })
+      userWithSessions.sessions = sessionsAfterLogout
+    }
+
+    await req.payload.db.updateOne({
+      id: user.id,
+      collection: collectionConfig.slug,
+      data: userWithSessions,
+    })
+  }
 
   return true
 }

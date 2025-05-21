@@ -487,6 +487,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
         graphqlResult.Mutation.fields[`logout${singularName}`] = {
           type: GraphQLString,
+          args: {
+            allSessions: { type: GraphQLBoolean },
+          },
           resolve: logout(collection),
         }
 

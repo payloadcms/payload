@@ -87,34 +87,6 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
         const decoded = decodeJwt(currentToken)
         if (decoded) {
           result.exp = decoded.exp
-
-          const validSession = user.sessions?.find((s) => {
-            const expired = new Date() > s.expiresAt
-            const matchingSession = s.id === decoded.sid
-            req.payload.logger.info({
-              expired,
-              expiresAt: s.expiresAt,
-              msg: `DEBUG: Checking session validity of ${s.id}`,
-              now: new Date(),
-            })
-
-            return matchingSession && !expired
-          })
-
-          req.payload.logger.info({
-            msg: 'DEBUG: me operation - checking session validity',
-            validSession,
-          })
-
-          if (validSession) {
-            // Q: Should we update the session expiry date here?
-          } else {
-            req.payload.logger.info({
-              msg: 'DEBUG: me operation - session expired!!',
-            })
-            result.user = null
-            // Q: Throw an error if the session is expired or is null user sufficient?
-          }
         }
         if (!collection.config.auth.removeTokenFromResponses) {
           result.token = currentToken

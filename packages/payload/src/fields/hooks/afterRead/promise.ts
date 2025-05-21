@@ -462,7 +462,7 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
       break
@@ -565,7 +565,7 @@ export const promise = async ({
             })
           }
         })
-      } else {
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
 

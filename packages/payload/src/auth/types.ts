@@ -134,7 +134,7 @@ export type ClientUser = {
   [key: string]: any
 } & BaseUser
 
-export type UserSession = { createdAt: Date; expiresAt: Date; id: string }
+export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
