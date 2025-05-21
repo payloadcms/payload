@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 import React, { useId, useMemo } from 'react'
@@ -31,13 +31,22 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
 
   const pills: SelectablePill[] = useMemo(() => {
     return filteredColumns
-      ? filteredColumns.map((col) => {
+      ? filteredColumns.map((col, i) => {
           const { accessor, active, field } = col
+
+          const label =
+            'labelWithPrefix' in field && field.labelWithPrefix !== undefined
+              ? field.labelWithPrefix
+              : 'label' in field && field.label !== undefined
+                ? field.label
+                : 'name' in field && field.name !== undefined
+                  ? field.name
+                  : undefined
 
           return {
             name: accessor,
-            key: `${collectionSlug}-${field && 'name' in field ? field?.name : uuid}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
-            Label: <FieldLabel label={field && 'label' in field && field.label} unstyled />,
+            key: `${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
+            Label: <FieldLabel label={label as StaticLabel} unstyled />,
             selected: active,
           } as SelectablePill
         })

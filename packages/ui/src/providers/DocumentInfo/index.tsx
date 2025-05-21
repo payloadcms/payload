@@ -4,16 +4,16 @@ import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } fr
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
-
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
+import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
+import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
@@ -75,7 +75,11 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [documentTitle, setDocumentTitle] = useState(() =>
+  /**
+   * @deprecated This state will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   */
+  const [title, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
       data: { ...(initialData || {}), id },
@@ -272,6 +276,10 @@ const DocumentInfo: React.FC<
     [],
   )
 
+  /**
+   * @todo: Remove this in v4
+   * Users should use the `DocumentTitleContext` instead.
+   */
   useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
@@ -343,7 +351,7 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: documentTitle,
+    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
@@ -352,7 +360,11 @@ const DocumentInfo: React.FC<
     versionCount,
   }
 
-  return <Context value={value}>{children}</Context>
+  return (
+    <Context value={value}>
+      <DocumentTitleProvider>{children}</DocumentTitleProvider>
+    </Context>
+  )
 }
 
 export const DocumentInfoProvider: React.FC<

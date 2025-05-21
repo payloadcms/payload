@@ -6,10 +6,11 @@ import { VersionPillLabel } from './VersionPillLabel.js'
 
 export function formatVersionPill(args: {
   doc: TypeWithVersion<any>
+  hasPublishedDoc: boolean
   latestDraftVersionID: string
   latestPublishedVersionID: string
 }): VersionPill {
-  const { doc, latestDraftVersionID, latestPublishedVersionID } = args
+  const { doc, hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID } = args
 
   if (!doc) {
     return {
@@ -23,6 +24,7 @@ export function formatVersionPill(args: {
     Label: (
       <VersionPillLabel
         doc={doc}
+        hasPublishedDoc={hasPublishedDoc}
         key={doc.id}
         latestDraftVersionID={latestDraftVersionID}
         latestPublishedVersionID={latestPublishedVersionID}

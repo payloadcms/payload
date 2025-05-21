@@ -1,25 +1,27 @@
 import type { Page } from '@playwright/test'
-import type { User as PayloadUser } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post, User } from '../../payload-types.js'
+import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
+  openColumnControls,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
 import {
+  arrayCollectionSlug,
   customViews1CollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
+  placeholderCollectionSlug,
   postsCollectionSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
@@ -57,11 +59,13 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('List View', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
+  let arrayUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
   let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
   let with300DocumentsUrl: AdminUrlUtil
   let withListViewUrl: AdminUrlUtil
+  let placeholderUrl: AdminUrlUtil
   let user: any
 
   let serverURL: string
@@ -79,12 +83,13 @@ describe('List View', () => {
     }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
+    arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     with300DocumentsUrl = new AdminUrlUtil(serverURL, with300DocumentsSlug)
     baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
-
+    placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -387,6 +392,50 @@ describe('List View', () => {
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should search for nested fields in field dropdown', async () => {
+      await page.goto(postsUrl.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+      await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+
+      await expect(
+        conditionField.locator('.rs__menu-list').locator('div', {
+          hasText: exactText('Tab 1 > Title'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should allow to filter in array field', async () => {
+      await createArray()
+
+      await page.goto(arrayUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Array > Text',
+        operatorLabel: 'equals',
+        value: 'test',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+      await addListFilter({
+        page,
+        fieldLabel: 'Array > Text',
+        operatorLabel: 'equals',
+        value: 'not-matching',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(0)
     })
 
     test('should reset filter value when a different field is selected', async () => {
@@ -906,6 +955,20 @@ describe('List View', () => {
       expect(page.url()).not.toMatch(/columns=/)
     })
 
+    test('should render field in group as column', async () => {
+      await createPost({ group: { nestedTitle: 'nested group title 1' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Nested Title'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+    })
+
     test('should drag to reorder columns and save to preferences', async () => {
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
@@ -1213,7 +1276,7 @@ describe('List View', () => {
     beforeEach(async () => {
       // delete all posts created by the seed
       await deleteAllPosts()
-      await createPost({ number: 1 })
+      await createPost({ number: 1, group: { nestedTitle: 'nested group title 1' } })
       await createPost({ number: 2 })
     })
 
@@ -1233,6 +1296,34 @@ describe('List View', () => {
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
+    })
+
+    test('should allow sorting by nested field within group in separate column', async () => {
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Nested Title'),
+        })
+        .click()
+      const upChevron = page.locator('#heading-group-nestedTitle .sort-column__asc')
+      const downChevron = page.locator('#heading-group-nestedTitle .sort-column__desc')
+
+      await upChevron.click()
+      await page.waitForURL(/sort=group.nestedTitle/)
+
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText('<No Nested Title>')
+      await expect(page.locator('.row-2 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+
+      await downChevron.click()
+      await page.waitForURL(/sort=-group.nestedTitle/)
+
+      await expect(page.locator('.row-1 .cell-group-nestedTitle')).toHaveText(
+        'nested group title 1',
+      )
+      await expect(page.locator('.row-2 .cell-group-nestedTitle')).toHaveText('<No Nested Title>')
     })
 
     test('should sort with existing filters', async () => {
@@ -1379,6 +1470,66 @@ describe('List View', () => {
       ).toHaveText('Title')
     })
   })
+
+  describe('placeholder', () => {
+    test('should display placeholder in filter options', async () => {
+      await page.goto(
+        `${placeholderUrl.list}${qs.stringify(
+          {
+            where: {
+              or: [
+                {
+                  and: [
+                    {
+                      defaultSelect: {
+                        equals: '',
+                      },
+                    },
+                    {
+                      placeholderSelect: {
+                        equals: '',
+                      },
+                    },
+                    {
+                      defaultRelationship: {
+                        equals: '',
+                      },
+                    },
+                    {
+                      placeholderRelationship: {
+                        equals: '',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          { addQueryPrefix: true },
+        )}`,
+      )
+
+      const conditionValueSelects = page.locator('#list-controls-where .condition__value')
+      await expect(conditionValueSelects.nth(0)).toHaveText('Select a value')
+      await expect(conditionValueSelects.nth(1)).toHaveText('Custom placeholder')
+      await expect(conditionValueSelects.nth(2)).toHaveText('Select a value')
+      await expect(conditionValueSelects.nth(3)).toHaveText('Custom placeholder')
+    })
+  })
+  test('should display placeholder in edit view', async () => {
+    await page.goto(placeholderUrl.create)
+
+    await expect(page.locator('#field-defaultSelect .rs__placeholder')).toHaveText('Select a value')
+    await expect(page.locator('#field-placeholderSelect .rs__placeholder')).toHaveText(
+      'Custom placeholder',
+    )
+    await expect(page.locator('#field-defaultRelationship .rs__placeholder')).toHaveText(
+      'Select a value',
+    )
+    await expect(page.locator('#field-placeholderRelationship .rs__placeholder')).toHaveText(
+      'Custom placeholder',
+    )
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
@@ -1404,4 +1555,13 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
   }) as unknown as Promise<Geo>
+}
+
+async function createArray() {
+  return payload.create({
+    collection: arrayCollectionSlug,
+    data: {
+      array: [{ text: 'test' }],
+    },
+  })
 }

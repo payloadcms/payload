@@ -1,6 +1,4 @@
 import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
-import reactCompiler from 'eslint-plugin-react-compiler'
-const { rules } = reactCompiler
 
 /** @typedef {import('eslint').Linter.Config} Config */
 
@@ -8,26 +6,10 @@ const { rules } = reactCompiler
 export const index = [
   ...rootEslintConfig,
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     settings: {
       next: {
         rootDir: '../../app/',
       },
-    },
-  },
-  {
-    plugins: {
-      'react-compiler': {
-        rules,
-      },
-    },
-    rules: {
-      'react-compiler/react-compiler': 'error',
     },
   },
 ]

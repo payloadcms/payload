@@ -8,9 +8,12 @@ import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
 
 export const VersionPillLabel: React.FC<{
   doc: any
+  hasPublishedDoc: boolean
   latestDraftVersionID: string
   latestPublishedVersionID: string
 }> = (args) => {
+  const { doc, hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID } = args
+
   const {
     config: {
       admin: { dateFormat },
@@ -18,8 +21,6 @@ export const VersionPillLabel: React.FC<{
     },
   } = useConfig()
   const { i18n, t } = useTranslation()
-
-  const { doc, latestDraftVersionID, latestPublishedVersionID } = args
 
   const status = doc.version._status
   let publishedLocalePill = null
@@ -35,12 +36,15 @@ export const VersionPillLabel: React.FC<{
       },
       published: {
         currentLabel: t('version:currentlyPublished'),
-        latestVersion: latestPublishedVersionID,
+        // The latest published version does not necessarily equal the current published version,
+        // because the latest published version might have been unpublished in the meantime.
+        // Hence, we should only use the latest published version if there is a published document.
+        latestVersion: hasPublishedDoc ? latestPublishedVersionID : undefined,
         pillStyle: 'success',
         previousLabel: t('version:previouslyPublished'),
       },
     }
-  }, [latestDraftVersionID, latestPublishedVersionID, t])
+  }, [hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID, t])
 
   const { currentLabel, latestVersion, pillStyle, previousLabel } = versionInfo[status] || {}
 

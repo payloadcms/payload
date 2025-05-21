@@ -16,7 +16,9 @@ export const DeviceContainer: React.FC<{
 
   // Keep an accurate measurement of the actual device size as it is truly rendered
   // This is helpful when `sizes` are non-number units like percentages, etc.
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   const { size: measuredDeviceSize } = useResize(deviceFrameRef.current)
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   const { size: outerFrameSize } = useResize(outerFrameRef.current)
 
   let deviceIsLargerThanFrame: boolean = false

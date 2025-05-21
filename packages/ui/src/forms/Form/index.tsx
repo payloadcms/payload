@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'

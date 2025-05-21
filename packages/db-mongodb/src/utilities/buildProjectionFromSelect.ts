@@ -128,7 +128,6 @@ const traverseFields = ({
 
         break
       }
-
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType
 

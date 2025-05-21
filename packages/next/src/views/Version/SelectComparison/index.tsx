@@ -2,14 +2,18 @@
 
 import type { PaginatedDocs, Where } from 'payload'
 
-import { fieldBaseClass, Pill, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+import {
+  fieldBaseClass,
+  ReactSelect,
+  useConfig,
+  useDocumentInfo,
+  useTranslation,
+} from '@payloadcms/ui'
 import { stringify } from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
 import './index.scss'
 import { formatVersionPill } from './formatVersionPill.js'
 
@@ -35,6 +39,8 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const {
     config: { localization },
   } = useConfig()
+
+  const { hasPublishedDoc } = useDocumentInfo()
 
   const [options, setOptions] = useState<
     {
@@ -101,6 +107,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
           const additionalOptions = data.docs.map((doc) => {
             const pill = formatVersionPill({
               doc,
+              hasPublishedDoc,
               latestDraftVersionID,
               latestPublishedVersionID,
             })
@@ -133,6 +140,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
       draftsEnabled,
       baseURL,
       i18n.language,
+      hasPublishedDoc,
       latestDraftVersionID,
       latestPublishedVersionID,
       t,
