@@ -1112,6 +1112,7 @@ export type SelectField = {
    */
   interfaceName?: string
   options: Option[]
+  reduceOptions?: (args: { options: Option[]; req: PayloadRequest }) => Option[] | Promise<Option[]>
   type: 'select'
 } & (
   | {

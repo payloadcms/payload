@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { Field, Option, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -66,6 +66,10 @@ export type FieldState = {
    */
   lastRenderedPath?: string
   passesCondition?: boolean
+  /**
+   * The result of running `field.reduceOptions` on select fields.
+   */
+  reducedOptions?: Option[]
   rows?: Row[]
   valid?: boolean
   validate?: Validate

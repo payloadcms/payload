@@ -1,4 +1,4 @@
-import type { FieldState, FilterOptionsResult, Row, Validate } from 'payload'
+import type { FieldState, FilterOptionsResult, Option, Row, Validate } from 'payload'
 
 export type Options = {
   disableFormData?: boolean
@@ -39,6 +39,7 @@ export type FieldType<T> = {
   initialValue?: T
   path: string
   readOnly?: boolean
+  reducedOptions?: Option[]
   rows?: Row[]
   setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean

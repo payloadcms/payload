@@ -243,6 +243,32 @@ const SelectFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'selectWithReducedOptions',
+      label: 'Select with reduced options',
+      type: 'select',
+      defaultValue: 'three',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
+        },
+      ],
+      reduceOptions: ({ options }) => {
+        const reducedOptions = options.filter(
+          (option) => (typeof option === 'string' ? options : option.value) !== 'one',
+        )
+        return reducedOptions
+      },
+    },
   ],
 }
 

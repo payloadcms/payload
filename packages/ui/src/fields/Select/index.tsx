@@ -43,7 +43,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       hasMany = false,
       label,
       localized,
-      options: optionsFromProps = [],
+      options,
       required,
     },
     onChange: onChangeFromProps,
@@ -51,8 +51,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-
-  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -67,6 +65,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     path,
+    reducedOptions,
     setValue,
     showError,
     value,
@@ -117,7 +116,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       localized={localized}
       name={name}
       onChange={onChange}
-      options={options}
+      options={formatOptions(reducedOptions)}
       path={path}
       placeholder={placeholder}
       readOnly={readOnly || disabled}

@@ -631,6 +631,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         break
       }
+
       case 'relationship':
       case 'upload': {
         if (field.filterOptions) {
@@ -710,6 +711,27 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               : data[field.name]
           fieldState.value = relationshipValue
           fieldState.initialValue = relationshipValue
+        }
+
+        if (!filter || filter(args)) {
+          state[path] = fieldState
+        }
+
+        break
+      }
+
+      case 'select': {
+        fieldState.reducedOptions =
+          typeof field.reduceOptions === 'function'
+            ? await field.reduceOptions({
+                options: field.options,
+                req,
+              })
+            : field.options
+
+        if (data[field.name] !== undefined) {
+          fieldState.value = data[field.name]
+          fieldState.initialValue = data[field.name]
         }
 
         if (!filter || filter(args)) {
