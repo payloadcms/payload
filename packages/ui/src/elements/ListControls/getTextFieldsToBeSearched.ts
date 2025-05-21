@@ -11,8 +11,8 @@ export const getTextFieldsToBeSearched = (
 ): ClientField[] => {
   if (listSearchableFields) {
     const flattenedFields = flattenTopLevelFields(fields, {
-      extractFieldsToTopFromGroupFields: true,
       i18n,
+      moveSubFieldsToTop: true,
     }) as ClientField[]
 
     return flattenedFields.filter(

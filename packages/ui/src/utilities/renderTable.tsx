@@ -119,9 +119,9 @@ export const renderTable = ({
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
           flattenTopLevelFields(fields, {
-            extractFieldsToTopFromGroupFields: true,
             i18n,
             keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
           })?.some((field) => {
             const accessor =
               'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
@@ -146,9 +146,9 @@ export const renderTable = ({
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
           flattenTopLevelFields(clientCollectionConfig.fields, {
-            extractFieldsToTopFromGroupFields: true,
             i18n,
             keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
           })?.some((field) => {
             const accessor =
               'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined

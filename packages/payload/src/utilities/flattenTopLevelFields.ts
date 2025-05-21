@@ -35,12 +35,6 @@ type TabType<TField> = TField extends ClientField ? ClientTab : Tab
  */
 type FlattenFieldsOptions = {
   /**
-   * If true, nested fields inside `group` fields will be lifted to the top level
-   * and given contextual `accessor` and `labelWithPrefix` values.
-   * Default: false.
-   */
-  extractFieldsToTopFromGroupFields?: boolean
-  /**
    * i18n context used for translating `label` values via `getTranslation`.
    */
   i18n?: I18nClient
@@ -55,6 +49,12 @@ type FlattenFieldsOptions = {
    * Used recursively when flattening nested fields.
    */
   labelPrefix?: string
+  /**
+   * If true, nested fields inside `group` fields will be lifted to the top level
+   * and given contextual `accessor` and `labelWithPrefix` values.
+   * Default: false.
+   */
+  moveSubFieldsToTop?: boolean
   /**
    * A path prefix to prepend to field names when building the `accessor`.
    * Used recursively when flattening nested fields.
@@ -77,17 +77,17 @@ function flattenFields<TField extends ClientField | Field>(
     typeof options === 'boolean' ? { keepPresentationalFields: options } : (options ?? {})
 
   const {
-    extractFieldsToTopFromGroupFields = false,
     i18n,
     keepPresentationalFields,
     labelPrefix,
+    moveSubFieldsToTop = false,
     pathPrefix,
   } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     if (fieldHasSubFields(field)) {
       if (field.type === 'group') {
-        if (extractFieldsToTopFromGroupFields && 'fields' in field) {
+        if (moveSubFieldsToTop && 'fields' in field) {
           const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
 
           const translatedLabel =
@@ -109,10 +109,10 @@ function flattenFields<TField extends ClientField | Field>(
 
           acc.push(
             ...flattenFields(field.fields as TField[], {
-              extractFieldsToTopFromGroupFields,
               i18n,
               keepPresentationalFields,
               labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
+              moveSubFieldsToTop,
               pathPrefix: isNamedGroup ? nameWithPrefix : pathPrefix,
             }),
           )
@@ -145,7 +145,7 @@ function flattenFields<TField extends ClientField | Field>(
 
       acc.push({
         ...(field as FlattenedField<TField>),
-        ...(extractFieldsToTopFromGroupFields &&
+        ...(moveSubFieldsToTop &&
           isHoistingFromGroup && {
             accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
             labelWithPrefix:
@@ -164,7 +164,7 @@ function flattenFields<TField extends ClientField | Field>(
               {
                 ...tab,
                 type: 'tab',
-                ...(extractFieldsToTopFromGroupFields && { labelPrefix }),
+                ...(moveSubFieldsToTop && { labelPrefix }),
               } as unknown as FlattenedField<TField>,
             ]
           } else {

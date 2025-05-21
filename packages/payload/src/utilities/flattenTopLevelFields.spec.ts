@@ -28,7 +28,7 @@ describe('flattenFields', () => {
   })
 
   describe('group flattening', () => {
-    it('should flatten fields inside group with accessor and labelWithPrefix with extractFieldsToTopFromGroupFields', () => {
+    it('should flatten fields inside group with accessor and labelWithPrefix with moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'group',
@@ -45,7 +45,7 @@ describe('flattenFields', () => {
       ]
 
       const result = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -55,7 +55,7 @@ describe('flattenFields', () => {
       expect(result[0].labelWithPrefix).toBe('Meta Info > Slug')
     })
 
-    it('should NOT flatten fields inside group without extractFieldsToTopFromGroupFields', () => {
+    it('should NOT flatten fields inside group without moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'group',
@@ -81,7 +81,7 @@ describe('flattenFields', () => {
       expect('labelWithPrefix' in result[0]).toBe(false)
     })
 
-    it('should correctly handle deeply nested group fields with and without extractFieldsToTopFromGroupFields', () => {
+    it('should correctly handle deeply nested group fields with and without moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'group',
@@ -105,7 +105,7 @@ describe('flattenFields', () => {
       ]
 
       const hoisted = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -123,7 +123,7 @@ describe('flattenFields', () => {
       expect('labelWithPrefix' in nonHoisted[0]).toBe(false)
     })
 
-    it('should hoist fields from unnamed group if extractFieldsToTopFromGroupFields is true', () => {
+    it('should hoist fields from unnamed group if moveSubFieldsToTop is true', () => {
       const fields: ClientField[] = [
         {
           type: 'group',
@@ -138,7 +138,7 @@ describe('flattenFields', () => {
       ]
 
       const withExtract = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -191,7 +191,7 @@ describe('flattenFields', () => {
       ]
 
       const hoistedResult = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -211,7 +211,7 @@ describe('flattenFields', () => {
   })
 
   describe('array and block edge cases', () => {
-    it('should NOT flatten fields in arrays or blocks with extractFieldsToTopFromGroupFields', () => {
+    it('should NOT flatten fields in arrays or blocks with moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'array',
@@ -243,13 +243,13 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { extractFieldsToTopFromGroupFields: true })
+      const result = flattenFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(2)
       expect(result[0].name).toBe('items')
       expect(result[1].name).toBe('layout')
     })
 
-    it('should NOT flatten fields in arrays or blocks without extractFieldsToTopFromGroupFields', () => {
+    it('should NOT flatten fields in arrays or blocks without moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'array',
@@ -310,7 +310,7 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { extractFieldsToTopFromGroupFields: true })
+      const result = flattenFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('arrayField')
     })
@@ -342,14 +342,14 @@ describe('flattenFields', () => {
         },
       ]
 
-      const result = flattenFields(fields, { extractFieldsToTopFromGroupFields: true })
+      const result = flattenFields(fields, { moveSubFieldsToTop: true })
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('blockField')
     })
   })
 
   describe('row and collapsible behavior', () => {
-    it('should recursively flatten collapsible fields regardless of extractFieldsToTopFromGroupFields', () => {
+    it('should recursively flatten collapsible fields regardless of moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'collapsible',
@@ -365,7 +365,7 @@ describe('flattenFields', () => {
       ]
 
       const defaultResult = flattenFields(fields)
-      const hoistedResult = flattenFields(fields, { extractFieldsToTopFromGroupFields: true })
+      const hoistedResult = flattenFields(fields, { moveSubFieldsToTop: true })
 
       for (const result of [defaultResult, hoistedResult]) {
         expect(result).toHaveLength(1)
@@ -375,7 +375,7 @@ describe('flattenFields', () => {
       }
     })
 
-    it('should recursively flatten row fields regardless of extractFieldsToTopFromGroupFields', () => {
+    it('should recursively flatten row fields regardless of moveSubFieldsToTop', () => {
       const fields: ClientField[] = [
         {
           type: 'row',
@@ -395,7 +395,7 @@ describe('flattenFields', () => {
       ]
 
       const defaultResult = flattenFields(fields)
-      const hoistedResult = flattenFields(fields, { extractFieldsToTopFromGroupFields: true })
+      const hoistedResult = flattenFields(fields, { moveSubFieldsToTop: true })
 
       for (const result of [defaultResult, hoistedResult]) {
         expect(result).toHaveLength(2)
@@ -428,7 +428,7 @@ describe('flattenFields', () => {
       ]
 
       const result = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -460,7 +460,7 @@ describe('flattenFields', () => {
       ]
 
       const result = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
@@ -471,7 +471,7 @@ describe('flattenFields', () => {
   })
 
   describe('tab integration', () => {
-    it('should hoist named group fields inside tabs when extractFieldsToTopFromGroupFields is true', () => {
+    it('should hoist named group fields inside tabs when moveSubFieldsToTop is true', () => {
       const fields: ClientField[] = [
         {
           type: 'tabs',
@@ -498,7 +498,7 @@ describe('flattenFields', () => {
       ]
 
       const result = flattenFields(fields, {
-        extractFieldsToTopFromGroupFields: true,
+        moveSubFieldsToTop: true,
         i18n,
       })
 
