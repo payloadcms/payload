@@ -47,7 +47,7 @@ export function FolderFileCard({
 }: Props) {
   const disableDrop = !id || disabled || type !== 'folder'
   const { isOver, setNodeRef } = useDroppable({
-    id,
+    id: itemKey,
     data: {
       id,
       type,
@@ -85,6 +85,7 @@ export function FolderFileCard({
       ]
         .filter(Boolean)
         .join(' ')}
+      key={itemKey}
     >
       {!disabled && (onClick || onKeyDown) && (
         <DraggableWithClick

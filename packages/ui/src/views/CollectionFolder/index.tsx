@@ -324,6 +324,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                   collectionSlugs={[collectionSlug]}
                   key="create-document"
+                  onCreateSuccess={onCreateSuccess}
                   slugPrefix="create-document--no-results"
                 />,
               ].filter(Boolean)}

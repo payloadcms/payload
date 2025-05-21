@@ -1,4 +1,4 @@
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 import type { Document } from '../types/index.js'
 
@@ -68,3 +68,35 @@ export type GetFolderDataResult = {
   documents: FolderOrDocument[]
   subfolders: FolderOrDocument[]
 }
+
+export type RootFoldersConfiguration = {
+  /**
+   * An array of functions to be ran when the folder collection is initialized
+   * This allows plugins to modify the collection configuration
+   */
+  collectionOverrides?: (({
+    collection,
+  }: {
+    collection: CollectionConfig
+  }) => CollectionConfig | Promise<CollectionConfig>)[]
+  /**
+   * Ability to view hidden fields and collections related to folders
+   *
+   * @default false
+   */
+  debug?: boolean
+  /**
+   * The Folder field name
+   *
+   * @default "folder"
+   */
+  fieldName?: string
+  /**
+   * Slug for the folder collection
+   *
+   * @default "payload-folders"
+   */
+  slug?: string
+}
+
+export type CollectionFoldersConfiguration = boolean

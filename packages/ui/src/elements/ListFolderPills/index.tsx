@@ -20,6 +20,7 @@ type ListFolderPillsProps = {
 export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsProps) {
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
+
   return (
     <div className={baseClass}>
       <Button

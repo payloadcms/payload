@@ -107,14 +107,13 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
           />
         ),
-        config.folders.enabled &&
-          Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
-            <ListFolderPills
-              collectionConfig={collectionConfig}
-              key="list-header-buttons"
-              viewType={viewType}
-            />
-          ),
+        collectionConfig.admin.folders && (
+          <ListFolderPills
+            collectionConfig={collectionConfig}
+            key="list-header-buttons"
+            viewType={viewType}
+          />
+        ),
       ].filter(Boolean)}
       AfterListHeaderContent={Description}
       className={className}

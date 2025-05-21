@@ -1,6 +1,7 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
@@ -16,17 +17,28 @@ export function CollectionTypePill() {
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
 
-  const allFolderCollectionSlugs = [
-    folderCollectionSlug,
-    ...Object.keys(config.folders.collections),
-  ]
+  const [allCollectionOptions] = React.useState(() => {
+    return config.collections.reduce(
+      (acc, collection) => {
+        if (collection.admin.folders) {
+          acc.push({
+            label: getTranslation(collection.labels?.plural, i18n),
+            value: collection.slug,
+          })
+        }
 
-  const collectionOptions = allFolderCollectionSlugs.map((collectionSlug) => {
-    const collectionConfig = getEntityConfig({ collectionSlug })
-    return {
-      label: getTranslation(collectionConfig.labels?.plural, i18n),
-      value: collectionSlug,
-    }
+        return acc
+      },
+      [
+        {
+          label: getTranslation(
+            getEntityConfig({ collectionSlug: folderCollectionSlug }).labels?.plural,
+            i18n,
+          ),
+          value: folderCollectionSlug,
+        },
+      ],
+    )
   })
 
   return (
@@ -43,7 +55,7 @@ export function CollectionTypePill() {
       onChange={({ selectedValues }) => {
         void filterItems({ relationTo: selectedValues })
       }}
-      options={collectionOptions}
+      options={allCollectionOptions}
       selectedValues={visibleCollectionSlugs}
     />
   )

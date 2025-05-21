@@ -114,9 +114,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
 
   config.folders = {
     slug: foldersSlug,
-    collections: {},
     debug: false,
-    enabled: false,
     fieldName: parentFolderFieldName,
     ...(config.folders || {}),
   }

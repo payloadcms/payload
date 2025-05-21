@@ -43,8 +43,14 @@ export const generatePageMetadata = async ({
   params: paramsPromise,
 }: Args) => {
   const config = await configPromise
-
   const params = await paramsPromise
+
+  const folderCollectionSlugs = config.collections.reduce((acc, { slug, admin }) => {
+    if (admin?.folders) {
+      return [...acc, slug]
+    }
+    return acc
+  }, [])
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const currentRoute = `/${segments.join('/')}`
@@ -69,15 +75,13 @@ export const generatePageMetadata = async ({
   const globalConfig =
     isGlobal && segments.length > 1 && config?.globals?.find((global) => global.slug === segmentTwo)
 
-  const isFolderViewEnabled = config.folders.enabled
-
   switch (segments.length) {
     case 0: {
       meta = await generateDashboardViewMetadata({ config, i18n })
       break
     }
     case 1: {
-      if (isFolderViewEnabled && segmentOne === config.admin.routes.browseByFolder) {
+      if (folderCollectionSlugs.length && `/${segmentOne}` === config.admin.routes.browseByFolder) {
         // --> /:folderCollectionSlug
         meta = await oneSegmentMeta.folders({ config, i18n })
       } else if (segmentOne === 'account') {
@@ -100,7 +104,10 @@ export const generatePageMetadata = async ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordViewMetadata({ config, i18n })
-      } else if (isFolderViewEnabled && `/${segmentOne}` === config.admin.routes.browseByFolder) {
+      } else if (
+        folderCollectionSlugs.length &&
+        `/${segmentOne}` === config.admin.routes.browseByFolder
+      ) {
         // --> /browse-by-folder/:folderID
         meta = await generateBrowseByFolderMetadata({ config, i18n })
       } else if (isCollection) {
@@ -123,7 +130,7 @@ export const generatePageMetadata = async ({
         meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
         if (segmentThree === config.folders.slug) {
-          if (Object.keys(config.folders.collections).includes(collectionConfig.slug)) {
+          if (folderCollectionSlugs.includes(collectionConfig.slug)) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/:folderCollectionSlug
             // --> /collections/:collectionSlug/:folderCollectionSlug/:id

@@ -40,10 +40,10 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
+import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
-  CollectionSlug,
   FlattenedBlock,
   JobsConfig,
   Payload,
@@ -986,45 +986,7 @@ export type Config = {
   /**
    * Options for folder view within the admin panel
    */
-  folders?: {
-    /**
-     * An array of functions to be ran when the folder collection is initialized
-     * This allows plugins to modify the collection configuration
-     */
-    collectionOverrides?: (({
-      collection,
-    }: {
-      collection: CollectionConfig
-    }) => CollectionConfig | Promise<CollectionConfig>)[]
-    /**
-     * Collections that you would like organize within folders
-     */
-    collections: {
-      [key: CollectionSlug]: any
-    }
-    /**
-     * Ability to view hidden fields and collections related to folders
-     *
-     * @default false
-     */
-    debug?: boolean
-    /**
-     * Enable folders in the admin panel
-     *
-     * @default false
-     */
-    enabled?: boolean
-    /**
-     * The Folder field name
-     */
-    fieldName?: string
-    /**
-     * Slug for the folder collection
-     *
-     * @default "_folders"
-     */
-    slug?: string
-  }
+  folders?: RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */

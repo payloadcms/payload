@@ -22,6 +22,16 @@ export async function queryDocumentsAndFoldersFromJoin({
   payload,
   user,
 }: QueryDocumentsAndFoldersArgs): Promise<QueryDocumentsAndFoldersResults> {
+  const folderCollectionSlugs: string[] = payload.config.collections.reduce<string[]>(
+    (acc, collection) => {
+      if (collection?.admin?.folders) {
+        acc.push(collection.slug)
+      }
+      return acc
+    },
+    [],
+  )
+
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
     joins: {
@@ -32,16 +42,14 @@ export async function queryDocumentsAndFoldersFromJoin({
           relationTo: {
             in: [
               payload.config.folders.slug,
-              ...(collectionSlug
-                ? [collectionSlug]
-                : Object.keys(payload.config.folders.collections)),
+              ...(collectionSlug ? [collectionSlug] : folderCollectionSlugs),
             ],
           },
         },
       },
     },
     limit: 1,
-    // overrideAccess: false, // @todo: bug in core, throws "QueryError: The following paths cannot be queried: relationTo"
+    overrideAccess: false,
     user,
     where: {
       id: {

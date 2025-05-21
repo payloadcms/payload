@@ -23,13 +23,14 @@ export const FolderTableCellClient = ({
   folderFieldName,
 }: Props) => {
   const docID = data.id
-  const folderID = data?.[folderFieldName]
+  const intialFolderID = data?.[folderFieldName]
 
   const { config } = useConfig()
   const { t } = useTranslation()
   const [fromFolderName, setFromFolderName] = React.useState(() =>
-    folderID ? `${t('general:loading')}...` : t('folder:noFolder'),
+    intialFolderID ? `${t('general:loading')}...` : t('folder:noFolder'),
   )
+  const [fromFolderID, setFromFolderID] = React.useState(intialFolderID)
 
   const hasLoadedFolderName = React.useRef(false)
 
@@ -47,6 +48,7 @@ export const FolderTableCellClient = ({
           method: 'PATCH',
         })
 
+        setFromFolderID(id)
         setFromFolderName(name || t('folder:noFolder'))
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -60,7 +62,7 @@ export const FolderTableCellClient = ({
     const loadFolderName = async () => {
       try {
         const req = await fetch(
-          `${config.routes.api}/${config.folders.slug}${folderID ? `/${folderID}` : ''}`,
+          `${config.routes.api}/${config.folders.slug}${intialFolderID ? `/${intialFolderID}` : ''}`,
           {
             credentials: 'include',
             headers: {
@@ -93,7 +95,7 @@ export const FolderTableCellClient = ({
       docData={data as FolderOrDocument['value']}
       docID={docID}
       docTitle={docTitle}
-      fromFolderID={data?.[folderFieldName]}
+      fromFolderID={fromFolderID}
       fromFolderName={fromFolderName}
       modalSlug={`move-doc-to-folder-cell--${docID}`}
       onConfirm={onConfirm}
