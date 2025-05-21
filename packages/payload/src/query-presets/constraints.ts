@@ -73,7 +73,10 @@ export const getConstraints = (config: Config): Field => ({
                 beforeValidate: [
                   ({ operation, previousValue, req, value }) => {
                     // determine if the user has access to set this constraint
-                    if (operation === 'create' || operation === 'update') {
+                    if (
+                      config.queryPresets?.allowedConstraints &&
+                      (operation === 'create' || operation === 'update')
+                    ) {
                       const valueIsChanging = (!previousValue && value) || previousValue !== value
 
                       if (valueIsChanging) {
@@ -86,8 +89,8 @@ export const getConstraints = (config: Config): Field => ({
                         })
 
                         const changeNotPermitted =
-                          !allowedConstraints.includes(value) ||
-                          (previousValue && !allowedConstraints.includes(previousValue))
+                          !allowedConstraints?.includes(value) ||
+                          (previousValue && !allowedConstraints?.includes(previousValue))
 
                         if (changeNotPermitted) {
                           throw new APIError(

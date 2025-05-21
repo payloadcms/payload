@@ -50,7 +50,6 @@ The following options are available for Query Presets:
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
 | `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
-| `hooks`       | Used to add custom hooks to the query presets collection. [More details](#hooks).                                               |
 | `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
@@ -177,7 +176,7 @@ The following options are available for each constraint:
 
 You can also specify exactly who can change the constraints within a preset. This is useful to grant or restrict access to certain constraints based on any given user criteria. For example, you want to ensure that only "admins" are allowed to make a preset available to "everyone".
 
-When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already set.
+When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
 
 To do this, you can use the `allowedConstraints` property in your [Payload Config](../configuration/overview):
 

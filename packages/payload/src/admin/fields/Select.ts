@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { SelectField, SelectFieldClient } from '../../fields/config/types.js'
+import type { Option, SelectField, SelectFieldClient } from '../../fields/config/types.js'
 import type { SelectFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
@@ -22,7 +22,7 @@ import type {
 type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
 
 type SelectFieldBaseClientProps = {
-  readonly filterOption?: () => boolean
+  readonly filterOption?: (option: Option) => boolean
   readonly onChange?: (e: string | string[]) => void
   readonly path: string
   readonly validate?: SelectFieldValidation
