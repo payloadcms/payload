@@ -39,6 +39,7 @@ export type ServerOnlyFieldProperties =
   | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'graphQL'
   | 'label'
+  | 'reduceOptions' // This is a `select` only property
   | 'typescriptSchema'
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
@@ -60,6 +61,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL
+  'reduceOptions', // This is a `select` only property
   // the following props are handled separately (see below):
   // `label`
   // `fields`
@@ -67,10 +69,12 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   // `tabs`
   // `admin`
 ]
+
 const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
   'condition',
   'components',
 ]
+
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField
