@@ -12,7 +12,7 @@ export type DefaultConstraint = 'everyone' | 'onlyMe' | 'specificUsers'
 
 export type Constraint = DefaultConstraint | string // TODO: type `string` as the custom constraints provided by the config
 
-export type EnableQueryPresetConstraints = (args: {
+export type AllowedQueryPresetConstraints = (args: {
   allConstraints: Constraint[]
   operation: ConstraintOperation
   req: PayloadRequest

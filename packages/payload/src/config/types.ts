@@ -50,7 +50,7 @@ import type {
   TypedUser,
 } from '../index.js'
 import type {
-  EnableQueryPresetConstraints,
+  AllowedQueryPresetConstraints,
   QueryPreset,
   QueryPresetConstraints,
 } from '../query-presets/types.js'
@@ -1118,7 +1118,7 @@ export type Config = {
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
-    allowedConstraints?: EnableQueryPresetConstraints
+    allowedConstraints?: AllowedQueryPresetConstraints
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints
