@@ -865,11 +865,12 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = async (
   value,
-  { hasMany, options, reduceOptions, req, req: { t }, required },
+  { data, hasMany, options, reduceOptions, req, req: { t }, required },
 ) => {
   const reducedOptions =
     typeof reduceOptions === 'function'
       ? await reduceOptions({
+          data,
           options,
           req,
         })

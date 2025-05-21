@@ -244,10 +244,14 @@ const SelectFields: CollectionConfig = {
       ],
     },
     {
+      name: 'disallowOption1',
+      type: 'checkbox',
+    },
+    {
       name: 'selectWithReducedOptions',
       label: 'Select with reduced options',
       type: 'select',
-      defaultValue: 'three',
+      defaultValue: 'one',
       options: [
         {
           label: 'Value One',
@@ -262,12 +266,12 @@ const SelectFields: CollectionConfig = {
           value: 'three',
         },
       ],
-      reduceOptions: ({ options }) => {
-        const reducedOptions = options.filter(
-          (option) => (typeof option === 'string' ? options : option.value) !== 'one',
-        )
-        return reducedOptions
-      },
+      reduceOptions: ({ options, data }) =>
+        data.disallowOption1
+          ? options.filter(
+              (option) => (typeof option === 'string' ? options : option.value) !== 'one',
+            )
+          : options,
     },
   ],
 }

@@ -854,6 +854,7 @@ describe('Fields', () => {
         const result = await payload.create({
           collection: 'select-fields',
           data: {
+            disallowOption1: true,
             selectWithReducedOptions: 'one',
           },
         })
@@ -868,6 +869,7 @@ describe('Fields', () => {
       const result = await payload.create({
         collection: 'select-fields',
         data: {
+          disallowOption1: true,
           selectWithReducedOptions: 'two',
         },
       })

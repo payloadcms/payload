@@ -98,6 +98,7 @@ describe('Select', () => {
 
   test('should reduce options', async () => {
     await page.goto(url.create)
+    await page.locator('#field-disallowOption1').click()
     const field = page.locator('#field-selectWithReducedOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')

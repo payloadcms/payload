@@ -43,7 +43,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       hasMany = false,
       label,
       localized,
-      options,
+      options: optionsFromProps = [],
       required,
     },
     onChange: onChangeFromProps,
@@ -51,6 +51,8 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+
+  const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -99,7 +101,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-
+  console.log(reducedOptions)
   return (
     <SelectInput
       AfterInput={AfterInput}
@@ -108,6 +110,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={(o) => reducedOptions?.includes(typeof o === 'string' ? o : o.value)}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
@@ -116,7 +119,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       localized={localized}
       name={name}
       onChange={onChange}
-      options={formatOptions(reducedOptions)}
+      options={options}
       path={path}
       placeholder={placeholder}
       readOnly={readOnly || disabled}

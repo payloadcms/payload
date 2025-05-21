@@ -42,6 +42,7 @@ import type {
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
+  Data,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
@@ -1112,7 +1113,11 @@ export type SelectField = {
    */
   interfaceName?: string
   options: Option[]
-  reduceOptions?: (args: { options: Option[]; req: PayloadRequest }) => Option[] | Promise<Option[]>
+  reduceOptions?: (args: {
+    data: Data
+    options: Option[]
+    req: PayloadRequest
+  }) => Option[] | Promise<Option[]>
   type: 'select'
 } & (
   | {
