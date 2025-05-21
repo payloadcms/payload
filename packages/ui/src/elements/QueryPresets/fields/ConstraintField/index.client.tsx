@@ -1,6 +1,7 @@
 'use client'
 
 import type { SelectFieldClient } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { SelectField } from '../../../../fields/Select/index.js'
 import { useFormFields } from '../../../../forms/Form/index.js'
@@ -11,7 +12,7 @@ export const ConstraintFieldClient = ({
   path,
 }: {
   allowedConstraints: string[]
-  field: SelectFieldClient
+  field: MarkOptional<SelectFieldClient, 'type'>
   path: string
 }) => {
   const fieldState = useFormFields(([fields]) => fields[path])
