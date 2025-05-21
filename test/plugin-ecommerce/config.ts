@@ -33,23 +33,25 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     ecommercePlugin({
-      variants: true,
-      products: true,
+      products: {
+        variants: true,
+      },
       orders: true,
-      transactions: true,
-      paymentMethods: [
-        stripeAdapter({
-          secretKey: process.env.STRIPE_SECRET_KEY!,
-          publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
-          webhookSecret: process.env.STRIPE_WEBHOOKS_SECRET!,
-          webhooks: {
-            'payment_intent.succeeded': ({ event, req }) => {
-              console.log({ event, data: event.data.object })
-              req.payload.logger.info('Payment succeeded')
+      payments: {
+        paymentMethods: [
+          stripeAdapter({
+            secretKey: process.env.STRIPE_SECRET_KEY!,
+            publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
+            webhookSecret: process.env.STRIPE_WEBHOOKS_SECRET!,
+            webhooks: {
+              'payment_intent.succeeded': ({ event, req }) => {
+                console.log({ event, data: event.data.object })
+                req.payload.logger.info('Payment succeeded')
+              },
             },
-          },
-        }),
-      ],
+          }),
+        ],
+      },
       currencies: {
         supportedCurrencies: [USD, JPY, EUR],
         defaultCurrency: 'USD',
