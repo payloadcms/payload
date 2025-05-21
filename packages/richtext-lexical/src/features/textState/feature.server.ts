@@ -60,7 +60,7 @@ export type TextStateFeatureProps = {
  *
  * @experimental There may be breaking changes to this API
  */
-export const TextStateFeature = createServerFeature<
+export const EXPERIMENTAL_TextStateFeature = createServerFeature<
   TextStateFeatureProps,
   TextStateFeatureProps,
   TextStateFeatureProps
