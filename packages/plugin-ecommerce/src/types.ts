@@ -124,14 +124,16 @@ export type VariantsConfig = {
 
 export type ProductsConfig = {
   productsCollection?: CollectionOverride
+  variants?: true | VariantsConfig
 }
 
 export type OrdersConfig = {
   ordersCollection?: CollectionOverride
 }
 
-export type TransactionsConfig = {
-  transactionsCollection?: CollectionOverride
+export type PaymentsConfig = {
+  paymentMethods?: PaymentAdapter[]
+  paymentRecordsCollection?: CollectionOverride
 }
 
 export type SubscriptionsConfig = {
@@ -165,8 +167,11 @@ export type EcommercePluginConfig = {
    */
   customersCollectionSlug?: string
   orders?: boolean | OrdersConfig
-  paymentMethods?: PaymentAdapter[]
+  /**
+   * Enable tracking of payments. Accepts a config object to override the default collection settings.
+   *
+   * Defaults to true when the paymentMethods array is provided.
+   */
+  payments?: PaymentsConfig | true
   products?: boolean | ProductsConfig
-  transactions?: boolean | TransactionsConfig
-  variants?: boolean | VariantsConfig
 }

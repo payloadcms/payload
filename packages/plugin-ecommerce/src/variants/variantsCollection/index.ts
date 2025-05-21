@@ -48,7 +48,7 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
       admin: {
         components: {
           Field: {
-            path: '@payloadcms/ecommerce/ui#VariantOptionsSelector',
+            path: '@payloadcms/plugin-ecommerce/ui#VariantOptionsSelector',
           },
         },
       },

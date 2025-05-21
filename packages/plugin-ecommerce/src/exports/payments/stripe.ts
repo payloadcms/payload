@@ -1,1 +1,1 @@
-export { stripeAdapter } from '../../payments/stripe/index.js'
+export { stripeAdapter } from '../../payments/adapters/stripe/index.js'

@@ -1,7 +1,7 @@
 import type { Field, GroupField, PayloadRequest } from 'payload'
 import type { Stripe } from 'stripe'
 
-import type { BasePaymentAdapterArgs, PaymentAdapter } from '../../types.js'
+import type { BasePaymentAdapterArgs, PaymentAdapter } from '../../../types.js'
 
 import { webhooksEndpoint } from './endpoints/webhooks.js'
 import { createTransaction } from './hooks/createTransaction.js'

@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import type { CurrenciesConfig, PaymentAdapter } from '../../types.js'
+import type { CurrenciesConfig, PaymentAdapter } from '../../../types.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig

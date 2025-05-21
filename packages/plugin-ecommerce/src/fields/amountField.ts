@@ -28,7 +28,7 @@ export const amountField: (props: Props) => NumberField = ({
             currenciesConfig,
             currency,
           },
-          path: '@payloadcms/ecommerce/ui#PriceInput',
+          path: '@payloadcms/plugin-ecommerce/ui#PriceInput',
         },
         ...overrides?.admin?.components,
       },

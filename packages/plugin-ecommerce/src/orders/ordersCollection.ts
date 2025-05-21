@@ -23,9 +23,9 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       relationTo: customersCollectionSlug,
     },
     {
-      name: 'transaction',
+      name: 'paymentRecord',
       type: 'relationship',
-      relationTo: 'transactions',
+      relationTo: 'paymentRecords',
     },
     {
       name: 'status',

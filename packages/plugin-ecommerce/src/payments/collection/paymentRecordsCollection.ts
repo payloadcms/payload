@@ -2,12 +2,12 @@ import type { CollectionConfig, Field, SelectField } from 'payload'
 
 import { de } from 'payload/i18n/de'
 
-import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
+import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../../types.js'
 
-import { amountField } from '../fields/amountField.js'
-import { cartItemsField } from '../fields/cartItemsField.js'
-import { currencyField } from '../fields/currencyField.js'
-import { statusField } from '../fields/statusField.js'
+import { amountField } from '../../fields/amountField.js'
+import { cartItemsField } from '../../fields/cartItemsField.js'
+import { currencyField } from '../../fields/currencyField.js'
+import { statusField } from '../../fields/statusField.js'
 import { afterChange } from './hooks/afterChange.js'
 import { afterRead } from './hooks/afterRead.js'
 import { beforeChange } from './hooks/beforeChange.js'
@@ -20,7 +20,7 @@ type Props = {
   paymentMethods?: PaymentAdapter[]
 }
 
-export const transactionsCollection: (props?: Props) => CollectionConfig = (props) => {
+export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
     customersCollectionSlug = 'users',
@@ -73,7 +73,7 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
       : defaultFields
 
   const baseConfig: CollectionConfig = {
-    slug: 'transactions',
+    slug: 'paymentRecords',
     ...overrides,
     access: {
       read: () => true,

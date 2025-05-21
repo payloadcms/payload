@@ -51,10 +51,10 @@
       "types": "./src/exports/products.ts",
       "default": "./src/exports/products.ts"
     },
-    "./transactions": {
-      "import": "./src/exports/transactions.ts",
-      "types": "./src/exports/transactions.ts",
-      "default": "./src/exports/transactions.ts"
+    "./payments": {
+      "import": "./src/exports/payments/index.ts",
+      "types": "./src/exports/payments/index.ts",
+      "default": "./src/exports/payments/index.ts"
     },
     "./payments/stripe": {
       "import": "./src/exports/payments/stripe.ts",
@@ -146,10 +146,10 @@
         "types": "./dist/exports/products.d.ts",
         "default": "./dist/exports/products.js"
       },
-      "./transactions": {
-        "import": "./dist/exports/transactions.js",
-        "types": "./dist/exports/transactions.d.ts",
-        "default": "./dist/exports/transactions.js"
+      "./payments": {
+        "import": "./dist/exports/payments/index.js",
+        "types": "./dist/exports/payments/index.d.ts",
+        "default": "./dist/exports/payments/index.js"
       },
       "./currencies": {
         "import": "./dist/exports/currencies.js",

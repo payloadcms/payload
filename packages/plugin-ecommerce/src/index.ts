@@ -6,8 +6,8 @@ import type { EcommercePluginConfig, PaymentAdapter } from './types.js'
 
 import { USD } from './currencies/index.js'
 import { ordersCollection } from './orders/ordersCollection.js'
+import { paymentRecordsCollection } from './payments/collection/paymentRecordsCollection.js'
 import { productsCollection } from './products/productsCollection.js'
-import { transactionsCollection } from './transactions/transactionsCollection.js'
 import { translations } from './translations/index.js'
 import { variantOptionsCollection } from './variants/variantOptionsCollection.js'
 import { variantsCollection } from './variants/variantsCollection/index.js'
@@ -21,23 +21,6 @@ export const ecommercePlugin =
     }
 
     const customersCollectionSlug = pluginConfig.customersCollectionSlug || 'users'
-
-    if (pluginConfig.paymentMethods?.length && pluginConfig.paymentMethods.length > 0) {
-      pluginConfig.paymentMethods.forEach((method) => {
-        if (method.endpoints && method.endpoints.length > 0) {
-          const endpoints = method.endpoints.map((endpoint) => {
-            const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
-
-            return {
-              ...endpoint,
-              path: `/payments/${method.name}${path}`,
-            }
-          })
-
-          incomingConfig.endpoints!.push(...endpoints)
-        }
-      })
-    }
 
     // Ensure collections exists
     if (!incomingConfig.collections) {
@@ -54,26 +37,35 @@ export const ecommercePlugin =
       currenciesConfig.defaultCurrency = currenciesConfig.supportedCurrencies[0]?.code
     }
 
-    if (pluginConfig.variants) {
-      const overrides =
-        typeof pluginConfig.variants === 'boolean' ? undefined : pluginConfig.variants
-
-      const variants = variantsCollection({
-        currenciesConfig,
-        overrides: overrides?.variantsCollection,
-      })
-      const variantTypes = variantTypesCollection({ overrides: overrides?.variantTypesCollection })
-      const variantOptions = variantOptionsCollection({
-        overrides: overrides?.variantOptionsCollection,
-      })
-
-      incomingConfig.collections.push(variants, variantTypes, variantOptions)
-    }
-
     if (pluginConfig.products) {
+      const productsConfig =
+        typeof pluginConfig.products === 'boolean'
+          ? {
+              variants: true,
+            }
+          : pluginConfig.products
+
+      if (productsConfig.variants) {
+        const overrides =
+          typeof productsConfig.variants === 'boolean' ? undefined : productsConfig.variants
+
+        const variants = variantsCollection({
+          currenciesConfig,
+          overrides: overrides?.variantsCollection,
+        })
+        const variantTypes = variantTypesCollection({
+          overrides: overrides?.variantTypesCollection,
+        })
+        const variantOptions = variantOptionsCollection({
+          overrides: overrides?.variantOptionsCollection,
+        })
+
+        incomingConfig.collections.push(variants, variantTypes, variantOptions)
+      }
+
       const products = productsCollection({
         currenciesConfig,
-        enableVariants: Boolean(pluginConfig.variants),
+        enableVariants: Boolean(productsConfig.variants),
       })
 
       incomingConfig.collections.push(products)
@@ -84,11 +76,33 @@ export const ecommercePlugin =
       incomingConfig.collections.push(orders)
     }
 
-    if (pluginConfig.transactions) {
-      const transactions = transactionsCollection({
+    if (pluginConfig.payments) {
+      const paymentMethods =
+        typeof pluginConfig.payments === 'object' && pluginConfig.payments?.paymentMethods?.length
+          ? pluginConfig.payments?.paymentMethods
+          : []
+
+      if (paymentMethods.length) {
+        paymentMethods.forEach((method) => {
+          if (method.endpoints && method.endpoints.length > 0) {
+            const endpoints = method.endpoints.map((endpoint) => {
+              const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
+
+              return {
+                ...endpoint,
+                path: `/payments/${method.name}${path}`,
+              }
+            })
+
+            incomingConfig.endpoints!.push(...endpoints)
+          }
+        })
+      }
+
+      const transactions = paymentRecordsCollection({
         currenciesConfig,
         customersCollectionSlug,
-        paymentMethods: pluginConfig.paymentMethods,
+        paymentMethods,
       })
       incomingConfig.collections.push(transactions)
     }
