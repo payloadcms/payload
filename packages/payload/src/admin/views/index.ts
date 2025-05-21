@@ -31,6 +31,7 @@ export type AdminViewConfig = {
 export type AdminViewClientProps = {
   clientConfig: ClientConfig
   documentSubViewType?: DocumentSubViewTypes
+  folderCollectionSlugs?: SanitizedCollectionConfig['slug'][]
   viewType: ViewTypes
 }
 

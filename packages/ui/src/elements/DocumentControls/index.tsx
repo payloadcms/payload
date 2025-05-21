@@ -158,9 +158,7 @@ export const DocumentControls: React.FC<{
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
   const showFolderMetaIcon =
-    config.folders.enabled &&
-    collectionConfig &&
-    Object.keys(config.folders.collections).includes(collectionConfig.slug)
+    config.folders.enabled && collectionConfig && collectionConfig.admin.folders
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (

@@ -37,6 +37,7 @@ export const buildCollectionFolderView = async (
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
+    folderCollectionSlugs,
     folderID,
     initPageResult,
     isInDrawer,
@@ -81,7 +82,7 @@ export const buildCollectionFolderView = async (
 
     if (
       (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) ||
-      !Object.keys(config.folders.collections).includes(collectionSlug)
+      !folderCollectionSlugs.includes(collectionSlug)
     ) {
       throw new Error('not-found')
     }
@@ -175,6 +176,7 @@ export const buildCollectionFolderView = async (
           breadcrumbs={breadcrumbs}
           collectionSlug={collectionSlug}
           documents={documents}
+          folderCollectionSlugs={folderCollectionSlugs}
           folderID={folderID}
           search={search}
           subfolders={subfolders}

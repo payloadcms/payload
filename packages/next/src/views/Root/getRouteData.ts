@@ -1,5 +1,6 @@
 import type {
   AdminViewServerProps,
+  CollectionSlug,
   DocumentSubViewTypes,
   ImportMap,
   PayloadComponent,
@@ -74,6 +75,7 @@ type GetRouteDataArgs = {
 type GetRouteDataResult = {
   DefaultView: ViewFromConfig
   documentSubViewType?: DocumentSubViewTypes
+  folderCollectionSlugs: CollectionSlug[]
   folderID?: string
   initPageOptions: Parameters<typeof initPage>[0]
   serverProps: ServerPropsFromView
@@ -111,6 +113,15 @@ export const getRouteData = ({
   let matchedCollection: SanitizedConfig['collections'][number] = undefined
   let matchedGlobal: SanitizedConfig['globals'][number] = undefined
   const isFolderViewEnabled = config.folders?.enabled
+
+  const folderCollectionSlugs = isFolderViewEnabled
+    ? config.collections.reduce((acc, { slug, admin }) => {
+        if (admin?.folders) {
+          return [...acc, slug]
+        }
+        return acc
+      }, [])
+    : []
 
   const serverProps: ServerPropsFromView = {
     viewActions: config?.admin?.components?.actions || [],
@@ -252,7 +263,7 @@ export const getRouteData = ({
         if (
           isFolderViewEnabled &&
           segmentThree === config.folders.slug &&
-          Object.keys(config.folders.collections).includes(matchedCollection.slug)
+          folderCollectionSlugs.includes(matchedCollection.slug)
         ) {
           // Collection Folder Views
           // --> /collections/:collectionSlug/:folderCollectionSlug
@@ -325,6 +336,7 @@ export const getRouteData = ({
   return {
     DefaultView: ViewToRender,
     documentSubViewType,
+    folderCollectionSlugs,
     folderID,
     initPageOptions,
     serverProps,

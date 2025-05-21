@@ -16,7 +16,7 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
 
     for (let i = 0; i < config.collections.length; i++) {
       const collection = config.collections[i]
-      if (config.folders.collections[collection.slug]) {
+      if (collection?.admin?.folders) {
         if (collection) {
           collection.fields.push({
             name: folderFieldName,

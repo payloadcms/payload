@@ -45,6 +45,16 @@ export const generatePageMetadata = async ({
   const config = await configPromise
 
   const params = await paramsPromise
+
+  const isFolderViewEnabled = config.folders.enabled
+  const folderCollectionSlugs = isFolderViewEnabled
+    ? config.collections.reduce((acc, { slug, admin }) => {
+        if (admin?.folders) {
+          return [...acc, slug]
+        }
+        return acc
+      }, [])
+    : []
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const currentRoute = `/${segments.join('/')}`
@@ -68,8 +78,6 @@ export const generatePageMetadata = async ({
 
   const globalConfig =
     isGlobal && segments.length > 1 && config?.globals?.find((global) => global.slug === segmentTwo)
-
-  const isFolderViewEnabled = config.folders.enabled
 
   switch (segments.length) {
     case 0: {
@@ -123,7 +131,7 @@ export const generatePageMetadata = async ({
         meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
         if (segmentThree === config.folders.slug) {
-          if (Object.keys(config.folders.collections).includes(collectionConfig.slug)) {
+          if (folderCollectionSlugs.includes(collectionConfig.slug)) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/:folderCollectionSlug
             // --> /collections/:collectionSlug/:folderCollectionSlug/:id

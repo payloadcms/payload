@@ -4,6 +4,7 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
+    folders: true,
   },
   fields: [
     {

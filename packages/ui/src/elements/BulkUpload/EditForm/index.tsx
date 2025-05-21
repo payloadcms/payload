@@ -169,17 +169,16 @@ export function EditForm({
                   <Upload_v4
                     collectionSlug={collectionConfig.slug}
                     customActions={[
-                      folders.enabled &&
-                        Object.keys(folders.collections).includes(collectionSlug) && (
-                          <MoveDocToFolder
-                            buttonProps={{
-                              buttonStyle: 'pill',
-                              size: 'small',
-                            }}
-                            folderFieldName={folders.fieldName}
-                            key="move-doc-to-folder"
-                          />
-                        ),
+                      folders.enabled && collectionConfig.admin.folders && (
+                        <MoveDocToFolder
+                          buttonProps={{
+                            buttonStyle: 'pill',
+                            size: 'small',
+                          }}
+                          folderFieldName={folders.fieldName}
+                          key="move-doc-to-folder"
+                        />
+                      ),
                     ].filter(Boolean)}
                     initialState={initialState}
                     resetUploadEdits={resetUploadEdits}

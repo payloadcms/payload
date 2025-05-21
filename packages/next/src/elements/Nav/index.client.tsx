@@ -23,10 +23,23 @@ export const DefaultNavClient: React.FC<{
       admin: {
         routes: { browseByFolder: foldersRoute },
       },
-      folders: { collections: folderCollections = {}, enabled } = {},
+      collections,
+      folders: { enabled } = {},
       routes: { admin: adminRoute },
     },
   } = useConfig()
+
+  const [folderCollectionSlugs] = React.useState<string[]>(() => {
+    if (enabled) {
+      return collections.reduce<string[]>((acc, collection) => {
+        if (collection.admin.folders) {
+          acc.push(collection.slug)
+        }
+        return acc
+      }, [])
+    }
+    return []
+  })
 
   const { i18n } = useTranslation()
 
@@ -39,7 +52,7 @@ export const DefaultNavClient: React.FC<{
 
   return (
     <Fragment>
-      {enabled && Object.keys(folderCollections).length > 0 && (
+      {enabled && folderCollectionSlugs.length > 0 && (
         <BrowseByFolderButton active={viewingRootFolderView} />
       )}
       {groups.map(({ entities, label }, key) => {

@@ -4,6 +4,7 @@ export const Drafts: CollectionConfig = {
   slug: 'drafts',
   admin: {
     useAsTitle: 'title',
+    folders: true,
   },
   fields: [
     {

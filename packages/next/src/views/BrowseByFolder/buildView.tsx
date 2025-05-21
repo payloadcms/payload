@@ -32,6 +32,7 @@ export const buildBrowseByFolderView = async (
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
+    folderCollectionSlugs,
     folderID,
     initPageResult,
     isInDrawer,
@@ -53,9 +54,7 @@ export const buildBrowseByFolderView = async (
     visibleEntities,
   } = initPageResult
 
-  const allFolderCollectionSlugs = Object.keys(config?.folders?.collections || {})
-
-  const collections = allFolderCollectionSlugs.filter(
+  const collections = folderCollectionSlugs.filter(
     (collectionSlug) =>
       permissions?.collections?.[collectionSlug]?.read &&
       visibleEntities.collections.includes(collectionSlug),
@@ -66,11 +65,10 @@ export const buildBrowseByFolderView = async (
   }
 
   const query = queryFromArgs || queryFromReq
-  // get relationTo filter from query params
   const selectedCollectionSlugs: string[] =
     Array.isArray(query?.relationTo) && query.relationTo.length
       ? query.relationTo
-      : [...allFolderCollectionSlugs, config.folders.slug]
+      : [...folderCollectionSlugs, config.folders.slug]
 
   const {
     routes: { admin: adminRoute },
@@ -128,7 +126,7 @@ export const buildBrowseByFolderView = async (
 
   // documents cannot be created without a parent folder in this view
   const hasCreatePermissionCollectionSlugs = folderID
-    ? [config.folders.slug, ...allFolderCollectionSlugs]
+    ? [config.folders.slug, ...folderCollectionSlugs]
     : [config.folders.slug]
 
   return {
@@ -137,6 +135,7 @@ export const buildBrowseByFolderView = async (
         breadcrumbs={breadcrumbs}
         documents={documents}
         filteredCollectionSlugs={selectedCollectionSlugs}
+        folderCollectionSlugs={folderCollectionSlugs}
         folderID={folderID}
         subfolders={subfolders}
       >

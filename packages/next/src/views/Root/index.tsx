@@ -65,6 +65,7 @@ export const RootPage = async ({
   const {
     DefaultView,
     documentSubViewType,
+    folderCollectionSlugs,
     folderID: folderIDParam,
     initPageOptions,
     serverProps,
@@ -139,7 +140,6 @@ export const RootPage = async ({
   })
 
   const payload = initPageResult?.req.payload
-
   const folderID = parseDocumentID({
     id: folderIDParam,
     collectionSlug: payload.config.folders.slug,
@@ -147,7 +147,12 @@ export const RootPage = async ({
   })
 
   const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+    clientProps: {
+      clientConfig,
+      documentSubViewType,
+      folderCollectionSlugs,
+      viewType,
+    } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
     importMap,

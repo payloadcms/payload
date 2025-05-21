@@ -17,12 +17,6 @@ export default buildConfigWithDefaults({
   },
   folders: {
     enabled: true,
-    collections: {
-      posts: {},
-      media: {},
-      drafts: {},
-      autosave: {},
-    },
     // debug: true,
   },
   collections: [Posts, Media, Drafts, Autosave],

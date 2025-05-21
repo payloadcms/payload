@@ -158,6 +158,10 @@ export type FolderProviderProps = {
    */
   readonly filteredCollectionSlugs?: CollectionSlug[]
   /**
+   * Folder enabled collection slugs
+   */
+  readonly folderCollectionSlugs: CollectionSlug[]
+  /**
    * The ID of the current folder
    */
   readonly folderID?: number | string
@@ -185,6 +189,7 @@ export function FolderProvider({
   collectionSlug,
   documents: allDocumentsFromProps = [],
   filteredCollectionSlugs,
+  folderCollectionSlugs = [],
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
   sort,
@@ -208,7 +213,7 @@ export function FolderProvider({
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>(null)
   const [visibleCollectionSlugs, setVisibleCollectionSlugs] = React.useState<CollectionSlug[]>(
-    filteredCollectionSlugs || [...Object.keys(config.folders.collections), folderCollectionSlug],
+    filteredCollectionSlugs || [...folderCollectionSlugs, folderCollectionSlug],
   )
   const [activeFolderID, setActiveFolderID] =
     React.useState<FolderContextValue['folderID']>(_folderIDFromProps)

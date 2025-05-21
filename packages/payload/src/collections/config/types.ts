@@ -345,6 +345,10 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
+   * Enables folders for this collection
+   */
+  folders?: boolean
+  /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.

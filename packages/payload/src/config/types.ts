@@ -997,12 +997,6 @@ export type Config = {
       collection: CollectionConfig
     }) => CollectionConfig | Promise<CollectionConfig>)[]
     /**
-     * Collections that you would like organize within folders
-     */
-    collections: {
-      [key: CollectionSlug]: any
-    }
-    /**
      * Ability to view hidden fields and collections related to folders
      *
      * @default false
@@ -1016,12 +1010,14 @@ export type Config = {
     enabled?: boolean
     /**
      * The Folder field name
+     *
+     * @default "folder"
      */
     fieldName?: string
     /**
      * Slug for the folder collection
      *
-     * @default "_folders"
+     * @default "payload-folders"
      */
     slug?: string
   }
