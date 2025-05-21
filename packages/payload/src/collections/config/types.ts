@@ -32,6 +32,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -347,7 +348,7 @@ export type CollectionAdminOptions = {
   /**
    * Enables folders for this collection
    */
-  folders?: boolean
+  folders?: CollectionFoldersConfiguration
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
