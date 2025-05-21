@@ -515,16 +515,14 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should only allow admins to share presets with other admins (custom hook)', async () => {
-      // create a preset with the read constraint set to "admins"
-      // ensure that _ONLY_ other admins can do this
+    it('should only allow admins to share presets with everyone via `allowedPresets`', async () => {
       try {
-        const presetForEditorsAndAdmins = await payload.create({
+        const presetForEveryoneCreatedByEditor = await payload.create({
           collection: queryPresetsCollectionSlug,
           user: editorUser,
           overrideAccess: false,
           data: {
-            title: 'Editors and Admins',
+            title: 'Everyone (Created by Editor)',
             where: {
               text: {
                 equals: 'example page',
@@ -532,31 +530,29 @@ describe('Query Presets', () => {
             },
             access: {
               read: {
-                constraint: 'specificRoles',
-                roles: ['admin', 'editor'],
+                constraint: 'everyone',
               },
               update: {
-                constraint: 'specificRoles',
-                roles: ['admin', 'editor'],
+                constraint: 'everyone',
               },
             },
             relatedCollection: 'pages',
           },
         })
 
-        expect(presetForEditorsAndAdmins).toBeFalsy()
+        expect(presetForEveryoneCreatedByEditor).toBeFalsy()
       } catch (error: unknown) {
         expect((error as Error).message).toBe(
-          'You must be an admin to add or remove the "admin" role from a preset.',
+          'You are not allowed to set the "everyone" constraint.',
         )
       }
 
-      const presetForEditors = await payload.create({
+      const presetForEveryoneCreatedByAdmin = await payload.create({
         collection: queryPresetsCollectionSlug,
-        user: editorUser,
+        user: adminUser,
         overrideAccess: false,
         data: {
-          title: 'Editors',
+          title: 'Everyone (Created by Admin)',
           where: {
             text: {
               equals: 'example page',
@@ -564,37 +560,33 @@ describe('Query Presets', () => {
           },
           access: {
             read: {
-              constraint: 'specificRoles',
-              roles: ['editor'],
+              constraint: 'everyone',
             },
             update: {
-              constraint: 'specificRoles',
-              roles: ['editor'],
+              constraint: 'everyone',
             },
           },
           relatedCollection: 'pages',
         },
       })
 
-      expect(presetForEditors).toBeTruthy()
+      expect(presetForEveryoneCreatedByAdmin).toBeDefined()
 
-      // attempt to update the preset to include admins
+      // attempt to update the preset using an editor user
       try {
         const presetUpdatedByEditorUser = await payload.update({
           collection: queryPresetsCollectionSlug,
-          id: presetForEditors.id,
+          id: presetForEveryoneCreatedByAdmin.id,
           user: editorUser,
           overrideAccess: false,
           data: {
-            title: 'Editors (Now Admins)',
+            title: 'From `everyone` to `onlyMe` (Updated by Editor)',
             access: {
               read: {
-                constraint: 'specificRoles',
-                roles: ['admin', 'editor'],
+                constraint: 'onlyMe',
               },
               update: {
-                constraint: 'specificRoles',
-                roles: ['admin', 'editor'],
+                constraint: 'onlyMe',
               },
             },
           },
@@ -603,56 +595,7 @@ describe('Query Presets', () => {
         expect(presetUpdatedByEditorUser).toBeFalsy()
       } catch (error: unknown) {
         expect((error as Error).message).toBe(
-          'You must be an admin to add or remove the "admin" role from a preset.',
-        )
-      }
-
-      await payload.update({
-        collection: queryPresetsCollectionSlug,
-        id: presetForEditors.id,
-        context: {
-          overrideAccess: true, // TODO: remove this when hooks receive `overrideAccess` arg
-        },
-        data: {
-          title: 'Editors (Now Admins)',
-          access: {
-            read: {
-              constraint: 'specificRoles',
-              roles: ['admin', 'editor'],
-            },
-            update: {
-              constraint: 'specificRoles',
-              roles: ['admin', 'editor'],
-            },
-          },
-        },
-      })
-
-      try {
-        const presetUpdatedByEditorUser = await payload.update({
-          collection: queryPresetsCollectionSlug,
-          id: presetForEditors.id,
-          user: editorUser,
-          overrideAccess: false,
-          data: {
-            title: 'Editors (Now Admins) (Updated)',
-            access: {
-              read: {
-                constraint: 'specificRoles',
-                roles: ['editor'],
-              },
-              update: {
-                constraint: 'specificRoles',
-                roles: ['editor'],
-              },
-            },
-          },
-        })
-
-        expect(presetUpdatedByEditorUser).toBeFalsy()
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe(
-          'You must be an admin to add or remove the "admin" role from a preset.',
+          'You are not allowed to change the "everyone" constraint.',
         )
       }
     })

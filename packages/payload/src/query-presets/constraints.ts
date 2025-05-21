@@ -74,9 +74,7 @@ export const getConstraints = (config: Config): Field => ({
                   ({ operation, previousValue, req, value }) => {
                     // determine if the user has access to set this constraint
                     if (operation === 'create' || operation === 'update') {
-                      const valueIsChanging =
-                        !previousValue ||
-                        previousValue?.access?.[constraintOperation]?.constraint !== value
+                      const valueIsChanging = (!previousValue && value) || previousValue !== value
 
                       if (valueIsChanging) {
                         const allowedConstraints = config.queryPresets.allowedConstraints({
@@ -87,9 +85,15 @@ export const getConstraints = (config: Config): Field => ({
                           req,
                         })
 
-                        if (!allowedConstraints.includes(value)) {
+                        const changeNotPermitted =
+                          !allowedConstraints.includes(value) ||
+                          (previousValue && !allowedConstraints.includes(previousValue))
+
+                        if (changeNotPermitted) {
                           throw new APIError(
-                            'You are not allowed to use this constraint',
+                            operation === 'create'
+                              ? `You are not allowed to set the "${value}" constraint.`
+                              : `You are not allowed to change the "${previousValue}" constraint.`,
                             403,
                             {},
                             true,

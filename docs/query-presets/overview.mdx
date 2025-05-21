@@ -173,13 +173,13 @@ The following options are available for each constraint:
 | `fields` | An array of fields to render when this constraint is selected.           |
 | `access` | A function that determines the access control rules for this constraint. |
 
-## Hooks
+### Constraint Access Control
 
-You can attach your own [Hooks](../hooks/overview) to the Query Presets collection. This can be useful for defining custom behavior when a preset is created, updated, or deleted.
+You can also define access control to control exactly who can make changes to the specific constraints of a preset. This is useful in restricting the ability to set a specific constraint to only certain users.
 
-For example, you may want to add additional access control rules that prevent certain users from creating or updating presets in a certain way.
+For example, you want to ensure that only admins are allowed to make a preset available to everyone. When a user lacks the permission to set a constraint, the option will either be hidden from them or disabled if it is already set.
 
-To do this, you can use the `hooks` property in your [Payload Config](../configuration/overview):
+To do this, you can use the `allowedConstraints` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -189,47 +189,10 @@ const config = buildConfig({
   queryPresets: {
     // ...
     // highlight-start
-    hooks: {
-      beforeValidate: [
-        // this is a custom `beforeValidate` hook that runs before the preset is validated
-        // it ensures that only admins can add or remove the "admin" role from a preset
-        ({ data, req, originalDoc }) => {
-          const adminRoleChanged = (current, original) => {
-            const currentHasAdmin = current?.roles?.includes('admin') ?? false
-            const originalHasAdmin = original?.roles?.includes('admin') ?? false
-            return currentHasAdmin !== originalHasAdmin
-          }
-
-          const readChanged =
-            data?.access?.read?.constraint === 'specificRoles' &&
-            adminRoleChanged(
-              data?.access?.read,
-              originalDoc?.access?.read || {},
-            )
-
-          const updateChanged =
-            data?.access?.update?.constraint === 'specificRoles' &&
-            adminRoleChanged(
-              data?.access?.update,
-              originalDoc?.access?.update || {},
-            )
-
-          if (
-            (readChanged || updateChanged) &&
-            !req.user?.roles?.includes('admin')
-          ) {
-            throw new APIError(
-              'You must be an admin to add or remove the admin role from a preset',
-              403,
-              {},
-              true,
-            )
-          }
-
-          return data
-        },
-      ],
-    },
+    allowedConstraints: ({ req, allConstraints }) =>
+      !req.user?.roles?.includes('admin')
+        ? allConstraints.filter((constraint) => constraint !== 'everyone')
+        : allConstraints,
     // highlight-end
   },
 })
