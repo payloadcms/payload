@@ -59,8 +59,9 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   })
 
   const { From, To } = getHTMLDiffComponents({
-    fromHTML,
-    toHTML,
+    // Ensure empty paragraph is displayed for empty rich text fields - otherwise, toHTML may be displayed in the wrong column
+    fromHTML: fromHTML?.length ? fromHTML : '<p></p>',
+    toHTML: toHTML?.length ? toHTML : '<p></p>',
   })
 
   return (
