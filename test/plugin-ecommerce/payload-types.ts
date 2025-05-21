@@ -73,12 +73,13 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    media: Media;
     variants: Variant;
     variantTypes: VariantType;
     variantOptions: VariantOption;
     products: Product;
     orders: Order;
-    transactions: Transaction;
+    paymentRecords: PaymentRecord;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -93,12 +94,13 @@ export interface Config {
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     variantTypes: VariantTypesSelect<false> | VariantTypesSelect<true>;
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
-    transactions: TransactionsSelect<false> | TransactionsSelect<true>;
+    paymentRecords: PaymentRecordsSelect<false> | PaymentRecordsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -151,6 +153,24 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -250,7 +270,7 @@ export interface VariantOption {
 export interface Order {
   id: string;
   customer?: (string | null) | User;
-  transaction?: (string | null) | Transaction;
+  paymentRecord?: (string | null) | PaymentRecord;
   status?: OrderStatus;
   total?: number | null;
   currency?: ('USD' | 'JPY' | 'EUR') | null;
@@ -269,9 +289,9 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transactions".
+ * via the `definition` "paymentRecords".
  */
-export interface Transaction {
+export interface PaymentRecord {
   id: string;
   customer: string | User;
   order?: (string | null) | Order;
@@ -307,6 +327,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
         relationTo: 'variants';
         value: string | Variant;
       } | null)
@@ -327,8 +351,8 @@ export interface PayloadLockedDocument {
         value: string | Order;
       } | null)
     | ({
-        relationTo: 'transactions';
-        value: string | Transaction;
+        relationTo: 'paymentRecords';
+        value: string | PaymentRecord;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -386,6 +410,23 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -475,7 +516,7 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
-  transaction?: T;
+  paymentRecord?: T;
   status?: T;
   total?: T;
   currency?: T;
@@ -494,9 +535,9 @@ export interface OrdersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transactions_select".
+ * via the `definition` "paymentRecords_select".
  */
-export interface TransactionsSelect<T extends boolean = true> {
+export interface PaymentRecordsSelect<T extends boolean = true> {
   customer?: T;
   order?: T;
   status?: T;
