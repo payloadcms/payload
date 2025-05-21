@@ -14,7 +14,7 @@ import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { NewFolderDrawer } from '../../FolderView/Drawers/NewFolder/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 
-const newFolderDrawerSlug = 'create-new-folder'
+const newFolderDrawerBaseSlug = 'create-new-folder'
 const newDocInFolderDrawerSlug = 'create-new-document-with-folder'
 const baseClass = 'create-new-doc-in-folder'
 
@@ -22,6 +22,7 @@ export function ListCreateNewDocInFolderButton({
   buttonLabel,
   collectionSlugs,
   onCreateSuccess,
+  slugPrefix,
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
@@ -29,7 +30,9 @@ export function ListCreateNewDocInFolderButton({
     collectionSlug: CollectionSlug
     doc: Record<string, unknown>
   }) => Promise<void> | void
+  slugPrefix: string
 }) {
+  const newFolderDrawerSlug = `${slugPrefix}-${newFolderDrawerBaseSlug}`
   const { i18n } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { config } = useConfig()
