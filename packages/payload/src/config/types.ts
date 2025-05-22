@@ -1115,7 +1115,6 @@ export type Config = {
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
-    allowedConstraints?: SelectField['reduceOptions']
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints
@@ -1123,6 +1122,7 @@ export type Config = {
       update?: QueryPresetConstraints
     }
     labels?: CollectionConfig['labels']
+    reduceConstraints?: SelectField['reduceOptions']
   }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
