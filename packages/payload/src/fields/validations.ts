@@ -865,7 +865,7 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = (
   value,
-  { data, filterOptions, hasMany, options, req, req: { t }, required },
+  { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
   const filteredOptions =
     typeof filterOptions === 'function'
@@ -873,6 +873,7 @@ export const select: SelectFieldValidation = (
           data,
           options,
           req,
+          siblingData,
         })
       : options
 

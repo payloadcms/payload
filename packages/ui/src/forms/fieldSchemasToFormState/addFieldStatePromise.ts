@@ -726,6 +726,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             data: fullData,
             options: field.options,
             req,
+            siblingData: data,
           })
         }
 
