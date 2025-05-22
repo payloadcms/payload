@@ -327,105 +327,105 @@ describe('Field Validations', () => {
         },
       ],
     }
-    it('should allow valid input', () => {
+    it('should allow valid input', async () => {
       const val = 'one'
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).toStrictEqual(true)
     })
-    it('should prevent invalid input', () => {
+    it('should prevent invalid input', async () => {
       const val = 'bad'
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).not.toStrictEqual(true)
     })
-    it('should allow null input', () => {
+    it('should allow null input', async () => {
       const val = null
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).toStrictEqual(true)
     })
-    it('should allow undefined input', () => {
+    it('should allow undefined input', async () => {
       let val
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).toStrictEqual(true)
     })
-    it('should prevent empty string input', () => {
+    it('should prevent empty string input', async () => {
       const val = ''
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent undefined input with required', () => {
+    it('should prevent undefined input with required', async () => {
       let val
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent empty string input with required', () => {
-      const result = select('', optionsRequired)
+    it('should prevent empty string input with required', async () => {
+      const result = await select('', optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent undefined input with required and hasMany', () => {
+    it('should prevent undefined input with required and hasMany', async () => {
       let val
       options.hasMany = true
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent empty array input with required and hasMany', () => {
+    it('should prevent empty array input with required and hasMany', async () => {
       optionsRequired.hasMany = true
-      const result = select([], optionsRequired)
+      const result = await select([], optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent empty string array input with required and hasMany', () => {
+    it('should prevent empty string array input with required and hasMany', async () => {
       options.hasMany = true
-      const result = select([''], optionsRequired)
+      const result = await select([''], optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should prevent null input with required and hasMany', () => {
+    it('should prevent null input with required and hasMany', async () => {
       const val = null
       options.hasMany = true
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should allow valid input with option objects', () => {
+    it('should allow valid input with option objects', async () => {
       const val = 'one'
       options.hasMany = false
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).toStrictEqual(true)
     })
-    it('should prevent invalid input with option objects', () => {
+    it('should prevent invalid input with option objects', async () => {
       const val = 'bad'
       options.hasMany = false
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
-    it('should allow empty string input with option object', () => {
+    it('should allow empty string input with option object', async () => {
       const val = ''
-      const result = select(val, optionsWithEmptyString)
+      const result = await select(val, optionsWithEmptyString)
       expect(result).toStrictEqual(true)
     })
-    it('should allow empty string input with option object and required', () => {
+    it('should allow empty string input with option object and required', async () => {
       const val = ''
       optionsWithEmptyString.required = true
-      const result = select(val, optionsWithEmptyString)
+      const result = await select(val, optionsWithEmptyString)
       expect(result).toStrictEqual(true)
     })
-    it('should allow valid input with hasMany', () => {
+    it('should allow valid input with hasMany', async () => {
       const val = ['one', 'two']
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).toStrictEqual(true)
     })
-    it('should prevent invalid input with hasMany', () => {
+    it('should prevent invalid input with hasMany', async () => {
       const val = ['one', 'bad']
-      const result = select(val, selectOptions)
+      const result = await select(val, selectOptions)
       expect(result).not.toStrictEqual(true)
     })
-    it('should allow valid input with hasMany option objects', () => {
+    it('should allow valid input with hasMany option objects', async () => {
       const val = ['one', 'three']
       optionsRequired.hasMany = true
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).toStrictEqual(true)
     })
-    it('should prevent invalid input with hasMany option objects', () => {
+    it('should prevent invalid input with hasMany option objects', async () => {
       const val = ['three', 'bad']
       optionsRequired.hasMany = true
-      const result = select(val, optionsRequired)
+      const result = await select(val, optionsRequired)
       expect(result).not.toStrictEqual(true)
     })
   })
