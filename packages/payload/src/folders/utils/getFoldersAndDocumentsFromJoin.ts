@@ -24,7 +24,7 @@ export async function queryDocumentsAndFoldersFromJoin({
 }: QueryDocumentsAndFoldersArgs): Promise<QueryDocumentsAndFoldersResults> {
   const folderCollectionSlugs: string[] = payload.config.collections.reduce<string[]>(
     (acc, collection) => {
-      if (collection?.admin?.folders) {
+      if (collection?.folders) {
         acc.push(collection.slug)
       }
       return acc

@@ -107,7 +107,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
           />
         ),
-        collectionConfig.admin.folders && (
+        collectionConfig.folders && (
           <ListFolderPills
             collectionConfig={collectionConfig}
             key="list-header-buttons"

@@ -30,7 +30,7 @@ export const DefaultNavClient: React.FC<{
 
   const [folderCollectionSlugs] = React.useState<string[]>(() => {
     return collections.reduce<string[]>((acc, collection) => {
-      if (collection.admin.folders) {
+      if (collection.folders) {
         acc.push(collection.slug)
       }
       return acc

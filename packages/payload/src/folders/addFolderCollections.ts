@@ -15,25 +15,23 @@ export async function addFolderCollections(config: NonNullable<Config>): Promise
 
   for (let i = 0; i < config.collections.length; i++) {
     const collection = config.collections[i]
-    if (collection?.admin?.folders) {
-      if (collection) {
-        collection.fields.push({
-          name: folderFieldName,
-          type: 'relationship',
-          admin: {
-            allowCreate: false,
-            allowEdit: false,
-            components: {
-              Cell: '@payloadcms/ui/rsc#FolderTableCell',
-              Field: '@payloadcms/ui/rsc#FolderEditField',
-            },
+    if (collection && collection?.folders) {
+      collection.fields.push({
+        name: folderFieldName,
+        type: 'relationship',
+        admin: {
+          allowCreate: false,
+          allowEdit: false,
+          components: {
+            Cell: '@payloadcms/ui/rsc#FolderTableCell',
+            Field: '@payloadcms/ui/rsc#FolderEditField',
           },
-          index: true,
-          label: 'Folder',
-          relationTo: folderSlug,
-        })
-        enabledCollectionSlugs.push(collection.slug)
-      }
+        },
+        index: true,
+        label: 'Folder',
+        relationTo: folderSlug,
+      })
+      enabledCollectionSlugs.push(collection.slug)
     }
   }
 
