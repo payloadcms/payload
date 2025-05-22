@@ -37,8 +37,8 @@ export const init: Init = function init(this: MongooseAdapter) {
           options: {
             minimize: false,
             timestamps: false,
+            ...schemaOptions,
           },
-          ...schemaOptions,
         },
         compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
         configFields: versionCollectionFields,

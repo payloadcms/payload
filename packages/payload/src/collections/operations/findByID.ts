@@ -87,6 +87,7 @@ export const findByIDOperation = async <
     } = args
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })
@@ -117,6 +118,7 @@ export const findByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      draftsEnabled: draftEnabled,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {

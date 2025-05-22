@@ -13,18 +13,26 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
-import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
-import { filterFields } from '../elements/TableColumns/filterFields.js'
-import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
+import {
+  OrderableTable,
+  Pill,
+  SelectAll,
+  SelectRow,
+  SortHeader,
+  SortRow,
+  Table,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir
+} from '../exports/client/index.js'
+import { buildColumnState } from '../providers/TableColumns/buildColumnState.js'
+import { buildPolymorphicColumnState } from '../providers/TableColumns/buildPolymorphicColumnState.js'
+import { filterFields } from '../providers/TableColumns/filterFields.js'
+import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -62,6 +70,7 @@ export const renderTable = ({
   docs,
   enableRowSelections,
   i18n,
+  orderableFieldName,
   payload,
   renderRowTypes,
   tableAppearance,
@@ -78,6 +87,7 @@ export const renderTable = ({
   drawerSlug?: string
   enableRowSelections: boolean
   i18n: I18nClient
+  orderableFieldName: string
   payload: Payload
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
@@ -108,9 +118,15 @@ export const renderTable = ({
 
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
+          flattenTopLevelFields(fields, {
+            i18n,
+            keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(fields, useAsTitle, [])
 
@@ -129,9 +145,15 @@ export const renderTable = ({
   } else {
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
+          flattenTopLevelFields(clientCollectionConfig.fields, {
+            i18n,
+            keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(
           filterFields(clientCollectionConfig.fields),
@@ -195,9 +217,38 @@ export const renderTable = ({
     } as Column)
   }
 
+  if (!orderableFieldName) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    }
+  }
+
+  columnsToUse.unshift({
+    accessor: '_dragHandle',
+    active: true,
+    field: {
+      admin: {
+        disabled: true,
+      },
+      hidden: true,
+    },
+    Heading: <SortHeader />,
+    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+  } as Column)
+
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
-    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    Table: (
+      <OrderableTable
+        appearance={tableAppearance}
+        collection={clientCollectionConfig}
+        columns={columnsToUse}
+        data={docs}
+        key="table"
+      />
+    ),
   }
 }

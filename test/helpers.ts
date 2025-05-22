@@ -185,9 +185,20 @@ export async function login(args: LoginArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
-    admin: { routes: { createFirstUser, login: incomingLoginRoute } = {} },
+    admin: {
+      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
+    },
     routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
+
+  const logoutRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLogoutRoute,
+  })
+
+  await page.goto(logoutRoute)
+  await wait(500)
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
   const loginRoute = formatAdminURL({
@@ -245,7 +256,7 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
@@ -367,6 +378,11 @@ export async function switchTab(page: Page, selector: string) {
   await page.locator(selector).click()
   await wait(300)
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+}
+
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 }
 
 /**

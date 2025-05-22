@@ -79,6 +79,7 @@ export default buildConfig({
 | `beforeSchemaInit`          | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
 | `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 | `generateSchemaOutputFile`  | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
+| `allowIDOnCreate`           | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
 
 ## Access to Drizzle
 

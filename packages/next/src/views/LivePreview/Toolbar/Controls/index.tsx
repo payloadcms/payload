@@ -31,7 +31,6 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
               <span>
                 {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
               </span>
-              &nbsp;
               <ChevronIcon className={`${baseClass}__chevron`} />
             </React.Fragment>
           }
@@ -82,7 +81,6 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         button={
           <React.Fragment>
             <span>{zoom * 100}%</span>
-            &nbsp;
             <ChevronIcon className={`${baseClass}__chevron`} />
           </React.Fragment>
         }

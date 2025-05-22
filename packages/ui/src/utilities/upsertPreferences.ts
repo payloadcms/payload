@@ -53,14 +53,23 @@ export const getPreferences = cache(
  * @param value - The new value to merge with the existing preferences
  */
 export const upsertPreferences = async <T extends Record<string, unknown> | string>({
+  customMerge,
   key,
   req,
   value: incomingValue,
 }: {
   key: string
   req: PayloadRequest
-  value: T
-}): Promise<T> => {
+} & (
+  | {
+      customMerge: (existingValue: T) => T
+      value?: never
+    }
+  | {
+      customMerge?: never
+      value: T
+    }
+)): Promise<T> => {
   const existingPrefs: { id?: DefaultDocumentIDType; value?: T } = req.user
     ? await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
     : {}
@@ -83,14 +92,20 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
       user: req.user,
     })
   } else {
-    // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
-    const mergedPrefs =
-      typeof incomingValue === 'object'
-        ? {
-            ...(typeof existingPrefs.value === 'object' ? existingPrefs?.value : {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
-            ...removeUndefined(incomingValue || {}),
-          }
-        : incomingValue
+    let mergedPrefs: T
+
+    if (typeof customMerge === 'function') {
+      mergedPrefs = customMerge(existingPrefs.value)
+    } else {
+      // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
+      mergedPrefs =
+        typeof incomingValue === 'object'
+          ? ({
+              ...(typeof existingPrefs.value === 'object' ? existingPrefs?.value : {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
+              ...removeUndefined(incomingValue || {}),
+            } as T)
+          : incomingValue
+    }
 
     if (!dequal(mergedPrefs, existingPrefs.value)) {
       newPrefs = await req.payload

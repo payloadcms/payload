@@ -29,6 +29,7 @@ export const getDocumentData = async ({
 }: Args): Promise<null | Record<string, unknown> | TypeWithID> => {
   const id = sanitizeID(idArg)
   let resolvedData: Record<string, unknown> | TypeWithID = null
+  const { transactionID, ...rest } = req
 
   try {
     if (collectionSlug && id) {
@@ -41,9 +42,7 @@ export const getDocumentData = async ({
         locale: locale?.code,
         overrideAccess: false,
         req: {
-          query: req?.query,
-          search: req?.search,
-          searchParams: req?.searchParams,
+          ...rest,
         },
         user,
       })
@@ -58,9 +57,7 @@ export const getDocumentData = async ({
         locale: locale?.code,
         overrideAccess: false,
         req: {
-          query: req?.query,
-          search: req?.search,
-          searchParams: req?.searchParams,
+          ...rest,
         },
         user,
       })

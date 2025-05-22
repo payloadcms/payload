@@ -2,13 +2,19 @@
 import type { Column } from '@payloadcms/ui'
 import type { ClientField, FieldAffectingDataClient } from 'payload'
 
-import { Table, useConfig, useField } from '@payloadcms/ui'
+import { getTranslation } from '@payloadcms/translations'
+import { Table, Translation, useConfig, useField, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { useImportExport } from '../ImportExportProvider/index.js'
+import type {
+  PluginImportExportTranslationKeys,
+  PluginImportExportTranslations,
+} from '../../translations/index.js'
+
 import './index.scss'
+import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'preview'
 
@@ -23,6 +29,10 @@ export const Preview = () => {
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
   const [resultCount, setResultCount] = React.useState<any>('')
   const [columns, setColumns] = React.useState<Column[]>([])
+  const { i18n, t } = useTranslation<
+    PluginImportExportTranslations,
+    PluginImportExportTranslationKeys
+  >()
 
   const collectionSlug = typeof collection === 'string' && collection
   const collectionConfig = config.collections.find(
@@ -75,7 +85,7 @@ export const Preview = () => {
               accessor: field.name || '',
               active: true,
               field: field as ClientField,
-              Heading: field?.label || field.name,
+              Heading: getTranslation(field?.label || (field.name as string), i18n),
               renderedCells: data.docs.map((doc: Record<string, unknown>) => {
                 if (!field.name || !doc[field.name]) {
                   return null
@@ -100,8 +110,20 @@ export const Preview = () => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
-        <h3>Preview</h3>
-        {resultCount && <span>{resultCount} total documents</span>}
+        <h3>
+          <Translation i18nKey="version:preview" t={t} />
+        </h3>
+        {resultCount && (
+          <Translation
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            i18nKey="plugin-import-export:totalDocumentsCount"
+            t={t}
+            variables={{
+              count: resultCount,
+            }}
+          />
+        )}
       </div>
       {dataToRender && <Table columns={columns} data={dataToRender} />}
     </div>

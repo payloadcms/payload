@@ -280,6 +280,10 @@ export type CollectionAdminOptions = {
      */
     edit?: {
       /**
+       * Inject custom components before the document controls
+       */
+      beforeDocumentControls?: CustomComponent[]
+      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomComponent
@@ -421,6 +425,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   disableDuplicate?: boolean
   /**
+   * Opt-in to enable query presets for this collection.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  enableQueryPresets?: boolean
+  /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
@@ -502,6 +511,17 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields

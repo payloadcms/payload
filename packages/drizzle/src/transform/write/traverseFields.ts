@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
@@ -175,7 +176,17 @@ export const traverseFields = ({
 
     if (field.type === 'blocks') {
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
-        blocksToDelete.add(toSnakeCase(typeof block === 'string' ? block : block.slug))
+        const matchedBlock =
+          typeof block === 'string'
+            ? adapter.payload.config.blocks.find((each) => each.slug === block)
+            : block
+
+        blocksToDelete.add(
+          resolveBlockTableName(
+            matchedBlock,
+            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
+          ),
+        )
       })
 
       if (isLocalized) {
@@ -494,6 +505,10 @@ export const traverseFields = ({
       if (typeof value !== 'undefined') {
         if (value && field.type === 'point' && adapter.name !== 'sqlite') {
           formattedValue = sql`ST_GeomFromGeoJSON(${JSON.stringify(value)})`
+        }
+
+        if (field.type === 'text' && value && typeof value !== 'string') {
+          formattedValue = JSON.stringify(value)
         }
 
         if (field.type === 'date') {

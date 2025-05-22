@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 22.6.0
+  NODE_VERSION: 23.11.0
   PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
@@ -62,12 +62,6 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
-    # Follows same github's ci skip: [skip lint], [lint skip], [no lint]
-    if: >
-      github.event_name == 'pull_request' &&
-      !contains(github.event.pull_request.title, '[skip lint]') &&
-      !contains(github.event.pull_request.title, '[lint skip]') &&
-      !contains(github.event.pull_request.title, '[no lint]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +75,8 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Lint staged
-        run: |
-          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
-          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
+      - name: Lint
+        run: pnpm lint -- --quiet
 
   build:
     needs: changes
@@ -279,6 +271,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
           - joins
           - field-error-states
           - fields-relationship
@@ -293,14 +286,10 @@ jobs:
           - fields__collections__Email
           - fields__collections__Indexed
           - fields__collections__JSON
-          - fields__collections__Lexical__e2e__main
-          - fields__collections__Lexical__e2e__blocks
-          - fields__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - fields__collections__Number
           - fields__collections__Point
           - fields__collections__Radio
           - fields__collections__Relationship
-          - fields__collections__RichText
           - fields__collections__Row
           - fields__collections__Select
           - fields__collections__Tabs
@@ -308,6 +297,12 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - hooks
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
+          - query-presets
           - form-state
           - live-preview
           - localization
@@ -318,6 +313,7 @@ jobs:
           - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
+          - sort
           - versions
           - uploads
     env:

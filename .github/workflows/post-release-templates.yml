@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 22.6.0
+  NODE_VERSION: 23.11.0
   PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
@@ -83,7 +83,7 @@ jobs:
           echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
+        uses: supercharge/mongodb-github-action@1.12.0
         with:
           mongodb-version: 6.0
 
