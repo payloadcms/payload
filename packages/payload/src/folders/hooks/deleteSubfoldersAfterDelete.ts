@@ -1,13 +1,13 @@
-import type { CollectionAfterDeleteHook } from '../../index.js'
+import type { CollectionBeforeDeleteHook } from '../../index.js'
 
 type Args = {
   folderFieldName: string
   folderSlug: string
 }
-export const deleteSubfoldersAfterDelete = ({
+export const deleteSubfoldersBeforeDelete = ({
   folderFieldName,
   folderSlug,
-}: Args): CollectionAfterDeleteHook => {
+}: Args): CollectionBeforeDeleteHook => {
   return async ({ id, req }) => {
     await req.payload.delete({
       collection: folderSlug,

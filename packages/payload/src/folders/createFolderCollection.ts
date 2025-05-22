@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
 import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
-import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
+import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
@@ -61,8 +61,8 @@ export const createFolderCollection = ({
         collectionSlugs,
         folderFieldName,
       }),
-      deleteSubfoldersAfterDelete({ folderFieldName, folderSlug: slug }),
     ],
+    beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
   },
   labels: {
     plural: 'Folders',
