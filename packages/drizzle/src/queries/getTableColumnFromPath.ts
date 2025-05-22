@@ -280,7 +280,7 @@ export const getTableColumnFromPath = ({
               tableName: newTableName,
               value,
             })
-          } catch (error) {
+          } catch (_) {
             // this is fine, not every block will have the field
           }
           if (!result) {

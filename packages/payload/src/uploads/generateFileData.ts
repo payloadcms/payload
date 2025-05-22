@@ -241,7 +241,7 @@ export const generateFileData = async <T>({
       })
 
       // Apply resize after cropping to ensure it conforms to resizeOptions
-      if (resizeOptions) {
+      if (resizeOptions && !resizeOptions.withoutEnlargement) {
         const resizedAfterCrop = await sharp(croppedImage)
           .resize({
             fit: resizeOptions?.fit || 'cover',

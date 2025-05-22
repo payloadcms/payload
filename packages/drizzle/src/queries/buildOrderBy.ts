@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
-import { asc, desc, or } from 'drizzle-orm'
+import { asc, desc } from 'drizzle-orm'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
@@ -39,8 +39,9 @@ export const buildOrderBy = ({
 }: Args): BuildQueryResult['orderBy'] => {
   const orderBy: BuildQueryResult['orderBy'] = []
 
+  const createdAt = adapter.tables[tableName]?.createdAt
+
   if (!sort) {
-    const createdAt = adapter.tables[tableName]?.createdAt
     if (createdAt) {
       sort = '-createdAt'
     } else {
@@ -50,6 +51,18 @@ export const buildOrderBy = ({
 
   if (typeof sort === 'string') {
     sort = [sort]
+  }
+
+  // In the case of Mongo, when sorting by a field that is not unique, the results are not guaranteed to be in the same order each time.
+  // So we add a fallback sort to ensure that the results are always in the same order.
+  let fallbackSort = '-id'
+
+  if (createdAt) {
+    fallbackSort = '-createdAt'
+  }
+
+  if (!(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', '')))) {
+    sort.push(fallbackSort)
   }
 
   for (const sortItem of sort) {
@@ -92,7 +105,7 @@ export const buildOrderBy = ({
 
         selectFields[sortTableColumnName] = sortTable[sortTableColumnName]
       }
-    } catch (err) {
+    } catch (_) {
       // continue
     }
   }

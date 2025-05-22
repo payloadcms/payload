@@ -85,6 +85,7 @@ formBuilderPlugin({
     checkbox: true,
     number: true,
     message: true,
+    date: false,
     payment: false,
   },
 })
@@ -349,6 +350,18 @@ Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
+### Date
+
+Maps to a `date` input on your front-end. Used to collect a date value.
+
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | date     | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
+
 ### Number
 
 Maps to a `number` input on your front-end. Used to collect a number.
@@ -416,6 +429,42 @@ formBuilderPlugin({
         singular: 'Custom Text Field',
         plural: 'Custom Text Fields',
       },
+    },
+  },
+})
+```
+
+### Customizing the date field default value
+
+You can custommise the default value of the date field and any other aspects of the date block in this way.
+Note that the end submission source will be responsible for the timezone of the date. Payload only stores the date in UTC format.
+
+```ts
+import { fields as formFields } from '@payloadcms/plugin-form-builder'
+
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    // date: true, // just enable it without any customizations
+    date: {
+      ...formFields.date,
+      fields: [
+        ...(formFields.date && 'fields' in formFields.date
+          ? formFields.date.fields.map((field) => {
+              if ('name' in field && field.name === 'defaultValue') {
+                return {
+                  ...field,
+                  timezone: true, // optionally enable timezone
+                  admin: {
+                    ...field.admin,
+                    description: 'This is a date field',
+                  },
+                }
+              }
+              return field
+            })
+          : []),
+      ],
     },
   },
 })

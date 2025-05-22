@@ -8,6 +8,7 @@ import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { draftsSlug } from './collections/Drafts/index.js'
+import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
@@ -130,6 +131,154 @@ describe('Sort', () => {
           'Post 2',
           'Post 1',
         ])
+      })
+    })
+
+    describe('Non-unique sorting', () => {
+      // There are situations where the sort order is not guaranteed to be consistent, such as when sorting by a non-unique field in MongoDB which does not keep an internal order of items
+      // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
+      it('should always be consistent when sorting', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent when sorting - with limited pages', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          sort: 'order',
+          limit: 5,
+          page: 2,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              limit: 5,
+              page: 2,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should sort by createdAt as fallback', async () => {
+        // This is the (reverse - newest first) order that the posts are created in so this should remain consistent as the sort should fallback to '-createdAt'
+        const postsInOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              sort: 'order',
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        console.log({ fetch1, fetch2, fetch3 })
+
+        expect(fetch1).toEqual(postsInOrder)
+
+        expect(fetch2).toEqual(postsInOrder)
+
+        expect(fetch3).toEqual(postsInOrder)
+      })
+
+      it('should always be consistent without sort params in the query', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
+      })
+
+      it('should always be consistent without sort params in the query - with limited pages', async () => {
+        const posts = await payload.find({
+          collection: nonUniqueSortSlug,
+          page: 2,
+          limit: 4,
+        })
+
+        const initialMap = posts.docs.map((post) => post.title)
+
+        const dataFetches = await Promise.all(
+          Array.from({ length: 3 }).map(() =>
+            payload.find({
+              collection: nonUniqueSortSlug,
+              page: 2,
+              limit: 4,
+            }),
+          ),
+        )
+
+        const [fetch1, fetch2, fetch3] = dataFetches.map((fetch) =>
+          fetch.docs.map((post) => post.title),
+        )
+
+        expect(fetch1).toEqual(initialMap)
+
+        expect(fetch2).toEqual(initialMap)
+
+        expect(fetch3).toEqual(initialMap)
       })
     })
 
