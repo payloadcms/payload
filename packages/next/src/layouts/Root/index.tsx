@@ -5,7 +5,7 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
-import React from 'react'
+import React, { ReactNode } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -26,12 +26,14 @@ export const RootLayout = async ({
   htmlProps = {},
   importMap,
   serverFunction,
+  customHeadElements,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
+  readonly customHeadElements?: ReactNode[]
 }) => {
   checkDependencies()
 
@@ -111,6 +113,10 @@ export const RootLayout = async ({
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
+
+        {customHeadElements && customHeadElements.map((element, index) => (
+          <React.Fragment key={index}>{element}</React.Fragment>
+        ))}
       </head>
       <body>
         <RootProvider
