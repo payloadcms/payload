@@ -1209,17 +1209,17 @@ describe('List View', () => {
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
       // delete should not appear without selection
-      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(0)
+      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
       // delete button should be present
-      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(1)
+      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
 
       await page.locator('.row-2 .cell-_select input').check()
 
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-posts #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
   })

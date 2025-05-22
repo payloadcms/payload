@@ -1,0 +1,100 @@
+---
+title: Folders
+label: Folders
+order: 10
+desc: Folders allow you to group documents across collections, and are a great way to organize your content.
+keywords: folders, folder, content organization
+---
+
+Folders allow you to group documents across collections, and are a great way to organize your content. Folders are built on top of relationship fields, when you enable folders on a collection, Payload adds a hidden relationship field `folders`, that relates to a folder — or no folder. Folders also have the `folder` field, allowing folders to be nested within other folders.
+
+The configuration for folders is done in two places, the collection config and the Payload config. The collection config is where you enable folders, and the Payload config is where you configure the global folder settings.
+
+## Folder Configuration
+
+On the payload config, you can configure the following settings under the `folders` property:
+
+```ts
+// Type definition
+
+type RootFoldersConfiguration = {
+  /**
+   * An array of functions to be ran when the folder collection is initialized
+   * This allows plugins to modify the collection configuration
+   */
+  collectionOverrides?: (({
+    collection,
+  }: {
+    collection: CollectionConfig
+  }) => CollectionConfig | Promise<CollectionConfig>)[]
+  /**
+   * Ability to view hidden fields and collections related to folders
+   *
+   * @default false
+   */
+  debug?: boolean
+  /**
+   * The Folder field name
+   *
+   * @default "folder"
+   */
+  fieldName?: string
+  /**
+   * Slug for the folder collection
+   *
+   * @default "payload-folders"
+   */
+  slug?: string
+}
+```
+
+```ts
+// Example usage
+
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  folders: {
+    // highlight-start
+    debug: true, // optional
+    collectionOverrides: [
+      async ({ collection }) => {
+        return collection
+      },
+    ], // optional
+    fieldName: 'folder', // optional
+    slug: 'payload-folders', // optional
+    // highlight-end
+  },
+})
+```
+
+## Collection Configuration
+
+To enable folders on a collection, you need to set the `admin.folders` property to `true` on the collection config. This will add a hidden relationship field to the collection that relates to a folder — or no folder.
+
+```ts
+// Type definition
+
+type CollectionFoldersConfiguration = boolean
+```
+
+```ts
+// Example usage
+
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      // highlight-start
+      admin: {
+        folders: true, // defaults to false
+      },
+      // highlight-end
+    },
+  ],
+})
+```

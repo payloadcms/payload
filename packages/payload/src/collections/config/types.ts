@@ -32,6 +32,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -256,6 +257,11 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
+
 export type BaseListFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -339,6 +345,10 @@ export type CollectionAdminOptions = {
   disableCopyToLocale?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Enables folders for this collection
+   */
+  folders?: CollectionFoldersConfiguration
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
@@ -583,8 +593,9 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
