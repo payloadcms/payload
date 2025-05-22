@@ -113,4 +113,83 @@ describe('folders', () => {
       expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
     })
   })
+
+  describe('hooks', () => {
+    it('reparentChildFolder should change the child after updating the parent', async () => {
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Parent Folder',
+        },
+      })
+
+      const childFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Child Folder',
+          folder: parentFolder,
+        },
+      })
+
+      await payload.update({
+        collection: 'payload-folders',
+        data: { folder: childFolder },
+        id: parentFolder.id,
+      })
+
+      const parentAfter = await payload.findByID({
+        collection: 'payload-folders',
+        id: parentFolder.id,
+        depth: 0,
+      })
+      const childAfter = await payload.findByID({
+        collection: 'payload-folders',
+        id: childFolder.id,
+        depth: 0,
+      })
+      expect(childAfter.folder).toBeFalsy()
+      expect(parentAfter.folder).toBe(childFolder.id)
+    })
+
+    it('dissasociateAfterDelete should delete _folder value in children after deleting the folder', async () => {
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Parent Folder',
+        },
+      })
+
+      const post = await payload.create({ collection: 'posts', data: { folder: parentFolder } })
+
+      await payload.delete({ collection: 'payload-folders', id: parentFolder.id })
+      const postAfter = await payload.findByID({ collection: 'posts', id: post.id })
+      expect(postAfter.folder).toBeFalsy()
+    })
+
+    it('deleteSubfoldersBeforeDelete deletes subfolders after deleting the parent folder', async () => {
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Parent Folder',
+        },
+      })
+      const childFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Child Folder',
+          folder: parentFolder,
+        },
+      })
+
+      await payload.delete({ collection: 'payload-folders', id: parentFolder.id })
+
+      await expect(
+        payload.findByID({
+          collection: 'payload-folders',
+          id: childFolder.id,
+          disableErrors: true,
+        }),
+      ).resolves.toBeNull()
+    })
+  })
 })
