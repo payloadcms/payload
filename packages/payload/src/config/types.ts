@@ -985,6 +985,7 @@ export type Config = {
   endpoints?: Endpoint[]
   /**
    * Options for folder view within the admin panel
+   * @experimental this feature may change in minor versions until it is fully stable
    */
   folders?: RootFoldersConfiguration
   /**

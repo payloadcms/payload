@@ -347,6 +347,7 @@ export type CollectionAdminOptions = {
   enableRichTextRelationship?: boolean
   /**
    * Enables folders for this collection
+   * @deprecated this property will move out of `admin` in the next patch
    */
   folders?: CollectionFoldersConfiguration
   /**
