@@ -110,7 +110,7 @@ export const renderTable = ({
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
-      for (const field of filterFields(clientFields)) {
+      for (const field of filterFields(clientCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
