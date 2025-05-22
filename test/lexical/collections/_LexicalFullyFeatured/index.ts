@@ -2,9 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
+  defaultColors,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TextStateFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -21,11 +23,17 @@ export const LexicalFullyFeatured: CollectionConfig = {
       name: 'richText',
       type: 'richText',
       editor: lexicalEditor({
+        // Try to keep feature props simple and minimal in this collection
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
           FixedToolbarFeature(),
           EXPERIMENTAL_TableFeature(),
+          TextStateFeature({
+            state: {
+              color: { ...defaultColors.background, ...defaultColors.text },
+            },
+          }),
           BlocksFeature({
             blocks: [
               {

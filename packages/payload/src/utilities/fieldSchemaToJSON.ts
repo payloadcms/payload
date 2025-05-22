@@ -1,7 +1,8 @@
 import type { ClientConfig } from '../config/client.js'
 // @ts-strict-ignore
 import type { ClientField } from '../fields/config/client.js'
-import type { FieldTypes } from '../fields/config/types.js'
+
+import { fieldAffectsData, type FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -67,11 +68,15 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
         break
 
       case 'group':
-        acc.push({
-          name: field.name,
-          type: field.type,
-          fields: fieldSchemaToJSON(field.fields, config),
-        })
+        if (fieldAffectsData(field)) {
+          acc.push({
+            name: field.name,
+            type: field.type,
+            fields: fieldSchemaToJSON(field.fields, config),
+          })
+        } else {
+          result = result.concat(fieldSchemaToJSON(field.fields, config))
+        }
 
         break
 

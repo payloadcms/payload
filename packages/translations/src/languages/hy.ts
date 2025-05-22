@@ -27,11 +27,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     forgotPassword: 'Մոռացե՞լ եք գաղտնաբառը',
     forgotPasswordEmailInstructions:
       'Խնդրում ենք մուտքագրել Ձեր էլ. փոստը։ Դուք կստանաք էլ. նամակ՝ գաղտնաբառը վերականգնելու հրահանգներով։',
+    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     forgotPasswordUsernameInstructions:
       'Խնդրում ենք ներքևում մուտքագրել Ձեր օգտանունը։ Գաղտնաբառը վերականգնելու հրահանգները կուղարկվեն Ձեր օգտանվան հետ կապված էլ. փոստի հասցեին։',
-    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
-
-    forgotPasswordQuestion: 'Մոռացե՞լ եք գաղտնաբառը։',
     generate: 'Ստեղծել',
     generateNewAPIKey: 'Ստեղծել նոր API բանալի',
     generatingNewAPIKeyWillInvalidate:
@@ -68,6 +66,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     tokenRefreshSuccessful: 'Թոքենի թարմացումը հաջողվել է։',
     unableToVerify: 'Հնարավոր չէ հաստատել',
     username: 'Օգտանուն',
+    usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
     verified: 'Ստուգված',
     verifiedSuccessfully: 'Հաջողությամբ ստուգված',
     verify: 'Ստուգել',
@@ -185,6 +184,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     adminTheme: 'Կառավարման թեմա',
     all: 'Բոլորը',
     allCollections: 'Բոլոր հավաքածուները',
+    allLocales: 'Բոլոր տեղայինությունները',
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
@@ -254,6 +254,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     enterAValue: 'Մուտքագրեք արժեք',
     error: 'Սխալ',
     errors: 'Սխալներ',
+    export: 'Արտարժույթ',
     fallbackToDefaultLocale: 'Վերադառնալ լռելյայն լոկալին',
     false: 'Կեղծ',
     filter: 'Ֆիլտր',
@@ -261,6 +262,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     filterWhere: 'Ֆիլտրել {{label}}-ը, որտեղ',
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
+    import: 'Ներմուծում',
     isEditing: 'խմբագրում է',
     language: 'Լեզու',
     lastModified: 'Վերջին փոփոխություն',
@@ -277,6 +279,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     moveUp: 'Տեղափոխել վերև',
     newPassword: 'Նոր գաղտնաբառ',
     next: 'Հաջորդ',
+    no: 'Ոչ',
     noDateSelected: 'Չկա ընտրված ամսաթիվ',
     noFiltersSet: 'Ֆիլտրեր սահմանված չեն',
     noLabel: '<Չկա {{label}}>',
@@ -358,6 +361,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     value: 'Արժեք',
     viewReadOnly: '«Միայն կարդալու» ռեժիմ',
     welcome: 'Բարի գալուստ',
+    yes: 'Այո',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',
@@ -392,6 +396,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     crop: 'Կտրել',
     cropToolDescription:
       'Քաշեք ընտրված տարածքի անկյունները, նշեք նոր տարածք կամ կարգավորեք ստորև նշված արժեքները։',
+    download: 'Ներբեռնել',
     dragAndDrop: 'Քաշեք և գցեք ֆայլը',
     dragAndDropHere: 'կամ քաշեք և գցեք ֆայլն այստեղ',
     editImage: 'Խմբագրել պատկերը',
