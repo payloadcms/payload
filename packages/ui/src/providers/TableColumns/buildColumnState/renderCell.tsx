@@ -18,7 +18,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
-import { findValueInDoc } from './findValueInDoc.js'
+import { findValueFromPath } from './findValueFromPath.js'
 
 type RenderCellArgs = {
   readonly clientField: ClientField
@@ -54,9 +54,14 @@ export function renderCell({
     rowData: undefined,
   }
 
+  const accessor: string | undefined =
+    ('accessor' in clientField ? (clientField.accessor as string) : undefined) ??
+    ('name' in clientField ? clientField.name : undefined)
+  const dotAccessor = accessor?.replace(/-/g, '.')
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueInDoc(doc, clientField.name) : undefined,
+    cellData: 'name' in clientField ? findValueFromPath(doc, dotAccessor) : undefined,
     link: isLinkedColumn,
     rowData: doc,
   }
