@@ -144,11 +144,15 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'someTextField',
+      type: 'text',
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
         {
-          name: 'nestedTitle',
+          name: 'someTextField',
           type: 'text',
         },
       ],
