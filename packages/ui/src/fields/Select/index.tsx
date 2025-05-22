@@ -110,10 +110,13 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
-      filterOption={({ value }) =>
-        reducedOptions?.some(
-          (option) => (typeof option === 'string' ? option : option.value) === value,
-        )
+      filterOption={
+        reducedOptions
+          ? ({ value }) =>
+              reducedOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
       }
       hasMany={hasMany}
       isClearable={isClearable}
