@@ -849,7 +849,7 @@ describe('Fields', () => {
       expect(data.hasMany).toStrictEqual(['a'])
     })
 
-    it('should prevent against saving a value outside of reduceOptions', async () => {
+    it('should prevent against saving a value excluded by `reduceOptions`', async () => {
       try {
         const result = await payload.create({
           collection: 'select-fields',

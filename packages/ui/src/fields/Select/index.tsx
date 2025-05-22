@@ -101,7 +101,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-  console.log(reducedOptions)
+
   return (
     <SelectInput
       AfterInput={AfterInput}
@@ -110,7 +110,11 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
-      filterOption={(o) => reducedOptions?.includes(typeof o === 'string' ? o : o.value)}
+      filterOption={({ value }) =>
+        reducedOptions?.some(
+          (option) => (typeof option === 'string' ? option : option.value) === value,
+        )
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
