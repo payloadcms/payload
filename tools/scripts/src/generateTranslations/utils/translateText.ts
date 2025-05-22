@@ -12,7 +12,7 @@ export async function translateText(text: string, targetLang: string) {
       max_tokens: 150,
       messages: [
         {
-          content: `Only respond with the translation of the text you receive. The original language is English and the translation language is ${targetLang}. Use formal and professional language. Only respond with the translation - do not say anything else. If you cannot translate the text, respond with "[SKIPPED]"`,
+          content: `Only respond with the translation of the text you receive. The original language is English and the translation language is ${targetLang}. Use formal and professional language. Only respond with the translation - do not say anything else. If you cannot translate the text, respond with "[SKIPPED]". Do not translate text inside double curly braces, i.e. "{{do_not_translate}}".`,
           role: 'system',
         },
         {
@@ -30,11 +30,16 @@ export async function translateText(text: string, targetLang: string) {
   })
   try {
     const data = await response.json()
-    if (data?.choices?.[0]) {
-      console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
-      return data.choices[0].message.content.trim()
+
+    if (response.status > 200) {
+      console.log(data.error)
     } else {
-      console.log(`Could not translate: ${text} in lang: ${targetLang}`)
+      if (data?.choices?.[0]) {
+        console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
+        return data.choices[0].message.content.trim()
+      } else {
+        console.log(`Could not translate: ${text} in lang: ${targetLang}`)
+      }
     }
   } catch (e) {
     console.error('Error translating:', text, 'to', targetLang, 'response', response, '. Error:', e)

@@ -175,7 +175,34 @@ export const myTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ဘလောက်ကို ပြောင်းပါ။',
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
+  folder: {
+    browseByFolder: 'Layari mengikut Folder',
+    byFolder: 'Dengan Folder',
+    deleteFolder: 'Padam Folder',
+    folderName: 'ဖိုင်နာမည်',
+    folders: 'Fail',
+    itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
+    itemHasBeenMovedToRoot: '"{{title}}" က ဗဟိုဖိုလ်ဒါသို့ရွှေ့ပြီးပါပြီ။',
+    itemsMovedToFolder: '{{title}} သို့ {{folderName}} သို့ ရွှေ့လိုက်သွားပါပယ်',
+    itemsMovedToRoot: '{{title}} telah dipindahkan ke folder akar',
+    moveFolder: 'Pindah Folder',
+    moveItemsToFolderConfirmation:
+      'သင့်တွင် <1>{{count}} {{label}}</1> <2>{{toFolder}}</2>သို့ ရွှေ့နေသည့်အခါဖြစ်ပါသည်။ သေချာပါသလား?',
+    moveItemsToRootConfirmation:
+      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke folder akar. Adakah anda pasti?',
+    moveItemToFolderConfirmation:
+      'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
+    moveItemToRootConfirmation:
+      'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
+    movingFromFolder: 'Memindahkan {{title}} dari {{folderName}}',
+    newFolder: 'Folder Baru',
+    noFolder: 'ဖိုလ်ဒါမရှိပါ',
+    renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
+    searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
+    selectFolderForItem: 'Pilih folder untuk {{title}}',
+  },
   general: {
+    name: 'နာမည်',
     aboutToDelete:
       '{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။',
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
@@ -207,6 +234,7 @@ export const myTranslations: DefaultTranslationsObject = {
     confirmCopy: 'အောင်မြင်စေသည့်ကူးထားပြီးအတည်ပြုပါ',
     confirmDeletion: 'ဖျက်တော့မယ်နော်။',
     confirmDuplication: 'ပုံတူပွားခြင်းကို အတည်ပြုပါ။',
+    confirmMove: 'Sahkan pergerakan',
     confirmReindex: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်ပါသလား?',
     confirmReindexAll: 'အပေါ် ကော်လက်ရှင်းများအားလုံးကို ထပ်လိပ်ပါသလား?',
     confirmReindexDescription:
@@ -266,6 +294,8 @@ export const myTranslations: DefaultTranslationsObject = {
     goBack: 'နောက်သို့',
     import: 'သွင်းကုန်',
     isEditing: 'ပြင်ဆင်နေသည်',
+    item: 'barang',
+    items: 'barang-barang',
     language: 'ဘာသာစကား',
     lastModified: 'နောက်ဆုံးပြင်ဆင်ထားသည်။',
     leaveAnyway: 'ဘာဖြစ်ဖြစ် ထွက်မည်။',
@@ -277,8 +307,14 @@ export const myTranslations: DefaultTranslationsObject = {
     locales: 'Locales',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
+    move: 'ရွှေ့ပြောင်းပါ',
+    moveConfirm:
+      'သင် <1>{{destination}}</1> သို့ {{count}} {{label}} ကို ရွှေ့မည်ဖြစ်သည်။ သင့်တောင်းဆိုမှုကို သေချာပါသလား?',
+    moveCount: 'Pindah {{count}} {{label}}',
     moveDown: 'Move Down',
     moveUp: 'Move Up',
+    moving: 'ရွှေ့ပြောင်းခြင်း',
+    movingCount: 'Memindahkan {{count}} {{label}}',
     newPassword: 'စကားဝှက် အသစ်',
     next: 'Seterusnya',
     no: 'Tidak',
@@ -307,6 +343,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     remove: 'ဖယ်ရှားမည်။',
+    rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
@@ -318,6 +355,7 @@ export const myTranslations: DefaultTranslationsObject = {
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: 'Jadualkan penerbitan untuk {{title}}',
     searchBy: 'ရှာဖွေပါ။',
+    select: 'Pilih',
     selectAll: '{{count}} {{label}} အားလုံးကို ရွေးပါ',
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',

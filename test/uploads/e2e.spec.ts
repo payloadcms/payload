@@ -445,7 +445,7 @@ describe('Uploads', () => {
 
       await openDocDrawer({
         page,
-        selector: 'button.list-drawer__create-new-button.doc-drawer__toggler',
+        selector: 'button.list-header__create-new-button.doc-drawer__toggler',
       })
       await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
