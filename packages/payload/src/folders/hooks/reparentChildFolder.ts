@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, Payload } from '../../index.js'
+import type { CollectionAfterChangeHook, JsonObject, Payload, TypeWithID } from '../../index.js'
 
 import { extractID } from '../../utilities/extractID.js'
 
@@ -19,10 +19,14 @@ async function isChildOfFolder({
   parentIDToFind,
   payload,
 }: Args): Promise<boolean> {
-  const parentFolder = await payload.findByID({
+  const parentFolder = (await payload.findByID({
     id: folderID,
     collection: payload.config.folders.slug,
-  })
+    overrideAccess: false,
+    select: {
+      parentFolderFieldName: true,
+    },
+  })) as JsonObject & TypeWithID
 
   const parentFolderID = parentFolder[folderFieldName]
     ? extractID(parentFolder[folderFieldName])
@@ -48,9 +52,9 @@ async function isChildOfFolder({
 
 /**
  * If a parent is moved into a child folder, we need to re-parent the child
- * 
+ *
  * @example
- * 
+ *
  * ```ts
     → F1
       → F2
@@ -93,6 +97,8 @@ export const reparentChildFolder = ({
               ? extractID(previousDoc[folderFieldName])
               : null,
           },
+          depth: 0,
+          overrideAccess: false,
           req,
         })
       }
