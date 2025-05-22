@@ -175,7 +175,12 @@ The following options are available for each constraint:
 
 ### Constraint Access Control
 
-You can also specify exactly who can change the constraints within a preset. This is useful to grant or restrict access to certain constraints based on any given user criteria. For example, you want to ensure that only "admins" are allowed to make a preset available to "everyone".
+Used to dynamically filter which constraints are available based on the current user, document data, or other criteria.
+
+Some examples of this might include:
+
+- Ensuring that only "admins" are allowed to make a preset available to "everyone"
+- Preventing the "onlyMe" option from being selected based on a hypothetical "disablePrivatePresets" checkbox
 
 When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
 
