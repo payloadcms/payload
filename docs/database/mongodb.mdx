@@ -61,3 +61,118 @@ Limitations with [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cos
 - For Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
 - The [Join Field](../fields/join) is not supported in DocumentDB and Azure Cosmos DB, as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
 - For DocumentDB pass `disableIndexHints: true` to disable hinting to the DB to use `id` as index which can cause problems with DocumentDB.
+
+## Common migration scripts
+
+### Delete field from the database
+
+With the MongoDB adapter, even if you delete a field from your Payload config, the existing field data will still be remained in the database.
+If you want to ensure that the field is fully erased from the database, you can use the following script:
+
+```ts
+// pnpx payload migrate:create --name delete-field
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+  await payload.db.collections.posts.collection.updateMany(
+    {},
+    {
+      $unset: {
+        // delete title field
+        title: true,
+        // nested to array
+        'array.title': true,
+      },
+    },
+    { session },
+  )
+}
+```
+
+### Synchronize indexes
+
+Payload won't automatically replace existing indexes in MongoDB when you change your Payload config.
+For example, changing `index: true` to `unique: true` won't automatically update the index in MongoDB.
+You can use the following script to synchronize indexes:
+
+```ts
+// pnpx payload migrate:create --name sync-posts-indexes
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+  await payload.db.collections.posts.syncIndexes()
+}
+```
+
+<Banner type="warning">
+  Note that this will also drop all indexes that aren't in the payload config.
+  If you have custom indexes that you want to keep, they must be added to the collection schema
+  or you can insert them manually after `syncIndexes` with:
+  `payload.db.collections.posts.collection.createIndex({ title: 1 })`
+</Banner>
+
+### Making field localized and vice versa
+
+When you change a field to be localized or vice versa, you can use the following script to update the field in the database:
+
+```ts
+// pnpx payload migrate:create --name make-title-localized
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+  const posts = await payload.db.collections.posts.collection
+    .find({}, { session })
+    .toArray()
+
+  // Make "title" localized
+  await payload.db.collections.posts.collection.bulkWrite(
+    posts.map((post) => ({
+      updateOne: {
+        filter: { _id: post._id },
+        update: { $set: { title: { en: post.title } } },
+      },
+    })),
+  )
+
+  // Make "title" non-localized
+  await payload.db.collections.posts.collection.bulkWrite(
+    posts.map((post) => ({
+      updateOne: {
+        filter: { _id: post._id },
+        update: { $set: { title: post.title.en } },
+      },
+    })),
+  )
+}
+```
+
+### Example renaming a collection
+
+The following example renames a collection with slug "pages" to "articles" and it includes migrating the \_versions collection also.
+
+```ts
+import { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-mongodb'
+// import type { Db } from 'mongodb' // you will need to add this package as a devDependency in the package.json if you want db to be typed as Db
+
+export async function up({
+  payload,
+  req,
+  session,
+}: MigrateUpArgs): Promise<void> {
+  const db = payload.db.connection.db as any
+
+  await db.renameCollection('pages', 'articles', { session, dropTarget: true })
+  await db.renameCollection('_pages_versions', '_articles_versions', {
+    session,
+    dropTarget: true,
+  }) // remove this line if you do not have versions enabled
+}
+
+export async function down({
+  payload,
+  req,
+  session,
+}: MigrateDownArgs): Promise<void> {
+  const db = payload.db.connection.db as any
+
+  await db.renameCollection('articles', 'pages', { session, dropTarget: true })
+  await db.renameCollection('_articles_versions', '_pages_versions', {
+    session,
+    dropTarget: true,
+  }) // remove this line if you do not have versions enabled
+}
+```
