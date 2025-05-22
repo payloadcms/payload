@@ -113,8 +113,8 @@ export const getRouteData = ({
   let matchedCollection: SanitizedConfig['collections'][number] = undefined
   let matchedGlobal: SanitizedConfig['globals'][number] = undefined
 
-  const folderCollectionSlugs = config.collections.reduce((acc, { slug, admin }) => {
-    if (admin?.folders) {
+  const folderCollectionSlugs = config.collections.reduce((acc, { slug, folders }) => {
+    if (folders) {
       return [...acc, slug]
     }
     return acc

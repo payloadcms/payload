@@ -346,11 +346,6 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
-   * Enables folders for this collection
-   * @deprecated this property will move out of `admin` in the next patch
-   */
-  folders?: CollectionFoldersConfiguration
-  /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.
@@ -445,6 +440,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Enables folders for this collection
+   */
+  folders?: CollectionFoldersConfiguration
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */

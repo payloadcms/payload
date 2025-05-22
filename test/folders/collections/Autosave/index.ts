@@ -4,8 +4,8 @@ export const Autosave: CollectionConfig = {
   slug: 'autosave',
   admin: {
     useAsTitle: 'title',
-    folders: true,
   },
+  folders: true,
   fields: [
     {
       name: 'title',

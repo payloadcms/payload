@@ -45,8 +45,8 @@ export const generatePageMetadata = async ({
   const config = await configPromise
   const params = await paramsPromise
 
-  const folderCollectionSlugs = config.collections.reduce((acc, { slug, admin }) => {
-    if (admin?.folders) {
+  const folderCollectionSlugs = config.collections.reduce((acc, { slug, folders }) => {
+    if (folders) {
       return [...acc, slug]
     }
     return acc
