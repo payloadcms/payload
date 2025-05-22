@@ -47,6 +47,10 @@ export const getConstraints = (config: Config): Field => ({
             name: 'constraint',
             type: 'select',
             defaultValue: 'onlyMe',
+            filterOptions: (args) =>
+              typeof config?.queryPresets?.filterConstraints === 'function'
+                ? config.queryPresets.filterConstraints(args)
+                : args.options,
             label: ({ i18n }) =>
               `Specify who can ${constraintOperation} this ${getTranslation(config.queryPresets?.labels?.singular || 'Preset', i18n)}`,
             options: [
@@ -58,10 +62,6 @@ export const getConstraints = (config: Config): Field => ({
                 }),
               ) || []),
             ],
-            reduceOptions: (args) =>
-              typeof config?.queryPresets?.reduceConstraints === 'function'
-                ? config.queryPresets.reduceConstraints(args)
-                : args.options,
           },
           {
             name: 'users',

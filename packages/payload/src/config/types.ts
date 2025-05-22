@@ -1132,8 +1132,8 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
-    reduceConstraints?: SelectField['reduceOptions']
   }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {

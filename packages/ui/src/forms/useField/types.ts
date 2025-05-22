@@ -39,7 +39,6 @@ export type FieldType<T> = {
   initialValue?: T
   path: string
   readOnly?: boolean
-  reducedOptions?: Option[]
   rows?: Row[]
   selectFilterOptions?: Option[]
   setValue: (val: unknown, disableModifyingForm?: boolean) => void

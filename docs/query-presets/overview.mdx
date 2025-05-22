@@ -49,7 +49,7 @@ The following options are available for Query Presets:
 | Option              | Description                                                                                                                     |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `access`            | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
-| `reduceConstraints` | Used to define which constraints are available to users when managing presets. [More details](#constraint-access-control).      |
+| `filterConstraints` | Used to define which constraints are available to users when managing presets. [More details](#constraint-access-control).      |
 | `constraints`       | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
 | `labels`            | Custom labels to use for the Query Presets collection.                                                                          |
 
@@ -179,7 +179,7 @@ You can also specify exactly who can change the constraints within a preset. Thi
 
 When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
 
-To do this, you can use the `reduceConstraints` property in your [Payload Config](../configuration/overview):
+To do this, you can use the `filterConstraints` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -189,7 +189,7 @@ const config = buildConfig({
   queryPresets: {
     // ...
     // highlight-start
-    reduceConstraints: ({ req, options }) =>
+    filterConstraints: ({ req, options }) =>
       !req.user?.roles?.includes('admin')
         ? options.filter(
             (option) =>
@@ -202,4 +202,4 @@ const config = buildConfig({
 })
 ```
 
-The `reduceConstraints` function receives the same arguments as [`reduceOptions`](../fields/select#reduceOptions) in the [Select field](../fields/select).
+The `filterConstraints` function receives the same arguments as [`filterOptions`](../fields/select#filterOptions) in the [Select field](../fields/select).

@@ -27,7 +27,7 @@ export default buildConfigWithDefaults({
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
-    reduceConstraints: ({ req, options }) =>
+    filterConstraints: ({ req, options }) =>
       !req.user?.roles?.includes('admin')
         ? options.filter(
             (option) => (typeof option === 'string' ? option : option.value) !== 'onlyAdmins',
