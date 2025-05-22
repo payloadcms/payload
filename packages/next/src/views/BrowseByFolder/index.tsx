@@ -11,6 +11,9 @@ export const BrowseByFolder: React.FC<BuildFolderViewArgs> = async (args) => {
     const { View } = await buildBrowseByFolderView(args)
     return View
   } catch (error) {
+    if (error?.message === 'NEXT_REDIRECT') {
+      throw error
+    }
     if (error.message === 'not-found') {
       notFound()
     } else {

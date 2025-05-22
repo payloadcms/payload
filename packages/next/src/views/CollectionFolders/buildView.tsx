@@ -124,7 +124,7 @@ export const buildCollectionFolderView = async (
       ((resolvedFolderID && folderID && folderID !== resolvedFolderID) ||
         (folderID && !resolvedFolderID))
     ) {
-      return redirect(
+      redirect(
         formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${config.folders.slug}`,

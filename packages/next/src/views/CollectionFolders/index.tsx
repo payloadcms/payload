@@ -11,6 +11,9 @@ export const CollectionFolderView: React.FC<BuildCollectionFolderViewStateArgs> 
     const { View } = await buildCollectionFolderView(args)
     return View
   } catch (error) {
+    if (error?.message === 'NEXT_REDIRECT') {
+      throw error
+    }
     if (error.message === 'not-found') {
       notFound()
     } else {

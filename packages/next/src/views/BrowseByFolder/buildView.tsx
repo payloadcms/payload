@@ -88,7 +88,7 @@ export const buildBrowseByFolderView = async (
     ((resolvedFolderID && folderID && folderID !== resolvedFolderID) ||
       (folderID && !resolvedFolderID))
   ) {
-    return redirect(
+    redirect(
       formatAdminURL({
         adminRoute,
         path: config.admin.routes.browseByFolder,
