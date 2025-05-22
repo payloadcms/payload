@@ -460,11 +460,18 @@ export default buildConfigWithDefaults({
     {
       slug: 'virtual-relations',
       admin: { useAsTitle: 'postTitle' },
+      access: { read: () => true },
       fields: [
         {
           name: 'postTitle',
           type: 'text',
           virtual: 'post.title',
+        },
+        {
+          name: 'postTitleHidden',
+          type: 'text',
+          virtual: 'post.title',
+          hidden: true,
         },
         {
           name: 'postCategoryTitle',
@@ -698,8 +705,93 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'blocks-docs',
+      fields: [
+        {
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocksLocalized',
+        },
+        {
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocks',
+        },
+      ],
+    },
   ],
   globals: [
+    {
+      slug: 'header',
+      fields: [
+        {
+          name: 'itemsLvl1',
+          type: 'array',
+          dbName: 'header_items_lvl1',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+            {
+              name: 'itemsLvl2',
+              type: 'array',
+              dbName: 'header_items_lvl2',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                },
+                {
+                  name: 'itemsLvl3',
+                  type: 'array',
+                  dbName: 'header_items_lvl3',
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                    },
+                    {
+                      name: 'itemsLvl4',
+                      type: 'array',
+                      dbName: 'header_items_lvl4',
+                      fields: [
+                        {
+                          name: 'label',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     {
       slug: 'global',
       dbName: 'customGlobal',

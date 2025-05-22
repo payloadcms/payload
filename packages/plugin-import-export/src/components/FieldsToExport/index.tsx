@@ -83,11 +83,12 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
 
   return (
     <div className={baseClass}>
-      <FieldLabel label="Columns to Export" />
+      <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={baseClass}
         disabled={props.readOnly}
         getOptionValue={(option) => String(option.value)}
+        inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={true}
         isMulti={true}
         isSortable={true}

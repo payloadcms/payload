@@ -112,7 +112,7 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
             i18nKey="plugin-multi-tenant:confirm-tenant-switch--heading"
             t={t}
             variables={{
-              tenantLabel: label.toLowerCase(),
+              tenantLabel: getTranslation(label, i18n),
             }}
           />
         }

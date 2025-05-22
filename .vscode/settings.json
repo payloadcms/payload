@@ -7,9 +7,6 @@
   },
   "editor.formatOnSaveMode": "file",
   "eslint.rules.customizations": [
-    // Defaultt all ESLint errors to 'warn' to differentate from TypeScript's 'error' level
-    { "rule": "*", "severity": "warn" },
-
     // Silence some warnings that will get auto-fixed
     { "rule": "perfectionist/*", "severity": "off", "fixable": true },
     { "rule": "curly", "severity": "off", "fixable": true },

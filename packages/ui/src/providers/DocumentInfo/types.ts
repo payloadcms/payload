@@ -11,7 +11,8 @@ import type {
   SanitizedGlobalConfig,
   TypedUser,
 } from 'payload'
-import type React from 'react'
+
+import React from 'react'
 
 export type DocumentInfoProps = {
   readonly action?: string
@@ -60,12 +61,31 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
-  setDocumentTitle: (title: string) => void
+  /**
+   *
+   * @deprecated This property is deprecated and will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   * @example
+   * ```tsx
+   * import { useDocumentTitle } from '@payloadcms/ui'
+   * const { setDocumentTitle }  = useDocumentTitle()
+   * ```
+   */
+  setDocumentTitle: React.Dispatch<React.SetStateAction<string>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
+  /**
+   * @deprecated This property is deprecated and will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   * @example
+   * ```tsx
+   * import { useDocumentTitle } from '@payloadcms/ui'
+   * const { title }  = useDocumentTitle()
+   * ```
+   */
   title: string
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
@@ -74,3 +94,5 @@ export type DocumentInfoContext = {
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps
+
+export const DocumentTitleContext = React.createContext<string>('')

@@ -5,8 +5,8 @@ import { pagesSlug } from '../shared.js'
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
   labels: {
-    singular: 'Page',
-    plural: 'Pages',
+    singular: { en: 'Page', es: 'Página' },
+    plural: { en: 'Pages', es: 'Páginas' },
   },
   admin: {
     useAsTitle: 'title',

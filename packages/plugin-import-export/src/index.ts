@@ -2,6 +2,7 @@ import type { Config, JobsConfig } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { ImportExportPluginConfig } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
@@ -70,7 +71,23 @@ export const importExportPlugin =
       config.i18n = {}
     }
 
-    config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
+    // config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
+
+    /**
+     * Merge plugin translations
+     */
+    const simplifiedTranslations = Object.entries(translations).reduce(
+      (acc, [key, value]) => {
+        acc[key] = value.translations
+        return acc
+      },
+      {} as Record<string, PluginDefaultTranslationsObject>,
+    )
+
+    config.i18n = {
+      ...config.i18n,
+      translations: deepMergeSimple(simplifiedTranslations, config.i18n?.translations ?? {}),
+    }
 
     return config
   }

@@ -307,7 +307,11 @@ export const promise = async ({
       }
     }
 
-    if ('virtual' in field && typeof field.virtual === 'string') {
+    if (
+      'virtual' in field &&
+      typeof field.virtual === 'string' &&
+      (!field.hidden || showHiddenFields)
+    ) {
       populationPromises.push(
         virtualFieldPopulationPromise({
           name: field.name,
