@@ -20,6 +20,7 @@
     "@payloadcms/next": "3.39.0",
     "@payloadcms/payload-cloud": "3.39.0",
     "@payloadcms/richtext-lexical": "3.39.0",
+    "@payloadcms/ui": "3.39.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.3.0",
