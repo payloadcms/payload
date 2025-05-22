@@ -1,6 +1,7 @@
 import type { RelationshipFieldServerProps } from 'payload'
 
-import { MoveDocToFolder } from '../MoveDocToFolder/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { MoveDocToFolder } from '../../../exports/client/index.js'
 import './index.scss'
 
 const baseClass = 'folder-edit-field'
