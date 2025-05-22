@@ -98,7 +98,7 @@ describe('Select', () => {
 
   test('should reduce options', async () => {
     await page.goto(url.create)
-    const field = page.locator('#field-selectWithReducedOptions')
+    const field = page.locator('#field-selectWithFilteredOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
     await expect(options.locator('text=One')).toBeVisible()
