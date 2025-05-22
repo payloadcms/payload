@@ -1104,6 +1104,11 @@ export type SelectField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
+  /**
+   * Reduce the available options based on the current user, value of another field, etc.
+   * Similar to the `filterOptions` property on `relationship` and `upload` fields, except with a different return type.
+   */
+  filterOptions?: (args: { data: Data; options: Option[]; req: PayloadRequest }) => Option[]
   hasMany?: boolean
   /**
    * Customize generated GraphQL and Typescript schema names.
@@ -1114,12 +1119,6 @@ export type SelectField = {
    */
   interfaceName?: string
   options: Option[]
-  /**
-   * Reduce the available options based on the current user or value of another field.
-   * Similar to the `filterOptions` property on `relationship` and `upload` fields, and the `condition` property on all fields.
-   * Used to determine which options are shown to the user and what is validated on the server.
-   */
-  reduceOptions?: (args: { data: Data; options: Option[]; req: PayloadRequest }) => Option[]
   type: 'select'
 } & (
   | {

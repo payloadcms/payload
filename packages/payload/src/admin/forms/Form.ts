@@ -66,11 +66,11 @@ export type FieldState = {
    */
   lastRenderedPath?: string
   passesCondition?: boolean
-  /**
-   * The result of running `field.reduceOptions` on select fields.
-   */
-  reducedOptions?: Option[]
   rows?: Row[]
+  /**
+   * The result of running `field.filterOptions` on select fields.
+   */
+  selectFilterOptions?: Option[]
   valid?: boolean
   validate?: Validate
   value?: unknown

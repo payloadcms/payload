@@ -1381,7 +1381,7 @@ export interface SelectField {
   };
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   disallowOption1?: boolean | null;
-  selectWithReducedOptions?: ('one' | 'two' | 'three') | null;
+  selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2880,7 +2880,7 @@ export interface SelectFieldsSelect<T extends boolean = true> {
       };
   selectWithJsxLabelOption?: T;
   disallowOption1?: T;
-  selectWithReducedOptions?: T;
+  selectWithFilteredOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
