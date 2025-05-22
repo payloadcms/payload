@@ -59,7 +59,7 @@ export const getConstraints = (config: Config): Field => ({
               ) || []),
             ],
             reduceOptions: (args) =>
-              config.queryPresets.reduceConstraints
+              typeof config?.queryPresets?.reduceConstraints === 'function'
                 ? config.queryPresets.reduceConstraints(args)
                 : args.options,
           },
