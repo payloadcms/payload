@@ -29,15 +29,15 @@ export function formatFolderOrDocumentItem({
   if (isUpload) {
     itemValue.filename = value.filename
     itemValue.mimeType = value.mimeType
-    itemValue.url =
-      isImage(value.mimeType) &&
-      getBestFitFromSizes({
-        sizes: value.sizes,
-        targetSizeMax: 520,
-        targetSizeMin: 300,
-        url: value.url,
-        width: value.width,
-      })
+    itemValue.url = isImage(value.mimeType)
+      ? getBestFitFromSizes({
+          sizes: value.sizes,
+          targetSizeMax: 520,
+          targetSizeMin: 300,
+          url: value.url,
+          width: value.width,
+        })
+      : undefined
   }
 
   return {
