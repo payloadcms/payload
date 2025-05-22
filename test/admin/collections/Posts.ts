@@ -69,6 +69,12 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
+      },
     },
     pagination: {
       defaultLimit: 5,
@@ -134,6 +140,16 @@ export const Posts: CollectionConfig = {
           admin: {
             description: () => `t:${customTabAdminDescription}`,
           },
+        },
+      ],
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
         },
       ],
     },
@@ -204,6 +220,41 @@ export const Posts: CollectionConfig = {
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
       },
+    },
+    {
+      type: 'radio',
+      name: 'wavelengths',
+      defaultValue: 'fm',
+      options: [
+        {
+          label: 'FM',
+          value: 'fm',
+        },
+        {
+          label: 'AM',
+          value: 'am',
+        },
+      ],
+    },
+    {
+      type: 'select',
+      name: 'selectField',
+      hasMany: true,
+      defaultValue: ['option1', 'option2'],
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+      ],
+    },
+    {
+      name: 'file',
+      type: 'text',
     },
   ],
   labels: {

@@ -35,6 +35,7 @@ import {
   $isParagraphNode,
   $isRangeSelection,
   $isTextNode,
+  $setSelection,
   COMMAND_PRIORITY_CRITICAL,
   getDOMSelection,
   isDOMNode,
@@ -219,8 +220,7 @@ function TableActionMenu({
         updateTableCellNode(tableCellNode.getLatest())
       }
 
-      const rootNode = $getRoot()
-      rootNode.selectStart()
+      $setSelection(null)
     })
   }, [editor, tableCellNode])
 

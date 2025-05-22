@@ -131,6 +131,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -199,6 +200,8 @@ export interface Page {
       )[]
     | null;
   author?: (string | null) | User;
+  virtualRelationship?: string | null;
+  virtual?: string | null;
   hasManyNumber?: number[] | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
@@ -217,7 +220,7 @@ export interface Export {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -253,7 +256,7 @@ export interface ExportsTask {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -444,6 +447,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -500,6 +504,8 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   author?: T;
+  virtualRelationship?: T;
+  virtual?: T;
   hasManyNumber?: T;
   relationship?: T;
   excerpt?: T;
@@ -635,7 +641,7 @@ export interface TaskCreateCollectionExport {
     limit?: number | null;
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('true' | 'false') | null;
+    drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
     collectionSlug: string;

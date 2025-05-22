@@ -39,6 +39,26 @@ export default buildConfigWithDefaults({
           ],
         },
         {
+          type: 'group',
+          label: 'Unnamed Group',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideUnnamedGroup',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'namedGroup',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideNamedGroup',
+            },
+          ],
+        },
+        {
           name: 'radioField',
           type: 'radio',
           required: true,

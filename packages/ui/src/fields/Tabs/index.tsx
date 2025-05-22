@@ -98,7 +98,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
-      ? activeTabDescription({ t: i18n.t })
+      ? activeTabDescription({ i18n, t: i18n.t })
       : activeTabDescription
 
   const hasVisibleTabs = tabStates.some(({ passesCondition }) => passesCondition)
@@ -269,15 +269,13 @@ function TabContent({
   parentIndexPath,
   parentPath,
   parentSchemaPath,
-  path,
   permissions,
   readOnly,
 }: ActiveTabProps) {
   const { i18n } = useTranslation()
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField({
-    path,
-  })
+  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {}, path } =
+    useField()
 
   if (Field) {
     return Field

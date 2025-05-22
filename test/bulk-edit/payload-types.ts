@@ -135,6 +135,8 @@ export interface Post {
               id?: string | null;
             }[]
           | null;
+        noRead?: string | null;
+        noUpdate?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -146,6 +148,8 @@ export interface Post {
         blockType: 'textBlock';
       }[]
     | null;
+  noRead?: string | null;
+  noUpdate?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -248,6 +252,8 @@ export interface PostsSelect<T extends boolean = true> {
               innerOptional?: T;
               id?: T;
             };
+        noRead?: T;
+        noUpdate?: T;
         id?: T;
       };
   blocks?:
@@ -261,6 +267,8 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  noRead?: T;
+  noUpdate?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

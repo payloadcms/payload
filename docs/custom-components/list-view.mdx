@@ -6,13 +6,13 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
+The List View is where users interact with a list of [Collection](../configuration/collections) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
 
 The List View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="info">
-  **Note:** Only [Collections](../collections/overview) have a List View.
-  [Globals](../globals/overview) do not have a List View as they are single
+  **Note:** Only [Collections](../configuration/collections) have a List View.
+  [Globals](../configuration/globals) do not have a List View as they are single
   documents.
 </Banner>
 
@@ -90,11 +90,11 @@ The following options are available:
 
 | Path              | Description                                                                                                               |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `beforeList`      | An array of custom components to inject before the list of documents in the List View. [More details](#beforeList).       |
-| `beforeListTable` | An array of custom components to inject before the table of documents in the List View. [More details](#beforeListTable). |
-| `afterList`       | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).         |
-| `afterListTable`  | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).   |
-| `Description`     | A component to render a description of the Collection. [More details](#Description).                                      |
+| `beforeList`      | An array of custom components to inject before the list of documents in the List View. [More details](#beforelist).       |
+| `beforeListTable` | An array of custom components to inject before the table of documents in the List View. [More details](#beforelisttable). |
+| `afterList`       | An array of custom components to inject after the list of documents in the List View. [More details](#afterlist).         |
+| `afterListTable`  | An array of custom components to inject after the table of documents in the List View. [More details](#afterlisttable).   |
+| `Description`     | A component to render a description of the Collection. [More details](#description).                                      |
 
 ### beforeList
 
