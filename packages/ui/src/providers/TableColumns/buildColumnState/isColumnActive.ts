@@ -1,15 +1,15 @@
 import type { ColumnPreference } from 'payload'
 
 export function isColumnActive({
+  accessor,
   activeColumnsIndices,
   columnPreference,
   columns,
-  accessor,
 }: {
+  accessor: string
   activeColumnsIndices: number[]
   columnPreference: ColumnPreference
   columns: ColumnPreference[]
-  accessor: string
 }) {
   if (columnPreference) {
     return columnPreference.active
