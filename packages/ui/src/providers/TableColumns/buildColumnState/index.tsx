@@ -31,7 +31,6 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { filterFields } from './filterFields.js'
-import { findValueInDoc } from './findValueInDoc.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
 import { sortFieldMap } from './sortFieldMap.js'
@@ -233,10 +232,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               collectionSlug: dataType === 'monomorphic' ? collectionSlug : doc.relationTo,
               columnIndex: colIndex,
               customCellProps,
-              doc:
-                dataType === 'monomorphic' && 'name' in clientField
-                  ? findValueInDoc(doc, clientField.name)
-                  : undefined,
+              doc: dataType === 'monomorphic' ? doc : doc.value,
               enableRowSelections,
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
