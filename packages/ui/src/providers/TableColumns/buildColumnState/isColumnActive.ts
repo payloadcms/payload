@@ -1,22 +1,20 @@
-import type { ClientField, ColumnPreference } from 'payload'
+import type { ColumnPreference } from 'payload'
 
 export function isColumnActive({
   activeColumnsIndices,
   columnPreference,
   columns,
-  field,
+  accessor,
 }: {
   activeColumnsIndices: number[]
   columnPreference: ColumnPreference
   columns: ColumnPreference[]
-  field: ClientField
+  accessor: string
 }) {
   if (columnPreference) {
     return columnPreference.active
   } else if (columns && Array.isArray(columns) && columns.length > 0) {
-    return Boolean(
-      columns.find((column) => field && 'name' in field && column.accessor === field.name)?.active,
-    )
+    return Boolean(columns.find((column) => column.accessor === accessor)?.active)
   } else if (activeColumnsIndices.length < 4) {
     return true
   }

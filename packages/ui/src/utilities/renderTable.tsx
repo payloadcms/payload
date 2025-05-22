@@ -110,7 +110,7 @@ export const renderTable = ({
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+      for (const field of filterFields(clientFields)) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -133,11 +133,17 @@ export const renderTable = ({
     }
   }
 
-  const columnPreferences2: ColumnPreference[] = columnsFromArgs
+  const columns: ColumnPreference[] = columnsFromArgs
     ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientFields, true)?.some(
-          (field) => 'name' in field && field.name === column.accessor,
-        ),
+        flattenTopLevelFields(clientFields, {
+          i18n,
+          keepPresentationalFields: true,
+          moveSubFieldsToTop: true,
+        })?.some((field) => {
+          const accessor =
+            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+          return accessor === column.accessor
+        }),
       )
     : getInitialColumns(
         isPolymorphic ? clientFields : filterFields(clientFields),
@@ -159,7 +165,7 @@ export const renderTable = ({
   > = {
     clientFields,
     columnPreferences,
-    columns: columnPreferences2,
+    columns,
     enableRowSelections,
     i18n,
     // sortColumnProps,

@@ -31,6 +31,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { filterFields } from './filterFields.js'
+import { findValueInDoc } from './findValueInDoc.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
 import { sortFieldMap } from './sortFieldMap.js'
@@ -85,8 +86,17 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields(filterFields(clientFields), true) as ClientField[]
-  let _sortedFieldMap = flattenTopLevelFields(filterFields(serverFields), true) as Field[] // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenTopLevelFields(filterFields(clientFields), {
+    i18n,
+    keepPresentationalFields: true,
+    moveSubFieldsToTop: true,
+  }) as ClientField[]
+
+  let _sortedFieldMap = flattenTopLevelFields(filterFields(serverFields), {
+    i18n,
+    keepPresentationalFields: true,
+    moveSubFieldsToTop: true,
+  }) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -122,20 +132,23 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       return acc
     }
 
-    const serverField = _sortedFieldMap.find(
-      (f) => 'name' in clientField && 'name' in f && f.name === clientField.name,
-    )
+    const accessor =
+      (clientField as any).accessor ?? ('name' in clientField ? clientField.name : undefined)
+
+    const serverField = _sortedFieldMap.find((f) => {
+      const fAccessor = (f as any).accessor ?? ('name' in f ? f.name : undefined)
+      return fAccessor === accessor
+    })
 
     const columnPreference = columnPreferences?.find(
-      (preference) =>
-        clientField && 'name' in clientField && preference.accessor === clientField.name,
+      (preference) => clientField && 'name' in clientField && preference.accessor === accessor,
     )
 
     const isActive = isColumnActive({
+      accessor,
       activeColumnsIndices,
       columnPreference,
       columns,
-      field: clientField,
     })
 
     if (isActive && !activeColumnsIndices.includes(colIndex)) {
@@ -187,20 +200,28 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
         clientField.type === 'group' ||
         clientField.type === 'blocks')
 
+    const label =
+      clientField && 'labelWithPrefix' in clientField && clientField.labelWithPrefix !== undefined
+        ? clientField.labelWithPrefix
+        : 'label' in clientField
+          ? clientField.label
+          : undefined
+
+    // Convert accessor to dot notation specifically for SortColumn sorting behavior
+    const dotAccessor = accessor?.replace(/-/g, '.')
+
     const Heading = (
       <SortColumn
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(clientField) || undefined}
         Label={CustomLabel}
-        label={
-          clientField && 'label' in clientField ? (clientField.label as StaticLabel) : undefined
-        }
-        name={'name' in clientField ? clientField.name : undefined}
+        label={label as StaticLabel}
+        name={dotAccessor}
         {...(sortColumnProps || {})}
       />
     )
 
     const column: Column = {
-      accessor: 'name' in clientField ? clientField.name : undefined,
+      accessor,
       active: isActive,
       CustomLabel,
       field: clientField,
@@ -212,7 +233,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               collectionSlug: dataType === 'monomorphic' ? collectionSlug : doc.relationTo,
               columnIndex: colIndex,
               customCellProps,
-              doc: dataType === 'monomorphic' ? doc : doc.value,
+              doc:
+                dataType === 'monomorphic' && 'name' in clientField
+                  ? findValueInDoc(doc, clientField.name)
+                  : undefined,
               enableRowSelections,
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
