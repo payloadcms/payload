@@ -5,9 +5,8 @@ import type { FolderOrDocument } from 'payload/shared'
 
 import React, { useEffect } from 'react'
 
-import { useConfig } from '../../../providers/Config/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
-import { MoveDocToFolderButton } from '../MoveDocToFolder/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir
+import { MoveDocToFolderButton, useConfig, useTranslation } from '../../../exports/client/index.js'
 
 type Props = {
   collectionSlug: string
