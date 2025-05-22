@@ -11,6 +11,7 @@ import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
   draftCollectionSlug,
+  media2CollectionSlug,
   mediaCollectionSlug,
 } from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
@@ -36,11 +37,23 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
+  const { id: uploadedImageMedia2 } = await _payload.create({
+    collection: media2CollectionSlug,
+    data: {},
+    file: imageFile,
+  })
+
   const imageFilePath2 = path.resolve(dirname, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
     collection: mediaCollectionSlug,
+    data: {},
+    file: imageFile2,
+  })
+
+  const { id: uploadedImage2Media2 } = await _payload.create({
+    collection: media2CollectionSlug,
     data: {},
     file: imageFile2,
   })
@@ -178,8 +191,19 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       number: 1,
       point: [1, 2],
+      json: {
+        text: 'json',
+        number: 1,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson',
+          },
+        ],
+      },
       radio: 'option1',
       relationship: manyDraftsID,
+      relationshipHasMany: [manyDraftsID],
       richtext: generateLexicalData({
         mediaID: uploadedImage,
         textID: doc1ID,
@@ -192,16 +216,60 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      relationshipPolymorphic: {
+        relationTo: 'text',
+        value: doc1ID,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+      ],
       upload: uploadedImage,
+      uploadHasMany: [uploadedImage],
     },
     depth: 0,
   })
+
+  await _payload.db.updateOne({
+    collection: diffCollectionSlug,
+    id: diffDoc.id,
+    data: {
+      ...diffDoc,
+      createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+    },
+  })
+
+  const versions = await _payload.findVersions({
+    collection: diffCollectionSlug,
+    depth: 0,
+    where: {
+      parent: {
+        equals: diffDoc.id,
+      },
+    },
+  })
+
+  for (const version of versions.docs) {
+    await _payload.db.updateVersion({
+      id: version.id,
+      collection: diffCollectionSlug,
+      versionData: {
+        ...version.version,
+        createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+        updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+      },
+    })
+  }
 
   const updatedDiffDoc = await _payload.update({
     id: diffDoc.id,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
+      _status: 'published',
       array: [
         {
           textInArray: 'textInArray2',
@@ -241,9 +309,34 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textInNamedTab1: 'textInNamedTab12',
       },
       number: 2,
+      json: {
+        text: 'json2',
+        number: 2,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson2',
+          },
+        ],
+      },
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,
+      relationshipHasMany: [manyDraftsID, draft2.id],
+      relationshipPolymorphic: {
+        relationTo: draftCollectionSlug,
+        value: draft2.id,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+        {
+          relationTo: draftCollectionSlug,
+          value: draft2.id,
+        },
+      ],
       richtext: generateLexicalData({
         mediaID: uploadedImage2,
         textID: doc2ID,
@@ -257,6 +350,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textInUnnamedTab2: 'textInUnnamedTab22',
       upload: uploadedImage2,
+      uploadHasMany: [uploadedImage, uploadedImage2],
     },
     depth: 0,
   })

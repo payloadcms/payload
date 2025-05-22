@@ -11,6 +11,9 @@ type LabelType =
 
 export const getTranslation = <T extends LabelType>(
   label: T,
+  /**
+   * @todo type as I18nClient in 4.0
+   */
   i18n: Pick<I18n<any, any>, 'fallbackLanguage' | 'language' | 't'>,
 ): T extends JSX.Element ? JSX.Element : string => {
   // If it's a Record, look for translation. If string or React Element, pass through
@@ -35,7 +38,7 @@ export const getTranslation = <T extends LabelType>(
   }
 
   if (typeof label === 'function') {
-    return label({ i18n: undefined as any, t: i18n.t }) as unknown as T extends JSX.Element
+    return label({ i18n: i18n as I18nClient, t: i18n.t }) as unknown as T extends JSX.Element
       ? JSX.Element
       : string
   }

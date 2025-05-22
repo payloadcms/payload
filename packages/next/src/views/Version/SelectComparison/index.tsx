@@ -4,20 +4,18 @@ import type { PaginatedDocs, Where } from 'payload'
 
 import {
   fieldBaseClass,
-  Pill,
   ReactSelect,
   useConfig,
   useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
 import { stringify } from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
 import './index.scss'
+import { formatVersionPill } from './formatVersionPill.js'
 
 const baseClass = 'compare-version'
 
@@ -29,19 +27,17 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const {
     baseURL,
     draftsEnabled,
-    latestDraftVersion,
-    latestPublishedVersion,
+    latestDraftVersionID,
+    latestPublishedVersionID,
     onChange,
     parentID,
-    value,
-    versionID,
+    versionFromOption,
+    versionToID,
   } = props
+  const { i18n, t } = useTranslation()
 
   const {
-    config: {
-      admin: { dateFormat },
-      localization,
-    },
+    config: { localization },
   } = useConfig()
 
   const { hasPublishedDoc } = useDocumentInfo()
@@ -54,7 +50,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
   >(baseOptions)
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
-  const { i18n, t } = useTranslation()
   const loadedAllOptionsRef = React.useRef(false)
 
   const getResults = useCallback(
@@ -73,7 +68,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
           and: [
             {
               id: {
-                not_equals: versionID,
+                not_equals: versionToID,
               },
             },
           ],
@@ -109,58 +104,25 @@ export const SelectComparison: React.FC<Props> = (props) => {
         const data: PaginatedDocs = await response.json()
 
         if (data.docs.length > 0) {
-          const versionInfo = {
-            draft: {
-              currentLabel: t('version:currentDraft'),
-              latestVersion: latestDraftVersion,
-              pillStyle: undefined,
-              previousLabel: t('version:draft'),
-            },
-            published: {
-              currentLabel: t('version:currentPublishedVersion'),
-              // The latest published version does not necessarily equal the current published version,
-              // because the latest published version might have been unpublished in the meantime.
-              // Hence, we should only use the latest published version if there is a published document.
-              latestVersion: hasPublishedDoc ? latestPublishedVersion : undefined,
-              pillStyle: 'success',
-              previousLabel: t('version:previouslyPublished'),
-            },
-          }
-
           const additionalOptions = data.docs.map((doc) => {
-            const status = doc.version._status
-            let publishedLocalePill = null
-            const publishedLocale = doc.publishedLocale || undefined
-            const { currentLabel, latestVersion, pillStyle, previousLabel } =
-              versionInfo[status] || {}
-
-            if (localization && localization?.locales && publishedLocale) {
-              const localeCode = Array.isArray(publishedLocale)
-                ? publishedLocale[0]
-                : publishedLocale
-
-              const locale = localization.locales.find((loc) => loc.code === localeCode)
-              const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
-
-              if (formattedLabel) {
-                publishedLocalePill = <Pill>{formattedLabel}</Pill>
-              }
-            }
+            const pill = formatVersionPill({
+              doc,
+              hasPublishedDoc,
+              latestDraftVersionID,
+              latestPublishedVersionID,
+            })
 
             return {
-              label: (
-                <div>
-                  {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
-                  &nbsp;&nbsp;
-                  {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}
-                  {publishedLocalePill}
-                </div>
-              ),
-              value: doc.id,
+              label: pill.Label,
+              value: pill.id,
             }
           })
 
-          setOptions((existingOptions) => [...existingOptions, ...additionalOptions])
+          setOptions((existingOptions) =>
+            [...existingOptions, ...additionalOptions].filter(
+              (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
+            ),
+          )
 
           if (!data.hasNextPage) {
             loadedAllOptionsRef.current = true
@@ -171,7 +133,18 @@ export const SelectComparison: React.FC<Props> = (props) => {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [dateFormat, baseURL, parentID, versionID, t, i18n, latestDraftVersion, latestPublishedVersion],
+    [
+      versionToID,
+      parentID,
+      localization,
+      draftsEnabled,
+      baseURL,
+      i18n.language,
+      hasPublishedDoc,
+      latestDraftVersionID,
+      latestPublishedVersionID,
+      t,
+    ],
   )
 
   useEffect(() => {
@@ -182,15 +155,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
     void getResults({ lastLoadedPage: 1 })
   }, [getResults, i18n.dateFNS])
 
-  const filteredOptions = options.filter(
-    (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
-  )
-
   useEffect(() => {
-    if (filteredOptions.length > 0 && !value) {
-      onChange(filteredOptions[0])
+    if (options.length > 0 && !versionFromOption) {
+      onChange(options[0])
     }
-  }, [filteredOptions, value, onChange])
+  }, [options, versionFromOption, onChange])
 
   return (
     <div
@@ -198,7 +167,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <div className={`${baseClass}__label`}>{t('version:compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
           isClearable={false}
@@ -207,9 +175,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
           onMenuScrollToBottom={() => {
             void getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          options={filteredOptions}
+          options={options}
           placeholder={t('version:selectVersionToCompare')}
-          value={value}
+          value={versionFromOption}
         />
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
