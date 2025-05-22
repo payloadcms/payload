@@ -14,7 +14,7 @@
 ## Documentation edits
 
 - MDX files are in the `/docs` folder.
-- If you want to preview the changes, see the instructions in the [website repository](https://github.com/payloadcms/website).
+- If you want to preview the changes, see the instructions further down in this document.
 
 ## Installation & Requirements
 
@@ -73,50 +73,43 @@ You can run the entire test suite using `pnpm test`. If you wish to only run e2e
 
 By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
 
-### Commits
+### Pull Request Titles
 
 We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for our commit messages. Please follow this format when creating commits. Here are some examples:
 
 - `feat: adds new feature`
 - `fix: fixes bug`
 - `docs: adds documentation`
-- `chore: does chore`
-
-Here's a breakdown of the format. At the top-level, we use the following types to categorize our commits:
-
-- `feat`: new feature that adds functionality. These are automatically added to the changelog when creating new releases.
-- `fix`: a fix to an existing feature. These are automatically added to the changelog when creating new releases.
-- `docs`: changes to [docs](./docs) only. These do not appear in the changelog.
-- `chore`: changes to code that is neither a fix nor a feature (e.g. refactoring, adding tests, etc.). These do not appear in the changelog.
+- `chore: anything that is not a feature, fix, or docs`
 
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
 
-## Pull Requests
-
-For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR message.
-
 ## Previewing docs
 
 This is how you can preview changes you made locally to the docs:
 
 1. Clone our [website repository](https://github.com/payloadcms/website)
-2. Run `yarn install`
+2. Run `pnpm install`
 3. Duplicate the `.env.example` file and rename it to `.env`
 4. Add a `DOCS_DIR` environment variable to the `.env` file which points to the absolute path of your modified docs folder. For example `DOCS_DIR=/Users/yourname/Documents/GitHub/payload/docs`
-5. Run `yarn run fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
-6. You're done! Now you can start the website locally using `yarn run dev` and preview the docs under [http://localhost:3000/docs/](http://localhost:3000/docs/)
+5. Run `pnpm fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
+6. You're done! Now you can start the website locally using `pnpm dev` and preview the docs under [http://localhost:3000/docs/local](http://localhost:3000/docs/local)
 
-## Internationalization
+## Internationalization (i18n)
 
-- Add UI strings to English locale in `packages/translations/src/languages`
-- Use `useTranslation` hook:
+If your PR adds a string to the UI, we need to make sure to translate it into all the languages ​​that Payload supports. To do that:
+
+- Find the appropriate internationalization file for your package. These are typically located in `packages/translations/src/languages`, although some packages (e.g., richtext-lexical) have separate i18n files for each feature.
+- Add the string to the English locale "en".
+- Translate it to other languages. You can use the `translateNewKeys` script if you have an OpenAI API key in your `.env` (under `OPENAI_KEY`), or you can use ChatGPT or Google translate - whatever is easier for you. For payload core translations (in packages/translations) you can run the `translateNewKeys` script using `cd packages/translations && pnpm translateNewKeys`. For lexical translations, you can run it using `cd packages/richtext-lexical && pnpm translateNewKeys`. External contributors can skip this step and leave it to us.
+
+To display translation strings in the UI, make sure to use the `t` utility of the `useTranslation` hook:
 
 ```ts
 const { t } = useTranslation()
+// ...
 t('yourStringKey')
 ```
-
-- External contributors can skip translations
