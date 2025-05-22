@@ -36,6 +36,7 @@ import {
 } from '../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
 import { filterFields } from './filterFields.js'
+import { findValueInDoc } from './findValueInDoc.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -70,15 +71,17 @@ export const buildColumnState = (args: Args): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields(
-    filterFields(clientCollectionConfig.fields),
-    true,
-  ) as ClientField[]
+  let sortedFieldMap = flattenTopLevelFields(filterFields(clientCollectionConfig.fields), {
+    i18n,
+    keepPresentationalFields: true,
+    moveSubFieldsToTop: true,
+  }) as ClientField[]
 
-  let _sortedFieldMap = flattenTopLevelFields(
-    filterFields(collectionConfig.fields),
-    true,
-  ) as Field[] // TODO: think of a way to avoid this additional flatten
+  let _sortedFieldMap = flattenTopLevelFields(filterFields(collectionConfig.fields), {
+    i18n,
+    keepPresentationalFields: true,
+    moveSubFieldsToTop: true,
+  }) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -103,8 +106,9 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const sortFieldMap = (fieldMap, sortTo) =>
     fieldMap?.sort((a, b) => {
-      const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
-      const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
+      const getAccessor = (field) => field.accessor ?? ('name' in field ? field.name : undefined)
+      const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === getAccessor(a))
+      const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === getAccessor(b))
 
       if (aIndex === -1 && bIndex === -1) {
         return 0
@@ -134,12 +138,15 @@ export const buildColumnState = (args: Args): Column[] => {
       return acc
     }
 
-    const _field = _sortedFieldMap.find(
-      (f) => 'name' in field && 'name' in f && f.name === field.name,
-    )
+    const accessor = (field as any).accessor ?? ('name' in field ? field.name : undefined)
+
+    const _field = _sortedFieldMap.find((f) => {
+      const fAccessor = (f as any).accessor ?? ('name' in f ? f.name : undefined)
+      return fAccessor === accessor
+    })
 
     const columnPreference = columnPreferences?.find(
-      (preference) => field && 'name' in field && preference.accessor === field.name,
+      (preference) => field && 'name' in field && preference.accessor === accessor,
     )
 
     let active = false
@@ -147,9 +154,7 @@ export const buildColumnState = (args: Args): Column[] => {
     if (columnPreference) {
       active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = columns.find(
-        (column) => field && 'name' in field && column.accessor === field.name,
-      )?.active
+      active = columns.find((column) => column.accessor === accessor)?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -197,12 +202,22 @@ export const buildColumnState = (args: Args): Column[] => {
       field.type &&
       (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
 
+    const label =
+      field && 'labelWithPrefix' in field && field.labelWithPrefix !== undefined
+        ? field.labelWithPrefix
+        : 'label' in field
+          ? field.label
+          : undefined
+
+    // Convert accessor to dot notation specifically for SortColumn sorting behavior
+    const dotAccessor = accessor?.replace(/-/g, '.')
+
     const Heading = (
       <SortColumn
         disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
         Label={CustomLabel}
-        label={field && 'label' in field ? (field.label as StaticLabel) : undefined}
-        name={'name' in field ? field.name : undefined}
+        label={label as StaticLabel}
+        name={dotAccessor}
         {...(sortColumnProps || {})}
       />
     )
@@ -216,7 +231,7 @@ export const buildColumnState = (args: Args): Column[] => {
     }
 
     const column: Column = {
-      accessor: 'name' in field ? field.name : undefined,
+      accessor,
       active,
       CustomLabel,
       field,
@@ -227,7 +242,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
             const cellClientProps: DefaultCellComponentProps = {
               ...baseCellClientProps,
-              cellData: 'name' in field ? doc[field.name] : undefined,
+              cellData: 'name' in field ? findValueInDoc(doc, field.name) : undefined,
               link: isLinkedColumn,
               rowData: doc,
             }
