@@ -46,7 +46,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       options: optionsFromProps = [],
       required,
     },
-    filterOption,
     onChange: onChangeFromProps,
     path: pathFromProps,
     readOnly,
@@ -68,6 +67,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     path,
+    reducedOptions,
     setValue,
     showError,
     value,
@@ -110,7 +110,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
-      filterOption={filterOption}
+      filterOption={
+        reducedOptions
+          ? ({ value }) =>
+              reducedOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}

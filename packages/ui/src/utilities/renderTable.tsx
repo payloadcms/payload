@@ -118,9 +118,15 @@ export const renderTable = ({
 
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
+          flattenTopLevelFields(fields, {
+            i18n,
+            keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(fields, useAsTitle, [])
 
@@ -139,9 +145,15 @@ export const renderTable = ({
   } else {
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
+          flattenTopLevelFields(clientCollectionConfig.fields, {
+            i18n,
+            keepPresentationalFields: true,
+            moveSubFieldsToTop: true,
+          })?.some((field) => {
+            const accessor =
+              'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+            return accessor === column.accessor
+          }),
         )
       : getInitialColumns(
           filterFields(clientCollectionConfig.fields),

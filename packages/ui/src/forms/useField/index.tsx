@@ -127,6 +127,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
       formSubmitted: submitted,
       initialValue,
       path,
+      reducedOptions: field?.reducedOptions,
       rows: field?.rows,
       setValue,
       showError,
