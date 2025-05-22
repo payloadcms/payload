@@ -30,7 +30,7 @@ export default buildConfigWithDefaults({
     reduceConstraints: ({ req, options }) =>
       !req.user?.roles?.includes('admin')
         ? options.filter(
-            (option) => (typeof option === 'string' ? option : option.value) !== 'everyone',
+            (option) => (typeof option === 'string' ? option : option.value) !== 'onlyAdmins',
           )
         : options,
     constraints: {
@@ -50,6 +50,11 @@ export default buildConfigWithDefaults({
           value: 'noone',
           access: () => false,
         },
+        {
+          label: 'Only Admins',
+          value: 'onlyAdmins',
+          access: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
+        },
       ],
       update: [
         {
@@ -61,6 +66,11 @@ export default buildConfigWithDefaults({
               in: user?.roles || [],
             },
           }),
+        },
+        {
+          label: 'Only Admins',
+          value: 'onlyAdmins',
+          access: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
         },
       ],
     },
