@@ -1119,11 +1119,7 @@ export type SelectField = {
    * Similar to the `filterOptions` property on `relationship` and `upload` fields, and the `condition` property on all fields.
    * Used to determine which options are shown to the user and what is validated on the server.
    */
-  reduceOptions?: (args: {
-    data: Data
-    options: Option[]
-    req: PayloadRequest
-  }) => Option[] | Promise<Option[]>
+  reduceOptions?: (args: { data: Data; options: Option[]; req: PayloadRequest }) => Option[]
   type: 'select'
 } & (
   | {

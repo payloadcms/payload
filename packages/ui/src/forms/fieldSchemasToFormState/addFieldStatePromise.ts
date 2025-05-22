@@ -722,7 +722,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'select': {
         if (typeof field.reduceOptions === 'function') {
-          fieldState.reducedOptions = await field.reduceOptions({
+          fieldState.reducedOptions = field.reduceOptions({
             data: fullData,
             options: field.options,
             req,

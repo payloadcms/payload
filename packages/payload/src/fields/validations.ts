@@ -863,13 +863,13 @@ export type SelectFieldManyValidation = Validate<string[], unknown, unknown, Sel
 
 export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
 
-export const select: SelectFieldValidation = async (
+export const select: SelectFieldValidation = (
   value,
   { data, hasMany, options, reduceOptions, req, req: { t }, required },
 ) => {
   const reducedOptions =
     typeof reduceOptions === 'function'
-      ? await reduceOptions({
+      ? reduceOptions({
           data,
           options,
           req,
