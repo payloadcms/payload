@@ -69,6 +69,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     custom: {},
     enableRichTextLink: true,
     enableRichTextRelationship: true,
+    folders: false,
     useAsTitle: 'id',
     ...(collection.admin || {}),
     pagination: {

@@ -21,6 +21,8 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
 
   const req = await createLocalReq({}, payload)
 
+  migrationFiles.reverse()
+
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
     // Create or update migration in database

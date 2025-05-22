@@ -71,6 +71,10 @@ export type FieldState = {
    */
   reducedOptions?: Option[]
   rows?: Row[]
+  /**
+   * The result of running `field.filterOptions` on select fields.
+   */
+  selectFilterOptions?: Option[]
   valid?: boolean
   validate?: Validate
   value?: unknown

@@ -67,7 +67,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     path,
-    reducedOptions,
+    selectFilterOptions,
     setValue,
     showError,
     value,
@@ -111,9 +111,9 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       description={description}
       Error={Error}
       filterOption={
-        reducedOptions
+        selectFilterOptions
           ? ({ value }) =>
-              reducedOptions?.some(
+              selectFilterOptions?.some(
                 (option) => (typeof option === 'string' ? option : option.value) === value,
               )
           : undefined

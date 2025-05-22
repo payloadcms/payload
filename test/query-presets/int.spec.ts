@@ -545,7 +545,7 @@ describe('Query Presets', () => {
       }
     })
 
-    it('should only allow admins to select the "onlyAdmins" preset (via `reducedConstraints`)', async () => {
+    it('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async () => {
       try {
         const presetForAdminsCreatedByEditor = await payload.create({
           collection: queryPresetsCollectionSlug,
