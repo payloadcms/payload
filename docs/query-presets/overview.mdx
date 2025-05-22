@@ -46,11 +46,12 @@ const config = buildConfig({
 
 The following options are available for Query Presets:
 
-| Option        | Description                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
-| `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
-| `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
+| Option               | Description                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `access`             | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
+| `allowedConstraints` | Used to define which constraints are available to users when managing presets. [More details](#constraint-access-control).      |
+| `constraints`        | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
+| `labels`             | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
 
@@ -188,10 +189,10 @@ const config = buildConfig({
   queryPresets: {
     // ...
     // highlight-start
-    allowedConstraints: ({ req, allConstraints }) =>
+    allowedConstraints: ({ req, options }) =>
       !req.user?.roles?.includes('admin')
-        ? allConstraints.filter((constraint) => constraint !== 'everyone')
-        : allConstraints,
+        ? options.filter((option) => option !== 'everyone')
+        : options,
     // highlight-end
   },
 })

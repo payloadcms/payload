@@ -47,13 +47,10 @@ import type {
   JobsConfig,
   Payload,
   RequestContext,
+  SelectField,
   TypedUser,
 } from '../index.js'
-import type {
-  AllowedQueryPresetConstraints,
-  QueryPreset,
-  QueryPresetConstraints,
-} from '../query-presets/types.js'
+import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -1118,7 +1115,7 @@ export type Config = {
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
-    allowedConstraints?: AllowedQueryPresetConstraints
+    allowedConstraints?: SelectField['reduceOptions']
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints

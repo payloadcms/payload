@@ -27,10 +27,12 @@ export default buildConfigWithDefaults({
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
-    allowedConstraints: ({ req, allConstraints }) =>
+    allowedConstraints: ({ req, options }) =>
       !req.user?.roles?.includes('admin')
-        ? allConstraints.filter((constraint) => constraint !== 'everyone')
-        : allConstraints,
+        ? options.filter(
+            (option) => (typeof option === 'string' ? option : option.value) !== 'everyone',
+          )
+        : options,
     constraints: {
       read: [
         {
