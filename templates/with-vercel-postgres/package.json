@@ -16,15 +16,15 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-vercel-postgres": "3.38.0",
-    "@payloadcms/next": "3.38.0",
-    "@payloadcms/payload-cloud": "3.38.0",
-    "@payloadcms/richtext-lexical": "3.38.0",
-    "@payloadcms/storage-vercel-blob": "3.38.0",
+    "@payloadcms/db-vercel-postgres": "3.39.0",
+    "@payloadcms/next": "3.39.0",
+    "@payloadcms/payload-cloud": "3.39.0",
+    "@payloadcms/richtext-lexical": "3.39.0",
+    "@payloadcms/storage-vercel-blob": "3.39.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.3.0",
-    "payload": "3.38.0",
+    "payload": "3.39.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
