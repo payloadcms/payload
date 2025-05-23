@@ -61,6 +61,7 @@ export async function LivePreviewView(props: DocumentViewServerProps) {
       PublishButton={props.PublishButton}
       SaveButton={props.SaveButton}
       SaveDraftButton={props.SaveDraftButton}
+      Status={props.Status}
       Upload={props.Upload}
       url={url}
     />

@@ -77,6 +77,8 @@ export type {
 
 export type { Column } from './elements/Table.js'
 
+export type { CustomStatus } from './elements/Status.js'
+
 export type { CustomUpload } from './elements/Upload.js'
 
 export type {
@@ -559,6 +561,7 @@ export type DocumentSlots = {
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Status?: React.ReactNode
   Upload?: React.ReactNode
 }
 
