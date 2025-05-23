@@ -39,7 +39,7 @@ export function CurrentFolderActions({ className }: Props) {
   const { i18n, t } = useTranslation()
 
   const deleteCurrentFolder = React.useCallback(async () => {
-    await fetch(`${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}`, {
+    await fetch(`${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}?depth=0`, {
       credentials: 'include',
       method: 'DELETE',
     })

@@ -30,7 +30,7 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <Form
-        action={`${serverURL}${routes.api}/${folderCollectionSlug}`}
+        action={`${serverURL}${routes.api}/${folderCollectionSlug}?depth=0`}
         handleResponse={async (res, successToast, errorToast) => {
           try {
             const { doc } = await res.json()
