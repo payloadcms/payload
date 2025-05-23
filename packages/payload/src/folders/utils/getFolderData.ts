@@ -1,5 +1,5 @@
-import type { CollectionSlug, User } from '../../index.js'
-import type { Payload } from '../../types/index.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { GetFolderDataResult } from '../types.js'
 
 import { parseDocumentID } from '../../index.js'
@@ -19,20 +19,11 @@ type Args = {
    * @default undefined
    */
   folderID?: number | string
-  /**
-   * The locale to use for the document query
-   * @default undefined
-   */
-  payload: Payload
+  req: PayloadRequest
   /**
    * Search term to filter documents by - only applicable IF `collectionSlug` exists and NO `folderID` is provided
    */
   search?: string
-  /**
-   * The user making the request
-   * @default undefined
-   */
-  user?: User
 }
 /**
  * Query for documents, subfolders and breadcrumbs for a given folder
@@ -40,10 +31,10 @@ type Args = {
 export const getFolderData = async ({
   collectionSlug,
   folderID: _folderID,
-  payload,
+  req,
   search,
-  user,
 }: Args): Promise<GetFolderDataResult> => {
+  const { payload, user } = req
   const parentFolderID = parseDocumentID({
     id: _folderID,
     collectionSlug: payload.config.folders.slug,
@@ -52,8 +43,7 @@ export const getFolderData = async ({
 
   const breadcrumbsPromise = getFolderBreadcrumbs({
     folderID: parentFolderID,
-    payload,
-    user,
+    req,
   })
 
   if (parentFolderID) {
@@ -61,8 +51,7 @@ export const getFolderData = async ({
     const documentAndSubfolderPromise = queryDocumentsAndFoldersFromJoin({
       collectionSlug,
       parentFolderID,
-      payload,
-      user,
+      req,
     })
     const [breadcrumbs, documentsAndSubfolders] = await Promise.all([
       breadcrumbsPromise,
@@ -78,16 +67,14 @@ export const getFolderData = async ({
     // subfolders and documents are queried separately
     const subfoldersPromise = getOrphanedDocs({
       collectionSlug: payload.config.folders.slug,
-      payload,
+      req,
       search,
-      user,
     })
     const documentsPromise = collectionSlug
       ? getOrphanedDocs({
           collectionSlug,
-          payload,
+          req,
           search,
-          user,
         })
       : Promise.resolve([])
     const [breadcrumbs, subfolders, documents] = await Promise.all([

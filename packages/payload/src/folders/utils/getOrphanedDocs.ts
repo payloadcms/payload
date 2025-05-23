@@ -1,20 +1,19 @@
-import type { CollectionSlug, Payload, User, Where } from '../../index.js'
+import type { CollectionSlug, PayloadRequest, Where } from '../../index.js'
 import type { FolderOrDocument } from '../types.js'
 
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type Args = {
   collectionSlug: CollectionSlug
-  payload: Payload
+  req: PayloadRequest
   search?: string
-  user?: User
 }
 export async function getOrphanedDocs({
   collectionSlug,
-  payload,
+  req,
   search,
-  user,
 }: Args): Promise<FolderOrDocument[]> {
+  const { payload, user } = req
   let whereConstraints: Where = {
     or: [
       {
@@ -42,6 +41,7 @@ export async function getOrphanedDocs({
     collection: collectionSlug,
     limit: 0,
     overrideAccess: false,
+    req,
     sort: payload.collections[collectionSlug].config.admin.useAsTitle,
     user,
     where: whereConstraints,
