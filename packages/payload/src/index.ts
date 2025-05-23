@@ -76,6 +76,7 @@ import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
+import { generateTypes } from './bin/generateTypes.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
@@ -644,12 +645,7 @@ export class BasePayload {
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
-      // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
-      // see: https://github.com/vercel/next.js/issues/66723
-      void this.bin({
-        args: ['generate:types'],
-        log: false,
-      })
+      void generateTypes(this.config, { log: false })
     }
 
     this.db = this.config.db.init({ payload: this })
@@ -856,12 +852,7 @@ export const reload = async (
 
   // Generate types
   if (config.typescript.autoGenerate !== false) {
-    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
-    // see: https://github.com/vercel/next.js/issues/66723
-    void payload.bin({
-      args: ['generate:types'],
-      log: false,
-    })
+    void generateTypes(config, { log: false })
   }
 
   // Generate component map
