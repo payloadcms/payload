@@ -4,14 +4,15 @@ import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 
 interface Args {
   adapter: GeneratedAdapter
-  collection: CollectionConfig
+  collectionSlug: string
 }
 
 export const getAfterDeleteHook = ({
   adapter,
-  collection,
+  collectionSlug,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
+    const collection = req.payload.collections[collectionSlug]?.config as CollectionConfig
     try {
       const filesToDelete: string[] = [
         doc.filename,
