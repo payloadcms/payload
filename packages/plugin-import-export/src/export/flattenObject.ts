@@ -1,12 +1,20 @@
 import type { Document } from 'payload'
 
+import type { ToCSVFunction } from '../types.js'
+
 type Args = {
   doc: Document
   fields?: string[]
   prefix?: string
+  toCSVFunctions: Record<string, ToCSVFunction>
 }
 
-export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unknown> => {
+export const flattenObject = ({
+  doc,
+  fields,
+  prefix,
+  toCSVFunctions,
+}: Args): Record<string, unknown> => {
   const result: Record<string, unknown> = {}
 
   const flatten = (doc: Document, prefix?: string) => {
@@ -18,13 +26,32 @@ export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unk
           if (typeof item === 'object' && item !== null) {
             flatten(item, `${newKey}_${index}`)
           } else {
-            result[`${newKey}_${index}`] = item
+            if (toCSVFunctions?.[newKey]) {
+              const columnName = `${newKey}_${index}`
+              result[columnName] = toCSVFunctions[newKey]({
+                columnName,
+                data: result,
+                siblingData: doc,
+                value: item,
+              })
+            } else {
+              result[`${newKey}_${index}`] = item
+            }
           }
         })
       } else if (typeof value === 'object' && value !== null) {
         flatten(value, newKey)
       } else {
-        result[newKey] = value
+        if (toCSVFunctions?.[key]) {
+          result[key] = toCSVFunctions[key]({
+            columnName: key,
+            data: result,
+            siblingData: doc,
+            value,
+          })
+        } else {
+          result[newKey] = value
+        }
       }
     })
   }
