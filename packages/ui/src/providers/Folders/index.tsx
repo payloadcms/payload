@@ -1070,15 +1070,13 @@ export function FolderProvider({
         breadcrumbs,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
-          ? {
-              itemKey: `${folderCollectionSlug}-${activeFolderID}`,
+          ? formatFolderOrDocumentItem({
+              folderFieldName,
+              isUpload: false,
               relationTo: folderCollectionSlug,
-              value: {
-                id: activeFolderID,
-                _folderOrDocumentTitle: breadcrumbs[breadcrumbs.length - 1]?.name,
-                folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null,
-              },
-            }
+              useAsTitle: folderCollectionConfig.admin.useAsTitle,
+              value: breadcrumbs[breadcrumbs.length - 1],
+            })
           : null,
         documents,
         filterItems,

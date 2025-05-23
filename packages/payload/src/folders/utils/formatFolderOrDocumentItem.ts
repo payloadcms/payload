@@ -20,7 +20,7 @@ export function formatFolderOrDocumentItem({
 }: Args): FolderOrDocument {
   const itemValue: FolderOrDocument['value'] = {
     id: value?.id,
-    _folderOrDocumentTitle: (useAsTitle && value?.[useAsTitle]) || value['id'],
+    _folderOrDocumentTitle: String((useAsTitle && value?.[useAsTitle]) || value['id']),
     createdAt: value?.createdAt,
     folderID: value?.[folderFieldName],
     updatedAt: value?.updatedAt,

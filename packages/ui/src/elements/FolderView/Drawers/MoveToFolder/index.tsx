@@ -10,6 +10,7 @@ import type {
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatFolderOrDocumentItem } from 'payload/shared'
 import React from 'react'
 
 import { useConfig } from '../../../../providers/Config/index.js'
@@ -162,6 +163,7 @@ function Content({
     setFolderID,
     subfolders,
   } = useFolder()
+  const { getEntityConfig } = useConfig()
 
   const getSelectedFolder = React.useCallback((): {
     id: null | number | string
@@ -187,23 +189,18 @@ function Content({
 
   const onCreateSuccess = React.useCallback(
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
-      const itemValue: FolderOrDocument['value'] = {
-        id: doc?.id,
-        _folderOrDocumentTitle: doc?.[folderCollectionConfig.admin.useAsTitle ?? 'id'],
-        createdAt: doc?.createdAt,
-        folderID: doc?.[folderFieldName],
-        updatedAt: doc?.updatedAt,
-      }
-
+      const collectionConfig = getEntityConfig({ collectionSlug })
       void addItems([
-        {
-          itemKey: `${collectionSlug}-${doc.id}`,
+        formatFolderOrDocumentItem({
+          folderFieldName,
+          isUpload: Boolean(collectionConfig?.upload),
           relationTo: collectionSlug,
-          value: itemValue,
-        },
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          value: doc,
+        }),
       ])
     },
-    [addItems, folderCollectionConfig.admin.useAsTitle],
+    [addItems, folderFieldName, getEntityConfig],
   )
 
   const onConfirmMove = React.useCallback(() => {
