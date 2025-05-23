@@ -403,11 +403,11 @@ describe('List View', () => {
       await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
-      await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+      await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
         conditionField.locator('.rs__menu-list').locator('div', {
-          hasText: exactText('Tab 1 > Title'),
+          hasText: exactText('Title'),
         }),
       ).toBeVisible()
     })
@@ -634,7 +634,7 @@ describe('List View', () => {
 
       await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'test',
       })
@@ -648,7 +648,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test',
       })
@@ -659,7 +659,7 @@ describe('List View', () => {
 
       await expect(
         secondLi.locator('.condition__field').locator('.rs__single-value'),
-      ).toContainText('Tab 1 > Title')
+      ).toContainText('Title')
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
       await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
@@ -670,7 +670,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         skipValueInput: true,
       })
@@ -693,7 +693,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test 1',
       })
@@ -709,11 +709,9 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField
-        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
-        .click()
+      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
 
-      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
       await secondOperatorField.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
@@ -1482,7 +1480,7 @@ describe('List View', () => {
       await page.locator('.condition__field .rs__control').click()
       const options = page.locator('.rs__option')
 
-      await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
+      await expect(options.first()).toHaveText('Title')
 
       await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
       await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
