@@ -283,8 +283,10 @@ export const traverseFields = <T extends Record<string, any>>(args: {
           break
         case 'richText':
           result[fieldName] = traverseRichText({
+            blocksFieldSchema: fieldSchema.blocks,
             externallyUpdatedRelationship,
             incomingData: incomingData[fieldName],
+            localeChanged,
             populationsByCollection,
             result: result[fieldName],
           })
