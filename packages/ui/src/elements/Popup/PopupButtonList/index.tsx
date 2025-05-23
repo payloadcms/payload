@@ -47,7 +47,12 @@ export const Button: React.FC<MenuButtonProps> = ({
   href,
   onClick,
 }) => {
-  const classes = [`${baseClass}__button`, active && `${baseClass}__button--selected`, className]
+  const classes = [
+    `${baseClass}__button`,
+    disabled && `${baseClass}__disabled`,
+    active && `${baseClass}__button--selected`,
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 

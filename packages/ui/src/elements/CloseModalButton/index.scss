@@ -1,0 +1,25 @@
+.close-modal-button {
+  flex-shrink: 0;
+  border: 0;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  overflow: hidden;
+  width: var(--base);
+  height: var(--base);
+  align-self: flex-start;
+
+  svg {
+    width: calc(var(--base) * 2);
+    height: calc(var(--base) * 2);
+    position: relative;
+    inset-inline-start: calc(var(--base) * -0.5);
+    top: calc(var(--base) * -0.5);
+
+    .stroke {
+      stroke-width: 2px;
+      vector-effect: non-scaling-stroke;
+    }
+  }
+}

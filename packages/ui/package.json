@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.38.0",
+  "version": "3.39.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -119,6 +119,7 @@
     "@date-fns/tz": "1.2.0",
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
+    "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",

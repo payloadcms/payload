@@ -38,6 +38,7 @@
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
+      "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
@@ -55,9 +56,6 @@
       "@payloadcms/plugin-search/client": ["./packages/plugin-search/src/exports/client.ts"],
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
-      ],
-      "@payloadcms/plugin-import-export/rsc": [
-        "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
