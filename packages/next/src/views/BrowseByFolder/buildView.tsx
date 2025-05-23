@@ -76,9 +76,8 @@ export const buildBrowseByFolderView = async (
 
   const { breadcrumbs, documents, subfolders } = await getFolderData({
     folderID,
-    payload: initPageResult.req.payload,
+    req: initPageResult.req,
     search: query?.search as string,
-    user: initPageResult.req.user,
   })
 
   const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
