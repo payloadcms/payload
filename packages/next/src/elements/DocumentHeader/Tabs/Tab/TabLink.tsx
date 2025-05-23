@@ -59,6 +59,7 @@ export const DocumentTabLink: React.FC<{
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
       disabled={isActive}
       el={!isActive || href !== pathname ? 'link' : 'div'}
+      margin={false}
       newTab={newTab}
       size="medium"
       to={!isActive || href !== pathname ? hrefWithLocale : undefined}
