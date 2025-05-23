@@ -89,13 +89,10 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
+      D1Binding: args.D1Binding_Temporary,
       defaultDrizzleSnapshot,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      D1Binding: args.D1Binding_Temporary ?? false,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       features: {
         json: true,
@@ -113,7 +110,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       logger: args.logger,
       operators,
       prodMigrations: args.prodMigrations,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},
       rawTables: {},
@@ -124,7 +120,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       transactionOptions: args.transactionOptions || undefined,
       updateJobs,
       updateMany,
@@ -141,7 +136,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       countVersions,
       create,
       createGlobal,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
@@ -153,7 +147,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
             .join('\n')
         },
       }),
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -166,7 +159,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       find,
       findGlobal,
       findGlobalVersions,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -182,17 +174,13 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       packageName: '@payloadcms/db-sqlite',
       payload,
       queryDrafts,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateGlobalVersion,
       updateOne,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateVersion,
       upsert: updateOne,
     })

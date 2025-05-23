@@ -51,7 +51,7 @@ export type Args = {
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
-  D1Binding_Temporary?: boolean
+  D1Binding_Temporary?: string
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
   idType?: 'number' | 'uuid'

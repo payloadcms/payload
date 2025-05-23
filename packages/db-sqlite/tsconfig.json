@@ -1,5 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {"strictNullChecks": false},
   "references": [
     {
       "path": "../payload"
