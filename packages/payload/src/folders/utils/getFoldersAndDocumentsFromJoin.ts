@@ -1,7 +1,6 @@
-import type { User } from '../../auth/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug } from '../../index.js'
-import type { Document, Payload } from '../../types/index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 import type { FolderOrDocument } from '../types.js'
 
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
@@ -13,18 +12,17 @@ type QueryDocumentsAndFoldersResults = {
 type QueryDocumentsAndFoldersArgs = {
   collectionSlug?: CollectionSlug
   parentFolderID: number | string
-  payload: Payload
-  user?: User
+  req: PayloadRequest
 }
 export async function queryDocumentsAndFoldersFromJoin({
   collectionSlug,
   parentFolderID,
-  payload,
-  user,
+  req,
 }: QueryDocumentsAndFoldersArgs): Promise<QueryDocumentsAndFoldersResults> {
+  const { payload, user } = req
   const folderCollectionSlugs: string[] = payload.config.collections.reduce<string[]>(
     (acc, collection) => {
-      if (collection?.admin?.folders) {
+      if (collection?.folders) {
         acc.push(collection.slug)
       }
       return acc
@@ -50,6 +48,7 @@ export async function queryDocumentsAndFoldersFromJoin({
     },
     limit: 1,
     overrideAccess: false,
+    req,
     user,
     where: {
       id: {

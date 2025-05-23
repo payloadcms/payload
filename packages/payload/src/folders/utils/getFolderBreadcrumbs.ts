@@ -1,12 +1,10 @@
-import type { User } from '../../index.js'
-import type { Document, Payload } from '../../types/index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 import type { FolderBreadcrumb } from '../types.js'
 
 type GetFolderBreadcrumbsArgs = {
   breadcrumbs?: FolderBreadcrumb[]
   folderID?: number | string
-  payload: Payload
-  user?: User
+  req: PayloadRequest
 }
 /**
  * Builds breadcrumbs up from child folder
@@ -15,9 +13,9 @@ type GetFolderBreadcrumbsArgs = {
 export const getFolderBreadcrumbs = async ({
   breadcrumbs = [],
   folderID,
-  payload,
-  user,
+  req,
 }: GetFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[] | null> => {
+  const { payload, user } = req
   const folderFieldName: string = payload.config.folders.fieldName
   if (folderID) {
     const folderQuery = await payload.find({
@@ -25,6 +23,7 @@ export const getFolderBreadcrumbs = async ({
       depth: 0,
       limit: 1,
       overrideAccess: false,
+      req,
       select: {
         name: true,
         [folderFieldName]: true,
@@ -52,8 +51,7 @@ export const getFolderBreadcrumbs = async ({
             typeof folder[folderFieldName] === 'string'
               ? folder[folderFieldName]
               : folder[folderFieldName].id,
-          payload,
-          user,
+          req,
         })
       }
     }

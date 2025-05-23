@@ -195,6 +195,7 @@ export function FolderProvider({
   sort,
   subfolders: subfoldersFromProps = [],
 }: FolderProviderProps) {
+  const parentFolderContext = useFolder()
   const { config, getEntityConfig } = useConfig()
   const folderFieldName = config.folders.fieldName
   const { routes, serverURL } = config
@@ -806,8 +807,36 @@ export function FolderProvider({
    * Does NOT handle the request to the server.
    * Used when a document needs to be added to the current state.
    */
-  const addItems = React.useCallback(
-    (items: FolderOrDocument[]) => {
+  const addItems: FolderContextValue['addItems'] = React.useCallback(
+    (itemsToAdd) => {
+      const { items, parentItems } = itemsToAdd.reduce(
+        (acc, item) => {
+          const destinationFolderID = item.value.folderID || null
+          if (
+            (item.value.folderID && item.value.folderID === activeFolderID) ||
+            (!activeFolderID && !item.value.folderID)
+          ) {
+            acc.items.push(item)
+          }
+
+          if (
+            parentFolderContext &&
+            ((parentFolderContext.folderID &&
+              destinationFolderID === parentFolderContext.folderID) ||
+              (!parentFolderContext.folderID && !item.value.folderID))
+          ) {
+            acc.parentItems.push(item)
+          }
+
+          return acc
+        },
+        { items: [], parentItems: [] },
+      )
+
+      if (parentItems.length) {
+        parentFolderContext.addItems(parentItems)
+      }
+
       if (!items.length) {
         return
       }
@@ -845,7 +874,7 @@ export function FolderProvider({
         setAllSubfolders(sortedAllSubfolders)
       }
     },
-    [documents, separateItems, sortItems, subfolders],
+    [activeFolderID, documents, separateItems, sortItems, subfolders],
   )
 
   /**
@@ -867,7 +896,7 @@ export function FolderProvider({
 
       if (movingCurrentFolder) {
         const req = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}`,
+          `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}?depth=0`,
           {
             body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
             credentials: 'include',
@@ -1070,15 +1099,13 @@ export function FolderProvider({
         breadcrumbs,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
-          ? {
-              itemKey: `${folderCollectionSlug}-${activeFolderID}`,
+          ? formatFolderOrDocumentItem({
+              folderFieldName,
+              isUpload: false,
               relationTo: folderCollectionSlug,
-              value: {
-                id: activeFolderID,
-                _folderOrDocumentTitle: breadcrumbs[breadcrumbs.length - 1]?.name,
-                folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null,
-              },
-            }
+              useAsTitle: folderCollectionConfig.admin.useAsTitle,
+              value: breadcrumbs[breadcrumbs.length - 1],
+            })
           : null,
         documents,
         filterItems,

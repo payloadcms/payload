@@ -20,7 +20,7 @@ export function CollectionTypePill() {
   const [allCollectionOptions] = React.useState(() => {
     return config.collections.reduce(
       (acc, collection) => {
-        if (collection.admin.folders) {
+        if (collection.folders) {
           acc.push({
             label: getTranslation(collection.labels?.plural, i18n),
             value: collection.slug,

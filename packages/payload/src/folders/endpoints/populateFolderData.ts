@@ -33,9 +33,8 @@ export const populateFolderDataEndpoint: Endpoint = {
     const data = await getFolderData({
       collectionSlug: req.searchParams?.get('collectionSlug') || undefined,
       folderID: req.searchParams?.get('folderID') || undefined,
-      payload: req.payload,
+      req,
       search: req.searchParams?.get('search') || undefined,
-      user: req.user,
     })
 
     return Response.json(data)

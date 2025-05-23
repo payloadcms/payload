@@ -55,10 +55,9 @@ export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocum
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
-
 export { isImage } from '../uploads/isImage.js'
-export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
+export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -74,12 +73,14 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { extractID } from '../utilities/extractID.js'
+
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
-
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
+
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
+export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
