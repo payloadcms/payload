@@ -471,7 +471,7 @@ describe('flattenFields', () => {
   })
 
   describe('tab integration', () => {
-    it('should hoist named group fields inside tabs when moveSubFieldsToTop is true', () => {
+    it('should hoist named group fields inside unamed tabs when moveSubFieldsToTop is true', () => {
       const fields: ClientField[] = [
         {
           type: 'tabs',
@@ -505,6 +505,80 @@ describe('flattenFields', () => {
       expect(result).toHaveLength(1)
       expect(result[0].accessor).toBe('groupInTab-nestedInTabGroup')
       expect(result[0].labelWithPrefix).toBe('Group In Tab > Nested In Tab Group')
+    })
+
+    it('should properly hoist fields inside named tabs when moveSubFieldsToTop is true', () => {
+      const fields: ClientField[] = [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab One',
+              name: 'tabOne',
+              fields: [
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'text',
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'arrayInRow',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'textInArrayInRow',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  type: 'text',
+                  name: 'textInTab',
+                  label: 'Text In Tab',
+                },
+                {
+                  type: 'group',
+                  name: 'groupInTab',
+                  label: 'Group In Tab',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'nestedTextInTabGroup',
+                      label: 'Nested Text In Tab Group',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const result = flattenFields(fields, {
+        moveSubFieldsToTop: true,
+        keepPresentationalFields: true,
+        i18n,
+      })
+
+      expect(result).toHaveLength(4)
+      expect(result[0].accessor).toBe('tabOne-array')
+      expect(result[0].labelWithPrefix).toBe('Tab One > array')
+      expect(result[1].accessor).toBe('tabOne-arrayInRow')
+      expect(result[1].labelWithPrefix).toBe('Tab One > arrayInRow')
+      expect(result[2].accessor).toBe('tabOne-textInTab')
+      expect(result[2].labelWithPrefix).toBe('Tab One > Text In Tab')
+      expect(result[3].accessor).toBe('tabOne-groupInTab-nestedTextInTabGroup')
+      expect(result[3].labelWithPrefix).toBe('Tab One > Group In Tab > Nested Text In Tab Group')
     })
   })
 })
