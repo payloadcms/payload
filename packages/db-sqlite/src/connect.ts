@@ -1,10 +1,10 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Connect, Migration } from 'payload'
 
-import { createClient } from '@libsql/client'
+import { createClient } from '@libsql/client/web'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
-import { drizzle } from 'drizzle-orm/libsql'
+import { drizzle } from 'drizzle-orm/libsql/web'
 
 import type { SQLiteAdapter } from './types.js'
 
