@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Pages } from './collections/Pages/index.js'
@@ -25,6 +26,43 @@ export default buildConfigWithDefaults({
     access: {
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
+    },
+    hooks: {
+      beforeValidate: [
+        // this is a custom `beforeValidate` hook that runs before the preset is validated
+        // it ensures that only admins can add or remove the "admin" role from a preset
+        ({ data, req, originalDoc, context }) => {
+          if (context.overrideAccess) {
+            // TODO: this is temporary, remove when `overrideAccess` becomes an arg to hooks
+            return data
+          }
+
+          const adminRoleChanged = (current, original) => {
+            const currentHasAdmin = current?.roles?.includes('admin') ?? false
+            const originalHasAdmin = original?.roles?.includes('admin') ?? false
+            return currentHasAdmin !== originalHasAdmin
+          }
+
+          const readRoleChanged =
+            data?.access?.read?.constraint === 'specificRoles' &&
+            adminRoleChanged(data?.access?.read, originalDoc?.access?.read || {})
+
+          const updateRoleChanged =
+            data?.access?.update?.constraint === 'specificRoles' &&
+            adminRoleChanged(data?.access?.update, originalDoc?.access?.update || {})
+
+          if ((readRoleChanged || updateRoleChanged) && !req.user?.roles?.includes('admin')) {
+            throw new APIError(
+              'You must be an admin to add or remove the "admin" role from a preset.',
+              403,
+              {},
+              true,
+            )
+          }
+
+          return data
+        },
+      ],
     },
     constraints: {
       read: [
