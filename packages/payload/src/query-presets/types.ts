@@ -6,12 +6,16 @@ import type { Where } from '../types/index.js'
 // Note: order matters here as it will change the rendered order in the UI
 export const operations = ['read', 'update', 'delete'] as const
 
-type Operation = (typeof operations)[number]
+export type ConstraintOperation = (typeof operations)[number]
+
+export type DefaultConstraint = 'everyone' | 'onlyMe' | 'specificUsers'
+
+export type Constraint = DefaultConstraint | string // TODO: type `string` as the custom constraints provided by the config
 
 export type QueryPreset = {
   access: {
-    [operation in Operation]: {
-      constraint: 'everyone' | 'onlyMe' | 'specificUsers'
+    [operation in ConstraintOperation]: {
+      constraint: DefaultConstraint
       users?: string[]
     }
   }

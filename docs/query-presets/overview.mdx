@@ -46,11 +46,12 @@ const config = buildConfig({
 
 The following options are available for Query Presets:
 
-| Option        | Description                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
-| `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
-| `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
+| Option              | Description                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `access`            | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
+| `filterConstraints` | Used to define which constraints are available to users when managing presets. [More details](#constraint-access-control).      |
+| `constraints`       | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
+| `labels`            | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
 
@@ -59,7 +60,7 @@ Query Presets are subject to the same [Access Control](../access-control/overvie
 Access Control for Query Presets can be customized in two ways:
 
 1. [Collection Access Control](#collection-access-control): Applies to all presets. These rules are not controllable by the user and are statically defined in the config.
-2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are saved to the document.
+2. [Document Access Control](#document-access-control): Applies to each individual preset. These rules are controllable by the user and are dynamically defined on each record in the database.
 
 ### Collection Access Control
 
@@ -97,7 +98,7 @@ This example restricts all Query Presets to users with the role of `admin`.
 
 ### Document Access Control
 
-You can also define access control rules that apply to each specific preset. Users have the ability to define and modify these rules on the fly as they manage presets. These are saved dynamically in the database on each document.
+You can also define access control rules that apply to each specific preset. Users have the ability to define and modify these rules on the fly as they manage presets. These are saved dynamically in the database on each record.
 
 When a user manages a preset, document-level access control options will be available to them in the Admin Panel for each operation.
 
@@ -150,8 +151,8 @@ const config = buildConfig({
           }),
         },
       ],
-      // highlight-end
     },
+    // highlight-end
   },
 })
 ```
@@ -171,3 +172,39 @@ The following options are available for each constraint:
 | `value`  | The value to store in the database when this constraint is selected.     |
 | `fields` | An array of fields to render when this constraint is selected.           |
 | `access` | A function that determines the access control rules for this constraint. |
+
+### Constraint Access Control
+
+Used to dynamically filter which constraints are available based on the current user, document data, or other criteria.
+
+Some examples of this might include:
+
+- Ensuring that only "admins" are allowed to make a preset available to "everyone"
+- Preventing the "onlyMe" option from being selected based on a hypothetical "disablePrivatePresets" checkbox
+
+When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
+
+To do this, you can use the `filterConstraints` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  queryPresets: {
+    // ...
+    // highlight-start
+    filterConstraints: ({ req, options }) =>
+      !req.user?.roles?.includes('admin')
+        ? options.filter(
+            (option) =>
+              (typeof option === 'string' ? option : option.value) !==
+              'everyone',
+          )
+        : options,
+    // highlight-end
+  },
+})
+```
+
+The `filterConstraints` function receives the same arguments as [`filterOptions`](../fields/select#filterOptions) in the [Select field](../fields/select).
