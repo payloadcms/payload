@@ -267,6 +267,7 @@ function Content({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__add-folder-button`}
+              margin={false}
               onClick={() => {
                 openModal(newFolderDrawerSlug)
               }}

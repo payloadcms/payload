@@ -39,7 +39,7 @@ export function RenameFolderDrawer(props: Props) {
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <Form
-        action={`${serverURL}${routes.api}/${folderCollectionSlug}/${folderToRename.value.id}`}
+        action={`${serverURL}${routes.api}/${folderCollectionSlug}/${folderToRename.value.id}?depth=0`}
         initialState={{
           name: {
             initialValue: folderName,
