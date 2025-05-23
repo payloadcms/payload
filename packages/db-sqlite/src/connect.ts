@@ -3,6 +3,7 @@ import type { Connect, Migration } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { pushDevSchema } from '@payloadcms/drizzle'
+import { drizzle as drizzleD1 } from 'drizzle-orm/d1'
 import { drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'
@@ -21,12 +22,14 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    if (!this.client) {
+    if (!this.client && !this.D1Binding) {
       this.client = createClient(this.clientConfig)
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
+    this.drizzle = this.D1Binding
+      ? (drizzleD1(this.D1Binding, { logger, schema: this.schema }) as any)
+      : drizzle(this.client, { logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

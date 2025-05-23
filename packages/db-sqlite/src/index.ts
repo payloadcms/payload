@@ -94,6 +94,8 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       clientConfig: args.client,
       defaultDrizzleSnapshot,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      D1Binding: args.D1Binding_Temporary ?? false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       features: {
         json: true,
@@ -139,6 +141,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       countVersions,
       create,
       createGlobal,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
@@ -150,6 +153,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
             .join('\n')
         },
       }),
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -185,8 +189,10 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateGlobalVersion,
       updateOne,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateVersion,
       upsert: updateOne,
     })

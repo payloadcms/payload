@@ -51,6 +51,7 @@ export type Args = {
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
+  D1Binding_Temporary?: boolean
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
   idType?: 'number' | 'uuid'
@@ -142,6 +143,7 @@ export type SQLiteAdapter = {
   client: Client
   clientConfig: Args['client']
   countDistinct: CountDistinct
+  D1Binding?: string
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
   drizzle: Drizzle
