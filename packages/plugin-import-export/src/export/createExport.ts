@@ -1,10 +1,11 @@
-import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
+import type { PaginatedDocs, PayloadRequest, SelectIncludeType, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { flattenObject } from './flattenObject.js'
+import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
@@ -62,6 +63,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
   const isCSV = format === 'csv'
+  const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
   const findArgs = {
     collection: collectionSlug,
@@ -71,13 +73,18 @@ export const createExport = async (args: CreateExportArgs) => {
     locale,
     overrideAccess: false,
     page: 0,
-    select: Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined,
+    select,
     sort,
     user,
     where,
   }
 
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
+
+  const toCSVFunctions = getCustomFieldFunctions({
+    fields: collectionConfig.flattenedFields,
+    select,
+  })
 
   if (download) {
     const encoder = new TextEncoder()
@@ -87,7 +94,7 @@ export const createExport = async (args: CreateExportArgs) => {
         let isFirstBatch = true
 
         while (result.docs.length > 0) {
-          const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
+          const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
           const csvString = stringify(csvInput, { header: isFirstBatch })
           this.push(encoder.encode(csvString))
           isFirstBatch = false
@@ -119,7 +126,7 @@ export const createExport = async (args: CreateExportArgs) => {
     result = await payload.find(findArgs)
 
     if (isCSV) {
-      const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
+      const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
       outputData.push(stringify(csvInput, { header: isFirstBatch }))
       isFirstBatch = false
     } else {

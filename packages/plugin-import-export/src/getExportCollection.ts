@@ -1,6 +1,5 @@
 import type {
   CollectionAfterChangeHook,
-  CollectionBeforeChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
   Config,

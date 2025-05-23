@@ -22,3 +22,13 @@ export type ImportExportPluginConfig = {
    */
   overrideExportCollection?: (collection: CollectionOverride) => CollectionOverride
 }
+
+/**
+ * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+ */
+export type ToCSVFunction = (args: {
+  columnName: string
+  data: Record<string, unknown>
+  siblingData: Record<string, unknown>
+  value: unknown
+}) => unknown
