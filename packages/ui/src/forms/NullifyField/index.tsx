@@ -7,17 +7,20 @@ import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useForm } from '../Form/context.js'
 
 type NullifyLocaleFieldProps = {
   readonly fieldValue?: [] | null | number
   readonly localized: boolean
   readonly path: string
+  readonly readOnly?: boolean
 }
 
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   fieldValue,
   localized,
   path,
+  readOnly = false,
 }) => {
   const { code: currentLocale } = useLocale()
   const {
@@ -25,6 +28,12 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   } = useConfig()
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number')
   const { t } = useTranslation()
+  const { dispatchFields, setModified } = useForm()
+
+  if (readOnly) {
+    // do not render when field is read-only
+    return null
+  }
 
   if (!localized || !localization) {
     // hide when field is not localized or localization is not enabled
@@ -34,6 +43,18 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   if (localization.defaultLocale === currentLocale || !localization.fallback) {
     // if editing default locale or when fallback is disabled
     return null
+  }
+
+  const onChange = () => {
+    const useFallback = !checked
+
+    dispatchFields({
+      type: 'UPDATE',
+      path,
+      value: useFallback ? null : fieldValue || 0,
+    })
+    setModified(true)
+    setChecked(useFallback)
   }
 
   if (fieldValue) {
@@ -62,9 +83,9 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
           label: t('general:fallbackToDefaultLocale'),
         }}
         id={`field-${path.replace(/\./g, '__')}`}
+        onChange={onChange}
         path={path}
         schemaPath=""
-        // onToggle={onChange}
       />
     </Banner>
   )
