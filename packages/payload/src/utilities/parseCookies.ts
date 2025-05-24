@@ -14,8 +14,8 @@ export const parseCookies = (headers: Request['headers']): Map<string, string> =
       try {
         const decodedValue = decodeURI(encodedValue)
         list.set(key, decodedValue)
-      } catch (e) {
-        throw new APIError(`Error decoding cookie value for key ${key}: ${e.message}`)
+      } catch {
+        // ignore invalid encoded values
       }
     })
   }
