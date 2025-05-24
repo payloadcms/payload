@@ -1,14 +1,15 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Init } from 'payload'
 
-import { buildDrizzleRelations, buildRawSchema, executeSchemaHooks } from '@payloadcms/drizzle'
+import type { DrizzleAdapter } from '../types.js'
+import type { BaseSQLiteAdapter } from './types.js'
 
-import type { SQLiteAdapter } from './types.js'
-
+import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
+import { buildRawSchema } from '../schema/buildRawSchema.js'
+import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
 import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
 import { setColumnID } from './schema/setColumnID.js'
 
-export const init: Init = async function init(this: SQLiteAdapter) {
+export const init: Init = async function init(this: BaseSQLiteAdapter) {
   let locales: string[] | undefined
 
   this.rawRelations = {}
@@ -28,7 +29,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
   for (const tableName in this.rawTables) {
-    buildDrizzleTable({ adapter, locales: locales!, rawTable: this.rawTables[tableName]! })
+    buildDrizzleTable({ adapter, locales, rawTable: this.rawTables[tableName] })
   }
 
   buildDrizzleRelations({
