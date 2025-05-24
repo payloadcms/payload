@@ -9,8 +9,10 @@ import { logoutOperation } from '../operations/logout.js'
 
 export const logoutHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { t } = req
+  const { searchParams, t } = req
+
   const result = await logoutOperation({
+    allSessions: searchParams.get('allSessions') === 'true',
     collection,
     req,
   })
