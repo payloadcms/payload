@@ -39,7 +39,7 @@ export default buildConfig({
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
 export default buildConfig({
-  // Automatically uses proces.env.POSTGRES_URL if no options are provided.
+  // Automatically uses process.env.POSTGRES_URL if no options are provided.
   db: vercelPostgresAdapter(),
   // Optionally, can accept the same options as the @vercel/postgres package.
   db: vercelPostgresAdapter({
@@ -224,7 +224,7 @@ Make sure Payload doesn't overlap table names with its collections. For example,
 ### afterSchemaInit
 
 Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
-To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+To extend a table, Payload exposes `extendTable` utility to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
 The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
 
 ```ts

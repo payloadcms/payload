@@ -177,7 +177,7 @@ The following options are available:
 #### Edit View Options
 
 ```ts
-import type { CollectionCOnfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const MyCollection: CollectionConfig = {
   // ...
@@ -275,7 +275,7 @@ You can also pass an object to the collection's `graphQL` property, which allows
 
 ## TypeScript
 
-You can import types from Payload to help make writing your Collection configs easier and type-safe. There are two main types that represent the Collection Config, `CollectionConfig` and `SanitizeCollectionConfig`.
+You can import types from Payload to help make writing your Collection configs easier and type-safe. There are two main types that represent the Collection Config, `CollectionConfig` and `SanitizedCollectionConfig`.
 
 The `CollectionConfig` type represents a raw Collection Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedCollectionConfig` type represents a Collection Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
