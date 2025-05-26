@@ -21,11 +21,17 @@
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
+  "dependencies": {
+    "@miniflare/d1": "2.14.4",
+    "@miniflare/shared": "2.14.4",
+    "better-sqlite3": "11.10.0"
+  },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
     "@date-fns/tz": "1.2.0",
     "@next/env": "15.3.0",
     "@payloadcms/admin-bar": "workspace:*",
+    "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",

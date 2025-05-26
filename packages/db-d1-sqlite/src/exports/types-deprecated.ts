@@ -12,7 +12,7 @@ import type {
   Insert as _Insert,
   MigrateDownArgs as _MigrateDownArgs,
   MigrateUpArgs as _MigrateUpArgs,
-  SQLiteAdapter as _SQLiteAdapter,
+  SQLiteD1Adapter as _SQLiteAdapter,
   SQLiteSchemaHook as _SQLiteSchemaHook,
 } from '../types.js'
 

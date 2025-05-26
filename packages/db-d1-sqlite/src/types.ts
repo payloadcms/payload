@@ -58,7 +58,7 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: SQLiteD1Adapter }) => Promise<void>
 
 export type Execute<T> = (args: {
   db?: LibSQLDatabase
@@ -96,12 +96,12 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle = { $client: D1Database } & DrizzleD1Database<Record<string, any>>
 
-export type SQLiteAdapter = {
+export type SQLiteD1Adapter = {
   binding: Args['binding']
   client: D1Database
-  drizzle: { $client: D1Database } & DrizzleD1Database<Record<string, any>>
+  drizzle: Drizzle
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 

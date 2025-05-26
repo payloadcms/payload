@@ -3,12 +3,13 @@ import type { Connect, Migration } from 'payload'
 
 import { D1Database } from '@miniflare/d1'
 import { pushDevSchema } from '@payloadcms/drizzle'
+import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 
-import type { SQLiteAdapter } from './types.js'
+import type { SQLiteD1Adapter } from './types.js'
 
 export const connect: Connect = async function connect(
-  this: SQLiteAdapter,
+  this: SQLiteD1Adapter,
   options = {
     hotReload: false,
   },
@@ -24,6 +25,7 @@ export const connect: Connect = async function connect(
     const logger = this.logger || false
 
     this.drizzle = drizzle(new D1Database(this.binding), { logger })
+    this.client = this.drizzle.$client as any
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -38,6 +40,7 @@ export const connect: Connect = async function connect(
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
+    console.error(err)
     process.exit(1)
   }
 

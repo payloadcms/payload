@@ -1,5 +1,6 @@
 import type { Client, ResultSet } from '@libsql/client'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
@@ -99,8 +100,8 @@ export type DeleteWhere = (args: {
 export type DropDatabase = (args: { adapter: BaseSQLiteAdapter }) => Promise<void>
 
 export type Execute<T> = (args: {
-  db?: LibSQLDatabase
-  drizzle?: LibSQLDatabase
+  db?: DrizzleD1Database | LibSQLDatabase
+  drizzle?: DrizzleD1Database | LibSQLDatabase
   raw?: string
   sql?: SQL<unknown>
 }) => SQLiteRaw<Promise<T>> | SQLiteRaw<ResultSet>

@@ -56,13 +56,13 @@ import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
-import type { Args, SQLiteAdapter } from './types.js'
+import type { Args, SQLiteD1Adapter } from './types.js'
 
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
 
-export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
+export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter> {
   const sqliteIDType = args.idType || 'number'
   const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
   const allowIDOnCreate = args.allowIDOnCreate ?? false
@@ -85,7 +85,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       not_like: notLike,
     } as unknown as Operators
 
-    return createDatabaseAdapter<SQLiteAdapter>({
+    return createDatabaseAdapter<SQLiteD1Adapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -177,7 +177,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       migrateReset,
       migrateStatus,
       migrationDir,
-      packageName: '@payloadcms/db-sqlite',
+      packageName: '@payloadcms/db-d1-sqlite',
       payload,
       queryDrafts,
       rejectInitializing,
@@ -193,7 +193,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 
   return {
-    name: 'sqlite',
+    name: 'd1-sqlite',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
@@ -217,7 +217,7 @@ export type {
   Insert,
   MigrateDownArgs,
   MigrateUpArgs,
-  SQLiteAdapter,
+  SQLiteD1Adapter as SQLiteAdapter,
   SQLiteSchemaHook,
 } from './types.js'
 
