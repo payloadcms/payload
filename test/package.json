@@ -21,14 +21,11 @@
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
-  "dependencies": {
-    "@miniflare/d1": "2.14.4",
-    "@miniflare/shared": "2.14.4",
-    "better-sqlite3": "11.10.0"
-  },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
     "@date-fns/tz": "1.2.0",
+    "@miniflare/d1": "2.14.4",
+    "@miniflare/shared": "2.14.4",
     "@next/env": "15.3.0",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
@@ -71,6 +68,7 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
+    "better-sqlite3": "11.10.0",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "csv-parse": "^5.6.0",
