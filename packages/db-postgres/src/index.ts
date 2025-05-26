@@ -80,6 +80,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     })
 
     if (args.schemaName) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       adapterSchema = pgSchema(args.schemaName)
     } else {
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -175,8 +176,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -194,6 +193,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
