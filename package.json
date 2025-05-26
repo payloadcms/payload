@@ -14,6 +14,7 @@
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\" --filter \"!@payloadcms/storage-*\"",
     "build:core:force": "pnpm clean:build && pnpm build:core --no-cache --force",
     "build:create-payload-app": "turbo build --filter create-payload-app",
+    "build:db-d1-sqlite": "turbo build --filter \"@payloadcms/db-d1-sqlite\"",
     "build:db-mongodb": "turbo build --filter \"@payloadcms/db-mongodb\"",
     "build:db-postgres": "turbo build --filter \"@payloadcms/db-postgres\"",
     "build:db-sqlite": "turbo build --filter \"@payloadcms/db-sqlite\"",

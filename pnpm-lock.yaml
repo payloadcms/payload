@@ -45,7 +45,7 @@ importers:
         version: 1.50.0
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
       '@sentry/node':
         specifier: ^8.33.1
         version: 8.37.1
@@ -102,7 +102,7 @@ importers:
         version: 0.28.0
       drizzle-orm:
         specifier: 0.36.1
-        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -135,7 +135,7 @@ importers:
         version: 10.1.3(@aws-sdk/credential-providers@3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0)))(socks@2.8.3)
       next:
         specifier: 15.3.0
-        version: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -268,6 +268,49 @@ importers:
         specifier: 22.5.4
         version: 22.5.4
 
+  packages/db-d1-sqlite:
+    dependencies:
+      '@miniflare/d1':
+        specifier: 2.14.4
+        version: 2.14.4
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../drizzle
+      console-table-printer:
+        specifier: 2.12.1
+        version: 2.12.1
+      drizzle-kit:
+        specifier: 0.28.0
+        version: 0.28.0
+      drizzle-orm:
+        specifier: 0.36.1
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      to-snake-case:
+        specifier: 1.0.0
+        version: 1.0.0
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
+      '@types/to-snake-case':
+        specifier: 1.0.0
+        version: 1.0.0
+      '@types/uuid':
+        specifier: 10.0.0
+        version: 10.0.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/db-mongodb:
     dependencies:
       mongoose:
@@ -321,7 +364,7 @@ importers:
         version: 0.28.0
       drizzle-orm:
         specifier: 0.36.1
-        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -367,7 +410,7 @@ importers:
         version: 0.28.0
       drizzle-orm:
         specifier: 0.36.1
-        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -410,7 +453,7 @@ importers:
         version: 0.28.0
       drizzle-orm:
         specifier: 0.36.1
-        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -453,7 +496,7 @@ importers:
         version: 2.0.3
       drizzle-orm:
         specifier: 0.36.1
-        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
+        version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -1144,7 +1187,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.37.1
@@ -1503,7 +1546,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: 7.3.0
-        version: 7.3.0(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
+        version: 7.3.0(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1789,7 +1832,7 @@ importers:
         version: link:../packages/ui
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.119.2(react@19.1.0)
@@ -1846,7 +1889,7 @@ importers:
         version: 8.9.5(@aws-sdk/credential-providers@3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0)))(socks@2.8.3)
       next:
         specifier: 15.3.0
-        version: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       nodemailer:
         specifier: 6.9.16
         version: 6.9.16
@@ -3721,6 +3764,9 @@ packages:
       cjs-module-lexer:
         optional: true
 
+  '@iarna/toml@2.2.5':
+    resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
+
   '@img/sharp-darwin-arm64@0.33.5':
     resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
@@ -4178,6 +4224,31 @@ packages:
     resolution: {integrity: sha512-7pJzOWzPm6oJUxml+PCDRzYQ4A1hTMHAciTAHfFK4fkbDZX33nWPVG7Y3vqdKtslcwAzwmrNDc6sXy2nwWnbiw==}
     cpu: [x64]
     os: [win32]
+
+  '@miniflare/core@2.14.4':
+    resolution: {integrity: sha512-FMmZcC1f54YpF4pDWPtdQPIO8NXfgUxCoR9uyrhxKJdZu7M6n8QKopPVNuaxR40jcsdxb7yKoQoFWnHfzJD9GQ==}
+    engines: {node: '>=16.13'}
+    deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
+
+  '@miniflare/d1@2.14.4':
+    resolution: {integrity: sha512-pMBVq9XWxTDdm+RRCkfXZP+bREjPg1JC8s8C0JTovA9OGmLQXqGTnFxIaS9vf1d8k3uSUGhDzPTzHr0/AUW1gA==}
+    engines: {node: '>=16.7'}
+    deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
+
+  '@miniflare/queues@2.14.4':
+    resolution: {integrity: sha512-aXQ5Ik8Iq1KGMBzGenmd6Js/jJgqyYvjom95/N9GptCGpiVWE5F0XqC1SL5rCwURbHN+aWY191o8XOFyY2nCUA==}
+    engines: {node: '>=16.7'}
+    deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
+
+  '@miniflare/shared@2.14.4':
+    resolution: {integrity: sha512-upl4RSB3hyCnITOFmRZjJj4A72GmkVrtfZTilkdq5Qe5TTlzsjVeDJp7AuNUM9bM8vswRo+N5jOiot6O4PVwwQ==}
+    engines: {node: '>=16.13'}
+    deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
+
+  '@miniflare/watcher@2.14.4':
+    resolution: {integrity: sha512-PYn05ET2USfBAeXF6NZfWl0O32KVyE8ncQ/ngysrh3hoIV7l3qGGH7ubeFx+D8VWQ682qYhwGygUzQv2j1tGGg==}
+    engines: {node: '>=16.13'}
+    deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
 
   '@monaco-editor/loader@1.5.0':
     resolution: {integrity: sha512-hKoGSM+7aAc7eRTRjpqAZucPmoNOC4UUbknb/VNoTkEIkCPhqV8LfbsgM1webRM7S/z21eHEx9Fkwx8Z/C/+Xw==}
@@ -5361,6 +5432,9 @@ packages:
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
+  '@types/better-sqlite3@7.6.13':
+    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
+
   '@types/busboy@1.5.4':
     resolution: {integrity: sha512-kG7WrUuAKK0NoyxfQHsVE6j1m01s6kMma64E+OZenQABMQyTJop1DumUWcLwAQ2JzpefU7PDYoRDKl8uZosFjw==}
 
@@ -6093,6 +6167,9 @@ packages:
   bufferutil@4.0.8:
     resolution: {integrity: sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==}
     engines: {node: '>=6.14.2'}
+
+  builtins@5.1.0:
+    resolution: {integrity: sha512-SW9lzGTLvWTP1AY8xeAMZimqDrIaSdLQUcVr9DMef51niJ022Ri87SwRRKYm4A6iHfkPaiVUu/Duw2Wc4J7kKg==}
 
   bundle-name@4.1.0:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
@@ -7066,6 +7143,10 @@ packages:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
 
+  execa@6.1.0:
+    resolution: {integrity: sha512-QVWlX2e50heYJcCPG0iWtf8r0xjEYfz/OYLGDYH+IyjWezzPNxz63qNFOu0l4YftGWuizFVZHHs8PrLU5p2IDA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   execa@8.0.1:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
@@ -7561,6 +7642,10 @@ packages:
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
+
+  human-signals@3.0.1:
+    resolution: {integrity: sha512-rQLskxnM/5OCldHo+wNXbpVgDn5A17CUoKX+7Sokwaknlq7CdSnphy0W39GU8dw59XiCXmFXDg4fRuckQRKewQ==}
+    engines: {node: '>=12.20.0'}
 
   human-signals@5.0.0:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
@@ -8108,6 +8193,10 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
+  kleur@4.1.5:
+    resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+    engines: {node: '>=6'}
+
   language-subtag-registry@0.3.23:
     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
 
@@ -8133,6 +8222,7 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   license-checker@25.0.1:
@@ -8596,6 +8686,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch-native@1.6.4:
     resolution: {integrity: sha512-IhOigYzAKHd244OC0JIMIUrjzctirCmPkaIfhDeGcEETWof5zKYUW7e7MYvChGWh/4CJeXEgsRyGzuF334rOOQ==}
@@ -8655,6 +8746,9 @@ packages:
   npm-run-path@5.3.0:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  npx-import@1.1.4:
+    resolution: {integrity: sha512-3ShymTWOgqGyNlh5lMJAejLuIv3W1K3fbI5Ewc6YErZU3Sp0PqsNs8UIU1O8z5+KVl/Du5ag56Gza9vdorGEoA==}
 
   nypm@0.3.12:
     resolution: {integrity: sha512-D3pzNDWIvgA+7IORhD/IuWzEk4uXv6GsgOxiid4UU3h9oq5IqV1KtPDi63n4sZJ/xcWlr88c0QM2RgN5VbOhFA==}
@@ -8795,6 +8889,9 @@ packages:
   parse-json@5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
     engines: {node: '>=8'}
+
+  parse-package-name@1.0.0:
+    resolution: {integrity: sha512-kBeTUtcj+SkyfaW4+KBe0HtsloBJ/mKTPoxpVdA57GZiPerREsUWJOhVj9anXweFiJkm5y8FG1sxFZkZ0SN6wg==}
 
   parse-passwd@1.0.0:
     resolution: {integrity: sha512-1Y1A//QUXEZK7YKz+rD9WydcE1+EuPr6ZBgKecAB8tmoW6UFv0NREVJe1p+jRxtThkcbbKkfwIbWJe/IeE6m2Q==}
@@ -9541,6 +9638,9 @@ packages:
   server-only@0.0.1:
     resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
+  set-cookie-parser@2.7.1:
+    resolution: {integrity: sha512-IOc8uWeOZgnb3ptbCURJWNjWUPcO3ZnTTdzsurqERrP6nPyv+paC55vJM0LpOlT2ne+Ix+9+CRG1MNLlyZ4GjQ==}
+
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
     engines: {node: '>= 0.4'}
@@ -10284,6 +10384,9 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
+  urlpattern-polyfill@4.0.3:
+    resolution: {integrity: sha512-DOE84vZT2fEcl9gqCUTcnAw5ZY5Id55ikUcziSUntuEFL3pRvavg5kwDmTEUJkeCHInTlV/HexFomgYnzO5kdQ==}
+
   use-context-selector@2.0.0:
     resolution: {integrity: sha512-owfuSmUNd3eNp3J9CdDl0kMgfidV+MkDvHPpvthN5ThqM+ibMccNE0k+Iq7TWC6JPFvGZqanqiGCuQx6DyV24g==}
     peerDependencies:
@@ -10334,6 +10437,10 @@ packages:
 
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
+
+  validate-npm-package-name@4.0.0:
+    resolution: {integrity: sha512-mzR0L8ZDktZjpX4OB46KT+56MAhl4EIazWP/+G/HPGuvfdaqg4YsCdtOm6U9+LOFyYDoh4dpnpxZRB9MQQns5Q==}
+    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
 
   varint@6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
@@ -12803,6 +12910,8 @@ snapshots:
     optionalDependencies:
       cjs-module-lexer: 1.4.1
 
+  '@iarna/toml@2.2.5': {}
+
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-arm64': 1.0.4
@@ -13379,6 +13488,39 @@ snapshots:
 
   '@libsql/win32-x64-msvc@0.4.7':
     optional: true
+
+  '@miniflare/core@2.14.4':
+    dependencies:
+      '@iarna/toml': 2.2.5
+      '@miniflare/queues': 2.14.4
+      '@miniflare/shared': 2.14.4
+      '@miniflare/watcher': 2.14.4
+      busboy: 1.6.0
+      dotenv: 16.4.7
+      kleur: 4.1.5
+      set-cookie-parser: 2.7.1
+      undici: 5.28.4
+      urlpattern-polyfill: 4.0.3
+
+  '@miniflare/d1@2.14.4':
+    dependencies:
+      '@miniflare/core': 2.14.4
+      '@miniflare/shared': 2.14.4
+
+  '@miniflare/queues@2.14.4':
+    dependencies:
+      '@miniflare/shared': 2.14.4
+
+  '@miniflare/shared@2.14.4':
+    dependencies:
+      '@types/better-sqlite3': 7.6.13
+      kleur: 4.1.5
+      npx-import: 1.1.4
+      picomatch: 2.3.1
+
+  '@miniflare/watcher@2.14.4':
+    dependencies:
+      '@miniflare/shared': 2.14.4
 
   '@monaco-editor/loader@1.5.0':
     dependencies:
@@ -14041,7 +14183,7 @@ snapshots:
       '@sentry/utils': 7.119.2
       localforage: 1.10.0
 
-  '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))':
+  '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation-http': 0.53.0(@opentelemetry/api@1.9.0)
@@ -14057,7 +14199,7 @@ snapshots:
       '@sentry/vercel-edge': 8.37.1
       '@sentry/webpack-plugin': 2.22.6(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
       chalk: 3.0.0
-      next: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.10
@@ -14836,6 +14978,10 @@ snapshots:
   '@types/babel__traverse@7.20.6':
     dependencies:
       '@babel/types': 7.26.7
+
+  '@types/better-sqlite3@7.6.13':
+    dependencies:
+      '@types/node': 22.5.4
 
   '@types/busboy@1.5.4':
     dependencies:
@@ -15784,6 +15930,10 @@ snapshots:
     dependencies:
       node-gyp-build: 4.8.2
 
+  builtins@5.1.0:
+    dependencies:
+      semver: 7.7.1
+
   bundle-name@4.1.0:
     dependencies:
       run-applescript: 7.0.0
@@ -16273,22 +16423,24 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0):
+  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
       '@neondatabase/serverless': 0.9.5
       '@opentelemetry/api': 1.9.0
+      '@types/better-sqlite3': 7.6.13
       '@types/pg': 8.10.2
       '@types/react': 19.1.0
       '@vercel/postgres': 0.9.0
       pg: 8.11.3
       react: 19.1.0
 
-  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0):
+  drizzle-orm@0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@types/react@19.1.0)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.1.0):
     optionalDependencies:
       '@libsql/client': 0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5)
       '@neondatabase/serverless': 0.9.5
       '@opentelemetry/api': 1.9.0
+      '@types/better-sqlite3': 7.6.13
       '@types/pg': 8.11.6
       '@types/react': 19.1.0
       '@vercel/postgres': 0.9.0
@@ -16900,6 +17052,18 @@ snapshots:
       signal-exit: 3.0.7
       strip-final-newline: 2.0.0
 
+  execa@6.1.0:
+    dependencies:
+      cross-spawn: 7.0.6
+      get-stream: 6.0.1
+      human-signals: 3.0.1
+      is-stream: 3.0.0
+      merge-stream: 2.0.0
+      npm-run-path: 5.3.0
+      onetime: 6.0.0
+      signal-exit: 3.0.7
+      strip-final-newline: 3.0.0
+
   execa@8.0.1:
     dependencies:
       cross-spawn: 7.0.5
@@ -17453,6 +17617,8 @@ snapshots:
   human-signals@1.1.1: {}
 
   human-signals@2.1.0: {}
+
+  human-signals@3.0.1: {}
 
   human-signals@5.0.0: {}
 
@@ -18136,6 +18302,8 @@ snapshots:
 
   kleur@3.0.3: {}
 
+  kleur@4.1.5: {}
+
   language-subtag-registry@0.3.23: {}
 
   language-tags@1.0.9:
@@ -18752,7 +18920,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
+  next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
     dependencies:
       '@next/env': 15.3.0
       '@swc/counter': 0.1.3
@@ -18839,6 +19007,13 @@ snapshots:
   npm-run-path@5.3.0:
     dependencies:
       path-key: 4.0.0
+
+  npx-import@1.1.4:
+    dependencies:
+      execa: 6.1.0
+      parse-package-name: 1.0.0
+      semver: 7.7.1
+      validate-npm-package-name: 4.0.0
 
   nypm@0.3.12:
     dependencies:
@@ -19011,6 +19186,8 @@ snapshots:
       error-ex: 1.3.2
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
+
+  parse-package-name@1.0.0: {}
 
   parse-passwd@1.0.0: {}
 
@@ -19728,14 +19905,15 @@ snapshots:
 
   semver@7.6.3: {}
 
-  semver@7.7.1:
-    optional: true
+  semver@7.7.1: {}
 
   serialize-javascript@6.0.2:
     dependencies:
       randombytes: 2.1.0
 
   server-only@0.0.1: {}
+
+  set-cookie-parser@2.7.1: {}
 
   set-function-length@1.2.2:
     dependencies:
@@ -20552,18 +20730,20 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  uploadthing@7.3.0(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
+  uploadthing@7.3.0(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
     dependencies:
       '@effect/platform': 0.69.8(effect@3.10.3)
       '@uploadthing/mime-types': 0.3.2
       '@uploadthing/shared': 7.1.1
       effect: 3.10.3
     optionalDependencies:
-      next: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  urlpattern-polyfill@4.0.3: {}
 
   use-context-selector@2.0.0(react@19.1.0)(scheduler@0.25.0):
     dependencies:
@@ -20604,6 +20784,10 @@ snapshots:
     dependencies:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
+
+  validate-npm-package-name@4.0.0:
+    dependencies:
+      builtins: 5.1.0
 
   varint@6.0.0: {}
 

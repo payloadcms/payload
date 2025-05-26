@@ -144,7 +144,6 @@ export type BaseSQLiteAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
-  drizzle: Drizzle
   dropDatabase: DropDatabase
   execute: Execute<unknown>
   /**

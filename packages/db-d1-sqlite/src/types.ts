@@ -1,8 +1,11 @@
-import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { Client, ResultSet } from '@libsql/client'
+import type { D1Database, D1Options, DatabaseBinding } from '@miniflare/d1'
+const o: D1Options = {}
+import type { extendDrizzleTable } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
@@ -26,7 +29,7 @@ type SQLiteSchemaHookArgs = {
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
 export type Args = {
-  client: Config
+  binding: DatabaseBinding
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -96,9 +99,9 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
 export type SQLiteAdapter = {
-  client: Client
-  clientConfig: Args['client']
-  drizzle: Drizzle
+  binding: Args['binding']
+  client: D1Database
+  drizzle: { $client: D1Database } & DrizzleD1Database<Record<string, any>>
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 

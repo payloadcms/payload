@@ -91,9 +91,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      binding: args.binding,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
-      clientConfig: args.client,
       defaultDrizzleSnapshot,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
@@ -129,6 +129,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
+
       // DatabaseAdapter
       beginTransaction: args.transactionOptions ? beginTransaction : defaultBeginTransaction(),
       commitTransaction,

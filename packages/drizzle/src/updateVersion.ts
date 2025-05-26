@@ -26,7 +26,7 @@ export async function updateVersion<T extends TypeWithID>(
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
