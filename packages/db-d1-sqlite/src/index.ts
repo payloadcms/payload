@@ -151,6 +151,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
             .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
             .join('\n')
         },
+        sqlOnly: true,
       }),
       createVersion,
       defaultIDType: payloadIDType,
