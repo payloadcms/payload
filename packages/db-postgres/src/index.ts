@@ -80,7 +80,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     })
 
     if (args.schemaName) {
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       adapterSchema = pgSchema(args.schemaName)
     } else {
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
