@@ -1,0 +1,14 @@
+@import '../../../../../scss/styles.scss';
+
+@layer payload-default {
+  .relationship-cell {
+    &:has(.file) {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    & .file:not(:first-child) {
+      padding-left: base(1);
+    }
+  }
+}
