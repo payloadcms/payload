@@ -1,6 +1,6 @@
 import type { CollectionSlug, Config } from 'payload'
 
-import { getCustomEndpointHandler } from './endpoints/getCustomEndpointHandler.js'
+import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
 
 export type MyPluginConfig = {
   /**
@@ -77,7 +77,7 @@ export const myPlugin =
     )
 
     config.endpoints.push({
-      handler: getCustomEndpointHandler(),
+      handler: customEndpointHandler(),
       method: 'get',
       path: '/my-plugin-endpoint',
     })

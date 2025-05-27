@@ -1,6 +1,6 @@
 import type { PayloadHandler } from 'payload'
 
-export const getCustomEndpointHandler = (): PayloadHandler => {
+export const customEndpointHandler = (): PayloadHandler => {
   return () => {
     return Response.json({ message: 'Hello from custom endpoint' })
   }
