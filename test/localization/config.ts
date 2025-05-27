@@ -397,6 +397,37 @@ export default buildConfigWithDefaults({
       ],
     },
     LocalizedWithinLocalized,
+    {
+      slug: 'tabs-and-nested-group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'hero',
+              label: 'Hero',
+              localized: true,
+              fields: [
+                {
+                  type: 'group',
+                  name: 'group',
+                  fields: [
+                    {
+                      name: 'heading',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {

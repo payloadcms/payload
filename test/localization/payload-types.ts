@@ -87,6 +87,7 @@ export interface Config {
     'localized-sort': LocalizedSort;
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
+    'tabs-and-nested-group': TabsAndNestedGroup;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -113,6 +114,7 @@ export interface Config {
     'localized-sort': LocalizedSortSelect<false> | LocalizedSortSelect<true>;
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
+    'tabs-and-nested-group': TabsAndNestedGroupSelect<false> | TabsAndNestedGroupSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -702,6 +704,21 @@ export interface LocalizedWithinLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-and-nested-group".
+ */
+export interface TabsAndNestedGroup {
+  id: string;
+  title?: string | null;
+  hero?: {
+    group?: {
+      heading?: string | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -786,6 +803,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-within-localized';
         value: string | LocalizedWithinLocalized;
+      } | null)
+    | ({
+        relationTo: 'tabs-and-nested-group';
+        value: string | TabsAndNestedGroup;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1342,6 +1363,24 @@ export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
     | T
     | {
         shouldNotBeLocalized?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-and-nested-group_select".
+ */
+export interface TabsAndNestedGroupSelect<T extends boolean = true> {
+  title?: T;
+  hero?:
+    | T
+    | {
+        group?:
+          | T
+          | {
+              heading?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

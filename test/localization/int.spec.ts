@@ -1894,6 +1894,28 @@ describe('Localization', () => {
         expect(docEs.deep.array[0].title).toBe('hello es')
         expect(docEs.deep.blocks[0].title).toBe('hello es')
       })
+
+      it('should properly create/updated/read when localized tab has a group field', async () => {
+        const res = await payload.create({
+          collection: 'tabs-and-nested-group',
+          locale: 'en',
+          data: { hero: { group: { heading: 'EN' } } },
+        })
+        expect(res.hero?.group?.heading).toBe('EN')
+        const resES = await payload.update({
+          collection: 'tabs-and-nested-group',
+          locale: 'es',
+          id: res.id,
+          data: { hero: { group: { heading: 'ES' } } },
+        })
+        expect(resES.hero?.group?.heading).toBe('ES')
+        const resEN = await payload.findByID({
+          collection: 'tabs-and-nested-group',
+          locale: 'en',
+          id: res.id,
+        })
+        expect(resEN.hero?.group?.heading).toBe('EN')
+      })
     })
 
     // Nested localized fields do no longer have their localized property stripped in
