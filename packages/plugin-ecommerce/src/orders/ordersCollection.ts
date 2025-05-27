@@ -3,7 +3,7 @@ import type { CollectionConfig, Field } from 'payload'
 import type { CurrenciesConfig, FieldsOverride } from '../types.js'
 
 import { amountField } from '../fields/amountField.js'
-import { cartItemsField } from '../fields/cartItemsField.js'
+import { cartField } from '../fields/cartField.js'
 import { currencyField } from '../fields/currencyField.js'
 
 type Props = {
@@ -21,6 +21,10 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       name: 'customer',
       type: 'relationship',
       relationTo: customersCollectionSlug,
+    },
+    {
+      name: 'customerEmail',
+      type: 'email',
     },
     {
       name: 'paymentRecord',
@@ -52,12 +56,9 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       ],
     },
     ...(currenciesConfig
-      ? [
-          amountField({ currenciesConfig, overrides: { name: 'total' } }),
-          currencyField({ currenciesConfig }),
-        ]
+      ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
       : []),
-    cartItemsField({ currenciesConfig, individualPrices: true }),
+    cartField({ currenciesConfig, individualPrices: true }),
   ]
 
   const fields =

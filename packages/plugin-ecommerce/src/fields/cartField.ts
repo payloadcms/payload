@@ -14,18 +14,17 @@ type Props = {
   overrides?: Partial<ArrayField>
 }
 
-export const cartItemsField: (props?: Props) => ArrayField = (props) => {
+export const cartField: (props?: Props) => ArrayField = (props) => {
   const { currenciesConfig, individualPrices, overrides } = props || {}
 
   const field: ArrayField = {
-    name: 'cartItems',
+    name: 'cart',
     type: 'array',
     fields: [
       {
         name: 'product',
         type: 'relationship',
         relationTo: 'products',
-        required: true,
       },
       {
         name: 'variant',

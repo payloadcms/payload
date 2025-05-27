@@ -1,10 +1,12 @@
-import type { Config } from 'payload'
+import type { Config, Endpoint } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, PaymentAdapter } from './types.js'
 
 import { USD } from './currencies/index.js'
+import { confirmOrderHandler } from './endpoints/confirmOrder.js'
+import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { paymentRecordsCollection } from './payments/collection/paymentRecordsCollection.js'
 import { productsCollection } from './products/productsCollection.js'
@@ -83,28 +85,52 @@ export const ecommercePlugin =
           : []
 
       if (paymentMethods.length) {
-        paymentMethods.forEach((method) => {
-          if (method.endpoints && method.endpoints.length > 0) {
-            const endpoints = method.endpoints.map((endpoint) => {
+        if (!Array.isArray(incomingConfig.endpoints)) {
+          incomingConfig.endpoints = []
+        }
+
+        paymentMethods.forEach((paymentMethod) => {
+          const methodPath = `/payments/${paymentMethod.name}`
+          const endpoints: Endpoint[] = []
+
+          const initiatePayment: Endpoint = {
+            handler: initiatePaymentHandler({ currenciesConfig, paymentMethod }),
+            method: 'post',
+            path: `${methodPath}/initiate-payment`,
+          }
+
+          const confirmOrder: Endpoint = {
+            handler: confirmOrderHandler({ currenciesConfig, paymentMethod }),
+            method: 'post',
+            path: `${methodPath}/confirm-order`,
+          }
+
+          endpoints.push(initiatePayment, confirmOrder)
+
+          // Attach any additional endpoints defined in the payment method
+          if (paymentMethod.endpoints && paymentMethod.endpoints.length > 0) {
+            const methodEndpoints = paymentMethod.endpoints.map((endpoint) => {
               const path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`
 
               return {
                 ...endpoint,
-                path: `/payments/${method.name}${path}`,
+                path: `${methodPath}${path}`,
               }
             })
 
-            incomingConfig.endpoints!.push(...endpoints)
+            endpoints.push(...methodEndpoints)
           }
+
+          incomingConfig.endpoints!.push(...endpoints)
         })
       }
 
-      const transactions = paymentRecordsCollection({
+      const paymentRecords = paymentRecordsCollection({
         currenciesConfig,
         customersCollectionSlug,
         paymentMethods,
       })
-      incomingConfig.collections.push(transactions)
+      incomingConfig.collections.push(paymentRecords)
     }
 
     if (!incomingConfig.i18n) {

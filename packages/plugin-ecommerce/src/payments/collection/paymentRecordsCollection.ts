@@ -1,17 +1,10 @@
-import type { CollectionConfig, Field, SelectField } from 'payload'
-
-import { de } from 'payload/i18n/de'
+import type { CollectionConfig, Field } from 'payload'
 
 import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../../types.js'
 
 import { amountField } from '../../fields/amountField.js'
-import { cartItemsField } from '../../fields/cartItemsField.js'
 import { currencyField } from '../../fields/currencyField.js'
 import { statusField } from '../../fields/statusField.js'
-import { afterChange } from './hooks/afterChange.js'
-import { afterRead } from './hooks/afterRead.js'
-import { beforeChange } from './hooks/beforeChange.js'
-import { beforeChangePayments } from './hooks/beforeChangePayments.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
@@ -27,7 +20,6 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
     overrides,
     paymentMethods,
   } = props || {}
-  const { defaultCurrency, supportedCurrencies } = currenciesConfig || {}
 
   const fieldsOverride = overrides?.fields
 
@@ -36,7 +28,10 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
       name: 'customer',
       type: 'relationship',
       relationTo: customersCollectionSlug,
-      required: true,
+    },
+    {
+      name: 'customerEmail',
+      type: 'email',
     },
     {
       name: 'order',
@@ -44,7 +39,6 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
       relationTo: 'orders',
     },
     statusField(),
-    cartItemsField({ currenciesConfig, overrides: { name: 'cartSnapshot', minRows: 1 } }),
   ]
 
   if (paymentMethods?.length && paymentMethods.length > 0) {
@@ -84,26 +78,6 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
       ...overrides?.admin,
     },
     fields,
-    hooks: {
-      ...overrides?.hooks,
-      afterChange: [
-        ...(currenciesConfig ? [afterChange({ currenciesConfig, paymentMethods })] : []),
-        ...(overrides?.hooks?.afterChange || []),
-      ],
-      afterRead: [
-        ...(currenciesConfig ? [afterRead({ currenciesConfig, paymentMethods })] : []),
-        ...(overrides?.hooks?.afterRead || []),
-      ],
-      beforeChange: [
-        ...(currenciesConfig
-          ? [
-              beforeChange({ currenciesConfig, paymentMethods }),
-              beforeChangePayments({ currenciesConfig, paymentMethods }),
-            ]
-          : []),
-        ...(overrides?.hooks?.beforeChange || []),
-      ],
-    },
   }
 
   return { ...baseConfig }

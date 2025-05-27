@@ -5,12 +5,37 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
   Omit<CollectionConfig, 'fields'>
 >
 
+type CartItemWithProduct = {
+  product: string
+  quantity: number
+  variant: never
+}
+
+type CartItemWithVariant = {
+  product: never
+  quantity: number
+  variant: string
+}
+
+type CartItem = CartItemWithProduct | CartItemWithVariant
+
+export type Cart = CartItem[]
+
 /**
  * The full payment adapter config expected as part of the config for the Ecommerce plugin.
  *
  * You can insert this type directly or return it from a function constructing it.
  */
 export type PaymentAdapter = {
+  confirmOrder: (args: {
+    data: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [key: string]: any // Allows for additional data to be passed through, such as payment method specific data
+      cart: Cart
+      customerEmail: string
+    }
+    req: PayloadRequest
+  }) => Promise<Record<string, any>> | Record<string, any>
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
    *
@@ -52,18 +77,15 @@ export type PaymentAdapter = {
   /**
    * Hooks used to manage the lifecycle of the payment method. These are run on transactions at various stages when they update.
    */
-  hooks?: {
-    /**
-     * A hook that runs when a transaction is created. This is where you can create a transaction in the payment provider.
-     *
-     * For example, in Stripe, this is where you would create a PaymentIntent and make sure you return the data shape as configured in the group config adjacent.
-     */
-    createTransaction?: (args: {
-      data: Record<string, any>
-      operation: 'create'
-      req: PayloadRequest
-    }) => Promise<Record<string, any>> | Record<string, any>
-  }
+  initiatePayment: (args: {
+    data: {
+      cart: Cart
+      currency: string
+      customerEmail: string
+      total: number
+    }
+    req: PayloadRequest
+  }) => Promise<Record<string, any>> | Record<string, any>
   /**
    * The label of the payment method
    * @example

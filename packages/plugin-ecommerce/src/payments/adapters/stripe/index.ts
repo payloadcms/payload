@@ -3,8 +3,9 @@ import type { Stripe } from 'stripe'
 
 import type { BasePaymentAdapterArgs, PaymentAdapter } from '../../../types.js'
 
+import { confirmOrder } from './confirmOrder.js'
 import { webhooksEndpoint } from './endpoints/webhooks.js'
-import { createTransaction } from './hooks/createTransaction.js'
+import { initiatePayment } from './initiatePayment.js'
 
 type StripeWebhookHandler = (args: {
   event: Stripe.Event
@@ -46,16 +47,14 @@ export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (prop
 
   const baseFields: Field[] = [
     {
-      name: 'stripeCustomerID',
+      name: 'customerID',
       type: 'text',
       label: 'Stripe Customer ID',
-      required: true,
     },
     {
-      name: 'stripePaymentIntentID',
+      name: 'paymentIntentID',
       type: 'text',
       label: 'Stripe PaymentIntent ID',
-      required: true,
     },
   ]
 
@@ -79,15 +78,18 @@ export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (prop
 
   return {
     name: 'stripe',
+    confirmOrder: confirmOrder({
+      apiVersion,
+      appInfo,
+      secretKey,
+    }),
     endpoints: [webhooksEndpoint({ apiVersion, appInfo, secretKey, webhooks, webhookSecret })],
     group: groupField,
-    hooks: {
-      createTransaction: createTransaction({
-        apiVersion,
-        appInfo,
-        secretKey,
-      }),
-    },
+    initiatePayment: initiatePayment({
+      apiVersion,
+      appInfo,
+      secretKey,
+    }),
     label,
   }
 }
