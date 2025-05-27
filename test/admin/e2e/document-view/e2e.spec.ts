@@ -21,9 +21,11 @@ import {
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customTabAdminDescription,
+  customTabComponent,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  overriddenDefaultRouteTabLabel,
 } from '../../shared.js'
 import {
   customFieldsSlug,
@@ -295,6 +297,18 @@ describe('Document View', () => {
       await expect(editTab).toBeVisible()
     })
 
+    test('collection - should allow to override the tab for the default view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      const customTab = page.locator(
+        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+      )
+
+      await expect(customTab).toBeVisible()
+    })
+
     test('collection — should render custom tab component', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
@@ -323,8 +337,18 @@ describe('Document View', () => {
       const docTab = page.locator('.custom-doc-tab').first()
 
       await expect(docTab).toBeVisible()
-      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(docTab).toContainText(customTabComponent)
       await expect(title).toContainText('Custom View With Tab Component')
+    })
+
+    test('global — should allow to override the tab for the default view', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
+
+      const customTab = page.locator(
+        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+      )
+
+      await expect(customTab).toBeVisible()
     })
   })
 
