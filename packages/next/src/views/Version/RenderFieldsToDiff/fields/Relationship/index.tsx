@@ -32,17 +32,12 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   const polymorphic = Array.isArray(field.relationTo)
   const placeholder = `[${i18n.t('general:noValue')}]`
 
-  const localeToUse =
-    locale ??
-    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
-    'en'
-
   if (hasMany) {
     return (
       <ManyRelationshipDiff
         field={field}
         i18n={i18n}
-        locale={localeToUse}
+        locale={locale}
         nestingLevel={nestingLevel}
         parentIsLocalized={parentIsLocalized}
         placeholder={placeholder}
@@ -58,7 +53,7 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
     <SingleRelationshipDiff
       field={field}
       i18n={i18n}
-      locale={localeToUse}
+      locale={locale}
       nestingLevel={nestingLevel}
       parentIsLocalized={parentIsLocalized}
       placeholder={placeholder}
@@ -251,9 +246,14 @@ const RelationshipDocumentDiff = ({
   showPill?: boolean
   value: PopulatedRelationshipValue
 }) => {
+  const localeToUse =
+    locale ??
+    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
+    'en'
+
   const title = generateLabelFromValue({
     field,
-    locale,
+    locale: localeToUse,
     parentIsLocalized,
     req,
     value,
