@@ -123,6 +123,33 @@ test.describe('Folders', () => {
       await expect(deletedFolderCard).toBeHidden()
     })
 
+    test('should delete folder but not delete documents', async () => {
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await createFolder('Folder With Documents')
+      await createPostWithExistingFolder('Document 1', 'Folder With Documents')
+      await createPostWithExistingFolder('Document 2', 'Folder With Documents')
+
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await clickFolderCard('Folder With Documents')
+      const deleteButton = page.locator('.list-selection__actions button', {
+        hasText: 'Delete',
+      })
+      await deleteButton.click()
+      const confirmButton = page.getByRole('button', { name: 'Confirm' })
+      await confirmButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      const deletedFolderCard = page.locator('.folder-file-card__name', {
+        hasText: 'Folder With Documents',
+      })
+      await expect(deletedFolderCard).toBeHidden()
+
+      await page.goto(postURL.list)
+      const firstDoc = page.locator('tbody .row-1')
+      const secondDoc = page.locator('tbody .row-2')
+      await expect(firstDoc).toContainText('Document 2')
+      await expect(secondDoc).toContainText('Document 1')
+    })
+
     test('should move folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
       await createFolder('Move Into This Folder')
@@ -628,6 +655,20 @@ test.describe('Folders', () => {
     const titleInput = page.locator('input[name="title"]')
     await titleInput.fill('Test Post')
     await saveDocAndAssert(page)
+  }
+
+  async function createPostWithExistingFolder(postTitle: string, folderName: string) {
+    await page.goto(postURL.create)
+    const titleInput = page.locator('input[name="title"]')
+    await titleInput.fill(postTitle)
+    await saveDocAndAssert(page)
+    const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
+    await folderPill.click()
+    await clickFolderCard(folderName)
+    const selectButton = page
+      .locator('button[aria-label="Apply Changes"]')
+      .filter({ hasText: 'Select' })
+    await selectButton.click()
   }
 })
 
