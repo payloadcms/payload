@@ -8,7 +8,7 @@ import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { textToLexicalJSON } from '../fields/collections/LexicalLocalized/textToLexicalJSON.js'
+import { textToLexicalJSON } from '../lexical/collections/LexicalLocalized/textToLexicalJSON.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
 import { Regression1 } from './collections/Regression-1/index.js'

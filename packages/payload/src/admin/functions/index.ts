@@ -53,13 +53,14 @@ export type ListQuery = {
   search?: string
   sort?: Sort
   where?: Where
-}
+} & Record<string, unknown>
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
     id: number | string
@@ -69,4 +70,8 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
 }

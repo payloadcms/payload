@@ -40,6 +40,12 @@ type RenderListViewArgs = {
   redirectAfterDuplicate?: boolean
 } & AdminViewServerProps
 
+/**
+ * This function is responsible for rendering
+ * the list view on the server for both:
+ *  - default list view
+ *  - list view within drawers
+ */
 export const renderListView = async (
   args: RenderListViewArgs,
 ): Promise<{
@@ -195,6 +201,7 @@ export const renderListView = async (
       drawerSlug,
       enableRowSelections,
       i18n: req.i18n,
+      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
       payload,
       useAsTitle: collectionConfig.admin.useAsTitle,
     })
@@ -259,6 +266,7 @@ export const renderListView = async (
             defaultSort={sort}
             listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           >
             {RenderServerComponent({
               clientProps: {

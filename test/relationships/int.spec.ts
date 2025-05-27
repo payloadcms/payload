@@ -336,6 +336,41 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should allow querying by relationships with an object where as AND', async () => {
+        const director = await payload.create({
+          collection: 'directors',
+          data: { name: 'Director1', localized: 'Director1_Localized' },
+        })
+
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { director: director.id },
+          depth: 0,
+        })
+
+        const { docs: trueRes } = await payload.find({
+          collection: 'movies',
+          depth: 0,
+          where: {
+            'director.name': { equals: 'Director1' },
+            'director.localized': { equals: 'Director1_Localized' },
+          },
+        })
+
+        expect(trueRes).toStrictEqual([movie])
+
+        const { docs: falseRes } = await payload.find({
+          collection: 'movies',
+          depth: 0,
+          where: {
+            'director.name': { equals: 'Director1_Fake' },
+            'director.localized': { equals: 'Director1_Localized' },
+          },
+        })
+
+        expect(falseRes).toStrictEqual([])
+      })
+
       it('should allow querying within blocks', async () => {
         const rel = await payload.create({
           collection: relationSlug,
@@ -635,18 +670,6 @@ describe('Relationships', () => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
-          const director_1 = await payload.create({
-            collection: 'directors',
-            data: { name: 'Dan', localized: 'Dan' },
-          })
-
-          await payload.update({
-            collection: 'directors',
-            id: director_1.id,
-            locale: 'de',
-            data: { localized: 'Mr. Dan' },
-          })
-
           const director_2 = await payload.create({
             collection: 'directors',
             data: { name: 'Mr. Dan', localized: 'Mr. Dan' },
@@ -657,6 +680,18 @@ describe('Relationships', () => {
             id: director_2.id,
             locale: 'de',
             data: { localized: 'Dan' },
+          })
+
+          const director_1 = await payload.create({
+            collection: 'directors',
+            data: { name: 'Dan', localized: 'Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_1.id,
+            locale: 'de',
+            data: { localized: 'Mr. Dan' },
           })
 
           const movie_1 = await payload.create({

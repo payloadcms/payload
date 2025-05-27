@@ -78,6 +78,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           overrideAccess: true,
           req,
         }
+
         if (operation === 'readVersions') {
           const paginatedRes = await payload.findVersions({
             ...options,
@@ -91,6 +92,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           pagination: false,
           where: combineQueries(where, { id: { equals: id } }),
         })
+
         return paginatedRes?.docs?.[0] || undefined
       }
 
@@ -119,6 +121,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         docBeingAccessed = doc
       })
     }
+
     // awaiting the promise to ensure docBeingAccessed is assigned before it is used
     await docBeingAccessed
 

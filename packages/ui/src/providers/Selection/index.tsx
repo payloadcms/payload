@@ -20,6 +20,7 @@ type SelectionContext = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   getQueryParams: (additionalParams?: Where) => string
+  getSelectedIds: () => (number | string)[]
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
@@ -148,6 +149,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     [selectAll, selected, locale, searchParams],
   )
 
+  const getSelectedIds = useCallback(() => {
+    const ids = []
+    for (const [key, value] of selected) {
+      if (value) {
+        ids.push(key)
+      }
+    }
+    return ids
+  }, [selected])
+
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {
       return
@@ -190,9 +201,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
     count,
     getQueryParams,
+    getSelectedIds,
     selectAll,
     selected,
     setSelection,
@@ -200,6 +213,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   return <Context value={contextRef.current}>{children}</Context>
 }
 

@@ -1,10 +1,18 @@
 import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
 
-import type { PopulationsByCollection } from './types.js'
+import type { CollectionPopulationRequestHandler, PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
-const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
+const defaultRequestHandler = ({
+  apiPath,
+  endpoint,
+  serverURL,
+}: {
+  apiPath: string
+  endpoint: string
+  serverURL: string
+}) => {
   const url = `${serverURL}${apiPath}/${endpoint}`
   return fetch(url, {
     credentials: 'include',
@@ -19,23 +27,19 @@ const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
 // Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
 let prevLocale: string | undefined
 
-export const mergeData = async <T>(args: {
+export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: ({
-    apiPath,
-    endpoint,
-    serverURL,
-  }: {
-    apiPath: string
-    endpoint: string
-    serverURL: string
-  }) => Promise<Response>
+  /**
+   * @deprecated Use `requestHandler` instead
+   */
+  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   externallyUpdatedRelationship?: DocumentEvent
   fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
   locale?: string
+  requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -73,7 +77,8 @@ export const mergeData = async <T>(args: {
       let res: PaginatedDocs
 
       const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
+      const requestHandler =
+        args.collectionPopulationRequestHandler || args.requestHandler || defaultRequestHandler
 
       try {
         res = await requestHandler({
@@ -86,7 +91,7 @@ export const mergeData = async <T>(args: {
 
         if (res?.docs?.length > 0) {
           res.docs.forEach((doc) => {
-            populationsByCollection[collection].forEach((population) => {
+            populationsByCollection[collection]?.forEach((population) => {
               if (population.id === doc.id) {
                 population.ref[population.accessor] = doc
               }

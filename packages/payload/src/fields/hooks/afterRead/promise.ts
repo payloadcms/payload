@@ -2,7 +2,6 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -13,6 +12,7 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
+import { type RequestContext } from '../../../index.js'
 import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
 import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
@@ -20,6 +20,7 @@ import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
+import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
 type Args = {
   /**
@@ -185,7 +186,7 @@ export const promise = async ({
     case 'group': {
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
-      if (typeof siblingDoc[field.name] === 'undefined') {
+      if (fieldAffectsData(field) && typeof siblingDoc[field.name] === 'undefined') {
         siblingDoc[field.name] = {}
       }
 
@@ -304,6 +305,28 @@ export const promise = async ({
           }
         }
       }
+    }
+
+    if (
+      'virtual' in field &&
+      typeof field.virtual === 'string' &&
+      (!field.hidden || showHiddenFields)
+    ) {
+      populationPromises.push(
+        virtualFieldPopulationPromise({
+          name: field.name,
+          draft,
+          fallbackLocale,
+          fields: (collection || global).flattenedFields,
+          locale,
+          overrideAccess,
+          ref: doc,
+          req,
+          segments: field.virtual.split('.'),
+          showHiddenFields,
+          siblingDoc,
+        }),
+      )
     }
 
     // Execute access control
@@ -590,44 +613,77 @@ export const promise = async ({
     }
 
     case 'group': {
-      let groupDoc = siblingDoc[field.name] as JsonObject
+      if (fieldAffectsData(field)) {
+        let groupDoc = siblingDoc[field.name] as JsonObject
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        groupDoc = {}
+        if (typeof siblingDoc[field.name] !== 'object') {
+          groupDoc = {}
+        }
+
+        const groupSelect = select?.[field.name]
+
+        traverseFields({
+          blockData,
+          collection,
+          context,
+          currentDepth,
+          depth,
+          doc,
+          draft,
+          fallbackLocale,
+          fieldPromises,
+          fields: field.fields,
+          findMany,
+          flattenLocales,
+          global,
+          locale,
+          overrideAccess,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          populate,
+          populationPromises,
+          req,
+          select: typeof groupSelect === 'object' ? groupSelect : undefined,
+          selectMode,
+          showHiddenFields,
+          siblingDoc: groupDoc,
+          triggerAccessControl,
+          triggerHooks,
+        })
+      } else {
+        traverseFields({
+          blockData,
+          collection,
+          context,
+          currentDepth,
+          depth,
+          doc,
+          draft,
+          fallbackLocale,
+          fieldPromises,
+          fields: field.fields,
+          findMany,
+          flattenLocales,
+          global,
+          locale,
+          overrideAccess,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          populate,
+          populationPromises,
+          req,
+          select,
+          selectMode,
+          showHiddenFields,
+          siblingDoc,
+          triggerAccessControl,
+          triggerHooks,
+        })
       }
-
-      const groupSelect = select?.[field.name]
-
-      traverseFields({
-        blockData,
-        collection,
-        context,
-        currentDepth,
-        depth,
-        doc,
-        draft,
-        fallbackLocale,
-        fieldPromises,
-        fields: field.fields,
-        findMany,
-        flattenLocales,
-        global,
-        locale,
-        overrideAccess,
-        parentIndexPath: '',
-        parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        populate,
-        populationPromises,
-        req,
-        select: typeof groupSelect === 'object' ? groupSelect : undefined,
-        selectMode,
-        showHiddenFields,
-        siblingDoc: groupDoc,
-        triggerAccessControl,
-        triggerHooks,
-      })
 
       break
     }

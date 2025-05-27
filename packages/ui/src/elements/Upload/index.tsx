@@ -1,6 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -15,13 +16,13 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
-import './index.scss'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import './index.scss'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -49,6 +50,7 @@ export const UploadActions = ({
   mimeType,
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
+  const { openModal } = useModal()
 
   const fileTypeIsAdjustable =
     isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
@@ -62,14 +64,28 @@ export const UploadActions = ({
       {fileTypeIsAdjustable && (
         <React.Fragment>
           {enablePreviewSizes && (
-            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__previewSizes`}
+              onClick={() => {
+                openModal(sizePreviewSlug)
+              }}
+              size="small"
+            >
               {t('upload:previewSizes')}
-            </DrawerToggler>
+            </Button>
           )}
           {enableAdjustments && (
-            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__edit`}
+              onClick={() => {
+                openModal(editDrawerSlug)
+              }}
+              size="small"
+            >
               {t('upload:editImage')}
-            </DrawerToggler>
+            </Button>
           )}
         </React.Fragment>
       )}
@@ -91,7 +107,34 @@ export type UploadProps = {
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  return (
+    <Upload_v4
+      {...props}
+      resetUploadEdits={resetUploadEdits}
+      updateUploadEdits={updateUploadEdits}
+      uploadEdits={uploadEdits}
+    />
+  )
+}
+
+export type UploadProps_v4 = {
+  readonly resetUploadEdits?: () => void
+  readonly updateUploadEdits?: (args: UploadEdits) => void
+  readonly uploadEdits?: UploadEdits
+} & UploadProps
+
+export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
+  const {
+    collectionSlug,
+    customActions,
+    initialState,
+    onChange,
+    resetUploadEdits,
+    updateUploadEdits,
+    uploadConfig,
+    uploadEdits,
+  } = props
 
   const {
     config: {
@@ -102,7 +145,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({

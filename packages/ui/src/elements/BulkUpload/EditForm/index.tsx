@@ -16,11 +16,11 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
-import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
-import { Upload } from '../../Upload/index.js'
+import { MoveDocToFolder } from '../../FolderView/MoveDocToFolder/index.js'
+import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { BulkUploadProvider } from '../index.js'
 import './index.scss'
@@ -31,7 +31,12 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 
-export function EditForm({ submitted }: EditFormProps) {
+export function EditForm({
+  resetUploadEdits,
+  submitted,
+  updateUploadEdits,
+  uploadEdits,
+}: EditFormProps) {
   const {
     action,
     collectionSlug: docSlug,
@@ -50,6 +55,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const {
     config: {
+      folders,
       routes: { admin: adminRoute },
     },
     getEntityConfig,
@@ -62,7 +68,6 @@ export function EditForm({ submitted }: EditFormProps) {
   const depth = useEditDepth()
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
-  const { resetUploadEdits } = useUploadEdits()
   const { startRouteTransition } = useRouteTransition()
 
   const locale = params.get('locale')
@@ -161,10 +166,25 @@ export function EditForm({ submitted }: EditFormProps) {
             BeforeFields={
               <React.Fragment>
                 {CustomUpload || (
-                  <Upload
+                  <Upload_v4
                     collectionSlug={collectionConfig.slug}
+                    customActions={[
+                      collectionConfig.folders && (
+                        <MoveDocToFolder
+                          buttonProps={{
+                            buttonStyle: 'pill',
+                            size: 'small',
+                          }}
+                          folderFieldName={folders.fieldName}
+                          key="move-doc-to-folder"
+                        />
+                      ),
+                    ].filter(Boolean)}
                     initialState={initialState}
+                    resetUploadEdits={resetUploadEdits}
+                    updateUploadEdits={updateUploadEdits}
                     uploadConfig={collectionConfig.upload}
+                    uploadEdits={uploadEdits}
                   />
                 )}
               </React.Fragment>
@@ -185,7 +205,8 @@ function GetFieldProxy() {
   const { getFields } = useForm()
   const { getFormDataRef } = useFormsManager()
 
-  React.useEffect(() => {
+  useEffect(() => {
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
   }, [getFields, getFormDataRef])
 
