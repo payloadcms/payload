@@ -316,6 +316,16 @@ const GroupFields: CollectionConfig = {
     },
     {
       type: 'group',
+      label: false,
+      fields: [
+        {
+          type: 'text',
+          name: 'insideGroupWithNoLabel',
+        },
+      ],
+    },
+    {
+      type: 'group',
       label: 'Deeply nested group',
       fields: [
         {
