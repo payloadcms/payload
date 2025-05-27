@@ -851,7 +851,7 @@ export type Config = {
        *
        * @default '/browse-by-folder'
        */
-      browseByFolder: `/${string}`
+      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
