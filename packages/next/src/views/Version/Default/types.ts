@@ -12,8 +12,8 @@ export type VersionPill = {
 
 export type DefaultVersionsViewProps = {
   readonly canUpdate: boolean
-  readonly latestDraftVersionID: string
-  readonly latestPublishedVersionID: string
+  readonly latestDraftVersionID?: string
+  readonly latestPublishedVersionID?: string
   modifiedOnly: boolean
   readonly RenderedDiff: React.ReactNode
   readonly selectedLocales: string[]

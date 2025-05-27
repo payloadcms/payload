@@ -7,8 +7,8 @@ import { VersionPillLabel } from './VersionPillLabel.js'
 export function formatVersionPill(args: {
   doc: TypeWithVersion<any>
   hasPublishedDoc: boolean
-  latestDraftVersionID: string
-  latestPublishedVersionID: string
+  latestDraftVersionID?: string
+  latestPublishedVersionID?: string
 }): VersionPill {
   const { doc, hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID } = args
 

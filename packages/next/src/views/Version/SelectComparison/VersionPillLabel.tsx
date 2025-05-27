@@ -9,8 +9,8 @@ import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
 export const VersionPillLabel: React.FC<{
   doc: any
   hasPublishedDoc: boolean
-  latestDraftVersionID: string
-  latestPublishedVersionID: string
+  latestDraftVersionID?: string
+  latestPublishedVersionID?: string
 }> = (args) => {
   const { doc, hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID } = args
 

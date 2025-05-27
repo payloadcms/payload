@@ -1,7 +1,6 @@
 import type {
   DocumentViewServerProps,
   Locale,
-  OptionObject,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
   TypeWithVersion,
@@ -305,6 +304,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       selectedLocales={selectedLocales}
       versionFromPill={formatVersionPill({
         doc: versionFrom,
+        hasPublishedDoc: !!latestPublishedVersion,
         latestDraftVersionID: latestDraftVersion?.id,
         latestPublishedVersionID: latestPublishedVersion?.id,
       })}
@@ -313,6 +313,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       VersionToCreatedAtLabel={
         formatVersionPill({
           doc: versionTo,
+          hasPublishedDoc: !!latestPublishedVersion,
           latestDraftVersionID: latestDraftVersion?.id,
           latestPublishedVersionID: latestPublishedVersion?.id,
         }).Label
