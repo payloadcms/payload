@@ -182,6 +182,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 icon={<ChevronIcon direction={localeSelectorOpen ? 'up' : 'down'} />}
                 onClick={() => setLocaleSelectorOpen((localeSelectorOpen) => !localeSelectorOpen)}
                 pillStyle="light"
+                size="small"
               >
                 {t('general:locales')}
               </Pill>
