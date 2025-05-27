@@ -6,21 +6,37 @@ import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { debug, error } from '../utils/log.js'
 import { dbChoiceRecord } from './select-db.js'
 
-const updateEnvExampleVariables = (
+const sanitizeEnv = (
   contents: string,
   databaseType: DbType | undefined,
   payloadSecret?: string,
   databaseUri?: string,
 ): string => {
   const seenKeys = new Set<string>()
-  const updatedEnv = contents
+
+  // add defaults
+  let withDefaults = contents
+
+  if (
+    !contents.includes('DATABASE_URI') &&
+    !contents.includes('POSTGRES_URL') &&
+    !contents.includes('MONGODB_URI')
+  ) {
+    withDefaults += '\nDATABASE_URI=your-database-name'
+  }
+
+  if (!contents.includes('PAYLOAD_SECRET')) {
+    withDefaults += '\nPAYLOAD_SECRET=YOUR_SECRET_HERE'
+  }
+
+  let updatedEnv = withDefaults
     .split('\n')
     .map((line) => {
       if (line.startsWith('#') || !line.includes('=')) {
         return line
       }
 
-      const [key] = line.split('=')
+      const [key, value] = line.split('=')
 
       if (!key) {
         return
@@ -37,6 +53,8 @@ const updateEnvExampleVariables = (
             databaseType === 'vercel-postgres'
               ? `POSTGRES_URL=${placeholderUri}`
               : `DATABASE_URI=${placeholderUri}`
+        } else {
+          line = `${key}=${value}`
         }
       }
 
@@ -56,6 +74,10 @@ const updateEnvExampleVariables = (
     .filter(Boolean)
     .reverse()
     .join('\n')
+
+  if (!updatedEnv.includes('# Added by Payload')) {
+    updatedEnv = `# Added by Payload\n${updatedEnv}`
+  }
 
   return updatedEnv
 }
@@ -78,73 +100,48 @@ export async function manageEnvFiles(args: {
     return
   }
 
-  const envExamplePath = path.join(projectDir, '.env.example')
+  const pathToEnvExample = path.join(projectDir, '.env.example')
   const envPath = path.join(projectDir, '.env')
-  const emptyEnvContent = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
+
+  let exampleEnv: null | string = ''
 
   try {
-    let updatedExampleContents: string
-
     if (template?.type === 'plugin') {
       if (debugFlag) {
         debug(`plugin template detected - no .env added .env.example added`)
       }
+
       return
     }
 
-    if (!fs.existsSync(envExamplePath)) {
-      updatedExampleContents = updateEnvExampleVariables(
-        emptyEnvContent,
-        databaseType,
-        payloadSecret,
-        databaseUri,
-      )
+    // If there's a .env.example file, use it to create or update the .env file
+    if (fs.existsSync(pathToEnvExample)) {
+      const envExampleContents = await fs.readFile(pathToEnvExample, 'utf8')
 
-      await fs.writeFile(envExamplePath, updatedExampleContents)
+      exampleEnv = sanitizeEnv(envExampleContents, databaseType, payloadSecret, databaseUri)
 
       if (debugFlag) {
-        debug(`.env.example file successfully created`)
-      }
-    } else {
-      const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-      const mergedEnvs = envExampleContents + '\n' + emptyEnvContent
-      updatedExampleContents = updateEnvExampleVariables(
-        mergedEnvs,
-        databaseType,
-        payloadSecret,
-        databaseUri,
-      )
-
-      await fs.writeFile(envExamplePath, updatedExampleContents)
-
-      if (debugFlag) {
-        debug(`.env.example file successfully updated`)
+        debug(`.env.example file successfully read`)
       }
     }
 
+    // If there's no .env file, create it using the .env.example content (if it exists)
     if (!fs.existsSync(envPath)) {
-      const envContent = updateEnvExampleVariables(
-        emptyEnvContent,
-        databaseType,
-        payloadSecret,
-        databaseUri,
-      )
+      const envContent = sanitizeEnv(exampleEnv, databaseType, payloadSecret, databaseUri)
+
       await fs.writeFile(envPath, envContent)
 
       if (debugFlag) {
         debug(`.env file successfully created`)
       }
     } else {
+      // If the .env file already exists, sanitize it as-is
       const envContents = await fs.readFile(envPath, 'utf8')
-      const mergedEnvs = envContents + '\n' + emptyEnvContent
-      const updatedEnvContents = updateEnvExampleVariables(
-        mergedEnvs,
-        databaseType,
-        payloadSecret,
-        databaseUri,
-      )
+
+      const updatedEnvContents = sanitizeEnv(envContents, databaseType, payloadSecret, databaseUri)
 
       await fs.writeFile(envPath, updatedEnvContents)
+
       if (debugFlag) {
         debug(`.env file successfully updated`)
       }
