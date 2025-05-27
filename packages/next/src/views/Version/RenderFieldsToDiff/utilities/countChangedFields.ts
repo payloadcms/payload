@@ -1,6 +1,6 @@
 import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } from 'payload'
 
-import { fieldShouldBeLocalized } from 'payload/shared'
+import { fieldShouldBeLocalized, groupHasName } from 'payload/shared'
 
 import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
@@ -114,25 +114,37 @@ export function countChangedFields({
 
       // Fields that have nested fields and nest their fields' data.
       case 'group': {
-        if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-          locales.forEach((locale) => {
+        if (groupHasName(field)) {
+          if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+            locales.forEach((locale) => {
+              count += countChangedFields({
+                comparison: comparison?.[field.name]?.[locale],
+                config,
+                fields: field.fields,
+                locales,
+                parentIsLocalized: parentIsLocalized || field.localized,
+                version: version?.[field.name]?.[locale],
+              })
+            })
+          } else {
             count += countChangedFields({
-              comparison: comparison?.[field.name]?.[locale],
+              comparison: comparison?.[field.name],
               config,
               fields: field.fields,
               locales,
               parentIsLocalized: parentIsLocalized || field.localized,
-              version: version?.[field.name]?.[locale],
+              version: version?.[field.name],
             })
-          })
+          }
         } else {
+          // Unnamed group field: data is NOT nested under `field.name`
           count += countChangedFields({
-            comparison: comparison?.[field.name],
+            comparison,
             config,
             fields: field.fields,
             locales,
             parentIsLocalized: parentIsLocalized || field.localized,
-            version: version?.[field.name],
+            version,
           })
         }
         break

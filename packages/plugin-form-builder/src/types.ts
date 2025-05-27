@@ -33,6 +33,7 @@ export interface FieldsConfig {
   [key: string]: boolean | FieldConfig | undefined
   checkbox?: boolean | FieldConfig
   country?: boolean | FieldConfig
+  date?: boolean | FieldConfig
   email?: boolean | FieldConfig
   message?: boolean | FieldConfig
   number?: boolean | FieldConfig
@@ -146,6 +147,16 @@ export interface EmailField {
   width?: number
 }
 
+export interface DateField {
+  blockName?: string
+  blockType: 'date'
+  defaultValue?: string
+  label?: string
+  name: string
+  required?: boolean
+  width?: number
+}
+
 export interface StateField {
   blockName?: string
   blockType: 'state'
@@ -185,6 +196,7 @@ export interface MessageField {
 export type FormFieldBlock =
   | CheckboxField
   | CountryField
+  | DateField
   | EmailField
   | MessageField
   | PaymentField

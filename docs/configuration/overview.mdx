@@ -84,6 +84,7 @@ The following options are available:
 | **`csrf`**                 | A whitelist array of URLs to allow Payload to accept cookies from. [More details](../authentication/cookies#csrf-attacks).                                                                     |
 | **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../queries/depth).                                                                     |
 | **`defaultMaxTextLength`** | The maximum allowed string length to be permitted application-wide. Helps to prevent malicious public document creation.                                                                       |
+| `folders`                  | An optional object to configure global folder settings. [More details](../folders/overview).                                                                                                   |
 | `queryPresets`             | An object that to configure Collection Query Presets. [More details](../query-presets/overview).                                                                                               |
 | **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. [More details](../queries/depth).                          |
 | **`indexSortableFields`**  | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar.                                     |
@@ -212,7 +213,7 @@ For more information about what we track, take a look at our [privacy policy](/p
 
 ## Cross-origin resource sharing (CORS)#cors
 
-Cross-origin resource sharing (CORS) can be configured with either a whitelist array of URLS to allow CORS requests from, a wildcard string (`*`) to accept incoming requests from any domain, or a object with the following properties:
+Cross-origin resource sharing (CORS) can be configured with either a whitelist array of URLS to allow CORS requests from, a wildcard string (`*`) to accept incoming requests from any domain, or an object with the following properties:
 
 | Option        | Description                                                                                                                             |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -291,7 +292,7 @@ export const script = async (config: SanitizedConfig) => {
     collection: 'pages',
     data: { title: 'my title' },
   })
-  payload.logger.info('Succesffully seeded!')
+  payload.logger.info('Successfully seeded!')
   process.exit(0)
 }
 ```

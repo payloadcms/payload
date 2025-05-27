@@ -6,7 +6,7 @@ desc: Converting between lexical richtext and JSX
 keywords: lexical, richtext, jsx
 ---
 
-## Converting Richtext to JSX
+## Richtext to JSX
 
 To convert richtext to JSX, import the `RichText` component from `@payloadcms/richtext-lexical/react` and pass the richtext content to it:
 
@@ -28,7 +28,7 @@ The `RichText` component includes built-in converters for common Lexical nodes. 
   populated data to work correctly.
 </Banner>
 
-### Converting Internal Links
+### Internal Links
 
 By default, Payload doesn't know how to convert **internal** links to JSX, as it doesn't know what the corresponding URL of the internal link is. You'll notice that you get a "found internal link, but internalDocToHref is not provided" error in the console when you try to render content with internal links.
 
@@ -81,7 +81,7 @@ export const MyComponent: React.FC<{
 }
 ```
 
-### Converting Lexical Blocks
+### Lexical Blocks
 
 If your rich text includes custom Blocks or Inline Blocks, you must supply custom converters that match each block's slug. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
 
@@ -133,9 +133,9 @@ export const MyComponent: React.FC<{
 }
 ```
 
-### Overriding Default JSX Converters
+### Overriding Converters
 
-You can override any of the default JSX converters by passing passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
+You can override any of the default JSX converters by passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
 
 Example - overriding the upload node converter to use next/image:
 

@@ -176,7 +176,34 @@ export const trTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloğu aç/kapat',
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
+  folder: {
+    browseByFolder: 'Klasöre Göre Gözat',
+    byFolder: 'Klasör Bazında',
+    deleteFolder: 'Klasörü Sil',
+    folderName: 'Klasör Adı',
+    folders: 'Klasörler',
+    itemHasBeenMoved: '{{title}} {{folderName}} klasörüne taşındı.',
+    itemHasBeenMovedToRoot: '{{title}} kök klasöre taşındı.',
+    itemsMovedToFolder: "{{title}} {{folderName}}'ye taşındı.",
+    itemsMovedToRoot: '{{title}} kök klasörüne taşındı',
+    moveFolder: 'Klasörü Taşı',
+    moveItemsToFolderConfirmation:
+      "<1>{{count}} {{label}}</1>'yi <2>{{toFolder}}</2>'ye taşımayı planlıyorsunuz. Emin misiniz?",
+    moveItemsToRootConfirmation:
+      '<1>{{count}} {{label}}</1> kök klasöre taşımayı planlıyorsunuz. Emin misiniz?',
+    moveItemToFolderConfirmation:
+      '<1>{{title}}</1> ögesini <2>{{toFolder}}</2> konumuna taşımak üzeresiniz. Emin misiniz?',
+    moveItemToRootConfirmation:
+      '<1>{{title}}</1> öğesini ana klasöre taşımak üzeresiniz. Emin misiniz?',
+    movingFromFolder: '{{title}} öğesinin {{folderName}} klasöründen taşınması',
+    newFolder: 'Yeni Klasör',
+    noFolder: 'Klasör Yok',
+    renameFolder: 'Klasörü Yeniden Adlandır',
+    searchByNameInFolder: "{{folderName}}'da İsme Göre Ara",
+    selectFolderForItem: '{{title}} için klasör seçin',
+  },
   general: {
+    name: 'İsim',
     aboutToDelete:
       '<1>{{title}}</1> {{label}} silinmek üzere. Silme işlemine devam etmek istiyor musunuz?',
     aboutToDeleteCount_many: '{{count}} {{label}} silmek üzeresiniz',
@@ -208,6 +235,7 @@ export const trTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Kopyayı onayla',
     confirmDeletion: 'Silmeyi onayla',
     confirmDuplication: 'Çoğaltmayı onayla',
+    confirmMove: 'Hareketi onayla',
     confirmReindex: 'Tüm {{collections}} yeniden dizine alınsın mı?',
     confirmReindexAll: 'Tüm koleksiyonlar yeniden dizine alinsın mı?',
     confirmReindexDescription:
@@ -267,6 +295,8 @@ export const trTranslations: DefaultTranslationsObject = {
     goBack: 'Geri dön',
     import: 'İthalat',
     isEditing: 'düzenliyor',
+    item: 'öğe',
+    items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
     leaveAnyway: 'Yine de ayrıl',
@@ -278,8 +308,14 @@ export const trTranslations: DefaultTranslationsObject = {
     locales: 'Diller',
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
+    move: 'Hareket et',
+    moveConfirm:
+      '<1>{{destination}}</1> konumuna {{count}} {{label}} taşımayı planlıyorsunuz. Emin misiniz?',
+    moveCount: '{{count}} {{label}} taşı',
     moveDown: 'Aşağı taşı',
     moveUp: 'Yukarı taşı',
+    moving: 'Taşınma',
+    movingCount: '{{count}} {{label}} taşıma',
     newPassword: 'Yeni parola',
     next: 'Sonraki',
     no: 'Hayır',
@@ -308,6 +344,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     remove: 'Kaldır',
+    rename: 'Yeniden adlandır',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
@@ -319,6 +356,7 @@ export const trTranslations: DefaultTranslationsObject = {
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',
+    select: 'Seçiniz',
     selectAll: "Tüm {{count}} {{label}}'ı seçin",
     selectAllRows: 'Tüm satırları seçin',
     selectedCount: '{{count}} {{label}} seçildi',

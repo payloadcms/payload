@@ -36,7 +36,7 @@ export type ServerOnlyFieldProperties =
   | 'dbName' // can be a function
   | 'editor' // This is a `richText` only property
   | 'enumName' // can be a function
-  | 'filterOptions' // This is a `relationship` and `upload` only property
+  | 'filterOptions' // This is a `relationship`, `upload`, and `select` only property
   | 'graphQL'
   | 'label'
   | 'typescriptSchema'
@@ -53,7 +53,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'access',
   'validate',
   'defaultValue',
-  'filterOptions', // This is a `relationship` and `upload` only property
+  'filterOptions', // This is a `relationship`, `upload`, and `select` only property
   'editor', // This is a `richText` only property
   'custom',
   'typescriptSchema',
@@ -67,10 +67,12 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   // `tabs`
   // `admin`
 ]
+
 const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
   'condition',
   'components',
 ]
+
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField

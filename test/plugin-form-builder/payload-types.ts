@@ -270,6 +270,20 @@ export interface Form {
             blockName?: string | null;
             blockType: 'color';
           }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            /**
+             * This is a date field
+             */
+            defaultValue?: string | null;
+            defaultValue_tz?: SupportedTimezones;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
       )[]
     | null;
   submitButtonLabel?: string | null;
@@ -612,6 +626,18 @@ export interface FormsSelect<T extends boolean = true> {
           | T
           | {
               value?: T;
+              id?: T;
+              blockName?: T;
+            };
+        date?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              defaultValue_tz?: T;
               id?: T;
               blockName?: T;
             };

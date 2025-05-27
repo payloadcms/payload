@@ -30,7 +30,7 @@ export function findUpSync({
           break
         }
       }
-      if (!found) {
+      if (!found && dir !== root) {
         dir = path.dirname(dir) // Move up one directory level.
         continue
       }
@@ -77,7 +77,7 @@ export async function findUp({
           break
         }
       }
-      if (!found) {
+      if (!found && dir !== root) {
         dir = path.dirname(dir) // Move up one directory level.
         continue
       }

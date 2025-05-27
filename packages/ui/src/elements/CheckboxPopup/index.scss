@@ -1,0 +1,19 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .checkbox-popup {
+    &__options {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.5);
+      padding: 0 3px;
+    }
+
+    .checkbox-input {
+      align-items: center;
+      label {
+        padding-bottom: 0;
+      }
+    }
+  }
+}

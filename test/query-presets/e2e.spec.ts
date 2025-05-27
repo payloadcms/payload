@@ -364,6 +364,7 @@ describe('Query Presets', () => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
+    await openListMenu({ page })
     await clickListMenuItem({ page, menuItemLabel: 'Edit' })
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
@@ -398,6 +399,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
+    await openListMenu({ page })
     await clickListMenuItem({ page, menuItemLabel: 'Create New' })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()

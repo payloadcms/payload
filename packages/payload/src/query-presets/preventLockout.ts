@@ -72,7 +72,7 @@ export const preventLockout: Validate = async (
       canUpdate = true
     } catch (_err) {
       if (!canRead || !canUpdate) {
-        throw new APIError('Cannot remove yourself from this preset.', 403, {}, true)
+        throw new APIError('This action will lock you out of this preset.', 403, {}, true)
       }
     } finally {
       if (transaction) {

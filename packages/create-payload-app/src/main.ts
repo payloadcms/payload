@@ -8,7 +8,6 @@ import path from 'path'
 import type { CliArgs } from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
-import { PACKAGE_VERSION } from './lib/constants.js'
 import { createProject } from './lib/create-project.js'
 import { parseExample } from './lib/examples.js'
 import { generateSecret } from './lib/generate-secret.js'
@@ -20,6 +19,7 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
+import { getLatestPackageVersion } from './utils/getLatestPackageVersion.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -78,12 +78,17 @@ export class Main {
 
   async init(): Promise<void> {
     try {
+      const debugFlag = this.args['--debug']
+
+      const LATEST_VERSION = await getLatestPackageVersion({
+        debug: debugFlag,
+        packageName: 'payload',
+      })
+
       if (this.args['--help']) {
         helpMessage()
         process.exit(0)
       }
-
-      const debugFlag = this.args['--debug']
 
       // eslint-disable-next-line no-console
       console.log('\n')
@@ -200,7 +205,7 @@ export class Main {
 
       const templateArg = this.args['--template']
       if (templateArg) {
-        const valid = validateTemplate(templateArg)
+        const valid = validateTemplate({ templateName: templateArg })
         if (!valid) {
           helpMessage()
           process.exit(1)
@@ -230,7 +235,7 @@ export class Main {
       }
 
       if (debugFlag) {
-        debug(`Using ${exampleArg ? 'examples' : 'templates'} from git tag: v${PACKAGE_VERSION}`)
+        debug(`Using ${exampleArg ? 'examples' : 'templates'} from git tag: v${LATEST_VERSION}`)
       }
 
       if (!exampleArg) {

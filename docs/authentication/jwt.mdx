@@ -38,7 +38,7 @@ const request = await fetch('http://localhost:3000', {
 
 ### Omitting The Token
 
-In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponse` to `true` like so:
+In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponses` to `true` like so:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -46,7 +46,7 @@ import type { CollectionConfig } from 'payload'
 export const UsersWithoutJWTs: CollectionConfig = {
   slug: 'users-without-jwts',
   auth: {
-    removeTokenFromResponse: true, // highlight-line
+    removeTokenFromResponses: true, // highlight-line
   },
 }
 ```

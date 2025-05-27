@@ -327,7 +327,7 @@ describe('Field Validations', () => {
         },
       ],
     }
-    it('should allow valid input', () => {
+    it('should allow valid input', async () => {
       const val = 'one'
       const result = select(val, selectOptions)
       expect(result).toStrictEqual(true)

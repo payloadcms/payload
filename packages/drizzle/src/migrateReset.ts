@@ -28,6 +28,8 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
 
   const req = await createLocalReq({}, payload)
 
+  existingMigrations.reverse()
+
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)

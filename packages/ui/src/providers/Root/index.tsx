@@ -9,9 +9,10 @@ import type {
   User,
 } from 'payload'
 
+import { DndContext, pointerWithin } from '@dnd-kit/core'
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { Theme } from '../Theme/index.js'
 
@@ -19,6 +20,7 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
+import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
@@ -69,14 +71,15 @@ export const RootProvider: React.FC<Props> = ({
   translations,
   user,
 }) => {
-  const RouteCacheComponent =
-    process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true' ? RouteCache : Fragment
+  const dndContextID = React.useId()
 
   return (
-    <Fragment>
+    <ClickOutsideProvider>
       <ServerFunctionsProvider serverFunction={serverFunction}>
         <RouteTransitionProvider>
-          <RouteCacheComponent>
+          <RouteCache
+            cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
+          >
             <ConfigProvider config={config}>
               <ClientFunctionProvider>
                 <TranslationProvider
@@ -108,7 +111,12 @@ export const RootProvider: React.FC<Props> = ({
                                         <DocumentEventsProvider>
                                           <NavProvider initialIsOpen={isNavOpen}>
                                             <UploadHandlersProvider>
-                                              {children}
+                                              <DndContext
+                                                collisionDetection={pointerWithin}
+                                                id={dndContextID}
+                                              >
+                                                {children}
+                                              </DndContext>
                                             </UploadHandlersProvider>
                                           </NavProvider>
                                         </DocumentEventsProvider>
@@ -128,10 +136,10 @@ export const RootProvider: React.FC<Props> = ({
                 </TranslationProvider>
               </ClientFunctionProvider>
             </ConfigProvider>
-          </RouteCacheComponent>
+          </RouteCache>
         </RouteTransitionProvider>
       </ServerFunctionsProvider>
       <ToastContainer />
-    </Fragment>
+    </ClickOutsideProvider>
   )
 }

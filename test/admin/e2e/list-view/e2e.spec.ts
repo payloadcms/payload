@@ -11,6 +11,7 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
+  openColumnControls,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -954,6 +955,52 @@ describe('List View', () => {
       expect(page.url()).not.toMatch(/columns=/)
     })
 
+    test('should render field in group as column', async () => {
+      await createPost({ group: { someTextField: 'nested group text field' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Some Text Field'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+        'nested group text field',
+      )
+    })
+
+    test('should render top-level and group field with same name in separate columns', async () => {
+      await createPost({
+        someTextField: 'top-level text field',
+        group: { someTextField: 'nested group text field' },
+      })
+
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+
+      // Enable top-level column
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Some Text Field'),
+        })
+        .click()
+
+      // Enable group column
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Some Text Field'),
+        })
+        .click()
+
+      // Expect top-level cell
+      await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
+
+      // Expect nested group cell
+      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+        'nested group text field',
+      )
+    })
+
     test('should drag to reorder columns and save to preferences', async () => {
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
@@ -1162,17 +1209,17 @@ describe('List View', () => {
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
       // delete should not appear without selection
-      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(0)
+      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
       // delete button should be present
-      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(1)
+      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
 
       await page.locator('.row-2 .cell-_select input').check()
 
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-posts #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
   })
@@ -1261,7 +1308,7 @@ describe('List View', () => {
     beforeEach(async () => {
       // delete all posts created by the seed
       await deleteAllPosts()
-      await createPost({ number: 1 })
+      await createPost({ number: 1, group: { someTextField: 'nested group text field' } })
       await createPost({ number: 2 })
     })
 
@@ -1281,6 +1328,38 @@ describe('List View', () => {
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
+    })
+
+    test('should allow sorting by nested field within group in separate column', async () => {
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group > Some Text Field'),
+        })
+        .click()
+      const upChevron = page.locator('#heading-group-someTextField .sort-column__asc')
+      const downChevron = page.locator('#heading-group-someTextField .sort-column__desc')
+
+      await upChevron.click()
+      await page.waitForURL(/sort=group.someTextField/)
+
+      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+        '<No Some Text Field>',
+      )
+      await expect(page.locator('.row-2 .cell-group-someTextField')).toHaveText(
+        'nested group text field',
+      )
+
+      await downChevron.click()
+      await page.waitForURL(/sort=-group.someTextField/)
+
+      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+        'nested group text field',
+      )
+      await expect(page.locator('.row-2 .cell-group-someTextField')).toHaveText(
+        '<No Some Text Field>',
+      )
     })
 
     test('should sort with existing filters', async () => {

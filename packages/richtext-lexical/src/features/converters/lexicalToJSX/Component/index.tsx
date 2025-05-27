@@ -16,7 +16,7 @@ export type JSXConvertersFunction<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string }>
-    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
+    | SerializedInlineBlockNode<{ blockName?: null | string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
 type RichTextProps = {

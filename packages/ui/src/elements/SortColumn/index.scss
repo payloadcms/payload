@@ -25,7 +25,7 @@
     &__buttons {
       display: flex;
       align-items: center;
-      gap: calc(var(--base) / 4);
+      gap: 0;
     }
 
     &__button {

@@ -18,9 +18,11 @@ export const renderPill = (data, latestVersion, currentLabel, previousLabel, pil
   return (
     <React.Fragment>
       {data?.id === latestVersion ? (
-        <Pill pillStyle={pillStyle}>{currentLabel}</Pill>
+        <Pill pillStyle={pillStyle} size="small">
+          {currentLabel}
+        </Pill>
       ) : (
-        <Pill>{previousLabel}</Pill>
+        <Pill size="small">{previousLabel}</Pill>
       )}
       &nbsp;&nbsp;
     </React.Fragment>

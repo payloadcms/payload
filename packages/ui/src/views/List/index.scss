@@ -16,12 +16,6 @@
       a {
         text-decoration: none;
       }
-
-      .btn--withoutPopup,
-      .btn--withPopup {
-        position: relative;
-        margin: 0 0 base(0.2);
-      }
     }
 
     &__sub-header {
@@ -46,7 +40,6 @@
 
         #heading-_select,
         .cell-_select {
-          display: flex;
           min-width: unset;
         }
 

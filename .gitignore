@@ -3,6 +3,7 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+/.idea/runConfigurations/_template*
 !/.idea/payload.iml
 
 # Custom actions

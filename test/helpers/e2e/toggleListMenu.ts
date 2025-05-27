@@ -16,8 +16,6 @@ export async function clickListMenuItem({
   menuItemLabel: string
   page: Page
 }) {
-  await openListMenu({ page })
-
   const menuItem = page.locator('.popup__content').locator('button', {
     hasText: exactText(menuItemLabel),
   })

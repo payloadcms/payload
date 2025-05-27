@@ -309,6 +309,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,
@@ -327,7 +328,6 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
-      redirectAfterCreate,
     ],
   )
 

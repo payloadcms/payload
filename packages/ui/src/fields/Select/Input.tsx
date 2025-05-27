@@ -22,6 +22,7 @@ export type SelectInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly filterOption?: ReactSelectAdapterProps['filterOption']
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
@@ -49,6 +50,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Description,
     description,
     Error,
+    filterOption,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -118,6 +120,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         {BeforeInput}
         <ReactSelect
           disabled={readOnly}
+          filterOption={filterOption}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}

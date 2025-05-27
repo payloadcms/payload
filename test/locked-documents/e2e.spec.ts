@@ -218,9 +218,9 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
-      await expect(page.locator('#delete-posts .confirmation-modal__content p')).toHaveText(
-        'You are about to delete 2 Posts',
-      )
+      await expect(
+        page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
+      ).toHaveText('You are about to delete 2 Posts')
     })
 
     test('should only allow bulk delete on unlocked documents on all pages', async () => {
@@ -235,9 +235,9 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-posts #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -253,8 +253,8 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
-      await page.locator('.publish-many__toggle').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
+      await page.locator('.list-selection__button[aria-label="Publish"]').click()
       await page.locator('#publish-posts #confirm-action').click()
 
       const paginator = page.locator('.paginator')
@@ -268,8 +268,8 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
-      await page.locator('.unpublish-many__toggle').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
+      await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
       await page.locator('#unpublish-posts #confirm-action').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
@@ -282,7 +282,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
 
       await page.locator('input#select-all').check()
-      await page.locator('.list-selection .list-selection__button').click()
+      await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
       await page.locator('.field-select .rs__control').click()
@@ -547,7 +547,7 @@ describe('Locked Documents', () => {
 
       expect(lockedDocs.docs.length).toBe(1)
 
-      await page.locator('li[aria-label="API"] a').click()
+      await page.locator('a[aria-label="API"]').click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')

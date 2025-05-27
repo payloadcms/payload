@@ -82,6 +82,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.custom = collection.custom ?? {}
   collection.endpoints = collection.endpoints ?? []
   collection.fields = collection.fields ?? []
+  collection.folders = collection.folders ?? false
 
   collection.hooks = {
     afterChange: [],

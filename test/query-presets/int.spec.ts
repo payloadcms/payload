@@ -379,27 +379,25 @@ describe('Query Presets', () => {
     })
 
     it('should prevent accidental lockout', async () => {
-      // attempt to create a preset without access to read or update
       try {
+        // create a preset using "specificRoles"
+        // this will ensure the user on the request is _NOT_ automatically added to the `users` list
+        // and will throw a validation error instead
         const presetWithoutAccess = await payload.create({
           collection: queryPresetsCollectionSlug,
-          user: adminUser,
+          user: editorUser,
           overrideAccess: false,
           data: {
             title: 'Prevent Lockout',
             relatedCollection: 'pages',
             access: {
               read: {
-                constraint: 'specificUsers',
-                users: [],
+                constraint: 'specificRoles',
+                roles: ['admin'],
               },
               update: {
-                constraint: 'specificUsers',
-                users: [],
-              },
-              delete: {
-                constraint: 'specificUsers',
-                users: [],
+                constraint: 'specificRoles',
+                roles: ['admin'],
               },
             },
           },
@@ -407,8 +405,48 @@ describe('Query Presets', () => {
 
         expect(presetWithoutAccess).toBeFalsy()
       } catch (error: unknown) {
-        expect((error as Error).message).toBe('Cannot remove yourself from this preset.')
+        expect((error as Error).message).toBe('This action will lock you out of this preset.')
       }
+
+      // create a preset using "specificUsers"
+      // this will ensure the user on the request _IS_ automatically added to the `users` list
+      // this will avoid a validation error
+      const presetWithoutAccess = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user: adminUser,
+        overrideAccess: false,
+        data: {
+          title: 'Prevent Lockout',
+          relatedCollection: 'pages',
+          access: {
+            read: {
+              constraint: 'specificUsers',
+              users: [],
+            },
+            update: {
+              constraint: 'specificUsers',
+              users: [],
+            },
+            delete: {
+              constraint: 'specificUsers',
+              users: [],
+            },
+          },
+        },
+      })
+
+      // the user on the request is automatically added to the `users` array
+      expect(
+        presetWithoutAccess.access?.read?.users?.find(
+          (user) => (typeof user === 'string' ? user : user.id) === adminUser.id,
+        ),
+      ).toBeTruthy()
+
+      expect(
+        presetWithoutAccess.access?.update?.users?.find(
+          (user) => (typeof user === 'string' ? user : user.id) === adminUser.id,
+        ),
+      ).toBeTruthy()
 
       const presetWithUser1 = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -419,16 +457,12 @@ describe('Query Presets', () => {
           relatedCollection: 'pages',
           access: {
             read: {
-              constraint: 'specificUsers',
-              users: [adminUser.id],
+              constraint: 'specificRoles',
+              roles: ['admin'],
             },
             update: {
-              constraint: 'specificUsers',
-              users: [adminUser.id],
-            },
-            delete: {
-              constraint: 'specificUsers',
-              users: [adminUser.id],
+              constraint: 'specificRoles',
+              roles: ['admin'],
             },
           },
         },
@@ -445,16 +479,12 @@ describe('Query Presets', () => {
             title: 'Prevent Lockout (Updated)',
             access: {
               read: {
-                constraint: 'specificUsers',
-                users: [],
+                constraint: 'specificRoles',
+                roles: ['user'],
               },
               update: {
-                constraint: 'specificUsers',
-                users: [],
-              },
-              delete: {
-                constraint: 'specificUsers',
-                users: [],
+                constraint: 'specificRoles',
+                roles: ['user'],
               },
             },
           },
@@ -462,7 +492,7 @@ describe('Query Presets', () => {
 
         expect(presetUpdatedByUser1).toBeFalsy()
       } catch (error: unknown) {
-        expect((error as Error).message).toBe('Cannot remove yourself from this preset.')
+        expect((error as Error).message).toBe('This action will lock you out of this preset.')
       }
     })
   })

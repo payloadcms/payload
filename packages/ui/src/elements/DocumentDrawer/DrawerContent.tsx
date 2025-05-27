@@ -16,11 +16,9 @@ import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
-  AfterFields,
   collectionSlug,
   disableActions,
   drawerSlug,
-  Header,
   initialData,
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
@@ -92,6 +90,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDelete,
       redirectAfterDuplicate,
       renderDocument,
+      redirectAfterCreate,
       closeModal,
       overrideEntityVisibility,
       t,

@@ -128,6 +128,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
       initialValue,
       path,
       rows: field?.rows,
+      selectFilterOptions: field?.selectFilterOptions,
       setValue,
       showError,
       valid: field?.valid,

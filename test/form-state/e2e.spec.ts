@@ -241,14 +241,8 @@ test.describe('Form State', () => {
     await expect(
       page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
     ).toHaveValue('2')
-  })
 
-  test('should queue onChange functions', async () => {
-    await page.goto(postsUrl.create)
-    await page.locator('#field-array .array-field__add-row').click()
-    await expect(
-      page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-    ).toHaveValue('This is a default value')
+    await page.unroute(postsUrl.create)
   })
 
   // TODO: This test is not very reliable but would be really nice to have
@@ -378,6 +372,8 @@ test.describe('Form State', () => {
       })
 
       await assertElementStaysVisible(page, '#field-array #array-row-1')
+
+      await page.unroute(postsUrl.create)
     })
 
     test('should queue onChange functions', async () => {
