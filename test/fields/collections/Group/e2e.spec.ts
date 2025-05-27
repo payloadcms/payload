@@ -120,7 +120,7 @@ describe('Group', () => {
       await expect(unnamedNestedGroupField).toBeVisible()
     })
 
-    test('should display no label when label is set to false', async () => {
+    test('should display with no label when label is undefined', async () => {
       await page.goto(url.create)
 
       // Makes sure the fields are rendered

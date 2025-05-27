@@ -316,7 +316,6 @@ const GroupFields: CollectionConfig = {
     },
     {
       type: 'group',
-      label: false,
       fields: [
         {
           type: 'text',
