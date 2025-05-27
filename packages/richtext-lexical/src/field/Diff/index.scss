@@ -1,7 +1,7 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
-  .lexical-diff .field-diff-container {
+  .lexical-diff .field-diff-content {
     .html-diff {
       font-family: var(--font-serif);
       font-size: base(0.8);

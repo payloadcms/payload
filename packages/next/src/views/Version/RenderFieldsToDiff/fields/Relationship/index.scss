@@ -1,16 +1,34 @@
 @import '../../../../../scss//styles.scss';
 
 @layer payload-default {
-  .field-diff-container.relationship-diff-container {
+  .relationship-diff {
     padding: 0;
     background: unset;
+  }
+
+  .relationship-diff-container--single {
+    .relationship-diff {
+      min-width: 100%;
+      max-width: fit-content;
+    }
+  }
+
+  .relationship-diff-container--hasMany .field-diff-content {
+    background: var(--theme-elevation-50);
+    padding: 10px;
+
+    .html-diff {
+      display: flex;
+      min-width: 0;
+      max-width: max-content;
+      flex-wrap: wrap;
+      gap: calc(var(--base) * 0.5);
+    }
   }
 
   .relationship-diff {
     @extend %body;
     @include shadow-sm;
-    min-width: 100%;
-    max-width: fit-content;
     display: flex;
     align-items: center;
     background-color: var(--theme-input-bg);
@@ -20,12 +38,6 @@
     font-family: var(--font-body);
     max-height: calc(var(--base) * 3);
     padding: calc(var(--base) * 0.3);
-
-    &-hasMany {
-      display: flex;
-      flex-direction: column;
-      gap: calc(var(--base) * 0.5);
-    }
 
     &[data-match-type='create'] {
       border-color: var(--diff-create-pill-border);

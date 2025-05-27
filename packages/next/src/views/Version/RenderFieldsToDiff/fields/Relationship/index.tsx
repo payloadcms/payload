@@ -145,7 +145,7 @@ export const SingleRelationshipDiff: React.FC<{
 
   return (
     <FieldDiffContainer
-      className={`${baseClass}-container`}
+      className={`${baseClass}-container ${baseClass}-container--single`}
       From={diff.From}
       i18n={i18n}
       label={{ label: field.label, locale }}
@@ -209,12 +209,8 @@ const ManyRelationshipDiff: React.FC<{
   const toNodes =
     toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}>{placeholder}</p>
 
-  const fromHTML = ReactDOMServer.renderToString(
-    <div className={`${baseClass}-hasMany`}>{fromNodes}</div>,
-  )
-  const toHTML = ReactDOMServer.renderToString(
-    <div className={`${baseClass}-hasMany`}>{toNodes}</div>,
-  )
+  const fromHTML = ReactDOMServer.renderToString(fromNodes)
+  const toHTML = ReactDOMServer.renderToString(toNodes)
 
   const diff = getHTMLDiffComponents({
     fromHTML,
@@ -224,7 +220,7 @@ const ManyRelationshipDiff: React.FC<{
 
   return (
     <FieldDiffContainer
-      className={`${baseClass}-container`}
+      className={`${baseClass}-container ${baseClass}-container--hasMany`}
       From={diff.From}
       i18n={i18n}
       label={{ label: field.label, locale }}

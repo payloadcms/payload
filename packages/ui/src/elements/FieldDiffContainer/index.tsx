@@ -30,7 +30,7 @@ export const FieldDiffContainer: React.FC<{
 
   return (
     <div
-      className={`${baseClass}${className ? ` ${className}` : ''} nested-level-${nestingLevel}`}
+      className={`${baseClass}-container${className ? ` ${className}` : ''} nested-level-${nestingLevel}`}
       style={
         nestingLevel
           ? ({
@@ -47,7 +47,7 @@ export const FieldDiffContainer: React.FC<{
         {typeof label !== 'function' && getTranslation(label || '', i18n)}
       </FieldDiffLabel>
       <div
-        className={`${baseClass}-container${className ? ` ${className}` : ''}`}
+        className={`${baseClass}-content`}
         style={
           nestingLevel
             ? {

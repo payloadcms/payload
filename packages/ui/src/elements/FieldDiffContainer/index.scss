@@ -2,8 +2,6 @@
 
 @layer payload-default {
   .field-diff {
-    position: relative;
-
     &__locale-label {
       background: var(--theme-elevation-100);
       border-radius: var(--style-radius-s);
@@ -17,8 +15,11 @@
       }
     }
 
-    // Vertical separator line - not needed anymore, as the parent version view container adds a vertical line that spans the entire height of the container.
-    /*
+    &-container {
+      position: relative;
+
+      // Vertical separator line - not needed anymore, as the parent version view container adds a vertical line that spans the entire height of the container.
+      /*
     &::after {
       content: '';
       position: absolute;
@@ -29,8 +30,9 @@
       background-color: var(--theme-elevation-100);
       transform: translateX(-50%); // Center the line
     }*/
+    }
 
-    &-container {
+    &-content {
       display: grid;
       // Need to use 50% 50% so that we can apply overflow-x without the column shrinking to the content width.
       // Need -base(0.5) to enure the gap is center aligned - this is required when using 50% over 1fr.
