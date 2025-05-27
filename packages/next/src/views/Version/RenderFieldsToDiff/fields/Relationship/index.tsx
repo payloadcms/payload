@@ -42,7 +42,7 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   }
 
   return (
-    <SingleRelatonshipDiff
+    <SingleRelationshipDiff
       field={field}
       i18n={i18n}
       // Locale only exists if this is a localized field
@@ -59,7 +59,7 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   )
 }
 
-export const SingleRelatonshipDiff: React.FC<{
+export const SingleRelationshipDiff: React.FC<{
   field: RelationshipField
   i18n: I18nClient
   locale: string
