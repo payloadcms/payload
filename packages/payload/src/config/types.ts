@@ -48,6 +48,7 @@ import type {
   JobsConfig,
   Payload,
   RequestContext,
+  SelectField,
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -1131,6 +1132,7 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */

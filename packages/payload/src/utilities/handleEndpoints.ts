@@ -81,7 +81,8 @@ export const handleEndpoints = async ({
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
-    request.headers.get('X-HTTP-Method-Override') === 'GET'
+    (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
+      request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
     const search = await request.text()
 
