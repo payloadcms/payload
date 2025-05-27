@@ -417,6 +417,18 @@ export interface Diff {
           }
       )[]
     | null;
+  relationshipHasManyPolymorphic2?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
   richtext?: {
     root: {
       type: string;
@@ -959,6 +971,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasMany?: T;
   relationshipPolymorphic?: T;
   relationshipHasManyPolymorphic?: T;
+  relationshipHasManyPolymorphic2?: T;
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
