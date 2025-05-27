@@ -5,6 +5,7 @@ import type { Field } from '../fields/config/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import { toWords } from '../utilities/formatLabels.js'
+import { preventLockout } from './preventLockout.js'
 import { operations, type QueryPresetConstraint } from './types.js'
 
 export const getConstraints = (config: Config): Field => ({
@@ -64,10 +65,12 @@ export const getConstraints = (config: Config): Field => ({
             hooks: {
               beforeChange: [
                 ({ data, req }) => {
-                  if (data?.access?.[operation]?.constraint === 'onlyMe') {
-                    if (req.user) {
-                      return [req.user.id]
-                    }
+                  if (data?.access?.[operation]?.constraint === 'onlyMe' && req.user) {
+                    return [req.user.id]
+                  }
+
+                  if (data?.access?.[operation]?.constraint === 'specificUsers' && req.user) {
+                    return [...(data?.access?.[operation]?.users || []), req.user.id]
                   }
 
                   return data?.access?.[operation]?.users
@@ -101,4 +104,5 @@ export const getConstraints = (config: Config): Field => ({
     label: () => toWords(operation),
   })),
   label: 'Sharing settings',
+  validate: preventLockout,
 })

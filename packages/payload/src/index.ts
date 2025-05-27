@@ -1282,6 +1282,8 @@ export type {
   JSONFieldClient,
   Labels,
   LabelsClient,
+  NamedGroupField,
+  NamedGroupFieldClient,
   NamedTab,
   NonPresentationalField,
   NonPresentationalFieldClient,
@@ -1318,6 +1320,8 @@ export type {
   TextFieldClient,
   UIField,
   UIFieldClient,
+  UnnamedGroupField,
+  UnnamedGroupFieldClient,
   UnnamedTab,
   UploadField,
   UploadFieldClient,
@@ -1367,6 +1371,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1374,7 +1379,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1386,7 +1390,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
 export { findOneOperation } from './globals/operations/findOne.js'
@@ -1433,11 +1436,11 @@ export type {
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1495,6 +1498,7 @@ export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
+export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
@@ -1511,6 +1515,7 @@ export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryK
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

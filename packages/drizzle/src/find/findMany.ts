@@ -4,7 +4,7 @@ import { inArray } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'

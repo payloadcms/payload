@@ -134,16 +134,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     // If there are blocks, add parent to each, and then
     // store by table name and rows
-    Object.keys(rowToInsert.blocks).forEach((blockName) => {
-      rowToInsert.blocks[blockName].forEach((blockRow) => {
+    Object.keys(rowToInsert.blocks).forEach((tableName) => {
+      rowToInsert.blocks[tableName].forEach((blockRow) => {
         blockRow.row._parentID = insertedRow.id
-        if (!blocksToInsert[blockName]) {
-          blocksToInsert[blockName] = []
+        if (!blocksToInsert[tableName]) {
+          blocksToInsert[tableName] = []
         }
         if (blockRow.row.uuid) {
           delete blockRow.row.uuid
         }
-        blocksToInsert[blockName].push(blockRow)
+        blocksToInsert[tableName].push(blockRow)
       })
     })
 
@@ -258,12 +258,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
     if (operation === 'update') {
-      for (const blockName of rowToInsert.blocksToDelete) {
-        const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
-        const blockTable = adapter.tables[blockTableName]
+      for (const tableName of rowToInsert.blocksToDelete) {
+        const blockTable = adapter.tables[tableName]
         await adapter.deleteWhere({
           db,
-          tableName: blockTableName,
+          tableName,
           where: eq(blockTable._parentID, insertedRow.id),
         })
       }
@@ -272,15 +271,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // When versions are enabled, this is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
     const arraysBlocksUUIDMap: Record<string, number | string> = {}
 
-    for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
-      const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
-      insertedBlockRows[blockName] = await adapter.insert({
+    for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
+      insertedBlockRows[tableName] = await adapter.insert({
         db,
-        tableName: blockTableName,
+        tableName,
         values: blockRows.map(({ row }) => row),
       })
 
-      insertedBlockRows[blockName].forEach((row, i) => {
+      insertedBlockRows[tableName].forEach((row, i) => {
         blockRows[i].row = row
         if (
           typeof row._uuid === 'string' &&
@@ -310,7 +308,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       if (blockLocaleRowsToInsert.length > 0) {
         await adapter.insert({
           db,
-          tableName: `${blockTableName}${adapter.localesSuffix}`,
+          tableName: `${tableName}${adapter.localesSuffix}`,
           values: blockLocaleRowsToInsert,
         })
       }
@@ -319,7 +317,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
         db,
-        parentRows: insertedBlockRows[blockName],
+        parentRows: insertedBlockRows[tableName],
         uuidMap: arraysBlocksUUIDMap,
       })
     }

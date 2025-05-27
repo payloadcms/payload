@@ -437,6 +437,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                     <Pill
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                       pillStyle="white"
+                      size="small"
                     >
                       {blockDisplayName ?? formData?.blockType}
                     </Pill>

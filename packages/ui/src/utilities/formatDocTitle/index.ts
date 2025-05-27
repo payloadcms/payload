@@ -45,6 +45,7 @@ export const formatDocTitle = ({
           const dateFormat =
             ('date' in fieldConfig.admin && fieldConfig?.admin?.date?.displayFormat) ||
             dateFormatFromConfig
+
           title = formatDate({ date: title, i18n, pattern: dateFormat }) || title
         }
       }
@@ -59,6 +60,7 @@ export const formatDocTitle = ({
   if (isSerializedLexicalEditor(title)) {
     title = formatLexicalDocTitle(title.root.children?.[0]?.children || [], '')
   }
+
   if (!title && isSerializedLexicalEditor(fallback)) {
     title = formatLexicalDocTitle(fallback.root.children?.[0]?.children || [], '')
   }

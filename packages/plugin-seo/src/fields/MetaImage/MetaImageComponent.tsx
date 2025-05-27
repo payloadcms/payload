@@ -9,6 +9,7 @@ import {
   UploadInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
@@ -56,6 +57,8 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
 
+  const { title } = useDocumentTitle()
+
   const regenerateImage = useCallback(async () => {
     if (!hasGenerateImageFn) {
       return
@@ -75,7 +78,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateImage>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -87,7 +90,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       method: 'POST',
     })
 
-    const generatedImage = await genImageResponse.text()
+    const { result: generatedImage } = await genImageResponse.json()
 
     setValue(generatedImage || '')
   }, [
@@ -102,10 +105,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   const hasImage = Boolean(value)

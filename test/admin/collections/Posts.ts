@@ -35,22 +35,7 @@ export const Posts: CollectionConfig = {
       ],
       listMenuItems: [
         {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'listMenuItems',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Many of them',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Ok last one',
-          },
+          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
         },
       ],
       afterList: [
@@ -140,6 +125,20 @@ export const Posts: CollectionConfig = {
           admin: {
             description: () => `t:${customTabAdminDescription}`,
           },
+        },
+      ],
+    },
+    {
+      name: 'someTextField',
+      type: 'text',
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'someTextField',
+          type: 'text',
         },
       ],
     },

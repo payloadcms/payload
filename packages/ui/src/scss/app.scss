@@ -22,8 +22,8 @@
     --theme-overlay: rgba(5, 5, 5, 0.5);
     --theme-baseline: #{$baseline-px};
     --theme-baseline-body-size: #{$baseline-body-size};
-    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-      sans-serif;
+    --font-body:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
     --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
@@ -201,6 +201,10 @@
   .payload__modal-item--enter,
   .payload__modal-item--enterDone {
     z-index: var(--z-modal);
+  }
+
+  button {
+    font: var(--font-body);
   }
 
   // @import '~payload-user-css'; TODO: re-enable this
