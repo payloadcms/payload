@@ -131,6 +131,31 @@ describe('Hooks', () => {
       expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText)
     })
 
+    it('should retrieve data generated with afterRead hook from async virtual field in nested field structures', async () => {
+      const relation = await payload.create({
+        collection: relationsSlug,
+        data: {
+          title: 'Hello',
+        },
+      })
+
+      const document: NestedAfterReadHook = await payload.create({
+        collection: nestedAfterReadHooksSlug,
+        data: {
+          group: { array: [{ input: 'input' }] },
+          text: 'ok',
+        },
+      })
+
+      const retrievedDoc = await payload.findByID({
+        id: document.id,
+        collection: nestedAfterReadHooksSlug,
+        depth: 1,
+      })
+
+      expect(retrievedDoc.group.subGroup.blocks[0].shouldPopulateVirtual[0]).toEqual(relation)
+    })
+
     it('should populate related docs within nested field structures', async () => {
       const relation = await payload.create({
         collection: relationsSlug,
