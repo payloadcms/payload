@@ -755,6 +755,7 @@ export type UnnamedGroupField = {
     | {
         [selectedLanguage: string]: string
       }
+    | false
     | LabelFunction
     | string
   localized?: never
