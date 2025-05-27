@@ -77,7 +77,7 @@ export const myPlugin =
     )
 
     config.endpoints.push({
-      handler: customEndpointHandler(),
+      handler: customEndpointHandler,
       method: 'get',
       path: '/my-plugin-endpoint',
     })

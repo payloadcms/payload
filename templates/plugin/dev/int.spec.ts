@@ -4,7 +4,7 @@ import config from '@payload-config'
 import { createPayloadRequest, getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
-import { customEndpointHandler as getCustomEndpointHandler } from '../src/endpoints/customEndpointHandler.js'
+import { customEndpointHandler } from '../src/endpoints/customEndpointHandler.js'
 
 let payload: Payload
 
@@ -19,8 +19,6 @@ beforeAll(async () => {
 })
 
 describe('Plugin integration tests', () => {
-  const customEndpointHandler = getCustomEndpointHandler()
-
   test('should query custom endpoint added by plugin', async () => {
     const request = new Request('http://localhost:3000/api/my-plugin-endpoint', {
       method: 'GET',
