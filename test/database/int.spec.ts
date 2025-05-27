@@ -577,6 +577,27 @@ describe('database', () => {
     })
   })
 
+  it('should run migrate:reset', async () => {
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+    let error
+    try {
+      await payload.db.migrateReset()
+    } catch (e) {
+      error = e
+    }
+
+    const migrations = await payload.find({
+      collection: 'payload-migrations',
+    })
+
+    expect(error).toBeUndefined()
+    expect(migrations.docs).toHaveLength(0)
+  })
+
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test

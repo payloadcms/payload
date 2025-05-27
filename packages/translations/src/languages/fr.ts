@@ -180,7 +180,34 @@ export const frTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloc bascule',
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
+  folder: {
+    browseByFolder: 'Parcourir par Dossier',
+    byFolder: 'Par Dossier',
+    deleteFolder: 'Supprimer le dossier',
+    folderName: 'Nom du dossier',
+    folders: 'Dossiers',
+    itemHasBeenMoved: '{{title}} a été déplacé vers {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} a été déplacé dans le dossier racine',
+    itemsMovedToFolder: '{{title}} déplacé vers {{folderName}}',
+    itemsMovedToRoot: '{{title}} déplacé vers le dossier racine',
+    moveFolder: 'Déplacer le dossier',
+    moveItemsToFolderConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers <2>{{toFolder}}</2>. Êtes-vous sûr ?',
+    moveItemsToRootConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers le dossier racine. Êtes-vous sûr ?',
+    moveItemToFolderConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{title}}</1> dans <2>{{toFolder}}</2>. Êtes-vous sûr ?',
+    moveItemToRootConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{title}}</1> vers le dossier racine. Êtes-vous sûr ?',
+    movingFromFolder: 'Déplacement de {{title}} de {{folderName}}',
+    newFolder: 'Nouveau Dossier',
+    noFolder: 'Pas de dossier',
+    renameFolder: 'Renommer le dossier',
+    searchByNameInFolder: 'Recherche par nom dans {{folderName}}',
+    selectFolderForItem: 'Sélectionnez le dossier pour {{title}}',
+  },
   general: {
+    name: 'Nom',
     aboutToDelete:
       'Vous êtes sur le point de supprimer ce ou cette {{label}} <1>{{title}}</1>. Êtes-vous sûr ?',
     aboutToDeleteCount_many: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
@@ -212,6 +239,7 @@ export const frTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmer la copie',
     confirmDeletion: 'Confirmer la suppression',
     confirmDuplication: 'Confirmer la duplication',
+    confirmMove: 'Confirmez le déplacement',
     confirmReindex: 'Réindexer toutes les {{collections}} ?',
     confirmReindexAll: 'Réindexer toutes les collections ?',
     confirmReindexDescription:
@@ -271,6 +299,8 @@ export const frTranslations: DefaultTranslationsObject = {
     goBack: 'Retourner',
     import: 'Importation',
     isEditing: 'est en train de modifier',
+    item: 'article',
+    items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
     leaveAnyway: 'Quitter quand même',
@@ -282,8 +312,14 @@ export const frTranslations: DefaultTranslationsObject = {
     locales: 'Paramètres régionaux',
     menu: 'Menu',
     moreOptions: "Plus d'options",
+    move: 'Déplacez-vous',
+    moveConfirm:
+      'Vous êtes sur le point de déplacer {{count}} {{label}} vers <1>{{destination}}</1>. Êtes-vous sûr ?',
+    moveCount: 'Déplacez {{count}} {{label}}',
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
+    moving: 'Déménagement',
+    movingCount: 'Déplacement de {{count}} {{label}}',
     newPassword: 'Nouveau mot de passe',
     next: 'Prochain',
     no: 'Non',
@@ -312,6 +348,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     remove: 'Retirer',
+    rename: 'Renommer',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:
@@ -323,6 +360,7 @@ export const frTranslations: DefaultTranslationsObject = {
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',
+    select: 'Sélectionner',
     selectAll: 'Tout sélectionner {{count}} {{label}}',
     selectAllRows: 'Sélectionnez toutes les lignes',
     selectedCount: '{{count}} {{label}} sélectionné',

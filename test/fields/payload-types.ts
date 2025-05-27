@@ -730,6 +730,7 @@ export interface TextField {
 export interface CheckboxField {
   id: string;
   checkbox: boolean;
+  checkboxNotRequired?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1380,6 +1381,8 @@ export interface SelectField {
     category?: ('a' | 'b')[] | null;
   };
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+  disallowOption1?: boolean | null;
+  selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2316,6 +2319,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
+  checkboxNotRequired?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2877,6 +2881,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
         category?: T;
       };
   selectWithJsxLabelOption?: T;
+  disallowOption1?: T;
+  selectWithFilteredOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
