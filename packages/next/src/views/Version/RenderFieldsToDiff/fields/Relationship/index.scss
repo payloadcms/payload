@@ -38,14 +38,13 @@
 
     &[data-match-type='delete'] {
       border-color: var(--diff-delete-pill-border);
-      text-decoration-line: none;
       color: var(--diff-delete-parent-color);
       background-color: var(--diff-delete-pill-bg);
       text-decoration-line: none !important;
 
       * {
-        text-decoration-line: none;
         color: var(--diff-delete-parent-color);
+        text-decoration-line: none;
       }
 
       .relationship-diff__info {
@@ -61,7 +60,6 @@
       border-radius: $style-radius-s;
       margin: 0 calc(var(--base) * 0.4) 0 calc(var(--base) * 0.2);
       padding: 0 calc(var(--base) * 0.1);
-
       background-color: var(--theme-elevation-150);
       color: var(--theme-elevation-750);
     }

@@ -38,15 +38,26 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
     'en'
 
   if (hasMany) {
-    return <p>TODO</p>
+    return (
+      <ManyRelationshipDiff
+        field={field}
+        i18n={i18n}
+        locale={localeToUse}
+        nestingLevel={nestingLevel}
+        parentIsLocalized={parentIsLocalized}
+        placeholder={placeholder}
+        polymorphic={polymorphic}
+        req={req}
+        valueFrom={valueFrom as PopulatedRelationshipValue[] | undefined}
+        valueTo={valueTo as PopulatedRelationshipValue[] | undefined}
+      />
+    )
   }
 
   return (
     <SingleRelationshipDiff
       field={field}
       i18n={i18n}
-      // Locale only exists if this is a localized field
-      // If this is not a localized field, we'll use the default locale
       locale={localeToUse}
       nestingLevel={nestingLevel}
       parentIsLocalized={parentIsLocalized}
@@ -86,9 +97,6 @@ export const SingleRelationshipDiff: React.FC<{
 
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  let From: React.ReactNode = placeholder
-  let To: React.ReactNode = placeholder
-
   const FromComponent = valueFrom ? (
     <RelationshipDocumentDiff
       field={field}
@@ -124,37 +132,119 @@ export const SingleRelationshipDiff: React.FC<{
     />
   ) : null
 
-  const fromHtml = FromComponent
+  const fromHTML = FromComponent
     ? ReactDOMServer.renderToString(FromComponent)
-    : '<p>' + placeholder + '</p>'
-  const toHtml = ToComponent
-    ? ReactDOMServer.renderToString(ToComponent)
-    : '<p>' + placeholder + '</p>'
+    : `<p>${placeholder}</p>`
+  const toHTML = ToComponent ? ReactDOMServer.renderToString(ToComponent) : `<p>${placeholder}</p>`
 
-  const diffResult = getHTMLDiffComponents({
-    fromHTML: fromHtml,
-    toHTML: toHtml,
+  const diff = getHTMLDiffComponents({
+    fromHTML,
+    toHTML,
     tokenizeByCharacter: false,
   })
-  From = diffResult.From
-  To = diffResult.To
 
   return (
     <FieldDiffContainer
       className={`${baseClass}-container`}
-      From={From}
+      From={diff.From}
       i18n={i18n}
-      label={{
-        label: field.label,
-        locale,
-      }}
+      label={{ label: field.label, locale }}
       nestingLevel={nestingLevel}
-      To={To}
+      To={diff.To}
     />
   )
 }
 
-const RelationshipDocumentDiff = (args: {
+const ManyRelationshipDiff: React.FC<{
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  parentIsLocalized: boolean
+  placeholder: string
+  polymorphic: boolean
+  req: PayloadRequest
+  valueFrom: PopulatedRelationshipValue[] | undefined
+  valueTo: PopulatedRelationshipValue[] | undefined
+}> = async ({
+  field,
+  i18n,
+  locale,
+  nestingLevel,
+  parentIsLocalized,
+  placeholder,
+  polymorphic,
+  req,
+  valueFrom,
+  valueTo,
+}) => {
+  const ReactDOMServer = (await import('react-dom/server')).default
+
+  const fromArr = Array.isArray(valueFrom) ? valueFrom : []
+  const toArr = Array.isArray(valueTo) ? valueTo : []
+
+  const makeNodes = (list: PopulatedRelationshipValue[]) =>
+    list.map((val, idx) => (
+      <RelationshipDocumentDiff
+        field={field}
+        i18n={i18n}
+        key={idx}
+        locale={locale}
+        parentIsLocalized={parentIsLocalized}
+        polymorphic={polymorphic}
+        relationTo={
+          polymorphic
+            ? (val as { relationTo: string; value: TypeWithID }).relationTo
+            : (field.relationTo as string)
+        }
+        req={req}
+        showPill={polymorphic}
+        value={val}
+      />
+    ))
+
+  const fromNodes =
+    fromArr.length > 0 ? makeNodes(fromArr) : <p className={`${baseClass}__empty`}>{placeholder}</p>
+
+  const toNodes =
+    toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}>{placeholder}</p>
+
+  const fromHTML = ReactDOMServer.renderToString(
+    <div className={`${baseClass}-hasMany`}>{fromNodes}</div>,
+  )
+  const toHTML = ReactDOMServer.renderToString(
+    <div className={`${baseClass}-hasMany`}>{toNodes}</div>,
+  )
+
+  const diff = getHTMLDiffComponents({
+    fromHTML,
+    toHTML,
+    tokenizeByCharacter: false,
+  })
+
+  return (
+    <FieldDiffContainer
+      className={`${baseClass}-container`}
+      From={diff.From}
+      i18n={i18n}
+      label={{ label: field.label, locale }}
+      nestingLevel={nestingLevel}
+      To={diff.To}
+    />
+  )
+}
+
+const RelationshipDocumentDiff = ({
+  field,
+  i18n,
+  locale,
+  parentIsLocalized,
+  polymorphic,
+  relationTo,
+  req,
+  showPill = false,
+  value,
+}: {
   field: RelationshipField
   i18n: I18nClient
   locale: string
@@ -165,10 +255,6 @@ const RelationshipDocumentDiff = (args: {
   showPill?: boolean
   value: PopulatedRelationshipValue
 }) => {
-  const { field, i18n, locale, parentIsLocalized, polymorphic, relationTo, req, showPill, value } =
-    args
-
-  let pillLabel: null | string = null
   const title = generateLabelFromValue({
     field,
     locale,
@@ -177,6 +263,7 @@ const RelationshipDocumentDiff = (args: {
     value,
   })
 
+  let pillLabel: null | string = null
   if (showPill) {
     const collectionConfig = req.payload.collections[relationTo].config
     pillLabel = collectionConfig.labels?.singular
