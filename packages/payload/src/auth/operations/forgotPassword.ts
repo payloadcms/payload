@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
@@ -153,7 +152,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url).protocol // includes the final :
+      const protocol = new URL(req.url!).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
