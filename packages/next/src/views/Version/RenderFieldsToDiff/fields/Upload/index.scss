@@ -1,31 +1,30 @@
 @import '../../../../../scss//styles.scss';
 
 @layer payload-default {
-  .field-diff-container.upload-diff-container {
+  .upload-diff-container .field-diff-content {
     padding: 0;
     background: unset;
   }
 
+  .upload-diff-hasMany {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.4);
+  }
+
   .upload-diff {
     @extend %body;
-    @include shadow-sm;
     min-width: 100%;
     max-width: fit-content;
     display: flex;
     align-items: center;
-    background-color: var(--theme-input-bg);
+    background-color: var(--theme-elevation-50);
     border-radius: $style-radius-s;
-    border: 1px solid var(--theme-elevation-100);
+    border: 1px solid var(--theme-elevation-150);
     position: relative;
     font-family: var(--font-body);
     max-height: calc(var(--base) * 3);
-    padding: calc(var(--base) * 0.2);
-
-    &-hasMany {
-      display: flex;
-      flex-direction: column;
-      gap: calc(var(--base) * 0.5);
-    }
+    padding: calc(var(--base) * 0.1);
 
     &[data-match-type='create'] {
       border-color: var(--diff-create-pill-border);

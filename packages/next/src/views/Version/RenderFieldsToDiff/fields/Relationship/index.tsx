@@ -145,7 +145,7 @@ export const SingleRelationshipDiff: React.FC<{
 
   return (
     <FieldDiffContainer
-      className={`${baseClass}-container ${baseClass}-container--single`}
+      className={`${baseClass}-container ${baseClass}-container--hasOne`}
       From={diff.From}
       i18n={i18n}
       label={{ label: field.label, locale }}

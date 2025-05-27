@@ -124,7 +124,7 @@ export const HasManyUploadDiff: React.FC<{
 
   return (
     <FieldDiffContainer
-      className={`${baseClass}-container`}
+      className={`${baseClass}-container ${baseClass}-container--hasMany`}
       From={From}
       i18n={i18n}
       label={{
@@ -192,7 +192,7 @@ export const SingleUploadDiff: React.FC<{
 
   return (
     <FieldDiffContainer
-      className={`${baseClass}-container`}
+      className={`${baseClass}-container ${baseClass}-container--hasOne`}
       From={From}
       i18n={i18n}
       label={{
