@@ -17,7 +17,7 @@
 
     textarea:not(:empty) {
       field-sizing: content;
-      min-height: calc(var(--rows) * base(1) + base(0.8) + 2px);
+      min-height: calc(var(--rows) * var(--base) + var(--base) * 0.8 + 2px);
     }
 
     &.read-only {
