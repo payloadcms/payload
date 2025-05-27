@@ -23,6 +23,8 @@ export const hiddenAccessCountSlug = 'hidden-access-count'
 export const disabledSlug = 'disabled'
 export const authAccess = 'auth-access'
 
+export const defaultAuthCollectionSlug = 'default-auth-collection'
+
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'
 export const publicUserEmail = 'public-user@payloadcms.com'
 export const publicUsersSlug = 'public-users'

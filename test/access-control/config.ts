@@ -16,6 +16,7 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
   createNotUpdateCollectionSlug,
+  defaultAuthCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
@@ -577,6 +578,16 @@ export default buildConfigWithDefaults(
             return req.user && isUser(req.user) && req.user?.roles?.includes('admin') ? true : false
           },
         },
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: defaultAuthCollectionSlug,
+        auth: true,
         fields: [
           {
             name: 'text',

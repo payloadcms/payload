@@ -42,6 +42,7 @@ export const CollectionWithAccessControl: CollectionConfig = {
 
     // Auth-enabled Collections only
     admin: () => {...},
+    auth: () => {...},
     unlock: () => {...},
 
     // Version-enabled Collections only
@@ -62,10 +63,11 @@ The following options are available:
 
 If a Collection supports [`Authentication`](../authentication/overview), the following additional options are available:
 
-| Function     | Allows/Denies Access                                                                     |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| **`admin`**  | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin). |
-| **`unlock`** | Used to restrict which users can access the `unlock` operation. [More details](#unlock). |
+| Function     | Allows/Denies Access                                                                                                                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`admin`**  | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin).                                                                                                             |
+| **`auth`**   | Used to restrict access to the [Authentication Fields](../authentication/overview) that get automatically added to auth-enabled collections (i.e. email, username, password). [More details](#auth). |
+| **`unlock`** | Used to restrict which users can access the `unlock` operation. [More details](#unlock).                                                                                                             |
 
 If a Collection supports [Versions](../versions/overview), the following additional options are available:
 
@@ -282,6 +284,33 @@ export const CollectionWithAdminAccess: CollectionConfig = {
 ```
 
 The following arguments are provided to the `admin` function:
+
+| Option    | Description                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+
+### Auth
+
+Determines which users can access the [Authentication Fields](../authentication/overview) that are automatically added to auth-enabled collections—specifically `email`, `username`, and `password`. This access control function allows you to restrict read and update access to these fields. The access control function will be applied to all fields, it is not currently possible to target specfic fields i.e. just `email` or just `password`.
+
+To add Auth Access Control to a Collection, use the `auth` property in the [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const CollectionWithAuthFieldAccess: CollectionConfig = {
+  // ...
+  access: {
+    // highlight-start
+    auth: ({ req: { user } }) => {
+      return user?.role === 'admin'
+    },
+    // highlight-end
+  },
+}
+```
+
+The following arguments are provided to the `auth` function:
 
 | Option    | Description                                                                                                                   |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------- |

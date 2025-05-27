@@ -27,6 +27,7 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   authAccess as authAccessSlug,
   createNotUpdateCollectionSlug,
+  defaultAuthCollectionSlug,
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
@@ -70,6 +71,7 @@ describe('Access Control', () => {
   let userRestrictedGlobalURL: AdminUrlUtil
   let disabledFields: AdminUrlUtil
   let authAccess: AdminUrlUtil
+  let defaultAuthCollection: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
   let logoutURL: string
@@ -90,6 +92,7 @@ describe('Access Control', () => {
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
     authAccess = new AdminUrlUtil(serverURL, authAccessSlug)
+    defaultAuthCollection = new AdminUrlUtil(serverURL, defaultAuthCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -228,6 +231,7 @@ describe('Access Control', () => {
       ).toBeVisible()
       await expect(page.locator('#field-blocks.rich-text-lexical--read-only')).not.toBeAttached()
     }
+
     /**
      * This reproduces a bug where certain fields were incorrectly marked as read-only
      */
@@ -738,6 +742,13 @@ describe('Access Control', () => {
   })
 
   describe('auth access control', () => {
+    test('should show default auth fields when auth access is not defined', async () => {
+      await page.goto(defaultAuthCollection.create)
+
+      await expect(page.locator('#field-email')).toBeVisible()
+      await expect(page.locator('#field-password')).toBeVisible()
+    })
+
     test('should show auth fields when auth access is true', async () => {
       await page.goto(authAccess.create)
 
