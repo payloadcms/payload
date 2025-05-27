@@ -1,6 +1,8 @@
-import type { PayloadRequest, RelationshipField, RelationshipValue, TypeWithID } from 'payload'
+import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
 
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
+
+import type { PopulatedRelationshipValue } from './index.js'
 
 export const generateLabelFromValue = ({
   field,
@@ -13,15 +15,10 @@ export const generateLabelFromValue = ({
   locale: string
   parentIsLocalized: boolean
   req: PayloadRequest
-  value: { relationTo: string; value: TypeWithID } | TypeWithID
+  value: PopulatedRelationshipValue
 }): string => {
   let relatedDoc: TypeWithID
-  let valueToReturn: RelationshipValue | string = ''
-
-  if (!value) {
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- We want to return a string specifilly for null and undefined
-    return String(value)
-  }
+  let valueToReturn: string = ''
 
   const relationTo: string = 'relationTo' in value ? value.relationTo : (field.relationTo as string)
 
@@ -47,10 +44,15 @@ export const generateLabelFromValue = ({
   if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
     valueToReturn = relatedDoc[useAsTitle]
   } else {
-    valueToReturn = relatedDoc.id
+    valueToReturn = String(relatedDoc.id)
   }
 
-  if (typeof valueToReturn === 'object' && titleFieldIsLocalized && valueToReturn?.[locale]) {
+  if (
+    typeof valueToReturn === 'object' &&
+    valueToReturn &&
+    titleFieldIsLocalized &&
+    valueToReturn?.[locale]
+  ) {
     valueToReturn = valueToReturn[locale]
   }
 

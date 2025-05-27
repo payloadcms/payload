@@ -175,12 +175,16 @@ export const SingleUploadDiff: React.FC<{
     />
   ) : null
 
-  const fromHtml = FromComponent ? ReactDOMServer.renderToString(FromComponent) : placeholder
-  const toHtml = ToComponent ? ReactDOMServer.renderToString(ToComponent) : placeholder
+  const fromHtml = FromComponent
+    ? ReactDOMServer.renderToString(FromComponent)
+    : '<p>' + placeholder + '</p>'
+  const toHtml = ToComponent
+    ? ReactDOMServer.renderToString(ToComponent)
+    : '<p>' + placeholder + '</p>'
 
   const diffResult = getHTMLDiffComponents({
-    fromHTML: '<p>' + fromHtml + '</p>',
-    toHTML: '<p>' + toHtml + '</p>',
+    fromHTML: fromHtml,
+    toHTML: toHtml,
     tokenizeByCharacter: false,
   })
   From = diffResult.From

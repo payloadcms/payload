@@ -1,4 +1,74 @@
+@import '../../../../../scss//styles.scss';
+
 @layer payload-default {
+  .field-diff-container.relationship-diff-container {
+    padding: 0;
+    background: unset;
+  }
+
   .relationship-diff {
+    @extend %body;
+    @include shadow-sm;
+    min-width: 100%;
+    max-width: fit-content;
+    display: flex;
+    align-items: center;
+    background-color: var(--theme-input-bg);
+    border-radius: $style-radius-s;
+    border: 1px solid var(--theme-elevation-100);
+    position: relative;
+    font-family: var(--font-body);
+    max-height: calc(var(--base) * 3);
+    padding: calc(var(--base) * 0.3);
+
+    &-hasMany {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &[data-match-type='create'] {
+      border-color: var(--diff-create-pill-border);
+      color: var(--diff-create-parent-color);
+
+      * {
+        color: var(--diff-create-parent-color);
+      }
+    }
+
+    &[data-match-type='delete'] {
+      border-color: var(--diff-delete-pill-border);
+      text-decoration-line: none;
+      color: var(--diff-delete-parent-color);
+      background-color: var(--diff-delete-pill-bg);
+
+      * {
+        text-decoration-line: none;
+        color: var(--diff-delete-parent-color);
+      }
+    }
+
+    &__info {
+      font-weight: 500;
+    }
+
+    &__pill {
+      border-radius: $style-radius-s;
+      margin: 0 calc(var(--base) * 0.4) 0 calc(var(--base) * 0.2);
+      padding: 0 calc(var(--base) * 0.1);
+
+      background-color: var(--theme-elevation-150);
+      color: var(--theme-elevation-750);
+    }
+
+    &[data-match-type='create'] .relationship-diff__pill {
+      background-color: var(--diff-create-parent-bg);
+      color: var(--diff-create-pill-color);
+    }
+
+    &[data-match-type='delete'] .relationship-diff__pill {
+      background-color: var(--diff-delete-parent-bg);
+      color: var(--diff-delete-pill-color);
+    }
   }
 }

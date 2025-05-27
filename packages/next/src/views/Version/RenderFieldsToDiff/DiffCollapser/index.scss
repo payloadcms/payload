@@ -46,7 +46,7 @@
       // Reset the font weight of the change count to normal
       font-weight: normal;
       margin-left: calc(var(--base) * 0.3);
-      padding: 0 calc(var(--base) * 0.2);
+      padding: calc(var(--base) * 0.1) calc(var(--base) * 0.2);
       background: var(--theme-elevation-100);
       border-radius: var(--style-radius-s);
       font-size: 0.8rem;

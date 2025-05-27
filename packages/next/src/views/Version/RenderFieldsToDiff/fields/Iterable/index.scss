@@ -12,7 +12,7 @@
       background-color: var(--theme-bg);
       position: relative;
       width: calc(var(--base) * 0.5);
-      height: 100%;
+      height: 16px;
       margin-left: calc((var(--base) * -0.5) - 5px);
       margin-right: calc(var(--base) * 0.5);
 
@@ -20,7 +20,7 @@
         content: '';
         position: absolute;
         left: 1px;
-        top: 50%;
+        top: 8px;
         transform: translateY(-50%);
         width: 6px;
         height: 6px;
