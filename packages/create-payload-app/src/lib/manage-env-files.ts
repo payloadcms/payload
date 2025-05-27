@@ -28,6 +28,7 @@ const updateEnvExampleVariables = (
 
       if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
         const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
+
         if (dbChoice) {
           const placeholderUri = databaseUri
             ? databaseUri
@@ -63,7 +64,7 @@ const updateEnvExampleVariables = (
 export async function manageEnvFiles(args: {
   cliArgs: CliArgs
   databaseType?: DbType
-  databaseUri: string
+  databaseUri?: string
   payloadSecret: string
   projectDir: string
   template?: ProjectTemplate
@@ -80,6 +81,7 @@ export async function manageEnvFiles(args: {
   const envExamplePath = path.join(projectDir, '.env.example')
   const envPath = path.join(projectDir, '.env')
   const emptyEnvContent = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
+
   try {
     let updatedExampleContents: string
 
@@ -99,6 +101,7 @@ export async function manageEnvFiles(args: {
       )
 
       await fs.writeFile(envExamplePath, updatedExampleContents)
+
       if (debugFlag) {
         debug(`.env.example file successfully created`)
       }
@@ -113,6 +116,7 @@ export async function manageEnvFiles(args: {
       )
 
       await fs.writeFile(envExamplePath, updatedExampleContents)
+
       if (debugFlag) {
         debug(`.env.example file successfully updated`)
       }
