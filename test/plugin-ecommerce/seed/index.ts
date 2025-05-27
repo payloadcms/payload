@@ -124,22 +124,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         customer: customer.id,
         paymentMethod: 'stripe',
         stripe: {
-          stripeCustomerID: 'cus_123',
-          stripePaymentIntentID: 'pi_123',
+          customerID: 'cus_123',
+          paymentIntentID: 'pi_123',
         },
         status: 'pending',
-        cartSnapshot: [
-          {
-            product: hoodieProduct.id,
-            variant: hoodieSmallWhite.id,
-            quantity: 1,
-          },
-          {
-            product: hatProduct.id,
-            variant: null,
-            quantity: 2,
-          },
-        ],
       },
     })
 
@@ -150,22 +138,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         customer: customer.id,
         paymentMethod: 'stripe',
         stripe: {
-          stripeCustomerID: 'cus_123',
-          stripePaymentIntentID: 'pi_123',
+          customerID: 'cus_123',
+          paymentIntentID: 'pi_123',
         },
         status: 'succeeded',
-        cartSnapshot: [
-          {
-            product: hoodieProduct.id,
-            variant: hoodieSmallWhite.id,
-            quantity: 1,
-          },
-          {
-            product: hatProduct.id,
-            variant: null,
-            quantity: 2,
-          },
-        ],
       },
     })
 

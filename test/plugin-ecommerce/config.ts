@@ -31,6 +31,9 @@ export default buildConfigWithDefaults({
 
     await seed(payload)
   },
+  jobs: {
+    autoRun: undefined,
+  },
   plugins: [
     ecommercePlugin({
       products: {

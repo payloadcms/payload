@@ -270,13 +270,14 @@ export interface VariantOption {
 export interface Order {
   id: string;
   customer?: (string | null) | User;
+  customerEmail?: string | null;
   paymentRecord?: (string | null) | PaymentRecord;
   status?: OrderStatus;
-  total?: number | null;
+  amount?: number | null;
   currency?: ('USD' | 'JPY' | 'EUR') | null;
-  cartItems?:
+  cart?:
     | {
-        product: string | Product;
+        product?: (string | null) | Product;
         variant?: (string | null) | Variant;
         quantity: number;
         amount?: number | null;
@@ -293,22 +294,14 @@ export interface Order {
  */
 export interface PaymentRecord {
   id: string;
-  customer: string | User;
+  customer?: (string | null) | User;
+  customerEmail?: string | null;
   order?: (string | null) | Order;
   status: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
-  cartSnapshot?:
-    | {
-        product: string | Product;
-        variant?: (string | null) | Variant;
-        quantity: number;
-        currency?: ('USD' | 'JPY' | 'EUR') | null;
-        id?: string | null;
-      }[]
-    | null;
   paymentMethod?: 'stripe' | null;
   stripe?: {
-    stripeCustomerID: string;
-    stripePaymentIntentID: string;
+    customerID?: string | null;
+    paymentIntentID?: string | null;
   };
   currency?: ('USD' | 'JPY' | 'EUR') | null;
   amount?: number | null;
@@ -516,11 +509,12 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
+  customerEmail?: T;
   paymentRecord?: T;
   status?: T;
-  total?: T;
+  amount?: T;
   currency?: T;
-  cartItems?:
+  cart?:
     | T
     | {
         product?: T;
@@ -539,23 +533,15 @@ export interface OrdersSelect<T extends boolean = true> {
  */
 export interface PaymentRecordsSelect<T extends boolean = true> {
   customer?: T;
+  customerEmail?: T;
   order?: T;
   status?: T;
-  cartSnapshot?:
-    | T
-    | {
-        product?: T;
-        variant?: T;
-        quantity?: T;
-        currency?: T;
-        id?: T;
-      };
   paymentMethod?: T;
   stripe?:
     | T
     | {
-        stripeCustomerID?: T;
-        stripePaymentIntentID?: T;
+        customerID?: T;
+        paymentIntentID?: T;
       };
   currency?: T;
   amount?: T;
