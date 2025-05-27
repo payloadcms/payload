@@ -34,7 +34,7 @@ export const formatDate = ({ date, i18n, pattern, timezone }: FormatDateArgs): s
 
 type FormatTimeToNowArgs = {
   date: Date | number | string | undefined
-  i18n: I18n<unknown, unknown>
+  i18n: I18n<unknown, unknown> | I18nClient<unknown>
 }
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
