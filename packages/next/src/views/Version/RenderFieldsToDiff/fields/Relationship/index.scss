@@ -41,10 +41,15 @@
       text-decoration-line: none;
       color: var(--diff-delete-parent-color);
       background-color: var(--diff-delete-pill-bg);
+      text-decoration-line: none !important;
 
       * {
         text-decoration-line: none;
         color: var(--diff-delete-parent-color);
+      }
+
+      .relationship-diff__info {
+        text-decoration-line: line-through;
       }
     }
 
