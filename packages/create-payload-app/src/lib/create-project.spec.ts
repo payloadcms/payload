@@ -155,8 +155,65 @@ describe('createProject', () => {
         expect(content).toContain(dbReplacement.configReplacement().join('\n'))
       })
     })
+
     describe('managing env files', () => {
-      it('updates .env files without overwriting existing data', async () => {
+      it('generates .env with defaults', async () => {
+        const envFilePath = path.join(projectDir, '.env')
+        const envExampleFilePath = path.join(projectDir, '.env.example')
+
+        fse.ensureDirSync(projectDir)
+
+        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
+        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
+
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseUri: '',
+          payloadSecret: '',
+          projectDir,
+          template: undefined,
+        })
+
+        expect(fse.existsSync(envFilePath)).toBe(true)
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+        expect(updatedEnvContent).toContain('DATABASE_URI=your-connection-string-here')
+        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
+      })
+
+      it('generates .env from .env.example', async () => {
+        const envFilePath = path.join(projectDir, '.env')
+        const envExampleFilePath = path.join(projectDir, '.env.example')
+
+        fse.ensureDirSync(projectDir)
+
+        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
+        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
+
+        // create .env.example with unique identifiers
+        const envExampleContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=example-connection-string`
+        fse.writeFileSync(envExampleFilePath, envExampleContent)
+
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseUri: '',
+          payloadSecret: '',
+          projectDir,
+          template: undefined,
+        })
+
+        expect(fse.existsSync(envFilePath)).toBe(true)
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+        expect(updatedEnvContent).toContain('DATABASE_URI=example-connection-string')
+        expect(updatedEnvContent).toContain('CUSTOM_VAR=custom-value')
+      })
+
+      it('updates existing .env without overriding vars', async () => {
         const envFilePath = path.join(projectDir, '.env')
         const envExampleFilePath = path.join(projectDir, '.env.example')
 
@@ -192,37 +249,6 @@ describe('createProject', () => {
         expect(updatedEnvExampleContent).toContain('CUSTOM_VAR=custom-value')
         expect(updatedEnvContent).toContain('DATABASE_URI=mongodb://localhost:27017/test')
         expect(updatedEnvContent).toContain('PAYLOAD_SECRET=test-secret')
-      })
-
-      it('creates .env and .env.example if they do not exist', async () => {
-        const envFilePath = path.join(projectDir, '.env')
-        const envExampleFilePath = path.join(projectDir, '.env.example')
-
-        fse.ensureDirSync(projectDir)
-
-        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
-        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
-
-        await manageEnvFiles({
-          cliArgs: {
-            '--debug': true,
-          } as CliArgs,
-          databaseUri: '',
-          payloadSecret: '',
-          projectDir,
-          template: undefined,
-        })
-
-        expect(fse.existsSync(envFilePath)).toBe(true)
-        expect(fse.existsSync(envExampleFilePath)).toBe(true)
-
-        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
-        expect(updatedEnvContent).toContain('DATABASE_URI=your-connection-string-here')
-        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
-
-        const updatedEnvExampleContent = fse.readFileSync(envExampleFilePath, 'utf-8')
-        expect(updatedEnvExampleContent).toContain('DATABASE_URI=your-connection-string-here')
-        expect(updatedEnvExampleContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
       })
     })
   })

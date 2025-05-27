@@ -22,7 +22,7 @@ const sanitizeEnv = (
     !contents.includes('POSTGRES_URL') &&
     !contents.includes('MONGODB_URI')
   ) {
-    withDefaults += '\nDATABASE_URI=your-database-name'
+    withDefaults += '\nDATABASE_URI=your-connection-string-here'
   }
 
   if (!contents.includes('PAYLOAD_SECRET')) {
