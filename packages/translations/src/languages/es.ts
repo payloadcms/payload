@@ -338,7 +338,7 @@ export const esTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescribir los datos existentes del campo',
     pageNotFound: 'Página no encontrada',
     password: 'Contraseña',
-    payloadSettings: 'Configuraciones de Payload',
+    payloadSettings: 'Configuración de Payload',
     perPage: 'Por página: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexar',
