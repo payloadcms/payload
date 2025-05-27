@@ -107,7 +107,7 @@ function flattenFields<TField extends ClientField | Field>(
             : pathPrefix
 
         acc.push(
-          // Always include the top-level group field when hoisting its subfields,
+          // Need to include the top-level group field when hoisting its subfields,
           // so that `buildColumnState` can detect and render a column if the group
           // has a custom admin Cell component defined in its configuration.
           // See: packages/ui/src/providers/TableColumns/buildColumnState/index.tsx
