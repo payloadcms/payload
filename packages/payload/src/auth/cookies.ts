@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from './../collections/config/types.js'
 
 type CookieOptions = {
@@ -197,7 +196,7 @@ export const parseCookies = (headers: Request['headers']): Map<string, string> =
 
       try {
         const decodedValue = decodeURI(encodedValue)
-        cookieMap.set(key, decodedValue)
+        cookieMap.set(key!, decodedValue)
       } catch (ignore) {
         return null
       }
