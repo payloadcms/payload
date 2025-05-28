@@ -27,7 +27,7 @@ export const updateHandler: PayloadHandler = async (req) => {
 
   const result = await updateOperation({
     collection,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
     limit: isNumber(limit) ? Number(limit) : undefined,
@@ -36,7 +36,7 @@ export const updateHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
-    where,
+    where: where!,
   })
 
   const headers = headersWithCors({

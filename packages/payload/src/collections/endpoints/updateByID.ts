@@ -23,7 +23,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     id,
     autosave,
     collection,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     overrideLock: Boolean(overrideLock === 'true'),
