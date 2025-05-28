@@ -83,6 +83,13 @@ describe('lexicalBlocks', () => {
     const { newBlock: newRSCBlock } = await createBlock({
       richTextField,
       name: 'Block R S C',
+      async afterLastParagraphClick() {
+        await page.keyboard.press('1')
+        await page.keyboard.press('2')
+        await page.keyboard.press('3')
+
+        await page.keyboard.press('Enter')
+      },
     })
 
     await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
@@ -1594,7 +1601,9 @@ async function createInlineBlock({
 async function createBlock({
   richTextField,
   name,
+  afterLastParagraphClick,
 }: {
+  afterLastParagraphClick?: (args: { lastParagraph: Locator }) => Promise<void> | void
   name: string
   richTextField: Locator
 }): Promise<{
@@ -1606,11 +1615,11 @@ async function createBlock({
   await expect(lastParagraph).toBeVisible()
 
   await lastParagraph.click()
-  await page.keyboard.press('1')
-  await page.keyboard.press('2')
-  await page.keyboard.press('3')
 
-  await page.keyboard.press('Enter')
+  if (afterLastParagraphClick) {
+    await afterLastParagraphClick({ lastParagraph })
+  }
+
   await page.keyboard.press('/')
   await page.keyboard.type(name.toLocaleLowerCase().replace(/ /g, ''))
 
