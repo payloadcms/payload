@@ -30,7 +30,7 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
-    const protocol = new URL(req.url).protocol // includes the final :
+    const protocol = new URL(req.url!).protocol // includes the final :
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL

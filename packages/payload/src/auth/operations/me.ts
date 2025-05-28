@@ -29,7 +29,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   const { collection, currentToken, req } = args
 
   let result: MeOperationResult = {
-    user: null,
+    user: null!,
   }
 
   if (req.user) {

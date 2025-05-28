@@ -52,8 +52,8 @@ async function autoLogin({
 
   const user = (
     await payload.find({
-      collection: collection.config.slug,
-      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      collection: collection!.config.slug,
+      depth: isGraphQL ? 0 : collection!.config.auth.depth,
       limit: 1,
       pagination: false,
       where,
@@ -63,7 +63,7 @@ async function autoLogin({
   if (!user) {
     return { user: null }
   }
-  user.collection = collection.config.slug
+  user.collection = collection!.config.slug
   user._strategy = strategyName
 
   return {

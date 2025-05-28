@@ -72,7 +72,7 @@ export async function getAccessResults({
         operations: globalOperations,
         req,
       })
-      results.globals[global.slug] = globalPolicy
+      results.globals![global.slug] = globalPolicy
     }),
   )
 

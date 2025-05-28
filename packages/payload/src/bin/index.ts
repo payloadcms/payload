@@ -48,7 +48,7 @@ export const bin = async () => {
 
     // Modify process.argv to remove 'run' and the script path
     const originalArgv = process.argv
-    process.argv = [process.argv[0], process.argv[1], ...args._.slice(2)]
+    process.argv = [process.argv[0]!, process.argv[1]!, ...args._.slice(2)]
 
     try {
       await import(pathToFileURL(absoluteScriptPath).toString())

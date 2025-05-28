@@ -303,15 +303,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: user,
+      // @ts-expect-error - I think this is an exception
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

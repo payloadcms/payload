@@ -70,7 +70,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url)
+    const parsedURL = url.parse(args.req.url!)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
     const user = await args.req.payload.findByID({

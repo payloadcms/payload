@@ -6,14 +6,14 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   path: string
 } {
   if (!PayloadComponent) {
-    return null
+    return null!
   }
 
   const pathAndMaybeExport =
     typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
-  let path = ''
-  let exportName = 'default'
+  let path: string | undefined = ''
+  let exportName: string | undefined = 'default'
 
   if (pathAndMaybeExport?.includes('#')) {
     ;[path, exportName] = pathAndMaybeExport.split('#')
@@ -25,5 +25,5 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
     exportName = PayloadComponent.exportName
   }
 
-  return { exportName, path }
+  return { exportName: exportName!, path: path! }
 }
