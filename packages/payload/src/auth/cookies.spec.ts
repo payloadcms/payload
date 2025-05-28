@@ -21,4 +21,14 @@ describe('parseCookies', () => {
     expect(parsed.get('my_value')).toBe('true')
     expect(parsed.size).toBe(1)
   })
+
+  it('ensure invalid cookies are ignored', () => {
+    const fakeHeaders = new Map()
+    fakeHeaders.set('Cookie', 'my_value=true; invalid_cookie=%E0%A4%A')
+
+    const parsed = parseCookies(fakeHeaders as unknown as Request['headers'])
+
+    expect(parsed.get('my_value')).toBe('true')
+    expect(parsed.size).toBe(1)
+  })
 })
