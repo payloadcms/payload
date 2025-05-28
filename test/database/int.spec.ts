@@ -7,7 +7,6 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
-import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
@@ -27,6 +26,7 @@ import { fileURLToPath } from 'url'
 
 import type { Global2 } from './payload-types.js'
 
+import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
@@ -2617,5 +2617,29 @@ describe('database', () => {
 
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+  })
+
+  it('ensure mongodb query sanitization does not duplicate IDs', () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+
+    const res: any = sanitizeQueryValue({
+      field: {
+        name: '_id',
+        type: 'text',
+      },
+      hasCustomID: false,
+      operator: 'in',
+      val: ['68378b649ca45274fb10126f'],
+      path: '_id',
+      parentIsLocalized: false,
+      payload,
+    })
+
+    expect(res?.val).toHaveLength(1)
+    expect(typeof res?.val?.[0]).toBe('object')
+    expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
   })
 })

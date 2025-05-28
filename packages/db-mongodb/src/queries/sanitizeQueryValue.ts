@@ -2,6 +2,7 @@ import type {
   FlattenedBlock,
   FlattenedBlocksField,
   FlattenedField,
+  Operator,
   Payload,
   RelationshipField,
 } from 'payload'
@@ -14,7 +15,7 @@ type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   path: string
   payload: Payload
