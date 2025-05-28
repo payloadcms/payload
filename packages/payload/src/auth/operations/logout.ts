@@ -60,7 +60,7 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       userWithSessions.sessions = []
     } else {
       const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
-        (s) => s.id !== req.user._sid,
+        (s) => s.id !== req?.user?._sid,
       )
 
       userWithSessions.sessions = sessionsAfterLogout
