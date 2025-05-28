@@ -177,6 +177,10 @@ describe('Select', () => {
           number: post.number,
           text: post.text,
         })
+
+        // this will fail if types are not the same
+        const _enforce_1: Equal<(typeof res)['number'], null | number | undefined> = true
+        const _enforce_2: Equal<(typeof res)['text'], null | string | undefined> = true
       })
 
       it('should select relationships', async () => {
