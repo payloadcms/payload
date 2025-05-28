@@ -33,14 +33,14 @@
     }
 
     &__main-detail {
-      padding: base(0.8) base(1.2);
+      padding: base(1) base(1.2);
       width: auto;
       flex-grow: 1;
       min-width: 280px;
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-self: stretch;
       gap: base(0.2);
     }
