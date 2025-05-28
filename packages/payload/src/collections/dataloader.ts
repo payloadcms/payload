@@ -4,6 +4,7 @@ import type { BatchLoadFn } from 'dataloader'
 import DataLoader from 'dataloader'
 
 import type { FindArgs } from '../database/types.js'
+import type { Payload } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 import type { Options } from './operations/local/find.js'
@@ -163,7 +164,7 @@ export const getDataLoader = (req: PayloadRequest) => {
   const findQueries = new Map()
   const dataLoader = new DataLoader(batchAndLoadDocs(req)) as PayloadRequest['payloadDataLoader']
 
-  dataLoader.find = (args: FindArgs) => {
+  dataLoader.find = ((args: FindArgs) => {
     const key = createFindDataloaderCacheKey(args)
     const cached = findQueries.get(key)
     if (cached) {
@@ -172,7 +173,7 @@ export const getDataLoader = (req: PayloadRequest) => {
     const request = req.payload.find(args)
     findQueries.set(key, request)
     return request
-  }
+  }) as Payload['find']
 
   return dataLoader
 }

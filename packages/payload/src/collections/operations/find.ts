@@ -144,7 +144,7 @@ export const findOperation = async <
 
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
-    let fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where!, accessResult!)
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
@@ -154,7 +154,7 @@ export const findOperation = async <
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -163,7 +163,7 @@ export const findOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -173,7 +173,7 @@ export const findOperation = async <
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination: usePagination,
         req,
@@ -187,9 +187,9 @@ export const findOperation = async <
     } else {
       await validateQueryPaths({
         collectionConfig,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
-        where,
+        where: where!,
       })
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
@@ -197,7 +197,7 @@ export const findOperation = async <
         draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination,
         req,
@@ -302,18 +302,18 @@ export const findOperation = async <
           collection: collectionConfig,
           context: req.context,
           currentDepth,
-          depth,
+          depth: depth!,
           doc,
-          draft: draftsEnabled,
-          fallbackLocale,
+          draft: draftsEnabled!,
+          fallbackLocale: fallbackLocale!,
           findMany: true,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         }),
       ),
     )
