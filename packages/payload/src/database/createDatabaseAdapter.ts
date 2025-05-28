@@ -17,7 +17,9 @@ import { migrateReset } from './migrations/migrateReset.js'
 import { migrateStatus } from './migrations/migrateStatus.js'
 
 const beginTransaction: BeginTransaction = () => Promise.resolve(null)
+// @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
 const rollbackTransaction: RollbackTransaction = () => Promise.resolve(null)
+// @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
 const commitTransaction: CommitTransaction = () => Promise.resolve(null)
 
 export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
@@ -37,7 +39,9 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
 ): T {
   return {
     // Default 'null' transaction functions
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     beginTransaction,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     commitTransaction,
     createMigration,
     migrate,
@@ -46,6 +50,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     migrateRefresh,
     migrateReset,
     migrateStatus,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     rollbackTransaction,
     updateJobs: defaultUpdateJobs,
 

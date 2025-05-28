@@ -795,8 +795,10 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         account?: AdminViewConfig
         /** Replace the admin homepage */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         dashboard?: AdminViewConfig
       }
     }
@@ -1287,11 +1289,17 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   api?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   default?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   livePreview?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   root?: never
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   version?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   versions?: Partial<EditViewConfig>
 }
 
