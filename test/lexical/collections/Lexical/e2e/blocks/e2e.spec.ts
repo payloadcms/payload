@@ -184,7 +184,7 @@ async function createBlock({
 
   await page.keyboard.press('Enter')
   await page.keyboard.press('/')
-  await page.keyboard.type(name.toLocaleLowerCase().replace(' ', ''))
+  await page.keyboard.type(name.toLocaleLowerCase().replace(/ /g, ''))
 
   // CreateBlock
   const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
