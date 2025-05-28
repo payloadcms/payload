@@ -40,7 +40,7 @@ async function localForgotPassword<T extends CollectionSlug>(
     disableEmail,
     expiration,
     req: await createLocalReq(options, payload),
-  })
+  }) as Promise<Result>
 }
 
 export const forgotPassword = localForgotPassword

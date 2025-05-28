@@ -126,7 +126,7 @@ export const getFieldsToSign = (args: {
   }
 
   traverseFields({
-    data: user,
+    data: user!,
     fields: collectionConfig.fields,
     result,
   })

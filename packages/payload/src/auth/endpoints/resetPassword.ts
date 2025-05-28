@@ -26,7 +26,7 @@ export const resetPasswordHandler: PayloadHandler = async (req) => {
   const cookie = generatePayloadCookie({
     collectionAuthConfig: collection.config.auth,
     cookiePrefix: req.payload.config.cookiePrefix,
-    token: result.token,
+    token: result.token!,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

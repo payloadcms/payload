@@ -53,7 +53,7 @@ export async function getAccessResults({
         operations: collectionOperations,
         req,
       })
-      results.collections[collection.slug] = collectionPolicy
+      results.collections![collection.slug] = collectionPolicy
     }),
   )
 

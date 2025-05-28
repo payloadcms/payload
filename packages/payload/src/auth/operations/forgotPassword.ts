@@ -153,7 +153,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url).protocol // includes the final :
+      const protocol = new URL(req.url!).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
