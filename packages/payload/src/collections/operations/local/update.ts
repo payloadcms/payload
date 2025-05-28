@@ -12,6 +12,7 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
   RequiredDataFromCollectionSlug,
@@ -230,8 +231,7 @@ async function updateLocal<
     )
   }
 
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  const req = await createLocalReq(options, payload)
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
   req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {

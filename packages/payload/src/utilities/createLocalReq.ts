@@ -86,17 +86,16 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
   }
 }
 
-type CreateLocalReq = (
-  options: {
-    context?: RequestContext
-    fallbackLocale?: false | TypedLocale
-    locale?: string
-    req?: Partial<PayloadRequest>
-    urlSuffix?: string
-    user?: User
-  },
-  payload: Payload,
-) => Promise<PayloadRequest>
+export type CreateLocalReqOptions = {
+  context?: RequestContext
+  fallbackLocale?: false | TypedLocale
+  locale?: string
+  req?: Partial<PayloadRequest>
+  urlSuffix?: string
+  user?: User
+}
+
+type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },

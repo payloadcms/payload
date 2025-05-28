@@ -59,7 +59,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     // If errors are disabled, and access returns false, return null
     if (accessResults === false) {
-      return null
+      return null!
     }
 
     const hasWhereAccess = typeof accessResults === 'object'
@@ -80,7 +80,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     const versionsQuery = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: 1,
-      locale,
+      locale: locale!,
       pagination: false,
       req,
       select,
@@ -99,7 +99,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
         }
       }
 
-      return null
+      return null!
     }
 
     if (!result.version) {
@@ -132,17 +132,18 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       collection: collectionConfig,
       context: req.context,
       currentDepth,
-      depth,
+      depth: depth!,
       doc: result.version,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select: typeof select?.version === 'object' ? select.version : undefined,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

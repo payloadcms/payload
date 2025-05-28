@@ -10,6 +10,7 @@ import type {
   Sort,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -122,7 +123,7 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     overrideAccess,
     page,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     sort,

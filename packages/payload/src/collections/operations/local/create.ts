@@ -7,6 +7,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -148,7 +149,7 @@ export default async function createLocal<
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
   req.file = file ?? (await getFileByPath(filePath!))
 

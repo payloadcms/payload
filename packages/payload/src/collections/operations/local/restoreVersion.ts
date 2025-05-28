@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -100,8 +101,7 @@ export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
     overrideAccess,
     payload,
     populate,
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   }
