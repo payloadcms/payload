@@ -27,7 +27,7 @@ export type BaseVersionField = {
 
 export type VersionField = {
   field?: BaseVersionField
-  fieldByLocale?: Record<TypedLocale, BaseVersionField>
+  fieldByLocale?: Record<string, BaseVersionField>
 }
 
 /**

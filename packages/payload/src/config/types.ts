@@ -678,6 +678,16 @@ export type AfterErrorHookArgs = {
   result?: ErrorResult
 }
 
+export type ImportMapGenerators = Array<
+  (props: {
+    addToImportMap: AddToImportMap
+    baseDir: string
+    config: SanitizedConfig
+    importMap: InternalImportMap
+    imports: Imports
+  }) => void
+>
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -821,15 +831,7 @@ export type Config = {
        * You can use generators to add custom components to the component import map.
        * This allows you to import custom components in the admin panel.
        */
-      generators?: Array<
-        (props: {
-          addToImportMap: AddToImportMap
-          baseDir: string
-          config: SanitizedConfig
-          importMap: InternalImportMap
-          imports: Imports
-        }) => void
-      >
+      generators?: ImportMapGenerators
       /**
        * If Payload cannot find the import map file location automatically,
        * you can manually provide it here.
