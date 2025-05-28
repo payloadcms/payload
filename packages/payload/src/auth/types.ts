@@ -158,11 +158,11 @@ type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
-  headers: Request['headers']
   /**
-   * Whether or not the strategy is being executed from a React Server Component in the Admin UI.
+   * Specifies whether or not response headers can be set from this strategy.
    */
-  isAdmin?: boolean
+  canSetHeaders?: boolean
+  headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
   /**

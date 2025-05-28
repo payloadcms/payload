@@ -6,11 +6,11 @@ import { executeAuthStrategies } from '../executeAuthStrategies.js'
 import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
-  headers: Request['headers']
   /**
-   * Specify if you are calling this operation from a React Server Component in the Admin UI.
+   * Specify if it's possible for auth strategies to set headers within this operation.
    */
-  isAdmin?: boolean
+  canSetHeaders?: boolean
+  headers: Request['headers']
   req?: Omit<PayloadRequest, 'user'>
 }
 
@@ -21,14 +21,14 @@ export type AuthResult = {
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
-  const { headers, isAdmin } = args
+  const { canSetHeaders, headers } = args
   const req = args.req as PayloadRequest
   const { payload } = req
 
   try {
     const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders,
       headers,
-      isAdmin,
       payload,
     })
 

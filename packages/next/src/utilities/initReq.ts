@@ -49,15 +49,15 @@ const reqCache = selectiveCache<Result>('req')
  * As access control and getting the request locale is dependent on the current URL and
  */
 export const initReq = async function ({
+  canSetHeaders,
   configPromise,
   importMap,
-  isAdmin,
   key,
   overrides,
 }: {
+  canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-  isAdmin?: boolean
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
 }): Promise<Result> {
@@ -79,8 +79,8 @@ export const initReq = async function ({
     })
 
     const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders,
       headers,
-      isAdmin,
       payload,
     })
 

@@ -15,7 +15,7 @@ export const executeAuthStrategies = async (
     // add the configured AuthStrategy `name` to the strategy function args
     args.strategyName = strategy.name
     args.isGraphQL = Boolean(args.isGraphQL)
-    args.isAdmin = Boolean(args.isAdmin)
+    args.canSetHeaders = Boolean(args.canSetHeaders)
 
     try {
       const authResult = await strategy.authenticate(args)
