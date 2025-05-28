@@ -5,7 +5,7 @@ export const sessionsFieldConfig: ArrayField = {
   type: 'array',
   access: {
     read: ({ doc, req: { user } }) => {
-      return user?.id === doc.id
+      return user?.id === doc?.id
     },
     update: () => false,
   },
