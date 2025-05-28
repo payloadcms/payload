@@ -89,12 +89,14 @@ By default, `pnpm test:int` will only run int test against MongoDB. To run int t
 
 ### Pull Request Titles
 
-We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for our commit messages. Please follow this format when creating commits. Here are some examples:
+We squash PR commits and use the PR title as the commit message. For that reason, please use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for your PR titles. Here are some examples:
 
-- `feat: adds new feature`
-- `fix: fixes bug`
-- `docs: adds documentation`
-- `chore: anything that is not a feature, fix, or docs`
+- `feat: add new feature`
+- `fix: fix bug`
+- `docs: add documentation`
+- `test: add/fix tests`
+- `refactor: refactor code`
+- `chore: anything that does not fit into the above categories`
 
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
