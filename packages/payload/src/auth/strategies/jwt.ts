@@ -97,11 +97,11 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     const user = (await payload.findByID({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
-      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      depth: isGraphQL ? 0 : collection!.config.auth.depth,
     })) as AuthStrategyResult['user']
 
-    if (user && (!collection.config.auth.verify || user._verified)) {
-      user.collection = collection.config.slug
+    if (user && (!collection!.config.auth.verify || user._verified)) {
+      user.collection = collection!.config.slug
       user._strategy = strategyName
       return {
         user,

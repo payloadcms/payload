@@ -29,7 +29,7 @@ export const deleteHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
-    where,
+    where: where!,
   })
 
   const headers = headersWithCors({

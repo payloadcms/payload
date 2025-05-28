@@ -21,7 +21,7 @@ export const createHandler: PayloadHandler = async (req) => {
   const doc = await createOperation({
     autosave,
     collection,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? depth : undefined,
     draft,
     populate: sanitizePopulateParam(req.query.populate),

@@ -52,7 +52,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
     if (req.user.collection !== collection.config.slug) {
       return {
-        user: null,
+        user: null!,
       }
     }
 

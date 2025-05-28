@@ -85,7 +85,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       user._strategy = args.req.user._strategy
     }
 
-    let result: Result
+    let result!: Result
 
     // /////////////////////////////////////
     // refresh hook - Collection

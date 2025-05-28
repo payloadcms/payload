@@ -148,8 +148,8 @@ export const createClientCollectionConfig = ({
             case 'livePreview':
               clientCollection.admin.livePreview =
                 {} as ClientCollectionConfig['admin']['livePreview']
-              if (collection.admin.livePreview.breakpoints) {
-                clientCollection.admin.livePreview.breakpoints =
+              if (collection.admin.livePreview?.breakpoints) {
+                clientCollection.admin.livePreview!.breakpoints =
                   collection.admin.livePreview.breakpoints
               }
               break
