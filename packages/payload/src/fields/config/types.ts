@@ -751,7 +751,6 @@ export type UnnamedGroupField = {
    * - A string, which will be used as the tab's label.
    * - An object, where the key is the language code and the value is the label.
    */
-  label?:
     | {
         [selectedLanguage: string]: string
       }
