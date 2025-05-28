@@ -101,14 +101,15 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#savebutton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#savedraftbutton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#publishbutton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#previewbutton).           |
-| `Description`     | A description of the Collection. [More details](#description).                         |
-| `Upload`          | A file upload component. [More details](#upload).                                      |
+| Path                     | Description                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols). |
+| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                               |
+| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).               |
+| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                        |
+| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                         |
+| `Description`            | A description of the Collection. [More details](#description).                                       |
+| `Upload`                 | A file upload component. [More details](#upload).                                                    |
 
 #### Globals
 
@@ -133,13 +134,14 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#savebutton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#savedraftbutton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#publishbutton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#previewbutton).           |
-| `Description`     | A description of the Global. [More details](#description).                             |
+| Path                     | Description                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols). |
+| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                               |
+| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).               |
+| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                        |
+| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                         |
+| `Description`            | A description of the Global. [More details](#description).                                           |
 
 ### SaveButton
 
@@ -188,6 +190,73 @@ import type { SaveButtonClientProps } from 'payload'
 
 export function MySaveButton(props: SaveButtonClientProps) {
   return <SaveButton label="Save" />
+}
+```
+
+### beforeDocumentControls
+
+The `beforeDocumentControls` property allows you to render custom components just before the default document action buttons (like Save, Publish, or Preview). This is useful for injecting custom buttons, status indicators, or any other UI elements before the built-in controls.
+
+To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in you [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
+
+#### Collections
+
+```
+export const MyCollection: CollectionConfig = {
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        beforeDocumentControls: ['/path/to/CustomComponent'],
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Globals
+
+```
+export const MyGlobal: GlobalConfig = {
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        beforeDocumentControls: ['/path/to/CustomComponent'],
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `beforeDocumentControls` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { BeforeDocumentControlsServerProps } from 'payload'
+
+export function MyCustomDocumentControlButton(
+  props: BeforeDocumentControlsServerProps,
+) {
+  return <div>This is a custom beforeDocumentControl button (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeDocumentControlsClientProps } from 'payload'
+
+export function MyCustomDocumentControlButton(
+  props: BeforeDocumentControlsClientProps,
+) {
+  return <div>This is a custom beforeDocumentControl button (Client)</div>
 }
 ```
 

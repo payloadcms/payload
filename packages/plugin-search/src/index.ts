@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
+import type { CollectionAfterChangeHook, Config } from 'payload'
 
 import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
@@ -7,7 +7,6 @@ import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
-type CollectionAfterDeleteHookArgs = Parameters<CollectionAfterDeleteHook>[0]
 
 export const searchPlugin =
   (incomingPluginConfig: SearchPluginConfig) =>
@@ -67,14 +66,9 @@ export const searchPlugin =
                     })
                   },
                 ],
-                afterDelete: [
-                  ...(existingHooks?.afterDelete || []),
-                  async (args: CollectionAfterDeleteHookArgs) => {
-                    await deleteFromSearch({
-                      ...args,
-                      pluginConfig,
-                    })
-                  },
+                beforeDelete: [
+                  ...(existingHooks?.beforeDelete || []),
+                  deleteFromSearch(pluginConfig),
                 ],
               },
             }

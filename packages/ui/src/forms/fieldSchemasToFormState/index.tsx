@@ -5,6 +5,7 @@ import type {
   DocumentPreferences,
   Field,
   FieldSchemaMap,
+  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,

@@ -37,12 +37,36 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+          // access: { read: () => false },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          name: 'category',
+        },
+        {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'text',
+          type: 'text',
         },
         {
           name: 'number',
@@ -434,6 +458,60 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'virtual-relations',
+      admin: { useAsTitle: 'postTitle' },
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: 'post.title',
+        },
+        {
+          name: 'postTitleHidden',
+          type: 'text',
+          virtual: 'post.title',
+          hidden: true,
+        },
+        {
+          name: 'postCategoryTitle',
+          type: 'text',
+          virtual: 'post.category.title',
+        },
+        {
+          name: 'postCategoryID',
+          type: 'json',
+          virtual: 'post.category.id',
+        },
+        {
+          name: 'postID',
+          type: 'json',
+          virtual: 'post.id',
+        },
+        {
+          name: 'postLocalized',
+          type: 'text',
+          virtual: 'post.localized',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+        {
+          name: 'customID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
+        {
+          name: 'customIDValue',
+          type: 'text',
+          virtual: 'customID.id',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
       slug: fieldsPersistanceSlug,
       fields: [
         {
@@ -627,8 +705,93 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'blocks-docs',
+      fields: [
+        {
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocksLocalized',
+        },
+        {
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocks',
+        },
+      ],
+    },
   ],
   globals: [
+    {
+      slug: 'header',
+      fields: [
+        {
+          name: 'itemsLvl1',
+          type: 'array',
+          dbName: 'header_items_lvl1',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+            {
+              name: 'itemsLvl2',
+              type: 'array',
+              dbName: 'header_items_lvl2',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                },
+                {
+                  name: 'itemsLvl3',
+                  type: 'array',
+                  dbName: 'header_items_lvl3',
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                    },
+                    {
+                      name: 'itemsLvl4',
+                      type: 'array',
+                      dbName: 'header_items_lvl4',
+                      fields: [
+                        {
+                          name: 'label',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     {
       slug: 'global',
       dbName: 'customGlobal',
@@ -655,6 +818,21 @@ export default buildConfigWithDefaults({
         {
           name: 'text',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-relation-global',
+      fields: [
+        {
+          type: 'text',
+          name: 'postTitle',
+          virtual: 'post.title',
+        },
+        {
+          type: 'relationship',
+          name: 'post',
+          relationTo: 'posts',
         },
       ],
     },

@@ -81,7 +81,8 @@ export const handleEndpoints = async ({
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
-    request.headers.get('X-HTTP-Method-Override') === 'GET'
+    (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
+      request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
     const search = await request.text()
 
@@ -222,8 +223,12 @@ export const handleEndpoints = async ({
     }
 
     const response = await handler(req)
+
     return new Response(response.body, {
-      headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+      headers: headersWithCors({
+        headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+        req,
+      }),
       status: response.status,
       statusText: response.statusText,
     })

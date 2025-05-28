@@ -196,5 +196,14 @@ export const CustomFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'allButtons',
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Buttons/index.js#AllButtons',
+        },
+      },
+      type: 'ui',
+    },
   ],
 }

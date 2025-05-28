@@ -78,6 +78,7 @@ async function main() {
       },
       sharp: false,
       skipDockerCompose: true,
+      skipReadme: true,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -131,6 +132,7 @@ async function main() {
       },
       sharp: false,
       storage: 'vercelBlobStorage',
+      skipReadme: true,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -150,6 +152,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipReadme: true, // Do not copy the README.md file from the base template
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -260,10 +263,10 @@ async function main() {
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
     } else {
       log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 

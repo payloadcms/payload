@@ -235,6 +235,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     if (Array.isArray(relationTo) && !isDrawerOpen && selectedCollection) {
       setSelectedCollection(undefined)
     }
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
 
@@ -335,6 +336,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
+                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 orderableFieldName={
