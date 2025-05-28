@@ -203,6 +203,10 @@ export function parseCookies(headers: Request['headers']) {
 
   const cookie = headers.get('Cookie')
 
+  if (!cookie) {
+    return map
+  }
+
   for (const pair of cookie.split(/; */)) {
     if (!pair) {
       continue

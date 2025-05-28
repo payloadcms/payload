@@ -31,4 +31,12 @@ describe('parseCookies', () => {
     expect(parsed.get('my_value')).toBe('true')
     expect(parsed.size).toBe(1)
   })
+
+  it('ensure empty map is returned if there are no cookies', () => {
+    const fakeHeaders = new Map()
+
+    const parsed = parseCookies(fakeHeaders as unknown as Request['headers'])
+
+    expect(parsed.size).toBe(0)
+  })
 })
