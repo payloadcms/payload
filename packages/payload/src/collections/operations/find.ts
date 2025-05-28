@@ -72,9 +72,9 @@ export const findOperation = async <
           (await hook({
             args,
             collection: args.collection.config,
-            context: args.req.context,
+            context: args.req!.context,
             operation: 'read',
-            req: args.req,
+            req: args.req!,
           })) || args
       }
     }
@@ -93,13 +93,14 @@ export const findOperation = async <
       page,
       pagination = true,
       populate,
-      req: { fallbackLocale, locale, payload },
-      req,
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
       where,
     } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -122,7 +123,7 @@ export const findOperation = async <
           docs: [],
           hasNextPage: false,
           hasPrevPage: false,
-          limit,
+          limit: limit!,
           nextPage: null,
           page: 1,
           pagingCounter: 1,
@@ -360,7 +361,7 @@ export const findOperation = async <
 
     return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

@@ -137,7 +137,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
-      doc: docToDelete,
+      doc: docToDelete!,
       overrideDelete: true,
       req,
     })

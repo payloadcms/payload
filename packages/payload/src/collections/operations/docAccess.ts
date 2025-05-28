@@ -52,7 +52,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       },
     })
 
-    return sanitizedPermissions?.collections?.[config.slug]
+    return sanitizedPermissions.collections![config.slug]!
   } catch (e: unknown) {
     await killTransaction(req)
     throw e
