@@ -238,9 +238,23 @@ export type TransformDataWithSelect<
                 ? Data[K] // do nothing
                 : // drop foreign keys from to-many relations
                   Extract<Data[K], Array<unknown>> extends Array<infer U>
-                  ?
-                      | Array<Exclude<U, Extract<U, TypeWithID>['id']>>
-                      | Exclude<Data[K], Array<unknown>>
+                  ? Extract<U, DataFromCollectionSlug<CollectionSlug>> extends never // if the select field is object but not a collection (e.g., a group)
+                    ?
+                        | Array<
+                            Exclude<
+                              // transform nested object that are not collections
+                              K extends keyof Select
+                                ? Select[K] extends object
+                                  ? TransformDataWithSelect<U, Select[K]>
+                                  : U
+                                : U,
+                              Extract<U, TypeWithID>['id']
+                            >
+                          >
+                        | Exclude<Data[K], Array<unknown>>
+                    :
+                        | Array<Exclude<U, Extract<U, TypeWithID>['id']>>
+                        | Exclude<Data[K], Array<unknown>>
                   : never
               : // drop foreign keys from to-one relations
                 Exclude<Data[K], Extract<Data[K], TypeWithID>['id']>
