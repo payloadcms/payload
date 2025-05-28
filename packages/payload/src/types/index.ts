@@ -233,7 +233,10 @@ export type TransformDataWithSelect<
               : // select 'id' always
                 K extends 'id'
                 ? K
-                : never]: Data[K]
+                : never]: Extract<Data[K], TypeWithID> extends never // if the select field is not to-one relation
+              ? Data[K] // TODO handle to many relations
+              : // drop foreign keys from to-one relations
+                Exclude<Data[K], Extract<Data[K], TypeWithID>['id']>
           }
         : // Handle exclude mode
           {

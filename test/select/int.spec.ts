@@ -1,3 +1,5 @@
+import type { Equal } from 'drizzle-orm'
+
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { deepCopyObject, type Payload } from 'payload'
@@ -13,6 +15,8 @@ import type {
   Page,
   Point,
   Post,
+  Rel,
+  Upload,
   VersionedPost,
 } from './payload-types.js'
 
@@ -203,6 +207,9 @@ describe('Select', () => {
           id: postId,
           hasOne: post.hasOne,
         })
+
+        // this will fail if types are not the same
+        const _enforce_2: Equal<(typeof res_2)['hasOne'], null | Rel | undefined> = true
 
         const res_3 = await payload.findByID({
           collection: 'posts',
