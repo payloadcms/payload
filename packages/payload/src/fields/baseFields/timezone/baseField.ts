@@ -8,13 +8,13 @@ export const baseTimezoneField: (args: Partial<SelectField>) => SelectField = ({
   required,
 }) => {
   return {
-    name,
+    name: name!,
     type: 'select',
     admin: {
       hidden: true,
     },
     defaultValue,
-    options,
+    options: options!,
     required,
   }
 }

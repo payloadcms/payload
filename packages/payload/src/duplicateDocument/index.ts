@@ -81,7 +81,7 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     doc: duplicatedFromDocWithLocales,
-    overrideAccess,
+    overrideAccess: overrideAccess!,
     req,
   })
 
@@ -95,10 +95,10 @@ export const getDuplicateDocumentData = async ({
     context: req.context,
     depth: 0,
     doc: deepCopyObjectSimple(duplicatedFromDocWithLocales),
-    draft: draftArg,
+    draft: draftArg!,
     fallbackLocale: null,
     global: null,
-    locale: req.locale,
+    locale: req.locale!,
     overrideAccess: true,
     req,
     showHiddenFields: true,

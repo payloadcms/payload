@@ -589,6 +589,7 @@ export type NumberField = {
   Omit<FieldBase, 'validate'>
 
 export type NumberFieldClient = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<NumberField['admin'], 'autoComplete' | 'placeholder' | 'step'>
 } & FieldBaseClient &
   Pick<NumberField, 'hasMany' | 'max' | 'maxRows' | 'min' | 'minRows' | 'type'>
