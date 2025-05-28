@@ -47,7 +47,7 @@ export const getDuplicateDocumentData = async ({
   // /////////////////////////////////////
   const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
-    locale: req.locale,
+    locale: req.locale!,
     req,
     where: combineQueries({ id: { equals: id } }, accessResults),
   }
