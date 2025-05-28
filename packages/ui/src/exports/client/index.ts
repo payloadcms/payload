@@ -224,6 +224,7 @@ export {
   useWatchForm,
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
+export type { FieldAction } from '../../forms/Form/types.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
