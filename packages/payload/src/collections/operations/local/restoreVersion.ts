@@ -100,6 +100,7 @@ export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
     overrideAccess,
     payload,
     populate,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

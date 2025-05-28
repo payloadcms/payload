@@ -230,8 +230,9 @@ async function updateLocal<
     )
   }
 
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const req = await createLocalReq(options, payload)
-  req.file = file ?? (await getFileByPath(filePath))
+  req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {
     id,
@@ -256,8 +257,10 @@ async function updateLocal<
   }
 
   if (options.id) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return updateByIDOperation<TSlug, TSelect>(args)
   }
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   return updateOperation<TSlug, TSelect>(args)
 }
 

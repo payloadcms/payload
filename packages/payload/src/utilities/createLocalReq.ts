@@ -8,7 +8,7 @@ import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 
 function getRequestContext(
-  req: Partial<PayloadRequest> = { context: null } as PayloadRequest,
+  req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
@@ -41,14 +41,14 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
     const urlToUse =
-      req?.url || req.payload.config?.serverURL
-        ? `${req.payload.config.serverURL}${urlSuffix || ''}`
+      req?.url || req.payload?.config?.serverURL
+        ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
         : fallbackURL
 
     try {
       urlObject = new URL(urlToUse)
     } catch (_err) {
-      req.payload.logger.error(
+      req.payload?.logger.error(
         `Failed to create URL object from URL: ${urlToUse}, falling back to ${fallbackURL}`,
       )
 
@@ -113,12 +113,12 @@ export const createLocalReq: CreateLocalReq = async (
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       locale: req.locale,
       localization,
     })
 
-    req.fallbackLocale = sanitizedFallback
+    req.fallbackLocale = sanitizedFallback!
   }
 
   const i18n =
