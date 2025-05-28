@@ -7,6 +7,10 @@ import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
+  /**
+   * Specify if you are calling this function from within the admin UI or not.
+   */
+  isAdmin?: boolean
   req?: Omit<PayloadRequest, 'user'>
 }
 
@@ -17,13 +21,14 @@ export type AuthResult = {
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
-  const { headers } = args
+  const { headers, isAdmin } = args
   const req = args.req as PayloadRequest
   const { payload } = req
 
   try {
     const { responseHeaders, user } = await executeAuthStrategies({
       headers,
+      isAdmin,
       payload,
     })
 

@@ -159,6 +159,10 @@ type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
 
 export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
+  /**
+   * Specify if you are calling this function from within the admin UI or not.
+   */
+  isAdmin?: boolean
   isGraphQL?: boolean
   payload: Payload
   /**

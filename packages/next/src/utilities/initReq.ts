@@ -51,11 +51,13 @@ const reqCache = selectiveCache<Result>('req')
 export const initReq = async function ({
   configPromise,
   importMap,
+  isAdmin,
   key,
   overrides,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
+  isAdmin?: boolean
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
 }): Promise<Result> {
@@ -78,6 +80,7 @@ export const initReq = async function ({
 
     const { responseHeaders, user } = await executeAuthStrategies({
       headers,
+      isAdmin,
       payload,
     })
 

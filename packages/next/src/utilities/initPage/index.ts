@@ -30,6 +30,7 @@ export const initPage = async ({
   } = await initReq({
     configPromise,
     importMap,
+    isAdmin: true,
     key: useLayoutReq ? 'RootLayout' : 'initPage',
     overrides: {
       fallbackLocale: false,

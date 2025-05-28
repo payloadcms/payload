@@ -29,6 +29,7 @@ The `authenticate` function is passed the following arguments:
 | ---------------- | ------------------------------------------------------------------------------------------------- |
 | **`headers`** \* | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
 | **`payload`** \* | The Payload class. Useful for authenticating the identifiable information against Payload.        |
+| **`isAdmin`** \* | Whether or not the request was made from the admin UI or not. Default is `false`.                 |
 | **`isGraphQL`**  | Whether or not the request was made from a GraphQL endpoint. Default is `false`.                  |
 
 ### Example Strategy
