@@ -88,7 +88,7 @@ export function generateJobsJSONSchemas(
       additionalProperties: false,
       properties: {
         ...Object.fromEntries(
-          jobsConfig.tasks.map((task) => {
+          (jobsConfig.tasks ?? []).map((task) => {
             const normalizedTaskSlug = task.slug[0].toUpperCase() + task.slug.slice(1)
 
             const toReturn: JSONSchema4 = {
@@ -110,7 +110,7 @@ export function generateJobsJSONSchemas(
           required: ['input', 'output'],
         },
       },
-      required: [...jobsConfig.tasks.map((task) => task.slug), 'inline'],
+      required: [...(jobsConfig.tasks ?? []).map((task) => task.slug), 'inline'],
     }
   }
 

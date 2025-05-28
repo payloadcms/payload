@@ -569,7 +569,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersion: category.id },
+        data: { title: 'version', categoryVersion: category.id },
       })
 
       const res = await payload.find({ collection: 'categories-versions', draft: false })
@@ -582,7 +582,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersions: [category.id] },
+        data: { title: 'version', categoryVersions: [category.id] },
       })
 
       const res = await payload.find({ collection: 'categories-versions', draft: false })
@@ -595,7 +595,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersion: category.id },
+        data: { title: 'version', categoryVersion: category.id },
       })
 
       const res = await payload.find({
@@ -615,7 +615,14 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { _status: 'draft', categoryVersion: category.id },
+        data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: 'versions',
+        id: version.id,
+        data: { title: 'updated-title' },
         draft: true,
       })
 
@@ -625,6 +632,7 @@ describe('Joins Field', () => {
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+      expect(res.docs[0].relatedVersions.docs[0].title).toBe('updated-title')
     })
 
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
@@ -632,7 +640,7 @@ describe('Joins Field', () => {
 
       const version = await payload.create({
         collection: 'versions',
-        data: { categoryVersions: [category.id] },
+        data: { categoryVersions: [category.id], title: 'version' },
       })
 
       const res = await payload.find({
@@ -929,6 +937,140 @@ describe('Joins Field', () => {
       )
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
         unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
+      )
+    })
+
+    it('should have simple paginate with page for joins polymorphic', async () => {
+      let queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 2
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      let pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            polymorphic(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[0].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[1].id,
+      )
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                polymorphic(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 2,
+                ) {
+                  docs {
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[2].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[3].id,
+      )
+    })
+
+    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: { _status: 'draft' },
+        draft: true,
+      })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: 'versions',
+        draft: true,
+        id: version.id,
+        data: { title: 'updated-title' },
+      })
+
+      const query = `query {
+        CategoriesVersions(draft: true) {
+              docs {
+                  relatedVersions(
+                    limit: 1
+                  ) {
+                    docs {
+                      id,
+                      title
+                    }
+                    hasNextPage
+                  }
+                }
+            }
+          }`
+
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(res.data.CategoriesVersions.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+      expect(res.data.CategoriesVersions.docs[0].relatedVersions.docs[0].title).toBe(
+        'updated-title',
       )
     })
 
@@ -1335,10 +1477,27 @@ describe('Joins Field', () => {
       expect(parent.children?.docs).toHaveLength(1)
       expect(parent.children.docs[0]?.value.title).toBe('doc-1')
 
-      // WHERE by _relationTo (join for specific collectionSlug)
+      // WHERE by relationTo (join for specific collectionSlug)
       parent = await payload.findByID({
         collection: 'multiple-collections-parents',
         id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      // WHERE by relationTo with overrideAccess:false
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        overrideAccess: false,
         depth: 1,
         joins: {
           children: {
@@ -1387,6 +1546,51 @@ describe('Joins Field', () => {
 
       expect(parent.children?.totalDocs).toBe(1)
     })
+  })
+
+  it('should support where querying by a top level join field', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category.id, title: 'my-title' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'relatedPosts.title': { equals: 'my-title' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with hasMany relationship', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { categories: [category.id], title: 'my-title' },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'hasManyPosts.title': { equals: 'my-title' } },
+    })
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with relationship nested to a group', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { group: { category: category.id }, title: 'my-category-title' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
   })
 })
 

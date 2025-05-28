@@ -553,6 +553,7 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
@@ -562,6 +563,7 @@ export type DocumentSlots = {
 }
 
 export type {
+  BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
   ListQuery,
@@ -578,6 +580,9 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  BeforeDocumentControlsClientProps,
+  BeforeDocumentControlsServerProps,
+  BeforeDocumentControlsServerPropsOnly,
   DocumentSubViewTypes,
   DocumentTabClientProps,
   /**
@@ -613,6 +618,26 @@ export type {
   DocumentViewServerPropsOnly,
   EditViewProps,
 } from './views/document.js'
+
+export type {
+  AfterFolderListClientProps,
+  AfterFolderListServerProps,
+  AfterFolderListServerPropsOnly,
+  AfterFolderListTableClientProps,
+  AfterFolderListTableServerProps,
+  AfterFolderListTableServerPropsOnly,
+  BeforeFolderListClientProps,
+  BeforeFolderListServerProps,
+  BeforeFolderListServerPropsOnly,
+  BeforeFolderListTableClientProps,
+  BeforeFolderListTableServerProps,
+  BeforeFolderListTableServerPropsOnly,
+  FolderListViewClientProps,
+  FolderListViewServerProps,
+  FolderListViewServerPropsOnly,
+  FolderListViewSlots,
+  FolderListViewSlotSharedClientProps,
+} from './views/folderList.js'
 
 export type {
   AdminViewClientProps,

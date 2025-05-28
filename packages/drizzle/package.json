@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.31.0",
+  "version": "3.39.1",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -30,13 +30,13 @@
       "default": "./src/exports/postgres.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "console-table-printer": "2.12.1",
+    "dequal": "2.0.3",
     "drizzle-orm": "0.36.1",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
@@ -81,9 +82,9 @@
         "default": "./dist/exports/postgres.js"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+        "import": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts",
+        "default": "./dist/exports/types-deprecated.js"
       }
     },
     "main": "./dist/index.js",

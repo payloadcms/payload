@@ -8,12 +8,16 @@
 
     textarea {
       @include formInput();
-      field-sizing: content;
       overflow-y: auto;
       resize: vertical;
       min-height: base(3);
-      height: 100%;
+      height: auto;
       display: flex;
+    }
+
+    textarea:not(:empty) {
+      field-sizing: content;
+      min-height: calc(var(--rows) * var(--base) + var(--base) * 0.8 + 2px);
     }
 
     &.read-only {
@@ -21,7 +25,6 @@
         @include readOnly;
       }
     }
-
   }
 
   html[data-theme='light'] {

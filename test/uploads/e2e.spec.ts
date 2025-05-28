@@ -31,12 +31,14 @@ import {
   customUploadFieldSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
+  withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
@@ -55,6 +57,7 @@ let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
+let listViewPreviewURL: AdminUrlUtil
 let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
@@ -67,6 +70,7 @@ let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
 let bestFitURL: AdminUrlUtil
+let withoutEnlargementResizeOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -89,6 +93,7 @@ describe('Uploads', () => {
       serverURL,
       adminThumbnailWithSearchQueries,
     )
+    listViewPreviewURL = new AdminUrlUtil(serverURL, listViewPreviewSlug)
     mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
@@ -101,6 +106,7 @@ describe('Uploads', () => {
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
     bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
+    withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -439,7 +445,7 @@ describe('Uploads', () => {
 
       await openDocDrawer({
         page,
-        selector: 'button.list-drawer__create-new-button.doc-drawer__toggler',
+        selector: 'button.list-header__create-new-button.doc-drawer__toggler',
       })
       await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
@@ -1254,7 +1260,7 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -1352,6 +1358,35 @@ describe('Uploads', () => {
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
   })
 
+  test('should skip applying resizeOptions after updating an image if resizeOptions.withoutEnlargement is true and the original image size is smaller than the dimensions defined in resizeOptions', async () => {
+    await page.goto(withoutEnlargementResizeOptionsURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.file-field__edit').click()
+
+    // no need to make any changes to the image if resizeOptions.withoutEnlargement is actually being respected now
+    await page.locator('button:has-text("Apply Changes")').click()
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+
+    // expect the image to be the original size since the original image is smaller than the dimensions defined in resizeOptions
+    await expect(resizeOptionMedia).toContainText('800x800')
+  })
+
   describe('imageSizes best fit', () => {
     test('should select adminThumbnail if one exists', async () => {
       await page.goto(bestFitURL.create)
@@ -1399,5 +1434,31 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-original div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
     })
+  })
+
+  test('should show correct image preview or placeholder after paginating', async () => {
+    await page.goto(listViewPreviewURL.list)
+    const firstRow = page.locator('.row-1')
+
+    const imageUploadCell = firstRow.locator('.cell-imageUpload .relationship-cell')
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+
+    const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+
+    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
+    await expect(pageTwoButton).toBeVisible()
+    await pageTwoButton.click()
+
+    const imageUploadImg = imageUploadCell.locator('.thumbnail')
+    await expect(imageUploadImg).toBeVisible()
+    await expect(imageRelationshipCell).toHaveText('image-1.png')
+
+    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
+    await expect(pageOneButton).toBeVisible()
+    await pageOneButton.click()
+
+    await expect(imageUploadCell).toHaveText('<No Image Upload>')
+    await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
   })
 })

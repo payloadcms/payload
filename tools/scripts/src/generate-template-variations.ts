@@ -45,6 +45,13 @@ type TemplateVariation = {
   skipReadme?: boolean
   storage: StorageAdapterType
   vercelDeployButtonLink?: string
+  /**
+   * Identify where this template is intended to be deployed.
+   * Useful for making some modifications like PNPM's engines config for Vercel.
+   *
+   * @default 'default'
+   */
+  targetDeployment?: 'default' | 'vercel'
 }
 
 main().catch((error) => {
@@ -71,7 +78,9 @@ async function main() {
       },
       sharp: false,
       skipDockerCompose: true,
+      skipReadme: true,
       storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -95,6 +104,7 @@ async function main() {
       skipDockerCompose: true,
       skipReadme: true,
       storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -122,6 +132,8 @@ async function main() {
       },
       sharp: false,
       storage: 'vercelBlobStorage',
+      skipReadme: true,
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -140,6 +152,7 @@ async function main() {
       generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipReadme: true, // Do not copy the README.md file from the base template
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -186,6 +199,7 @@ async function main() {
       skipReadme = false,
       storage,
       vercelDeployButtonLink,
+      targetDeployment = 'default',
     } = variation
 
     header(`Generating ${name}...`)
@@ -239,20 +253,20 @@ async function main() {
     }
 
     // Fetch latest npm version of payload package:
-    const version = await getLatestPayloadVersion()
+    const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
 
     // Bump package.json versions
     await bumpPackageJson({
       templateDir: destDir,
-      latestVersion: version,
+      latestVersion: payloadVersion,
     })
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
     } else {
       log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 
@@ -281,6 +295,13 @@ async function main() {
           DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
+      })
+    }
+
+    if (targetDeployment) {
+      await handleDeploymentTarget({
+        targetDeployment,
+        destDir,
       })
     }
 
@@ -335,6 +356,30 @@ ${description}
   const readmePath = path.join(destDir, 'README.md')
   await fs.writeFile(readmePath, readmeContent)
   log('Generated README.md')
+}
+
+async function handleDeploymentTarget({
+  targetDeployment,
+  destDir,
+}: {
+  targetDeployment: TemplateVariation['targetDeployment']
+  destDir: string
+}) {
+  if (targetDeployment === 'vercel') {
+    // Add Vercel specific settings to package.json
+    const packageJsonPath = path.join(destDir, 'package.json')
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
+
+    if (packageJson.engines?.pnpm) {
+      delete packageJson.engines.pnpm
+    }
+
+    const pnpmVersion = await getLatestPackageVersion({ packageName: 'pnpm' })
+
+    packageJson.packageManager = `pnpm@${pnpmVersion}`
+
+    await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  }
 }
 
 async function writeEnvExample({
@@ -393,9 +438,10 @@ function header(message: string) {
 function log(message: string) {
   console.log(chalk.dim(message))
 }
+
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
-    console.log(`Executing: ${command}`)
+    log(`Executing: ${command}`)
     execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
@@ -450,11 +496,29 @@ async function bumpPackageJson({
   )
 }
 
-async function getLatestPayloadVersion() {
+/**
+ * Fetches the latest version of a package from the NPM registry.
+ *
+ * Used in determining the latest version of Payload to use in the generated templates.
+ */
+async function getLatestPackageVersion({
+  packageName = 'payload',
+}: {
+  /**
+   * Package name to fetch the latest version for based on the NPM registry URL
+   *
+   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
+   *
+   * @default 'payload'
+   */
+  packageName?: string
+}) {
   try {
-    const response = await fetch('https://registry.npmjs.org/payload')
+    const response = await fetch(`https://registry.npmjs.org/${packageName}`)
     const data = await response.json()
     const latestVersion = data['dist-tags'].latest
+
+    log(`Found latest version of ${packageName}: ${latestVersion}`)
 
     return latestVersion
   } catch (error) {

@@ -105,6 +105,7 @@ export const sanitizeQueryValue = ({
   | undefined => {
   let formattedValue = val
   let formattedOperator = operator
+
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
@@ -418,7 +419,7 @@ export const sanitizeQueryValue = ({
       return buildExistsQuery(
         formattedValue,
         path,
-        !['relationship', 'upload'].includes(field.type),
+        !['checkbox', 'relationship', 'upload'].includes(field.type),
       )
     }
   }

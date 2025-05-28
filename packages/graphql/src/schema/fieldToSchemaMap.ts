@@ -8,6 +8,7 @@ import type {
   DateField,
   EmailField,
   Field,
+  FlattenedJoinField,
   GraphQLInfo,
   GroupField,
   JoinField,
@@ -40,7 +41,7 @@ import {
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
-import { tabHasName } from 'payload/shared'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 
@@ -68,6 +69,7 @@ function formattedNameResolver({
 }
 
 type SharedArgs = {
+  collectionSlug?: string
   config: SanitizedConfig
   forceNullable?: boolean
   graphqlResult: GraphQLInfo
@@ -300,47 +302,67 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     field,
     forceNullable,
     graphqlResult,
+    newlyCreatedBlockType,
     objectTypeConfig,
     parentIsLocalized,
     parentName,
   }) => {
-    const interfaceName =
-      field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
+    if (fieldAffectsData(field)) {
+      const interfaceName =
+        field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
-    if (!graphqlResult.types.groupTypes[interfaceName]) {
-      const objectType = buildObjectType({
-        name: interfaceName,
-        config,
-        fields: field.fields,
-        forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
-        graphqlResult,
-        parentIsLocalized: field.localized || parentIsLocalized,
-        parentName: interfaceName,
-      })
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
+        const objectType = buildObjectType({
+          name: interfaceName,
+          config,
+          fields: field.fields,
+          forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
+          graphqlResult,
+          parentIsLocalized: field.localized || parentIsLocalized,
+          parentName: interfaceName,
+        })
 
-      if (Object.keys(objectType.getFields()).length) {
-        graphqlResult.types.groupTypes[interfaceName] = objectType
+        if (Object.keys(objectType.getFields()).length) {
+          graphqlResult.types.groupTypes[interfaceName] = objectType
+        }
       }
-    }
 
-    if (!graphqlResult.types.groupTypes[interfaceName]) {
-      return objectTypeConfig
-    }
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
+        return objectTypeConfig
+      }
 
-    return {
-      ...objectTypeConfig,
-      [formatName(field.name)]: {
-        type: graphqlResult.types.groupTypes[interfaceName],
-        resolve: (parent, args, context: Context) => {
-          return {
-            ...parent[field.name],
-            _id: parent._id ?? parent.id,
-          }
+      return {
+        ...objectTypeConfig,
+        [formatName(field.name)]: {
+          type: graphqlResult.types.groupTypes[interfaceName],
+          resolve: (parent, args, context: Context) => {
+            return {
+              ...parent[field.name],
+              _id: parent._id ?? parent.id,
+            }
+          },
         },
-      },
+      }
+    } else {
+      return field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
+        const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
+        if (addSubField) {
+          return addSubField({
+            config,
+            field: subField,
+            forceNullable,
+            graphqlResult,
+            newlyCreatedBlockType,
+            objectTypeConfig: objectTypeConfigWithCollapsibleFields,
+            parentIsLocalized,
+            parentName,
+          })
+        }
+        return objectTypeConfigWithCollapsibleFields
+      }, objectTypeConfig)
     }
   },
-  join: ({ field, graphqlResult, objectTypeConfig, parentName }) => {
+  join: ({ collectionSlug, field, graphqlResult, objectTypeConfig, parentName }) => {
     const joinName = combineParentName(parentName, toWords(field.name, true))
 
     const joinType = {
@@ -348,11 +370,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         name: joinName,
         fields: {
           docs: {
-            type: Array.isArray(field.collection)
-              ? GraphQLJSON
-              : new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
+            type: new GraphQLNonNull(
+              Array.isArray(field.collection)
+                ? GraphQLJSON
+                : new GraphQLList(
+                    new GraphQLNonNull(graphqlResult.collections[field.collection].graphQL.type),
+                  ),
+            ),
           },
-          hasNextPage: { type: GraphQLBoolean },
+          hasNextPage: { type: new GraphQLNonNull(GraphQLBoolean) },
         },
       }),
       args: {
@@ -379,26 +405,56 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { limit, page, sort, where } = args
         const { req } = context
 
-        const fullWhere = combineQueries(where, {
-          [field.on]: { equals: parent._id ?? parent.id },
-        })
+        const draft = Boolean(args.draft ?? context.req.query?.draft)
+
+        const targetField = (field as FlattenedJoinField).targetField
+
+        const fullWhere = combineQueries(
+          where,
+          Array.isArray(targetField.relationTo)
+            ? {
+                [field.on]: {
+                  equals: {
+                    relationTo: collectionSlug,
+                    value: parent._id ?? parent.id,
+                  },
+                },
+              }
+            : {
+                [field.on]: { equals: parent._id ?? parent.id },
+              },
+        )
 
         if (Array.isArray(collection)) {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
         }
 
-        return await req.payload.find({
+        const { docs } = await req.payload.find({
           collection,
           depth: 0,
+          draft,
           fallbackLocale: req.fallbackLocale,
-          limit,
+          // Fetch one extra document to determine if there are more documents beyond the requested limit (used for hasNextPage calculation).
+          limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
           locale: req.locale,
           overrideAccess: false,
           page,
+          pagination: false,
           req,
           sort,
           where: fullWhere,
         })
+
+        let shouldSlice = false
+
+        if (typeof limit === 'number' && limit !== 0 && limit < docs.length) {
+          shouldSlice = true
+        }
+
+        return {
+          docs: shouldSlice ? docs.slice(0, -1) : docs,
+          hasNextPage: limit === 0 ? false : limit < docs.length,
+        }
       },
     }
 
@@ -425,7 +481,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       ...objectTypeConfig,
       [formatName(field.name)]: formattedNameResolver({
         type: withNullableType({
-          type: field?.hasMany === true ? new GraphQLList(type) : type,
+          type: field?.hasMany === true ? new GraphQLList(new GraphQLNonNull(type)) : type,
           field,
           forceNullable,
           parentIsLocalized,
@@ -853,7 +909,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     ...objectTypeConfig,
     [formatName(field.name)]: formattedNameResolver({
       type: withNullableType({
-        type: field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+        type:
+          field.hasMany === true
+            ? new GraphQLList(new GraphQLNonNull(GraphQLString))
+            : GraphQLString,
         field,
         forceNullable,
         parentIsLocalized,

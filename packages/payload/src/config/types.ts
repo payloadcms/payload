@@ -40,6 +40,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
+import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
@@ -47,6 +48,7 @@ import type {
   JobsConfig,
   Payload,
   RequestContext,
+  SelectField,
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -846,6 +848,11 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
+      /** The route for the browse by folder view.
+       *
+       * @default '/browse-by-folder'
+       */
+      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -977,6 +984,11 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
+  /**
+   * Options for folder view within the admin panel
+   * @experimental this feature may change in minor versions until it is fully stable
+   */
+  folders?: RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1120,6 +1132,7 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */
