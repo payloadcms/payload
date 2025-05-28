@@ -14,7 +14,7 @@ export const meHandler: PayloadHandler = async (req) => {
 
   const result = await meOperation({
     collection,
-    currentToken,
+    currentToken: currentToken!,
     req,
   })
 
