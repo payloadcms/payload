@@ -9,6 +9,7 @@ export const auth = async (payload: Payload, options: AuthArgs): Promise<AuthRes
 
   return await authOperation({
     headers,
+    isAdmin: Boolean(options.isAdmin),
     req: await createLocalReq({ req }, payload),
   })
 }
