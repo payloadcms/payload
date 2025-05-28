@@ -194,6 +194,10 @@ describe('Select', () => {
           hasManyUpload: post.hasManyUpload,
         })
 
+        // this will fail if types are not the same
+        const _enforce_1: Equal<(typeof res_1)['hasManyUpload'], Array<Upload> | null | undefined> =
+          true
+
         const res_2 = await payload.findByID({
           collection: 'posts',
           id: postId,
