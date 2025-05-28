@@ -78,7 +78,7 @@ export async function translateText(text: string, targetLang: string) {
         console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
         return data.choices[0].message.content.trim()
       } else {
-        console.log(`Could not translate: ${text} in lang: ${targetLang}`)
+        console.log(`Could not translate: ${text} in lang: ${targetLang}`, data.error)
       }
     }
   } catch (e) {
