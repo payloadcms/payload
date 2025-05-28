@@ -213,7 +213,7 @@ export type TransformDataWithSelect<
     ? Data
     : // START Handle types when they aren't generated
       // For example in any package in this repository outside of tests / plugins
-      // This stil gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
+      // This still gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
       string extends keyof Omit<Data, 'id'>
       ? Select extends SelectIncludeType
         ? {
