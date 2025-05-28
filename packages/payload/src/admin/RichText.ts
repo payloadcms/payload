@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
@@ -197,6 +196,7 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   generateImportMap?: Config['admin']['importMap']['generators'][0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig

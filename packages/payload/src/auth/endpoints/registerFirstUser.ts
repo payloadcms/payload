@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -34,7 +33,7 @@ export const registerFirstUserHandler: PayloadHandler = async (req) => {
   const cookie = generatePayloadCookie({
     collectionAuthConfig: collection.config.auth,
     cookiePrefix: req.payload.config.cookiePrefix,
-    token: result.token,
+    token: result.token!,
   })
 
   return Response.json(

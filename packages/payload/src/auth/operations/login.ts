@@ -251,7 +251,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email: sanitizedEmail,
+      email: sanitizedEmail!,
       user,
     })
 

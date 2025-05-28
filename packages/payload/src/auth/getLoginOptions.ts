@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Auth } from './types.js'
 
 export const getLoginOptions = (
@@ -8,7 +7,7 @@ export const getLoginOptions = (
   canLoginWithUsername: boolean
 } => {
   return {
-    canLoginWithEmail: !loginWithUsername || loginWithUsername.allowEmailLogin,
+    canLoginWithEmail: !loginWithUsername || loginWithUsername.allowEmailLogin!,
     canLoginWithUsername: Boolean(loginWithUsername),
   }
 }
