@@ -8,7 +8,7 @@ import { getAccessResults } from '../getAccessResults.js'
 export type AuthArgs = {
   headers: Request['headers']
   /**
-   * Specify if you are calling this function from within the admin UI or not.
+   * Specify if you are calling this operation from a React Server Component in the Admin UI.
    */
   isAdmin?: boolean
   req?: Omit<PayloadRequest, 'user'>
