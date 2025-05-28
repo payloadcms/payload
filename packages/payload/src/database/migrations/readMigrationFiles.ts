@@ -47,7 +47,7 @@ export const readMigrationFiles = async ({
       }
 
       const result: Migration = {
-        name: path.basename(filePath).split('.')?.[0],
+        name: path.basename(filePath).split('.')[0]!,
         down: migration.down,
         up: migration.up,
       }

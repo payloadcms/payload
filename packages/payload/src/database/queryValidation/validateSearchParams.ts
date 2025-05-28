@@ -196,7 +196,7 @@ export async function validateSearchParam({
             if (pathToQueryIndex === 0) {
               promises.push(
                 validateQueryPaths({
-                  collectionConfig: req.payload.collections[pathCollectionSlug].config,
+                  collectionConfig: req.payload.collections[pathCollectionSlug!]!.config,
                   errors,
                   globalConfig: undefined,
                   overrideAccess,
