@@ -16,6 +16,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const { req } = await initReq({
     configPromise,
     importMap,
+    isAdmin: false,
     key: 'RootLayout',
   })
 
