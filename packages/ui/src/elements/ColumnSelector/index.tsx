@@ -76,6 +76,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
             onClick={() => {
               void toggleColumn(accessor)
             }}
+            size="small"
           >
             {col.CustomLabel ?? <FieldLabel label={label as StaticLabel} unstyled />}
           </Pill>
