@@ -110,7 +110,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale: req.locale,
+      locale: req.locale!,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     })
@@ -202,17 +202,18 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
+      // @ts-expect-error - TODO: fix this
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

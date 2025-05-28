@@ -134,7 +134,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
           context: req.context,
           depth: depth!,
           doc: data.version,
-          // @ts-expect-error - I think this is an exception
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
           fallbackLocale: fallbackLocale!,
           findMany: true,

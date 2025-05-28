@@ -305,7 +305,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       context: req.context,
       depth: depth!,
       doc: user,
-      // @ts-expect-error - I think this is an exception
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
       fallbackLocale: fallbackLocale!,
       global: null,

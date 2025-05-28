@@ -218,7 +218,7 @@ export const deleteOperation = async <
           context: req.context,
           depth: depth!,
           doc: result || doc,
-          // @ts-expect-error - I think this is an exception
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
           fallbackLocale: fallbackLocale!,
           global: null,
