@@ -13,7 +13,7 @@ const colorVariantOptions = [
 ]
 
 export const seed = async (payload: Payload): Promise<boolean> => {
-  payload.logger.info('Seeding data...')
+  payload.logger.info('Seeding data for ecommerce...')
   const req = {} as PayloadRequest
 
   try {
@@ -81,10 +81,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         product: hoodieProduct.id,
         options: [small!.id, white!.id],
         inventory: 10,
-        priceInUSD: {
-          enabled: true,
-          amount: 1999,
-        },
+        priceInUSDEnabled: true,
+        priceInUSD: 1999,
       },
     })
 
@@ -94,10 +92,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         product: hoodieProduct.id,
         options: [white!.id, medium!.id],
         inventory: 492,
-        priceInUSD: {
-          enabled: true,
-          amount: 1999,
-        },
+        priceInUSDEnabled: true,
+        priceInUSD: 1999,
       },
     })
 
@@ -105,15 +101,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       collection: 'products',
       data: {
         name: 'Hat',
-
-        priceInUSD: {
-          enabled: true,
-          amount: 1999,
-        },
-        priceInEUR: {
-          enabled: true,
-          amount: 1999,
-        },
+        priceInUSDEnabled: true,
+        priceInUSD: 1999,
+        priceInEUREnabled: true,
+        priceInEUR: 1999,
       },
     })
 

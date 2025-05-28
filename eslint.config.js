@@ -42,6 +42,7 @@ export const rootEslintConfig = [
       ...defaultESLintIgnores,
       'packages/eslint-*/**',
       'test/live-preview/next-app',
+      'test/plugin-ecommerce/next-app',
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',

@@ -188,18 +188,12 @@ export interface Variant {
   product: string | Product;
   options: (string | VariantOption)[];
   inventory: number;
-  priceInUSD?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
-  priceInJPY?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
-  priceInEUR?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
+  priceInUSDEnabled?: boolean | null;
+  priceInUSD?: number | null;
+  priceInJPYEnabled?: boolean | null;
+  priceInJPY?: number | null;
+  priceInEUREnabled?: boolean | null;
+  priceInEUR?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -217,18 +211,12 @@ export interface Product {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  priceInUSD?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
-  priceInJPY?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
-  priceInEUR?: {
-    enabled?: boolean | null;
-    amount?: number | null;
-  };
+  priceInUSDEnabled?: boolean | null;
+  priceInUSD?: number | null;
+  priceInJPYEnabled?: boolean | null;
+  priceInJPY?: number | null;
+  priceInEUREnabled?: boolean | null;
+  priceInEUR?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -430,24 +418,12 @@ export interface VariantsSelect<T extends boolean = true> {
   product?: T;
   options?: T;
   inventory?: T;
-  priceInUSD?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
-  priceInJPY?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
-  priceInEUR?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
+  priceInUSDEnabled?: T;
+  priceInUSD?: T;
+  priceInJPYEnabled?: T;
+  priceInJPY?: T;
+  priceInEUREnabled?: T;
+  priceInEUR?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -482,24 +458,12 @@ export interface ProductsSelect<T extends boolean = true> {
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;
-  priceInUSD?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
-  priceInJPY?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
-  priceInEUR?:
-    | T
-    | {
-        enabled?: T;
-        amount?: T;
-      };
+  priceInUSDEnabled?: T;
+  priceInUSD?: T;
+  priceInJPYEnabled?: T;
+  priceInJPY?: T;
+  priceInEUREnabled?: T;
+  priceInEUR?: T;
   updatedAt?: T;
   createdAt?: T;
 }
