@@ -1,6 +1,7 @@
 export const getSafeRedirect = (
   redirectParam: string | string[],
   fallback: string = '/',
+  allowAbsoluteUrls: boolean = false,
 ): string => {
   if (typeof redirectParam !== 'string') {
     return fallback
@@ -30,5 +31,10 @@ export const getSafeRedirect = (
     // Prevent attempts to redirect to full URLs using "/http:" or "/https:"
     !redirectPath.toLowerCase().startsWith('/http')
 
-  return isSafeRedirect ? redirectPath : fallback
+  const isAbsoluteSafeRedirect =
+    allowAbsoluteUrls &&
+    // Must be a valid absolute URL with http or https
+    /^https?:\/\/\S+$/i.test(redirectPath)
+
+  return isSafeRedirect || isAbsoluteSafeRedirect ? redirectPath : fallback
 }

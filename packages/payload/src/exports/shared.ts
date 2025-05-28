@@ -38,7 +38,6 @@ export {
 } from '../fields/config/types.js'
 
 export { getFieldPaths } from '../fields/getFieldPaths.js'
-
 export * from '../fields/validations.js'
 
 export type {
@@ -50,21 +49,21 @@ export type {
   GetFolderDataResult,
   Subfolder,
 } from '../folders/types.js'
-export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 
+export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
-export { isImage } from '../uploads/isImage.js'
 
+export { isImage } from '../uploads/isImage.js'
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
+
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
-
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -75,15 +74,17 @@ export {
 export { extractID } from '../utilities/extractID.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
-
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
+
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
-
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+
+export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 
 export { getSelectMode } from '../utilities/getSelectMode.js'
 

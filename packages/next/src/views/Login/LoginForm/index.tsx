@@ -16,11 +16,10 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL, getLoginOptions } from 'payload/shared'
+import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
-import { getSafeRedirect } from '../../../utilities/getSafeRedirect.js'
 import { LoginField } from '../LoginField/index.js'
 import './index.scss'
 
