@@ -1,18 +1,22 @@
-export const getSafeRedirect = (
-  redirectParam: string | string[],
-  fallback: string = '/',
-  allowAbsoluteUrls: boolean = false,
-): string => {
-  if (typeof redirectParam !== 'string') {
-    return fallback
+export const getSafeRedirect = ({
+  allowAbsoluteUrls = false,
+  fallbackTo = '/',
+  redirectTo,
+}: {
+  allowAbsoluteUrls?: boolean
+  fallbackTo?: string
+  redirectTo: string | string[]
+}): string => {
+  if (typeof redirectTo !== 'string') {
+    return fallbackTo
   }
 
   // Normalize and decode the path
   let redirectPath: string
   try {
-    redirectPath = decodeURIComponent(redirectParam.trim())
+    redirectPath = decodeURIComponent(redirectTo.trim())
   } catch {
-    return fallback // invalid encoding
+    return fallbackTo // invalid encoding
   }
 
   const isSafeRedirect =
@@ -36,5 +40,5 @@ export const getSafeRedirect = (
     // Must be a valid absolute URL with http or https
     /^https?:\/\/\S+$/i.test(redirectPath)
 
-  return isSafeRedirect || isAbsoluteSafeRedirect ? redirectPath : fallback
+  return isSafeRedirect || isAbsoluteSafeRedirect ? redirectPath : fallbackTo
 }

@@ -25,7 +25,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
     routes: { admin },
   } = config
 
-  const redirectUrl = getSafeRedirect(searchParams.redirect, admin)
+  const redirectUrl = getSafeRedirect({ fallbackTo: admin, redirectTo: searchParams.redirect })
 
   if (user) {
     redirect(redirectUrl)
