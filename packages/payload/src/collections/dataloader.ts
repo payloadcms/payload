@@ -143,7 +143,7 @@ const batchAndLoadDocs =
           populate,
           select,
           showHiddenFields,
-          transactionID: req.transactionID,
+          transactionID: req.transactionID!,
         })
         const docsIndex = keys.findIndex((key) => key === docKey)
 
@@ -156,7 +156,7 @@ const batchAndLoadDocs =
     // Return docs array,
     // which has now been injected with all fetched docs
     // and should match the length of the incoming keys arg
-    return docs
+    return docs as TypeWithID[]
   }
 
 export const getDataLoader = (req: PayloadRequest) => {

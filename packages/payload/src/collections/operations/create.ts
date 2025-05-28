@@ -170,7 +170,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -299,7 +299,7 @@ export const createOperation = async <
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
-        disableEmail: disableVerificationEmail,
+        disableEmail: disableVerificationEmail!,
         email: payload.email,
         req,
         token: verificationToken,
@@ -314,17 +314,17 @@ export const createOperation = async <
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
       draft,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
