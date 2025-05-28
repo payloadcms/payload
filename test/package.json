@@ -64,7 +64,7 @@
     "@types/jest": "29.5.12",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "csv-parse": "^5.6.0",

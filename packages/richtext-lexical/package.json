@@ -399,7 +399,7 @@
     "@types/node": "22.5.4",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
