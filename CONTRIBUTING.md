@@ -1,28 +1,42 @@
 # Contributing to Payload
 
-## Bugs, Feature Requests, and Q&As
+Below you'll find a set of guidelines for how to contribute to Payload.
 
-- Bugs go in [GitHub Issues](https://github.com/payloadcms/payload/issues).
-- Feature Requests in [GitHub Discussions](https://github.com/payloadcms/payload/discussions).
-- Questions and Answers in [Discord](https://discord.com/invite/payload) or [GitHub Discussions](https://github.com/payloadcms/payload/discussions).
+## Opening issues
+
+Before you submit an issue, please check all existing [open and closed issues](https://github.com/payloadcms/payload/issues) to see if your issue has previously been resolved or is already known. If there is already an issue logged, feel free to upvote it by adding a :thumbsup: [reaction](https://github.com/blog/2119-add-reactions-to-pull-requests-issues-and-comments). If you would like to submit a new issue, please fill out our Issue Template to the best of your ability so we can accurately understand your report.
 
 ## Security issues & vulnerabilities
 
-- DO NOT report it publicly. Contact us internally at [`dev@payloadcms.com`](mailto:dev@payloadcms.com)
-- We are happy to reward vulnerabilities within the core repository if we determine they are significant.
+If you come across an issue related to security, or a potential attack vector within Payload or one of its dependencies, please DO NOT create a publicly viewable issue. Instead, please contact us directly at [`dev@payloadcms.com`](mailto:dev@payloadcms.com). We will do everything we can to respond to the issue as soon as possible.
+
+If you find a vulnerability within the core Payload repository, and we determine that it is remediable and of significant nature, we will be happy to pay you a reward for your findings and diligence. [`Contact us`](mailto:dev@payloadcms.com) to find out more.
 
 ## Documentation edits
 
-- MDX files are in the `/docs` folder.
-- If you want to preview the changes, see the instructions further down in this document.
+Payload documentation can be found directly within its codebase, and you can feel free to make changes / improvements to any of it through opening a PR. We utilize these files directly in our website and will periodically deploy documentation updates as necessary.
 
-## Installation & Requirements
+## Building additional features
 
-The first time, you will need to run these terminal commands in the root directory of the monorepo:
+If you're an incredibly awesome person and want to help us make Payload even better through new features or additions, we would be thrilled to work with you.
 
-- `corepack enable`. To install a compatible version of pnpm. Skip if you already have it.
-- Node v18+ required. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
-- `pnpm install`. If you are coming from a very outdated version, it may be recommended that you run `pnpm clean:all` first.
+## Design Contributions
+
+When it comes to design-related changes or additions, it's crucial for us to ensure a cohesive user experience and alignment with our broader design vision. Before embarking on any implementation that would affect the design or UI/UX, we ask that you **first share your design proposal** with us for review and approval.
+
+Our design review ensures that proposed changes fit seamlessly with other components, both existing and planned. This step is meant to prevent unintentional design inconsistencies and to save you from investing time in implementing features that might need significant design alterations later.
+
+### Before Starting
+
+To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
+
+### Installation & Requirements
+
+Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `corepack enable` in your terminal.
+
+If you're coming from a very outdated version of payload, it is recommended to nuke the node_modules folder before running pnpm install. On UNIX systems, you can easily do that using the `pnpm clean:unix` command, which will delete all node_modules folders and build artefacts.
+
+It is also recommended to use at least Node v18 or higher. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
 
 ### Code
 
@@ -86,6 +100,10 @@ If you are committing to [templates](./templates) or [examples](./examples), use
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
+
+## Pull Requests
+
+For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR message.
 
 ## Previewing docs
 
