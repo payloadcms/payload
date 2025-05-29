@@ -8,7 +8,7 @@ describe('getSafeRedirect', () => {
     'should allow safe relative path: %s',
     (input) => {
       // If the input is a clean relative path, it should be returned as-is
-      expect(getSafeRedirect(input, fallback)).toBe(input)
+      expect(getSafeRedirect({ redirectTo: input, fallbackTo: fallback })).toBe(input)
     },
   )
 
@@ -17,7 +17,7 @@ describe('getSafeRedirect', () => {
     'should fallback on invalid or non-string input: %s',
     (input) => {
       // If the input is not a valid string, it should return the fallback
-      expect(getSafeRedirect(input as any, fallback)).toBe(fallback)
+      expect(getSafeRedirect({ redirectTo: input as any, fallbackTo: fallback })).toBe(fallback)
     },
   )
 
@@ -36,20 +36,24 @@ describe('getSafeRedirect', () => {
     '%2Fjavascript:alert(1)', // encoded JavaScript scheme
   ])('should block unsafe redirect: %s', (input) => {
     // All of these should return the fallback because they’re unsafe
-    expect(getSafeRedirect(input, fallback)).toBe(fallback)
+    expect(getSafeRedirect({ redirectTo: input, fallbackTo: fallback })).toBe(fallback)
   })
 
   // Input with extra spaces should still be properly handled
   it('should trim whitespace before evaluating', () => {
     // A valid path with surrounding spaces should still be accepted
-    expect(getSafeRedirect('   /dashboard   ', fallback)).toBe('/dashboard')
+    expect(getSafeRedirect({ redirectTo: '   /dashboard   ', fallbackTo: fallback })).toBe(
+      '/dashboard',
+    )
 
     // An unsafe path with spaces should still be rejected
-    expect(getSafeRedirect('   //example.com   ', fallback)).toBe(fallback)
+    expect(getSafeRedirect({ redirectTo: '   //example.com   ', fallbackTo: fallback })).toBe(
+      fallback,
+    )
   })
 
   // If decoding the input fails (e.g., invalid percent encoding), it should not crash
   it('should return fallback on invalid encoding', () => {
-    expect(getSafeRedirect('%E0%A4%A', fallback)).toBe(fallback)
+    expect(getSafeRedirect({ redirectTo: '%E0%A4%A', fallbackTo: fallback })).toBe(fallback)
   })
 })
