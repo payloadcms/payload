@@ -54,6 +54,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const searchParams = useSearchParams()
+  const searchParamsString = searchParams.toString()
+  const prevSearchString = useRef(searchParamsString)
 
   const toggleAll = useCallback(
     (allAvailable = false) => {
@@ -200,6 +202,14 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
+
+  useEffect(() => {
+    if (searchParamsString !== prevSearchString.current) {
+      setSelectAll(SelectAllStatus.None)
+      setSelected(new Map())
+      prevSearchString.current = searchParamsString
+    }
+  }, [searchParamsString, toggleAll])
 
   // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
