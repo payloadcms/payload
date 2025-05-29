@@ -44,7 +44,7 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     operation,
     overrideAccess,
@@ -54,7 +54,7 @@ export const beforeValidate = async <T extends JsonObject>({
     parentSchemaPath: '',
     req,
     siblingData: incomingData,
-    siblingDoc: doc,
+    siblingDoc: doc!,
   })
 
   return incomingData

@@ -1975,7 +1975,7 @@ export function fieldIsHiddenOrDisabled<
 >(field: TField): field is { admin: { hidden: true } } & TField {
   return (
     ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled)
+    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled!)
   )
 }
 

@@ -40,7 +40,7 @@ export const traverseFields = async <T>({
   req,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const promises = []
+  const promises: Promise<void>[] = []
 
   fields.forEach((field, fieldIndex) => {
     promises.push(
