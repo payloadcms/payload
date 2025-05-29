@@ -1082,6 +1082,7 @@ export interface GroupField {
       | null;
   };
   insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
@@ -2685,6 +2686,7 @@ export interface GroupFieldsSelect<T extends boolean = true> {
         email?: T;
       };
   insideUnnamedGroup?: T;
+  insideGroupWithNoLabel?: T;
   deeplyNestedGroup?:
     | T
     | {
