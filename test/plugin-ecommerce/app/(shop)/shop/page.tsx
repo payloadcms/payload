@@ -1,15 +1,18 @@
-import configPromise from '@payload-config'
+import configPromise, { currenciesConfig } from '@payload-config'
+import { Cart } from '@/components/Cart.js'
 import { getPayload } from 'payload'
 import React from 'react'
+import { Product } from '@/components/Product.js'
+import { CurrencySelector } from '@/components/CurrencySelector.js'
 
-export const Page = async ({ params, searchParams }) => {
+export const Page = async () => {
   const payload = await getPayload({
     config: configPromise,
   })
 
   const products = await payload.find({
     collection: 'products',
-    depth: 0,
+    depth: 2,
     limit: 10,
   })
 
@@ -23,15 +26,17 @@ export const Page = async ({ params, searchParams }) => {
         <ul>
           {products.docs.map((product) => (
             <li key={product.id}>
-              <h2>{product.name}</h2>
-              {/* <p>{product.description}</p> */}
-              <p>{/* Price: {product.price?.amount} {product.price?.currency} */}</p>
+              <Product product={product} />
             </li>
           ))}
         </ul>
       ) : (
         <p>No products found.</p>
       )}
+
+      <Cart />
+
+      <CurrencySelector currenciesConfig={currenciesConfig} />
     </div>
   )
 }

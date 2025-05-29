@@ -104,7 +104,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         priceInUSDEnabled: true,
         priceInUSD: 1999,
         priceInEUREnabled: true,
-        priceInEUR: 1999,
+        priceInEUR: 2599,
       },
     })
 

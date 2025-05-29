@@ -7,11 +7,18 @@ import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
 import { EUR, JPY, USD } from '@payloadcms/plugin-ecommerce/currencies'
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
+import type { EcommercePluginConfig } from '../../packages/plugin-ecommerce/src/types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+
+export const currenciesConfig: NonNullable<EcommercePluginConfig['currencies']> = {
+  supportedCurrencies: [USD, JPY, EUR],
+  defaultCurrency: 'USD',
+}
 
 export default buildConfigWithDefaults({
   collections: [Users, Media],
@@ -20,6 +27,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  maxDepth: 10,
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -55,10 +63,7 @@ export default buildConfigWithDefaults({
           }),
         ],
       },
-      currencies: {
-        supportedCurrencies: [USD, JPY, EUR],
-        defaultCurrency: 'USD',
-      },
+      currencies: currenciesConfig,
     }),
   ],
   typescript: {

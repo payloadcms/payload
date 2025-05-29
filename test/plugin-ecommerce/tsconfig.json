@@ -4,6 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@payload-config": ["./config.ts"],
+      "@payload-types": ["./payload-types.ts"],
+      "@/components/*": ["./app/components/*"],
       "@payloadcms/plugin-ecommerce": ["../../packages/plugin-ecommerce/exports/index.ts"],
       "@payloadcms/plugin-ecommerce/*": ["../../packages/plugin-ecommerce/exports/*"],
       "@payloadcms/ui/assets": ["../../packages/ui/src/assets/index.ts"],
