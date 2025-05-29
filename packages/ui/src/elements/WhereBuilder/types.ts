@@ -23,7 +23,6 @@ export type ReducedField = {
     label: string
     value: Operator
   }[]
-  plainTextLabel?: string
   value: Value
 }
 
