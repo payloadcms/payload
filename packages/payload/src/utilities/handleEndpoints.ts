@@ -104,7 +104,7 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadRequest({ config: incomingConfig, request })
+    req = await createPayloadRequest({ canSetHeaders: true, config: incomingConfig, request })
 
     if (req.method.toLowerCase() === 'options') {
       return Response.json(

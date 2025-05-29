@@ -25,11 +25,12 @@ A strategy is made up of the following:
 
 The `authenticate` function is passed the following arguments:
 
-| Argument         | Description                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| **`headers`** \* | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
-| **`payload`** \* | The Payload class. Useful for authenticating the identifiable information against Payload.        |
-| **`isGraphQL`**  | Whether or not the request was made from a GraphQL endpoint. Default is `false`.                  |
+| Argument               | Description                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **`canSetHeaders`** \* | Whether or not the strategy is being executed from a context where response headers can be set. Default is `false`. |
+| **`headers`** \*       | The headers on the incoming request. Useful for retrieving identifiable information on a request.                   |
+| **`payload`** \*       | The Payload class. Useful for authenticating the identifiable information against Payload.                          |
+| **`isGraphQL`**        | Whether or not the strategy is being executed within the GraphQL endpoint. Default is `false`.                      |
 
 ### Example Strategy
 
