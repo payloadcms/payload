@@ -67,6 +67,7 @@ export const UploadActions = ({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__previewSizes`}
+              margin={false}
               onClick={() => {
                 openModal(sizePreviewSlug)
               }}
@@ -79,6 +80,7 @@ export const UploadActions = ({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__edit`}
+              margin={false}
               onClick={() => {
                 openModal(editDrawerSlug)
               }}
