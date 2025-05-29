@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
+import type { CollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
@@ -21,7 +22,12 @@ import type {
   VersionedRelationshipField,
 } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  throttleTest,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -50,6 +56,7 @@ let payload: PayloadTestSDK<Config>
 describe('Relationship Field', () => {
   let url: AdminUrlUtil
   let versionedRelationshipFieldURL: AdminUrlUtil
+  let context: BrowserContext
   let page: Page
   let collectionOneDoc: Collection1
   let relationOneDoc: RelationOne
@@ -68,7 +75,7 @@ describe('Relationship Field', () => {
     url = new AdminUrlUtil(serverURL, slug)
     versionedRelationshipFieldURL = new AdminUrlUtil(serverURL, versionedRelationshipFieldSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
@@ -79,6 +86,12 @@ describe('Relationship Field', () => {
     await ensureCompilationIsDone({ page, serverURL })
 
     await clearAllDocs()
+
+    /*await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })*/
 
     // Create docs to relate to
     relationOneDoc = (await payload.create({
@@ -272,32 +285,51 @@ describe('Relationship Field', () => {
   async function runFilterOptionsTest(fieldName: string, fieldLabel: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
+    await wait(200)
     const field = page.locator('#field-relationship')
     await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
+    await wait(200)
+
     const options = page.locator('.rs__option')
-    await options.nth(0).click()
+    await expect(options).toHaveCount(2)
+    await options.getByText(relationOneDoc.id).click()
     await expect(field).toContainText(relationOneDoc.id)
+    await wait(200)
+
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     let filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
-    await filteredOptions.nth(0).click()
+    await wait(200)
+
+    await filteredOptions.getByText(relationOneDoc.id).click()
     await expect(filteredField).toContainText(relationOneDoc.id)
+    await wait(200)
+
     await field.click({ delay: 100 })
-    await options.nth(1).click()
+    await expect(options).toHaveCount(2)
+    await wait(200)
+
+    await options.getByText(anotherRelationOneDoc.id).click()
     await expect(field).toContainText(anotherRelationOneDoc.id)
-    await wait(2000) // Need to wait form state to come back before clicking save
+    await wait(1000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
+    await wait(200)
     await assertToastErrors({
       page,
       errors: [fieldLabel],
+      dismissAfterAssertion: true,
     })
+    await wait(1000)
+
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
-    await filteredOptions.nth(1).click()
+    await wait(200)
+
+    await filteredOptions.getByText(anotherRelationOneDoc.id).click()
     await expect(filteredField).toContainText(anotherRelationOneDoc.id)
     await saveDocAndAssert(page)
   }
@@ -781,7 +813,7 @@ async function clearAllDocs(): Promise<void> {
   await clearCollectionDocs(versionedRelationshipFieldSlug)
 }
 
-async function clearCollectionDocs(collectionSlug: string): Promise<void> {
+async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void> {
   await payload.delete({
     collection: collectionSlug,
     where: {
