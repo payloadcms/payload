@@ -15,6 +15,26 @@ import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
+interface CopyDataFromLocaleContext {
+  fromLocale: string
+  fullDocWithAllLocales: JsonObject
+  toLocale: string
+}
+
+interface RequestContextWithCopy extends RequestContext {
+  copyDataFromLocale?: CopyDataFromLocaleContext
+}
+
+function isCopyContext(context: unknown): context is CopyDataFromLocaleContext {
+  return (
+    typeof context === 'object' &&
+    context !== null &&
+    'fromLocale' in context &&
+    'fullDocWithAllLocales' in context &&
+    'toLocale' in context
+  )
+}
+
 function buildFieldLabel(parentLabel: string, label: string): string {
   const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
   return parentLabel && capitalizedLabel
@@ -214,15 +234,68 @@ export const promise = async ({
     // Push merge locale action if applicable
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(() => {
+        // Check if this is a copy locale operation and use enhanced document data
+        const reqContext = req.context as RequestContextWithCopy
+        const copyContext = reqContext?.copyDataFromLocale
+        let enhancedSiblingDocWithLocales = siblingDocWithLocales
+
+        if (copyContext && isCopyContext(copyContext)) {
+          // Rebuild correct siblingDocWithLocales structure
+          enhancedSiblingDocWithLocales = copyContext.fullDocWithAllLocales
+
+          // For array fields, navigate to the corresponding item
+          if (path && path.includes('.')) {
+            const pathParts = path.split('.')
+            let currentLevel = enhancedSiblingDocWithLocales
+
+            for (const part of pathParts) {
+              if (!isNaN(Number(part))) {
+                // Array index
+                const arrayIndex = Number(part)
+                if (Array.isArray(currentLevel) && currentLevel[arrayIndex]) {
+                  currentLevel = currentLevel[arrayIndex]
+                }
+              } else {
+                // Field name
+                if (currentLevel && typeof currentLevel === 'object' && part in currentLevel) {
+                  currentLevel = currentLevel[part]
+                }
+              }
+            }
+
+            if (currentLevel && typeof currentLevel === 'object') {
+              enhancedSiblingDocWithLocales = currentLevel
+            }
+          }
+        }
+
         const localeData = {}
 
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name]
-              : siblingDocWithLocales?.[field.name]?.[locale]
+          let fieldValue
 
-          // update locale value if it's not undefined
+          if (locale === req.locale) {
+            // Current locale value comes from siblingData
+            fieldValue = siblingData[field.name]
+          } else {
+            // Other locale values come from enhancedSiblingDocWithLocales
+            if (copyContext && isCopyContext(copyContext) && path && path.includes('.')) {
+              // After path navigation, enhancedSiblingDocWithLocales is the locale object directly
+              fieldValue = enhancedSiblingDocWithLocales?.[locale]
+            } else if (
+              enhancedSiblingDocWithLocales?.[field.name] &&
+              typeof enhancedSiblingDocWithLocales[field.name] === 'object' &&
+              !Array.isArray(enhancedSiblingDocWithLocales[field.name])
+            ) {
+              // Already in locale object format {en: "value1", es: "value2"}
+              fieldValue = enhancedSiblingDocWithLocales[field.name][locale]
+            } else {
+              // Not in locale object format, use value directly
+              fieldValue = enhancedSiblingDocWithLocales?.[field.name]
+            }
+          }
+
+          // Update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
             localeData[locale] = fieldValue
           }
