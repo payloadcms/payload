@@ -25,6 +25,7 @@ export const variantsFields: () => Field[] = () => {
       },
       collection: 'variants',
       label: 'Available Variants',
+      maxDepth: 2,
       on: 'product',
     },
   ]

@@ -1,4 +1,12 @@
-import type { CollectionConfig, Endpoint, Field, GroupField, PayloadRequest } from 'payload'
+import type {
+  CollectionConfig,
+  DefaultDocumentIDType,
+  Endpoint,
+  Field,
+  GroupField,
+  PayloadRequest,
+  TypedCollection,
+} from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 export type CollectionOverride = { fields?: FieldsOverride } & Partial<
@@ -21,6 +29,26 @@ type CartItem = CartItemWithProduct | CartItemWithVariant
 
 export type Cart = CartItem[]
 
+type CartItemWithProductClient = {
+  product: TypedCollection['products']
+  productID: DefaultDocumentIDType
+  quantity: number
+  variant?: TypedCollection['variants']
+  variantID?: DefaultDocumentIDType
+}
+
+type CartItemWithVariantClient = {
+  product: Record<string, unknown>
+  productID: DefaultDocumentIDType
+  quantity: number
+  variant: Record<string, unknown>
+  variantID: DefaultDocumentIDType
+}
+
+export type CartItemClient = CartItemWithProductClient //| CartItemWithVariantClient
+
+export type CartClient = CartItemClient[]
+
 /**
  * The full payment adapter config expected as part of the config for the Ecommerce plugin.
  *
@@ -35,7 +63,7 @@ export type PaymentAdapter = {
       customerEmail: string
     }
     req: PayloadRequest
-  }) => Promise<Record<string, any>> | Record<string, any>
+  }) => Promise<Record<string, unknown>> | Record<string, unknown>
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
    *
@@ -85,7 +113,7 @@ export type PaymentAdapter = {
       total: number
     }
     req: PayloadRequest
-  }) => Promise<Record<string, any>> | Record<string, any>
+  }) => Promise<Record<string, unknown>> | Record<string, unknown>
   /**
    * The label of the payment method
    * @example
@@ -188,6 +216,12 @@ export type EcommercePluginConfig = {
    * @default 'users'
    */
   customersCollectionSlug?: string
+  /**
+   * Enable tracking of inventory for products, variants, and orders.
+   *
+   * Defaults to true.
+   */
+  inventory?: boolean
   orders?: boolean | OrdersConfig
   /**
    * Enable tracking of payments. Accepts a config object to override the default collection settings.

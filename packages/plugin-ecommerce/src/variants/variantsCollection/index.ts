@@ -52,76 +52,10 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
           },
         },
       },
-      label: 'Variant options',
-      required: true,
-      // filterOptions: async ({ data, req, siblingData }) => {
-      //   const productID = data.product
-      //   const product = await req.payload.findByID({
-      //     id: productID,
-      //     collection: 'products',
-      //   })
-
-      //   const variantTypes: (number | string)[] = []
-
-      //   product.variantTypes.forEach((key: any) => {
-      //     if (typeof key === 'string' || typeof key === 'number') {
-      //       variantTypes.push(key)
-      //     } else {
-      //       variantTypes.push(key.id)
-      //     }
-      //   })
-
-      //   // @ts-expect-error - filterOptions are not typed well yet
-      //   const selectedOptions = siblingData.options || []
-      //   const ignoredGroups: (number | string)[] = []
-
-      //   if (selectedOptions.length > 0) {
-      //     for (const selectedOption of selectedOptions) {
-      //       const option = await req.payload.findByID({
-      //         id: selectedOption,
-      //         collection: 'variantOptions',
-      //       })
-
-      //       if (!option) {
-      //         continue
-      //       }
-
-      //       const { variantType } = option
-
-      //       if (ignoredGroups.includes(variantType)) {
-      //         continue
-      //       }
-
-      //       const keyID =
-      //         typeof variantType === 'string' || typeof variantType === 'number'
-      //           ? variantType
-      //           : variantType.id
-
-      //       ignoredGroups.push(keyID)
-      //     }
-      //   }
-
-      //   if (!variantTypes.length) {
-      //     return true
-      //   }
-
-      //   return {
-      //     and: [
-      //       {
-      //         variantType: { in: variantTypes },
-      //       },
-      //       ...(ignoredGroups.length > 0
-      //         ? [
-      //             {
-      //               variantType: { not_in: ignoredGroups },
-      //             },
-      //           ]
-      //         : []),
-      //     ],
-      //   }
-      // },
       hasMany: true,
+      label: 'Variant options',
       relationTo: 'variantOptions',
+      required: true,
       validate: validateOptions(),
     },
     {
@@ -159,6 +93,12 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
       useAsTitle: 'title',
       ...overrides?.admin,
     },
+    // defaultPopulate: {
+    //   inventory: true,
+    //   options: true,
+    //   title: true,
+    //   variantOptions: true,
+    // },
     fields,
     hooks: {
       ...overrides?.hooks,

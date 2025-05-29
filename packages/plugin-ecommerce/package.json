@@ -85,6 +85,11 @@
       "import": "./src/exports/client.ts",
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
+    },
+    "./react": {
+      "import": "./src/exports/react.ts",
+      "types": "./src/exports/react.ts",
+      "default": "./src/exports/react.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -109,8 +114,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "workspace:*",
+    "@types/react-dom": "workspace:*",
     "payload": "workspace:*",
     "stripe": "^10.2.0"
   },
@@ -180,6 +185,11 @@
         "import": "./dist/exports/translations.js",
         "types": "./dist/exports/translations.d.ts",
         "default": "./dist/exports/translations.js"
+      },
+      "./react": {
+        "import": "./dist/exports/react.js",
+        "types": "./dist/exports/react.d.ts",
+        "default": "./dist/exports/react.js"
       }
     },
     "main": "./dist/index.js",

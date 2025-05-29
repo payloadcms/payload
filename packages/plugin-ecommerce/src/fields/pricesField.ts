@@ -27,25 +27,39 @@ export const pricesField: (props: Props) => GroupField[] = ({
     const name = `priceIn${currency.code}`
     const label = `Price (${currency.code})`
 
+    const path = conditionalPath ? `${conditionalPath}.${name}Enabled` : `${name}Enabled`
+
     return {
-      name,
       type: 'group',
       fields: [
         {
-          name: 'enabled',
-          type: 'checkbox',
-        },
-        amountField({
-          currenciesConfig,
-          currency,
-          overrides: {
-            admin: {
-              condition: (_, siblingData) => Boolean(siblingData?.enabled),
+          type: 'row',
+          fields: [
+            {
+              name: `${name}Enabled`,
+              type: 'checkbox',
+              admin: {
+                style: {
+                  alignSelf: 'baseline',
+                  flex: '0 0 auto',
+                },
+              },
+              label: `Enable ${currency.code} Price`,
             },
-          },
-        }),
+            amountField({
+              currenciesConfig,
+              currency,
+              overrides: {
+                name,
+                admin: {
+                  condition: (_, siblingData) => Boolean(siblingData?.[path]),
+                },
+                label,
+              },
+            }),
+          ],
+        },
       ],
-      label,
     }
   })
 
