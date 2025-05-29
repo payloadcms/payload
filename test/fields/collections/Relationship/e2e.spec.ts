@@ -825,6 +825,7 @@ describe('relationship', () => {
     await createTextFieldDoc({ text: 'list drawer test' })
     await createTextFieldDoc({ text: 'not test' })
     await page.goto(url.create)
+    await wait(200)
 
     const relationshipField = page.locator('#field-relationshipDrawerWithFilterOptions')
     await relationshipField.click()
