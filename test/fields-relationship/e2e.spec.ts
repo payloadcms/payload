@@ -68,6 +68,14 @@ describe('Relationship Field', () => {
   let relationWithTitle: RelationWithTitle
   let serverURL: string
 
+  async function loadCreatePage() {
+    await page.goto(url.create)
+    //ensure page is loaded
+    await wait(100)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await wait(100)
+  }
+
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -169,7 +177,7 @@ describe('Relationship Field', () => {
   const tableRowLocator = 'table > tbody > tr'
 
   test('should create relationship', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     const field = page.locator('#field-relationship')
     await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
@@ -181,7 +189,8 @@ describe('Relationship Field', () => {
   })
 
   test('should only make a single request for relationship values', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
+
     const field = page.locator('#field-relationship')
     await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
@@ -197,7 +206,7 @@ describe('Relationship Field', () => {
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
   test.skip('should create relations to multiple collections', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
 
     const field = page.locator('#field-relationshipMultiple')
     const value = page.locator('#field-relationshipMultiple .relationship--single-value__text')
@@ -223,7 +232,8 @@ describe('Relationship Field', () => {
   })
 
   test('should create hasMany relationship', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
+
     const field = page.locator('#field-relationshipHasMany')
     await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
@@ -245,7 +255,7 @@ describe('Relationship Field', () => {
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
   test.skip('should create many relations to multiple collections', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
 
     const field = page.locator('#field-relationshipHasManyMultiple')
     await field.click({ delay: 100 })
@@ -273,6 +283,7 @@ describe('Relationship Field', () => {
 
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
+    await wait(300)
 
     await openDocControls(page)
     await page.locator('#action-duplicate').click()
@@ -285,7 +296,7 @@ describe('Relationship Field', () => {
   async function runFilterOptionsTest(fieldName: string, fieldLabel: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
-    await wait(200)
+    await wait(300)
     const field = page.locator('#field-relationship')
     await expect(field.locator('input')).toBeEnabled()
     await field.click({ delay: 100 })
@@ -355,6 +366,7 @@ describe('Relationship Field', () => {
 
       // first ensure that filter options are applied in the edit view
       await page.goto(url.edit(idToInclude))
+      await wait(300)
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
       const options = field.locator('.rs__option')
@@ -363,7 +375,7 @@ describe('Relationship Field', () => {
 
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
-
+      await wait(300)
       const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Relationship Filtered By Field',
@@ -390,6 +402,7 @@ describe('Relationship Field', () => {
 
       // first ensure that filter options are applied in the edit view
       await page.goto(url.edit(idToInclude))
+      await wait(300)
       const field = page.locator('#field-nestedRelationshipFilteredByField')
       await field.click({ delay: 100 })
       const options = field.locator('.rs__option')
@@ -398,6 +411,7 @@ describe('Relationship Field', () => {
 
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
+      await wait(300)
 
       const { whereBuilder } = await addListFilter({
         page,
@@ -429,7 +443,7 @@ describe('Relationship Field', () => {
         },
       })) as any
 
-      await page.goto(url.create)
+      await loadCreatePage()
 
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
@@ -447,7 +461,7 @@ describe('Relationship Field', () => {
         },
       })
 
-      await page.goto(url.create)
+      await loadCreatePage()
 
       // enter a filter for relationshipManyFiltered to use
       await page.locator('#field-filter').fill('include')
@@ -468,7 +482,7 @@ describe('Relationship Field', () => {
         },
       })
 
-      await page.goto(url.create)
+      await loadCreatePage()
 
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
@@ -487,7 +501,8 @@ describe('Relationship Field', () => {
         },
       })
 
-      await page.goto(url.create)
+      await loadCreatePage()
+
       // wait for relationship options to load
       const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
       // select relationshipMany field that relies on siblingData field above
@@ -505,6 +520,7 @@ describe('Relationship Field', () => {
     // wait for relationship options to load
     const podcastsFilterOptionsReq = page.waitForResponse(/api\/podcasts/)
     const videosFilterOptionsReq = page.waitForResponse(/api\/videos/)
+    await wait(300)
     // select relationshipMany field that relies on siblingData field above
     await page.locator('#field-relatedMedia .rs__control').click()
     await podcastsFilterOptionsReq
@@ -523,7 +539,7 @@ describe('Relationship Field', () => {
   test.skip('should open document drawer from read-only relationships', async () => {
     const editURL = url.edit(docWithExistingRelations.id)
     await page.goto(editURL)
-
+    await wait(300)
     await openDocDrawer({
       page,
       selector:
@@ -536,6 +552,7 @@ describe('Relationship Field', () => {
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
+    await wait(300)
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationshipHasMany' })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
@@ -558,7 +575,7 @@ describe('Relationship Field', () => {
 
   test('should update relationship from drawer without enabling save in main doc', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
-
+    await wait(300)
     const saveButton = page.locator('#action-save')
     await expect(saveButton).toBeDisabled()
 
@@ -587,7 +604,7 @@ describe('Relationship Field', () => {
     ])
 
     await page.goto(versionedRelationshipFieldURL.list)
-
+    await wait(300)
     await page.locator('.list-controls__toggle-columns').click()
 
     await addListFilter({
@@ -603,6 +620,7 @@ describe('Relationship Field', () => {
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
+      await wait(300)
       const field = page.locator('#field-relationship')
       await expect(field.locator('input')).toBeEnabled()
       await field.click({ delay: 100 })
@@ -612,7 +630,7 @@ describe('Relationship Field', () => {
 
     test('should show untitled ID on restricted relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
-
+      await wait(300)
       const field = page.locator('#field-relationshipRestricted')
 
       // Check existing relationship has untitled ID
@@ -629,6 +647,7 @@ describe('Relationship Field', () => {
 
     test('should search within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
+      await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('title')
       const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
@@ -640,6 +659,7 @@ describe('Relationship Field', () => {
 
     test('should search using word boundaries within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
+      await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('word search')
       const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
@@ -648,7 +668,7 @@ describe('Relationship Field', () => {
 
     test('should show useAsTitle on relation', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
-
+      await wait(300)
       const field = page.locator('#field-relationshipWithTitle')
       const value = field.locator('.relationship--single-value__text')
 
@@ -663,21 +683,21 @@ describe('Relationship Field', () => {
 
     test('should show id on relation in list view', async () => {
       await page.goto(url.list)
-      await wait(110)
+      await wait(300)
       const relationship = page.locator('.row-1 .cell-relationship')
       await expect(relationship).toHaveText(relationOneDoc.id)
     })
 
     test('should show Untitled ID on restricted relation in list view', async () => {
       await page.goto(url.list)
-      await wait(110)
+      await wait(300)
       const relationship = page.locator('.row-1 .cell-relationshipRestricted')
       await expect(relationship).toContainText('Untitled - ID: ')
     })
 
     test('x in list view', async () => {
       await page.goto(url.list)
-      await wait(110)
+      await wait(300)
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle')
       await expect(relationship).toHaveText(relationWithTitle.name)
     })
@@ -714,7 +734,7 @@ describe('Relationship Field', () => {
       }
 
       await page.goto(url.list)
-
+      await wait(300)
       // check first doc on first page
       const relationship = page.locator('.row-1 .cell-relationshipHasManyMultiple')
       await expect(relationship).toHaveText(relationTwoDoc.id)
@@ -732,6 +752,7 @@ describe('Relationship Field', () => {
     beforeEach(async () => {
       const externalRelationURL = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug)
       await page.goto(externalRelationURL.create)
+      await wait(300)
     })
 
     test('has many, one collection', async () => {
@@ -788,7 +809,7 @@ describe('Relationship Field', () => {
 
     test('should update with new relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
-
+      await wait(300)
       const field = page.locator('#field-relationshipHasMany')
       const dropdownIndicator = field.locator('.dropdown-indicator')
       await dropdownIndicator.click({ delay: 100 })
