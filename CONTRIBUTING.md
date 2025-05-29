@@ -87,9 +87,13 @@ You can run the entire test suite using `pnpm test`. If you wish to only run e2e
 
 By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
 
-### Pull Request Titles
+### Pull Requests
 
-We squash PR commits and use the PR title as the commit message. For that reason, please use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for your PR titles. Here are some examples:
+For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR description.
+
+All commits within a PR are squashed when merged, using the PR title as the commit message. For that reason, please use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for your PR titles.
+
+Here are some examples:
 
 - `feat: add new feature`
 - `fix: fix bug`
@@ -98,15 +102,17 @@ We squash PR commits and use the PR title as the commit message. For that reason
 - `refactor: refactor code`
 - `chore: anything that does not fit into the above categories`
 
-If applicable, you must indicate the affected packages in parentheses. E.g., `fix(richtext-lexical): your title`. Changes to the payload chore package do not require scoping.
+If applicable, you must indicate the affected packages in parentheses to "scope" the changes. Changes to the payload chore package do not require scoping.
+
+Here are some examples:
+
+- `feat(ui): add new feature`
+- `fix(richtext-lexical): fix bug`
+
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
-
-## Pull Requests
-
-For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR message.
 
 ## Previewing docs
 
