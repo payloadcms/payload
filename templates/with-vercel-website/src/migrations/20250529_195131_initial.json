@@ -1,5 +1,5 @@
 {
-  "id": "aafddd74-d1de-48df-af80-a22a6b835a76",
+  "id": "0d475777-437c-4150-8395-d577aa7c874c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -6285,7 +6285,7 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true,
-          "default": "'You''''ve received a new message.'"
+          "default": "'You''ve received a new message.'"
         },
         "message": {
           "name": "message",
