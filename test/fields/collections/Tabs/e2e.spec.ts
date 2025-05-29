@@ -134,6 +134,7 @@ describe('Tabs', () => {
 
   test('should render conditional tab when checkbox is toggled', async () => {
     await navigateToDoc(page, url)
+    await wait(200)
 
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
     const button = page.locator(conditionalTabSelector)
@@ -167,6 +168,7 @@ describe('Tabs', () => {
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()
+    await wait(200)
     await switchTab(page, conditionalTabSelector)
 
     // Now assert on the nested conditional tab
