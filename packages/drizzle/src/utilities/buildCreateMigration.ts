@@ -14,10 +14,12 @@ export const buildCreateMigration = ({
   executeMethod,
   filename,
   sanitizeStatements,
+  sqlOnly,
 }: {
   executeMethod: string
   filename: string
   sanitizeStatements: (args: { sqlExecute: string; statements: string[] }) => string
+  sqlOnly?: boolean
 }): CreateMigration => {
   const dirname = path.dirname(filename)
   return async function createMigration(
@@ -78,7 +80,9 @@ export const buildCreateMigration = ({
       }
 
       const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
-      const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+      const sqlStatementsDown = sqlOnly
+        ? []
+        : await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
       const sqlExecute = `await db.${executeMethod}(` + 'sql`'
 
       if (sqlStatementsUp?.length) {
@@ -116,19 +120,22 @@ export const buildCreateMigration = ({
       fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
     }
 
+    const data = sqlOnly
+      ? upSQL
+      : getMigrationTemplate({
+          downSQL: downSQL || `  // Migration code`,
+          imports,
+          packageName: payload.db.packageName,
+          upSQL: upSQL || `  // Migration code`,
+        })
+
+    const fullPath = sqlOnly ? `${filePath}.sql` : `${filePath}.ts`
+
     // write migration
-    fs.writeFileSync(
-      `${filePath}.ts`,
-      getMigrationTemplate({
-        downSQL: downSQL || `  // Migration code`,
-        imports,
-        packageName: payload.db.packageName,
-        upSQL: upSQL || `  // Migration code`,
-      }),
-    )
+    fs.writeFileSync(fullPath, data)
 
     writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
-    payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
+    payload.logger.info({ msg: `Migration created at ${fullPath}` })
   }
 }

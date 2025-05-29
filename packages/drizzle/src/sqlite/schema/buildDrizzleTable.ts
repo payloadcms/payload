@@ -1,4 +1,3 @@
-import type { BuildDrizzleTable, RawColumn } from '@payloadcms/drizzle/types'
 import type { ForeignKeyBuilder, IndexBuilder } from 'drizzle-orm/sqlite-core'
 
 import { sql } from 'drizzle-orm'
@@ -12,6 +11,8 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core'
 import { v4 as uuidv4 } from 'uuid'
+
+import type { BuildDrizzleTable, RawColumn } from '../../types.js'
 
 const rawColumnBuilderMap: Partial<Record<RawColumn['type'], any>> = {
   integer,

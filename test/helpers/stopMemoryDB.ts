@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-restricted-exports
 export default async () => {
   if (global._mongoMemoryServer) {
     console.log('Stopping memorydb...')

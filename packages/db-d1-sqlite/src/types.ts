@@ -1,8 +1,11 @@
-import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { Client, ResultSet } from '@libsql/client'
+import type { D1Database, D1Options, DatabaseBinding } from '@miniflare/d1'
+const o: D1Options = {}
+import type { extendDrizzleTable } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
@@ -26,7 +29,7 @@ type SQLiteSchemaHookArgs = {
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
 export type Args = {
-  client: Config
+  binding: DatabaseBinding
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -55,7 +58,7 @@ export type DeleteWhere = (args: {
   where: SQL
 }) => Promise<void>
 
-export type DropDatabase = (args: { adapter: SQLiteAdapter }) => Promise<void>
+export type DropDatabase = (args: { adapter: SQLiteD1Adapter }) => Promise<void>
 
 export type Execute<T> = (args: {
   db?: LibSQLDatabase
@@ -93,11 +96,11 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle = { $client: D1Database } & DrizzleD1Database<Record<string, any>>
 
-export type SQLiteAdapter = {
-  client: Client
-  clientConfig: Args['client']
+export type SQLiteD1Adapter = {
+  binding: Args['binding']
+  client: D1Database
   drizzle: Drizzle
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter

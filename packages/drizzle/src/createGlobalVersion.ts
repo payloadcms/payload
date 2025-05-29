@@ -23,7 +23,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     updatedAt,
     versionData,
   }: CreateGlobalVersionArgs,
-) {
+): Promise<TypeWithVersion<T>> {
   const db = await getTransaction(this, req)
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
