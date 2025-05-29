@@ -50,7 +50,7 @@ type FlattenFieldsOptions = {
    */
   labelPrefix?: string
   /**
-   * If true, nested fields inside `group` fields will be lifted to the top level
+   * If true, nested fields inside `group` & `tabs` fields will be lifted to the top level
    * and given contextual `accessor` and `labelWithPrefix` values.
    * Default: false.
    */
@@ -85,48 +85,93 @@ function flattenFields<TField extends ClientField | Field>(
   } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
-    if (fieldHasSubFields(field)) {
-      if (field.type === 'group') {
-        if (moveSubFieldsToTop && 'fields' in field) {
-          const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
+    if (field.type === 'group' && 'fields' in field) {
+      if (moveSubFieldsToTop) {
+        const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
+        const groupName = 'name' in field ? field.name : undefined
 
-          const translatedLabel =
-            'label' in field && field.label && i18n
-              ? getTranslation(field.label as string, i18n)
-              : undefined
+        const translatedLabel =
+          'label' in field && field.label && i18n
+            ? getTranslation(field.label as string, i18n)
+            : undefined
 
-          const labelWithPrefix =
-            isNamedGroup && labelPrefix && translatedLabel
-              ? `${labelPrefix} > ${translatedLabel}`
-              : (labelPrefix ?? translatedLabel)
+        const labelWithPrefix = labelPrefix
+          ? `${labelPrefix} > ${translatedLabel ?? groupName}`
+          : (translatedLabel ?? groupName)
 
-          const nameWithPrefix =
-            isNamedGroup && field.name
-              ? pathPrefix
-                ? `${pathPrefix}-${field.name as string}`
-                : (field.name as string)
-              : pathPrefix
+        const nameWithPrefix =
+          'name' in field && field.name
+            ? pathPrefix
+              ? `${pathPrefix}-${field.name}`
+              : field.name
+            : pathPrefix
 
-          acc.push(
-            ...flattenFields(field.fields as TField[], {
-              i18n,
-              keepPresentationalFields,
-              labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
-              moveSubFieldsToTop,
-              pathPrefix: isNamedGroup ? nameWithPrefix : pathPrefix,
-            }),
-          )
-        } else {
-          // Just keep the group as-is
-          acc.push(field as FlattenedField<TField>)
-        }
-      } else if (['collapsible', 'row'].includes(field.type)) {
-        // Recurse into row and collapsible
-        acc.push(...flattenFields(field.fields as TField[], options))
+        acc.push(
+          // Need to include the top-level group field when hoisting its subfields,
+          // so that `buildColumnState` can detect and render a column if the group
+          // has a custom admin Cell component defined in its configuration.
+          // See: packages/ui/src/providers/TableColumns/buildColumnState/index.tsx
+          field as FlattenedField<TField>,
+          ...flattenFields(field.fields as TField[], {
+            i18n,
+            keepPresentationalFields,
+            labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
+            moveSubFieldsToTop,
+            pathPrefix: isNamedGroup ? nameWithPrefix : pathPrefix,
+          }),
+        )
       } else {
-        // Do not hoist fields from arrays & blocks
+        // Hoisting diabled - keep as top level field
         acc.push(field as FlattenedField<TField>)
       }
+    } else if (field.type === 'tabs' && 'tabs' in field) {
+      return [
+        ...acc,
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+          if (tabHasName(tab)) {
+            if (moveSubFieldsToTop) {
+              const translatedLabel =
+                'label' in tab && tab.label && i18n ? getTranslation(tab.label, i18n) : undefined
+
+              const labelWithPrefixForTab = labelPrefix
+                ? `${labelPrefix} > ${translatedLabel ?? tab.name}`
+                : (translatedLabel ?? tab.name)
+
+              const pathPrefixForTab = tab.name
+                ? pathPrefix
+                  ? `${pathPrefix}-${tab.name}`
+                  : tab.name
+                : pathPrefix
+
+              return [
+                ...tabFields,
+                ...flattenFields(tab.fields as TField[], {
+                  i18n,
+                  keepPresentationalFields,
+                  labelPrefix: labelWithPrefixForTab,
+                  moveSubFieldsToTop,
+                  pathPrefix: pathPrefixForTab,
+                }),
+              ]
+            } else {
+              // Named tab, hoisting disabled: keep as top-level field
+              return [
+                ...tabFields,
+                {
+                  ...tab,
+                  type: 'tab',
+                } as unknown as FlattenedField<TField>,
+              ]
+            }
+          } else {
+            // Unnamed tab: always hoist its fields
+            return [...tabFields, ...flattenFields<TField>(tab.fields as TField[], options)]
+          }
+        }, []),
+      ]
+    } else if (fieldHasSubFields(field) && ['collapsible', 'row'].includes(field.type)) {
+      // Recurse into row and collapsible
+      acc.push(...flattenFields(field.fields as TField[], options))
     } else if (
       fieldAffectsData(field) ||
       (keepPresentationalFields && fieldIsPresentationalOnly(field))
@@ -148,30 +193,11 @@ function flattenFields<TField extends ClientField | Field>(
         ...(moveSubFieldsToTop &&
           isHoistingFromGroup && {
             accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
-            labelWithPrefix:
-              labelPrefix && translatedLabel
-                ? `${labelPrefix} > ${translatedLabel}`
-                : (labelPrefix ?? translatedLabel),
+            labelWithPrefix: labelPrefix
+              ? `${labelPrefix} > ${translatedLabel ?? name}`
+              : (translatedLabel ?? name),
           }),
       })
-    } else if (field.type === 'tabs' && 'tabs' in field) {
-      return [
-        ...acc,
-        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
-          if (tabHasName(tab)) {
-            return [
-              ...tabFields,
-              {
-                ...tab,
-                type: 'tab',
-                ...(moveSubFieldsToTop && { labelPrefix }),
-              } as unknown as FlattenedField<TField>,
-            ]
-          } else {
-            return [...tabFields, ...flattenFields<TField>(tab.fields as TField[], options)]
-          }
-        }, []),
-      ]
     }
 
     return acc
