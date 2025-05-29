@@ -90,7 +90,7 @@ export const traverseFields = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const promises = []
+  const promises: Promise<void>[] = []
 
   fields.forEach((field, fieldIndex) => {
     promises.push(
@@ -111,7 +111,7 @@ export const traverseFields = async ({
         operation,
         overrideAccess,
         parentIndexPath,
-        parentIsLocalized,
+        parentIsLocalized: parentIsLocalized!,
         parentPath,
         parentSchemaPath,
         req,
@@ -119,7 +119,7 @@ export const traverseFields = async ({
         siblingDoc,
         siblingDocWithLocales,
         siblingFields: fields,
-        skipValidation,
+        skipValidation: skipValidation!,
       }),
     )
   })

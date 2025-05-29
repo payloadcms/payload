@@ -8,7 +8,7 @@ const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
   const mergedFields = [...(fields || [])]
 
   baseFields.forEach((baseField) => {
-    let matchedIndex = null
+    let matchedIndex: null | number = null
 
     if (fieldAffectsData(baseField)) {
       const match = mergedFields.find((field, i) => {
@@ -22,7 +22,7 @@ const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
 
       if (match) {
         const matchCopy: Field = { ...match }
-        mergedFields.splice(matchedIndex, 1)
+        mergedFields.splice(matchedIndex!, 1)
 
         const mergedField = deepMergeWithReactComponents<Field>(baseField, matchCopy)
 
