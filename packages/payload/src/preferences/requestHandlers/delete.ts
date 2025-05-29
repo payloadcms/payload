@@ -12,7 +12,7 @@ export const deleteHandler: PayloadHandler = async (incomingReq): Promise<Respon
   let data
 
   try {
-    data = await incomingReq.json()
+    data = await incomingReq.json?.()
   } catch (error) {
     data = {}
   }

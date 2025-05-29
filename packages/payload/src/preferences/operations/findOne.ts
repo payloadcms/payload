@@ -14,7 +14,7 @@ export async function findOne(args: PreferenceRequest): Promise<TypedCollection[
   } = args
 
   if (!user) {
-    return null
+    return null!
   }
 
   const where: Where = {
@@ -34,5 +34,5 @@ export async function findOne(args: PreferenceRequest): Promise<TypedCollection[
     where,
   })
 
-  return docs?.[0] || null
+  return docs?.[0] || null!
 }
