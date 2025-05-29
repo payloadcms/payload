@@ -329,11 +329,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
   // Pass complete document data via context for beforeChange hook
   const contextWithFullDoc = {
     ...req.context,
-    copyDataFromLocale: {
-      fromLocale,
-      fullDocWithAllLocales: currentDocForContext,
-      toLocale,
-    },
+    fullDocWithAllLocales: currentDocForContext,
   }
 
   const reqWithContext = {

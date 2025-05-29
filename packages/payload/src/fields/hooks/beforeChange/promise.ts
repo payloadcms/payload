@@ -15,24 +15,12 @@ import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
-interface CopyDataFromLocaleContext {
-  fromLocale: string
-  fullDocWithAllLocales: JsonObject
-  toLocale: string
-}
-
 interface RequestContextWithCopy extends RequestContext {
-  copyDataFromLocale?: CopyDataFromLocaleContext
+  fullDocWithAllLocales: JsonObject
 }
 
-function isCopyContext(context: unknown): context is CopyDataFromLocaleContext {
-  return (
-    typeof context === 'object' &&
-    context !== null &&
-    'fromLocale' in context &&
-    'fullDocWithAllLocales' in context &&
-    'toLocale' in context
-  )
+function isCopyContext(context: unknown): context is RequestContextWithCopy {
+  return typeof context === 'object' && context !== null && 'fullDocWithAllLocales' in context
 }
 
 function buildFieldLabel(parentLabel: string, label: string): string {
@@ -236,12 +224,11 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         // Check if this is a copy locale operation and use enhanced document data
         const reqContext = req.context as RequestContextWithCopy
-        const copyContext = reqContext?.copyDataFromLocale
         let enhancedSiblingDocWithLocales = siblingDocWithLocales
 
-        if (copyContext && isCopyContext(copyContext)) {
+        if (reqContext && isCopyContext(reqContext)) {
           // Rebuild correct siblingDocWithLocales structure
-          enhancedSiblingDocWithLocales = copyContext.fullDocWithAllLocales
+          enhancedSiblingDocWithLocales = reqContext.fullDocWithAllLocales
 
           // For array fields, navigate to the corresponding item
           if (path && path.includes('.')) {
@@ -279,7 +266,7 @@ export const promise = async ({
             fieldValue = siblingData[field.name]
           } else {
             // Other locale values come from enhancedSiblingDocWithLocales
-            if (copyContext && isCopyContext(copyContext) && path && path.includes('.')) {
+            if (reqContext && isCopyContext(reqContext) && path && path.includes('.')) {
               // After path navigation, enhancedSiblingDocWithLocales is the locale object directly
               fieldValue = enhancedSiblingDocWithLocales?.[locale]
             } else if (
