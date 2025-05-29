@@ -98,6 +98,7 @@ We squash PR commits and use the PR title as the commit message. For that reason
 - `refactor: refactor code`
 - `chore: anything that does not fit into the above categories`
 
+If applicable, you must indicate the affected packages in parentheses. E.g., `fix(richtext-lexical): your title`.
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
 - `chore(templates): adds feature to template`
