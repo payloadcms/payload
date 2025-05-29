@@ -68,7 +68,7 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
     const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
 
     if (formattedLabel) {
-      publishedLocalePill = <Pill>{formattedLabel}</Pill>
+      publishedLocalePill = <Pill size="small">{formattedLabel}</Pill>
     }
   }
 
