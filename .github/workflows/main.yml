@@ -386,7 +386,7 @@ jobs:
 
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
-    needs: [changes]
+    needs: [changes, build]
     if: >-
       needs.changes.outputs.needs_tests == 'true' &&
       (
