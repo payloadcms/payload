@@ -46,7 +46,7 @@ export const beforeChange = async <T extends JsonObject>({
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
-  const mergeLocaleActions = []
+  const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
 
   await traverseFields({
@@ -58,11 +58,11 @@ export const beforeChange = async <T extends JsonObject>({
     docWithLocales,
     errors,
     fieldLabelPath: '',
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     mergeLocaleActions,
     operation,
-    overrideAccess,
+    overrideAccess: overrideAccess!,
     parentIndexPath: '',
     parentIsLocalized: false,
     parentPath: '',

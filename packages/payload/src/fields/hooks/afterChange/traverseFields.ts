@@ -54,7 +54,7 @@ export const traverseFields = async ({
   siblingDoc,
   siblingFields,
 }: Args): Promise<void> => {
-  const promises = []
+  const promises: Promise<void>[] = []
 
   fields.forEach((field, fieldIndex) => {
     promises.push(
@@ -69,7 +69,7 @@ export const traverseFields = async ({
         global,
         operation,
         parentIndexPath,
-        parentIsLocalized,
+        parentIsLocalized: parentIsLocalized!,
         parentPath,
         parentSchemaPath,
         previousDoc,

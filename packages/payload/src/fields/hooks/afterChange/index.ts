@@ -42,7 +42,7 @@ export const afterChange = async <T extends JsonObject>({
     context,
     data,
     doc: incomingDoc,
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     operation,
     parentIndexPath: '',
