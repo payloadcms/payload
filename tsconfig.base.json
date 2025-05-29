@@ -51,6 +51,8 @@
       ],
       "@payloadcms/plugin-seo/client": ["./packages/plugin-seo/src/exports/client.ts"],
       "@payloadcms/plugin-ecommerce/ui": ["./packages/plugin-ecommerce/src/exports/ui.ts"],
+      "@payloadcms/plugin-ecommerce/react": ["./packages/plugin-ecommerce/src/exports/react.ts"],
+      "@payloadcms/plugin-ecommerce/types": ["./packages/plugin-ecommerce/src/exports/types.ts"],
       "@payloadcms/plugin-sentry/client": ["./packages/plugin-sentry/src/exports/client.ts"],
       "@payloadcms/plugin-stripe/client": ["./packages/plugin-stripe/src/exports/client.ts"],
       "@payloadcms/plugin-search/client": ["./packages/plugin-search/src/exports/client.ts"],
