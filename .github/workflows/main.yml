@@ -384,26 +384,15 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  needs-e2e-turbo:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
-    outputs:
-      run_e2e_turbo: ${{ steps.label-check.outputs.run_e2e_turbo }}
-    steps:
-      - name: Check for e2e-turbo label
-        id: label-check
-        run: |
-          LABEL_FOUND=$(echo "${{ toJson(github.event.pull_request.labels) }}" | grep -i '"name": "run-e2e-turbo"' || true)
-          if [[ -n "$LABEL_FOUND" ]]; then
-            echo "run_e2e_turbo=true" >> $GITHUB_OUTPUT
-          else
-            echo "run_e2e_turbo=false" >> $GITHUB_OUTPUT
-          fi
-
   tests-e2e-turbo:
     runs-on: ubuntu-24.04
-    needs: [changes, needs-e2e-turbo]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' && needs.needs-e2e-turbo.outputs.run_e2e_turbo == 'true' }}
+    needs: [changes]
+    if: >-
+      needs.changes.outputs.needs_tests == 'true' &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
+        github.event.label.name == 'run-e2e-turbo'
+      )
     name: e2e-turbo-${{ matrix.suite }}
     strategy:
       fail-fast: false
