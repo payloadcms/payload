@@ -41,7 +41,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       },
     })
 
-    return sanitizedPermissions?.globals?.[globalConfig.slug]
+    return sanitizedPermissions.globals![globalConfig.slug]!
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

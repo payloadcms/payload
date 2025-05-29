@@ -22,7 +22,7 @@ export const previewHandler: PayloadHandler = async (req) => {
     req,
   })
 
-  let previewURL: string
+  let previewURL!: string
 
   const generatePreviewURL = req.payload.config.globals.find(
     (config) => config.slug === globalConfig.slug,
@@ -31,11 +31,11 @@ export const previewHandler: PayloadHandler = async (req) => {
   const token = extractJWT(req)
 
   if (typeof generatePreviewURL === 'function') {
-    previewURL = await generatePreviewURL(doc, {
-      locale: req.locale,
+    previewURL = (await generatePreviewURL(doc, {
+      locale: req.locale!,
       req,
       token,
-    })
+    }))!
   }
 
   return Response.json(previewURL, {
