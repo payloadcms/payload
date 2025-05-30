@@ -34,8 +34,8 @@ export const adminInit = ({ headers, payload, user }: Args): void => {
   sendEvent({
     event: {
       type: 'admin-init',
-      domainID,
-      userID,
+      domainID: domainID!,
+      userID: userID!,
     },
     payload,
   })
