@@ -29,6 +29,7 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
+  customViewsTabsSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -64,6 +65,8 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
+  let customViewTabsURL: AdminUrlUtil
+  let collectionCustomViewPathId: string
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -79,6 +82,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
+    customViewTabsURL = new AdminUrlUtil(serverURL, customViewsTabsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -610,6 +614,45 @@ describe('Document View', () => {
       const customDraftButton = page.locator('#custom-draft-button')
 
       await expect(customDraftButton).toBeVisible()
+    })
+  })
+
+  describe('custom view paths', () => {
+    beforeAll(async () => {
+      await page.goto(customViewTabsURL.list)
+      const firstDoc = await page.locator('.collection-list .table a').first().getAttribute('href')
+      const id = firstDoc?.split('/').pop()
+      if (id) {
+        collectionCustomViewPathId = id
+      }
+    })
+
+    test('collection — should show live preview as first tab and default view', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const firstTab = tabs.first()
+      await expect(firstTab).toContainText('Live Preview')
+
+      const iframe = page.locator('.live-preview-iframe')
+      await expect(iframe).toBeVisible()
+    })
+
+    test('collection — should show edit as third tab', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(2)
+      await expect(secondTab).toContainText('Edit')
+    })
+
+    test('collection — should have `/edit` path', async () => {
+      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
+
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(2)
+      await secondTab.click()
+      await expect(page).toHaveURL(/\/edit/)
     })
   })
 })
