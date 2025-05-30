@@ -157,21 +157,33 @@ describe('createProject', () => {
     })
 
     describe('managing env files', () => {
-      it('generates .env with defaults', async () => {
-        const envFilePath = path.join(projectDir, '.env')
-        const envExampleFilePath = path.join(projectDir, '.env.example')
+      let envFilePath = ''
+      let envExampleFilePath = ''
+
+      beforeEach(() => {
+        envFilePath = path.join(projectDir, '.env')
+        envExampleFilePath = path.join(projectDir, '.env.example')
+
+        if (fse.existsSync(envFilePath)) {
+          fse.removeSync(envFilePath)
+        }
 
         fse.ensureDirSync(projectDir)
+      })
 
-        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
-        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
+      it('generates .env using defaults (not from .env.example)', async () => {
+        // ensure no .env.example exists so that the default values are used
+        // the `manageEnvFiles` function will look for .env.example in the file system
+        if (fse.existsSync(envExampleFilePath)) {
+          fse.removeSync(envExampleFilePath)
+        }
 
         await manageEnvFiles({
           cliArgs: {
             '--debug': true,
           } as CliArgs,
-          databaseUri: '',
-          payloadSecret: '',
+          databaseUri: '', // omitting this will ensure the default vars are used
+          payloadSecret: '', // omitting this will ensure the default vars are used
           projectDir,
           template: undefined,
         })
@@ -179,29 +191,26 @@ describe('createProject', () => {
         expect(fse.existsSync(envFilePath)).toBe(true)
 
         const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
-        expect(updatedEnvContent).toContain('DATABASE_URI=your-connection-string-here')
-        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=YOUR_SECRET_HERE')
+
+        expect(updatedEnvContent).toBe(
+          `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URI=your-connection-string-here`,
+        )
       })
 
       it('generates .env from .env.example', async () => {
-        const envFilePath = path.join(projectDir, '.env')
-        const envExampleFilePath = path.join(projectDir, '.env.example')
-
-        fse.ensureDirSync(projectDir)
-
-        if (fse.existsSync(envFilePath)) fse.removeSync(envFilePath)
-        if (fse.existsSync(envExampleFilePath)) fse.removeSync(envExampleFilePath)
-
-        // create .env.example with unique identifiers
-        const envExampleContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=example-connection-string`
-        fse.writeFileSync(envExampleFilePath, envExampleContent)
+        // create or override the .env.example file with a connection string that will NOT be overridden
+        fse.ensureFileSync(envExampleFilePath)
+        fse.writeFileSync(
+          envExampleFilePath,
+          `DATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value\n`,
+        )
 
         await manageEnvFiles({
           cliArgs: {
             '--debug': true,
           } as CliArgs,
-          databaseUri: '',
-          payloadSecret: '',
+          databaseUri: '', // omitting this will ensure the `.env.example` vars are used
+          payloadSecret: '', // omitting this will ensure the `.env.example` vars are used
           projectDir,
           template: undefined,
         })
@@ -209,46 +218,83 @@ describe('createProject', () => {
         expect(fse.existsSync(envFilePath)).toBe(true)
 
         const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
-        expect(updatedEnvContent).toContain('DATABASE_URI=example-connection-string')
-        expect(updatedEnvContent).toContain('CUSTOM_VAR=custom-value')
+
+        expect(updatedEnvContent).toBe(
+          `DATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n# Added by Payload`,
+        )
       })
 
       it('updates existing .env without overriding vars', async () => {
-        const envFilePath = path.join(projectDir, '.env')
-        const envExampleFilePath = path.join(projectDir, '.env.example')
-
-        fse.ensureDirSync(projectDir)
+        // create an existing .env file with some custom variables that should NOT be overridden
         fse.ensureFileSync(envFilePath)
+        fse.writeFileSync(
+          envFilePath,
+          `CUSTOM_VAR=custom-value\nDATABASE_URI=example-connection-string\n`,
+        )
+
+        // create an .env.example file to ensure that its contents DO NOT override existing .env vars
         fse.ensureFileSync(envExampleFilePath)
-
-        const initialEnvContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=old-connection\n`
-        const initialEnvExampleContent = `CUSTOM_VAR=custom-value\nDATABASE_URI=old-connection\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
-
-        fse.writeFileSync(envFilePath, initialEnvContent)
-        fse.writeFileSync(envExampleFilePath, initialEnvExampleContent)
+        fse.writeFileSync(
+          envExampleFilePath,
+          `CUSTOM_VAR=custom-value-2\nDATABASE_URI=example-connection-string-2\n`,
+        )
 
         await manageEnvFiles({
           cliArgs: {
             '--debug': true,
           } as CliArgs,
-          databaseType: 'mongodb',
-          databaseUri: 'mongodb://localhost:27017/test',
+          databaseUri: '', // omitting this will ensure the `.env` vars are kept
+          payloadSecret: '', // omitting this will ensure the `.env` vars are kept
+          projectDir,
+          template: undefined,
+        })
+
+        expect(fse.existsSync(envFilePath)).toBe(true)
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+
+        expect(updatedEnvContent).toBe(
+          `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value`,
+        )
+      })
+
+      it('sanitizes .env based on selected database type', async () => {
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URI
+          databaseUri: 'mongodb://localhost:27017/test', // this mimics the CLI selection and will be used as the DATABASE_URI
+          payloadSecret: 'test-secret', // this mimics the CLI selection and will be used as the PAYLOAD_SECRET
+          projectDir,
+          template: undefined,
+        })
+
+        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
+
+        expect(updatedEnvContent).toBe(
+          `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URI=mongodb://localhost:27017/test`,
+        )
+
+        // delete the generated .env file and do it again, but this time, omit the databaseUri to ensure the default is generated
+
+        fse.removeSync(envFilePath)
+
+        await manageEnvFiles({
+          cliArgs: {
+            '--debug': true,
+          } as CliArgs,
+          databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URI
+          databaseUri: '', // omit this to ensure the default is generated based on the selected database type
           payloadSecret: 'test-secret',
           projectDir,
           template: undefined,
         })
 
-        const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
-
-        expect(updatedEnvContent).toContain('CUSTOM_VAR=custom-value')
-        expect(updatedEnvContent).toContain('DATABASE_URI=mongodb://localhost:27017/test')
-        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=test-secret')
-
-        const updatedEnvExampleContent = fse.readFileSync(envExampleFilePath, 'utf-8')
-
-        expect(updatedEnvExampleContent).toContain('CUSTOM_VAR=custom-value')
-        expect(updatedEnvContent).toContain('DATABASE_URI=mongodb://localhost:27017/test')
-        expect(updatedEnvContent).toContain('PAYLOAD_SECRET=test-secret')
+        const updatedEnvContentWithDefault = fse.readFileSync(envFilePath, 'utf-8')
+        expect(updatedEnvContentWithDefault).toBe(
+          `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URI=mongodb://127.0.0.1/your-database-name`,
+        )
       })
     })
   })

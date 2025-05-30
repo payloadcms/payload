@@ -6,12 +6,17 @@ import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { debug, error } from '../utils/log.js'
 import { dbChoiceRecord } from './select-db.js'
 
-const sanitizeEnv = (
-  contents: string,
-  databaseType: DbType | undefined,
-  payloadSecret?: string,
-  databaseUri?: string,
-): string => {
+const sanitizeEnv = ({
+  contents,
+  databaseType,
+  databaseUri,
+  payloadSecret,
+}: {
+  contents: string
+  databaseType: DbType | undefined
+  databaseUri?: string
+  payloadSecret?: string
+}): string => {
   const seenKeys = new Set<string>()
 
   // add defaults
@@ -118,7 +123,12 @@ export async function manageEnvFiles(args: {
     if (fs.existsSync(pathToEnvExample)) {
       const envExampleContents = await fs.readFile(pathToEnvExample, 'utf8')
 
-      exampleEnv = sanitizeEnv(envExampleContents, databaseType, payloadSecret, databaseUri)
+      exampleEnv = sanitizeEnv({
+        contents: envExampleContents,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
 
       if (debugFlag) {
         debug(`.env.example file successfully read`)
@@ -127,7 +137,12 @@ export async function manageEnvFiles(args: {
 
     // If there's no .env file, create it using the .env.example content (if it exists)
     if (!fs.existsSync(envPath)) {
-      const envContent = sanitizeEnv(exampleEnv, databaseType, payloadSecret, databaseUri)
+      const envContent = sanitizeEnv({
+        contents: exampleEnv,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
 
       await fs.writeFile(envPath, envContent)
 
@@ -138,7 +153,12 @@ export async function manageEnvFiles(args: {
       // If the .env file already exists, sanitize it as-is
       const envContents = await fs.readFile(envPath, 'utf8')
 
-      const updatedEnvContents = sanitizeEnv(envContents, databaseType, payloadSecret, databaseUri)
+      const updatedEnvContents = sanitizeEnv({
+        contents: envContents,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
 
       await fs.writeFile(envPath, updatedEnvContents)
 
