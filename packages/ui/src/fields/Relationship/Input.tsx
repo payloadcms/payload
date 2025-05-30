@@ -282,7 +282,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               headers: {
                 'Accept-Language': i18n.language,
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-HTTP-Method-Override': 'GET',
+                'X-Payload-HTTP-Method-Override': 'GET',
               },
               method: 'POST',
             })
@@ -429,7 +429,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             headers: {
               'Accept-Language': i18n.language,
               'Content-Type': 'application/x-www-form-urlencoded',
-              'X-HTTP-Method-Override': 'GET',
+              'X-Payload-HTTP-Method-Override': 'GET',
             },
             method: 'POST',
           })
@@ -768,7 +768,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               onMenuOpen={() => {
                 if (appearance === 'drawer') {
-                  openListDrawer()
+                  // TODO: This timeout is only necessary for inline blocks in the lexical editor
+                  // and when the devtools are closed. Temporary solution, we can probably do better.
+                  setTimeout(() => {
+                    openListDrawer()
+                  }, 50)
                 } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {

@@ -139,6 +139,17 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       return fAccessor === accessor
     })
 
+    const hasCustomCell =
+      serverField?.admin &&
+      'components' in serverField.admin &&
+      serverField.admin.components &&
+      'Cell' in serverField.admin.components &&
+      serverField.admin.components.Cell
+
+    if (serverField && serverField.type === 'group' && !hasCustomCell) {
+      return acc // skip any group without a custom cell
+    }
+
     const columnPreference = columnPreferences?.find(
       (preference) => clientField && 'name' in clientField && preference.accessor === accessor,
     )
