@@ -161,10 +161,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       countVersions,
       create,
       createGlobal,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createGlobalVersion,
       createJSONQuery,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -203,11 +201,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateGlobalVersion,
       updateMany,
       updateOne,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       updateVersion,
       upsert: updateOne,
     })
