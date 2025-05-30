@@ -244,15 +244,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t)
     }
 
-    if (maxLoginAttemptsEnabled) {
-      await resetLoginAttempts({
-        collection: collectionConfig,
-        doc: user,
-        payload: req.payload,
-        req,
-      })
-    }
-
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: sanitizedEmail,
@@ -287,6 +278,15 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
+
+    if (maxLoginAttemptsEnabled) {
+      await resetLoginAttempts({
+        collection: collectionConfig,
+        doc: user,
+        payload: req.payload,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // beforeLogin - Collection
