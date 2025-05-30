@@ -102,6 +102,7 @@ export interface Config {
     'relation-preview': RelationPreview;
     'hide-file-input-on-create': HideFileInputOnCreate;
     'best-fit': BestFit;
+    'list-view-preview': ListViewPreview;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -144,6 +145,7 @@ export interface Config {
     'relation-preview': RelationPreviewSelect<false> | RelationPreviewSelect<true>;
     'hide-file-input-on-create': HideFileInputOnCreateSelect<false> | HideFileInputOnCreateSelect<true>;
     'best-fit': BestFitSelect<false> | BestFitSelect<true>;
+    'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1277,6 +1279,18 @@ export interface BestFit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview".
+ */
+export interface ListViewPreview {
+  id: string;
+  title?: string | null;
+  imageUpload?: (string | null) | MediaWithRelationPreview;
+  imageRelationship?: (string | null) | MediaWithRelationPreview;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1438,6 +1452,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'best-fit';
         value: string | BestFit;
+      } | null)
+    | ({
+        relationTo: 'list-view-preview';
+        value: string | ListViewPreview;
       } | null)
     | ({
         relationTo: 'users';
@@ -2660,6 +2678,17 @@ export interface BestFitSelect<T extends boolean = true> {
   withinRange?: T;
   nextSmallestOutOfRange?: T;
   original?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview_select".
+ */
+export interface ListViewPreviewSelect<T extends boolean = true> {
+  title?: T;
+  imageUpload?: T;
+  imageRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }

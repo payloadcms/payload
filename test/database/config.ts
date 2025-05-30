@@ -260,6 +260,11 @@ export default buildConfigWithDefaults({
           type: 'point',
           defaultValue: [10, 20],
         },
+        {
+          name: 'escape',
+          type: 'text',
+          defaultValue: "Thanks, we're excited for you to join us.",
+        },
       ],
     },
     {
@@ -460,6 +465,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'virtual-relations',
       admin: { useAsTitle: 'postTitle' },
+      access: { read: () => true },
       fields: [
         {
           name: 'postTitle',

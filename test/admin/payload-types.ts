@@ -237,6 +237,18 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  someTextField?: string | null;
+  namedGroup?: {
+    someTextField?: string | null;
+  };
+  textFieldInUnnamedGroup?: string | null;
+  groupWithCustomCell?: {
+    nestedTextFieldInGroupWithCustomCell?: string | null;
+  };
+  namedTab?: {
+    nestedTextFieldInNamedTab?: string | null;
+  };
+  nestedTextFieldInUnnamedTab?: string | null;
   relationship?: (string | null) | Post;
   users?: (string | null) | User;
   customCell?: string | null;
@@ -695,6 +707,24 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
+  someTextField?: T;
+  namedGroup?:
+    | T
+    | {
+        someTextField?: T;
+      };
+  textFieldInUnnamedGroup?: T;
+  groupWithCustomCell?:
+    | T
+    | {
+        nestedTextFieldInGroupWithCustomCell?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        nestedTextFieldInNamedTab?: T;
+      };
+  nestedTextFieldInUnnamedTab?: T;
   relationship?: T;
   users?: T;
   customCell?: T;

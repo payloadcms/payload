@@ -40,7 +40,7 @@ The following options are available:
 | `beforeDashboard` | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents. [More details](#beforedashboard).                          |
 | `beforeLogin`     | An array of Custom Components to inject into the built-in Login, _before_ the default login form. [More details](#beforelogin).                                          |
 | `beforeNavLinks`  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves. [More details](#beforenavlinks).                                           |
-| `graphics.Icon`   | The simplified logo used in contexts like the the `Nav` component. [More details](#graphicsicon).                                                                        |
+| `graphics.Icon`   | The simplified logo used in contexts like the `Nav` component. [More details](#graphicsicon).                                                                            |
 | `graphics.Logo`   | The full logo used in contexts like the `Login` view. [More details](#graphicslogo).                                                                                     |
 | `header`          | An array of Custom Components to be injected above the Payload header. [More details](#header).                                                                          |
 | `logout.Button`   | The button displayed in the sidebar that logs the user out. [More details](#logoutbutton).                                                                               |
@@ -345,7 +345,7 @@ export default function MyCustomIcon() {
 
 The `Logo` property is the full logo used in contexts like the `Login` view. This is typically a larger, more detailed representation of your brand.
 
-To add a custom logo, use the `admin.components.graphic.Logo` property in your Payload Config:
+To add a custom logo, use the `admin.components.graphics.Logo` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'

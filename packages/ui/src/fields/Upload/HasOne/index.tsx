@@ -2,12 +2,11 @@
 
 import type { JsonObject } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
-import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
 import './index.scss'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'

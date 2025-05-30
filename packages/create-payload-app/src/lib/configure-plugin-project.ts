@@ -16,12 +16,15 @@ export const configurePluginProject = ({
   const devPayloadConfigPath = path.resolve(projectDirPath, './dev/payload.config.ts')
   const devTsConfigPath = path.resolve(projectDirPath, './dev/tsconfig.json')
   const indexTsPath = path.resolve(projectDirPath, './src/index.ts')
+  const devImportMapPath = path.resolve(projectDirPath, './dev/app/(payload)/admin/importMap.js')
 
   const devPayloadConfig = fse.readFileSync(devPayloadConfigPath, 'utf8')
   const devTsConfig = fse.readFileSync(devTsConfigPath, 'utf8')
   const indexTs = fse.readFileSync(indexTsPath, 'utf-8')
+  const devImportMap = fse.readFileSync(devImportMapPath, 'utf-8')
 
   const updatedTsConfig = devTsConfig.replaceAll('plugin-package-name-placeholder', projectName)
+  const updatedImportMap = devImportMap.replaceAll('plugin-package-name-placeholder', projectName)
   let updatedIndexTs = indexTs.replaceAll('plugin-package-name-placeholder', projectName)
 
   const pluginExportVariableName = toCamelCase(projectName)
@@ -43,4 +46,5 @@ export const configurePluginProject = ({
   fse.writeFileSync(devPayloadConfigPath, updatedPayloadConfig)
   fse.writeFileSync(devTsConfigPath, updatedTsConfig)
   fse.writeFileSync(indexTsPath, updatedIndexTs)
+  fse.writeFileSync(devImportMapPath, updatedImportMap)
 }

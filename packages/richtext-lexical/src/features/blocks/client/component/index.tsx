@@ -437,10 +437,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
                     <Pill
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                       pillStyle="white"
+                      size="small"
                     >
                       {blockDisplayName ?? formData?.blockType}
                     </Pill>
-                    {!disableBlockName && (
+                    {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
                       <SectionTitle
                         path="blockName"
                         readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
@@ -478,6 +479,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       EditButton,
       RemoveButton,
       blockDisplayName,
+      clientBlock?.admin?.disableBlockName,
       editor,
       formData.blockType,
       i18n,
@@ -486,8 +488,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
       parentLexicalRichTextField?.admin?.readOnly,
     ],
   )
-
-  const clientBlockFields = clientBlock?.fields ?? []
 
   const BlockDrawer = useMemo(
     () => () => (
@@ -502,7 +502,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlockFields}
+                fields={clientBlock?.fields ?? []}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
@@ -542,7 +542,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           },
         ]}
         el="div"
-        fields={clientBlockFields}
+        fields={clientBlock?.fields ?? []}
         initialState={initialState}
         onChange={[onChange]}
         onSubmit={(formState, newData) => {
@@ -566,7 +566,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           CustomBlock={CustomBlock}
           EditButton={EditButton}
           errorCount={errorCount}
-          formSchema={clientBlockFields}
+          formSchema={clientBlock?.fields ?? []}
           initialState={initialState}
           nodeKey={nodeKey}
           RemoveButton={RemoveButton}
@@ -577,7 +577,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
-    clientBlockFields,
+    clientBlock?.fields,
     RemoveButton,
     EditButton,
     editor,

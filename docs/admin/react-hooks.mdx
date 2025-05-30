@@ -605,7 +605,7 @@ return (
         textField: {
           initialValue: 'Updated text',
           valid: true,
-          value: 'Upddated text',
+          value: 'Updated text',
         },
       },
       // blockType: "yourBlockSlug",
@@ -875,7 +875,7 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`refreshCookie`**      | A method to trigger the silent refreshing of a user's auth token                        |
 | **`setToken`**           | Set the token of the user, to be decoded and used to reset the user and token in memory |
 | **`token`**              | The logged in user's token (useful for creating preview links, etc.)                    |
-| **`refreshPermissions`** | Load new permissions (useful when content that effects permissions has been changed)    |
+| **`refreshPermissions`** | Load new permissions (useful when content that affects permissions has been changed)    |
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
@@ -1143,7 +1143,7 @@ This is useful for scenarios where you need to trigger another fetch regardless 
 
 Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
 
-By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions by default.
 
 ```tsx
 import { Link } from '@payloadcms/ui'

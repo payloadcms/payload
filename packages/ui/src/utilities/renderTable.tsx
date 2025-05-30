@@ -3,6 +3,8 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  Column,
+  ColumnPreference,
   Field,
   ImportMap,
   ListPreferences,
@@ -15,8 +17,7 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 import React from 'react'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { Column } from '../exports/client/index.js'
+import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
@@ -27,11 +28,10 @@ import {
   SortHeader,
   SortRow,
   Table,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { buildColumnState } from '../providers/TableColumns/buildColumnState.js'
-import { buildPolymorphicColumnState } from '../providers/TableColumns/buildPolymorphicColumnState.js'
-import { filterFields } from '../providers/TableColumns/filterFields.js'
+import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const renderFilters = (
@@ -82,7 +82,7 @@ export const renderTable = ({
   collections?: string[]
   columnPreferences: ListPreferences['columns']
   columns?: ListPreferences['columns']
-  customCellProps?: Record<string, any>
+  customCellProps?: Record<string, unknown>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean
@@ -99,68 +99,95 @@ export const renderTable = ({
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
 
   let columnState: Column[]
+  let clientFields: ClientField[] = clientCollectionConfig?.fields || []
+  let serverFields: Field[] = collectionConfig?.fields || []
+  const isPolymorphic = collections
 
-  if (collections) {
-    const fields: ClientField[] = []
+  if (isPolymorphic) {
+    clientFields = []
+    serverFields = []
     for (const collection of collections) {
-      const config = clientConfig.collections.find((each) => each.slug === collection)
-
-      for (const field of filterFields(config.fields)) {
+      const clientCollectionConfig = clientConfig.collections.find(
+        (each) => each.slug === collection,
+      )
+      for (const field of filterFields(clientCollectionConfig.fields)) {
         if (fieldAffectsData(field)) {
-          if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
+          if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
           }
         }
 
-        fields.push(field)
+        clientFields.push(field)
+      }
+
+      const serverCollectionConfig = payload.collections[collection].config
+      for (const field of filterFields(serverCollectionConfig.fields)) {
+        if (fieldAffectsData(field)) {
+          if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
+            continue
+          }
+        }
+
+        serverFields.push(field)
       }
     }
+  }
 
-    const columns = columnsFromArgs
-      ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
-        )
-      : getInitialColumns(fields, useAsTitle, [])
+  const columns: ColumnPreference[] = columnsFromArgs
+    ? columnsFromArgs?.filter((column) =>
+        flattenTopLevelFields(clientFields, {
+          i18n,
+          keepPresentationalFields: true,
+          moveSubFieldsToTop: true,
+        })?.some((field) => {
+          const accessor =
+            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
+          return accessor === column.accessor
+        }),
+      )
+    : getInitialColumns(
+        isPolymorphic ? clientFields : filterFields(clientFields),
+        useAsTitle,
+        isPolymorphic ? [] : clientCollectionConfig?.admin?.defaultColumns,
+      )
 
-    columnState = buildPolymorphicColumnState({
-      columnPreferences,
-      columns,
-      enableRowSelections,
-      fields,
-      i18n,
-      // sortColumnProps,
-      customCellProps,
+  const sharedArgs: Pick<
+    BuildColumnStateArgs,
+    | 'clientFields'
+    | 'columnPreferences'
+    | 'columns'
+    | 'customCellProps'
+    | 'enableRowSelections'
+    | 'i18n'
+    | 'payload'
+    | 'serverFields'
+    | 'useAsTitle'
+  > = {
+    clientFields,
+    columnPreferences,
+    columns,
+    enableRowSelections,
+    i18n,
+    // sortColumnProps,
+    customCellProps,
+    payload,
+    serverFields,
+    useAsTitle,
+  }
+
+  if (isPolymorphic) {
+    columnState = buildColumnState({
+      ...sharedArgs,
+      collectionSlug: undefined,
+      dataType: 'polymorphic',
       docs,
-      payload,
-      useAsTitle,
     })
   } else {
-    const columns = columnsFromArgs
-      ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
-          ),
-        )
-      : getInitialColumns(
-          filterFields(clientCollectionConfig.fields),
-          useAsTitle,
-          clientCollectionConfig?.admin?.defaultColumns,
-        )
-
     columnState = buildColumnState({
-      clientCollectionConfig,
-      collectionConfig,
-      columnPreferences,
-      columns,
-      enableRowSelections,
-      i18n,
-      // sortColumnProps,
-      customCellProps,
+      ...sharedArgs,
+      collectionSlug: clientCollectionConfig.slug,
+      dataType: 'monomorphic',
       docs,
-      payload,
-      useAsTitle,
     })
   }
 
