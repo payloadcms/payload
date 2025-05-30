@@ -30,7 +30,7 @@ export const getRequestLanguage = ({
   }
 
   const languageFromHeader = headers.get('Accept-Language')
-    ? extractHeaderLanguage(headers.get('Accept-Language'))
+    ? extractHeaderLanguage(headers.get('Accept-Language')!)
     : undefined
 
   if (languageFromHeader && supportedLanguageKeys.includes(languageFromHeader)) {
