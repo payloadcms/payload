@@ -251,9 +251,9 @@ describe('Uploads', () => {
   test('should show proper mimetype for glb file', async () => {
     await page.goto(threeDimensionalURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './three-dimensional.glb'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './duck.glb'))
     const filename = page.locator('.file-field__filename')
-    await expect(filename).toHaveValue('three-dimensional.glb')
+    await expect(filename).toHaveValue('duck.glb')
 
     await saveDocAndAssert(page)
 

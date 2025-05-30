@@ -1002,7 +1002,7 @@ export default buildConfigWithDefaults({
     // debug: true,
     abortOnLimit: true,
     limits: {
-      fileSize: 4_000_000, // 2MB
+      fileSize: 2_000_000, // 2MB
     },
   },
   typescript: {
