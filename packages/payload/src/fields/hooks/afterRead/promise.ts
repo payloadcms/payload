@@ -486,7 +486,9 @@ export const promise = async ({
 
           const { blockSelect, blockSelectMode } = getBlockSelect({
             block: block!,
-            select: select![field.name]!,
+            // TODO: fix this
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            select: select?.[field.name]!,
             selectMode: selectMode!,
           })
 
