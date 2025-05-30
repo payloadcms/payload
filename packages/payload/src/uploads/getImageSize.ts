@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs/promises'
 import { imageSize } from 'image-size'
 import { imageSizeFromFile } from 'image-size/fromFile'

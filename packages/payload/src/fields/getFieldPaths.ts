@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
 type Args = {

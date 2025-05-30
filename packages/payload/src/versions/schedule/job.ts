@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { User } from '../../auth/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'

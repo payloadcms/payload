@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs'
 import { pathToFileURL } from 'node:url'
 import path from 'path'

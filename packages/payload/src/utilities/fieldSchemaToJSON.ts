@@ -1,5 +1,5 @@
-import type { ClientConfig } from '../config/client.js'
 // @ts-strict-ignore
+import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
 
 import { fieldAffectsData, type FieldTypes } from '../fields/config/types.js'

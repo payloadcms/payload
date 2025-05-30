@@ -1,14 +1,12 @@
 import type { PathToQuery } from './queryValidation/types.js'
 
-import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
-
-// @ts-strict-ignore
 import {
   type Field,
   fieldShouldBeLocalized,
   type FlattenedBlock,
   type FlattenedField,
 } from '../fields/config/types.js'
+import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 
 export function getLocalizedPaths({
   collectionSlug,

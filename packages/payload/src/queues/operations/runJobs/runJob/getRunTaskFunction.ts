@@ -1,6 +1,6 @@
+// @ts-strict-ignore
 import ObjectIdImport from 'bson-objectid'
 
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,

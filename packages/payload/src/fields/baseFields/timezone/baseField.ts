@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SelectField } from '../../config/types.js'
 
 export const baseTimezoneField: (args: Partial<SelectField>) => SelectField = ({

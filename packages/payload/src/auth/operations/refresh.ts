@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import url from 'url'
 
 import type { Collection } from '../../collections/config/types.js'

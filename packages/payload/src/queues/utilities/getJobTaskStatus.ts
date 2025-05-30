@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { BaseJob, JobTaskStatus } from '../config/types/workflowTypes.js'
 
 type Args = {

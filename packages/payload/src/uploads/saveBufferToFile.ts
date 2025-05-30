@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs/promises'
 import { Readable } from 'stream'
 

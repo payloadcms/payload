@@ -1,6 +1,6 @@
+// @ts-strict-ignore
 import type { Stats } from 'fs'
 
-// @ts-strict-ignore
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import { status as httpStatus } from 'http-status'

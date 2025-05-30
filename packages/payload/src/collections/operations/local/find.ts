@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,

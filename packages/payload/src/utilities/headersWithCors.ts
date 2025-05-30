@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 
 type CorsArgs = {

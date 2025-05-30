@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadComponent } from '../../../config/types.js'
 
 export function parsePayloadComponent(PayloadComponent: PayloadComponent): {

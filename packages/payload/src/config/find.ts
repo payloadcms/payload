@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 
