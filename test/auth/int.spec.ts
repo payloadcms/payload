@@ -1237,8 +1237,8 @@ describe('Auth', () => {
           sessions: [
             {
               id: uuid(),
-              createdAt: String(new Date()),
-              expiresAt: String(new Date(new Date().getTime() - 5000)),
+              createdAt: new Date().toDateString(),
+              expiresAt: new Date(new Date().getTime() - 5000).toDateString(), // Set an expired session
             },
           ],
         },

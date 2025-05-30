@@ -99,6 +99,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         id: user.id,
         collection: collectionConfig.slug,
         data: {
+          ...user,
           sessions: removeExpiredSessions(user.sessions),
         },
         req,
