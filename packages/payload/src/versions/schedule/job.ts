@@ -55,7 +55,7 @@ export const getSchedulePublishTask = ({
           },
           depth: 0,
           overrideAccess: user === null,
-          publishSpecificLocale,
+          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }
@@ -68,7 +68,7 @@ export const getSchedulePublishTask = ({
           },
           depth: 0,
           overrideAccess: user === null,
-          publishSpecificLocale,
+          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }

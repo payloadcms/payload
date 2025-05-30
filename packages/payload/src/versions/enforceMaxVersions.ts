@@ -71,7 +71,7 @@ export const enforceMaxVersions = async ({
       }
 
       await payload.db.deleteVersions({
-        collection: slug,
+        collection: slug!,
         req,
         where: deleteQuery,
       })
