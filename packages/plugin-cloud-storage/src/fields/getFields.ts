@@ -63,7 +63,12 @@ export const getFields = ({
     ...(existingURLField || {}),
     hooks: {
       afterRead: [
-        getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
+        getAfterReadHook({
+          adapter,
+          collectionSlug: collection.slug,
+          disablePayloadAccessControl,
+          generateFileURL,
+        }),
         ...(existingURLField?.hooks?.afterRead || []),
       ],
     },
@@ -114,7 +119,7 @@ export const getFields = ({
                 afterRead: [
                   getAfterReadHook({
                     adapter,
-                    collection,
+                    collectionSlug: collection.slug,
                     disablePayloadAccessControl,
                     generateFileURL,
                     size,
