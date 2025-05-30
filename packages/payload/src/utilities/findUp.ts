@@ -35,7 +35,7 @@ export function findUpSync({
         continue
       }
     }
-    const result = condition(dir)
+    const result = condition?.(dir)
     if (result === true) {
       return dir
     }
@@ -82,7 +82,7 @@ export async function findUp({
         continue
       }
     }
-    const result = await condition(dir)
+    const result = await condition?.(dir)
     if (result === true) {
       return dir
     }
