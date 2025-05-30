@@ -754,6 +754,7 @@ describe('Auth', () => {
         'hash',
         'loginAttempts',
         'lockUntil',
+        'sessions',
       ])
     })
 
