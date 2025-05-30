@@ -7,14 +7,6 @@ export const withDefault = (column: RawColumn, field: FieldAffectingData): RawCo
     return column
   }
 
-  if (typeof field.defaultValue === 'string' && field.defaultValue.includes("'")) {
-    const escapedString = field.defaultValue.replaceAll("'", "''")
-    return {
-      ...column,
-      default: escapedString,
-    }
-  }
-
   return {
     ...column,
     default: field.defaultValue,

@@ -955,24 +955,64 @@ describe('List View', () => {
       expect(page.url()).not.toMatch(/columns=/)
     })
 
-    test('should render field in group as column', async () => {
-      await createPost({ group: { someTextField: 'nested group text field' } })
+    test('should render nested field in named group as separate column', async () => {
+      await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
         .locator('.column-selector .column-selector__column', {
-          hasText: exactText('Group > Some Text Field'),
+          hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
         'nested group text field',
       )
     })
 
-    test('should render top-level and group field with same name in separate columns', async () => {
+    test('should render nested field in unnamed group as separate column', async () => {
+      await createPost({ textFieldInUnnamedGroup: 'nested text in unnamed group' })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Text Field In Unnamed Group'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-textFieldInUnnamedGroup')).toHaveText(
+        'nested text in unnamed group',
+      )
+    })
+
+    test('should not render group field as top level column when custom cell is not defined', async () => {
+      await createPost({ namedGroup: { someTextField: 'nested group text field' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await expect(
+        page.locator('.column-selector .column-selector__column', {
+          hasText: exactText('Named Group'),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should render group field as top level column when custom cell is defined', async () => {
+      await createPost({
+        groupWithCustomCell: {
+          nestedTextFieldInGroupWithCustomCell: 'nested group text field in group with custom cell',
+        },
+      })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await expect(
+        page.locator('.column-selector .column-selector__column', {
+          hasText: exactText('Group With Custom Cell'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render top-level field and group field with same name in separate columns', async () => {
       await createPost({
         someTextField: 'top-level text field',
-        group: { someTextField: 'nested group text field' },
+        namedGroup: { someTextField: 'nested group text field' },
       })
 
       await page.goto(postsUrl.list)
@@ -988,7 +1028,7 @@ describe('List View', () => {
       // Enable group column
       await page
         .locator('.column-selector .column-selector__column', {
-          hasText: exactText('Group > Some Text Field'),
+          hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
 
@@ -996,8 +1036,36 @@ describe('List View', () => {
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
 
       // Expect nested group cell
-      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
         'nested group text field',
+      )
+    })
+
+    test('should render nested field in named tab as separate column', async () => {
+      await createPost({ namedTab: { nestedTextFieldInNamedTab: 'nested text in named tab' } })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+        'nested text in named tab',
+      )
+    })
+
+    test('should render nested field in unnamed tab as separate column', async () => {
+      await createPost({ nestedTextFieldInUnnamedTab: 'nested text in unnamed tab' })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Nested Text Field In Unnamed Tab'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-nestedTextFieldInUnnamedTab')).toHaveText(
+        'nested text in unnamed tab',
       )
     })
 
@@ -1308,7 +1376,11 @@ describe('List View', () => {
     beforeEach(async () => {
       // delete all posts created by the seed
       await deleteAllPosts()
-      await createPost({ number: 1, group: { someTextField: 'nested group text field' } })
+      await createPost({
+        number: 1,
+        namedGroup: { someTextField: 'nested group text field' },
+        namedTab: { nestedTextFieldInNamedTab: 'nested text in named tab' },
+      })
       await createPost({ number: 2 })
     })
 
@@ -1335,30 +1407,66 @@ describe('List View', () => {
       await openColumnControls(page)
       await page
         .locator('.column-selector .column-selector__column', {
-          hasText: exactText('Group > Some Text Field'),
+          hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      const upChevron = page.locator('#heading-group-someTextField .sort-column__asc')
-      const downChevron = page.locator('#heading-group-someTextField .sort-column__desc')
+      const upChevron = page.locator('#heading-namedGroup-someTextField .sort-column__asc')
+      const downChevron = page.locator('#heading-namedGroup-someTextField .sort-column__desc')
 
       await upChevron.click()
-      await page.waitForURL(/sort=group.someTextField/)
+      await page.waitForURL(/sort=namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
         '<No Some Text Field>',
       )
-      await expect(page.locator('.row-2 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
         'nested group text field',
       )
 
       await downChevron.click()
-      await page.waitForURL(/sort=-group.someTextField/)
+      await page.waitForURL(/sort=-namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
         'nested group text field',
       )
-      await expect(page.locator('.row-2 .cell-group-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
         '<No Some Text Field>',
+      )
+    })
+
+    test('should allow sorting by nested field within tab in separate column', async () => {
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
+        })
+        .click()
+      const upChevron = page.locator(
+        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__asc',
+      )
+      const downChevron = page.locator(
+        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__desc',
+      )
+
+      await upChevron.click()
+      await page.waitForURL(/sort=namedTab.nestedTextFieldInNamedTab/)
+
+      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+        '<No Nested Text Field In Named Tab>',
+      )
+      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+        'nested text in named tab',
+      )
+
+      await downChevron.click()
+      await page.waitForURL(/sort=-namedTab.nestedTextFieldInNamedTab/)
+
+      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+        'nested text in named tab',
+      )
+      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+        '<No Nested Text Field In Named Tab>',
       )
     })
 

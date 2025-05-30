@@ -30,6 +30,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   collapsibleFieldsSlug,
   groupFieldsSlug,
   relationshipFieldsSlug,
@@ -1346,6 +1347,58 @@ describe('Fields', () => {
       expect(doc.point).toEqual(point)
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
+    })
+  })
+
+  describe('checkbox', () => {
+    beforeEach(async () => {
+      await payload.delete({
+        collection: checkboxFieldsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
+
+    it('should query checkbox fields with exists operator', async () => {
+      const existsTrueDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+          checkboxNotRequired: false,
+        },
+      })
+
+      const existsFalseDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+        },
+      })
+
+      const existsFalse = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: false,
+          },
+        },
+      })
+      expect(existsFalse.totalDocs).toBe(1)
+      expect(existsFalse.docs[0]?.id).toEqual(existsFalseDoc.id)
+
+      const existsTrue = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: true,
+          },
+        },
+      })
+      expect(existsTrue.totalDocs).toBe(1)
+      expect(existsTrue.docs[0]?.id).toEqual(existsTrueDoc.id)
     })
   })
 

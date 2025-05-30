@@ -183,13 +183,13 @@ Depending on which Database Adapter you use, your migration workflow might diffe
 
 In relational databases, migrations will be **required** for non-development database environments. But with MongoDB, you might only need to run migrations once in a while (or never even need them).
 
-#### MongoDB
+#### MongoDB#mongodb-migrations
 
 In MongoDB, you'll only ever really need to run migrations for times where you change your database shape, and you have lots of existing data that you'd like to transform from Shape A to Shape B.
 
 In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you build / deploy, or you can run them locally, against your production database, by using your production database connection string on your local computer and running the `pnpm payload migrate` command.
 
-#### Postgres
+#### Postgres#postgres-migrations
 
 In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see errors upon trying to read / write your data).
 

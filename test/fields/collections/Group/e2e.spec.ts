@@ -119,5 +119,26 @@ describe('Group', () => {
       const unnamedNestedGroupField = page.locator(unnamedNestedGroupSelector)
       await expect(unnamedNestedGroupField).toBeVisible()
     })
+
+    test('should display with no label when label is undefined', async () => {
+      await page.goto(url.create)
+
+      // Makes sure the fields are rendered
+      await page.mouse.wheel(0, 2000)
+
+      const nolabelGroupSelector = `.field-type.group-field#field-_index-14 .group-field__header`
+      const nolabelGroupField = page.locator(nolabelGroupSelector)
+
+      await expect(nolabelGroupField).toBeHidden()
+
+      // Makes sure the fields are rendered
+      await page.mouse.wheel(0, 2000)
+
+      // Children should render even if the group has no label
+      const nolabelGroupChildSelector = `.field-type.group-field#field-_index-14 #field-insideGroupWithNoLabel`
+      const nolabelGroupChildField = page.locator(nolabelGroupChildSelector)
+
+      await expect(nolabelGroupChildField).toBeVisible()
+    })
   })
 })

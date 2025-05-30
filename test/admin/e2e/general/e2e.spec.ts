@@ -677,7 +677,7 @@ describe('General', () => {
 
       await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
         'title',
-        'Tablero',
+        'Panel de Control',
       )
 
       await field.click()

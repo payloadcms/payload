@@ -17,9 +17,9 @@ export type Options<T extends CollectionSlug> = {
   req?: Partial<PayloadRequest>
 }
 
-async function localResetPassword<T extends CollectionSlug>(
+async function localResetPassword<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
+  options: Options<TSlug>,
 ): Promise<Result> {
   const { collection: collectionSlug, data, overrideAccess } = options
 
@@ -33,7 +33,7 @@ async function localResetPassword<T extends CollectionSlug>(
     )
   }
 
-  const result = await resetPasswordOperation({
+  const result = await resetPasswordOperation<TSlug>({
     collection,
     data,
     overrideAccess,

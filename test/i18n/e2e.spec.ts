@@ -98,7 +98,7 @@ describe('i18n', () => {
     await page.goto(serverURL + '/admin/account')
     await page.locator('div.rs__control').click()
     await page.locator('div.rs__option').filter({ hasText: 'Español' }).click()
-    await expect(page.locator('div.payload-settings h3')).toHaveText('Configuración de la carga')
+    await expect(page.locator('div.payload-settings h3')).toHaveText('Configuración de Payload')
 
     await page.goto(serverURL + '/admin/collections/collection1/create')
     await expect(page.locator('label[for="field-fieldDefaultI18nValid"]')).toHaveText(

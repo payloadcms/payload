@@ -730,6 +730,7 @@ export interface TextField {
 export interface CheckboxField {
   id: string;
   checkbox: boolean;
+  checkboxNotRequired?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1081,6 +1082,7 @@ export interface GroupField {
       | null;
   };
   insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
   deeplyNestedGroup?: {
     insideNestedUnnamedGroup?: string | null;
   };
@@ -2318,6 +2320,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
+  checkboxNotRequired?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2683,6 +2686,7 @@ export interface GroupFieldsSelect<T extends boolean = true> {
         email?: T;
       };
   insideUnnamedGroup?: T;
+  insideGroupWithNoLabel?: T;
   deeplyNestedGroup?:
     | T
     | {

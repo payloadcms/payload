@@ -133,12 +133,60 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'group',
+      name: 'namedGroup',
       type: 'group',
       fields: [
         {
           name: 'someTextField',
           type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'groupWithCustomCell',
+      type: 'group',
+      admin: {
+        components: {
+          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
+        },
+      },
+      fields: [
+        {
+          name: 'nestedTextFieldInGroupWithCustomCell',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'namedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInNamedTab',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'unnamedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInUnnamedTab',
+              type: 'text',
+            },
+          ],
         },
       ],
     },

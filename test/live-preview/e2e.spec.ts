@@ -83,6 +83,13 @@ describe('Live Preview', () => {
     })
   })
 
+  test('collection - should render BeforeDocumentControls', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+    // locate using aria label "before-document-controls"
+    const beforeDocumentControls = page.locator('button[aria-label="before-document-controls"]')
+    await expect(beforeDocumentControls).toBeVisible()
+  })
+
   test('collection — has route', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     await expect(page.locator('.live-preview')).toBeVisible()

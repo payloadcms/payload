@@ -10,7 +10,7 @@ import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
-import fieldTypes from './field-types.js'
+import fieldTypes, { arrayOperators } from './field-types.js'
 
 type ReduceFieldOptionsArgs = {
   fields: ClientField[]
@@ -170,7 +170,10 @@ export const reduceFields = ({
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
 
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      const fieldOperators =
+        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+
+      const operators = fieldOperators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           const operatorKey = `operators:${operator.label}` as ClientTranslationKeys

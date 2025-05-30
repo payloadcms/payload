@@ -227,12 +227,12 @@ export interface PayloadQueryPreset {
   isShared?: boolean | null;
   access?: {
     read?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     update?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'editor' | 'user')[] | null;
     };

@@ -1671,6 +1671,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 

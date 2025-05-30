@@ -65,6 +65,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
     config,
+    disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
     ...prettySyncLogger,
   })

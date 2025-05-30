@@ -92,11 +92,8 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {

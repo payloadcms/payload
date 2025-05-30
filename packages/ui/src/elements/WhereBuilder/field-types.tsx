@@ -1,5 +1,5 @@
 'use client'
-const boolean = [
+const equalsOperators = [
   {
     label: 'equals',
     value: 'equals',
@@ -10,8 +10,7 @@ const boolean = [
   },
 ]
 
-const base = [
-  ...boolean,
+export const arrayOperators = [
   {
     label: 'isIn',
     value: 'in',
@@ -25,6 +24,8 @@ const base = [
     value: 'exists',
   },
 ]
+
+const base = [...equalsOperators, ...arrayOperators]
 
 const numeric = [
   ...base,
@@ -47,7 +48,7 @@ const numeric = [
 ]
 
 const geo = [
-  ...boolean,
+  ...equalsOperators,
   {
     label: 'exists',
     value: 'exists',
@@ -91,7 +92,7 @@ const fieldTypeConditions: {
 } = {
   checkbox: {
     component: 'Text',
-    operators: boolean,
+    operators: equalsOperators,
   },
   code: {
     component: 'Text',
