@@ -18,7 +18,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const filename = req.routeParams.filename as string
+  const filename = req.routeParams?.filename as string
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -27,18 +27,18 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const accessResult = await checkFileAccess({
+  const accessResult = (await checkFileAccess({
     collection,
     filename,
     req,
-  })
+  }))!
 
   if (accessResult instanceof Response) {
     return accessResult
   }
 
   if (collection.config.upload.handlers?.length) {
-    let customResponse = null
+    let customResponse: null | Response | void = null
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
         doc: accessResult,

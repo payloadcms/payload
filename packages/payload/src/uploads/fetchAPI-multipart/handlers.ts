@@ -22,7 +22,7 @@ type Handler = (
 }
 
 export const tempFileHandler: Handler = (options, fieldname, filename) => {
-  const dir = path.normalize(options.tempFileDir)
+  const dir = path.normalize(options.tempFileDir!)
   const tempFilePath = path.join(process.cwd(), dir, getTempFilename())
   checkAndMakeDir({ createParentPath: true }, tempFilePath)
 

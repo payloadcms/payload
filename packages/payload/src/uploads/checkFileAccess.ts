@@ -13,7 +13,7 @@ export const checkFileAccess = async ({
   collection: Collection
   filename: string
   req: PayloadRequest
-}): Promise<TypeWithID> => {
+}): Promise<TypeWithID | undefined> => {
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
   }
@@ -42,7 +42,7 @@ export const checkFileAccess = async ({
 
     if (config.upload.imageSizes) {
       config.upload.imageSizes.forEach(({ name }) => {
-        queryToBuild.and[0].or.push({
+        queryToBuild.and?.[0]?.or?.push({
           [`sizes.${name}.filename`]: {
             equals: filename,
           },

@@ -8,10 +8,10 @@ type CreateUploadTimer = (
 }
 
 export const createUploadTimer: CreateUploadTimer = (timeout = 0, callback = () => {}) => {
-  let timer = null
+  let timer: NodeJS.Timeout | null | number = null
 
   const clear = () => {
-    clearTimeout(timer)
+    clearTimeout(timer!)
   }
 
   const set = () => {
