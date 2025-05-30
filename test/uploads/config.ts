@@ -30,6 +30,7 @@ import {
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
+  withoutEnlargeSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -488,6 +489,19 @@ export default buildConfigWithDefaults({
           'audio/mpeg',
         ],
         staticDir: path.resolve(dirname, './media/enlarge'),
+      },
+    },
+    {
+      slug: withoutEnlargeSlug,
+      fields: [],
+      upload: {
+        resizeOptions: {
+          width: 1000,
+          height: undefined,
+          fit: 'inside',
+          withoutEnlargement: true,
+        },
+        staticDir: path.resolve(dirname, './media/without-enlarge'),
       },
     },
     {

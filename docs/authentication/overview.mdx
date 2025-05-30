@@ -71,7 +71,7 @@ export const Admins: CollectionConfig = {
 </Banner>
 
 <Banner type="warning">
-  **Note:** Auth-enabled Collections with be automatically injected with the
+  **Note:** Auth-enabled Collections will be automatically injected with the
   `hash`, `salt`, and `email` fields. [More
   details](../fields/overview#field-names).
 </Banner>
@@ -142,14 +142,17 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   // highlight-start
-  autoLogin:
-    process.env.NEXT_PUBLIC_ENABLE_AUTOLOGIN === 'true'
-      ? {
-          email: 'test@example.com',
-          password: 'test',
-          prefillOnly: true,
-        }
-      : false,
+  admin: {
+    autoLogin:
+      process.env.NODE_ENV === 'development'
+        ? {
+            email: 'test@example.com',
+            password: 'test',
+            prefillOnly: true,
+          }
+        : false,
+  },
+
   // highlight-end
 })
 ```

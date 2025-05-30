@@ -11,6 +11,7 @@ import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
@@ -25,6 +26,7 @@ import {
   defaultLocale,
   englishTitle,
   hungarianLocale,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -64,6 +66,7 @@ export default buildConfigWithDefaults({
     NestedArray,
     NestedFields,
     LocalizedDrafts,
+    LocalizedDateFields,
     {
       admin: {
         listSearchableFields: 'name',
@@ -475,6 +478,14 @@ export default buildConfigWithDefaults({
       collection,
       data: {
         title: englishTitle,
+      },
+    })
+
+    await payload.create({
+      collection: localizedDateFieldsSlug,
+      data: {
+        localizedDate: new Date().toISOString(),
+        date: new Date().toISOString(),
       },
     })
 

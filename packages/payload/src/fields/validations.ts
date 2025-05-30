@@ -200,7 +200,7 @@ export const email: EmailFieldValidation = (
    * Supports multiple subdomains (e.g., user@sub.domain.example.com)
    */
   const emailRegex =
-    /^(?!.*\.\.)[\w.%+-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
   if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
@@ -865,13 +865,23 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = (
   value,
-  { hasMany, options, req: { t }, required },
+  { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
+  const filteredOptions =
+    typeof filterOptions === 'function'
+      ? filterOptions({
+          data,
+          options,
+          req,
+          siblingData,
+        })
+      : options
+
   if (
     Array.isArray(value) &&
     value.some(
       (input) =>
-        !options.some(
+        !filteredOptions.some(
           (option) => option === input || (typeof option !== 'string' && option?.value === input),
         ),
     )
@@ -881,7 +891,7 @@ export const select: SelectFieldValidation = (
 
   if (
     typeof value === 'string' &&
-    !options.some(
+    !filteredOptions.some(
       (option) => option === value || (typeof option !== 'string' && option.value === value),
     )
   ) {

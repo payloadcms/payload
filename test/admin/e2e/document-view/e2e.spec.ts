@@ -290,9 +290,9 @@ describe('Document View', () => {
 
       // wait for the update view to load
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
-      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
+      const editTab = page.locator(`.doc-tab:has-text("${customEditLabel}")`)
 
-      await expect(editTab).toContainText(customEditLabel)
+      await expect(editTab).toBeVisible()
     })
 
     test('collection — should render custom tab component', async () => {
@@ -300,7 +300,7 @@ describe('Document View', () => {
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
 
-      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
+      const customTab = page.locator(`a.doc-tab:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
     })
@@ -310,7 +310,7 @@ describe('Document View', () => {
 
       const title = page.locator('#custom-view-title')
 
-      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+      const docTab = page.locator('.doc-tab:has-text("Custom")')
 
       await expect(docTab).toBeVisible()
       await expect(title).toContainText('Custom Tab Label View')
@@ -359,6 +359,65 @@ describe('Document View', () => {
       const drawer2Left = drawer2Box!.x
 
       await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
+    })
+
+    test('document drawer displays a link to document', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      // change the relationship to a document which is a different one than the current one
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option').nth(2).click()
+      await saveDocAndAssert(page)
+
+      // open relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      // modify the title to trigger the leave page modal
+      await page.locator('.drawer__content #field-title').fill('New Title')
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      await documentLink.click()
+
+      const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
+      await expect(leavePageModal).toBeVisible()
+
+      await leavePageModal.click()
+      await page.waitForURL(postsUrl.edit(documentId))
+    })
+
+    test('document can be opened in a new tab from within the drawer', async () => {
+      await navigateToDoc(page, postsUrl)
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+      await wait(500)
+      const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
+      await expect(drawer1Content).toBeVisible()
+
+      const currentUrl = page.url()
+
+      // Open link in a new tab by holding down the Meta or Control key
+      const documentLink = page.locator('.id-label a')
+      const documentId = String(await documentLink.textContent())
+      const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        documentLink.click({ modifiers: ['ControlOrMeta'] }),
+      ])
+
+      // Wait for navigation to complete in the new tab and ensure correct URL
+      await expect(newPage.locator('.doc-header')).toBeVisible()
+      // using contain here, because after load the lists view will add query params like "?limit=10"
+      expect(newPage.url()).toContain(postsUrl.edit(documentId))
+
+      // Ensure the original page did not change
+      expect(page.url()).toBe(currentUrl)
     })
   })
 

@@ -23,10 +23,10 @@ export async function createGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    ignoreResult: returning === false,
     operation: 'create',
     req,
     tableName,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {

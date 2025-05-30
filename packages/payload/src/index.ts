@@ -89,6 +89,10 @@ import { traverseFields } from './utilities/traverseFields.js'
 
 export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
+export { getAccessResults } from './auth/getAccessResults.js'
+export { getFieldsToSign } from './auth/getFieldsToSign.js'
+export { getLoginOptions } from './auth/getLoginOptions.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -977,13 +981,12 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
-export { getAccessResults } from './auth/getAccessResults.js'
-export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
+export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
+export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
 export { logoutOperation } from './auth/operations/logout.js'
 export type { MeOperationResult } from './auth/operations/me.js'
@@ -994,6 +997,8 @@ export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
+export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1201,6 +1206,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  UnverifiedEmail,
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
@@ -1276,6 +1282,8 @@ export type {
   JSONFieldClient,
   Labels,
   LabelsClient,
+  NamedGroupField,
+  NamedGroupFieldClient,
   NamedTab,
   NonPresentationalField,
   NonPresentationalFieldClient,
@@ -1312,6 +1320,8 @@ export type {
   TextFieldClient,
   UIField,
   UIFieldClient,
+  UnnamedGroupField,
+  UnnamedGroupFieldClient,
   UnnamedTab,
   UploadField,
   UploadFieldClient,
@@ -1361,6 +1371,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1368,7 +1379,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1380,7 +1390,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
 export { findOneOperation } from './globals/operations/findOne.js'
@@ -1427,11 +1436,11 @@ export type {
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1489,6 +1498,7 @@ export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
+export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
@@ -1505,6 +1515,7 @@ export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryK
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

@@ -17,6 +17,7 @@ import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { Radio } from '../../../fields/RadioGroup/Radio/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
@@ -59,7 +60,8 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug, title } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { title } = useDocumentTitle()
   const { i18n, t } = useTranslation()
   const { schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
@@ -136,7 +138,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
+          'X-Payload-HTTP-Method-Override': 'GET',
         },
       })
       .then((res) => res.json())

@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -22,6 +22,7 @@ export type SelectInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly filterOption?: ReactSelectAdapterProps['filterOption']
   readonly hasMany?: boolean
   readonly isClearable?: boolean
   readonly isSortable?: boolean
@@ -33,6 +34,7 @@ export type SelectInputProps = {
   readonly onInputChange?: ReactSelectAdapterProps['onInputChange']
   readonly options?: OptionObject[]
   readonly path: string
+  readonly placeholder?: LabelFunction | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
@@ -48,6 +50,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Description,
     description,
     Error,
+    filterOption,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -58,6 +61,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     onInputChange,
     options,
     path,
+    placeholder,
     readOnly,
     required,
     showError,
@@ -116,6 +120,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         {BeforeInput}
         <ReactSelect
           disabled={readOnly}
+          filterOption={filterOption}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}
@@ -125,6 +130,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
             ...option,
             label: getTranslation(option.label, i18n),
           }))}
+          placeholder={placeholder}
           showError={showError}
           value={valueToRender as OptionObject}
         />

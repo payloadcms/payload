@@ -100,6 +100,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         resetColumnsState,
         setActiveColumns,
         toggleColumn,
+        // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
         ...contextRef.current,
       }}
     >

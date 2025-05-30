@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../index.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
-import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
 import flattenFields from '../../utilities/flattenTopLevelFields.js'
 
 /**

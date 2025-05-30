@@ -18,6 +18,7 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { addFolderCollections } from '../folders/addFolderCollections.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import {
   baseBlockFields,
@@ -58,6 +59,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
     const firstCollectionWithAuth = sanitizedConfig.collections.find(({ auth }) => Boolean(auth))
+
     if (firstCollectionWithAuth) {
       sanitizedConfig.admin.user = firstCollectionWithAuth.slug
     } else {
@@ -69,6 +71,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   const userCollection = sanitizedConfig.collections.find(
     ({ slug }) => slug === sanitizedConfig.admin.user,
   )
+
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
@@ -187,6 +190,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
+
+  await addFolderCollections(config as unknown as Config)
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),
@@ -311,6 +316,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
           for (const hook of Object.keys(hooks)) {
             const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
             if (hooks[hook]?.length > defaultAmount) {
+              // eslint-disable-next-line no-console
               console.warn(
                 `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
               )
@@ -372,7 +378,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf.push(config.serverURL)
   }
 
-  // Get deduped list of upload adapters
+  const uploadAdapters = new Set<string>()
+  // interact with all collections
+  for (const collection of config.collections) {
+    // deduped upload adapters
+    if (collection.upload?.adapter) {
+      uploadAdapters.add(collection.upload.adapter)
+    }
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }
