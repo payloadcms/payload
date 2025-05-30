@@ -98,6 +98,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
   withinArrayOrBlockLocale,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
+  const localeCodes =
+    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
 
   const formatted = fields.reduce((result, field) => {
     if (fieldIsVirtual(field)) {
@@ -506,6 +508,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'text' && field?.hasMany) {
       const textPathMatch = texts[`${sanitizedPath}${field.name}`]
       if (!textPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -545,6 +551,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'number' && field.hasMany) {
       const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
       if (!numberPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -606,10 +616,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (isLocalized && Array.isArray(table._locales)) {
-      if (!table._locales.length && adapter.payload.config.localization) {
-        adapter.payload.config.localization.localeCodes.forEach((_locale) =>
-          (table._locales as unknown[]).push({ _locale }),
-        )
+      if (!table._locales.length && localeCodes) {
+        localeCodes.forEach((_locale) => (table._locales as unknown[]).push({ _locale }))
       }
 
       table._locales.forEach((localeRow) => {
@@ -723,8 +731,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (Object.keys(localizedFieldData).length > 0) {
       result[field.name] = localizedFieldData
     }
-
-    return result
 
     return result
   }, dataRef)
