@@ -55,7 +55,7 @@ export function generateJobsJSONSchemas(
           required: inputJsonSchema.required,
         }
 
-        fullTaskJsonSchema.properties.input = fullInputJsonSchema
+        fullTaskJsonSchema.properties!.input = fullInputJsonSchema
         ;(fullTaskJsonSchema.required as string[]).push('input')
       }
       if (task?.outputSchema?.length) {
@@ -74,7 +74,7 @@ export function generateJobsJSONSchemas(
           required: outputJsonSchema.required,
         }
 
-        fullTaskJsonSchema.properties.output = fullOutputJsonSchema
+        fullTaskJsonSchema.properties!.output = fullOutputJsonSchema
         ;(fullTaskJsonSchema.required as string[]).push('output')
       }
 
@@ -141,7 +141,7 @@ export function generateJobsJSONSchemas(
           required: inputJsonSchema.required,
         }
 
-        fullWorkflowJsonSchema.properties.input = fullInputJsonSchema
+        fullWorkflowJsonSchema.properties!.input = fullInputJsonSchema
         ;(fullWorkflowJsonSchema.required as string[]).push('input')
       }
       const normalizedWorkflowSlug = workflow.slug[0].toUpperCase() + workflow.slug.slice(1)
