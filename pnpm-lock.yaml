@@ -131,8 +131,12 @@ importers:
         version: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 =======
         specifier: 15.3.0
+<<<<<<< HEAD
         version: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+        version: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+>>>>>>> d52f6a55df (chore: updates lock)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -1145,10 +1149,14 @@ importers:
       '@sentry/nextjs':
         specifier: ^8.33.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))
 =======
         version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))
+>>>>>>> d52f6a55df (chore: updates lock)
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.37.1
@@ -1508,10 +1516,14 @@ importers:
       uploadthing:
         specifier: 7.3.0
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 7.3.0(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
 =======
         version: 7.3.0(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+        version: 7.3.0(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
+>>>>>>> d52f6a55df (chore: updates lock)
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1798,10 +1810,14 @@ importers:
       '@sentry/nextjs':
         specifier: ^8.33.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))
 =======
         version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))
+>>>>>>> d52f6a55df (chore: updates lock)
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.119.2(react@19.1.0)
@@ -1868,8 +1884,12 @@ importers:
         version: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 =======
         specifier: 15.3.0
+<<<<<<< HEAD
         version: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+        version: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+>>>>>>> d52f6a55df (chore: updates lock)
       nodemailer:
         specifier: 6.9.16
         version: 6.9.16
@@ -7090,6 +7110,7 @@ packages:
     engines: { node: '>=18.0.0' }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@smithy/types@3.0.0':
     resolution:
       {
@@ -7099,6 +7120,12 @@ packages:
 
 =======
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  '@smithy/types@3.0.0':
+    resolution: {integrity: sha512-VvWuQk2RKFuOr98gFhjca7fkBS+xLLURT8bUjk5XQoV0ZLm7WPwWPPY3/AwzTLuUBDeoKDCthfe1AsTUWaSEhw==}
+    engines: {node: '>=16.0.0'}
+
+>>>>>>> d52f6a55df (chore: updates lock)
   '@smithy/types@3.6.0':
     resolution:
       {
@@ -10069,7 +10096,7 @@ packages:
         integrity: sha512-H2/S7Pm8a9CL1uhp9OvjwrBh5Pvx0H8qVOxNu8Wed9Y7qv56MPtq+GGM8RJpq6glYJn9Wspr8uw7l55uyinNeg==,
       }
     peerDependencies:
-      esbuild: '>=0.12 <1'
+      esbuild: 0.25.0
 
   esbuild-sass-plugin@3.3.1:
     resolution:
@@ -12407,7 +12434,11 @@ packages:
     cpu: [x64, arm64, wasm32]
 =======
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
+<<<<<<< HEAD
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+    cpu: [x64, arm64, wasm32]
+>>>>>>> d52f6a55df (chore: updates lock)
     os: [darwin, linux, win32]
 
   license-checker@25.0.1:
@@ -13221,7 +13252,11 @@ packages:
 =======
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+<<<<<<< HEAD
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+    deprecated: Use your platform's native DOMException instead
+>>>>>>> d52f6a55df (chore: updates lock)
 
   node-fetch-native@1.6.4:
     resolution:
@@ -20234,10 +20269,14 @@ snapshots:
       localforage: 1.10.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))':
 =======
   '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))':
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))':
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation-http': 0.53.0(@opentelemetry/api@1.9.0)
@@ -20252,6 +20291,7 @@ snapshots:
       '@sentry/utils': 8.37.1
       '@sentry/vercel-edge': 8.37.1
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@sentry/webpack-plugin': 2.22.6(webpack@5.96.1(@swc/core@1.11.29))
       chalk: 3.0.0
       next: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
@@ -20260,6 +20300,11 @@ snapshots:
       chalk: 3.0.0
       next: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+      '@sentry/webpack-plugin': 2.22.6(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))
+      chalk: 3.0.0
+      next: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+>>>>>>> d52f6a55df (chore: updates lock)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.10
@@ -20368,19 +20413,27 @@ snapshots:
       '@sentry/utils': 8.37.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@sentry/webpack-plugin@2.22.6(webpack@5.96.1(@swc/core@1.11.29))':
 =======
   '@sentry/webpack-plugin@2.22.6(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))':
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  '@sentry/webpack-plugin@2.22.6(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))':
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@sentry/bundler-plugin-core': 2.22.6
       unplugin: 1.0.1
       uuid: 9.0.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       webpack: 5.96.1(@swc/core@1.11.29)
 =======
       webpack: 5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+      webpack: 5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12)
+>>>>>>> d52f6a55df (chore: updates lock)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -20600,7 +20653,7 @@ snapshots:
 
   '@smithy/middleware-serde@4.0.2':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/middleware-stack@3.0.8':
@@ -20624,7 +20677,7 @@ snapshots:
     dependencies:
       '@smithy/property-provider': 4.0.1
       '@smithy/shared-ini-file-loader': 4.0.1
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/node-http-handler@3.2.5':
@@ -20650,7 +20703,7 @@ snapshots:
 
   '@smithy/property-provider@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/protocol-http@4.1.5':
@@ -20660,7 +20713,7 @@ snapshots:
 
   '@smithy/protocol-http@5.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/querystring-builder@3.0.8':
@@ -20671,7 +20724,7 @@ snapshots:
 
   '@smithy/querystring-builder@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       '@smithy/util-uri-escape': 4.0.0
       tslib: 2.8.1
 
@@ -20696,7 +20749,7 @@ snapshots:
 
   '@smithy/shared-ini-file-loader@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/signature-v4@4.2.1':
@@ -20741,6 +20794,10 @@ snapshots:
       '@smithy/util-stream': 4.1.1
       tslib: 2.8.1
 
+  '@smithy/types@3.0.0':
+    dependencies:
+      tslib: 2.8.1
+
   '@smithy/types@3.6.0':
     dependencies:
       tslib: 2.8.1
@@ -20758,7 +20815,7 @@ snapshots:
   '@smithy/url-parser@4.0.1':
     dependencies:
       '@smithy/querystring-parser': 4.0.1
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/util-base64@3.0.0':
@@ -24977,8 +25034,12 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+<<<<<<< HEAD
   next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@next/env': 15.3.0
       '@swc/counter': 0.1.3
@@ -26509,16 +26570,21 @@ snapshots:
       supports-hyperlinks: 2.3.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   terser-webpack-plugin@5.3.10(@swc/core@1.11.29)(webpack@5.96.1(@swc/core@1.11.29)):
 =======
   terser-webpack-plugin@5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))):
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  terser-webpack-plugin@5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12)):
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.36.0
+<<<<<<< HEAD
 <<<<<<< HEAD
       webpack: 5.96.1(@swc/core@1.11.29)
     optionalDependencies:
@@ -26528,6 +26594,12 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.10.12(@swc/helpers@0.5.15)
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+      webpack: 5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12)
+    optionalDependencies:
+      '@swc/core': 1.10.12(@swc/helpers@0.5.15)
+      esbuild: 0.19.12
+>>>>>>> d52f6a55df (chore: updates lock)
 
   terser@5.36.0:
     dependencies:
@@ -26807,6 +26879,7 @@ snapshots:
       picocolors: 1.1.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   update-browserslist-db@1.1.3(browserslist@4.25.0):
     dependencies:
       browserslist: 4.25.0
@@ -26817,6 +26890,9 @@ snapshots:
 =======
   uploadthing@7.3.0(next@15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  uploadthing@7.3.0(next@15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@effect/platform': 0.69.8(effect@3.10.3)
       '@uploadthing/mime-types': 0.3.2
@@ -26824,10 +26900,14 @@ snapshots:
       effect: 3.10.3
     optionalDependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       next: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 =======
       next: 15.3.0(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+      next: 15.3.0(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.0.0-beta-e993439-20250405)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+>>>>>>> d52f6a55df (chore: updates lock)
 
   uri-js@4.4.1:
     dependencies:
@@ -26933,10 +27013,14 @@ snapshots:
   webpack-virtual-modules@0.5.0: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   webpack@5.96.1(@swc/core@1.11.29):
 =======
   webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)):
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+  webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12):
+>>>>>>> d52f6a55df (chore: updates lock)
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6
@@ -26959,10 +27043,14 @@ snapshots:
       schema-utils: 3.3.0
       tapable: 2.2.1
 <<<<<<< HEAD
+<<<<<<< HEAD
       terser-webpack-plugin: 5.3.10(@swc/core@1.11.29)(webpack@5.96.1(@swc/core@1.11.29))
 =======
       terser-webpack-plugin: 5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15)))
 >>>>>>> bb59d52de1 (chore: reset lockfile)
+=======
+      terser-webpack-plugin: 5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.19.12))
+>>>>>>> d52f6a55df (chore: updates lock)
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
