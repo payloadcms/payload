@@ -1,3 +1,5 @@
+import ssrfFilter from 'ssrf-req-filter'
+
 // @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
@@ -18,6 +20,8 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
       fileURL = `${baseUrl}${url}`
     }
+
+    ssrfFilter({ url: fileURL })
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
