@@ -11,6 +11,6 @@ export async function commitTransaction(
 ): Promise<void> {
   const { payload, transactionID } = req
 
-  await payload.db.commitTransaction(transactionID)
+  await payload.db.commitTransaction(transactionID!)
   delete req.transactionID
 }

@@ -68,18 +68,18 @@ export const createPayloadRequest = async ({
 
   if (localization) {
     const locales = sanitizeLocales({
-      fallbackLocale,
-      locale,
+      fallbackLocale: fallbackLocale!,
+      locale: locale!,
       localization,
     })
 
-    fallbackLocale = locales.fallbackLocale
-    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale!
+    locale = locales.locale!
   }
 
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    fallbackLocale,
+    fallbackLocale: fallbackLocale!,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
@@ -89,7 +89,7 @@ export const createPayloadRequest = async ({
     pathname: urlProperties.pathname,
     payload,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    payloadDataLoader: undefined,
+    payloadDataLoader: undefined!,
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
