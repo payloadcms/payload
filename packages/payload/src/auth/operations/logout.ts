@@ -70,6 +70,7 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       id: user.id,
       collection: collectionConfig.slug,
       data: userWithSessions,
+      returning: false,
     })
   }
 
