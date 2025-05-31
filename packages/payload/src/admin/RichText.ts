@@ -1,9 +1,13 @@
-// @ts-strict-ignore
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type {
+  Config,
+  ImportMapGenerators,
+  PayloadComponent,
+  SanitizedConfig,
+} from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
   FieldAffectingData,
@@ -197,7 +201,7 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  generateImportMap?: Config['admin']['importMap']['generators'][0]
+  generateImportMap?: ImportMapGenerators[0]
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField

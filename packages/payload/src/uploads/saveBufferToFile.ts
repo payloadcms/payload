@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs/promises'
 import { Readable } from 'stream'
 
@@ -13,7 +12,7 @@ const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void>
   const readStream = new Readable()
   readStream._read = () => {
     readStream.push(streamData)
-    streamData = null
+    streamData = null!
   }
   // Setup file system writable stream.
   return await fs.writeFile(filePath, buffer)

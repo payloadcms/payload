@@ -92,11 +92,11 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
         type: 'object',
         additionalProperties: false,
         properties: {},
-        required: [],
+        required: [] as string[],
       } satisfies JSONSchema4
 
       for (const collectionSlug in joins) {
-        for (const join of joins[collectionSlug]) {
+        for (const join of joins[collectionSlug]!) {
           schema.properties[join.joinPath] = {
             type: 'string',
             enum: [collectionSlug],
@@ -221,8 +221,8 @@ function entityOrFieldToJsDocs({
     } else if (typeof entity?.admin?.description === 'object') {
       if (entity?.admin?.description?.en) {
         description = entity?.admin?.description?.en
-      } else if (entity?.admin?.description?.[i18n.language]) {
-        description = entity?.admin?.description?.[i18n.language]
+      } else if (entity?.admin?.description?.[i18n!.language]) {
+        description = entity?.admin?.description?.[i18n!.language]
       }
     } else if (typeof entity?.admin?.description === 'function' && i18n) {
       // do not evaluate description functions for generating JSDocs. The output of
@@ -311,7 +311,7 @@ export function fieldsToJSONSchema(
                       if (typeof block === 'string') {
                         const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
                         return {
-                          $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
+                          $ref: `#/definitions/${resolvedBlock!.interfaceName ?? resolvedBlock!.slug}`,
                         }
                       }
                       const blockFieldSchemas = fieldsToJSONSchema(
@@ -585,7 +585,7 @@ export function fieldsToJSONSchema(
                 oneOf: [
                   {
                     type: withNullableJSONSchemaType(
-                      collectionIDFieldTypes[field.relationTo],
+                      collectionIDFieldTypes[field.relationTo]!,
                       isRequired,
                     ),
                   },
@@ -720,11 +720,11 @@ export function fieldsToJSONSchema(
 
         if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
           for (const schema of field.typescriptSchema) {
-            fieldSchema = schema({ jsonSchema: fieldSchema })
+            fieldSchema = schema({ jsonSchema: fieldSchema! })
           }
         }
 
-        if (fieldSchema && fieldAffectsData(field)) {
+        if (fieldSchema! && fieldAffectsData(field)) {
           if (isRequired && fieldSchema.required !== false) {
             requiredFieldNames.add(field.name)
           }
@@ -855,7 +855,7 @@ export function fieldsToSelectJSONSchema({
           }
         }
 
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           oneOf: [
             {
               type: 'boolean',
@@ -893,7 +893,7 @@ export function fieldsToSelectJSONSchema({
             }
           }
 
-          blocksSchema.properties[block.slug] = {
+          blocksSchema.properties![block.slug] = {
             oneOf: [
               {
                 type: 'boolean',
@@ -903,7 +903,7 @@ export function fieldsToSelectJSONSchema({
           }
         }
 
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           oneOf: [
             {
               type: 'boolean',
@@ -916,7 +916,7 @@ export function fieldsToSelectJSONSchema({
       }
 
       default:
-        schema.properties[field.name] = {
+        schema.properties![field.name] = {
           type: 'boolean',
         }
         break
@@ -1108,7 +1108,10 @@ export function configToJSONSchema(
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
   //  Used for relationship fields, to determine whether to use a string or number type for the ID.
-  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({
+    config,
+    defaultIDType: defaultIDType!,
+  })
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
@@ -1130,7 +1133,7 @@ export function configToJSONSchema(
         config,
         entity,
         interfaceNameDefinitions,
-        defaultIDType,
+        defaultIDType!,
         collectionIDFieldTypes,
         i18n,
       )
@@ -1141,7 +1144,7 @@ export function configToJSONSchema(
       })
 
       if (type === 'global') {
-        select.properties.globalType = {
+        select.properties!.globalType = {
           type: 'boolean',
         }
       }
@@ -1210,7 +1213,7 @@ export function configToJSONSchema(
       const interfaceName = block.interfaceName ?? block.slug
       interfaceNameDefinitions.set(interfaceName, blockSchema)
 
-      blocksDefinition.properties[block.slug] = {
+      blocksDefinition.properties![block.slug] = {
         $ref: `#/definitions/${interfaceName}`,
       }
       ;(blocksDefinition.required as string[]).push(block.slug)
@@ -1257,11 +1260,11 @@ export function configToJSONSchema(
 
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
-      jsonSchema.definitions[key] = value
+      jsonSchema.definitions![key] = value
     }
   }
   if (jobsSchemas.properties) {
-    jsonSchema.properties.jobs = {
+    jsonSchema.properties!.jobs = {
       type: 'object',
       additionalProperties: false,
       properties: jobsSchemas.properties,
@@ -1271,7 +1274,7 @@ export function configToJSONSchema(
 
   if (config?.typescript?.schema?.length) {
     for (const schema of config.typescript.schema) {
-      jsonSchema = schema({ collectionIDFieldTypes, config, i18n, jsonSchema })
+      jsonSchema = schema({ collectionIDFieldTypes, config, i18n: i18n!, jsonSchema })
     }
   }
 

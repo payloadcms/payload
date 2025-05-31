@@ -86,9 +86,7 @@ export const createClientGlobalConfig = ({
               }
               break
             case 'preview':
-              if (global.admin.preview) {
-                clientGlobal.admin.preview = true
-              }
+              clientGlobal.admin.preview = true
               break
             default:
               clientGlobal.admin[adminKey] = global.admin[adminKey]
@@ -135,7 +133,7 @@ export const createClientGlobalConfigs = ({
 
     clientGlobals[i] = createClientGlobalConfig({
       defaultIDType,
-      global,
+      global: global!,
       i18n,
       importMap,
     })

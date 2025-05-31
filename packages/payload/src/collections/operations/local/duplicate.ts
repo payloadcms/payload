@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
@@ -10,6 +9,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
@@ -125,7 +125,7 @@ export async function duplicate<
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
   return duplicateOperation<TSlug, TSelect>({
     id,

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 
@@ -42,6 +41,7 @@ export const sanitizeJoinField = ({
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
     parentIsLocalized,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     targetField: undefined,
   }
 
@@ -70,7 +70,7 @@ export const sanitizeJoinField = ({
     return
   }
 
-  const joinCollection = config.collections.find(
+  const joinCollection = config.collections?.find(
     (collection) => collection.slug === field.collection,
   )
   if (!joinCollection) {
@@ -91,7 +91,7 @@ export const sanitizeJoinField = ({
 
   if (relationshipField.pathHasLocalized) {
     join.getForeignPath = ({ locale }) => {
-      return relationshipField.localizedPath.replace('<locale>', locale)
+      return relationshipField.localizedPath.replace('<locale>', locale!)
     }
   }
 
@@ -117,6 +117,6 @@ export const sanitizeJoinField = ({
   if (!joins[field.collection]) {
     joins[field.collection] = [join]
   } else {
-    joins[field.collection].push(join)
+    joins[field.collection]?.push(join)
   }
 }

@@ -3,23 +3,23 @@ import type { JoinQuery } from '../types/index.js'
 
 import { isNumber } from './isNumber.js'
 
+export type JoinParams =
+  | {
+      [schemaPath: string]:
+        | {
+            limit?: unknown
+            sort?: string
+            where?: unknown
+          }
+        | false
+    }
+  | false
+
 /**
  * Convert request JoinQuery object from strings to numbers
  * @param joins
  */
-export const sanitizeJoinParams = (
-  joins:
-    | {
-        [schemaPath: string]:
-          | {
-              limit?: unknown
-              sort?: string
-              where?: unknown
-            }
-          | false
-      }
-    | false = {},
-): JoinQuery => {
+export const sanitizeJoinParams = (joins: JoinParams = {}): JoinQuery => {
   const joinQuery = {}
 
   Object.keys(joins).forEach((schemaPath) => {

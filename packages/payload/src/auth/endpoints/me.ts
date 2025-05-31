@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -14,7 +13,7 @@ export const meHandler: PayloadHandler = async (req) => {
 
   const result = await meOperation({
     collection,
-    currentToken,
+    currentToken: currentToken!,
     req,
   })
 

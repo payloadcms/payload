@@ -29,7 +29,7 @@ export async function getOrphanedDocs({
     ],
   }
 
-  if (collectionSlug && search && payload.collections[collectionSlug].config.admin?.useAsTitle) {
+  if (collectionSlug && search && payload.collections[collectionSlug]?.config.admin?.useAsTitle) {
     whereConstraints = {
       [payload.collections[collectionSlug].config.admin.useAsTitle]: {
         like: search,
@@ -42,7 +42,7 @@ export async function getOrphanedDocs({
     limit: 0,
     overrideAccess: false,
     req,
-    sort: payload.collections[collectionSlug].config.admin.useAsTitle,
+    sort: payload.collections[collectionSlug]?.config.admin.useAsTitle,
     user,
     where: whereConstraints,
   })
@@ -51,9 +51,9 @@ export async function getOrphanedDocs({
     orphanedFolders?.docs.map((doc) =>
       formatFolderOrDocumentItem({
         folderFieldName: payload.config.folders.fieldName,
-        isUpload: Boolean(payload.collections[collectionSlug].config.upload),
+        isUpload: Boolean(payload.collections[collectionSlug]?.config.upload),
         relationTo: collectionSlug,
-        useAsTitle: payload.collections[collectionSlug].config.admin.useAsTitle,
+        useAsTitle: payload.collections[collectionSlug]?.config.admin.useAsTitle,
         value: doc,
       }),
     ) || []

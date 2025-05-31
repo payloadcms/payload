@@ -25,7 +25,7 @@ type CropImageArgs = {
 export async function cropImage({
   cropData,
   dimensions,
-  file,
+  file: fileArg,
   heightInPixels,
   req,
   sharp,
@@ -33,7 +33,8 @@ export async function cropImage({
   withMetadata,
 }: CropImageArgs) {
   try {
-    const { x, y } = cropData
+    const { x, y } = cropData!
+    const file = fileArg!
 
     const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
 
@@ -57,7 +58,7 @@ export async function cropImage({
           file.tempFilePath || file.data,
           sharpOptions,
         ).metadata()
-        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height : originalHeight
+        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
       return {
@@ -80,9 +81,9 @@ export async function cropImage({
     let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
 
     cropped = await optionallyAppendMetadata({
-      req,
+      req: req!,
       sharpFile: cropped,
-      withMetadata,
+      withMetadata: withMetadata!,
     })
 
     return await cropped.toBuffer({

@@ -1,5 +1,5 @@
-import type { ClientConfig } from '../config/client.js'
 // @ts-strict-ignore
+import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
 
 import { fieldAffectsData, type FieldTypes } from '../fields/config/types.js'
@@ -42,7 +42,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           name: field.name,
           type: field.type,
           blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
-            const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+            const block = typeof _block === 'string' ? config.blocksMap[_block]! : _block
             acc[block.slug] = {
               fields: fieldSchemaToJSON(
                 [
@@ -57,7 +57,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
             }
 
             return acc
-          }, {}),
+          }, {} as FieldSchemaJSON),
         })
 
         break
@@ -86,13 +86,13 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           name: field.name,
           type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          relationTo: field.relationTo,
+          relationTo: field.relationTo as string,
         })
 
         break
 
       case 'tabs': {
-        let tabFields = []
+        let tabFields: FieldSchemaJSON = []
 
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
@@ -122,5 +122,5 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
     }
 
     return result
-  }, [])
+  }, [] as FieldSchemaJSON)
 }

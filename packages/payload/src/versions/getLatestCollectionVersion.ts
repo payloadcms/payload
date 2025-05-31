@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
-import type { Payload, PayloadRequest } from '../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
 import { combineQueries } from '../database/combineQueries.js'
@@ -24,7 +23,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   query,
   req,
 }: Args): Promise<T> => {
-  let latestVersion: TypeWithVersion<T>
+  let latestVersion!: TypeWithVersion<T>
 
   const whereQuery = published
     ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
@@ -37,19 +36,19 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       pagination: false,
       req,
       sort: '-updatedAt',
-      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery),
+      where: combineQueries(appendVersionToQueryKey(query.where), whereQuery as unknown as Where),
     })
-    ;[latestVersion] = docs
+    latestVersion = docs[0]!
   }
 
   if (!latestVersion) {
     if (!published) {
       const doc = await payload.db.findOne<T>({ ...query, req })
 
-      return doc
+      return doc!
     }
 
-    return undefined
+    return undefined!
   }
 
   latestVersion.version.id = id

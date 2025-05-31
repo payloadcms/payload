@@ -542,7 +542,7 @@ export class BasePayload {
       })
 
       spawned.on('exit', (code) => {
-        resolve({ code })
+        resolve({ code: code! })
       })
 
       spawned.on('error', (error) => {
@@ -585,7 +585,7 @@ export class BasePayload {
       void checkPayloadDependencies()
     }
 
-    this.importMap = options.importMap
+    this.importMap = options.importMap!
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
@@ -605,7 +605,7 @@ export class BasePayload {
     }
 
     for (const collection of this.config.collections) {
-      let customIDType = undefined
+      let customIDType: string | undefined = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
@@ -637,7 +637,7 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks.reduce((blocks, block) => {
+    this.blocks = this.config.blocks!.reduce((blocks, block) => {
       blocks[block.slug] = block
       return blocks
     }, {})
@@ -843,7 +843,7 @@ export const reload = async (
     return collections
   }, {})
 
-  payload.blocks = config.blocks.reduce((blocks, block) => {
+  payload.blocks = config.blocks!.reduce((blocks, block) => {
     blocks[block.slug] = block
     return blocks
   }, {})
@@ -871,7 +871,7 @@ export const reload = async (
     })
   }
 
-  await payload.db.init()
+  await payload.db.init?.()
 
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -894,7 +894,7 @@ export const getPayload = async (
 
   if (cached.payload) {
     if (cached.reload === true) {
-      let resolve: () => void
+      let resolve!: () => void
 
       // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
@@ -915,7 +915,6 @@ export const getPayload = async (
     return cached.payload
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)

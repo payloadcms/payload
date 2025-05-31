@@ -3,7 +3,7 @@ export const addSelectGenericsToGeneratedTypes = ({
 }: {
   compiledGeneratedTypes: string
 }) => {
-  const modifiedLines = []
+  const modifiedLines: string[] = []
 
   let isCollectionsSelectToken = false
   let isSelectTypeToken = false

@@ -45,6 +45,7 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<
   FieldBase['admin'],
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   'components' | 'condition'
 >
 
@@ -90,7 +91,7 @@ export const createClientBlocks = ({
 }): (ClientBlock | string)[] | ClientBlock[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i]
+    const block = blocks[i]!
 
     if (typeof block === 'string') {
       // Do not process blocks that are just strings - they are processed once in the client config
@@ -110,12 +111,13 @@ export const createClientBlocks = ({
     }
 
     if (block.admin?.custom || block.admin?.group) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       clientBlock.admin = {}
       if (block.admin.custom) {
-        clientBlock.admin.custom = block.admin.custom
+        clientBlock.admin!.custom = block.admin.custom
       }
       if (block.admin.group) {
-        clientBlock.admin.group = block.admin.group
+        clientBlock.admin!.group = block.admin.group
       }
     }
 
@@ -133,6 +135,7 @@ export const createClientBlocks = ({
       if (clientBlock.admin) {
         clientBlock.admin.disableBlockName = block.admin.disableBlockName
       } else {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
       }
     }
@@ -420,7 +423,7 @@ export const createClientField = ({
                     break
 
                   default:
-                    clientField.admin[adminKey] = tab.admin[adminKey]
+                    clientField.admin![adminKey] = tab.admin[adminKey]
                 }
               }
             } else {
@@ -457,7 +460,7 @@ export const createClientFields = ({
   const clientFields: ClientField[] = []
 
   for (let i = 0; i < fields.length; i++) {
-    const field = fields[i]
+    const field = fields[i]!
 
     const clientField = createClientField({
       defaultIDType,
@@ -483,7 +486,7 @@ export const createClientFields = ({
       },
       hidden: true,
       label: 'ID',
-    })
+    } as ClientField)
   }
 
   return clientFields

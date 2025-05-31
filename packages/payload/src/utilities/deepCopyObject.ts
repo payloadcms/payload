@@ -35,13 +35,13 @@ constructorHandlers.set(Map, (o, fn) => new Map(cloneArray<any>(Array.from(o), f
 constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
 constructorHandlers.set(RegExp, (regex: RegExp) => new RegExp(regex.source, regex.flags))
 
-let handler = null
+let handler: ((o: any, fn: any) => any) | null = null
 
-function cloneArray<T>(a: T, fn): T {
+function cloneArray<T extends object>(a: T, fn): T {
   const keys = Object.keys(a)
   const a2 = new Array(keys.length)
   for (let i = 0; i < keys.length; i++) {
-    const k = keys[i]
+    const k = keys[i]!
     const cur = a[k]
     if (typeof cur !== 'object' || cur === null) {
       a2[k] = cur
@@ -142,7 +142,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
     '$$typeof' in value &&
     typeof value.$$typeof === 'symbol'
   ) {
-    return undefined
+    return undefined!
   } else if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
@@ -171,7 +171,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
  */
 export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = new WeakMap()): T {
   if (object === null) {
-    return null
+    return null!
   }
 
   if (cache.has(object)) {

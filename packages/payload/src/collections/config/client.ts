@@ -148,8 +148,8 @@ export const createClientCollectionConfig = ({
             case 'livePreview':
               clientCollection.admin.livePreview =
                 {} as ClientCollectionConfig['admin']['livePreview']
-              if (collection.admin.livePreview.breakpoints) {
-                clientCollection.admin.livePreview.breakpoints =
+              if (collection.admin.livePreview?.breakpoints) {
+                clientCollection.admin.livePreview!.breakpoints =
                   collection.admin.livePreview.breakpoints
               }
               break
@@ -233,7 +233,7 @@ export const createClientCollectionConfig = ({
             continue
           }
           if (uploadKey === 'imageSizes') {
-            clientCollection.upload.imageSizes = collection.upload.imageSizes.map((size) => {
+            clientCollection.upload.imageSizes = collection.upload.imageSizes?.map((size) => {
               const sanitizedSize = { ...size }
               if ('generateImageName' in sanitizedSize) {
                 delete sanitizedSize.generateImageName
@@ -268,7 +268,7 @@ export const createClientCollectionConfigs = ({
   const clientCollections = new Array(collections.length)
 
   for (let i = 0; i < collections.length; i++) {
-    const collection = collections[i]
+    const collection = collections[i]!
 
     clientCollections[i] = createClientCollectionConfig({
       collection,

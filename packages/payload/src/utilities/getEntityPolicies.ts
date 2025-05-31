@@ -246,7 +246,7 @@ const executeFieldPolicies = async ({
 
           await Promise.all(
             (field.blockReferences ?? field.blocks).map(async (_block) => {
-              const block = typeof _block === 'string' ? payload.blocks[_block] : _block
+              const block = typeof _block === 'string' ? payload.blocks[_block]! : _block
 
               if (typeof _block === 'string') {
                 if (blockPolicies[_block]) {

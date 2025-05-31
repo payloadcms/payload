@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
@@ -57,7 +56,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     const { docs: versionDocs } = await req.payload.db.findVersions({
       collection: collectionConfig.slug,
       limit: 1,
-      locale,
+      locale: locale!,
       pagination: false,
       req,
       where: { id: { equals: id } },
@@ -86,7 +85,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
@@ -155,17 +154,18 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
+      locale: locale!,
       overrideAccess,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

@@ -47,7 +47,7 @@ export const getBlockSelect = ({
       }
     }
 
-    return { blockSelect, blockSelectMode }
+    return { blockSelect: blockSelect!, blockSelectMode }
   }
 
   return { blockSelect: select, blockSelectMode: selectMode }

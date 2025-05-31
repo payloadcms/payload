@@ -34,12 +34,12 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
       }
     }
 
-    if ((updatedJob.error as Record<string, unknown>)?.cancelled) {
+    if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
       const cancelledError = new Error('Job cancelled') as { cancelled: boolean } & Error
       cancelledError.cancelled = true
       throw cancelledError
     }
 
-    return updatedJob
+    return updatedJob!
   }
 }

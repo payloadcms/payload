@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
 
@@ -65,8 +64,8 @@ export const getPreferencesCollection = (config: Config): CollectionConfig => ({
         ],
       },
       index: true,
-      relationTo: config.collections
-        .filter((collectionConfig) => collectionConfig.auth)
+      relationTo: config
+        .collections!.filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),
       required: true,
     },

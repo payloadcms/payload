@@ -6,7 +6,7 @@ import { unflatten } from './unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
   if (!fields) {
-    return null
+    return null!
   }
 
   if (path.indexOf('.') === -1) {
@@ -35,8 +35,8 @@ export const getSiblingData = (fields: FormState, path: string): Data => {
   }
 
   Object.keys(fields).forEach((fieldKey) => {
-    if (!fields[fieldKey].disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
-      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey].value
+    if (!fields[fieldKey]?.disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
+      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey]?.value
     }
   })
 

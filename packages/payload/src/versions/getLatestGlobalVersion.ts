@@ -35,7 +35,7 @@ export const getLatestGlobalVersion = async ({
         locale,
         pagination: false,
         req,
-        where: whereQuery,
+        where: whereQuery as unknown as Where,
       })
     ).docs[0]
   }

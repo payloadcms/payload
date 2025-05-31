@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { JoinQuery, Where } from '../../types/index.js'
+import type { Where } from '../../types/index.js'
+import type { JoinParams } from '../../utilities/sanitizeJoinParams.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
@@ -18,7 +18,7 @@ export const findHandler: PayloadHandler = async (req) => {
     req.query as {
       depth?: string
       draft?: string
-      joins?: JoinQuery
+      joins?: JoinParams
       limit?: string
       page?: string
       pagination?: string

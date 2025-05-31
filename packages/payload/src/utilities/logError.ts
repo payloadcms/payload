@@ -20,7 +20,7 @@ export const logError = ({ err, payload }: { err: unknown; payload: Payload }): 
     const logObject: { err?: unknown; msg?: unknown } = {}
 
     if (level === 'info') {
-      logObject.msg = typeof err === 'object' && 'message' in err ? err.message : 'Error'
+      logObject.msg = typeof err === 'object' && 'message' in err! ? err.message : 'Error'
     } else {
       logObject.err = err
     }

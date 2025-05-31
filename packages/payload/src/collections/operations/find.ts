@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -72,9 +71,9 @@ export const findOperation = async <
           (await hook({
             args,
             collection: args.collection.config,
-            context: args.req.context,
+            context: args.req!.context,
             operation: 'read',
-            req: args.req,
+            req: args.req!,
           })) || args
       }
     }
@@ -93,13 +92,14 @@ export const findOperation = async <
       page,
       pagination = true,
       populate,
-      req: { fallbackLocale, locale, payload },
-      req,
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
       where,
     } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -122,7 +122,7 @@ export const findOperation = async <
           docs: [],
           hasNextPage: false,
           hasPrevPage: false,
-          limit,
+          limit: limit!,
           nextPage: null,
           page: 1,
           pagingCounter: 1,
@@ -143,7 +143,7 @@ export const findOperation = async <
 
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
-    let fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where!, accessResult!)
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
@@ -153,7 +153,7 @@ export const findOperation = async <
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -162,7 +162,7 @@ export const findOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -172,7 +172,7 @@ export const findOperation = async <
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination: usePagination,
         req,
@@ -186,9 +186,9 @@ export const findOperation = async <
     } else {
       await validateQueryPaths({
         collectionConfig,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
-        where,
+        where: where!,
       })
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
@@ -196,7 +196,7 @@ export const findOperation = async <
         draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination,
         req,
@@ -301,18 +301,18 @@ export const findOperation = async <
           collection: collectionConfig,
           context: req.context,
           currentDepth,
-          depth,
+          depth: depth!,
           doc,
-          draft: draftsEnabled,
-          fallbackLocale,
+          draft: draftsEnabled!,
+          fallbackLocale: fallbackLocale!,
           findMany: true,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         }),
       ),
     )
@@ -360,7 +360,7 @@ export const findOperation = async <
 
     return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

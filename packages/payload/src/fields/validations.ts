@@ -55,7 +55,7 @@ export const text: TextFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (!required) {
     if (!value) {
@@ -77,7 +77,7 @@ export const text: TextFieldValidation = (
     maxLength = fieldMaxLength
   }
 
-  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value!]
 
   for (const stringValue of stringsToValidate) {
     const length = stringValue?.length || 0
@@ -114,7 +114,7 @@ export const password: PasswordFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -177,7 +177,7 @@ export const email: EmailFieldValidation = (
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -223,12 +223,12 @@ export const username: UsernameFieldValidation = (
     siblingData,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -270,7 +270,7 @@ export const textarea: TextareaFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -310,7 +310,7 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = async (
+export const json: JSONFieldValidation = (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -363,7 +363,7 @@ export const json: JSONFieldValidation = async (
 
   if (jsonSchema && isNotEmpty(value)) {
     try {
-      jsonSchema.schema = await fetchSchema(jsonSchema)
+      jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
       // @ts-expect-error
       const ajv = new Ajv()
@@ -496,7 +496,7 @@ export const number: NumberFieldValidation = (
     }
   }
 
-  const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
+  const numbersToValidate: number[] = Array.isArray(value) ? value : [value!]
 
   for (const number of numbersToValidate) {
     if (!isNumber(number)) {
@@ -555,7 +555,7 @@ const validateFilterOptions: Validate<
         let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
-                id,
+                id: id!,
                 blockData,
                 data,
                 relationTo: collection,
@@ -590,8 +590,9 @@ const validateFilterOptions: Validate<
             and: [{ id: { in: valueIDs } }],
           }
 
+          // @ts-expect-error - I don't understand why optionFilter is inferred as `false | Where | null` instead of `boolean | Where | null`
           if (optionFilter && optionFilter !== true) {
-            findWhere.and.push(optionFilter)
+            findWhere.and?.push(optionFilter)
           }
 
           if (optionFilter === false) {
@@ -645,11 +646,11 @@ const validateFilterOptions: Validate<
         return true
       }
 
-      if (!options[collection]) {
+      if (!options[collection!]) {
         return true
       }
 
-      return options[collection].indexOf(requestedID) === -1
+      return options[collection!]!.indexOf(requestedID!) === -1
     })
 
     if (invalidRelationships.length > 0) {
@@ -733,7 +734,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
       return !isValidID(requestedID, idType)
     })
@@ -836,7 +837,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
       return !isValidID(requestedID, idType)
     })
@@ -931,11 +932,11 @@ export type PointFieldValidation = Validate<
 >
 
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
-  const lng = parseFloat(String(value[0]))
-  const lat = parseFloat(String(value[1]))
+  const lng = parseFloat(String(value![0]))
+  const lat = parseFloat(String(value![1]))
   if (
     required &&
-    ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number') ||
+    ((value![0] && value![1] && typeof lng !== 'number' && typeof lat !== 'number') ||
       Number.isNaN(lng) ||
       Number.isNaN(lat) ||
       (Array.isArray(value) && value.length !== 2))
@@ -943,7 +944,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
+  if ((value![1] && Number.isNaN(lng)) || (value![0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 
