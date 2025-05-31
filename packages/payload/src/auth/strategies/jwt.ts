@@ -9,6 +9,7 @@ import { extractJWT } from '../extractJWT.js'
 type JWTToken = {
   collection: string
   id: string
+  sid?: string
 }
 
 async function autoLogin({
@@ -101,6 +102,18 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     })) as AuthStrategyResult['user']
 
     if (user && (!collection.config.auth.verify || user._verified)) {
+      if (collection.config.auth.useSessions) {
+        const existingSession = (user.sessions || []).find(({ id }) => id === decodedPayload.sid)
+
+        if (!existingSession || !decodedPayload.sid) {
+          return {
+            user: null,
+          }
+        }
+
+        user._sid = decodedPayload.sid
+      }
+
       user.collection = collection.config.slug
       user._strategy = strategyName
       return {

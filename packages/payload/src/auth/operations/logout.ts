@@ -6,6 +6,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import { APIError } from '../../errors/index.js'
 
 export type Arguments = {
+  allSessions?: boolean
   collection: Collection
   req: PayloadRequest
 }
@@ -13,6 +14,7 @@ export type Arguments = {
 export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
   let args = incomingArgs
   const {
+    allSessions,
     collection: { config: collectionConfig },
     req: { user },
     req,
@@ -34,6 +36,42 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
           req,
         })) || args
     }
+  }
+
+  if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
+    const userWithSessions = await req.payload.db.findOne<{
+      id: number | string
+      sessions: { id: string }[]
+    }>({
+      collection: collectionConfig.slug,
+      req,
+      where: {
+        id: {
+          equals: user.id,
+        },
+      },
+    })
+
+    if (!userWithSessions) {
+      throw new APIError('No User', httpStatus.BAD_REQUEST)
+    }
+
+    if (allSessions) {
+      userWithSessions.sessions = []
+    } else {
+      const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
+        (s) => s.id !== req?.user?._sid,
+      )
+
+      userWithSessions.sessions = sessionsAfterLogout
+    }
+
+    await req.payload.db.updateOne({
+      id: user.id,
+      collection: collectionConfig.slug,
+      data: userWithSessions,
+      returning: false,
+    })
   }
 
   return true
