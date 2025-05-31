@@ -3,6 +3,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -82,7 +83,11 @@ export const CopyLocaleData: React.FC = () => {
 
         startRouteTransition(() =>
           router.push(
-            `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
+            formatAdminURL({
+              adminRoute: admin,
+              path: `/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}`,
+              serverURL,
+            }) + `?locale=${to}`,
           ),
         )
 
