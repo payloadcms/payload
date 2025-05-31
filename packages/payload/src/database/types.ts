@@ -32,14 +32,13 @@ export interface BaseDatabaseAdapter {
   connect?: Connect
   count: Count
   countGlobalVersions: CountGlobalVersions
-
   countVersions: CountVersions
 
   create: Create
 
   createGlobal: CreateGlobal
-  createGlobalVersion: CreateGlobalVersion
 
+  createGlobalVersion: CreateGlobalVersion
   /**
    * Output a migration file
    */
@@ -373,7 +372,8 @@ export type FindGlobalVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
-  collection: CollectionSlug
+  collection?: CollectionSlug
+  globalSlug?: GlobalSlug
   locale?: string
   req?: Partial<PayloadRequest>
   sort?: {
