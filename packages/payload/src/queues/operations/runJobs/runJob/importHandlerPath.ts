@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 import { pathToFileURL } from 'url'
 
+import { extractPathAndExportName } from '../../../../utilities/extractPathAndExportName.js'
+
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner: T
-  const [runnerPath, runnerImportName] = path.split('#')
+  const { exportName: runnerImportName, path: runnerPath } = extractPathAndExportName(path)
 
   let runnerModule
   try {
