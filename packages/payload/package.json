@@ -109,6 +109,7 @@
     "qs-esm": "7.0.2",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
+    "ssrf-req-filter": "1.1.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.19.2",
     "uuid": "10.0.0",
