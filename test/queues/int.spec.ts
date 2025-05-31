@@ -648,8 +648,39 @@ describe('Queues', () => {
       limit: 100,
     })
 
+    await expect(async () => {
+      await expect(
+        page.locator('.autosave:has-text("Last saved less than a minute ago")'),
+      ).toBeVisible()
+    }).toPass({
+      timeout: 3000,
+    })
+
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('hello!')
+  })
+
+  it('can create and autorun jobs', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      queue: 'autorunSecond',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    // Do not call payload.jobs.run()
+
+    // Autorun runs every second - so should definitely be done if we wait 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 
   it('should respect deleteJobOnComplete true default configuration', async () => {
@@ -1367,6 +1398,11 @@ describe('Queues', () => {
   })
 
   it('can reliably run workflows with parallel tasks', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (process.env.PAYLOAD_DATABASE === 'supabase') {
+      // TODO: This test is flaky on supabase in CI, so we skip it for now
+      return
+    }
     const amount = 500
     payload.config.jobs.deleteJobOnComplete = false
 

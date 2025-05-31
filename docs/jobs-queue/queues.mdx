@@ -30,7 +30,9 @@ As mentioned above, you can queue jobs, but the jobs won't run unless a worker p
 
 ### Cron jobs
 
-You can use the `jobs.autoRun` property to configure cron jobs:
+The `jobs.autoRun` property allows you to configure cron jobs that automatically run queued jobs at specified intervals. Note that this does not _queue_ new jobs - only _runs_ jobs that are already in the specified queue.
+
+**Example**:
 
 ```ts
 export default buildConfig({
