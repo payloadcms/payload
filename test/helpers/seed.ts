@@ -35,7 +35,11 @@ export async function seedDB({
   /**
    * Reset database
    */
-  await resetDB(_payload, collectionSlugs)
+  try {
+    await resetDB(_payload, collectionSlugs)
+  } catch (error) {
+    console.error('Error in operation (resetting database):', error)
+  }
   /**
    * Delete uploads directory if it exists
    */
@@ -117,18 +121,22 @@ export async function seedDB({
    *  Postgres: No need for any action here, since we only delete the table data and no schemas
    */
   // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
-  if (isMongoose(_payload)) {
-    await Promise.all([
-      ...collectionSlugs.map(async (collectionSlug) => {
-        await _payload.db.collections[collectionSlug].createIndexes()
-      }),
-    ])
+  try {
+    if (isMongoose(_payload)) {
+      await Promise.all([
+        ...collectionSlugs.map(async (collectionSlug) => {
+          await _payload.db.collections[collectionSlug].createIndexes()
+        }),
+      ])
 
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await _payload.db?.collections[coll.slug]?.ensureIndexes()
-      }),
-    )
+      await Promise.all(
+        _payload.config.collections.map(async (coll) => {
+          await _payload.db?.collections[coll.slug]?.ensureIndexes()
+        }),
+      )
+    }
+  } catch (e) {
+    console.error('Error in operation (re-creating indexes):', e)
   }
 
   /**

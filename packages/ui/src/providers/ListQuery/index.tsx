@@ -27,6 +27,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
 }) => {
+  // TODO: Investigate if this is still needed
+  // eslint-disable-next-line react-compiler/react-compiler
   'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
@@ -40,7 +42,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const contextRef = useRef({} as IListQueryContext)
 
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current.modified = modified
 
   const { onQueryChange } = useListDrawerContext()
@@ -210,7 +211,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         query: currentQuery,
         refineListData,
         setModified,
-        // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
+
         ...contextRef.current,
       }}
     >

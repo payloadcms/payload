@@ -9,7 +9,7 @@
 .content {
   display: flex;
   align-items: center;
-  margin: 0 var(--base(0.5));
+  margin: 0 calc(var(--base) * 0.5);
 }
 
 .divider {

@@ -1,8 +1,4 @@
-// As this is the demo folder, we import Payload SCSS functions relatively.
-@import '../../../../../packages/ui/src/scss/styles.scss';
-
-// In your own projects, you'd import as follows:
-// @import '~payload/scss';
+@import '~@payloadcms/ui/scss';
 
 .custom-minimal-view {
   &__login-btn {
