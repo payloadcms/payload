@@ -66,6 +66,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
 
+    const inferredMimeType =
+      (filename && filename.endsWith('.glb') && 'model/gltf-binary') ||
+      (filename && filename.endsWith('.gltf') && 'model/gltf+json') ||
+      mime
+
     // Define methods and handlers for upload process.
     const { cleanup, complete, dataHandler, getFilePath, getFileSize, getHash, getWritePromise } =
       options.useTempFiles
@@ -137,7 +142,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
             buffer: complete(),
             encoding,
             hash: getHash(),
-            mimetype: mime,
+            mimetype: inferredMimeType,
             size,
             tempFilePath: getFilePath(),
             truncated: Boolean('truncated' in file && file.truncated) || false,

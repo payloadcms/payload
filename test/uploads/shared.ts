@@ -25,3 +25,4 @@ export const withOnlyJPEGMetadataSlug = 'with-only-jpeg-meta-data'
 export const customFileNameMediaSlug = 'custom-file-name-media'
 
 export const listViewPreviewSlug = 'list-view-preview'
+export const threeDimensionalSlug = 'three-dimensional'
