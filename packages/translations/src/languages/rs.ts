@@ -194,7 +194,7 @@ export const rsTranslations: DefaultTranslationsObject = {
       'Uskoro ćete premestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
     moveItemToRootConfirmation:
       'Upravo ćete premestiti <1>{{title}}</1> u osnovnu fasciklu. Da li ste sigurni?',
-    movingFromFolder: 'Premeštanje {{title}} iz {{folderName}}',
+    movingFromFolder: 'Premeštanje {{title}} iz {{fromFolder}}',
     newFolder: 'Novi folder',
     noFolder: 'Nema foldera',
     renameFolder: 'Preimenuj folder',
