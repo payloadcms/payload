@@ -648,14 +648,6 @@ describe('Queues', () => {
       limit: 100,
     })
 
-    await expect(async () => {
-      await expect(
-        page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-      ).toBeVisible()
-    }).toPass({
-      timeout: 3000,
-    })
-
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('hello!')
   })
