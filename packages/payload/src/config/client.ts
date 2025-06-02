@@ -146,15 +146,11 @@ export const createClientConfig = ({
         break
       case 'folders':
         if (config.folders) {
-          clientConfig.folders = {}
-          if (config.folders.debug) {
-            clientConfig.folders.debug = config.folders.debug
-          }
-          if (config.folders.fieldName) {
-            clientConfig.folders.fieldName = config.folders.fieldName
-          }
-          if (config.folders.slug) {
-            clientConfig.folders.slug = config.folders.slug
+          clientConfig.folders = {
+            slug: config.folders.slug,
+            browseByFolder: config.folders.browseByFolder,
+            debug: config.folders.debug,
+            fieldName: config.folders.fieldName,
           }
         }
         break

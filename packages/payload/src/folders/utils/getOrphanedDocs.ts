@@ -6,15 +6,17 @@ import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type Args = {
   collectionSlug: CollectionSlug
+  folderFieldName: string
   req: PayloadRequest
   /**
    * Optional where clause to filter documents by
    * @default undefined
    */
-  where: Where // todo: make optional
+  where?: Where
 }
 export async function getOrphanedDocs({
   collectionSlug,
+  folderFieldName,
   req,
   where,
 }: Args): Promise<FolderOrDocument[]> {
@@ -22,12 +24,12 @@ export async function getOrphanedDocs({
   const noParentFolderConstraint: Where = {
     or: [
       {
-        [payload.config.folders.fieldName]: {
+        [folderFieldName]: {
           exists: false,
         },
       },
       {
-        [payload.config.folders.fieldName]: {
+        [folderFieldName]: {
           equals: null,
         },
       },
@@ -49,7 +51,7 @@ export async function getOrphanedDocs({
   return (
     orphanedFolders?.docs.map((doc) =>
       formatFolderOrDocumentItem({
-        folderFieldName: payload.config.folders.fieldName,
+        folderFieldName,
         isUpload: Boolean(payload.collections[collectionSlug].config.upload),
         relationTo: collectionSlug,
         useAsTitle: payload.collections[collectionSlug].config.admin.useAsTitle,

@@ -35,10 +35,10 @@ export const buildCollectionFolderView = async (
   args: BuildCollectionFolderViewStateArgs,
 ): Promise<BuildCollectionFolderViewResult> => {
   const {
+    browseByFolderSlugs = [],
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
-    folderCollectionSlugs,
     folderID,
     initPageResult,
     isInDrawer,
@@ -70,12 +70,12 @@ export const buildCollectionFolderView = async (
   if (collectionConfig) {
     const query = queryFromArgs || queryFromReq
 
-    const collectionFolderPreferences = await getPreferences<{ viewPreference: string }>(
-      `${collectionSlug}-collection-folder`,
-      payload,
-      user.id,
-      user.collection,
-    )
+    const collectionFolderPreferences = await getPreferences<{
+      sort?: string
+      viewPreference: string
+    }>(`${collectionSlug}-collection-folder`, payload, user.id, user.collection)
+
+    const sortPreference = collectionFolderPreferences?.value.sort
 
     const {
       routes: { admin: adminRoute },
@@ -83,7 +83,7 @@ export const buildCollectionFolderView = async (
 
     if (
       (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) ||
-      !folderCollectionSlugs.includes(collectionSlug)
+      !config.folders
     ) {
       throw new Error('not-found')
     }
@@ -96,6 +96,7 @@ export const buildCollectionFolderView = async (
       localeCode: fullLocale?.code,
       req: initPageResult.req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      sort: sortPreference,
     })
 
     if (folderCollectionConstraints) {
@@ -109,6 +110,7 @@ export const buildCollectionFolderView = async (
       localeCode: fullLocale?.code,
       req: initPageResult.req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      sort: sortPreference,
     })
     if (collectionConstraints) {
       documentWhere = collectionConstraints
@@ -179,9 +181,10 @@ export const buildCollectionFolderView = async (
       View: (
         <FolderProvider
           breadcrumbs={breadcrumbs}
+          browseByFolderSlugs={browseByFolderSlugs}
           collectionSlug={collectionSlug}
           documents={documents}
-          folderCollectionSlugs={folderCollectionSlugs}
+          folderFieldName={config.folders.fieldName}
           folderID={folderID}
           search={search}
           subfolders={subfolders}

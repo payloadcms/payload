@@ -30,6 +30,10 @@ export type FileCardData = {
 export type FolderContextValue = {
   addItems: (args: FolderOrDocument[]) => void
   breadcrumbs?: FolderBreadcrumb[]
+  /**
+   * Folder enabled collection slugs
+   */
+  readonly browseByFolderSlugs?: CollectionSlug[]
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
@@ -79,6 +83,7 @@ export type FolderContextValue = {
 const Context = React.createContext<FolderContextValue>({
   addItems: () => {},
   breadcrumbs: [],
+  browseByFolderSlugs: [],
   clearSelections: () => {},
   currentFolder: null,
   documents: [],
@@ -142,6 +147,10 @@ export type FolderProviderProps = {
    */
   readonly breadcrumbs?: FolderBreadcrumb[]
   /**
+   * Browse-by-folder enabled collection slugs
+   */
+  readonly browseByFolderSlugs: CollectionSlug[]
+  /**
    * Children to render inside the provider
    */
   readonly children: React.ReactNode
@@ -157,10 +166,7 @@ export type FolderProviderProps = {
    * The collection slugs that are being viewed
    */
   readonly filteredCollectionSlugs?: CollectionSlug[]
-  /**
-   * Folder enabled collection slugs
-   */
-  readonly folderCollectionSlugs: CollectionSlug[]
+  readonly folderFieldName: string
   /**
    * The ID of the current folder
    */
@@ -185,11 +191,12 @@ export type FolderProviderProps = {
 export function FolderProvider({
   allowMultiSelection = true,
   breadcrumbs: _breadcrumbsFromProps = [],
+  browseByFolderSlugs = [],
   children,
   collectionSlug,
   documents: allDocumentsFromProps = [],
   filteredCollectionSlugs,
-  folderCollectionSlugs = [],
+  folderFieldName,
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
   sort,
@@ -197,7 +204,6 @@ export function FolderProvider({
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
   const { config, getEntityConfig } = useConfig()
-  const folderFieldName = config.folders.fieldName
   const { routes, serverURL } = config
   const drawerDepth = useDrawerDepth()
   const { t } = useTranslation()
@@ -205,7 +211,9 @@ export function FolderProvider({
   const { startRouteTransition } = useRouteTransition()
 
   const [folderCollectionConfig] = React.useState(() =>
-    config.collections.find((collection) => collection.slug === config.folders.slug),
+    config.collections.find(
+      (collection) => config.folders && collection.slug === config.folders.slug,
+    ),
   )
   const folderCollectionSlug = folderCollectionConfig.slug
 
@@ -214,7 +222,7 @@ export function FolderProvider({
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>(null)
   const [visibleCollectionSlugs, setVisibleCollectionSlugs] = React.useState<CollectionSlug[]>(
-    filteredCollectionSlugs || [...folderCollectionSlugs, folderCollectionSlug],
+    filteredCollectionSlugs || [...browseByFolderSlugs, folderCollectionSlug],
   )
   const [activeFolderID, setActiveFolderID] =
     React.useState<FolderContextValue['folderID']>(_folderIDFromProps)
@@ -874,7 +882,7 @@ export function FolderProvider({
         setAllSubfolders(sortedAllSubfolders)
       }
     },
-    [activeFolderID, documents, separateItems, sortItems, subfolders],
+    [activeFolderID, documents, separateItems, sortItems, subfolders, parentFolderContext],
   )
 
   /**
@@ -964,7 +972,7 @@ export function FolderProvider({
               const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>(
                 (doc: Document) =>
                   formatFolderOrDocumentItem({
-                    folderFieldName: config.folders.fieldName,
+                    folderFieldName,
                     isUpload: Boolean(collectionConfig.upload),
                     relationTo: collectionSlug,
                     useAsTitle: collectionConfig.admin.useAsTitle,
@@ -1039,6 +1047,7 @@ export function FolderProvider({
       clearSelections,
       serverURL,
       routes.api,
+      folderFieldName,
       t,
       getFolderData,
       getEntityConfig,
@@ -1097,6 +1106,7 @@ export function FolderProvider({
       value={{
         addItems,
         breadcrumbs,
+        browseByFolderSlugs,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
           ? formatFolderOrDocumentItem({

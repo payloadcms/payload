@@ -35,7 +35,7 @@ export function ListCreateNewDocInFolderButton({
   const { i18n } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { config } = useConfig()
-  const { folderCollectionConfig, folderID } = useFolder()
+  const { folderCollectionConfig, folderFieldName, folderID } = useFolder()
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
     collectionSlugs.reduce((acc, collectionSlug) => {
@@ -114,7 +114,7 @@ export function ListCreateNewDocInFolderButton({
           collectionSlug={createCollectionSlug}
           drawerSlug={newDocInFolderDrawerSlug}
           initialData={{
-            [config.folders.fieldName]: folderID,
+            [folderFieldName]: folderID,
           }}
           onSave={({ doc }) => {
             closeModal(newDocInFolderDrawerSlug)

@@ -18,9 +18,12 @@ export const populateFolderDataEndpoint: Endpoint = {
       )
     }
 
-    const folderCollection = Boolean(req.payload.collections?.[req.payload.config.folders.slug])
-
-    if (!folderCollection) {
+    if (
+      !(
+        req.payload.config.folders &&
+        Boolean(req.payload.collections?.[req.payload.config.folders.slug])
+      )
+    ) {
       return Response.json(
         {
           message: 'Folders are not configured',
@@ -44,20 +47,16 @@ export const populateFolderDataEndpoint: Endpoint = {
       const collectionConstraints = await buildFolderWhereConstraints({
         collectionConfig,
         folderID: req.searchParams?.get('folderID') || undefined,
-        localeCode: req?.locale,
+        localeCode: typeof req?.locale === 'string' ? req.locale : undefined,
         req,
         search: req.searchParams?.get('search') || undefined,
+        sort: req.searchParams?.get('sort') || undefined,
       })
 
       if (collectionConstraints) {
         documentWhere = collectionConstraints
       }
     } else {
-      if (!documentWhere) {
-        documentWhere = {
-          or: [],
-        }
-      }
       // loop over all folder enabled collections and build constraints for each
       for (const collectionSlug of Object.keys(req.payload.collections)) {
         const collectionConfig = req.payload.collections[collectionSlug].config
@@ -66,13 +65,20 @@ export const populateFolderDataEndpoint: Endpoint = {
           const collectionConstraints = await buildFolderWhereConstraints({
             collectionConfig,
             folderID: req.searchParams?.get('folderID') || undefined,
-            localeCode: req?.locale,
+            localeCode: typeof req?.locale === 'string' ? req.locale : undefined,
             req,
             search: req.searchParams?.get('search') || undefined,
           })
 
           if (collectionConstraints) {
-            documentWhere.or.push(collectionConstraints)
+            if (!documentWhere) {
+              documentWhere = { or: [] }
+            }
+            if (!Array.isArray(documentWhere.or)) {
+              documentWhere.or = [documentWhere]
+            } else if (Array.isArray(documentWhere.or)) {
+              documentWhere.or.push(collectionConstraints)
+            }
           }
         }
       }
@@ -81,7 +87,7 @@ export const populateFolderDataEndpoint: Endpoint = {
     const folderConstraints = await buildFolderWhereConstraints({
       collectionConfig: req.payload.collections[req.payload.config.folders.slug].config,
       folderID: req.searchParams?.get('folderID') || undefined,
-      localeCode: req?.locale,
+      localeCode: typeof req?.locale === 'string' ? req.locale : undefined,
       req,
       search: req.searchParams?.get('search') || undefined,
     })

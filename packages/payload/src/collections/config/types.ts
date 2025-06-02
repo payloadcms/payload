@@ -444,7 +444,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Enables folders for this collection
    */
-  folders?: CollectionFoldersConfiguration
+  folders?: boolean | CollectionFoldersConfiguration
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -594,7 +594,7 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -608,6 +608,7 @@ export interface SanitizedCollectionConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
+  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
 
   /**

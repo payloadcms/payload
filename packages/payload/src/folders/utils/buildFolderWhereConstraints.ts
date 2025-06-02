@@ -10,46 +10,50 @@ type Args = {
   localeCode?: string
   req: PayloadRequest
   search?: string
+  sort?: string
 }
 export async function buildFolderWhereConstraints({
   collectionConfig,
   folderID,
   localeCode,
   req,
-  search,
+  search = '',
+  sort,
 }: Args): Promise<undefined | Where> {
-  const searchConstraint = mergeListSearchAndWhere({
-    collectionConfig,
-    search,
-    // where // cannot have where since fields in folders and collection will differ
-  })
+  const constraints: Where[] = [
+    mergeListSearchAndWhere({
+      collectionConfig,
+      search,
+      // where // cannot have where since fields in folders and collection will differ
+    }),
+  ]
 
-  let baseListFilterConstraint: undefined | Where = undefined
   if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-    baseListFilterConstraint = await collectionConfig.admin.baseListFilter({
+    const baseListFilterConstraint = await collectionConfig.admin.baseListFilter({
       limit: 0,
       locale: localeCode,
       page: 1,
       req,
-      sort: undefined,
+      sort:
+        sort ||
+        (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
     })
-  }
 
-  let relationConstraint: undefined | Where = undefined
-  if (folderID) {
-    // build folder join where constraints
-    relationConstraint = {
-      relationTo: {
-        equals: collectionConfig.slug,
-      },
+    if (baseListFilterConstraint) {
+      constraints.push(baseListFilterConstraint)
     }
   }
 
-  const filteredConstraints = [
-    searchConstraint,
-    baseListFilterConstraint,
-    relationConstraint,
-  ].filter(Boolean)
+  if (folderID) {
+    // build folder join where constraints
+    constraints.push({
+      relationTo: {
+        equals: collectionConfig.slug,
+      },
+    })
+  }
+
+  const filteredConstraints = constraints.filter(Boolean)
 
   if (filteredConstraints.length > 1) {
     return combineWhereConstraints(filteredConstraints)
