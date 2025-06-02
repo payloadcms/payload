@@ -42,6 +42,22 @@ describe('Collections - Uploads', () => {
     }
   })
 
+  const blockedUrls = [
+    'http://blocked-domain.com/file.png',
+    'http://127.0.0.1/file.png',
+    'http://localhost/file.png',
+    'http://[::1]/file.png',
+    'http://10.0.0.1/file.png',
+    'http://192.168.1.1/file.png',
+    'http://172.16.0.1/file.png',
+    'http://169.254.1.1/file.png',
+    'http://224.0.0.1/file.png',
+    'http://0.0.0.0/file.png',
+    'http://255.255.255.255/file.png',
+    'http://tellico.fun/redirect.php?target=http://localhost/test',
+    'https://tellico.fun/redirect.php?target=http://localhost/test',
+  ]
+
   describe('REST API', () => {
     describe('create', () => {
       it('creates from form data given a png', async () => {
@@ -363,22 +379,6 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('filters', () => {
-      const blockedUrls = [
-        'http://blocked-domain.com/file.png',
-        'http://127.0.0.1/file.png',
-        'http://localhost/file.png',
-        'http://[::1]/file.png',
-        'http://10.0.0.1/file.png',
-        'http://192.168.1.1/file.png',
-        'http://172.16.0.1/file.png',
-        'http://169.254.1.1/file.png',
-        'http://224.0.0.1/file.png',
-        'http://0.0.0.0/file.png',
-        'http://255.255.255.255/file.png',
-        'http://tellico.fun/redirect.php?target=http://localhost/test',
-        'https://tellico.fun/redirect.php?target=http://localhost/test',
-      ]
-
       blockedUrls.forEach((url) => {
         it(`should block upload from blocked URL: ${url}`, async () => {
           const response = await restClient.POST(`/${mediaSlug}`, {
@@ -580,22 +580,6 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('filters', () => {
-      const blockedUrls = [
-        'http://blocked-domain.com/file.png',
-        'http://127.0.0.1/file.png',
-        'http://localhost/file.png',
-        'http://[::1]/file.png',
-        'http://10.0.0.1/file.png',
-        'http://192.168.1.1/file.png',
-        'http://172.16.0.1/file.png',
-        'http://169.254.1.1/file.png',
-        'http://224.0.0.1/file.png',
-        'http://0.0.0.0/file.png',
-        'http://255.255.255.255/file.png',
-        'http://tellico.fun/redirect.php?target=http://localhost/test',
-        'https://tellico.fun/redirect.php?target=http://localhost/test',
-      ]
-
       blockedUrls.forEach((url) => {
         it(`should block upload from blocked URL: ${url}`, async () => {
           await expect(
