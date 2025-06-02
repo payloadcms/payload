@@ -3,7 +3,6 @@ import type { Connect, Migration, Payload } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
 
@@ -52,16 +51,9 @@ export const connect: Connect = async function connect(
 ) {
   const { hotReload } = options
 
-  this.schema = {
-    pgSchema: this.pgSchema,
-    ...this.tables,
-    ...this.relations,
-    ...this.enums,
-  }
-
   try {
     if (!this.pool) {
-      this.pool = new pg.Pool(this.poolOptions)
+      this.pool = new this.pg.Pool(this.poolOptions)
       await connectWithReconnect({ adapter: this, payload: this.payload })
     }
 

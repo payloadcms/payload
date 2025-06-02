@@ -1,7 +1,7 @@
 /**
  * @param {import('next').NextConfig} nextConfig
- * @param {Object} [options] - Optional configuration options
- * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
+ * @param {Object} [sortOnOptions] - Optional configuration options
+ * @param {boolean} [sortOnOptions.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
  *
  * @returns {import('next').NextConfig}
  * */
@@ -55,16 +55,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     outputFileTracingIncludes: {
       ...(nextConfig?.outputFileTracingIncludes || {}),
       '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
-    },
-    experimental: {
-      ...(nextConfig?.experimental || {}),
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          'payload-mock-package': 'payload-mock-package',
-        },
-      },
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
     ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
@@ -142,6 +132,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'drizzle-kit/api',
           'sharp',
           'libsql',
+          'require-in-the-middle',
         ],
         ignoreWarnings: [
           ...(incomingWebpackConfig?.ignoreWarnings || []),
@@ -149,6 +140,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           { file: /node_modules\/mongodb\/lib\/utils\.js/ },
           { module: /node_modules\/mongodb\/lib\/bson\.js/ },
           { file: /node_modules\/mongodb\/lib\/bson\.js/ },
+        ],
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),

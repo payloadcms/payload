@@ -28,25 +28,35 @@ const traverseFields = ({
         break
       }
       case 'group': {
-        let targetResult
-        if (typeof field.saveToJWT === 'string') {
-          targetResult = field.saveToJWT
-          result[field.saveToJWT] = data[field.name]
-        } else if (field.saveToJWT) {
-          targetResult = field.name
-          result[field.name] = data[field.name]
+        if (fieldAffectsData(field)) {
+          let targetResult
+          if (typeof field.saveToJWT === 'string') {
+            targetResult = field.saveToJWT
+            result[field.saveToJWT] = data[field.name]
+          } else if (field.saveToJWT) {
+            targetResult = field.name
+            result[field.name] = data[field.name]
+          }
+          const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
+          const groupResult = (targetResult ? result[targetResult] : result) as Record<
+            string,
+            unknown
+          >
+          traverseFields({
+            data: groupData,
+            fields: field.fields,
+            result: groupResult,
+          })
+          break
+        } else {
+          traverseFields({
+            data,
+            fields: field.fields,
+            result,
+          })
+
+          break
         }
-        const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
-        const groupResult = (targetResult ? result[targetResult] : result) as Record<
-          string,
-          unknown
-        >
-        traverseFields({
-          data: groupData,
-          fields: field.fields,
-          result: groupResult,
-        })
-        break
       }
       case 'tab': {
         if (tabHasName(field)) {

@@ -12,7 +12,6 @@ import { Button } from '../../elements/Button/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
@@ -20,15 +19,16 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListHeader } from './ListHeader/index.js'
+import { CollectionListHeader } from './ListHeader/index.js'
+import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -45,10 +45,13 @@ export function DefaultListView(props: ListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
     newDocumentURL,
+    queryPreset,
+    queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -56,12 +59,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const {
-    allowCreate,
-    createNewDrawerSlug,
-    drawerSlug: listDrawerSlug,
-    onBulkSelect,
-  } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -88,8 +86,12 @@ export function DefaultListView(props: ListViewClientProps) {
   } = useListQuery()
 
   const { openModal } = useModal()
-  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
-  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
+  const {
+    drawerSlug: bulkUploadDrawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -99,9 +101,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  const isInDrawer = Boolean(listDrawerSlug)
-
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
 
@@ -154,7 +154,7 @@ export function DefaultListView(props: ListViewClientProps) {
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
-              <ListHeader
+              <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
                   <div className={`${baseClass}__sub-header`}>
@@ -177,7 +177,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                t={t}
+                viewType="list"
               />
               <ListControls
                 beforeActions={
@@ -189,7 +189,12 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
+                disableQueryPresets={
+                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
+                }
                 listMenuItems={listMenuItems}
+                queryPreset={queryPreset}
+                queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

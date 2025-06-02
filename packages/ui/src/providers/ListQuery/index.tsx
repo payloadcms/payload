@@ -3,20 +3,21 @@ import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
 import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { ListQueryProps } from './types.js'
+import type { IListQueryContext, ListQueryProps } from './types.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { ListQueryContext } from './context.js'
+import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 
 export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  collectionSlug,
   columns,
   data,
   defaultLimit,
@@ -24,16 +25,23 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
+  orderableFieldName,
 }) => {
   'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
+  const [modified, setModified] = useState(false)
 
   const searchParams = useMemo<ListQuery>(
     () => parseSearchParams(rawSearchParams),
     [rawSearchParams],
   )
+
+  const contextRef = useRef({} as IListQueryContext)
+
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
+  contextRef.current.modified = modified
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -41,35 +49,53 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (modifySearchParams) {
       return searchParams
     } else {
-      return {}
+      return {
+        limit: String(defaultLimit),
+        sort: defaultSort,
+      }
     }
   })
 
-  const refineListData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async (query: ListQuery) => {
-      let page = 'page' in query ? query.page : currentQuery?.page
+  const mergeQuery = useCallback(
+    (newQuery: ListQuery = {}): ListQuery => {
+      let page = 'page' in newQuery ? newQuery.page : currentQuery?.page
 
-      if ('where' in query || 'search' in query) {
+      if ('where' in newQuery || 'search' in newQuery) {
         page = '1'
       }
 
-      const newQuery: ListQuery = {
-        columns: 'columns' in query ? query.columns : currentQuery.columns,
-        limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
+      const mergedQuery: ListQuery = {
+        ...currentQuery,
+        ...newQuery,
+        columns: 'columns' in newQuery ? newQuery.columns : currentQuery.columns,
+        limit: 'limit' in newQuery ? newQuery.limit : (currentQuery?.limit ?? String(defaultLimit)),
         page,
-        search: 'search' in query ? query.search : currentQuery?.search,
-        sort: 'sort' in query ? query.sort : ((currentQuery?.sort as string) ?? defaultSort),
-        where: 'where' in query ? query.where : currentQuery?.where,
+        preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
+        search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
+        sort: 'sort' in newQuery ? newQuery.sort : ((currentQuery?.sort as string) ?? defaultSort),
+        where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
       }
+
+      return mergedQuery
+    },
+    [currentQuery, defaultLimit, defaultSort],
+  )
+
+  const refineListData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async (incomingQuery: ListQuery, modified?: boolean) => {
+      if (modified !== undefined) {
+        setModified(modified)
+      } else {
+        setModified(true)
+      }
+
+      const newQuery = mergeQuery(incomingQuery)
 
       if (modifySearchParams) {
         startRouteTransition(() =>
           router.replace(
-            `${qs.stringify(
-              { ...newQuery, columns: JSON.stringify(newQuery.columns) },
-              { addQueryPrefix: true },
-            )}`,
+            `${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) }, { addQueryPrefix: true })}`,
           ),
         )
       } else if (
@@ -83,18 +109,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery?.columns,
-      currentQuery?.limit,
-      currentQuery?.page,
-      currentQuery?.search,
-      currentQuery?.sort,
-      currentQuery?.where,
-      startRouteTransition,
-      defaultLimit,
-      defaultSort,
+      mergeQuery,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
+      startRouteTransition,
       router,
     ],
   )
@@ -180,17 +199,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   return (
     <ListQueryContext
       value={{
+        collectionSlug,
         data,
         handlePageChange,
         handlePerPageChange,
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        orderableFieldName,
         query: currentQuery,
         refineListData,
+        setModified,
+        // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
+        ...contextRef.current,
       }}
     >
-      {children}
+      <ListQueryModifiedContext value={modified}>{children}</ListQueryModifiedContext>
     </ListQueryContext>
   )
 }

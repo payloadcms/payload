@@ -6,6 +6,8 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
+import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -23,6 +25,7 @@ type TraverseFieldsArgs = {
    * The full Payload config
    */
   config: SanitizedConfig
+  currentTableName: string
   /**
    * The data reference to be mutated within this recursive function
    */
@@ -60,10 +63,12 @@ type TraverseFieldsArgs = {
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
+  tablePath: string
   /**
    * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
    */
   texts: Record<string, Record<string, unknown>[]>
+  topLevelTableName: string
   /**
    * Set to a locale if this group of fields is within a localized array or block.
    */
@@ -76,6 +81,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   adapter,
   blocks,
   config,
+  currentTableName,
   dataRef,
   deletions,
   fieldPrefix,
@@ -86,7 +92,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
   path,
   relationships,
   table,
+  tablePath,
   texts,
+  topLevelTableName,
   withinArrayOrBlockLocale,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
@@ -111,6 +119,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
     const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
+      const arrayTableName = adapter.tableNameMap.get(
+        `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
+      )
+
+      fieldData = table[getArrayRelationName({ field, path: fieldName, tableName: arrayTableName })]
+
       if (Array.isArray(fieldData)) {
         if (isLocalized) {
           result[field.name] = fieldData.reduce((arrayResult, row) => {
@@ -130,6 +144,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 adapter,
                 blocks,
                 config,
+                currentTableName: arrayTableName,
                 dataRef: data,
                 deletions,
                 fieldPrefix: '',
@@ -139,7 +154,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                 relationships,
                 table: row,
+                tablePath: '',
                 texts,
+                topLevelTableName,
                 withinArrayOrBlockLocale: locale,
               })
 
@@ -176,6 +193,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   adapter,
                   blocks,
                   config,
+                  currentTableName: arrayTableName,
                   dataRef: row,
                   deletions,
                   fieldPrefix: '',
@@ -185,7 +203,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${sanitizedPath}${field.name}.${i}`,
                   relationships,
                   table: row,
+                  tablePath: '',
                   texts,
+                  topLevelTableName,
                   withinArrayOrBlockLocale,
                 }),
               )
@@ -229,11 +249,17 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   (block) => typeof block !== 'string' && block.slug === row.blockType,
                 ) as FlattenedBlock | undefined)
 
+              const tableName = resolveBlockTableName(
+                block,
+                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
+              )
+
               if (block) {
                 const blockResult = traverseFields<T>({
                   adapter,
                   blocks,
                   config,
+                  currentTableName: tableName,
                   dataRef: row,
                   deletions,
                   fieldPrefix: '',
@@ -243,7 +269,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${blockFieldPath}.${row._order - 1}`,
                   relationships,
                   table: row,
+                  tablePath: '',
                   texts,
+                  topLevelTableName,
                   withinArrayOrBlockLocale: locale,
                 })
 
@@ -301,11 +329,19 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   delete row._index
                 }
 
+                const tableName = resolveBlockTableName(
+                  block,
+                  adapter.tableNameMap.get(
+                    `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                  ),
+                )
+
                 acc.push(
                   traverseFields<T>({
                     adapter,
                     blocks,
                     config,
+                    currentTableName: tableName,
                     dataRef: row,
                     deletions,
                     fieldPrefix: '',
@@ -315,7 +351,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     path: `${blockFieldPath}.${i}`,
                     relationships,
                     table: row,
+                    tablePath: '',
                     texts,
+                    topLevelTableName,
                     withinArrayOrBlockLocale,
                   }),
                 )
@@ -615,6 +653,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             adapter,
             blocks,
             config,
+            currentTableName,
             dataRef: groupData as Record<string, unknown>,
             deletions,
             fieldPrefix: groupFieldPrefix,
@@ -625,13 +664,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
             path: `${sanitizedPath}${field.name}`,
             relationships,
             table,
+            tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             texts,
+            topLevelTableName,
             withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
           })
-
-          if ('_order' in ref) {
-            delete ref._order
-          }
 
           return
         }

@@ -372,36 +372,61 @@ const group: FieldSchemaGenerator<GroupField> = (
   buildSchemaOptions,
   parentIsLocalized,
 ): void => {
-  const formattedBaseSchema = formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized })
+  if (fieldAffectsData(field)) {
+    const formattedBaseSchema = formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized })
 
-  // carry indexSortableFields through to versions if drafts enabled
-  const indexSortableFields =
-    buildSchemaOptions.indexSortableFields &&
-    field.name === 'version' &&
-    buildSchemaOptions.draftsEnabled
+    // carry indexSortableFields through to versions if drafts enabled
+    const indexSortableFields =
+      buildSchemaOptions.indexSortableFields &&
+      field.name === 'version' &&
+      buildSchemaOptions.draftsEnabled
 
-  const baseSchema: SchemaTypeOptions<any> = {
-    ...formattedBaseSchema,
-    type: buildSchema({
-      buildSchemaOptions: {
-        disableUnique: buildSchemaOptions.disableUnique,
-        draftsEnabled: buildSchemaOptions.draftsEnabled,
-        indexSortableFields,
-        options: {
-          _id: false,
-          id: false,
-          minimize: false,
+    const baseSchema: SchemaTypeOptions<any> = {
+      ...formattedBaseSchema,
+      type: buildSchema({
+        buildSchemaOptions: {
+          disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
+          indexSortableFields,
+          options: {
+            _id: false,
+            id: false,
+            minimize: false,
+          },
         },
-      },
-      configFields: field.fields,
-      parentIsLocalized: parentIsLocalized || field.localized,
-      payload,
-    }),
-  }
+        configFields: field.fields,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        payload,
+      }),
+    }
 
-  schema.add({
-    [field.name]: localizeSchema(field, baseSchema, payload.config.localization, parentIsLocalized),
-  })
+    schema.add({
+      [field.name]: localizeSchema(
+        field,
+        baseSchema,
+        payload.config.localization,
+        parentIsLocalized,
+      ),
+    })
+  } else {
+    field.fields.forEach((subField) => {
+      if (fieldIsVirtual(subField)) {
+        return
+      }
+
+      const addFieldSchema = getSchemaGenerator(subField.type)
+
+      if (addFieldSchema) {
+        addFieldSchema(
+          subField,
+          schema,
+          payload,
+          buildSchemaOptions,
+          (parentIsLocalized || field.localized) ?? false,
+        )
+      }
+    })
+  }
 }
 
 const json: FieldSchemaGenerator<JSONField> = (

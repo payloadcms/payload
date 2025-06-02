@@ -32,9 +32,12 @@ import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
-// This function will be responsible for rendering an Edit Document view
-// it will be called on the server for Edit page views as well as
-// called on-demand from document drawers
+/**
+ * This function is responsible for rendering
+ * an Edit Document view on the server for both:
+ *  - default document edit views
+ *  - on-demand edit views within drawers
+ */
 export const renderDocument = async ({
   disableActions,
   documentSubViewType,
@@ -44,6 +47,7 @@ export const renderDocument = async ({
   initPageResult,
   overrideEntityVisibility,
   params,
+  redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
@@ -51,6 +55,9 @@ export const renderDocument = async ({
 }: {
   drawerSlug?: string
   overrideEntityVisibility?: boolean
+  readonly redirectAfterCreate?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
@@ -308,7 +315,7 @@ export const renderDocument = async ({
       id = doc.id
       isEditing = getIsEditing({ id: doc.id, collectionSlug, globalSlug })
 
-      if (!drawerSlug) {
+      if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
@@ -358,6 +365,7 @@ export const renderDocument = async ({
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
         unpublishedVersionCount={unpublishedVersionCount}

@@ -10,8 +10,10 @@ import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
 import { clearAndSeedEverything } from './seed.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
+import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
 import { noRetriesSetWorkflow } from './workflows/noRetriesSet.js'
+import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
 import { retries0Workflow } from './workflows/retries0.js'
 import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
 import { retriesRollbackTestWorkflow } from './workflows/retriesRollbackTest.js'
@@ -102,6 +104,11 @@ export default buildConfigWithDefaults({
           hidden: false,
         },
       }
+    },
+    processingOrder: {
+      queues: {
+        lifo: '-createdAt',
+      },
     },
     tasks: [
       {
@@ -375,11 +382,13 @@ export default buildConfigWithDefaults({
       workflowRetries2TasksRetriesUndefinedWorkflow,
       workflowRetries2TasksRetries0Workflow,
       inlineTaskTestWorkflow,
+      inlineTaskTestDelayedWorkflow,
       externalWorkflow,
       retriesBackoffTestWorkflow,
       subTaskWorkflow,
       subTaskFailsWorkflow,
       longRunningWorkflow,
+      parallelTaskWorkflow,
     ],
   },
   editor: lexicalEditor(),

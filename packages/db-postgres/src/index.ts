@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -53,6 +54,7 @@ import {
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
@@ -129,6 +131,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       operators: operatorMap,
+      pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
@@ -172,6 +175,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
@@ -206,12 +210,18 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 
   return {
+    name: 'postgres',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
 
+export type {
+  Args as PostgresAdapterArgs,
+  GeneratedDatabaseSchema,
+  PostgresAdapter,
+} from './types.js'
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

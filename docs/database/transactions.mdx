@@ -69,7 +69,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
 
 ## Direct Transaction Access
 
-When writing your own scripts or custom endpoints, you may wish to have direct control over transactions. This is useful for interacting with your database outside of Payload's local API.
+When writing your own scripts or custom endpoints, you may wish to have direct control over transactions. This is useful for interacting with your database outside of Payload's Local API.
 
 The following functions can be used for managing transactions:
 
@@ -77,7 +77,7 @@ The following functions can be used for managing transactions:
 - `payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
 - `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
-Payload uses the `req` object to pass the transaction ID through to the database adapter. If you are not using the `req` object, you can make a new object to pass the transaction ID directly to database adapter methods and local API calls.
+Payload uses the `req` object to pass the transaction ID through to the database adapter. If you are not using the `req` object, you can make a new object to pass the transaction ID directly to database adapter methods and Local API calls.
 Example:
 
 ```ts
@@ -91,7 +91,7 @@ const standalonePayloadScript = async () => {
   const transactionID = await payload.db.beginTransaction()
 
   try {
-    // Make an update using the local API
+    // Make an update using the Local API
     await payload.update({
       collection: 'posts',
       data: {
@@ -123,7 +123,7 @@ standalonePayloadScript()
 
 If you wish to disable transactions entirely, you can do so by passing `false` as the `transactionOptions` in your database adapter configuration. All the official Payload database adapters support this option.
 
-In addition to allowing database transactions to be disabled at the adapter level. You can prevent Payload from using a transaction in direct calls to the local API by adding `disableTransaction: true` to the args. For example:
+In addition to allowing database transactions to be disabled at the adapter level. You can prevent Payload from using a transaction in direct calls to the Local API by adding `disableTransaction: true` to the args. For example:
 
 ```ts
 await payload.update({
