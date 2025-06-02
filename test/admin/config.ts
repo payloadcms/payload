@@ -9,7 +9,7 @@ import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
-import { EditListItems } from './collections/editListItems.js'
+import { EditMenuItems } from './collections/editMenuItems.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -44,7 +44,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { editListViewSlug } from './slugs.js'
+import { editMenuItemsSlug } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
@@ -54,7 +54,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       url: 'http://localhost:3000/',
-      collections: [editListViewSlug],
+      collections: [editMenuItemsSlug],
     },
     components: {
       actions: ['/components/actions/AdminButton/index.js#AdminButton'],
@@ -169,7 +169,7 @@ export default buildConfigWithDefaults({
     Array,
     DisableDuplicate,
     DisableCopyToLocale,
-    EditListItems,
+    EditMenuItems,
     BaseListFilter,
     with300Documents,
     ListDrawer,

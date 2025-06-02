@@ -85,7 +85,7 @@ export interface Config {
     array: Array;
     'disable-duplicate': DisableDuplicate;
     'disable-copy-to-locale': DisableCopyToLocale;
-    'edit-list-view': EditListView;
+    'edit-menu-items': EditMenuItem;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
@@ -114,7 +114,7 @@ export interface Config {
     array: ArraySelect<false> | ArraySelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
-    'edit-list-view': EditListViewSelect<false> | EditListViewSelect<true>;
+    'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
@@ -469,9 +469,9 @@ export interface DisableCopyToLocale {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "edit-list-view".
+ * via the `definition` "edit-menu-items".
  */
-export interface EditListView {
+export interface EditMenuItem {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -603,8 +603,8 @@ export interface PayloadLockedDocument {
         value: string | DisableCopyToLocale;
       } | null)
     | ({
-        relationTo: 'edit-list-view';
-        value: string | EditListView;
+        relationTo: 'edit-menu-items';
+        value: string | EditMenuItem;
       } | null)
     | ({
         relationTo: 'base-list-filters';
@@ -938,9 +938,9 @@ export interface DisableCopyToLocaleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "edit-list-view_select".
+ * via the `definition` "edit-menu-items_select".
  */
-export interface EditListViewSelect<T extends boolean = true> {
+export interface EditMenuItemsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

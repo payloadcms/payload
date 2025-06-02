@@ -29,7 +29,7 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
-  editListViewSlug,
+  editMenuItemsSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -65,7 +65,7 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
-  let editListItemsURL: AdminUrlUtil
+  let editMenuItemsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -81,7 +81,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
-    editListItemsURL = new AdminUrlUtil(serverURL, editListViewSlug)
+    editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -618,7 +618,7 @@ describe('Document View', () => {
 
   describe('custom editMenuItem components', () => {
     test('should render custom editMenuItems component', async () => {
-      await page.goto(editListItemsURL.create)
+      await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
 
@@ -633,7 +633,7 @@ describe('Document View', () => {
       await expect(customEditMenuItem).toBeVisible()
     })
     test('should render custom editMenuItems component in live preview tab', async () => {
-      await page.goto(editListItemsURL.create)
+      await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
 

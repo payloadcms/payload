@@ -266,9 +266,9 @@ export function MyCustomDocumentControlButton(
 
 The `editMenuItems` property allows you to inject custom components into the 3-dot menu dropdown located in the document controls bar. This dropdown contains default options including `Create New`, `Duplicate`, `Delete`, and other options when additional features are enabled. Any custom components you add will appear below these default items.
 
-To add `editMenuItems`, use the `components.edit.editMenuItems` property in your [Collection Config](../configuration/collections) or `components.elements.editMenuItems` in your [Global Config](../configuration/globals).
+To add `editMenuItems`, use the `components.edit.editMenuItems` property in your [Collection Config](../configuration/collections):
 
-#### Collections
+#### Config Example
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -278,22 +278,6 @@ export const Pages: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        // highlight-start
-        editMenuItems: ['/path/to/CustomEditMenuItem'],
-        // highlight-end
-      },
-    },
-  },
-}
-```
-
-#### Globals
-
-```ts
-export const MyGlobal: GlobalConfig = {
-  admin: {
-    components: {
-      elements: {
         // highlight-start
         editMenuItems: ['/path/to/CustomEditMenuItem'],
         // highlight-end

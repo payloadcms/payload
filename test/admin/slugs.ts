@@ -58,4 +58,4 @@ export const globalSlugs = [
   noApiViewGlobalSlug,
 ]
 export const with300DocumentsSlug = 'with300documents'
-export const editListViewSlug = 'edit-list-view'
+export const editMenuItemsSlug = 'edit-menu-items'

@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { editListViewSlug, postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
+import { editMenuItemsSlug, postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
-export const EditListItems: CollectionConfig = {
-  slug: editListViewSlug,
+export const EditMenuItems: CollectionConfig = {
+  slug: editMenuItemsSlug,
   admin: {
     components: {
       edit: {

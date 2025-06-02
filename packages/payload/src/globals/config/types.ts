@@ -87,10 +87,6 @@ export type GlobalAdminOptions = {
       beforeDocumentControls?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
-       * Inject custom components within the 3-dot menu dropdown
-       */
-      editMenuItems?: CustomComponent[]
-      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomPreviewButton
