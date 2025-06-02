@@ -363,19 +363,37 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('filters', () => {
-      it('should block upload from a blocked domain', async () => {
-        const response = await restClient.POST(`/${mediaSlug}`, {
-          body: {
-            filename: 'test.png',
-            url: 'http://blocked-domain.com/file.png',
-          },
+      const blockedUrls = [
+        'http://blocked-domain.com/file.png',
+        'http://127.0.0.1/file.png',
+        'http://localhost/file.png',
+        'http://[::1]/file.png',
+        'http://10.0.0.1/file.png',
+        'http://192.168.1.1/file.png',
+        'http://172.16.0.1/file.png',
+        'http://169.254.1.1/file.png',
+        'http://224.0.0.1/file.png',
+        'http://0.0.0.0/file.png',
+        'http://255.255.255.255/file.png',
+        'http://tellico.fun/redirect.php?target=http://localhost/test',
+        'https://tellico.fun/redirect.php?target=http://localhost/test',
+      ]
+
+      blockedUrls.forEach((url) => {
+        it(`should block upload from blocked URL: ${url}`, async () => {
+          const response = await restClient.POST(`/${mediaSlug}`, {
+            body: {
+              filename: 'test.png',
+              url,
+            },
+          })
+
+          expect(response.status).toBe(400)
+
+          const body = await response.json()
+
+          expect(body.errors?.[0]?.message).toContain('No files were uploaded.')
         })
-
-        expect(response.status).toBe(400)
-
-        const body = await response.json()
-
-        expect(body.errors?.[0]?.message).toContain('No files were uploaded.')
       })
     })
   })
