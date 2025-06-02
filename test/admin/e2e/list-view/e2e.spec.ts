@@ -1245,6 +1245,18 @@ describe('List View', () => {
         }),
       ).toBeVisible()
     })
+
+    test('should reset default columns', async () => {
+      await page.goto(postsUrl.list)
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+
+      // should not have the ID column #heading-id
+      await expect(page.locator('#heading-id')).toBeHidden()
+
+      await page.locator('#reset-columns-button').click()
+
+      await expect(page.locator('#heading-id')).toBeVisible()
+    })
   })
 
   describe('multi-select', () => {
