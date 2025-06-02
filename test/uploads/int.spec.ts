@@ -362,6 +362,22 @@ describe('Collections - Uploads', () => {
         expect(response.headers.get('content-type')).toContain('image/png')
       })
     })
+    describe('filters', () => {
+      it('should block upload from a blocked domain', async () => {
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: {
+            filename: 'test.png',
+            url: 'http://blocked-domain.com/file.png',
+          },
+        })
+
+        expect(response.status).toBe(400)
+
+        const body = await response.json()
+
+        expect(body.errors?.[0]?.message).toContain('No files were uploaded.')
+      })
+    })
   })
 
   describe('Local API', () => {
@@ -543,6 +559,21 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+    })
+    describe('filters', () => {
+      it('should block upload from a blocked domain', async () => {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://blocked-domain.com/file.png',
+            },
+          }),
+        ).rejects.toThrow(
+          'There was a problem while uploading the file. Failed to fetch file from filtered url, http://blocked-domain.com/file.png',
+        )
       })
     })
   })

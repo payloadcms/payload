@@ -24,7 +24,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     try {
       ssrfFilter({ url: fileURL })
     } catch (error) {
-      throw new APIError(`Failed to fetch file from ${fileURL}`, 400)
+      throw new APIError(`Failed to fetch file from filtered url, ${fileURL}`, 400)
     }
 
     const headers = uploadConfig.externalFileHeaderFilter
