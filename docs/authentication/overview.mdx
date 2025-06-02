@@ -91,6 +91,7 @@ The following options are available:
 | **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
 | **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
 | **`useAPIKey`**                | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                                |
+| **`useSessions`**              | True by default. Set to `false` to use stateless JWTs for authentication instead of sessions.                                                                                                                               |
 | **`verify`**                   | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                     |
 
 ### Login With Username
