@@ -144,6 +144,21 @@ export const createClientConfig = ({
           importMap,
         })
         break
+      case 'folders':
+        if (config.folders) {
+          clientConfig.folders = {}
+          if (config.folders.debug) {
+            clientConfig.folders.debug = config.folders.debug
+          }
+          if (config.folders.fieldName) {
+            clientConfig.folders.fieldName = config.folders.fieldName
+          }
+          if (config.folders.slug) {
+            clientConfig.folders.slug = config.folders.slug
+          }
+        }
+        break
+
       case 'globals':
         ;(clientConfig.globals as ClientGlobalConfig[]) = createClientGlobalConfigs({
           defaultIDType: config.db.defaultIDType,
@@ -152,7 +167,6 @@ export const createClientConfig = ({
           importMap,
         })
         break
-
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}
