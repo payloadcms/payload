@@ -291,6 +291,10 @@ export type CollectionAdminOptions = {
        */
       beforeDocumentControls?: CustomComponent[]
       /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
+      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomComponent

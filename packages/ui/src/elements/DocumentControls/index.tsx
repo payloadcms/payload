@@ -49,6 +49,7 @@ export const DocumentControls: React.FC<{
   readonly data?: Data
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
+  readonly EditMenuItems?: React.ReactNode
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
   readonly id?: number | string
@@ -80,6 +81,7 @@ export const DocumentControls: React.FC<{
     data,
     disableActions,
     disableCreate,
+    EditMenuItems,
     hasSavePermission,
     isAccountView,
     isEditing,
@@ -340,6 +342,7 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
           )}
