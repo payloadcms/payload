@@ -99,7 +99,11 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        errors.push({ path })
+        if (polymorphicJoin) {
+          delete constraint[path]
+        } else {
+          errors.push({ path })
+        }
         return
       }
 
