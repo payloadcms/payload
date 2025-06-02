@@ -19,6 +19,8 @@ Instead, you can invest your time and effort into learning the underlying open-s
   srcLight="https://payloadcms.com/images/docs/fields/richtext.png"
 />
 
+**Tip:** Use `hasText` from `@payloadcms/richtext-lexical/shared` to check if a Rich Text field has any content. This is important because once you've edited text in the Rich Text editor, the field will never return to `null` even if you delete all the text. The `hasText` function helps you properly check if there's actual content in the field.
+
 ## Config Options
 
 | Option                 | Description                                                                                                                                                                                                                                                                                             |
