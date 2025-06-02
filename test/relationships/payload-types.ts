@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -268,6 +269,7 @@ export interface Movie {
   director?: (string | null) | Director;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -276,6 +278,7 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
   movies?: (string | Movie)[] | null;
   directors?: (string | Director)[] | null;
   updatedAt: string;
@@ -460,9 +463,10 @@ export interface Item {
   id: string;
   status?: ('completed' | 'failed' | 'pending') | null;
   relation?: {
-    docs?: (string | Relation1)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Relation1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -728,6 +732,7 @@ export interface MoviesSelect<T extends boolean = true> {
   director?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -735,6 +740,7 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
+  localized?: T;
   movies?: T;
   directors?: T;
   updatedAt?: T;

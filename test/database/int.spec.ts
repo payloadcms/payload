@@ -7,12 +7,13 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
@@ -21,6 +22,7 @@ import {
   killTransaction,
   QueryError,
 } from 'payload'
+import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
 import type { Global2 } from './payload-types.js'
@@ -306,6 +308,81 @@ describe('database', () => {
     })
   })
 
+  describe('allow ID on create', () => {
+    beforeAll(() => {
+      payload.db.allowIDOnCreate = true
+      payload.config.db.allowIDOnCreate = true
+    })
+
+    afterAll(() => {
+      payload.db.allowIDOnCreate = false
+      payload.config.db.allowIDOnCreate = false
+    })
+
+    it('local API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 9999
+      }
+
+      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+
+      expect(post.id).toBe(id)
+    })
+
+    it('rEST API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 99999
+      }
+
+      const response = await restClient.POST(`/posts`, {
+        body: JSON.stringify({
+          id,
+          title: 'created',
+        }),
+      })
+
+      const post = await response.json()
+
+      expect(post.doc.id).toBe(id)
+    })
+
+    it('graphQL - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 999999
+      }
+
+      const query = `mutation {
+                createPost(data: {title: "created", id: ${typeof id === 'string' ? `"${id}"` : id}}) {
+                id
+                title
+              }
+            }`
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const doc = res.data.createPost
+
+      expect(doc).toMatchObject({ title: 'created', id })
+      expect(doc.id).toBe(id)
+    })
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -498,6 +575,27 @@ describe('database', () => {
       expect(error).toBeUndefined()
       expect(migrations.docs).toHaveLength(1)
     })
+  })
+
+  it('should run migrate:reset', async () => {
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+    let error
+    try {
+      await payload.db.migrateReset()
+    } catch (e) {
+      error = e
+    }
+
+    const migrations = await payload.find({
+      collection: 'payload-migrations',
+    })
+
+    expect(error).toBeUndefined()
+    expect(migrations.docs).toHaveLength(0)
   })
 
   describe('predefined migrations', () => {
@@ -707,6 +805,28 @@ describe('database', () => {
       expect(doc.array[0].localizedText).toStrictEqual('goodbye')
       expect(doc.blocks[0].text).toStrictEqual('hello')
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
+
+    it('arrays should work with both long field names and dbName', async () => {
+      const { id } = await payload.create({
+        collection: 'aliases',
+        data: {
+          thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName: [
+            {
+              nestedArray: [{ text: 'some-text' }],
+            },
+          ],
+        },
+      })
+      const res = await payload.findByID({ collection: 'aliases', id })
+      expect(
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
+      ).toHaveLength(1)
+      const item =
+        res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?.[0]
+      assert(item)
+      expect(item.nestedArray).toHaveLength(1)
+      expect(item.nestedArray?.[0]?.text).toBe('some-text')
     })
   })
 
@@ -1093,6 +1213,274 @@ describe('database', () => {
       expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
     })
 
+    it('ensure updateMany respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.[i]?.number).toBe(i)
+        expect(result?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.docs?.[i]?.number).toBe(i)
+        expect(result?.docs?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.[-i + 10]?.number).toBe(i)
+        expect(result?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.docs?.[-i + 10]?.number).toBe(i)
+        expect(result?.docs?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
     it('ensure updateMany correctly handles 0 limit', async () => {
       await payload.db.deleteMany({
         collection: postsSlug,
@@ -1283,6 +1671,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 
@@ -1611,6 +2000,323 @@ describe('database', () => {
       expect(res.textWithinRow).toBeUndefined()
       expect(res.textWithinTabs).toBeUndefined()
     })
+
+    it('should allow virtual field with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitle).toBe('my-title')
+      const draft = await payload.find({
+        collection: 'virtual-relations',
+        depth: 0,
+        where: { id: { equals: id } },
+      })
+      expect(draft.docs[0]?.postTitle).toBe('my-title')
+    })
+
+    it('should not break when using select', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        select: { postTitle: true },
+      })
+      expect(doc.postTitle).toBe('my-title-10')
+    })
+
+    it('should respect hidden: true for virtual fields with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitleHidden).toBeUndefined()
+
+      const doc_show = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        showHiddenFields: true,
+      })
+      expect(doc_show.postTitleHidden).toBe('my-title-3')
+    })
+
+    it('should allow virtual field as reference to ID', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postID).toBe(post.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postID).toBe(post.id)
+    })
+
+    it('should allow virtual field as reference to custom ID', async () => {
+      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { customID: customID.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.customIDValue).toBe(customID.id)
+      const docDepth0 = await payload.findByID({
+        collection: 'virtual-relations',
+        id,
+        depth: 0,
+      })
+      expect(docDepth0.customIDValue).toBe(customID.id)
+    })
+
+    it('should allow deep virtual field as reference to ID', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category-3' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'my-title-3' },
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const docDepth2 = await payload.findByID({ collection: 'virtual-relations', id })
+      expect(docDepth2.postCategoryID).toBe(category.id)
+      const docDepth0 = await payload.findByID({ collection: 'virtual-relations', id, depth: 0 })
+      expect(docDepth0.postCategoryID).toBe(category.id)
+    })
+
+    it('should allow virtual field with reference localized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title', localized: 'localized en' },
+      })
+
+      await payload.update({
+        collection: 'posts',
+        id: post.id,
+        locale: 'es',
+        data: { localized: 'localized es' },
+      })
+
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      let doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postLocalized).toBe('localized en')
+
+      doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id, locale: 'es' })
+      expect(doc.postLocalized).toBe('localized es')
+    })
+
+    it('should allow to query by a virtual field with reference', async () => {
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_1.id },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_2.id },
+      })
+
+      const { docs: ascDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        depth: 0,
+      })
+
+      expect(ascDocs[0]?.id).toBe(doc_1.id)
+
+      expect(ascDocs[1]?.id).toBe(doc_2.id)
+
+      const { docs: descDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        depth: 0,
+      })
+
+      expect(descDocs[1]?.id).toBe(doc_1.id)
+
+      expect(descDocs[0]?.id).toBe(doc_2.id)
+    })
+
+    it('should allow virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '1-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '1-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should not break when using select 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '3-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '3-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+
+      const docWithSelect = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id: doc.id,
+        select: { postCategoryTitle: true },
+      })
+      expect(docWithSelect.postCategoryTitle).toBe('3-category')
+    })
+
+    it('should allow to query by virtual field 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '2-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '2-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const found = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: '2-category' } },
+      })
+      expect(found.docs).toHaveLength(1)
+      expect(found.docs[0].id).toBe(doc.id)
+    })
+
+    it('should allow referenced virtual field in globals', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const globalData = await payload.updateGlobal({
+        slug: 'virtual-relation-global',
+        data: { post: post.id },
+        depth: 0,
+      })
+      expect(globalData.postTitle).toBe('post')
+    })
+
+    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1 },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2 },
+      })
+
+      const queryDesc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "-postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlDesc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryDesc }) })
+        .then((res) => res.json())
+
+      const { docs: localDesc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlDesc[0].id).toBe(doc_2.id)
+      expect(graphqlDesc[1].id).toBe(doc_1.id)
+      expect(localDesc[0].id).toBe(doc_2.id)
+      expect(localDesc[1].id).toBe(doc_1.id)
+
+      const queryAsc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlAsc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryAsc }) })
+        .then((res) => res.json())
+
+      const { docs: localAsc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlAsc[1].id).toBe(doc_2.id)
+      expect(graphqlAsc[0].id).toBe(doc_1.id)
+      expect(localAsc[1].id).toBe(doc_2.id)
+      expect(localAsc[0].id).toBe(doc_1.id)
+    })
+  })
+
+  it('should convert numbers to text', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing',
+        // @ts-expect-error hardcoding a number and expecting that it will convert to string
+        text: 1,
+      },
+    })
+
+    expect(result.text).toStrictEqual('1')
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
@@ -1791,9 +2497,19 @@ describe('database', () => {
     expect(query3.totalDocs).toEqual(1)
   })
 
+  it('db.deleteOne should not fail if query does not resolve to any document', async () => {
+    await expect(
+      payload.db.deleteOne({
+        collection: 'posts',
+        returning: false,
+        where: { title: { equals: 'some random title' } },
+      }),
+    ).resolves.toBeNull()
+  })
+
   it('mongodb additional keys stripping', async () => {
     // eslint-disable-next-line jest/no-conditional-in-test
-    if (payload.db.name !== 'mognoose') {
+    if (payload.db.name !== 'mongoose') {
       return
     }
 
@@ -1834,5 +2550,73 @@ describe('database', () => {
     expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
 
     payload.db.allowAdditionalKeys = false
+  })
+
+  it('should not crash when the version field is not selected', async () => {
+    const customID = await payload.create({ collection: 'custom-ids', data: {} })
+    const res = await payload.db.queryDrafts({
+      collection: 'custom-ids',
+      where: { parent: { equals: customID.id } },
+      select: { parent: true },
+    })
+
+    expect(res.docs[0].id).toBe(customID.id)
+  })
+
+  it('deep nested arrays', async () => {
+    await payload.updateGlobal({
+      slug: 'header',
+      data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
+    })
+
+    const header = await payload.findGlobal({ slug: 'header' })
+
+    expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
+  })
+
+  it('should count with a query that contains subqueries', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'new-category' },
+    })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { title: 'new-post', category: category.id },
+    })
+
+    const result_1 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'new-category',
+        },
+      },
+    })
+
+    expect(result_1.totalDocs).toBe(1)
+
+    const result_2 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'non-existing-category',
+        },
+      },
+    })
+
+    expect(result_2.totalDocs).toBe(0)
+  })
+
+  it('can have localized and non localized blocks', async () => {
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 })

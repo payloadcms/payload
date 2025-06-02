@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 import type { DrizzleAdapter } from './types.js'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs.js'
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
 import { getCollection, getTableQuery } from './utilities/getEntity.js'
@@ -30,9 +30,9 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: [{ args: [1], method: 'limit' }],
     db,
     joins,
+    query: ({ query }) => query.limit(1),
     selectFields,
     tableName,
     where,
@@ -59,6 +59,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await queryTable.findFirst(findManyArgs)
   }
 
+  if (!docToDelete) {
+    return null
+  }
+
   const result =
     returning === false
       ? null
@@ -68,6 +72,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
           data: docToDelete,
           fields: collectionConfig.flattenedFields,
           joinQuery: false,
+          tableName,
         })
 
   await this.deleteWhere({

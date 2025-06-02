@@ -106,7 +106,7 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
       `
         case 'link':
           return `
-          <a href={${escapeHTML(replaceDoubleCurlys(node.url, submissionData))}}>
+          <a href={${escapeHTML(replaceDoubleCurlys(node.url!, submissionData))}}>
           ${serializeSlate(node.children, submissionData)}
         </a>
       `

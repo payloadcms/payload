@@ -75,7 +75,7 @@ export type UpdateManyArgs<
   TSlug extends keyof TGeneratedTypes['collections'],
 > = {
   id: never
-  where?: WhereField
+  where?: Where
 } & UpdateBaseArgs<TGeneratedTypes, TSlug>
 
 export type UpdateBaseArgs<

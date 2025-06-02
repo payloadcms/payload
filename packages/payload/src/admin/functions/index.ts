@@ -41,24 +41,26 @@ export type ServerFunctionHandler = (
 export type ListQuery = {
   /*
    * This is an of strings, i.e. `['title', '-slug']`
-   * Use `transformColumnsToPreferences` to convert it back and forth
+   * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
   limit?: string
   page?: string
+  preset?: number | string
   /*
     When provided, is automatically injected into the `where` object
   */
   search?: string
   sort?: Sort
   where?: Where
-}
+} & Record<string, unknown>
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
     id: number | string
@@ -68,4 +70,8 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
 }

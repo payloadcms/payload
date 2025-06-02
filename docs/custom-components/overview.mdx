@@ -11,8 +11,12 @@ The Payload [Admin Panel](../admin/overview) is designed to be as minimal and st
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
-  **Note:**
-  Client Components continue to be fully supported. To use Client Components in your app, simply include the `'use client'` directive. Payload will automatically detect and remove all [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) default props before rendering your component. [More details](#client-components).
+  **Note:** Client Components continue to be fully supported. To use Client
+  Components in your app, simply include the `'use client'` directive. Payload
+  will automatically detect and remove all
+  [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types)
+  default props before rendering your component. [More
+  details](#client-components).
 </Banner>
 
 There are four main types of Custom Components in Payload:
@@ -38,16 +42,17 @@ const config = buildConfig({
   admin: {
     components: {
       logout: {
-        Button: '/src/components/Logout#MyComponent' // highlight-line
-      }
-    }
+        Button: '/src/components/Logout#MyComponent', // highlight-line
+      },
+    },
   },
 })
 ```
 
 <Banner type="success">
-  **Note:**
-  All Custom Components can be either Server Components or Client Components, depending on the presence of the `'use client'` directive at the top of the file.
+  **Note:** All Custom Components can be either Server Components or Client
+  Components, depending on the presence of the `'use client'` directive at the
+  top of the file.
 </Banner>
 
 ### Component Paths
@@ -73,9 +78,9 @@ const config = buildConfig({
     },
     components: {
       logout: {
-        Button: '/components/Logout#MyComponent' // highlight-line
-      }
-    }
+        Button: '/components/Logout#MyComponent', // highlight-line
+      },
+    },
   },
 })
 ```
@@ -98,10 +103,10 @@ const config = buildConfig({
         Button: {
           path: '/src/components/Logout',
           exportName: 'MyComponent',
-        }
+        },
         // highlight-end
-      }
-    }
+      },
+    },
   },
 })
 ```
@@ -109,10 +114,10 @@ const config = buildConfig({
 The following options are available:
 
 | Property      | Description                                                                                                                   |
-|---------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `clientProps` | Props to be passed to the Custom Components if it's a Client Component. [More details](#custom-props).                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `clientProps` | Props to be passed to the Custom Components if it's a Client Component. [More details](#custom-props).                        |
 | `exportName`  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
-| `path`        | File path to the Custom Component. Named exports can be appended to the end of the path, separated by a `#`.                         |
+| `path`        | File path to the Custom Component. Named exports can be appended to the end of the path, separated by a `#`.                  |
 | `serverProps` | Props to be passed to the Custom Component if it's a Server Component. [More details](#custom-props).                         |
 
 For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
@@ -139,7 +144,12 @@ const config = buildConfig({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname, 'src'),
-      importMapFile: path.resolve(dirname, 'app', '(payload)', 'custom-import-map.js'), // highlight-line
+      importMapFile: path.resolve(
+        dirname,
+        'app',
+        '(payload)',
+        'custom-import-map.js',
+      ), // highlight-line
     },
   },
 })
@@ -159,7 +169,8 @@ export default buildConfig({
   admin: {
     // ...
     dependencies: {
-      myTestComponent: { // myTestComponent is the key - can be anything
+      myTestComponent: {
+        // myTestComponent is the key - can be anything
         path: '/components/TestComponent.js#TestComponent',
         type: 'component',
         clientProps: {
@@ -167,7 +178,7 @@ export default buildConfig({
         },
       },
     },
-  }
+  },
 })
 ```
 
@@ -186,7 +197,7 @@ import React from 'react'
 import type { Payload } from 'payload'
 
 async function MyServerComponent({
-  payload // highlight-line
+  payload, // highlight-line
 }: {
   payload: Payload
 }) {
@@ -195,22 +206,25 @@ async function MyServerComponent({
     id: '123',
   })
 
-  return (
-    <p>{page.title}</p>
-  )
+  return <p>{page.title}</p>
 }
 ```
 
 Each Custom Component receives the following props by default:
 
-| Prop                      | Description                                                                                           |
-| ------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `payload`                 | The [Payload](../local-api/overview) class.                                                           |
-| `i18n`                    | The [i18n](../configuration/i18n) object.                                                                           |
+| Prop      | Description                                 |
+| --------- | ------------------------------------------- |
+| `payload` | The [Payload](../local-api/overview) class. |
+| `i18n`    | The [i18n](../configuration/i18n) object.   |
 
 <Banner type="warning">
-  **Reminder:**
-  All Custom Components also receive various other props that are specific to the component being rendered. See [Root Components](#root-components), [Collection Components](../configuration/collections#custom-components), [Global Components](../configuration/globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
+  **Reminder:** All Custom Components also receive various other props that are
+  specific to the component being rendered. See [Root
+  Components](#root-components), [Collection
+  Components](../configuration/collections#custom-components), [Global
+  Components](../configuration/globals#custom-components), or [Field
+  Components](../fields/overview#custom-components) for a complete list of all
+  default props per component.
 </Banner>
 
 ### Custom Props
@@ -222,17 +236,18 @@ import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     components: {
       logout: {
         Button: {
           path: '/src/components/Logout#MyComponent',
           clientProps: {
-            myCustomProp: 'Hello, World!' // highlight-line
+            myCustomProp: 'Hello, World!', // highlight-line
           },
-        }
-      }
-    }
+        },
+      },
+    },
   },
 })
 ```
@@ -244,9 +259,7 @@ import React from 'react'
 import { Link } from '@payloadcms/ui'
 
 export function MyComponent({ myCustomProp }: { myCustomProp: string }) {
-  return (
-    <Link href="/admin/logout">{myCustomProp}</Link>
-  )
+  return <Link href="/admin/logout">{myCustomProp}</Link>
 }
 ```
 
@@ -264,16 +277,16 @@ export function MyClientComponent() {
   const [count, setCount] = useState(0)
 
   return (
-    <button onClick={() => setCount(count + 1)}>
-      Clicked {count} times
-    </button>
+    <button onClick={() => setCount(count + 1)}>Clicked {count} times</button>
   )
 }
 ```
 
 <Banner type="warning">
-  **Reminder:**
-  Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). If you are rendering your Client Component _from within_ a Server Component, ensure that its props are serializable.
+  **Reminder:** Client Components cannot be passed [non-serializable
+  props](https://react.dev/reference/rsc/use-client#serializable-types). If you
+  are rendering your Client Component _from within_ a Server Component, ensure
+  that its props are serializable.
 </Banner>
 
 ### Accessing the Payload Config
@@ -285,14 +298,10 @@ import React from 'react'
 
 export default async function MyServerComponent({
   payload: {
-    config // highlight-line
-  }
+    config, // highlight-line
+  },
 }) {
-  return (
-    <Link href={config.serverURL}>
-      Go Home
-    </Link>
-  )
+  return <Link href={config.serverURL}>Go Home</Link>
 }
 ```
 
@@ -307,14 +316,12 @@ import { useConfig } from '@payloadcms/ui'
 
 export function MyClientComponent() {
   // highlight-start
-  const { config: { serverURL } } = useConfig()
+  const {
+    config: { serverURL },
+  } = useConfig()
   // highlight-end
 
-  return (
-    <Link href={serverURL}>
-      Go Home
-    </Link>
-  )
+  return <Link href={serverURL}>Go Home</Link>
 }
 ```
 
@@ -330,12 +337,10 @@ Within Server Components, this prop is named `field`:
 import React from 'react'
 import type { TextFieldServerComponent } from 'payload'
 
-export const MyClientFieldComponent: TextFieldServerComponent = ({ field: { name } }) => {
-  return (
-    <p>
-      {`This field's name is ${name}`}
-    </p>
-  )
+export const MyClientFieldComponent: TextFieldServerComponent = ({
+  field: { name },
+}) => {
+  return <p>{`This field's name is ${name}`}</p>
 }
 ```
 
@@ -346,12 +351,10 @@ Within Client Components, this prop is named `clientField` because its non-seria
 import React from 'react'
 import type { TextFieldClientComponent } from 'payload'
 
-export const MyClientFieldComponent: TextFieldClientComponent = ({ clientField: { name } }) => {
-  return (
-    <p>
-      {`This field's name is ${name}`}
-    </p>
-  )
+export const MyClientFieldComponent: TextFieldClientComponent = ({
+  clientField: { name },
+}) => {
+  return <p>{`This field's name is ${name}`}</p>
 }
 ```
 
@@ -370,9 +373,7 @@ import { getTranslation } from '@payloadcms/translations'
 export default async function MyServerComponent({ i18n }) {
   const translatedTitle = getTranslation(myTranslation, i18n) // highlight-line
 
-  return (
-    <p>{translatedTitle}</p>
-  )
+  return <p>{translatedTitle}</p>
 }
 ```
 
@@ -397,7 +398,8 @@ export function MyClientComponent() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Getting the Current Locale
@@ -416,9 +418,7 @@ export default async function MyServerComponent({ payload, locale }) {
     locale,
   })
 
-  return (
-    <p>{localizedPage.title}</p>
-  )
+  return <p>{localizedPage.title}</p>
 }
 ```
 
@@ -437,14 +437,13 @@ function Greeting() {
     es: 'Hola',
   }
 
-  return (
-    <span>{trans[locale.code]}</span>
-  )
+  return <span>{trans[locale.code]}</span>
 }
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Using Hooks
@@ -459,14 +458,13 @@ import { useDocumentInfo } from '@payloadcms/ui'
 export function MyClientComponent() {
   const { slug } = useDocumentInfo() // highlight-line
 
-  return (
-    <p>{`Entity slug: ${slug}`}</p>
-  )
+  return <p>{`Entity slug: ${slug}`}</p>
 }
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Adding Styles
@@ -479,11 +477,7 @@ To apply custom styles, simply import your own `.css` or `.scss` file into your 
 import './index.scss'
 
 export function MyComponent() {
-  return (
-    <div className="my-component">
-      My Custom Component
-    </div>
-  )
+  return <div className="my-component">My Custom Component</div>
 }
 ```
 
@@ -508,6 +502,6 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 ```
 
 <Banner type="success">
-  **Note:**
-  You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](../admin/customizing-css).
+  **Note:** You can also drill into Payload's own component styles, or easily
+  apply global, app-wide CSS. More on that [here](../admin/customizing-css).
 </Banner>

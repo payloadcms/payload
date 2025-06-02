@@ -23,10 +23,12 @@ import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -93,11 +95,17 @@ export const findOperation = async <
       populate,
       req: { fallbackLocale, locale, payload },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
-      sort,
+      sort: incomingSort,
       where,
     } = args
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -137,6 +145,11 @@ export const findOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
+
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
@@ -164,7 +177,10 @@ export const findOperation = async <
         pagination: usePagination,
         req,
         select: getQueryDraftsSelect({ select }),
-        sort: getQueryDraftsSort({ collectionConfig, sort }),
+        sort: getQueryDraftsSort({
+          collectionConfig,
+          sort,
+        }),
         where: fullWhere,
       })
     } else {
@@ -177,6 +193,7 @@ export const findOperation = async <
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,

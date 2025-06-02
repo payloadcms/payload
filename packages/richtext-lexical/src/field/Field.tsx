@@ -12,7 +12,7 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -36,7 +36,6 @@ const RichTextComponent: React.FC<
     editorConfig,
     field,
     field: {
-      name,
       admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
@@ -48,7 +47,6 @@ const RichTextComponent: React.FC<
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-  const path = pathFromProps ?? name
 
   const editDepth = useEditDepth()
 
@@ -68,18 +66,18 @@ const RichTextComponent: React.FC<
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    formInitializing,
-    formProcessing,
+    disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField<SerializedEditorState>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || disabledFromField
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
   const [rerenderProviderKey, setRerenderProviderKey] = useState<Date>()
@@ -118,11 +116,33 @@ const RichTextComponent: React.FC<
 
   const pathWithEditDepth = `${path}.${editDepth}`
 
+  const dispatchFieldUpdateTask = useRef<number>(undefined)
+
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      const newState = editorState.toJSON()
-      prevValueRef.current = newState
-      setValue(newState)
+      const updateFieldValue = (editorState: EditorState) => {
+        const newState = editorState.toJSON()
+        prevValueRef.current = newState
+        setValue(newState)
+      }
+
+      if (typeof window.requestIdleCallback === 'function') {
+        // Cancel earlier scheduled value updates,
+        // so that a CPU-limited event loop isn't flooded with n callbacks for n keystrokes into the rich text field,
+        // but that there's only ever the latest one state update
+        // dispatch task, to be executed with the next idle time,
+        // or the deadline of 500ms.
+        if (typeof window.cancelIdleCallback === 'function' && dispatchFieldUpdateTask.current) {
+          cancelIdleCallback(dispatchFieldUpdateTask.current)
+        }
+        // Schedule the state update to happen the next time the browser has sufficient resources,
+        // or the latest after 500ms.
+        dispatchFieldUpdateTask.current = requestIdleCallback(() => updateFieldValue(editorState), {
+          timeout: 500,
+        })
+      } else {
+        updateFieldValue(editorState)
+      }
     },
     [setValue],
   )

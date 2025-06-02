@@ -19,13 +19,13 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
       const res = await new Promise<Doc | null>((resolve, reject) => {
         crypto.pbkdf2(password, salt, 25000, 512, 'sha256', (e, hashBuffer) => {
           if (e) {
-            reject(null)
+            reject(e)
           }
 
           if (scmp(hashBuffer, Buffer.from(hash, 'hex'))) {
             resolve(doc)
           } else {
-            reject(null)
+            reject(new Error('Invalid password'))
           }
         })
       })

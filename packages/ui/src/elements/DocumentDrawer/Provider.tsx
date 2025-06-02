@@ -1,6 +1,6 @@
 import type { ClientCollectionConfig, Data, FormState, TypeWithID } from 'payload'
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 export type DocumentDrawerContextProps = {
   readonly clearDoc?: () => void
@@ -31,15 +31,11 @@ export const DocumentDrawerContextProvider: React.FC<
     children: React.ReactNode
   } & DocumentDrawerContextProps
 > = ({ children, ...rest }) => {
-  return (
-    <DocumentDrawerCallbacksContext.Provider value={rest}>
-      {children}
-    </DocumentDrawerCallbacksContext.Provider>
-  )
+  return <DocumentDrawerCallbacksContext value={rest}>{children}</DocumentDrawerCallbacksContext>
 }
 
 export const useDocumentDrawerContext = (): DocumentDrawerContextType => {
-  const context = useContext(DocumentDrawerCallbacksContext)
+  const context = use(DocumentDrawerCallbacksContext)
 
   if (!context) {
     throw new Error('useDocumentDrawerContext must be used within a DocumentDrawerProvider')

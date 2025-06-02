@@ -189,6 +189,10 @@ export function UploadInput(props: UploadInputProps) {
 
   const populateDocs = React.useCallback<PopulateDocs>(
     async (ids, relatedCollectionSlug) => {
+      if (!ids.length) {
+        return
+      }
+
       const query: {
         [key: string]: unknown
         where: Where
@@ -214,7 +218,7 @@ export function UploadInput(props: UploadInputProps) {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
+          'X-Payload-HTTP-Method-Override': 'GET',
         },
         method: 'POST',
       })

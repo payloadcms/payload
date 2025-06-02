@@ -11,9 +11,9 @@ import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
-import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
 
 type Args = {
+  canSetHeaders?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
@@ -22,6 +22,7 @@ type Args = {
 }
 
 export const createPayloadRequest = async ({
+  canSetHeaders,
   config: configPromise,
   params,
   request,
@@ -66,18 +67,13 @@ export const createPayloadRequest = async ({
     : {}
 
   if (localization) {
-    fallbackLocale = sanitizeFallbackLocale({
-      fallbackLocale,
-      locale,
-      localization,
-    })
-
     const locales = sanitizeLocales({
       fallbackLocale,
       locale,
       localization,
     })
 
+    fallbackLocale = locales.fallbackLocale
     locale = locales.locale
   }
 
@@ -111,6 +107,7 @@ export const createPayloadRequest = async ({
   req.payloadDataLoader = getDataLoader(req)
 
   const { responseHeaders, user } = await executeAuthStrategies({
+    canSetHeaders,
     headers: req.headers,
     isGraphQL,
     payload,

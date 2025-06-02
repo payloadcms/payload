@@ -9,9 +9,6 @@ import type {
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -35,6 +32,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -109,7 +107,7 @@ export const createOperation = async <
         payload: { config },
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -224,6 +222,7 @@ export const createOperation = async <
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
+      overrideAccess,
       req,
       skipValidation:
         shouldSaveDraft &&
@@ -244,6 +243,12 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     let doc
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {

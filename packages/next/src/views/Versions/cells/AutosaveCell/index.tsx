@@ -1,6 +1,10 @@
 'use client'
 import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
-import React, { Fragment } from 'react'
+import React from 'react'
+
+import './index.scss'
+
+const baseClass = 'autosave-cell'
 
 type AutosaveCellProps = {
   latestDraftVersion?: string
@@ -18,11 +22,12 @@ export const renderPill = (data, latestVersion, currentLabel, previousLabel, pil
   return (
     <React.Fragment>
       {data?.id === latestVersion ? (
-        <Pill pillStyle={pillStyle}>{currentLabel}</Pill>
+        <Pill pillStyle={pillStyle} size="small">
+          {currentLabel}
+        </Pill>
       ) : (
-        <Pill>{previousLabel}</Pill>
+        <Pill size="small">{previousLabel}</Pill>
       )}
-      &nbsp;&nbsp;
     </React.Fragment>
   )
 }
@@ -71,10 +76,10 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   }
 
   return (
-    <Fragment>
+    <div className={`${baseClass}__items`}>
       {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
       {status && renderPill(rowData, latestVersion, currentLabel, previousLabel, pillStyle)}
       {publishedLocalePill}
-    </Fragment>
+    </div>
   )
 }

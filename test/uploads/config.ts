@@ -1,3 +1,5 @@
+import type { CollectionSlug } from 'payload'
+
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -18,6 +20,7 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
@@ -27,6 +30,7 @@ import {
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
+  withoutEnlargeSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -390,6 +394,10 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
           },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+          },
         ],
         pasteURL: false,
       },
@@ -481,6 +489,19 @@ export default buildConfigWithDefaults({
           'audio/mpeg',
         ],
         staticDir: path.resolve(dirname, './media/enlarge'),
+      },
+    },
+    {
+      slug: withoutEnlargeSlug,
+      fields: [],
+      upload: {
+        resizeOptions: {
+          width: 1000,
+          height: undefined,
+          fit: 'inside',
+          withoutEnlargement: true,
+        },
+        staticDir: path.resolve(dirname, './media/without-enlarge'),
       },
     },
     {
@@ -731,6 +752,51 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'best-fit',
+      fields: [
+        {
+          name: 'withAdminThumbnail',
+          type: 'upload',
+          relationTo: 'admin-thumbnail-function',
+        },
+        {
+          name: 'withinRange',
+          type: 'upload',
+          relationTo: enlargeSlug,
+        },
+        {
+          name: 'nextSmallestOutOfRange',
+          type: 'upload',
+          relationTo: 'focal-only',
+        },
+        {
+          name: 'original',
+          type: 'upload',
+          relationTo: 'focal-only',
+        },
+      ],
+    },
+    {
+      slug: listViewPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'imageUpload',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageRelationship',
+          type: 'relationship',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -903,6 +969,22 @@ export default buildConfigWithDefaults({
       },
       file: imageFile,
     })
+
+    for (let i = 0; i < 20; i++) {
+      const data = {
+        title: `List View Preview ${i + 1}`,
+        imageUpload: uploadedImageWithPreview,
+        imageRelationship: uploadedImageWithPreview,
+      }
+      if (i > 15) {
+        data.imageUpload = ''
+        data.imageRelationship = ''
+      }
+      await payload.create({
+        collection: listViewPreviewSlug as CollectionSlug,
+        data,
+      })
+    }
   },
   serverURL: undefined,
   upload: {

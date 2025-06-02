@@ -2,22 +2,6 @@
 
 @layer payload-default {
   .edit-many {
-    &__toggle {
-      font-size: inherit;
-      line-height: inherit;
-      display: inline-flex;
-      background: transparent;
-      color: var(--theme-elevation-800);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      border: 0;
-      padding: 0;
-      align-items: center;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
     &__form {
       height: 100%;
     }
@@ -124,14 +108,26 @@
       }
     }
 
+    &__save {
+      width: calc(50% - #{base(1)});
+
+      @include mid-break {
+        width: 100%;
+      }
+    }
+
+    &__publish,
+    &__draft {
+      width: 100%;
+    }
+
     &__document-actions {
       display: flex;
-      flex-wrap: wrap;
       padding: base(1);
       gap: base(0.5);
 
       .form-submit {
-        width: calc(50% - #{base(1)});
+        width: 100%;
 
         @include mid-break {
           width: auto;
@@ -139,7 +135,6 @@
         }
 
         .btn {
-          width: 100%;
           padding-left: base(0.5);
           padding-right: base(0.5);
           margin-bottom: 0;

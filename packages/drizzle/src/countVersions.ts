@@ -4,7 +4,7 @@ import { buildVersionCollectionFields } from 'payload'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 

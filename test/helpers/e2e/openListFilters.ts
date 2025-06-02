@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -11,10 +11,12 @@ export const openListFilters = async (
     filterContainerSelector?: string
     togglerSelector?: string
   },
-) => {
-  const columnContainer = page.locator(filterContainerSelector).first()
+): Promise<{
+  filterContainer: Locator
+}> => {
+  const filterContainer = page.locator(filterContainerSelector).first()
 
-  const isAlreadyOpen = await columnContainer.isVisible()
+  const isAlreadyOpen = await filterContainer.isVisible()
 
   if (!isAlreadyOpen) {
     await page.locator(togglerSelector).first().click()
@@ -22,5 +24,5 @@ export const openListFilters = async (
 
   await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
-  return columnContainer
+  return { filterContainer }
 }

@@ -18,9 +18,9 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
+import './index.scss'
 
 const baseClass = 'checkbox'
 
@@ -39,7 +39,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -59,12 +59,14 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
     disableFormData,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -91,7 +93,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         showError && 'error',
         className,
         value && `${baseClass}--checked`,
-        readOnly && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -112,7 +114,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
-        readOnly={readOnly}
+        readOnly={readOnly || disabled}
         required={required}
       />
       <RenderCustomComponent

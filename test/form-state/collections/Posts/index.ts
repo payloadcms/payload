@@ -13,6 +13,15 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'renderTracker',
+      type: 'text',
+      admin: {
+        components: {
+          Field: './collections/Posts/RenderTracker.js#RenderTracker',
+        },
+      },
+    },
+    {
       name: 'validateUsingEvent',
       type: 'text',
       admin: {
@@ -52,6 +61,31 @@ export const PostsCollection: CollectionConfig = {
               type: 'number',
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: './collections/Posts/ArrayRowLabel.js#ArrayRowLabel',
+        },
+      },
+      fields: [
+        {
+          name: 'customTextField',
+          type: 'text',
+          defaultValue: 'This is a default value',
+          admin: {
+            components: {
+              Field: './collections/Posts/TextField.js#CustomTextField',
+            },
+          },
+        },
+        {
+          name: 'defaultTextField',
+          type: 'text',
         },
       ],
     },

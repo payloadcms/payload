@@ -34,15 +34,14 @@ function createErrorsFromMessage(message: string): {
   message: string
 } {
   const [intro, errorsString] = message.split(':')
-  const errors = (errorsString || '')
-    .split(',')
-    .map((error) => error.replaceAll(' > ', ' → ').trim())
 
-  if (errors.length === 0) {
+  if (!errorsString) {
     return {
       message: intro,
     }
   }
+
+  const errors = errorsString.split(',').map((error) => error.replaceAll(' > ', ' → ').trim())
 
   if (errors.length === 1) {
     return {

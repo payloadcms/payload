@@ -36,11 +36,11 @@ export type DocumentTabServerPropsOnly = {
   readonly permissions: SanitizedPermissions
 } & ServerProps
 
-export type DocumentTabServerProps = DocumentTabClientProps & DocumentTabServerPropsOnly
-
 export type DocumentTabClientProps = {
   path: string
 }
+
+export type DocumentTabServerProps = DocumentTabClientProps & DocumentTabServerPropsOnly
 
 export type DocumentTabCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
@@ -75,3 +75,10 @@ export type DocumentTabConfig = {
 export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>
+
+// BeforeDocumentControls
+
+export type BeforeDocumentControlsClientProps = {}
+export type BeforeDocumentControlsServerPropsOnly = {} & ServerProps
+export type BeforeDocumentControlsServerProps = BeforeDocumentControlsClientProps &
+  BeforeDocumentControlsServerPropsOnly

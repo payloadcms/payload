@@ -8,6 +8,9 @@ export const groupDefaultChild = 'child takes priority'
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,
   versions: true,
+  admin: {
+    defaultColumns: ['id', 'group', 'insideUnnamedGroup', 'deeplyNestedGroup'],
+  },
   fields: [
     {
       label: 'Group Field',
@@ -298,6 +301,60 @@ const GroupFields: CollectionConfig = {
           relationTo: ['email-fields'],
           name: 'email',
           hasMany: true,
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          type: 'text',
+          name: 'insideUnnamedGroup',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      fields: [
+        {
+          type: 'text',
+          name: 'insideGroupWithNoLabel',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Deeply nested group',
+      fields: [
+        {
+          type: 'group',
+          label: 'Deeply nested group',
+          fields: [
+            {
+              type: 'group',
+              name: 'deeplyNestedGroup',
+              label: 'Deeply nested group',
+              fields: [
+                {
+                  type: 'group',
+                  label: 'Deeply nested group',
+                  fields: [
+                    {
+                      type: 'group',
+                      label: 'Deeply nested group',
+                      fields: [
+                        {
+                          type: 'text',
+                          name: 'insideNestedUnnamedGroup',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
