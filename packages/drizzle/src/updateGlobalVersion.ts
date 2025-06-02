@@ -6,19 +6,19 @@ import type {
 } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
   {
     id,
-    global,
+    global: globalSlug,
     locale,
     req,
     returning,
@@ -28,14 +28,8 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   }: UpdateGlobalVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
-  const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
-    ({ slug }) => slug === global,
-  )
+  const { globalConfig, tableName } = getGlobal({ adapter: this, globalSlug, versions: true })
   const whereToUse = whereArg || { id: { equals: id } }
-
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
-  )
 
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 

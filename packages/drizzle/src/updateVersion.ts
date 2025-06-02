@@ -1,24 +1,19 @@
-import type {
-  SanitizedCollectionConfig,
-  TypeWithID,
-  TypeWithVersion,
-  UpdateVersionArgs,
-} from 'payload'
+import type { TypeWithID, TypeWithVersion, UpdateVersionArgs } from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
   {
     id,
-    collection,
+    collection: collectionSlug,
     locale,
     req,
     returning,
@@ -28,11 +23,12 @@ export async function updateVersion<T extends TypeWithID>(
   }: UpdateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  )
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 

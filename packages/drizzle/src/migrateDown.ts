@@ -52,7 +52,7 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
 
       const tableExists = await migrationTableExists(this, db)
 
-      if (tableExists) {
+      if (tableExists && migration.id) {
         await payload.delete({
           id: migration.id,
           collection: 'payload-migrations',

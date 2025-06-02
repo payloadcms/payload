@@ -48,7 +48,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
       })
 
       const tableExists = await migrationTableExists(this, db)
-      if (tableExists) {
+      if (tableExists && migration.id) {
         await payload.delete({
           id: migration.id,
           collection: 'payload-migrations',
@@ -58,7 +58,10 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
 
       await commitTransaction(req)
     } catch (err: unknown) {
-      let msg = `Error running migration ${migrationFile.name}.`
+      let msg = `Error running migration`
+      if (migrationFile) {
+        msg += ` ${migrationFile.name}.`
+      }
 
       if (err instanceof Error) {
         msg += ` ${err.message}`

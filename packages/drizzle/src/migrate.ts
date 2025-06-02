@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { JsonObject, Payload, TypeWithID } from 'payload'
 
 import {
   commitTransaction,
@@ -32,7 +32,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
   }
 
   let latestBatch = 0
-  let migrationsInDB = []
+  let migrationsInDB: (JsonObject & TypeWithID)[] = []
 
   const hasMigrationTable = await migrationTableExists(this)
 

@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -25,17 +26,16 @@ export const updateOne: UpdateOne = async function updateOne(
   },
 ) {
   const db = await getTransaction(this, req)
-  const collection = this.payload.collections[collectionSlug].config
-  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+  const { collectionConfig, tableName } = getCollection({ adapter: this, collectionSlug })
   let idToUpdate = id
 
   if (!idToUpdate) {
     const { joins, selectFields, where } = buildQuery({
       adapter: this,
-      fields: collection.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       locale,
       tableName,
-      where: whereArg,
+      where: whereArg ?? {},
     })
 
     // selectDistinct will only return if there are joins
@@ -71,7 +71,7 @@ export const updateOne: UpdateOne = async function updateOne(
     adapter: this,
     data,
     db,
-    fields: collection.flattenedFields,
+    fields: collectionConfig.flattenedFields,
     ignoreResult: returning === false,
     joinQuery,
     operation: 'update',

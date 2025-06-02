@@ -1,3 +1,5 @@
+import type { MigrationData } from 'payload'
+
 import { Table } from 'console-table-printer'
 import { getMigrations, readMigrationFiles } from 'payload'
 
@@ -13,7 +15,7 @@ export async function migrateStatus(this: DrizzleAdapter): Promise<void> {
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  let existingMigrations = []
+  let existingMigrations: MigrationData[] = []
   const hasMigrationTable = await migrationTableExists(this)
 
   if (hasMigrationTable) {

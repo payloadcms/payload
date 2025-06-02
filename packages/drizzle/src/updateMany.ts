@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateMany: UpdateMany = async function updateMany(
@@ -26,14 +27,13 @@ export const updateMany: UpdateMany = async function updateMany(
   },
 ) {
   const db = await getTransaction(this, req)
-  const collection = this.payload.collections[collectionSlug].config
-  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+  const { collectionConfig, tableName } = getCollection({ adapter: this, collectionSlug })
 
-  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collection.defaultSort
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
 
   const { joins, orderBy, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collection.flattenedFields,
+    fields: collectionConfig.flattenedFields,
     locale,
     sort,
     tableName,
@@ -90,7 +90,7 @@ export const updateMany: UpdateMany = async function updateMany(
       adapter: this,
       data,
       db,
-      fields: collection.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       ignoreResult: returning === false,
       joinQuery,
       operation: 'update',

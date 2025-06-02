@@ -1,27 +1,39 @@
-import type { QueryDrafts, SanitizedCollectionConfig } from 'payload'
+import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getCollection } from './utilities/getEntity.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: DrizzleAdapter,
-  { collection, joins, limit, locale, page = 1, pagination, req, select, sort, where },
+  {
+    collection: collectionSlug,
+    joins,
+    limit,
+    locale,
+    page = 1,
+    pagination,
+    req,
+    select,
+    sort,
+    where,
+  },
 ) {
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  )
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
+  const combinedWhere = combineQueries({ latest: { equals: true } }, where ?? {})
 
   const result = await findMany({
     adapter: this,
-    collectionSlug: collection,
+    collectionSlug,
     fields,
     joins,
     limit,
@@ -38,7 +50,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
+    docs: result.docs.map((doc: any) => {
       doc = {
         id: doc.parent,
         ...doc.version,

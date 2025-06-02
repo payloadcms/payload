@@ -1,11 +1,10 @@
 import type { UpdateJobs, Where } from 'payload'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
@@ -15,18 +14,20 @@ export const updateJobs: UpdateJobs = async function updateMany(
   if (!(data?.log as object[])?.length) {
     delete data.log
   }
-  const whereToUse: Where = id ? { id: { equals: id } } : whereArg
+  const whereToUse: Where = id ? { id: { equals: id } } : (whereArg ?? {})
   const limit = id ? 1 : limitArg
 
   const db = await getTransaction(this, req)
-  const collection = this.payload.collections['payload-jobs'].config
-  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
-  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collection.defaultSort
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug: 'payload-jobs',
+  })
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
 
   const jobs = await findMany({
     adapter: this,
     collectionSlug: 'payload-jobs',
-    fields: collection.flattenedFields,
+    fields: collectionConfig.flattenedFields,
     limit: id ? 1 : limit,
     pagination: false,
     req,
@@ -52,7 +53,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
       adapter: this,
       data: updateData,
       db,
-      fields: collection.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       ignoreResult: returning === false,
       operation: 'update',
       req,
