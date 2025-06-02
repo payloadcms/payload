@@ -32,6 +32,7 @@ export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/l
 export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
 export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
+export { defaultColors } from '../../features/textState/defaultColors.js'
 
 export { RelationshipFeatureClient } from '../../features/relationship/client/index.js'
 

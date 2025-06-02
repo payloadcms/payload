@@ -67,6 +67,7 @@ export const UploadActions = ({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__previewSizes`}
+              margin={false}
               onClick={() => {
                 openModal(sizePreviewSlug)
               }}
@@ -79,6 +80,7 @@ export const UploadActions = ({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__edit`}
+              margin={false}
               onClick={() => {
                 openModal(editDrawerSlug)
               }}
@@ -394,6 +396,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                     setFileUrl(e.target.value)
                   }}
                   ref={urlInputRef}
+                  title={fileUrl}
                   type="text"
                   value={fileUrl}
                 />
@@ -435,6 +438,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
+                  title={filename || value.name}
                   type="text"
                   value={filename || value.name}
                 />

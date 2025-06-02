@@ -70,6 +70,7 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
                 void onClick({ pill })
               }
             }}
+            size="small"
           >
             {pill.Label ?? <span className={`${baseClass}__pill-label`}>{pill.name}</span>}
           </Pill>

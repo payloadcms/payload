@@ -580,7 +580,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"bcc" varchar,
   	"reply_to" varchar,
   	"email_from" varchar,
-  	"subject" varchar DEFAULT 'You''''ve received a new message.' NOT NULL,
+  	"subject" varchar DEFAULT 'You''ve received a new message.' NOT NULL,
   	"message" jsonb
   );
   
