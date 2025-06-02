@@ -1,20 +1,25 @@
 import type { CollectionSlug, PayloadRequest, Where } from '../../index.js'
 import type { FolderOrDocument } from '../types.js'
 
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type Args = {
   collectionSlug: CollectionSlug
   req: PayloadRequest
-  search?: string
+  /**
+   * Optional where clause to filter documents by
+   * @default undefined
+   */
+  where: Where // todo: make optional
 }
 export async function getOrphanedDocs({
   collectionSlug,
   req,
-  search,
+  where,
 }: Args): Promise<FolderOrDocument[]> {
   const { payload, user } = req
-  let whereConstraints: Where = {
+  const noParentFolderConstraint: Where = {
     or: [
       {
         [payload.config.folders.fieldName]: {
@@ -29,14 +34,6 @@ export async function getOrphanedDocs({
     ],
   }
 
-  if (collectionSlug && search && payload.collections[collectionSlug].config.admin?.useAsTitle) {
-    whereConstraints = {
-      [payload.collections[collectionSlug].config.admin.useAsTitle]: {
-        like: search,
-      },
-    }
-  }
-
   const orphanedFolders = await payload.find({
     collection: collectionSlug,
     limit: 0,
@@ -44,7 +41,9 @@ export async function getOrphanedDocs({
     req,
     sort: payload.collections[collectionSlug].config.admin.useAsTitle,
     user,
-    where: whereConstraints,
+    where: where
+      ? combineWhereConstraints([noParentFolderConstraint, where])
+      : noParentFolderConstraint,
   })
 
   return (

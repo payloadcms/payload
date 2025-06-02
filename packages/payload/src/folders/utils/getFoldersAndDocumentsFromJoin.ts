@@ -1,6 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type { Document, PayloadRequest, Where } from '../../types/index.js'
 import type { FolderOrDocument } from '../types.js'
 
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
@@ -10,40 +9,40 @@ type QueryDocumentsAndFoldersResults = {
   subfolders: FolderOrDocument[]
 }
 type QueryDocumentsAndFoldersArgs = {
-  collectionSlug?: CollectionSlug
+  /**
+   * Optional where clause to filter documents by
+   * @default undefined
+   */
+  documentWhere: Where // todo: make optional
+  /** Optional where clause to filter subfolders by
+   * @default undefined
+   */
+  folderWhere: Where // todo: make optional
   parentFolderID: number | string
   req: PayloadRequest
 }
 export async function queryDocumentsAndFoldersFromJoin({
-  collectionSlug,
+  documentWhere,
+  folderWhere,
   parentFolderID,
   req,
 }: QueryDocumentsAndFoldersArgs): Promise<QueryDocumentsAndFoldersResults> {
   const { payload, user } = req
-  const folderCollectionSlugs: string[] = payload.config.collections.reduce<string[]>(
-    (acc, collection) => {
-      if (collection?.folders) {
-        acc.push(collection.slug)
-      }
-      return acc
-    },
-    [],
-  )
+
+  const whereConstraints = [folderWhere, documentWhere].filter(Boolean)
 
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
     joins: {
       documentsAndFolders: {
-        limit: 100_000,
+        limit: 100_000_000,
         sort: 'name',
-        where: {
-          relationTo: {
-            in: [
-              payload.config.folders.slug,
-              ...(collectionSlug ? [collectionSlug] : folderCollectionSlugs),
-            ],
-          },
-        },
+        where:
+          whereConstraints.length > 0
+            ? {
+                or: whereConstraints,
+              }
+            : undefined,
       },
     },
     limit: 1,

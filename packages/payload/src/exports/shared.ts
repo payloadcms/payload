@@ -50,6 +50,7 @@ export type {
   Subfolder,
 } from '../folders/types.js'
 
+export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
 export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
