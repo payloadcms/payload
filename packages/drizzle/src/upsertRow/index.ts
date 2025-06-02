@@ -9,6 +9,7 @@ import type { Args } from './types.js'
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
+import { getTableQuery } from '../utilities/getEntity.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { insertArrays } from './insertArrays.js'
@@ -43,7 +44,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   })
 
   // First, we insert the main row
-  let insertedRow: Record<string, unknown>
+  let insertedRow: Record<string, unknown> | undefined
 
   try {
     if (operation === 'update') {
@@ -86,7 +87,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are locale rows with data, add the parent and locale to each
     if (Object.keys(rowToInsert.locales).length > 0) {
       Object.entries(rowToInsert.locales).forEach(([locale, localeRow]) => {
-        localeRow._parentID = insertedRow.id
+        if (insertedRow) {
+          localeRow._parentID = insertedRow.id
+        }
         localeRow._locale = locale
         localesToInsert.push(localeRow)
       })
@@ -95,7 +98,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are relationships, add parent to each
     if (rowToInsert.relationships.length > 0) {
       rowToInsert.relationships.forEach((relation) => {
-        relation.parent = insertedRow.id
+        if (insertedRow) {
+          relation.parent = insertedRow.id
+        }
         relationsToInsert.push(relation)
       })
     }
@@ -103,7 +108,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are texts, add parent to each
     if (rowToInsert.texts.length > 0) {
       rowToInsert.texts.forEach((textRow) => {
-        textRow.parent = insertedRow.id
+        if (insertedRow) {
+          textRow.parent = insertedRow.id
+        }
         textsToInsert.push(textRow)
       })
     }
@@ -111,7 +118,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are numbers, add parent to each
     if (rowToInsert.numbers.length > 0) {
       rowToInsert.numbers.forEach((numberRow) => {
-        numberRow.parent = insertedRow.id
+        if (insertedRow) {
+          numberRow.parent = insertedRow.id
+        }
         numbersToInsert.push(numberRow)
       })
     }
@@ -124,10 +133,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
         selectRows.forEach((row) => {
           if (typeof row.parent === 'undefined') {
-            row.parent = insertedRow.id
+            if (insertedRow) {
+              row.parent = insertedRow.id
+            }
           }
 
-          selectsToInsert[selectTableName].push(row)
+          selectsToInsert[selectTableName]?.push(row)
         })
       })
     }
@@ -135,8 +146,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // If there are blocks, add parent to each, and then
     // store by table name and rows
     Object.keys(rowToInsert.blocks).forEach((tableName) => {
-      rowToInsert.blocks[tableName].forEach((blockRow) => {
-        blockRow.row._parentID = insertedRow.id
+      rowToInsert.blocks[tableName]?.forEach((blockRow) => {
+        if (insertedRow) {
+          blockRow.row._parentID = insertedRow.id
+        }
         if (!blocksToInsert[tableName]) {
           blocksToInsert[tableName] = []
         }
@@ -155,7 +168,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const localeTableName = `${tableName}${adapter.localesSuffix}`
       const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
-      if (operation === 'update') {
+      if (operation === 'update' && insertedRow) {
         await adapter.deleteWhere({
           db,
           tableName: localeTableName,
@@ -176,7 +189,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
-    if (operation === 'update') {
+    if (operation === 'update' && insertedRow) {
       await deleteExistingRowsByPath({
         adapter,
         db,
@@ -203,7 +216,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const textsTableName = `${tableName}_texts`
 
-    if (operation === 'update') {
+    if (operation === 'update' && insertedRow) {
       await deleteExistingRowsByPath({
         adapter,
         db,
@@ -230,7 +243,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const numbersTableName = `${tableName}_numbers`
 
-    if (operation === 'update') {
+    if (operation === 'update' && insertedRow) {
       await deleteExistingRowsByPath({
         adapter,
         db,
@@ -257,7 +270,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
-    if (operation === 'update') {
+    if (operation === 'update' && insertedRow) {
       for (const tableName of rowToInsert.blocksToDelete) {
         const blockTable = adapter.tables[tableName]
         await adapter.deleteWhere({
@@ -279,7 +292,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       insertedBlockRows[tableName].forEach((row, i) => {
-        blockRows[i].row = row
+        if (blockRows[i]) {
+          blockRows[i].row = row
+        }
         if (
           typeof row._uuid === 'string' &&
           (typeof row.id === 'string' || typeof row.id === 'number')
@@ -290,20 +305,23 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       const blockLocaleIndexMap: number[] = []
 
-      const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
-        if (Object.entries(blockRow.locales).length > 0) {
-          Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
-            if (Object.keys(blockLocaleData).length > 0) {
-              blockLocaleData._parentID = blockRow.row.id
-              blockLocaleData._locale = blockLocale
-              acc.push(blockLocaleData)
-              blockLocaleIndexMap.push(i)
-            }
-          })
-        }
+      const blockLocaleRowsToInsert = blockRows.reduce<Record<string, unknown>[]>(
+        (acc, blockRow, i) => {
+          if (Object.entries(blockRow.locales).length > 0) {
+            Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
+              if (Object.keys(blockLocaleData).length > 0) {
+                blockLocaleData._parentID = blockRow.row.id
+                blockLocaleData._locale = blockLocale
+                acc.push(blockLocaleData)
+                blockLocaleIndexMap.push(i)
+              }
+            })
+          }
 
-        return acc
-      }, [])
+          return acc
+        },
+        [],
+      )
 
       if (blockLocaleRowsToInsert.length > 0) {
         await adapter.insert({
@@ -326,7 +344,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT ARRAYS RECURSIVELY
     // //////////////////////////////////
 
-    if (operation === 'update') {
+    if (operation === 'update' && insertedRow) {
       for (const arrayTableName of Object.keys(rowToInsert.arrays)) {
         await deleteExistingArrayRows({
           adapter,
@@ -337,13 +355,15 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
 
-    await insertArrays({
-      adapter,
-      arrays: [rowToInsert.arrays],
-      db,
-      parentRows: [insertedRow],
-      uuidMap: arraysBlocksUUIDMap,
-    })
+    if (insertedRow) {
+      await insertArrays({
+        adapter,
+        arrays: [rowToInsert.arrays],
+        db,
+        parentRows: [insertedRow],
+        uuidMap: arraysBlocksUUIDMap,
+      })
+    }
 
     // //////////////////////////////////
     // INSERT hasMany SELECTS
@@ -351,7 +371,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     for (const [selectTableName, tableRows] of Object.entries(selectsToInsert)) {
       const selectTable = adapter.tables[selectTableName]
-      if (operation === 'update') {
+      if (operation === 'update' && insertedRow) {
         await adapter.deleteWhere({
           db,
           tableName: selectTableName,
@@ -379,18 +399,20 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
     // Error Handling
     // //////////////////////////////////
-  } catch (error) {
-    if (error.code === '23505') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      const constraint =
+        ('constraint' in error && typeof error.constraint === 'string' && error.constraint) || ''
       let fieldName: null | string = null
       // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
       if (adapter.fieldConstraints?.[tableName]) {
-        if (adapter.fieldConstraints[tableName]?.[error.constraint]) {
-          fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
+        if (adapter.fieldConstraints[tableName]?.[constraint]) {
+          fieldName = adapter.fieldConstraints[tableName]?.[constraint]
         } else {
           const replacement = `${tableName}_`
 
-          if (error.constraint.includes(replacement)) {
-            const replacedConstraint = error.constraint.replace(replacement, '')
+          if (constraint.includes(replacement)) {
+            const replacedConstraint = constraint.replace(replacement, '')
 
             if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint]) {
               fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
@@ -401,14 +423,15 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (!fieldName) {
         // Last case scenario we extract the key and value from the detail on the error
-        const detail = error.detail
+        const detail = ('detail' in error && typeof error.detail === 'string' && error.detail) || ''
+        // eslint-disable-next-line regexp/no-unused-capturing-group
         const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
         const match = detail.match(regex)
 
         if (match) {
           const key = match[1]
 
-          fieldName = key
+          fieldName = key ?? null
         }
       }
 
@@ -418,7 +441,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           errors: [
             {
               message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
-              path: fieldName,
+              path: fieldName ?? '',
             },
           ],
           req,
@@ -430,7 +453,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
   }
 
-  if (ignoreResult === 'idOnly') {
+  if (ignoreResult === 'idOnly' && insertedRow) {
     return { id: insertedRow.id } as T
   }
 
@@ -451,9 +474,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     tableName,
   })
 
-  findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+  if (insertedRow) {
+    findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+  }
 
-  const doc = await db.query[tableName].findFirst(findManyArgs)
+  const queryTable = getTableQuery({ adapter, tableName })
+  const doc = await queryTable.findFirst(findManyArgs)
 
   // //////////////////////////////////
   // TRANSFORM DATA
@@ -462,7 +488,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   const result = transform<T>({
     adapter,
     config: adapter.payload.config,
-    data: doc,
+    data: doc ?? {},
     fields,
     joinQuery: false,
     tableName,

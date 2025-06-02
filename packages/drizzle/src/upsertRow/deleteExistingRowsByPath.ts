@@ -49,7 +49,7 @@ export const deleteExistingRowsByPath = async ({
     await adapter.deleteWhere({
       db,
       tableName,
-      where: and(...whereConstraints),
+      where: and(...whereConstraints)!,
     })
   }
 
@@ -63,7 +63,7 @@ export const deleteExistingRowsByPath = async ({
     await adapter.deleteWhere({
       db,
       tableName,
-      where: and(...whereConstraints),
+      where: and(...whereConstraints)!,
     })
   }
 }
