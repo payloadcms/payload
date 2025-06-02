@@ -257,6 +257,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     dark: 'Tamno',
     dashboard: 'Kontrolni panel',
     delete: 'Obriši',
+    deletedAt: 'Obrisano U',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspešno izbrisano.',
     deleting: 'Brisanje...',

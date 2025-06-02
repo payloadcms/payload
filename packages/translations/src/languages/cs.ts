@@ -255,6 +255,7 @@ export const csTranslations: DefaultTranslationsObject = {
     dark: 'Tmavý',
     dashboard: 'Nástěnka',
     delete: 'Odstranit',
+    deletedAt: 'Smazáno dne',
     deletedCountSuccessfully: 'Úspěšně smazáno {{count}} {{label}}.',
     deletedSuccessfully: 'Úspěšně odstraněno.',
     deleting: 'Odstraňování...',

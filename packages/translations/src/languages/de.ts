@@ -262,6 +262,7 @@ export const deTranslations: DefaultTranslationsObject = {
     dark: 'Dunkel',
     dashboard: 'Übersicht',
     delete: 'Löschen',
+    deletedAt: 'Gelöscht am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
     deleting: 'Löschen...',

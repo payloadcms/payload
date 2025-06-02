@@ -260,6 +260,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     dark: 'Donker',
     dashboard: 'Dashboard',
     delete: 'Verwijderen',
+    deletedAt: 'Verwijderd Op',
     deletedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
     deletedSuccessfully: 'Succesvol verwijderd.',
     deleting: 'Verwijderen...',

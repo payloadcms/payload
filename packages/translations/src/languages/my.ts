@@ -259,6 +259,7 @@ export const myTranslations: DefaultTranslationsObject = {
     dark: 'အမှောင်',
     dashboard: 'ပင်မစာမျက်နှာ',
     delete: 'ဖျက်မည်။',
+    deletedAt: 'Dihapus Pada',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deleting: 'ဖျက်နေဆဲ ...',

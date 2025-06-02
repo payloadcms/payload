@@ -256,6 +256,7 @@ export const slTranslations: DefaultTranslationsObject = {
     dark: 'Temno',
     dashboard: 'Nadzorna plošča',
     delete: 'Izbriši',
+    deletedAt: 'Izbrisano ob',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspešno izbrisano.',
     deleting: 'Brisanje...',

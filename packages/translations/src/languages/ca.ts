@@ -257,6 +257,7 @@ export const caTranslations: DefaultTranslationsObject = {
     dark: 'Fosc',
     dashboard: 'Tauler',
     delete: 'Eliminar',
+    deletedAt: 'Eliminat en',
     deletedCountSuccessfully: 'Eliminat {{count}} {{label}} correctament.',
     deletedSuccessfully: 'Eliminat correntament.',
     deleting: 'Eliminant...',

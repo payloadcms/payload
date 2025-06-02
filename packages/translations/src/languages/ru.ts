@@ -259,6 +259,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     dark: 'Тёмная',
     dashboard: 'Панель',
     delete: 'Удалить',
+    deletedAt: 'Удалено В',
     deletedCountSuccessfully: 'Удалено {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Удален успешно.',
     deleting: 'Удаление...',

@@ -254,6 +254,7 @@ export const koTranslations: DefaultTranslationsObject = {
     dark: '다크',
     dashboard: '대시보드',
     delete: '삭제',
+    deletedAt: '삭제된 시간',
     deletedCountSuccessfully: '{{count}}개의 {{label}}를 삭제했습니다.',
     deletedSuccessfully: '삭제되었습니다.',
     deleting: '삭제 중...',

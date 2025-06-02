@@ -257,6 +257,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     dark: 'Тамно',
     dashboard: 'Контролни панел',
     delete: 'Обриши',
+    deletedAt: 'Obrisano u',
     deletedCountSuccessfully: 'Успешно избрисано {{count}} {{label}}.',
     deletedSuccessfully: 'Успешно избрисано.',
     deleting: 'Брисање...',

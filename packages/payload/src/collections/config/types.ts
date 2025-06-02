@@ -535,7 +535,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
-   * Add `createdAt` and `updatedAt` fields
+   * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
    */
@@ -657,6 +657,7 @@ export type TypeWithID = {
 export type TypeWithTimestamps = {
   [key: string]: unknown
   createdAt: string
+  deletedAt?: string
   id: number | string
   updatedAt: string
 }

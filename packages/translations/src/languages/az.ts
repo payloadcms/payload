@@ -257,6 +257,7 @@ export const azTranslations: DefaultTranslationsObject = {
     dark: 'Tünd',
     dashboard: 'Panel',
     delete: 'Sil',
+    deletedAt: 'Silinib Tarixi',
     deletedCountSuccessfully: '{{count}} {{label}} uğurla silindi.',
     deletedSuccessfully: 'Uğurla silindi.',
     deleting: 'Silinir...',

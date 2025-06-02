@@ -257,6 +257,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     dark: 'Tamno',
     dashboard: 'Nadzorna ploča',
     delete: 'Izbriši',
+    deletedAt: 'Izbrisano U',
     deletedCountSuccessfully: 'Uspješno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspješno izbrisano.',
     deleting: 'Brisanje...',

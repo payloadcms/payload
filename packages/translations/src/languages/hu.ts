@@ -259,6 +259,7 @@ export const huTranslations: DefaultTranslationsObject = {
     dark: 'Sötét',
     dashboard: 'Irányítópult',
     delete: 'Törlés',
+    deletedAt: 'Törölve Ekkor',
     deletedCountSuccessfully: '{{count}} {{label}} sikeresen törölve.',
     deletedSuccessfully: 'Sikeresen törölve.',
     deleting: 'Törlés...',

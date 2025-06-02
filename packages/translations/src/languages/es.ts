@@ -1,4 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
+
 export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
@@ -260,6 +261,7 @@ export const esTranslations: DefaultTranslationsObject = {
     dark: 'Oscuro',
     dashboard: 'Panel de Control',
     delete: 'Eliminar',
+    deletedAt: 'Eliminado En',
     deletedCountSuccessfully: 'Se eliminaron {{count}} {{label}} correctamente.',
     deletedSuccessfully: 'Eliminado correctamente.',
     deleting: 'Eliminando...',

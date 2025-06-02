@@ -257,6 +257,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     dark: 'Mørk',
     dashboard: 'Kontrollpanel',
     delete: 'Slett',
+    deletedAt: 'Slettet kl.',
     deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
     deletedSuccessfully: 'Slettet.',
     deleting: 'Sletter...',

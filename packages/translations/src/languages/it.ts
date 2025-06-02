@@ -260,6 +260,7 @@ export const itTranslations: DefaultTranslationsObject = {
     dark: 'Scuro',
     dashboard: 'Dashboard',
     delete: 'Elimina',
+    deletedAt: 'Cancellato Alle',
     deletedCountSuccessfully: '{{count}} {{label}} eliminato con successo.',
     deletedSuccessfully: 'Eliminato con successo.',
     deleting: 'Sto eliminando...',

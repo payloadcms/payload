@@ -259,6 +259,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     dark: 'Tamsus',
     dashboard: 'Prietaisų skydelis',
     delete: 'Ištrinti',
+    deletedAt: 'Ištrinta',
     deletedCountSuccessfully: 'Sėkmingai ištrinta {{count}} {{label}}.',
     deletedSuccessfully: 'Sėkmingai ištrinta.',
     deleting: 'Trinama...',

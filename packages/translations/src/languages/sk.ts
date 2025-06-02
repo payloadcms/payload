@@ -258,6 +258,7 @@ export const skTranslations: DefaultTranslationsObject = {
     dark: 'Tmavý',
     dashboard: 'Nástenka',
     delete: 'Odstrániť',
+    deletedAt: 'Vymazané dňa',
     deletedCountSuccessfully: 'Úspešne zmazané {{count}} {{label}}.',
     deletedSuccessfully: 'Úspešne odstránené.',
     deleting: 'Odstraňovanie...',

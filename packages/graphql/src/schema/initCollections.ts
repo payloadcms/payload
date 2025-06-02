@@ -329,12 +329,17 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         {
           name: 'createdAt',
           type: 'date',
-          label: 'Created At',
+          label: ({ t }) => t('general:createdAt'),
         },
         {
           name: 'updatedAt',
           type: 'date',
-          label: 'Updated At',
+          label: ({ t }) => t('general:updatedAt'),
+        },
+        {
+          name: 'deletedAt',
+          type: 'date',
+          label: ({ t }) => t('general:deletedAt'),
         },
       ]
 

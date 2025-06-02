@@ -57,6 +57,7 @@ export type FolderOrDocument = {
   value: {
     _folderOrDocumentTitle: string
     createdAt?: string
+    deletedAt?: string
     folderID?: number | string
     id: number | string
     updatedAt?: string

@@ -256,6 +256,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     dark: 'Темна',
     dashboard: 'Головна',
     delete: 'Видалити',
+    deletedAt: 'Видалено в',
     deletedCountSuccessfully: 'Успішно видалено {{count}} {{label}}.',
     deletedSuccessfully: 'Успішно видалено.',
     deleting: 'Видалення...',

@@ -261,6 +261,7 @@ export const roTranslations: DefaultTranslationsObject = {
     dark: 'Dark',
     dashboard: 'Panoul de bord',
     delete: 'Șterge',
+    deletedAt: 'Șters la',
     deletedCountSuccessfully: 'Șterse cu succes {{count}} {{label}}.',
     deletedSuccessfully: 'Șters cu succes.',
     deleting: 'Deleting...',

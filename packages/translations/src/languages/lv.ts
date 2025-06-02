@@ -256,6 +256,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     dark: 'Tumšs',
     dashboard: 'Panelis',
     delete: 'Dzēst',
+    deletedAt: 'Dzēsts datumā',
     deletedCountSuccessfully: 'Veiksmīgi izdzēsti {{count}} {{label}}.',
     deletedSuccessfully: 'Veiksmīgi izdzēsts.',
     deleting: 'Dzēš...',

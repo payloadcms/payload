@@ -244,6 +244,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     dark: '深色',
     dashboard: '控制面板',
     delete: '刪除',
+    deletedAt: '刪除於',
     deletedCountSuccessfully: '已成功刪除 {{count}} 個 {{label}}。',
     deletedSuccessfully: '已成功刪除。',
     deleting: '刪除中...',

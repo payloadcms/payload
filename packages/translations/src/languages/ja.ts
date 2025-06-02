@@ -257,6 +257,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     dark: 'ダークモード',
     dashboard: 'ダッシュボード',
     delete: '削除',
+    deletedAt: '削除された時間',
     deletedCountSuccessfully: '{{count}}つの{{label}}を正常に削除しました。',
     deletedSuccessfully: '正常に削除されました。',
     deleting: '削除しています...',

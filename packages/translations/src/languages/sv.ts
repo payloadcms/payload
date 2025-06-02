@@ -257,6 +257,7 @@ export const svTranslations: DefaultTranslationsObject = {
     dark: 'Mörkt',
     dashboard: 'Översikt',
     delete: 'Ta bort',
+    deletedAt: 'Raderad Vid',
     deletedCountSuccessfully: 'Raderade {{count}} {{label}}',
     deletedSuccessfully: 'Borttaget',
     deleting: 'Tar bort...',

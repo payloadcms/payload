@@ -244,6 +244,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     dark: '深色',
     dashboard: '仪表板',
     delete: '删除',
+    deletedAt: '已删除时间',
     deletedCountSuccessfully: '已成功删除 {{count}} {{label}}。',
     deletedSuccessfully: '已成功删除。',
     deleting: '删除中...',
