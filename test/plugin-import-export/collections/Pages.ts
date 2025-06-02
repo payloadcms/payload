@@ -45,8 +45,8 @@ export const Pages: CollectionConfig = {
       custom: {
         'plugin-import-export': {
           toCSV: ({ value, columnName, data, siblingData }) => {
-            siblingData[`${columnName}_id`] = value.id
-            siblingData[`${columnName}_email`] = value.email
+            data[`${columnName}_id`] = value.id
+            data[`${columnName}_email`] = value.email
           },
         },
       },

@@ -40,11 +40,20 @@ export const flattenObject = ({
           }
         })
       } else if (typeof value === 'object' && value !== null) {
-        flatten(value, newKey)
+        if (!toCSVFunctions?.[newKey]) {
+          flatten(value, newKey)
+        } else {
+          result[newKey] = toCSVFunctions[newKey]({
+            columnName: newKey,
+            data: result,
+            siblingData: doc,
+            value,
+          })
+        }
       } else {
-        if (toCSVFunctions?.[key]) {
-          result[key] = toCSVFunctions[key]({
-            columnName: key,
+        if (toCSVFunctions?.[newKey]) {
+          result[newKey] = toCSVFunctions[newKey]({
+            columnName: newKey,
             data: result,
             siblingData: doc,
             value,

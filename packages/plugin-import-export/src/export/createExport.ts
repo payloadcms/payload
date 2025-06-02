@@ -67,8 +67,9 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const findArgs = {
     collection: collectionSlug,
-    depth: 0,
+    depth: 1,
     draft: drafts === 'yes',
+    joins: false,
     limit: 100,
     locale,
     overrideAccess: false,
