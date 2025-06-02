@@ -48,6 +48,7 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -98,6 +99,7 @@ export const findOperation = async <
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
+      trash = false,
       where,
     } = args
 
@@ -144,6 +146,17 @@ export const findOperation = async <
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
     let fullWhere = combineQueries(where, accessResult)
+
+    // If trash is false, restrict to non-trashed docs only
+    if (!trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

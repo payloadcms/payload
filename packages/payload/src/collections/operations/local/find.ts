@@ -115,6 +115,13 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   sort?: Sort
   /**
+   * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -147,6 +154,7 @@ export async function findLocal<
     select,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -175,6 +183,7 @@ export async function findLocal<
     select,
     showHiddenFields,
     sort,
+    trash,
     where,
   })
 }
