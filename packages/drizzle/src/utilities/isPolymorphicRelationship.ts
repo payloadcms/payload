@@ -6,11 +6,11 @@ export const isPolymorphicRelationship = (
   relationTo: CollectionSlug
   value: number | string
 } => {
-  return (
+  return Boolean(
     value &&
-    typeof value === 'object' &&
-    'relationTo' in value &&
-    typeof value.relationTo === 'string' &&
-    'value' in value
+      typeof value === 'object' &&
+      'relationTo' in value &&
+      typeof value.relationTo === 'string' &&
+      'value' in value,
   )
 }

@@ -27,7 +27,7 @@ const getFlattenedFieldNames = (args: {
   prefix?: string
 }): { localized?: boolean; name: string }[] => {
   const { fields, parentIsLocalized, prefix = '' } = args
-  return fields.reduce((fieldsToUse, field) => {
+  return fields.reduce<{ localized?: boolean; name: string }[]>((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
     if (
@@ -43,7 +43,8 @@ const getFlattenedFieldNames = (args: {
         ...fieldsToUse,
         ...getFlattenedFieldNames({
           fields: field.fields,
-          parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
+          parentIsLocalized:
+            (parentIsLocalized || ('localized' in field && field.localized)) ?? false,
           prefix: fieldPrefix,
         }),
       ]
@@ -52,7 +53,7 @@ const getFlattenedFieldNames = (args: {
     if (field.type === 'tabs') {
       return [
         ...fieldsToUse,
-        ...field.tabs.reduce((tabFields, tab) => {
+        ...field.tabs.reduce<{ localized?: boolean; name: string }[]>((tabFields, tab) => {
           fieldPrefix = 'name' in tab ? `${prefix}_${tab.name}` : prefix
           return [
             ...tabFields,
@@ -60,7 +61,7 @@ const getFlattenedFieldNames = (args: {
               ? [{ ...tab, type: 'tab' }]
               : getFlattenedFieldNames({
                   fields: tab.fields,
-                  parentIsLocalized: parentIsLocalized || tab.localized,
+                  parentIsLocalized: (parentIsLocalized || tab.localized) ?? false,
                   prefix: fieldPrefix,
                 })),
           ]
@@ -119,13 +120,13 @@ export const validateExistingBlockIsIdentical = ({
 
 export const InternalBlockTableNameIndex = Symbol('InternalBlockTableNameIndex')
 export const setInternalBlockIndex = (block: FlattenedBlock, index: number) => {
-  block[InternalBlockTableNameIndex] = index
+  ;(block as any)[InternalBlockTableNameIndex] = index
 }
 
 export const resolveBlockTableName = (block: FlattenedBlock, originalTableName: string) => {
-  if (!block[InternalBlockTableNameIndex]) {
+  if (!(block as any)[InternalBlockTableNameIndex]) {
     return originalTableName
   }
 
-  return `${originalTableName}_${block[InternalBlockTableNameIndex]}`
+  return `${originalTableName}_${(block as any)[InternalBlockTableNameIndex]}`
 }

@@ -9,7 +9,11 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
     if (key.startsWith('_blocks_') && Array.isArray(rows)) {
       let blockType = key.replace('_blocks_', '')
       const parsed = blockType.split('_')
-      if (parsed.length === 2 && Number.isInteger(Number(parsed[1]))) {
+      if (
+        parsed.length === 2 &&
+        Number.isInteger(Number(parsed[1])) &&
+        typeof parsed[0] === 'string'
+      ) {
         blockType = parsed[0]
       }
 
@@ -20,7 +24,7 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
           }
 
           row.blockType = blockType
-          blocksMap[row._path].push(row)
+          blocksMap[row._path]?.push(row)
 
           delete row._path
         }
@@ -30,7 +34,7 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
     }
   })
 
-  Object.entries(blocksMap).reduce((sortedBlocksMap, [path, blocks]) => {
+  Object.entries(blocksMap).reduce((sortedBlocksMap: any, [path, blocks]) => {
     sortedBlocksMap[path] = blocks.sort((a, b) => {
       if (typeof a._order === 'number' && typeof b._order === 'number') {
         return a._order - b._order

@@ -35,14 +35,14 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
 
       return
     } else {
-      previousSchema.localeCodes = localeCodes
+      previousSchema.localeCodes = localeCodes || null
       previousSchema.rawTables = adapter.rawTables
     }
   }
 
   const { pushSchema } = adapter.requireDrizzleKit()
 
-  const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
+  const { extensions = {}, tablesFilter } = adapter as unknown as BasePostgresAdapter
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, warnings } = await pushSchema(

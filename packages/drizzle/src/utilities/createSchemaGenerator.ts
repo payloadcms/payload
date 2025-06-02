@@ -75,7 +75,7 @@ export const createSchemaGenerator = ({
 
     let schemaDeclaration: null | string = null
 
-    if (this.schemaName) {
+    if (this.schemaName && schemaImport) {
       addImport(corePackage, schemaImport)
       schemaDeclaration = `export const db_schema = ${schemaImport}('${this.schemaName}')`
     }
@@ -113,11 +113,18 @@ export const createSchemaGenerator = ({
     for (const tableName in this.rawTables) {
       const table = this.rawTables[tableName]
 
+      if (!table) {
+        continue
+      }
+
       const extrasDeclarations: string[] = []
 
       if (table.indexes) {
         for (const key in table.indexes) {
           const index = table.indexes[key]
+          if (!index) {
+            continue
+          }
           let indexDeclaration = `${sanitizeObjectKey(key)}: ${index.unique ? 'uniqueIndex' : 'index'}('${index.name}')`
           indexDeclaration += `.on(${typeof index.on === 'string' ? `${accessProperty('columns', index.on)}` : `${index.on.map((on) => `${accessProperty('columns', on)}`).join(', ')}`}),`
           extrasDeclarations.push(indexDeclaration)
@@ -127,7 +134,9 @@ export const createSchemaGenerator = ({
       if (table.foreignKeys) {
         for (const key in table.foreignKeys) {
           const foreignKey = table.foreignKeys[key]
-
+          if (!foreignKey) {
+            continue
+          }
           let foreignKeyDeclaration = `${sanitizeObjectKey(key)}: foreignKey({
       columns: [${foreignKey.columns.map((col) => `columns['${col}']`).join(', ')}],
       foreignColumns: [${foreignKey.foreignColumns.map((col) => `${accessProperty(col.table, col.name)}`).join(', ')}],
@@ -179,10 +188,16 @@ ${Object.entries(table.columns)
 
     for (const tableName in this.rawRelations) {
       const relations = this.rawRelations[tableName]
+      if (!relations) {
+        continue
+      }
       const properties: string[] = []
 
       for (const key in relations) {
         const relation = relations[key]
+        if (!relation) {
+          continue
+        }
         let declaration: string
 
         if (relation.type === 'one') {
@@ -221,7 +236,7 @@ ${Object.entries(table.columns)
       relationsDeclarations.push(declaration)
     }
 
-    if (enumDeclarations.length && !this.schemaName) {
+    if (enumDeclarations.length && !this.schemaName && enumImport) {
       addImport(corePackage, enumImport)
     }
 
@@ -229,6 +244,9 @@ ${Object.entries(table.columns)
 
     for (const moduleName in importDeclarations) {
       const moduleImports = importDeclarations[moduleName]
+      if (!moduleImports) {
+        continue
+      }
 
       importDeclarationsSanitized.push(
         `import { ${Array.from(moduleImports).join(', ')} } from '${moduleName}'`,

@@ -9,5 +9,7 @@ export const rawConstraint = (value: unknown) => ({
 })
 
 export const isRawConstraint = (value: unknown): value is ReturnType<typeof rawConstraint> => {
-  return value && typeof value === 'object' && 'type' in value && value.type === RawConstraintSymbol
+  return Boolean(
+    value && typeof value === 'object' && 'type' in value && value.type === RawConstraintSymbol,
+  )
 }

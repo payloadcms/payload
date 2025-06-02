@@ -31,5 +31,5 @@ export const migrationTableExists = async (
 
   const [row] = result.rows
 
-  return row && typeof row === 'object' && 'exists' in row && !!row.exists
+  return Boolean(row && typeof row === 'object' && 'exists' in row && !!row.exists)
 }

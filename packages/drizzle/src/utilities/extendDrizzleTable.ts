@@ -26,7 +26,9 @@ type Args = {
 /**
  * Extends the passed table with additional columns / extra config
  */
-export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): void => {
+export const extendDrizzleTable = ({ columns, extraConfig, table: tableFromArgs }: Args): void => {
+  // hard drizzle types
+  const table: any = tableFromArgs
   const InlineForeignKeys = Object.getOwnPropertySymbols(table).find((symbol) => {
     return symbol.description?.includes('InlineForeignKeys')
   })
@@ -53,7 +55,7 @@ export const extendDrizzleTable = ({ columns, extraConfig, table }: Args): void 
   if (extraConfig) {
     const originalExtraConfigBuilder = table[DrizzleSymbol.ExtraConfigBuilder]
 
-    table[DrizzleSymbol.ExtraConfigBuilder] = (t) => {
+    table[DrizzleSymbol.ExtraConfigBuilder] = (t: any) => {
       return {
         ...originalExtraConfigBuilder(t),
         ...extraConfig(t),

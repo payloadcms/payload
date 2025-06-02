@@ -4,7 +4,7 @@ import { fieldAffectsData, fieldHasSubFields, fieldShouldBeLocalized } from 'pay
 
 export const hasLocalesTable = ({
   fields,
-  parentIsLocalized,
+  parentIsLocalized = false,
 }: {
   fields: Field[]
   /**

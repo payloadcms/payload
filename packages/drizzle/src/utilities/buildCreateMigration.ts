@@ -34,11 +34,11 @@ export const buildCreateMigration = ({
     const drizzleJsonAfter = await generateDrizzleJson(this.schema)
 
     const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
-    const formattedDate = yyymmdd.replace(/\D/g, '')
-    const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
-    let imports: string = ''
-    let downSQL: string
-    let upSQL: string
+    const formattedDate = yyymmdd?.replace(/\D/g, '')
+    const formattedTime = hhmmss?.split('.')[0]?.replace(/\D/g, '')
+    let imports: string | undefined = ''
+    let downSQL: string | undefined
+    let upSQL: string | undefined
     ;({ downSQL, imports, upSQL } = await getPredefinedMigration({
       dirname,
       file,
