@@ -390,24 +390,30 @@ describe('Document View', () => {
 
       // change the relationship to a document which is a different one than the current one
       await page.locator('#field-relationship').click()
+      await wait(200)
+
       await page.locator('#field-relationship .rs__option').nth(2).click()
+      await wait(500)
       await saveDocAndAssert(page)
 
       // open relationship drawer
       await page
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
+      await wait(200)
 
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
 
       // modify the title to trigger the leave page modal
       await page.locator('.drawer__content #field-title').fill('New Title')
+      await wait(200)
 
       // Open link in a new tab by holding down the Meta or Control key
       const documentLink = page.locator('.id-label a')
       const documentId = String(await documentLink.textContent())
       await documentLink.click()
+      await wait(200)
 
       const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
       await expect(leavePageModal).toBeVisible()

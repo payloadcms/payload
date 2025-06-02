@@ -16,7 +16,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -141,18 +144,18 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
-    "esbuild": "0.24.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*"
   },
