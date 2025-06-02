@@ -78,7 +78,7 @@ export type HasManyValueUnion =
       value?: PolymorphicRelationValue[]
     }
 
-export type UpdateResults = (
+export type GetResults = (
   args: {
     filterOptions?: FilterOptionsResult
     lastFullyLoadedRelation?: number
@@ -87,7 +87,7 @@ export type UpdateResults = (
     search?: string
     sort?: boolean
   } & HasManyValueUnion,
-) => void
+) => Promise<void>
 
 export type RelationshipInputProps = {
   readonly AfterInput?: React.ReactNode

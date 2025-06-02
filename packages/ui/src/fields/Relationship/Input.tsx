@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { HasManyValueUnion, Option, RelationshipInputProps, UpdateResults } from './types.js'
+import type { GetResults, HasManyValueUnion, Option, RelationshipInputProps } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -21,7 +21,6 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueues } from '../../hooks/useQueues.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -32,8 +31,8 @@ import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
-import './index.scss'
 import { SingleValue } from './select-components/SingleValue/index.js'
+import './index.scss'
 
 const baseClass = 'relationship'
 
@@ -95,13 +94,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
-  const { queueTask } = useQueues()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
   // the line below seems odd
-
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix this
   valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
@@ -175,8 +173,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const openDrawerWhenRelationChanges = useRef(false)
 
-  const updateResults: UpdateResults = useCallback(
-    ({
+  const getResults: GetResults = useCallback(
+    async ({
       filterOptions,
       hasMany: hasManyArg,
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -189,158 +187,155 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
-      queueTask(async () => {
-        const lastFullyLoadedRelationToUse =
-          typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
+      const lastFullyLoadedRelationToUse =
+        typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
-        const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
-        const relationsToFetch =
-          lastFullyLoadedRelationToUse === -1
-            ? relations
-            : relations.slice(lastFullyLoadedRelationToUse + 1)
+      const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
+      const relationsToFetch =
+        lastFullyLoadedRelationToUse === -1
+          ? relations
+          : relations.slice(lastFullyLoadedRelationToUse + 1)
 
-        let resultsFetched = 0
-        const relationMap = createRelationMap(
-          hasManyArg === true
-            ? {
-                hasMany: true,
-                relationTo,
-                value: valueArg,
-              }
-            : {
-                hasMany: false,
-                relationTo,
-                value: valueArg,
+      let resultsFetched = 0
+      const relationMap = createRelationMap(
+        hasManyArg === true
+          ? {
+              hasMany: true,
+              relationTo,
+              value: valueArg,
+            }
+          : {
+              hasMany: false,
+              relationTo,
+              value: valueArg,
+            },
+      )
+
+      if (!errorLoading) {
+        await relationsToFetch.reduce(async (priorRelation, relation) => {
+          const relationFilterOption = filterOptions?.[relation]
+
+          let lastLoadedPageToUse
+          if (search !== searchArg) {
+            lastLoadedPageToUse = 1
+          } else {
+            lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
+          }
+          await priorRelation
+
+          if (relationFilterOption === false) {
+            setLastFullyLoadedRelation(relations.indexOf(relation))
+            return Promise.resolve()
+          }
+
+          if (resultsFetched < 10) {
+            const collection = getEntityConfig({ collectionSlug: relation })
+            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSort = collection?.defaultSort || 'id'
+            if (typeof sortOptions === 'string') {
+              fieldToSort = sortOptions
+            } else if (sortOptions?.[relation]) {
+              fieldToSort = sortOptions[relation]
+            }
+
+            const query: {
+              [key: string]: unknown
+              where: Where
+            } = {
+              depth: 0,
+              draft: true,
+              limit: maxResultsPerRequest,
+              locale,
+              page: lastLoadedPageToUse,
+              select: {
+                [fieldToSearch]: true,
               },
-        )
-
-        if (!errorLoading) {
-          await relationsToFetch.reduce(async (priorRelation, relation) => {
-            const relationFilterOption = filterOptions?.[relation]
-
-            let lastLoadedPageToUse
-            if (search !== searchArg) {
-              lastLoadedPageToUse = 1
-            } else {
-              lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
-            }
-            await priorRelation
-
-            if (relationFilterOption === false) {
-              setLastFullyLoadedRelation(relations.indexOf(relation))
-              return Promise.resolve()
-            }
-
-            if (resultsFetched < 10) {
-              const collection = getEntityConfig({ collectionSlug: relation })
-              const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-              let fieldToSort = collection?.defaultSort || 'id'
-              if (typeof sortOptions === 'string') {
-                fieldToSort = sortOptions
-              } else if (sortOptions?.[relation]) {
-                fieldToSort = sortOptions[relation]
-              }
-
-              const query: {
-                [key: string]: unknown
-                where: Where
-              } = {
-                depth: 0,
-                draft: true,
-                limit: maxResultsPerRequest,
-                locale,
-                page: lastLoadedPageToUse,
-                select: {
-                  [fieldToSearch]: true,
-                },
-                sort: fieldToSort,
-                where: {
-                  and: [
-                    {
-                      id: {
-                        not_in: relationMap[relation],
-                      },
+              sort: fieldToSort,
+              where: {
+                and: [
+                  {
+                    id: {
+                      not_in: relationMap[relation],
                     },
-                  ],
-                },
-              }
-
-              if (searchArg) {
-                query.where.and.push({
-                  [fieldToSearch]: {
-                    like: searchArg,
                   },
-                })
-              }
+                ],
+              },
+            }
 
-              if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
-                query.where.and.push(relationFilterOption)
-              }
-
-              sanitizeFilterOptionsQuery(query.where)
-
-              const response = await fetch(`${serverURL}${api}/${relation}`, {
-                body: qs.stringify(query),
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'X-Payload-HTTP-Method-Override': 'GET',
+            if (searchArg) {
+              query.where.and.push({
+                [fieldToSearch]: {
+                  like: searchArg,
                 },
-                method: 'POST',
+              })
+            }
+
+            if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+              query.where.and.push(relationFilterOption)
+            }
+
+            sanitizeFilterOptionsQuery(query.where)
+
+            const response = await fetch(`${serverURL}${api}/${relation}`, {
+              body: qs.stringify(query),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Payload-HTTP-Method-Override': 'GET',
+              },
+              method: 'POST',
+            })
+
+            if (response.ok) {
+              const data: PaginatedDocs<unknown> = await response.json()
+              setLastLoadedPage((prevState) => {
+                return {
+                  ...prevState,
+                  [relation]: lastLoadedPageToUse,
+                }
               })
 
-              if (response.ok) {
-                const data: PaginatedDocs<unknown> = await response.json()
-                setLastLoadedPage((prevState) => {
-                  return {
-                    ...prevState,
-                    [relation]: lastLoadedPageToUse,
-                  }
-                })
-
-                if (!data.nextPage) {
-                  setLastFullyLoadedRelation(relations.indexOf(relation))
-                }
-
-                if (data.docs.length > 0) {
-                  resultsFetched += data.docs.length
-
-                  dispatchOptions({
-                    type: 'ADD',
-                    collection,
-                    config,
-                    docs: data.docs,
-                    i18n,
-                    sort,
-                  })
-                }
-              } else if (response.status === 403) {
+              if (!data.nextPage) {
                 setLastFullyLoadedRelation(relations.indexOf(relation))
+              }
+
+              if (data.docs.length > 0) {
+                resultsFetched += data.docs.length
+
                 dispatchOptions({
                   type: 'ADD',
                   collection,
                   config,
-                  docs: [],
+                  docs: data.docs,
                   i18n,
-                  ids: relationMap[relation],
                   sort,
                 })
-              } else {
-                setErrorLoading(t('error:unspecific'))
               }
+            } else if (response.status === 403) {
+              setLastFullyLoadedRelation(relations.indexOf(relation))
+              dispatchOptions({
+                type: 'ADD',
+                collection,
+                config,
+                docs: [],
+                i18n,
+                ids: relationMap[relation],
+                sort,
+              })
+            } else {
+              setErrorLoading(t('error:unspecific'))
             }
-          }, Promise.resolve())
-
-          if (typeof onSuccess === 'function') {
-            onSuccess()
           }
+        }, Promise.resolve())
+
+        if (typeof onSuccess === 'function') {
+          onSuccess()
         }
-      })
+      }
     },
     [
       permissions,
-      queueTask,
       relationTo,
       errorLoading,
       search,
@@ -358,7 +353,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
-      updateResultsEffectEvent({
+      void getResults({
         filterOptions,
         lastLoadedPage: {},
         search: searchArg,
@@ -598,8 +593,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [config.routes.admin],
   )
 
-  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
-    return updateResults(args)
+  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
+    return await getResults(args)
   })
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
@@ -610,7 +605,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     // re-fetch options
     if (hasLoadedFirstPageRef.current && menuIsOpen) {
       setIsLoading(true)
-      void updateResultsEffectEvent({
+      void getResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
         onSuccess: () => {
@@ -782,7 +777,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {
                     setIsLoading(true)
-                    updateResultsEffectEvent({
+                    void getResults({
                       filterOptions,
                       lastLoadedPage: {},
                       onSuccess: () => {
@@ -803,7 +798,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }
               }}
               onMenuScrollToBottom={() => {
-                updateResultsEffectEvent({
+                void getResults({
                   filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
