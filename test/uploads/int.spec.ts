@@ -562,18 +562,41 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('filters', () => {
-      it('should block upload from a blocked domain', async () => {
-        await expect(
-          payload.create({
-            collection: mediaSlug,
-            data: {
-              filename: 'test.png',
-              url: 'http://blocked-domain.com/file.png',
-            },
-          }),
-        ).rejects.toThrow(
-          'There was a problem while uploading the file. Failed to fetch file from filtered url, http://blocked-domain.com/file.png',
-        )
+      const blockedUrls = [
+        'http://blocked-domain.com/file.png',
+        'http://127.0.0.1/file.png',
+        'http://localhost/file.png',
+        'http://[::1]/file.png',
+        'http://10.0.0.1/file.png',
+        'http://192.168.1.1/file.png',
+        'http://172.16.0.1/file.png',
+        'http://169.254.1.1/file.png',
+        'http://224.0.0.1/file.png',
+        'http://0.0.0.0/file.png',
+        'http://255.255.255.255/file.png',
+        'http://tellico.fun/redirect.php?target=http://localhost/test',
+        'https://tellico.fun/redirect.php?target=http://localhost/test',
+      ]
+
+      blockedUrls.forEach((url) => {
+        it(`should block upload from blocked URL: ${url}`, async () => {
+          await expect(
+            payload.create({
+              collection: mediaSlug,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(
+                `There was a problem while uploading the file. Failed to fetch file from filtered url, ${url}`,
+              ),
+            }),
+          )
+        })
       })
     })
   })
