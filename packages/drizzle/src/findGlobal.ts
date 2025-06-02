@@ -1,18 +1,15 @@
 import type { FindGlobal } from 'payload'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getGlobal } from './utilities/getEntity.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: DrizzleAdapter,
-  { slug, locale, req, select, where },
+  { slug: globalSlug, locale, req, select, where },
 ) {
-  const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-
-  const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
+  const { globalConfig, tableName } = getGlobal({ adapter: this, globalSlug })
 
   const {
     docs: [doc],
@@ -29,7 +26,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
   })
 
   if (doc) {
-    doc.globalType = slug
+    doc.globalType = globalSlug
     return doc
   }
 

@@ -1,15 +1,14 @@
-import type { Find, SanitizedCollectionConfig } from 'payload'
-
-import toSnakeCase from 'to-snake-case'
+import type { Find } from 'payload'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getCollection } from './utilities/getEntity.js'
 
 export const find: Find = async function find(
   this: DrizzleAdapter,
   {
-    collection,
+    collection: collectionSlug,
     draftsEnabled,
     joins,
     limit,
@@ -22,10 +21,8 @@ export const find: Find = async function find(
     where,
   },
 ) {
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, tableName } = getCollection({ adapter: this, collectionSlug })
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
-
-  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   return findMany({
     adapter: this,

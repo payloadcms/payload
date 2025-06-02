@@ -1,24 +1,24 @@
-import type { DeleteVersions, SanitizedCollectionConfig } from 'payload'
+import type { DeleteVersions } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
-  { collection, locale, req, where: where },
+  { collection: collectionSlug, locale, req, where: where },
 ) {
   const db = await getTransaction(this, req)
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  )
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
@@ -35,9 +35,9 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
     where,
   })
 
-  const ids = []
+  const ids: (number | string)[] = []
 
-  docs.forEach((doc) => {
+  docs.forEach((doc: any) => {
     ids.push(doc.id)
   })
 
