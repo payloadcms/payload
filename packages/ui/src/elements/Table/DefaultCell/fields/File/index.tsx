@@ -6,11 +6,10 @@ import type {
   UploadFieldClient,
 } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import './index.scss'
-import { getBestFitFromSizes } from '../../../../../utilities/getBestFitFromSizes.js'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
@@ -30,9 +29,12 @@ export const FileCell: React.FC<FileCellProps> = ({
   const previewAllowed = fieldPreviewAllowed ?? collectionConfig.upload?.displayPreview ?? true
 
   if (previewAllowed) {
-    let fileSrc: string | undefined = rowData?.thumbnailURL ?? rowData?.url
+    const isFileImage = isImage(rowData?.mimeType)
+    let fileSrc: string | undefined = isFileImage
+      ? rowData?.thumbnailURL || rowData?.url
+      : rowData?.thumbnailURL
 
-    if (isImage(rowData?.mimeType)) {
+    if (isFileImage) {
       fileSrc = getBestFitFromSizes({
         sizes: rowData?.sizes,
         thumbnailURL: rowData?.thumbnailURL,

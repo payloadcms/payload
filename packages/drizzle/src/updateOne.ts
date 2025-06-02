@@ -5,7 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
@@ -41,9 +41,9 @@ export const updateOne: UpdateOne = async function updateOne(
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
       adapter: this,
-      chainedMethods: [{ args: [1], method: 'limit' }],
       db,
       joins,
+      query: ({ query }) => query.limit(1),
       selectFields,
       tableName,
       where,

@@ -139,6 +139,7 @@ export default async function createLocal<
     select,
     showHiddenFields,
   } = options
+
   const collection = payload.collections[collectionSlug]
 
   if (!collection) {
@@ -148,6 +149,7 @@ export default async function createLocal<
   }
 
   const req = await createLocalReq(options, payload)
+
   req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug, TSelect>({

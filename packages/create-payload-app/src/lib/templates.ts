@@ -1,9 +1,8 @@
 import type { ProjectTemplate } from '../types.js'
 
 import { error, info } from '../utils/log.js'
-import { PACKAGE_VERSION } from './constants.js'
 
-export function validateTemplate(templateName: string): boolean {
+export function validateTemplate({ templateName }: { templateName: string }): boolean {
   const validTemplates = getValidTemplates()
   if (!validTemplates.map((t) => t.name).includes(templateName)) {
     error(`'${templateName}' is not a valid template.`)
@@ -20,13 +19,13 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'blank',
       type: 'starter',
       description: 'Blank 3.0 Template',
-      url: `https://github.com/payloadcms/payload/templates/blank#v${PACKAGE_VERSION}`,
+      url: `https://github.com/payloadcms/payload/templates/blank#main`,
     },
     {
       name: 'website',
       type: 'starter',
       description: 'Website Template',
-      url: `https://github.com/payloadcms/payload/templates/website#v${PACKAGE_VERSION}`,
+      url: `https://github.com/payloadcms/payload/templates/website#main`,
     },
     {
       name: 'plugin',

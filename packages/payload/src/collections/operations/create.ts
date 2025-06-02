@@ -9,9 +9,6 @@ import type {
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -225,6 +222,7 @@ export const createOperation = async <
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
+      overrideAccess,
       req,
       skipValidation:
         shouldSaveDraft &&
@@ -247,6 +245,7 @@ export const createOperation = async <
     let doc
 
     const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
       forceSelect: collectionConfig.forceSelect,
       select: incomingSelect,
     })

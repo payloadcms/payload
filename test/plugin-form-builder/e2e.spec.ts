@@ -46,7 +46,7 @@ test.describe('Form Builder Plugin', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
 
-      const titleCell = page.locator('.row-1 .cell-title a')
+      const titleCell = page.locator('.row-2 .cell-title a')
       await expect(titleCell).toHaveText('Contact Form')
       const href = await titleCell.getAttribute('href')
 
@@ -92,10 +92,10 @@ test.describe('Form Builder Plugin', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
 
-      const idCell = page.locator('.row-1 .cell-id a')
-      const href = await idCell.getAttribute('href')
+      const firstSubmissionCell = page.locator('.table .cell-id a').last()
+      const href = await firstSubmissionCell.getAttribute('href')
 
-      await idCell.click()
+      await firstSubmissionCell.click()
       await expect(() => expect(page.url()).toContain(href)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -109,6 +109,11 @@ test.describe('Form Builder Plugin', () => {
     test('can create form submission', async () => {
       const { docs } = await payload.find({
         collection: 'forms',
+        where: {
+          title: {
+            contains: 'Contact',
+          },
+        },
       })
 
       const createdSubmission = await payload.create({
@@ -136,6 +141,50 @@ test.describe('Form Builder Plugin', () => {
 
       await expect(page.locator('#field-submissionData__0__value')).toHaveValue('New tester')
       await expect(page.locator('#field-submissionData__1__value')).toHaveValue('new@example.com')
+    })
+
+    test('can create form submission - with date field', async () => {
+      const { docs } = await payload.find({
+        collection: 'forms',
+        where: {
+          title: {
+            contains: 'Booking',
+          },
+        },
+      })
+
+      const createdSubmission = await payload.create({
+        collection: 'form-submissions',
+        data: {
+          form: docs[0].id,
+          submissionData: [
+            {
+              field: 'name',
+              value: 'New tester',
+            },
+            {
+              field: 'email',
+              value: 'new@example.com',
+            },
+            {
+              field: 'date',
+              value: '2025-10-01T00:00:00.000Z',
+            },
+          ],
+        },
+      })
+
+      await page.goto(submissionsUrl.edit(createdSubmission.id))
+
+      await expect(() => expect(page.url()).toContain(createdSubmission.id)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(page.locator('#field-submissionData__0__value')).toHaveValue('New tester')
+      await expect(page.locator('#field-submissionData__1__value')).toHaveValue('new@example.com')
+      await expect(page.locator('#field-submissionData__2__value')).toHaveValue(
+        '2025-10-01T00:00:00.000Z',
+      )
     })
   })
 })

@@ -28,6 +28,7 @@ export type PopupProps = {
   id?: string
   initActive?: boolean
   noBackground?: boolean
+  onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
   render?: (any) => React.ReactNode
   showOnHover?: boolean
@@ -52,6 +53,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     horizontalAlign: horizontalAlignFromProps = 'left',
     initActive = false,
     noBackground,
+    onToggleClose,
     onToggleOpen,
     render,
     showOnHover = false,
@@ -68,9 +70,23 @@ export const Popup: React.FC<PopupProps> = (props) => {
   })
 
   const contentRef = useRef(null)
-  const [active, setActive] = useState(initActive)
+  const triggerRef = useRef(null)
+  const [active, setActive_Internal] = useState(initActive)
   const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps)
   const [horizontalAlign, setHorizontalAlign] = useState(horizontalAlignFromProps)
+
+  const setActive = React.useCallback(
+    (active: boolean) => {
+      if (active && typeof onToggleOpen === 'function') {
+        onToggleOpen(true)
+      }
+      if (!active && typeof onToggleClose === 'function') {
+        onToggleClose()
+      }
+      setActive_Internal(active)
+    },
+    [onToggleClose, onToggleOpen],
+  )
 
   const setPosition = useCallback(
     ({ horizontal = false, vertical = false }) => {
@@ -120,13 +136,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const handleClickOutside = useCallback(
     (e) => {
-      if (contentRef.current.contains(e.target)) {
+      if (contentRef.current.contains(e.target) || triggerRef.current.contains(e.target)) {
         return
       }
 
       setActive(false)
     },
-    [contentRef],
+    [contentRef, setActive],
   )
 
   useEffect(() => {
@@ -138,10 +154,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
   }, [intersectionEntry, setPosition, windowHeight])
 
   useEffect(() => {
-    if (typeof onToggleOpen === 'function') {
-      onToggleOpen(active)
-    }
-
     if (active) {
       document.addEventListener('mousedown', handleClickOutside)
     } else {
@@ -155,7 +167,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   useEffect(() => {
     setActive(forceOpen)
-  }, [forceOpen])
+  }, [forceOpen, setActive])
 
   const classes = [
     baseClass,
@@ -172,12 +184,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <div className={`${baseClass}__trigger-wrap`}>
+      <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
         {showOnHover ? (
           <div
             className={`${baseClass}__on-hover-watch`}
             onMouseEnter={() => setActive(true)}
             onMouseLeave={() => setActive(false)}
+            role="button"
+            tabIndex={0}
           >
             <PopupTrigger
               {...{

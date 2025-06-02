@@ -18,7 +18,7 @@ export const getRequestLanguage = ({
   cookies,
   headers,
 }: GetRequestLanguageArgs): AcceptedLanguages => {
-  const supportedLanguageKeys = <AcceptedLanguages[]>Object.keys(config.i18n.supportedLanguages)
+  const supportedLanguageKeys = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
   const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
 
   const languageFromCookie: AcceptedLanguages = (

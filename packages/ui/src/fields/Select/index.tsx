@@ -38,6 +38,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         description,
         isClearable = true,
         isSortable = true,
+        placeholder,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -46,7 +47,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -65,11 +66,13 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
+    selectFilterOptions,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -107,6 +110,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ value }) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
@@ -117,6 +128,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
+      placeholder={placeholder}
       readOnly={readOnly || disabled}
       required={required}
       showError={showError}

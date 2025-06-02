@@ -41,7 +41,7 @@ export default buildConfigWithDefaults({
           isGlobal: true,
         },
       },
-      tenantSelectorLabel: 'Sites',
+      tenantSelectorLabel: { en: 'Site', es: 'Site in es' },
     }),
   ],
   typescript: {

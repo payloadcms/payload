@@ -64,6 +64,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -143,6 +144,10 @@ export interface Post {
   text?: string | null;
   title?: string | null;
   selectField: MySelectOptions;
+  insideUnnamedGroup?: string | null;
+  namedGroup?: {
+    insideNamedGroup?: string | null;
+  };
   radioField: MyRadioOptions;
   updatedAt: string;
   createdAt: string;
@@ -166,9 +171,10 @@ export interface PagesCategory {
   id: string;
   title?: string | null;
   relatedPages?: {
-    docs?: (string | Page)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Page)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -262,6 +268,12 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   title?: T;
   selectField?: T;
+  insideUnnamedGroup?: T;
+  namedGroup?:
+    | T
+    | {
+        insideNamedGroup?: T;
+      };
   radioField?: T;
   updatedAt?: T;
   createdAt?: T;
