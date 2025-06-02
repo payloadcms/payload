@@ -62,11 +62,31 @@ export const DocumentTabs: React.FC<{
                   (condition &&
                     Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
 
+                const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
+
                 if (meetsCondition) {
+                  if (tabFromConfig?.Component) {
+                    return RenderServerComponent({
+                      clientProps: {
+                        path,
+                      } satisfies DocumentTabClientProps,
+                      Component: tabFromConfig.Component,
+                      importMap: payload.importMap,
+                      key: `tab-${index}`,
+                      serverProps: {
+                        collectionConfig,
+                        globalConfig,
+                        i18n,
+                        payload,
+                        permissions,
+                      } satisfies DocumentTabServerPropsOnly,
+                    })
+                  }
+
                   return (
                     <DocumentTab
                       key={`tab-${index}`}
-                      path={viewConfig && 'path' in viewConfig ? viewConfig.path : ''}
+                      path={path}
                       {...{
                         ...props,
                         ...(tab || {}),
