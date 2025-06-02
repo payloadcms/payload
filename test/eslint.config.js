@@ -29,6 +29,12 @@ export const testEslintConfig = [
     },
   },
   {
+    files: ['**/*.config.ts', '**/config.ts'],
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  },
+  {
     files: ['**/*.int.spec.ts', '**/int.spec.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
