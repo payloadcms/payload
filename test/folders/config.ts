@@ -18,6 +18,11 @@ export default buildConfigWithDefaults({
   },
   folders: {
     // debug: true,
+    collectionOverrides: [
+      ({ collection }) => {
+        return collection
+      },
+    ],
   },
   collections: [Posts, Media, Drafts, Autosave],
   globals: [

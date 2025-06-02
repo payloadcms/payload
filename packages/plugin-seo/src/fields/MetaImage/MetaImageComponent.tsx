@@ -29,7 +29,7 @@ type MetaImageProps = {
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {
-    field: { label, localized, relationTo, required },
+    field: { admin: { allowCreate } = {}, label, localized, relationTo, required },
     hasGenerateImageFn,
     readOnly,
   } = props
@@ -175,6 +175,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          allowCreate={allowCreate !== false}
           api={api}
           collection={collection}
           Error={Error}
