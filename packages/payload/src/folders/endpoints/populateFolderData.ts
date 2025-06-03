@@ -43,6 +43,17 @@ export const populateFolderDataEndpoint: Endpoint = {
     if (collectionSlug) {
       const collectionConfig = req.payload.collections?.[collectionSlug]?.config
 
+      if (!collectionConfig) {
+        return Response.json(
+          {
+            message: `Collection with slug "${collectionSlug}" not found`,
+          },
+          {
+            status: httpStatus.NOT_FOUND,
+          },
+        )
+      }
+
       const collectionConstraints = await buildFolderWhereConstraints({
         collectionConfig,
         folderID: req.searchParams?.get('folderID') || undefined,
@@ -58,7 +69,7 @@ export const populateFolderDataEndpoint: Endpoint = {
     } else {
       // loop over all folder enabled collections and build constraints for each
       for (const collectionSlug of Object.keys(req.payload.collections)) {
-        const collectionConfig = req.payload.collections[collectionSlug].config
+        const collectionConfig = req.payload.collections[collectionSlug]?.config
 
         if (collectionConfig?.folders) {
           const collectionConstraints = await buildFolderWhereConstraints({
@@ -83,8 +94,22 @@ export const populateFolderDataEndpoint: Endpoint = {
       }
     }
 
+    const folderCollectionConfig =
+      req.payload.collections?.[req.payload.config.folders.slug]?.config
+
+    if (!folderCollectionConfig) {
+      return Response.json(
+        {
+          message: 'Folder collection not found',
+        },
+        {
+          status: httpStatus.NOT_FOUND,
+        },
+      )
+    }
+
     const folderConstraints = await buildFolderWhereConstraints({
-      collectionConfig: req.payload.collections[req.payload.config.folders.slug].config,
+      collectionConfig: folderCollectionConfig,
       folderID: req.searchParams?.get('folderID') || undefined,
       localeCode: typeof req?.locale === 'string' ? req.locale : undefined,
       req,
