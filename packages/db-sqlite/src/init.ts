@@ -36,4 +36,9 @@ export const init: Init = async function init(this: SQLiteAdapter) {
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  this.schema = {
+    ...this.tables,
+    ...this.relations,
+  }
 }

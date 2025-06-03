@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
@@ -34,9 +33,9 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
           (await hook({
             args,
             collection: args.collection.config,
-            context: args.req.context,
+            context: args.req!.context,
             operation: 'countVersions',
-            req: args.req,
+            req: args.req!,
           })) || args
       }
     }
@@ -45,10 +44,11 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
       collection: { config: collectionConfig },
       disableErrors,
       overrideAccess,
-      req: { payload },
       req,
       where,
     } = args
+
+    const { payload } = req!
 
     // /////////////////////////////////////
     // Access
@@ -58,7 +58,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     if (!overrideAccess) {
       accessResult = await executeAccess(
-        { disableErrors, req },
+        { disableErrors, req: req! },
         collectionConfig.access.readVersions,
       )
 
@@ -72,16 +72,16 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     let result: { totalDocs: number }
 
-    const fullWhere = combineQueries(where, accessResult)
+    const fullWhere = combineQueries(where!, accessResult!)
 
     const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
-      req,
+      overrideAccess: overrideAccess!,
+      req: req!,
       versionFields,
-      where,
+      where: where!,
     })
 
     result = await payload.db.countVersions({
@@ -107,7 +107,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

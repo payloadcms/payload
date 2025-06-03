@@ -1,6 +1,6 @@
+// @ts-strict-ignore
 import ObjectIdImport from 'bson-objectid'
 
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,
@@ -95,7 +95,7 @@ export async function handleTaskFailed({
       }
     : {
         message:
-          taskHandlerResult.state === 'failed'
+          taskHandlerResult?.state === 'failed'
             ? (taskHandlerResult.errorMessage ?? taskHandlerResult.state)
             : 'failed',
       }
@@ -186,16 +186,15 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     ) => {
       const executedAt = new Date()
 
-      let inlineRunner: TaskHandler<TaskType> = null
+      let inlineRunner: TaskHandler<TaskType> = null!
       if (isInline) {
         inlineRunner = task
       }
 
-      let taskConfig: TaskConfig<string>
+      let taskConfig!: TaskConfig<string>
       if (!isInline) {
-        taskConfig =
-          req.payload.config.jobs.tasks?.length &&
-          req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
+        taskConfig = (req.payload.config.jobs.tasks?.length &&
+          req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)) as TaskConfig<string>
 
         if (!taskConfig) {
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
@@ -220,7 +219,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
-        ? job.taskStatus[taskSlug][taskID]
+        ? job.taskStatus[taskSlug][taskID]!
         : null
 
       // Handle restoration of task if it succeeded in a previous run
@@ -229,7 +228,12 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         if (finalRetriesConfig?.shouldRestore === false) {
           shouldRestore = false
         } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
-          shouldRestore = await finalRetriesConfig.shouldRestore({ input, job, req, taskStatus })
+          shouldRestore = await finalRetriesConfig.shouldRestore({
+            input: input!,
+            job,
+            req,
+            taskStatus,
+          })
         }
         if (shouldRestore) {
           return taskStatus.output
@@ -311,9 +315,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         await handleTaskFailed({
           error: err,
           executedAt,
-          input,
+          input: input!,
           job,
-          maxRetries,
+          maxRetries: maxRetries!,
           output,
           parent,
           req,
@@ -331,9 +335,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       if (taskHandlerResult.state === 'failed') {
         await handleTaskFailed({
           executedAt,
-          input,
+          input: input!,
           job,
-          maxRetries,
+          maxRetries: maxRetries!,
           output,
           parent,
           req,
@@ -348,7 +352,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
         throw new Error('Task failed')
       } else {
-        output = taskHandlerResult.output
+        output = taskHandlerResult.output!
       }
 
       if (taskConfig?.onSuccess) {

@@ -43,7 +43,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (entityType === 'collection') {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       parent: {
         equals: doc.id,
       },
@@ -51,7 +51,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (docHasTimestamps(doc)) {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       or: [
         {
           updatedAt: {
@@ -77,7 +77,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    locale,
+    locale: locale!,
     pagination: false,
     req,
     select: getQueryDraftsSelect({ select }),

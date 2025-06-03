@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from './../collections/config/types.js'
 
 type CookieOptions = {
@@ -185,24 +184,50 @@ export const generateExpiredPayloadCookie = <T extends Omit<GeneratePayloadCooki
   })
 }
 
-export const parseCookies = (headers: Request['headers']): Map<string, string> => {
-  const cookieMap = new Map<string, string>()
+export function parseCookies(headers: Request['headers']) {
+  // Taken from https://github.com/vercel/edge-runtime/blob/main/packages/cookies/src/serialize.ts
+
+  /*
+  The MIT License (MIT)
+
+  Copyright (c) 2024 Vercel, Inc.
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  */
+  const map = new Map<string, string>()
+
   const cookie = headers.get('Cookie')
 
-  if (cookie) {
-    cookie.split(';').forEach((cookie) => {
-      const parts = cookie.split('=')
-      const key = parts.shift()?.trim()
-      const encodedValue = parts.join('=')
-
-      try {
-        const decodedValue = decodeURI(encodedValue)
-        cookieMap.set(key, decodedValue)
-      } catch (ignore) {
-        return null
-      }
-    })
+  if (!cookie) {
+    return map
   }
 
-  return cookieMap
+  for (const pair of cookie.split(/; */)) {
+    if (!pair) {
+      continue
+    }
+
+    const splitAt = pair.indexOf('=')
+
+    // If the attribute doesn't have a value, set it to 'true'.
+    if (splitAt === -1) {
+      map.set(pair, 'true')
+      continue
+    }
+
+    // Otherwise split it into key and value and trim the whitespace on the
+    // value.
+    const [key, value] = [pair.slice(0, splitAt), pair.slice(splitAt + 1)]
+    try {
+      map.set(key, decodeURIComponent(value ?? 'true'))
+    } catch {
+      // ignore invalid encoded values
+    }
+  }
+
+  return map
 }
