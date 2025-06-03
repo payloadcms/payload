@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -68,7 +67,7 @@ export const sanitizeGlobal = async (
   }
 
   // Sanitize fields
-  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+  const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 
   global.fields = await sanitizeFields({
     config,
@@ -124,8 +123,8 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
   // Sanitize fields
   // /////////////////////////////////
-  let hasUpdatedAt = null
-  let hasCreatedAt = null
+  let hasUpdatedAt: boolean | null = null
+  let hasCreatedAt: boolean | null = null
   global.fields.some((field) => {
     if (fieldAffectsData(field)) {
       if (field.name === 'updatedAt') {

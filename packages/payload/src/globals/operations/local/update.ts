@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
@@ -8,6 +7,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -128,8 +128,8 @@ export default async function updateLocal<
     overrideAccess,
     overrideLock,
     populate,
-    publishSpecificLocale,
-    req: await createLocalReq(options, payload),
+    publishSpecificLocale: publishSpecificLocale!,
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

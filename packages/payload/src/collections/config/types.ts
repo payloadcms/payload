@@ -82,6 +82,7 @@ export type HookOperationType =
   | 'login'
   | 'read'
   | 'refresh'
+  | 'resetPassword'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
@@ -289,6 +290,10 @@ export type CollectionAdminOptions = {
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */

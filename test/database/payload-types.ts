@@ -239,6 +239,7 @@ export interface DefaultValue {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  escape?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -749,6 +750,7 @@ export interface DefaultValuesSelect<T extends boolean = true> {
       };
   select?: T;
   point?: T;
+  escape?: T;
   updatedAt?: T;
   createdAt?: T;
 }

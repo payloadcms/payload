@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import nextEnvImport from '@next/env'
 
 import { findUpSync } from '../utilities/findUp.js'
@@ -19,6 +18,7 @@ export function loadEnv(path?: string) {
   if (!loadedEnvFiles?.length) {
     // use findUp to find the env file. So, run loadEnvConfig for every directory upwards
     findUpSync({
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       condition: (dir) => {
         const { loadedEnvFiles } = loadEnvConfig(dir, true)
         if (loadedEnvFiles?.length) {

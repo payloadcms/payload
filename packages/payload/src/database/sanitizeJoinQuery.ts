@@ -38,7 +38,7 @@ const sanitizeJoinFieldQuery = async ({
     return
   }
 
-  const joinCollectionConfig = req.payload.collections[collectionSlug].config
+  const joinCollectionConfig = req.payload.collections[collectionSlug]!.config
 
   const accessResult = !overrideAccess
     ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
@@ -103,7 +103,7 @@ export const sanitizeJoinQuery = async ({
   const promises: Promise<void>[] = []
 
   for (const collectionSlug in collectionConfig.joins) {
-    for (const join of collectionConfig.joins[collectionSlug]) {
+    for (const join of collectionConfig.joins[collectionSlug]!) {
       await sanitizeJoinFieldQuery({
         collectionSlug,
         errors,
