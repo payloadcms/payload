@@ -161,10 +161,54 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   })
 
-  const diffDoc = await _payload.create({
+  const diffDocDraft = await _payload.create({
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
+      _status: 'draft',
+      text: 'Draft 1',
+    },
+    depth: 0,
+  })
+
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 2',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 3',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 4',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+
+  const diffDoc = await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    id: diffDocDraft.id,
+    data: {
+      _status: 'published',
       array: [
         {
           textInArray: 'textInArray',
@@ -261,29 +305,32 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     id: diffDoc.id,
     data: {
       ...diffDoc,
-      createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
-      updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+      createdAt: new Date(new Date(diffDoc.createdAt).getTime() - 2 * 60 * 10000).toISOString(),
+      updatedAt: new Date(new Date(diffDoc.updatedAt).getTime() - 2 * 60 * 10000).toISOString(),
     },
   })
 
   const versions = await _payload.findVersions({
     collection: diffCollectionSlug,
     depth: 0,
-    where: {
-      parent: {
-        equals: diffDoc.id,
-      },
-    },
+    limit: 50,
+    sort: '-createdAt',
   })
 
+  let i = 0
   for (const version of versions.docs) {
+    i += 1
     await _payload.db.updateVersion({
       id: version.id,
       collection: diffCollectionSlug,
       versionData: {
         ...version.version,
-        createdAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
-        updatedAt: new Date(Date.now() - 2 * 60 * 10000).toISOString(),
+        createdAt: new Date(
+          new Date(version.createdAt).getTime() - 2 * 60 * 10000 * i,
+        ).toISOString(),
+        updatedAt: new Date(
+          new Date(version.updatedAt).getTime() - 2 * 60 * 10000 * i,
+        ).toISOString(),
       },
     })
   }
