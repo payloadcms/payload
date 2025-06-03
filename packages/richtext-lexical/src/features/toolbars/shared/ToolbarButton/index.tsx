@@ -79,6 +79,7 @@ export const ToolbarButton = ({
       editor.update(() => {
         $addUpdateTag('toolbar')
       })
+      // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
       item.onSelect?.({
         editor,
         isActive: _state.active,
