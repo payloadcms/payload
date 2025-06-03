@@ -374,7 +374,7 @@ export function parseParams({
                   Array.isArray(queryValue) &&
                   queryValue.some((v) => v === null)
                 ) {
-                  orConditions.push(adapter.operators.isNull(resolvedColumn))
+                  orConditions.push(isNull(resolvedColumn))
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
                 }
                 let constraint = adapter.operators[queryOperator](
