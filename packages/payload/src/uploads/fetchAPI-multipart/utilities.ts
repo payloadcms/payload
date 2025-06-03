@@ -228,14 +228,14 @@ const uriDecodeFileName = (opts, fileName) => {
   // See Issue https://github.com/richardgirges/express-fileupload/issues/342.
   try {
     return decodeURIComponent(fileName)
-  } catch (err) {
+  } catch (ignore) {
     const matcher = /(%[a-f\d]{2})/gi
     return fileName
       .split(matcher)
       .map((str) => {
         try {
           return decodeURIComponent(str)
-        } catch (err) {
+        } catch (ignore) {
           return ''
         }
       })

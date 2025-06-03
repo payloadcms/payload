@@ -213,6 +213,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -220,6 +221,7 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -238,6 +240,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig

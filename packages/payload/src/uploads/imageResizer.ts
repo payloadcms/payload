@@ -18,7 +18,7 @@ import type {
 } from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
-import fileExists from './fileExists.js'
+import { fileExists } from './fileExists.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type ResizeArgs = {

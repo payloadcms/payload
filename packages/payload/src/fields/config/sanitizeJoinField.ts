@@ -1,18 +1,12 @@
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { FlattenedJoinField, JoinField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
-import { traverseFields } from '../../utilities/traverseFields.js'
-import {
-  fieldShouldBeLocalized,
-  type FlattenedJoinField,
-  type JoinField,
-  type RelationshipField,
-  type UploadField,
-} from './types.js'
+
 export const sanitizeJoinField = ({
   config,
   field,

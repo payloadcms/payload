@@ -78,7 +78,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         : memHandler(options, field, filename) // Upload into RAM.
 
     const writePromise = options.useTempFiles
-      ? getWritePromise().catch((err) => {
+      ? getWritePromise().catch(() => {
           busboy.end()
           cleanup()
         })

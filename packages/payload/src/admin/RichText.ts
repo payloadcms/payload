@@ -2,12 +2,7 @@ import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type {
-  Config,
-  ImportMapGenerators,
-  PayloadComponent,
-  SanitizedConfig,
-} from '../config/types.js'
+import type { ImportMapGenerators, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
   FieldAffectingData,

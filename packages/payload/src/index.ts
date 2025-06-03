@@ -1336,7 +1336,7 @@ export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validations } from './fields/validations.js'
 export type {
@@ -1477,7 +1477,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { flattenAllFields } from './utilities/flattenAllFields.js'
-export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'

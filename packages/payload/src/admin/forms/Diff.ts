@@ -5,7 +5,6 @@ import type {
   ClientFieldWithOptionalType,
   PayloadRequest,
   SanitizedFieldPermissions,
-  TypedLocale,
 } from '../../index.js'
 
 export type VersionTab = {
