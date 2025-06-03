@@ -85,6 +85,7 @@ export interface Config {
     array: Array;
     'disable-duplicate': DisableDuplicate;
     'disable-copy-to-locale': DisableCopyToLocale;
+    'edit-menu-items': EditMenuItem;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
@@ -113,6 +114,7 @@ export interface Config {
     array: ArraySelect<false> | ArraySelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
+    'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
@@ -237,6 +239,18 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  someTextField?: string | null;
+  namedGroup?: {
+    someTextField?: string | null;
+  };
+  textFieldInUnnamedGroup?: string | null;
+  groupWithCustomCell?: {
+    nestedTextFieldInGroupWithCustomCell?: string | null;
+  };
+  namedTab?: {
+    nestedTextFieldInNamedTab?: string | null;
+  };
+  nestedTextFieldInUnnamedTab?: string | null;
   relationship?: (string | null) | Post;
   users?: (string | null) | User;
   customCell?: string | null;
@@ -455,6 +469,16 @@ export interface DisableCopyToLocale {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-menu-items".
+ */
+export interface EditMenuItem {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
@@ -579,6 +603,10 @@ export interface PayloadLockedDocument {
         value: string | DisableCopyToLocale;
       } | null)
     | ({
+        relationTo: 'edit-menu-items';
+        value: string | EditMenuItem;
+      } | null)
+    | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
       } | null)
@@ -695,6 +723,24 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
+  someTextField?: T;
+  namedGroup?:
+    | T
+    | {
+        someTextField?: T;
+      };
+  textFieldInUnnamedGroup?: T;
+  groupWithCustomCell?:
+    | T
+    | {
+        nestedTextFieldInGroupWithCustomCell?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        nestedTextFieldInNamedTab?: T;
+      };
+  nestedTextFieldInUnnamedTab?: T;
   relationship?: T;
   users?: T;
   customCell?: T;
@@ -886,6 +932,15 @@ export interface DisableDuplicateSelect<T extends boolean = true> {
  * via the `definition` "disable-copy-to-locale_select".
  */
 export interface DisableCopyToLocaleSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "edit-menu-items_select".
+ */
+export interface EditMenuItemsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

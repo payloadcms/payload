@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
@@ -71,7 +70,7 @@ export const enforceMaxVersions = async ({
       }
 
       await payload.db.deleteVersions({
-        collection: slug,
+        collection: slug!,
         req,
         where: deleteQuery,
       })

@@ -542,7 +542,7 @@ export class BasePayload {
       })
 
       spawned.on('exit', (code) => {
-        resolve({ code })
+        resolve({ code: code! })
       })
 
       spawned.on('error', (error) => {
@@ -585,7 +585,7 @@ export class BasePayload {
       void checkPayloadDependencies()
     }
 
-    this.importMap = options.importMap
+    this.importMap = options.importMap!
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
@@ -605,7 +605,7 @@ export class BasePayload {
     }
 
     for (const collection of this.config.collections) {
-      let customIDType = undefined
+      let customIDType: string | undefined = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
@@ -637,7 +637,7 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks.reduce((blocks, block) => {
+    this.blocks = this.config.blocks!.reduce((blocks, block) => {
       blocks[block.slug] = block
       return blocks
     }, {})
@@ -843,7 +843,7 @@ export const reload = async (
     return collections
   }, {})
 
-  payload.blocks = config.blocks.reduce((blocks, block) => {
+  payload.blocks = config.blocks!.reduce((blocks, block) => {
     blocks[block.slug] = block
     return blocks
   }, {})
@@ -871,7 +871,7 @@ export const reload = async (
     })
   }
 
-  await payload.db.init()
+  await payload.db.init?.()
 
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -894,7 +894,7 @@ export const getPayload = async (
 
   if (cached.payload) {
     if (cached.reload === true) {
-      let resolve: () => void
+      let resolve!: () => void
 
       // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
@@ -915,7 +915,6 @@ export const getPayload = async (
     return cached.payload
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
@@ -1371,6 +1370,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1378,7 +1378,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1390,7 +1389,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
 export { findOneOperation } from './globals/operations/findOne.js'
@@ -1437,11 +1435,11 @@ export type {
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1499,6 +1497,7 @@ export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
+export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
@@ -1515,6 +1514,7 @@ export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryK
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

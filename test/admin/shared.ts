@@ -24,6 +24,10 @@ export const customNestedViewTitle = 'Custom Nested View'
 
 export const customEditLabel = 'Custom Edit Label'
 
+export const customTabComponent = 'Custom Tab Component'
+
+export const overriddenDefaultRouteTabLabel = 'Custom Tab Component Default View'
+
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'

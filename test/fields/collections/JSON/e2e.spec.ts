@@ -113,12 +113,16 @@ describe('JSON', () => {
     })
 
     await page.goto(url.edit(createdDoc.id))
-    const jsonField = page.locator('.json-field #field-customJSON')
+    const jsonField = page.locator('.json-field:not(.read-only) #field-customJSON')
     await expect(jsonField).toContainText('"default": "value"')
 
-    const originalHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
+    const originalHeight =
+      (await page.locator('.json-field:not(.read-only) #field-customJSON').boundingBox())?.height ||
+      0
     await page.locator('#set-custom-json').click()
-    const newHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
+    const newHeight =
+      (await page.locator('.json-field:not(.read-only) #field-customJSON').boundingBox())?.height ||
+      0
     expect(newHeight).toBeGreaterThan(originalHeight)
   })
 })

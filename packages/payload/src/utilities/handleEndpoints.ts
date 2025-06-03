@@ -15,7 +15,7 @@ import { routeError } from './routeError.js'
 const notFoundResponse = (req: PayloadRequest, pathname?: string) => {
   return Response.json(
     {
-      message: `Route not found "${pathname ?? new URL(req.url).pathname}"`,
+      message: `Route not found "${pathname ?? new URL(req.url!).pathname}"`,
     },
     {
       headers: headersWithCors({
@@ -71,9 +71,9 @@ export const handleEndpoints = async ({
   path?: string
   request: Request
 }): Promise<Response> => {
-  let handler: PayloadHandler
+  let handler!: PayloadHandler
   let req: PayloadRequest
-  let collection: Collection
+  let collection!: Collection
 
   // This can be used against GET request search params size limit.
   // Instead you can do POST request with a text body as search params.
@@ -81,7 +81,8 @@ export const handleEndpoints = async ({
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
-    request.headers.get('X-HTTP-Method-Override') === 'GET'
+    (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
+      request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
     const search = await request.text()
 
@@ -103,9 +104,9 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadRequest({ config: incomingConfig, request })
+    req = await createPayloadRequest({ canSetHeaders: true, config: incomingConfig, request })
 
-    if (req.method.toLowerCase() === 'options') {
+    if (req.method?.toLowerCase() === 'options') {
       return Response.json(
         {},
         {
@@ -121,7 +122,7 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${path ?? new URL(req.url).pathname}`
+    const pathname = `${basePath}${path ?? new URL(req.url!).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
       return notFoundResponse(req, pathname)
@@ -144,12 +145,12 @@ export const handleEndpoints = async ({
 
     const firstParam = segments[0]
 
-    let globalConfig: GlobalConfig
+    let globalConfig!: GlobalConfig
 
     // first param can be a global slug or collection slug, find the relevant config
     if (firstParam) {
       if (isGlobals) {
-        globalConfig = payload.globals.config.find((each) => each.slug === firstParam)
+        globalConfig = payload.globals.config.find((each) => each.slug === firstParam)!
       } else if (payload.collections[firstParam]) {
         collection = payload.collections[firstParam]
       }
@@ -164,7 +165,7 @@ export const handleEndpoints = async ({
     } else if (globalConfig) {
       // /header/route -> /route
       adjustedPathname = adjustedPathname.replace(`/${globalConfig.slug}`, '')
-      endpoints = globalConfig.endpoints
+      endpoints = globalConfig.endpoints!
     }
 
     // sanitize when endpoint.path is '/'
@@ -175,7 +176,7 @@ export const handleEndpoints = async ({
     if (endpoints === false) {
       return Response.json(
         {
-          message: `Cannot ${req.method.toUpperCase()} ${req.url}`,
+          message: `Cannot ${req.method?.toUpperCase()} ${req.url}`,
         },
         {
           headers: headersWithCors({
@@ -189,7 +190,7 @@ export const handleEndpoints = async ({
 
     // Find the relevant endpoint configuration
     const endpoint = endpoints?.find((endpoint) => {
-      if (endpoint.method !== req.method.toLowerCase()) {
+      if (endpoint.method !== req.method?.toLowerCase()) {
         return false
       }
 
@@ -236,7 +237,7 @@ export const handleEndpoints = async ({
       collection,
       config: incomingConfig,
       err,
-      req,
+      req: req!,
     })
   }
 }
