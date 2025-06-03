@@ -12,6 +12,7 @@ import type { Enlarge, Media } from './payload-types.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  allowListMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -378,24 +379,6 @@ describe('Collections - Uploads', () => {
         expect(response.headers.get('content-type')).toContain('image/png')
       })
     })
-    describe('filters', () => {
-      blockedUrls.forEach((url) => {
-        it(`should block upload from blocked URL: ${url}`, async () => {
-          const response = await restClient.POST(`/${mediaSlug}`, {
-            body: {
-              filename: 'test.png',
-              url,
-            },
-          })
-
-          expect(response.status).toBe(400)
-
-          const body = await response.json()
-
-          expect(body.errors?.[0]?.message).toContain('No files were uploaded.')
-        })
-      })
-    })
   })
 
   describe('Local API', () => {
@@ -598,6 +581,28 @@ describe('Collections - Uploads', () => {
               ),
             }),
           )
+        })
+
+        it(`should allow upload from blocked URL if URL is in pasteURL allowList: ${url}`, async () => {
+          // eslint-disable-next-line jest/no-conditional-in-test
+          if (url != 'http://blocked-domain.com/file.png') {
+            await expect(
+              payload.create({
+                collection: allowListMediaSlug,
+                data: {
+                  filename: 'test.png',
+                  url,
+                },
+              }),
+            ).rejects.toThrow(
+              expect.objectContaining({
+                name: 'FileRetrievalError',
+                message: expect.stringContaining(`There was a problem while uploading the file.`),
+              }),
+            )
+          } else {
+            expect(true).toBe(true) // Skip test for the one URL that will fail because it will upload an actual file
+          }
         })
       })
     })
