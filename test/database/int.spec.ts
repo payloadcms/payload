@@ -2638,7 +2638,6 @@ describe('database', () => {
       data: { title: 'a', text: null },
     })
 
-    global.d = true
     const { docs } = await payload.find({
       collection: 'posts',
       where: { text: { in: ['text-1', 'text-3', null] } },
