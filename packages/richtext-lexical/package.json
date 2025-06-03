@@ -17,7 +17,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -384,11 +387,11 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
     "@lexical/eslint-plugin": "0.28.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
@@ -396,12 +399,12 @@
     "@types/node": "22.5.4",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.24.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "3.1.0"
+    "swc-plugin-transform-remove-imports": "4.0.4"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
