@@ -203,8 +203,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       context: req.context,
       depth: depth!,
       doc: result,
-      // @ts-expect-error - TODO: fix this
-      draft: undefined,
+      draft: undefined!,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
