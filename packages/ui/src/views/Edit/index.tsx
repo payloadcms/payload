@@ -45,6 +45,7 @@ const baseClass = 'collection-edit'
 export function DefaultEditView({
   BeforeDocumentControls,
   Description,
+  EditMenuItems,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -523,6 +524,7 @@ export function DefaultEditView({
             data={savedDocumentData}
             disableActions={disableActions}
             disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
