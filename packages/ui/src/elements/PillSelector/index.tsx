@@ -61,7 +61,7 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
             className={[`${baseClass}__pill`, pill.selected && `${baseClass}__pill--selected`]
               .filter(Boolean)
               .join(' ')}
-            draggable
+            draggable={Boolean(draggable)}
             icon={pill.selected ? <XIcon /> : <PlusIcon />}
             id={pill.name}
             key={pill.key ?? `${pill.name}-${i}`}
