@@ -118,6 +118,8 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
    * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
    * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
   trash?: boolean

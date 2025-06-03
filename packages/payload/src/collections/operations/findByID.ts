@@ -112,8 +112,8 @@ export const findByIDOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
-    // If trash is false, restrict to non-trashed docs only
-    if (!trash) {
+    // If softDeletes is enabled and trash is false, restrict to non-trashed documents only
+    if (collectionConfig.softDeletes && !trash) {
       const notTrashedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {

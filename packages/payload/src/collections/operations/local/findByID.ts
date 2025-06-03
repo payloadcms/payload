@@ -104,6 +104,8 @@ export type Options<
    * When set to `true`, the operation will return a document by ID, even if it is soft-deleted (trashed).
    * By default (`false`), the operation will exclude soft-deleted documents.
    * To fetch a soft-deleted document, set `trash: true`.
+   *
+   * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
   trash?: boolean

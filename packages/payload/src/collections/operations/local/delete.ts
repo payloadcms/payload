@@ -76,6 +76,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * When set to `true`, the operation will permanently delete both normal and soft-deleted (trashed) documents.
    * By default (`false`), only normal (non-trashed) documents will be permanently deleted.
+   *
+   * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
   trash?: boolean
