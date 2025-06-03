@@ -1,6 +1,6 @@
 ---
-title: API Key Strategy
-label: API Key Strategy
+title: API key strategy
+label: API key strategy
 order: 50
 desc: Enable API key based authentication to interface with Payload.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
@@ -48,7 +48,7 @@ no longer be valid.
 
 </Banner>
 
-### HTTP Authentication
+### HTTP authentication
 
 To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper [Access Control](../access-control/overview). By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
 
@@ -66,7 +66,7 @@ const response = await fetch('http://localhost:3000/api/pages', {
 
 Payload ensures that the same, uniform [Access Control](../access-control/overview) is used across all authentication strategies. This enables you to utilize your existing Access Control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
 
-### API Key Only Auth
+### API key only auth
 
 If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. This will disable the ability to authenticate with email and password, and will only allow for authentication via API key.
 

@@ -1,6 +1,6 @@
 ---
-title: JWT Strategy
-label: JWT Strategy
+title: JWT strategy
+label: JWT strategy
 order: 40
 desc: Enable JSON Web Token based authentication to interface with Payload.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
@@ -14,7 +14,7 @@ Payload offers the ability to [Authenticate](./overview) via JSON Web Tokens (JW
   the `req.user` argument. [More details](./token-data).
 </Banner>
 
-### Identifying Users Via The Authorization Header
+### Identifying users via the Authorization header
 
 In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
 
@@ -36,7 +36,7 @@ const request = await fetch('http://localhost:3000', {
 })
 ```
 
-### Omitting The Token
+### Omitting the token
 
 In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponses` to `true` like so:
 

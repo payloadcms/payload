@@ -1,6 +1,6 @@
 ---
-title: Cookie Strategy
-label: Cookie Strategy
+title: Cookie strategy
+label: Cookie strategy
 order: 40
 desc: Enable HTTP Cookie based authentication to interface with Payload.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
@@ -18,7 +18,7 @@ Payload offers the ability to [Authenticate](./overview) via HTTP-only cookies. 
 
 Modern browsers automatically include `http-only` cookies when making requests directly to URLs—meaning that if you are running your API on `https://example.com`, and you have logged in and visit `https://example.com/test-page`, your browser will automatically include the Payload authentication cookie for you.
 
-### HTTP Authentication
+### HTTP authentication
 
 However, if you use `fetch` or similar APIs to retrieve Payload resources from its REST or GraphQL API, you must specify to include credentials (cookies).
 
@@ -41,7 +41,7 @@ For more about including cookies in requests from your app to your Payload API, 
   cookies.
 </Banner>
 
-### CSRF Attacks
+### CSRF attacks
 
 CSRF (cross-site request forgery) attacks are common and dangerous. By using an HTTP-only cookie, Payload removes many XSS vulnerabilities, however, CSRF attacks can still be possible.
 
@@ -60,7 +60,7 @@ const maliciousRequest = await fetch(`https://payload-finances.com/api/me`, {
 
 In this scenario, if your cookie was still valid, malicious-intent.com would be able to make requests like the one above on your behalf. This is a CSRF attack.
 
-### CSRF Prevention
+### CSRF prevention
 
 Define domains that you trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
 

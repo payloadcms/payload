@@ -1,5 +1,5 @@
 ---
-title: Authentication Operations
+title: Authentication operations
 label: Operations
 order: 20
 desc: Enabling Authentication automatically makes key operations available such as Login, Logout, Verify, Unlock, Reset Password and more.
@@ -261,7 +261,7 @@ mutation {
   docs](../local-api/server-functions#reusable-payload-server-functions).
 </Banner>
 
-## Verify by Email
+## Verify by email
 
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
 
@@ -333,7 +333,7 @@ const result = await payload.unlock({
 })
 ```
 
-## Forgot Password
+## Forgot password
 
 Payload comes with built-in forgot password functionality. Submitting an email address to the Forgot Password operation will generate an email and send it to the respective email address with a link to reset their password.
 
@@ -399,7 +399,7 @@ use the token to "reset" their password.
 
 </Banner>
 
-## Reset Password
+## Reset password
 
 After a user has "forgotten" their password and a token is generated, that token can be used to send to the reset password operation along with a new password which will allow the user to reset their password securely.
 

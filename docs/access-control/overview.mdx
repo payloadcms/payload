@@ -1,5 +1,5 @@
 ---
-title: Access Control
+title: Access control
 label: Overview
 order: 10
 desc: Payload makes it simple to define and manage Access Control. By declaring roles, you can set permissions and restrict what your users can interact with.
@@ -27,7 +27,7 @@ There are three main types of Access Control in Payload:
 - [Global Access Control](./globals)
 - [Field Access Control](./fields)
 
-## Default Access Control
+## Default access control
 
 Payload provides default Access Control so that your data is secured behind [Authentication](../authentication/overview) without additional configuration. To do this, Payload sets a default function that simply checks if a user is present on the request. You can override this default behavior by defining your own Access Control functions as needed.
 
@@ -48,7 +48,7 @@ const defaultPayloadAccess = ({ req: { user } }) => {
   `false` in your requests.
 </Banner>
 
-## The Access Operation
+## The access operation
 
 The Admin Panel responds dynamically to your changes to Access Control. For example, if you restrict editing `ExampleCollection` to only users that feature an "admin" role, Payload will **hide** that Collection from the Admin Panel entirely. This is super powerful and allows you to control who can do what within your Admin Panel using the same functions that secure your APIs.
 
@@ -63,7 +63,7 @@ To accomplish this, Payload exposes the [Access Operation](../authentication/ope
 
 If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
 
-## Locale Specific Access Control
+## Locale specific access control
 
 To implement locale-specific access control, you can use the `req.locale` argument in your access control functions. This argument allows you to evaluate the current locale of the request and determine access permissions accordingly.
 

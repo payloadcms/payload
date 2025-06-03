@@ -1,6 +1,6 @@
 ---
-title: Token Data
-label: Token Data
+title: Token data
+label: Token data
 order: 70
 desc: Storing data for read on the request object.
 keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
@@ -8,7 +8,7 @@ keywords: authentication, config, configuration, documentation, Content Manageme
 
 During the lifecycle of a request you will be able to access the data you have configured to be stored in the JWT by accessing `req.user`. The user object is automatically appended to the request for you.
 
-### Defining Token Data
+### Defining token data
 
 You can specify what data gets encoded to the Cookie/JWT-Token by setting `saveToJWT` property on fields within your auth collection.
 
@@ -73,7 +73,7 @@ If you wish to use a different key other than the field `name`, you can define `
 
 </Banner>
 
-### Using Token Data
+### Using token data
 
 This is especially helpful when writing [Hooks](../hooks/overview) and [Access Control](../access-control/overview) that depend on user defined fields.
 

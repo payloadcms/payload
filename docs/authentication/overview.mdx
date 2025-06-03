@@ -1,5 +1,5 @@
 ---
-title: Authentication Overview
+title: Authentication overview
 label: Overview
 order: 10
 desc: Payload provides highly secure user Authentication out of the box, and you can fully customize, override, or remove the default Authentication support.
@@ -36,7 +36,7 @@ export const Users: CollectionConfig = {
 ![Authentication Admin Panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
 _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 
-## Config Options
+## Config options
 
 Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
@@ -93,7 +93,7 @@ The following options are available:
 | **`useAPIKey`**                | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                                |
 | **`verify`**                   | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                     |
 
-### Login With Username
+### Login with username
 
 You can allow users to login with their username instead of their email address by setting the `loginWithUsername` property to `true`.
 
@@ -130,7 +130,7 @@ If set to `true`, users can log in with either their username or email address. 
 
 If set to `true`, an email address is required when creating a new user. If set to `false`, email is not required upon creation.
 
-## Auto-Login
+## Auto-login
 
 For testing and demo purposes you may want to skip forcing the user to login in order to access your application. Typically, all users should be required to login, however, you can speed up local development time by enabling auto-login.
 
@@ -186,7 +186,7 @@ Out of the box Payload ships with a three powerful Authentication strategies:
 
 Each of these strategies can work together or independently. You can also create your own custom strategies to fit your specific needs. [More details](./custom-strategies).
 
-### HTTP-Only Cookies
+### HTTP-only cookies
 
 [HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and **cannot be read by JavaScript in the browser**, unlike JWT's. [More details](./cookies).
 
@@ -194,10 +194,10 @@ Each of these strategies can work together or independently. You can also create
 
 JWT (JSON Web Tokens) can also be utilized to perform authentication. Tokens are generated on `login`, `refresh` and `me` operations and can be attached to future requests to authenticate users. [More details](./jwt).
 
-### API Keys
+### API keys
 
 API Keys can be enabled on auth collections. These are particularly useful when you want to authenticate against Payload from a third party service. [More details](./api-keys).
 
-### Custom Strategies
+### Custom strategies
 
 There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to. [More details](./custom-strategies).

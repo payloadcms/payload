@@ -254,7 +254,7 @@ The \`find\` endpoint supports the following additional query parameters:
 ]}
 />
 
-## Auth Operations
+## Auth operations
 
 Auth enabled collections are also given the following endpoints:
 
@@ -564,7 +564,7 @@ In addition to the dynamically generated endpoints above Payload also has REST e
   ]}
 />
 
-## Custom Endpoints
+## Custom endpoints
 
 Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
@@ -732,11 +732,11 @@ import { headersWithCors } from 'payload'
 }
 ```
 
-## Method Override for GET Requests
+## Method override for GET requests
 
 Payload supports a method override feature that allows you to send GET requests using the HTTP POST method. This can be particularly useful in scenarios when the query string in a regular GET request is too long.
 
-### How to Use
+### How to use
 
 To use this feature, include the `X-Payload-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
 
@@ -744,7 +744,7 @@ To use this feature, include the `X-Payload-HTTP-Method-Override` header set to 
 
 Here is an example of how to use the method override to perform a GET request:
 
-#### Using Method Override (POST)
+#### Using method override (POST)
 
 ```ts
 const res = await fetch(`${api}/${collectionSlug}`, {
@@ -762,7 +762,7 @@ const res = await fetch(`${api}/${collectionSlug}`, {
 })
 ```
 
-#### Equivalent Regular GET Request
+#### Equivalent regular GET request
 
 ```ts
 const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
