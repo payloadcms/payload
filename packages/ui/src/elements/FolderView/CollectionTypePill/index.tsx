@@ -13,7 +13,7 @@ import './index.scss'
 const baseClass = 'collection-type'
 
 export function CollectionTypePill() {
-  const { browseByFolderSlugs, filterItems, folderCollectionSlug, visibleCollectionSlugs } =
+  const { filterItems, folderCollectionSlug, folderCollectionSlugs, visibleCollectionSlugs } =
     useFolder()
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
@@ -21,7 +21,7 @@ export function CollectionTypePill() {
   const [allCollectionOptions] = React.useState(() => {
     return config.collections.reduce(
       (acc, collection) => {
-        if (collection.folders && browseByFolderSlugs.includes(collection.slug)) {
+        if (collection.folders && folderCollectionSlugs.includes(collection.slug)) {
           acc.push({
             label: getTranslation(collection.labels?.plural, i18n),
             value: collection.slug,

@@ -30,10 +30,6 @@ export type FileCardData = {
 export type FolderContextValue = {
   addItems: (args: FolderOrDocument[]) => void
   breadcrumbs?: FolderBreadcrumb[]
-  /**
-   * Folder enabled collection slugs
-   */
-  readonly browseByFolderSlugs?: CollectionSlug[]
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
@@ -41,6 +37,10 @@ export type FolderContextValue = {
   focusedRowIndex: number
   folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
+  /**
+   * Folder enabled collection slugs that can be populated within the provider
+   */
+  readonly folderCollectionSlugs?: CollectionSlug[]
   folderFieldName: string
   folderID?: number | string
   getSelectedItems?: () => FolderOrDocument[]
@@ -83,7 +83,6 @@ export type FolderContextValue = {
 const Context = React.createContext<FolderContextValue>({
   addItems: () => {},
   breadcrumbs: [],
-  browseByFolderSlugs: [],
   clearSelections: () => {},
   currentFolder: null,
   documents: [],
@@ -91,6 +90,7 @@ const Context = React.createContext<FolderContextValue>({
   focusedRowIndex: -1,
   folderCollectionConfig: null,
   folderCollectionSlug: '',
+  folderCollectionSlugs: [],
   folderFieldName: 'folder',
   folderID: undefined,
   getSelectedItems: () => [],
@@ -147,10 +147,6 @@ export type FolderProviderProps = {
    */
   readonly breadcrumbs?: FolderBreadcrumb[]
   /**
-   * Browse-by-folder enabled collection slugs
-   */
-  readonly browseByFolderSlugs: CollectionSlug[]
-  /**
    * Children to render inside the provider
    */
   readonly children: React.ReactNode
@@ -166,6 +162,13 @@ export type FolderProviderProps = {
    * The collection slugs that are being viewed
    */
   readonly filteredCollectionSlugs?: CollectionSlug[]
+  /**
+   * Folder enabled collection slugs that can be populated within the provider
+   */
+  readonly folderCollectionSlugs: CollectionSlug[]
+  /**
+   * The name of the field that contains the folder relation
+   */
   readonly folderFieldName: string
   /**
    * The ID of the current folder
@@ -191,11 +194,11 @@ export type FolderProviderProps = {
 export function FolderProvider({
   allowMultiSelection = true,
   breadcrumbs: _breadcrumbsFromProps = [],
-  browseByFolderSlugs = [],
   children,
   collectionSlug,
   documents: allDocumentsFromProps = [],
   filteredCollectionSlugs,
+  folderCollectionSlugs = [],
   folderFieldName,
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
@@ -222,7 +225,7 @@ export function FolderProvider({
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>(null)
   const [visibleCollectionSlugs, setVisibleCollectionSlugs] = React.useState<CollectionSlug[]>(
-    filteredCollectionSlugs || [...browseByFolderSlugs, folderCollectionSlug],
+    filteredCollectionSlugs || [...folderCollectionSlugs, folderCollectionSlug],
   )
   const [activeFolderID, setActiveFolderID] =
     React.useState<FolderContextValue['folderID']>(_folderIDFromProps)
@@ -1106,7 +1109,6 @@ export function FolderProvider({
       value={{
         addItems,
         breadcrumbs,
-        browseByFolderSlugs,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
           ? formatFolderOrDocumentItem({
@@ -1122,6 +1124,7 @@ export function FolderProvider({
         focusedRowIndex,
         folderCollectionConfig,
         folderCollectionSlug,
+        folderCollectionSlugs,
         folderFieldName,
         folderID: activeFolderID,
         getSelectedItems,

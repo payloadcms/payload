@@ -180,9 +180,9 @@ export const buildBrowseByFolderView = async (
     View: (
       <FolderProvider
         breadcrumbs={breadcrumbs}
-        browseByFolderSlugs={browseByFolderSlugs}
         documents={documents}
         filteredCollectionSlugs={selectedCollectionSlugs}
+        folderCollectionSlugs={browseByFolderSlugs}
         folderFieldName={config.folders.fieldName}
         folderID={folderID}
         subfolders={subfolders}

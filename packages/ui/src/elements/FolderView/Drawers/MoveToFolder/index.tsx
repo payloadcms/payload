@@ -130,8 +130,8 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
     <FolderProvider
       allowMultiSelection={false}
       breadcrumbs={breadcrumbs}
-      browseByFolderSlugs={[]}
       documents={documents}
+      folderCollectionSlugs={[]}
       folderFieldName={props.folderFieldName}
       folderID={props.fromFolderID}
       subfolders={subfolders}

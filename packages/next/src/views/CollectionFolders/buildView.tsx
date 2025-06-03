@@ -35,7 +35,6 @@ export const buildCollectionFolderView = async (
   args: BuildCollectionFolderViewStateArgs,
 ): Promise<BuildCollectionFolderViewResult> => {
   const {
-    browseByFolderSlugs = [],
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
@@ -181,9 +180,9 @@ export const buildCollectionFolderView = async (
       View: (
         <FolderProvider
           breadcrumbs={breadcrumbs}
-          browseByFolderSlugs={browseByFolderSlugs}
           collectionSlug={collectionSlug}
           documents={documents}
+          folderCollectionSlugs={[collectionSlug]}
           folderFieldName={config.folders.fieldName}
           folderID={folderID}
           search={search}
