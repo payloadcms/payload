@@ -41,7 +41,7 @@ export async function getOrphanedDocs({
     limit: 0,
     overrideAccess: false,
     req,
-    sort: payload.collections[collectionSlug].config.admin.useAsTitle,
+    sort: payload.collections[collectionSlug]?.config.admin.useAsTitle,
     user,
     where: where
       ? combineWhereConstraints([noParentFolderConstraint, where])
@@ -52,9 +52,9 @@ export async function getOrphanedDocs({
     orphanedFolders?.docs.map((doc) =>
       formatFolderOrDocumentItem({
         folderFieldName,
-        isUpload: Boolean(payload.collections[collectionSlug].config.upload),
+        isUpload: Boolean(payload.collections[collectionSlug]?.config.upload),
         relationTo: collectionSlug,
-        useAsTitle: payload.collections[collectionSlug].config.admin.useAsTitle,
+        useAsTitle: payload.collections[collectionSlug]?.config.admin.useAsTitle,
         value: doc,
       }),
     ) || []

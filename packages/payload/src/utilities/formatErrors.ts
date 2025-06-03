@@ -30,13 +30,16 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
     if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
       return {
-        errors: Object.keys(incoming.errors).reduce((acc, key) => {
-          acc.push({
-            field: incoming.errors[key].path,
-            message: incoming.errors[key].message,
-          })
-          return acc
-        }, []),
+        errors: Object.keys(incoming.errors).reduce(
+          (acc, key) => {
+            acc.push({
+              field: incoming.errors![key].path,
+              message: incoming.errors![key].message,
+            })
+            return acc
+          },
+          [] as { field: string; message: string }[],
+        ),
       }
     }
 

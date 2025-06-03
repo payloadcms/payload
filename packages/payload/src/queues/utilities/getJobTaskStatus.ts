@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { BaseJob, JobTaskStatus } from '../config/types/workflowTypes.js'
 
 type Args = {
@@ -14,8 +13,8 @@ export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {
     if (!taskStatus[loggedJob.taskSlug]) {
       taskStatus[loggedJob.taskSlug] = {}
     }
-    if (!taskStatus[loggedJob.taskSlug][loggedJob.taskID]) {
-      taskStatus[loggedJob.taskSlug][loggedJob.taskID] = {
+    if (!taskStatus[loggedJob.taskSlug]?.[loggedJob.taskID]) {
+      taskStatus[loggedJob.taskSlug]![loggedJob.taskID] = {
         complete: loggedJob.state === 'succeeded',
         input: loggedJob.input,
         output: loggedJob.output,
@@ -23,7 +22,7 @@ export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {
         totalTried: 1,
       }
     } else {
-      const newTaskStatus = taskStatus[loggedJob.taskSlug][loggedJob.taskID]
+      const newTaskStatus = taskStatus[loggedJob.taskSlug]![loggedJob.taskID]!
       newTaskStatus.totalTried += 1
 
       if (loggedJob.state === 'succeeded') {
@@ -34,7 +33,7 @@ export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {
         newTaskStatus.input = loggedJob.input
         newTaskStatus.taskSlug = loggedJob.taskSlug
       }
-      taskStatus[loggedJob.taskSlug][loggedJob.taskID] = newTaskStatus
+      taskStatus[loggedJob.taskSlug]![loggedJob.taskID] = newTaskStatus
     }
   }
 
