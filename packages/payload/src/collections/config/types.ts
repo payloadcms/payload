@@ -32,6 +32,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -81,6 +82,7 @@ export type HookOperationType =
   | 'login'
   | 'read'
   | 'refresh'
+  | 'resetPassword'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
@@ -255,6 +257,11 @@ export type AfterForgotPasswordHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
 }) => any
+
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
 
 export type BaseListFilter = (args: {
   limit: number
@@ -435,6 +442,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Enables folders for this collection
+   */
+  folders?: CollectionFoldersConfiguration
+  /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
   forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
@@ -583,8 +594,9 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]

@@ -24,6 +24,7 @@ import {
   CodeBlock,
   ConditionalLayoutBlock,
   FilterOptionsBlock,
+  NoBlockNameBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -52,6 +53,7 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
   ConditionalLayoutBlock,
   TabBlock,
   CodeBlock,
+  NoBlockNameBlock,
   {
     slug: 'myBlock',
     admin: {
