@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { isURLAllowed } from '../utilities/isURLAllowed.js'
 
 type Args = {
   data: FileData
@@ -21,8 +22,11 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       fileURL = `${baseUrl}${url}`
     }
 
+    const allowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
     try {
-      ssrfFilter({ url: fileURL })
+      if (allowList.length === 0 || !isURLAllowed(fileURL, allowList)) {
+        ssrfFilter({ url: fileURL })
+      }
     } catch (error) {
       throw new APIError(`Failed to fetch file from filtered url, ${fileURL}`, 400)
     }
