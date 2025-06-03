@@ -43,9 +43,7 @@ export async function LivePreviewView(props: DocumentViewServerProps) {
     collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
     globalConfig?.admin?.components?.elements?.beforeDocumentControls
 
-  const EditMenuItems =
-    collectionConfig?.admin?.components?.edit?.editMenuItems ||
-    globalConfig?.admin?.components?.elements?.editMenuItems
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),
