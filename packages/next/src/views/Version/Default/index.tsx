@@ -184,7 +184,15 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 pillStyle="light"
                 size="small"
               >
-                {t('general:locales')}
+                <span className={`${baseClass}__toggle-locales-label`}>
+                  {t('general:locales')}:{' '}
+                </span>
+                <span className={`${baseClass}__toggle-locales-list`}>
+                  {locales
+                    .filter((locale) => locale.selected)
+                    .map((locale) => locale.name)
+                    .join(', ')}
+                </span>
               </Pill>
             )}
           </div>

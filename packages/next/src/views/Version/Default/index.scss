@@ -5,6 +5,10 @@
     width: 100%;
     padding-bottom: var(--spacing-view-bottom);
 
+    &__toggle-locales-label {
+      color: var(--theme-elevation-500);
+    }
+
     &-controls-top {
       border-bottom: 1px solid var(--theme-elevation-100);
       padding: 16px var(--gutter-h) 16px var(--gutter-h);
