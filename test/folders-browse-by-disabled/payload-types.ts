@@ -68,10 +68,6 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
-    media: Media;
-    drafts: Draft;
-    autosave: Autosave;
-    'omitted-from-browse-by': OmittedFromBrowseBy;
     users: User;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -80,15 +76,11 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by';
+      documentsAndFolders: 'payload-folders' | 'posts';
     };
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    drafts: DraftsSelect<false> | DraftsSelect<true>;
-    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
-    'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -138,30 +130,9 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
-  heroImage?: (string | null) | Media;
-  relatedAutosave?: (string | null) | Autosave;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -181,61 +152,10 @@ export interface FolderInterface {
           relationTo?: 'posts';
           value: string | Post;
         }
-      | {
-          relationTo?: 'media';
-          value: string | Media;
-        }
-      | {
-          relationTo?: 'drafts';
-          value: string | Draft;
-        }
-      | {
-          relationTo?: 'autosave';
-          value: string | Autosave;
-        }
-      | {
-          relationTo?: 'omitted-from-browse-by';
-          value: string | OmittedFromBrowseBy;
-        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts".
- */
-export interface Draft {
-  id: string;
-  title?: string | null;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave".
- */
-export interface Autosave {
-  id: string;
-  title?: string | null;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "omitted-from-browse-by".
- */
-export interface OmittedFromBrowseBy {
-  id: string;
-  title?: string | null;
-  folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -266,22 +186,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
-        relationTo: 'drafts';
-        value: string | Draft;
-      } | null)
-    | ({
-        relationTo: 'autosave';
-        value: string | Autosave;
-      } | null)
-    | ({
-        relationTo: 'omitted-from-browse-by';
-        value: string | OmittedFromBrowseBy;
       } | null)
     | ({
         relationTo: 'users';
@@ -338,58 +242,6 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  relatedAutosave?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts_select".
- */
-export interface DraftsSelect<T extends boolean = true> {
-  title?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave_select".
- */
-export interface AutosaveSelect<T extends boolean = true> {
-  title?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "omitted-from-browse-by_select".
- */
-export interface OmittedFromBrowseBySelect<T extends boolean = true> {
   title?: T;
   folder?: T;
   updatedAt?: T;
