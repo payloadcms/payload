@@ -75,6 +75,7 @@ const PreviewView: React.FC<Props> = ({
   collectionConfig,
   config,
   Description,
+  EditMenuItems,
   fields,
   globalConfig,
   PreviewButton,
@@ -504,6 +505,7 @@ const PreviewView: React.FC<Props> = ({
           }}
           data={initialData}
           disableActions={disableActions}
+          EditMenuItems={EditMenuItems}
           hasPublishPermission={hasPublishPermission}
           hasSavePermission={hasSavePermission}
           id={id}
@@ -610,6 +612,7 @@ export const LivePreviewClient: React.FC<
           collectionConfig={collectionConfig}
           config={config}
           Description={props.Description}
+          EditMenuItems={props.EditMenuItems}
           fields={(collectionConfig || globalConfig)?.fields}
           globalConfig={globalConfig}
           PreviewButton={props.PreviewButton}
