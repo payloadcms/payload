@@ -14,6 +14,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
   const { searchParams } = req
   const { id, collection } = getRequestCollectionWithID(req)
   const depth = searchParams.get('depth')
+  const trash = searchParams.get('trash') === 'true'
 
   const result = await findByIDOperation({
     id,
@@ -24,6 +25,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),
+    trash,
   })
 
   return Response.json(result, {
