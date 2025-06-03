@@ -7,6 +7,7 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  softDeletes: true,
   fields: [
     {
       name: 'title',

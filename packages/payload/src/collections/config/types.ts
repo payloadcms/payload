@@ -539,6 +539,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enables soft delete support for this collection.
+   *
+   * When enabled, documents will include a `deletedAt` timestamp field.
+   * This allows documents to be marked as deleted without being permanently removed.
+   * The `deletedAt` field will be set to the current date and time when a document is deleted.
+   *
+   * @default false
+   */
+  softDeletes?: boolean
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true

@@ -22,7 +22,6 @@ export function formatFolderOrDocumentItem({
     id: value?.id,
     _folderOrDocumentTitle: String((useAsTitle && value?.[useAsTitle]) || value['id']),
     createdAt: value?.createdAt,
-    deletedAt: value?.deletedAt,
     folderID: value?.[folderFieldName],
     updatedAt: value?.updatedAt,
   }
