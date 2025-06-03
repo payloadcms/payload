@@ -308,6 +308,35 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
   const fromLocaleDataWithoutID = removeIds(fromLocaleData.value)
   const toLocaleDataWithoutID = removeIds(toLocaleData.value)
 
+  // Get current document with all locales for context
+  const currentDocForContext = globalSlug
+    ? await payload.findGlobal({
+        slug: globalSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        user,
+      })
+    : await payload.findByID({
+        id: docID,
+        collection: collectionSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        user,
+      })
+
+  // Pass complete document data via context for beforeChange hook
+  const contextWithFullDoc = {
+    ...req.context,
+    fullDocWithAllLocales: currentDocForContext,
+  }
+
+  const reqWithContext = {
+    ...req,
+    context: contextWithFullDoc,
+  }
+
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
@@ -322,7 +351,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
             ),
         locale: toLocale,
         overrideAccess: false,
-        req,
+        req: reqWithContext,
         user,
       })
     : await payload.update({
@@ -339,7 +368,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
             ),
         locale: toLocale,
         overrideAccess: false,
-        req,
+        req: reqWithContext,
         user,
       })
 }

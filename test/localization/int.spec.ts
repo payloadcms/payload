@@ -2647,8 +2647,19 @@ describe('Localization', () => {
           collectionSlug: 'nested',
         })) as Nested
 
+        const sourceLocaleData = await payload.findByID({
+          collection: 'nested',
+          id: doc.id,
+          locale: 'en',
+          select: {
+            topLevelArray: true,
+          },
+        })
+
         expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
         expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
+        expect(sourceLocaleData.topLevelArray[0]?.localizedText).toBe('some-localized-text')
+        expect(sourceLocaleData.topLevelArray[0]?.notLocalizedText).toBe('some-not-localized-text')
       })
 
       it('should copy localized arrays', async () => {
