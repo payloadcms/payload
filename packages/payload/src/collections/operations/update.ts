@@ -53,6 +53,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
    * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  trash?: boolean
   where: Where
 }
 
@@ -105,6 +106,7 @@ export const updateOperation = async <
       select: incomingSelect,
       showHiddenFields,
       sort: incomingSort,
+      trash = false,
       where,
     } = args
 
@@ -135,7 +137,18 @@ export const updateOperation = async <
     // Retrieve documents
     // /////////////////////////////////////
 
-    const fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where, accessResult)
+
+    // If trash is false, restrict to non-trashed docs only
+    if (!trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

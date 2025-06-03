@@ -48,6 +48,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export const updateByIDOperation = async <
@@ -103,6 +104,7 @@ export const updateByIDOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
 
     if (!id) {
@@ -124,11 +126,26 @@ export const updateByIDOperation = async <
     // Retrieve document
     // /////////////////////////////////////
 
+    const where = { id: { equals: id } }
+
+    let fullWhere = combineQueries(where, accessResults)
+
+    // If trash is false, restrict to non-trashed docs only
+    if (!trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       locale,
       req,
-      where: combineQueries({ id: { equals: id } }, accessResults),
+      where: fullWhere,
     }
 
     const docWithLocales = await getLatestCollectionVersion({

@@ -101,6 +101,13 @@ export type Options<
    */
   showHiddenFields?: boolean
   /**
+   * When set to `true`, the operation will return a document by ID, even if it is soft-deleted (trashed).
+   * By default (`false`), the operation will exclude soft-deleted documents.
+   * To fetch a soft-deleted document, set `trash: true`.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -127,6 +134,7 @@ export default async function findByIDLocal<
     populate,
     select,
     showHiddenFields,
+    trash = false,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -151,5 +159,6 @@ export default async function findByIDLocal<
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,
+    trash,
   })
 }
