@@ -42,6 +42,7 @@ import type {
   CollapsibleFieldLabelClientComponent,
   CollapsibleFieldLabelServerComponent,
   ConditionalDateProps,
+  Data,
   DateFieldClientProps,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
@@ -745,17 +746,6 @@ export type NamedGroupField = {
 
 export type UnnamedGroupField = {
   interfaceName?: never
-  /**
-   * Can be either:
-   * - A string, which will be used as the tab's label.
-   * - An object, where the key is the language code and the value is the label.
-   */
-  label:
-    | {
-        [selectedLanguage: string]: string
-      }
-    | LabelFunction
-    | string
   localized?: never
 } & Omit<GroupBase, 'name' | 'virtual'>
 
@@ -1103,8 +1093,19 @@ export type SelectField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
+  /**
+   * Reduce the available options based on the current user, value of another field, etc.
+   * Similar to the `filterOptions` property on `relationship` and `upload` fields, except with a different return type.
+   */
+  filterOptions?: (args: {
+    data: Data
+    options: Option[]
+    req: PayloadRequest
+    siblingData: Data
+  }) => Option[]
   hasMany?: boolean
-  /** Customize generated GraphQL and Typescript schema names.
+  /**
+   * Customize generated GraphQL and Typescript schema names.
    * By default, it is bound to the collection.
    *
    * This is useful if you would like to generate a top level type to share amongst collections/fields.

@@ -865,13 +865,23 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = (
   value,
-  { hasMany, options, req: { t }, required },
+  { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
+  const filteredOptions =
+    typeof filterOptions === 'function'
+      ? filterOptions({
+          data,
+          options,
+          req,
+          siblingData,
+        })
+      : options
+
   if (
     Array.isArray(value) &&
     value.some(
       (input) =>
-        !options.some(
+        !filteredOptions.some(
           (option) => option === input || (typeof option !== 'string' && option?.value === input),
         ),
     )
@@ -881,7 +891,7 @@ export const select: SelectFieldValidation = (
 
   if (
     typeof value === 'string' &&
-    !options.some(
+    !filteredOptions.some(
       (option) => option === value || (typeof option !== 'string' && option.value === value),
     )
   ) {

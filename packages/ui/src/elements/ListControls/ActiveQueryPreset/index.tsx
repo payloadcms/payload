@@ -36,11 +36,16 @@ export function ActiveQueryPreset({
         openPresetListDrawer()
       }}
       pillStyle={activePreset ? 'always-white' : 'light'}
+      size="small"
     >
       {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
-      <div className={`${baseClass}__label-text`}>
-        {activePreset?.title ||
-          t('general:selectLabel', { label: getTranslation(presetsConfig.labels.singular, i18n) })}
+      <div className={`${baseClass}__label-text-max-width`}>
+        <div className={`${baseClass}__label-text`}>
+          {activePreset?.title ||
+            t('general:selectLabel', {
+              label: getTranslation(presetsConfig.labels.singular, i18n),
+            })}
+        </div>
       </div>
       {activePreset ? (
         <div
@@ -51,8 +56,10 @@ export function ActiveQueryPreset({
             await resetPreset()
           }}
           onKeyDown={async (e) => {
-            e.stopPropagation()
-            await resetPreset()
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation()
+              await resetPreset()
+            }
           }}
           role="button"
           tabIndex={0}

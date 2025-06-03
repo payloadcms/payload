@@ -11,8 +11,9 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
-import { EditManyDrawerContent } from './DrawerContent.js'
 import './index.scss'
+import { ListSelectionButton } from '../ListSelection/index.js'
+import { EditManyDrawerContent } from './DrawerContent.js'
 
 export const baseClass = 'edit-many'
 
@@ -21,44 +22,58 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const {
-    collection: { slug },
-  } = props
+  const { count, selectAll, selected } = useSelection()
+  return (
+    <EditMany_v4
+      {...props}
+      count={count}
+      ids={Array.from(selected.keys())}
+      selectAll={selectAll === SelectAllStatus.AllAvailable}
+    />
+  )
+}
 
+export const EditMany_v4: React.FC<
+  {
+    count: number
+    ids: (number | string)[]
+    selectAll: boolean
+  } & EditManyProps
+> = ({ collection, count, ids, selectAll }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
-  const { selectAll } = useSelection()
   const { t } = useTranslation()
 
   const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
 
-  const collectionPermissions = permissions?.collections?.[slug]
+  const collectionPermissions = permissions?.collections?.[collection.slug]
 
-  const drawerSlug = `edit-${slug}`
+  const drawerSlug = `edit-${collection.slug}`
 
-  if (selectAll === SelectAllStatus.None || !collectionPermissions?.update) {
+  if (count === 0 || !collectionPermissions?.update) {
     return null
   }
 
   return (
-    <div className={baseClass}>
-      <button
+    <div className={[baseClass, `${baseClass}__toggle`].filter(Boolean).join(' ')}>
+      <ListSelectionButton
         aria-label={t('general:edit')}
-        className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(drawerSlug)
           setSelectedFields([])
         }}
-        type="button"
       >
         {t('general:edit')}
-      </button>
+      </ListSelectionButton>
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <EditManyDrawerContent
-            collection={props.collection}
+            collection={collection}
+            count={count}
             drawerSlug={drawerSlug}
+            ids={ids}
+            selectAll={selectAll}
             selectedFields={selectedFields}
             setSelectedFields={setSelectedFields}
           />

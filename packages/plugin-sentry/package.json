@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "3.38.0",
+  "version": "3.40.0",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -25,6 +25,7 @@
     }
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": "./src/index.ts",
