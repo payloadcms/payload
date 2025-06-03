@@ -46,7 +46,7 @@ export async function validateQueryPaths({
 
   if (typeof where === 'object') {
     // We need to determine if the whereKey is an AND, OR, or a schema path
-    const promises = []
+    const promises: Promise<void>[] = []
     for (const path in where) {
       const constraint = where[path]
 

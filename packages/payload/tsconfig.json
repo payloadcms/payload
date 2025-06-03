@@ -3,7 +3,7 @@
   "compilerOptions": {
     /* TODO: remove the following lines */
     "strict": false,
-    "noUncheckedIndexedAccess": false,
+    "strictNullChecks": true,
     "plugins": [
       {
         "name": "typescript-strict-plugin"

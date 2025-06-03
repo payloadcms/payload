@@ -5,8 +5,8 @@ export const getObjectDotNotation = <T>(
   defaultValue?: T,
 ): T => {
   if (!path || !obj) {
-    return defaultValue
+    return defaultValue!
   }
   const result = path.split('.').reduce((o, i) => o?.[i], obj)
-  return result === undefined ? defaultValue : (result as T)
+  return result === undefined ? defaultValue! : (result as T)
 }

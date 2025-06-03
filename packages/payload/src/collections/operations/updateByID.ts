@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -126,7 +125,7 @@ export const updateByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
@@ -177,20 +176,20 @@ export const updateByIDOperation = async <
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
-      depth,
+      depth: depth!,
       docWithLocales,
       draftArg,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       filesToUpload,
-      locale,
-      overrideAccess,
-      overrideLock,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
+      overrideLock: overrideLock!,
       payload,
       populate,
       publishSpecificLocale,
       req,
-      select,
-      showHiddenFields,
+      select: select!,
+      showHiddenFields: showHiddenFields!,
     })
 
     await unlinkTempFiles({

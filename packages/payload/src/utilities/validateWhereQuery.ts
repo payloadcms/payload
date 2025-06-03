@@ -35,7 +35,7 @@ export const validateWhereQuery = (whereQuery: Where): whereQuery is Where => {
           }
 
           for (const key of andKeys) {
-            const operator = Object.keys(andQuery[key])[0]
+            const operator = Object.keys(andQuery[key]!)[0]
             // Check if the key is a valid Operator.
             if (!operator || !validOperatorSet.has(operator as Operator)) {
               return false
