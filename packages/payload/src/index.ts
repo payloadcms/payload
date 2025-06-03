@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -811,6 +813,7 @@ export class BasePayload {
 
 const initialized = new BasePayload()
 
+// eslint-disable-next-line no-restricted-exports
 export default initialized
 
 let cached: {

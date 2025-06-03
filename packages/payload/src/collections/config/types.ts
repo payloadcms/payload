@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
