@@ -5,6 +5,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../../../../', '.env') })
+dotenv.config({ path: path.resolve(dirname, '../../../../../', '.env') })
 
 type TranslationMessage = {
   role: 'system' | 'user'
