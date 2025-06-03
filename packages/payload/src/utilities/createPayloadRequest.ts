@@ -13,6 +13,7 @@ import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
 
 type Args = {
+  canSetHeaders?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
@@ -21,6 +22,7 @@ type Args = {
 }
 
 export const createPayloadRequest = async ({
+  canSetHeaders,
   config: configPromise,
   params,
   request,
@@ -105,6 +107,7 @@ export const createPayloadRequest = async ({
   req.payloadDataLoader = getDataLoader(req)
 
   const { responseHeaders, user } = await executeAuthStrategies({
+    canSetHeaders,
     headers: req.headers,
     isGraphQL,
     payload,

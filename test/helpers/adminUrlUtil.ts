@@ -9,6 +9,8 @@ export class AdminUrlUtil {
 
   admin: string
 
+  byFolder: string
+
   create: string
 
   entitySlug: string
@@ -65,6 +67,12 @@ export class AdminUrlUtil {
     this.create = formatAdminURL({
       adminRoute: this.routes.admin,
       path: `/collections/${this.entitySlug}/create`,
+      serverURL: this.serverURL,
+    })
+
+    this.byFolder = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}/payload-folders`,
       serverURL: this.serverURL,
     })
   }

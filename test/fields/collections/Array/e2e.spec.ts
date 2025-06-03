@@ -68,8 +68,16 @@ describe('Array', () => {
     url = new AdminUrlUtil(serverURL, 'array-fields')
   })
 
-  test('should be readOnly', async () => {
+  async function loadCreatePage() {
     await page.goto(url.create)
+    //ensure page is loaded
+    await expect(page.locator('#field-title')).toBeVisible()
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+  }
+
+  test('should be readOnly', async () => {
+    await loadCreatePage()
     const field = page.locator('#field-readOnly__0__text')
     await expect(field).toBeDisabled()
     await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
@@ -77,8 +85,10 @@ describe('Array', () => {
 
   test('should render RowLabel using a component', async () => {
     const label = 'custom row label as component'
-    await page.goto(url.create)
+    await loadCreatePage()
     await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
+    await expect(page.locator('#field-rowLabelAsComponent__0__title')).toBeVisible()
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     // ensure the default label does not blink in before form state returns
     const defaultRowLabelWasAttached = await page
@@ -103,19 +113,27 @@ describe('Array', () => {
   })
 
   test('should render default array field within custom component', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
+
     await page.locator('#field-customArrayField >> .array-field__add-row').click()
     await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
   test('should bypass min rows validation when no rows present and field is not required', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     await saveDocAndAssert(page)
   })
 
   test('should fail min rows validation when rows are present', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
+
+    // Ensure new array row is visible and fields are rendered
+    await expect(page.locator('#arrayWithMinRows-row-0')).toBeVisible()
+    await expect(
+      page.locator('#arrayWithMinRows-row-0 #field-arrayWithMinRows__0__text'),
+    ).toBeVisible()
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
@@ -125,12 +143,12 @@ describe('Array', () => {
   })
 
   test('should show singular label for array rows', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
   })
 
   test('ensure functions passed to array field labels property are respected', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
 
     const arrayWithLabelsField = page.locator('#field-arrayWithLabels')
     await expect(arrayWithLabelsField.locator('.array-field__add-row')).toHaveText('Add Account')
@@ -143,7 +161,7 @@ describe('Array', () => {
       const assertText1 = 'array row 2'
       const assertText3 = 'array row 3'
       const assertGroupText3 = 'text in group in row 3'
-      await page.goto(url.create)
+      await loadCreatePage()
       await page.mouse.wheel(0, 1750)
       await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
       await wait(300)
@@ -320,13 +338,13 @@ describe('Array', () => {
   })
 
   test('should externally update array rows and render custom fields', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     await page.locator('#updateArrayExternally').click()
     await expect(page.locator('#custom-text-field')).toBeVisible()
   })
 
   test('should not re-close initCollapsed true array rows on input in create new view', async () => {
-    await page.goto(url.create)
+    await loadCreatePage()
     await page.locator('#field-collapsedArray >> .array-field__add-row').click()
     await page.locator('#field-collapsedArray__0__text').fill('test')
     const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
@@ -335,13 +353,13 @@ describe('Array', () => {
 
   describe('sortable arrays', () => {
     test('should have disabled admin sorting', async () => {
-      await page.goto(url.create)
+      await loadCreatePage()
       const field = page.locator('#field-disableSort > div > div > .array-actions__action-chevron')
       expect(await field.count()).toEqual(0)
     })
 
     test('the drag handle should be hidden', async () => {
-      await page.goto(url.create)
+      await loadCreatePage()
       const field = page.locator(
         '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
       )
