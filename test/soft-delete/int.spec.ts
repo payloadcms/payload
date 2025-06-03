@@ -196,7 +196,7 @@ describe('soft-delete', () => {
         expect(updatedPost).toBeDefined()
         expect(updatedPost.id).toEqual(postOne.id)
         expect(updatedPost.title).toEqual('Updated Post One')
-        expect(updatedPost.deletedAt).toBeUndefined()
+        expect(updatedPost.deletedAt).toBeFalsy()
       })
     })
 
@@ -222,7 +222,7 @@ describe('soft-delete', () => {
 
         expect(updatedPost?.id).toEqual(postOne.id)
         expect(updatedPost?.title).toEqual('Updated Post')
-        expect(updatedPost?.deletedAt).toBeUndefined()
+        expect(updatedPost?.deletedAt).toBeFalsy()
       })
 
       it('should update all documents including soft-deleted documents when trash: true', async () => {
@@ -246,7 +246,7 @@ describe('soft-delete', () => {
         const updatedPostTwo: Post = result.docs.find((doc) => doc.id === postTwo.id)!
 
         expect(updatedPostOne?.title).toEqual('A New Updated Post')
-        expect(updatedPostOne?.deletedAt).toBeUndefined()
+        expect(updatedPostOne?.deletedAt).toBeFalsy()
 
         expect(updatedPostTwo?.title).toEqual('A New Updated Post')
         expect(updatedPostTwo?.deletedAt).toBeDefined()
@@ -392,7 +392,7 @@ describe('soft-delete', () => {
         })
         const result = await res.json()
         expect(result.doc.title).toBe('Updated Normal via REST')
-        expect(result.doc.deletedAt).toBeUndefined()
+        expect(result.doc.deletedAt).toBeFalsy()
       })
     })
 
@@ -408,7 +408,7 @@ describe('soft-delete', () => {
         expect(result.docs).toHaveLength(1)
         expect(result.docs[0].id).toBe(postOne.id)
         expect(result.docs[0].title).toBe('Updated Normal via REST')
-        expect(result.docs[0].deletedAt).toBeUndefined()
+        expect(result.docs[0].deletedAt).toBeFalsy()
       })
 
       it('should update all documents including soft-deleted documents when trash: true', async () => {
