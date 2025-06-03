@@ -2621,6 +2621,7 @@ describe('database', () => {
   })
 
   it('should support in with null', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
     const post_1 = await payload.create({
       collection: 'posts',
       data: { title: 'a', text: 'text-1' },
