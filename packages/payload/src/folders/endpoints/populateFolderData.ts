@@ -34,9 +34,8 @@ export const populateFolderDataEndpoint: Endpoint = {
       )
     }
 
-    // if collectionSlug exists, we need to creat constraints for that collection and the folder collection
-    // if collectionSlug does not exist, e need to create constraints for all folder enabled collections and the folder collection
-
+    // if collectionSlug exists, we need to create constraints for that _specific collection_ and the folder collection
+    // if collectionSlug does not exist, we need to create constraints for _all folder enabled collections_ and the folder collection
     let documentWhere: undefined | Where
     let folderWhere: undefined | Where
     const collectionSlug = req.searchParams?.get('collectionSlug')
