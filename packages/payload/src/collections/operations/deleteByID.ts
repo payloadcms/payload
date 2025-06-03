@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
@@ -125,7 +124,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale: req.locale,
+      locale: req.locale!,
       req,
       where,
     })
@@ -152,7 +151,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
-      doc: docToDelete,
+      doc: docToDelete!,
       overrideDelete: true,
       req,
     })
@@ -217,17 +216,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

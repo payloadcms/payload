@@ -115,6 +115,7 @@ Set the `uploadsCollection` to your application's upload-enabled collection slug
 ##### `tabbedUI`
 
 When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](../fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+Note that the order of plugins or fields in your config may affect whether or not the plugin can smartly merge tabs with your existing fields. If you have a complex structure we recommend you [make use of the fields directly](#direct-use-of-fields) instead of relying on this config option.
 
 <Banner type="info">
   If you wish to continue to use top-level or sidebar fields with `tabbedUI`,

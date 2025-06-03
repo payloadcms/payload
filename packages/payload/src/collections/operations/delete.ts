@@ -103,12 +103,12 @@ export const deleteOperation = async <
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       where,
     })
 
-    let fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where, accessResult!)
 
     // If trash is false, restrict to non-trashed docs only
     if (!trash) {
@@ -133,13 +133,13 @@ export const deleteOperation = async <
 
     const { docs } = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       select,
       where: fullWhere,
     })
 
-    const errors = []
+    const errors: { id: number | string; message: string }[] = []
 
     const promises = docs.map(async (doc) => {
       let result
@@ -229,17 +229,18 @@ export const deleteOperation = async <
         result = await afterRead({
           collection: collectionConfig,
           context: req.context,
-          depth,
+          depth: depth!,
           doc: result || doc,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
-          fallbackLocale,
+          fallbackLocale: fallbackLocale!,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         })
 
         // /////////////////////////////////////
