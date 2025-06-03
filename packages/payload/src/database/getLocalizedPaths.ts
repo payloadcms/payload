@@ -1,14 +1,12 @@
 import type { PathToQuery } from './queryValidation/types.js'
 
-import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
-
-// @ts-strict-ignore
 import {
   type Field,
   fieldShouldBeLocalized,
   type FlattenedBlock,
   type FlattenedField,
 } from '../fields/config/types.js'
+import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -39,11 +37,12 @@ export function getLocalizedPaths({
     {
       collectionSlug,
       complete: false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       field: undefined,
       fields,
       globalSlug,
       invalid: false,
-      parentIsLocalized,
+      parentIsLocalized: parentIsLocalized!,
       path: '',
     },
   ]
@@ -60,7 +59,7 @@ export function getLocalizedPaths({
       let fieldsToSearch: FlattenedField[]
       let _parentIsLocalized = parentIsLocalized
 
-      let matchedField: FlattenedField
+      let matchedField!: FlattenedField
 
       if (lastIncompletePath?.field?.type === 'blocks') {
         if (segment === 'blockType') {
@@ -73,12 +72,12 @@ export function getLocalizedPaths({
             lastIncompletePath.field.blocks) {
             let block: FlattenedBlock
             if (typeof _block === 'string') {
-              block = payload?.blocks[_block]
+              block = payload.blocks[_block]!
             } else {
               block = _block
             }
 
-            matchedField = block.flattenedFields.find((field) => field.name === segment)
+            matchedField = block.flattenedFields.find((field) => field.name === segment)!
             if (matchedField) {
               break
             }
@@ -88,14 +87,14 @@ export function getLocalizedPaths({
         if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
           fieldsToSearch = lastIncompletePath.field.flattenedFields
         } else {
-          fieldsToSearch = lastIncompletePath.fields
+          fieldsToSearch = lastIncompletePath.fields!
         }
         _parentIsLocalized = parentIsLocalized || lastIncompletePath.field?.localized
 
-        matchedField = fieldsToSearch.find((field) => field.name === segment)
+        matchedField = fieldsToSearch.find((field) => field.name === segment)!
       }
 
-      lastIncompletePath.field = matchedField
+      lastIncompletePath.field = matchedField!
 
       if (currentPath === 'globalType' && globalSlug) {
         lastIncompletePath.path = currentPath
@@ -136,7 +135,7 @@ export function getLocalizedPaths({
           lastIncompletePath.invalid = true
         }
 
-        const nextSegment = pathSegments[i + 1]
+        const nextSegment = pathSegments[i + 1]!
         const nextSegmentIsLocale =
           localizationConfig && localizationConfig.localeCodes.includes(nextSegment)
 
@@ -146,7 +145,7 @@ export function getLocalizedPaths({
           currentPath = `${currentPath}.${nextSegment}`
         } else if (
           localizationConfig &&
-          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized })
+          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized! })
         ) {
           currentPath = `${currentPath}.${locale}`
         }
@@ -159,7 +158,7 @@ export function getLocalizedPaths({
             // We only support querying directly (no nested querying)
             if (matchedField.type !== 'join' && typeof matchedField.relationTo !== 'string') {
               const lastSegmentIsValid =
-                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
+                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]!) ||
                 pathSegments.length === 1 ||
                 (pathSegments.length === 2 && pathSegments[0] === 'version')
 
@@ -173,7 +172,7 @@ export function getLocalizedPaths({
               }
             } else {
               lastIncompletePath.complete = true
-              lastIncompletePath.path = currentPath
+              lastIncompletePath.path = currentPath!
 
               const nestedPathToQuery = pathSegments
                 .slice(nextSegmentIsLocale ? i + 2 : i + 1)
@@ -186,9 +185,9 @@ export function getLocalizedPaths({
                     throw new APIError('Not supported')
                   }
 
-                  relatedCollection = payload.collections[matchedField.collection].config
+                  relatedCollection = payload.collections[matchedField.collection]!.config
                 } else {
-                  relatedCollection = payload.collections[matchedField.relationTo as string].config
+                  relatedCollection = payload.collections[matchedField.relationTo as string]!.config
                 }
 
                 const remainingPaths = getLocalizedPaths({
@@ -215,7 +214,7 @@ export function getLocalizedPaths({
             lastIncompletePath.complete = true
             lastIncompletePath.path = upcomingSegments
               ? `${currentPath}.${upcomingSegments}`
-              : currentPath
+              : currentPath!
             return paths
           }
 
@@ -223,12 +222,12 @@ export function getLocalizedPaths({
             if (i + 1 === pathSegments.length) {
               lastIncompletePath.complete = true
             }
-            lastIncompletePath.path = currentPath
+            lastIncompletePath.path = currentPath!
           }
         }
       } else {
         lastIncompletePath.invalid = true
-        lastIncompletePath.path = currentPath
+        lastIncompletePath.path = currentPath!
         return paths
       }
     }
