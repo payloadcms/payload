@@ -27,13 +27,13 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       if (allowList.length === 0 || !isURLAllowed(fileURL, allowList)) {
         ssrfFilter({ url: fileURL })
       }
-    } catch (error) {
+    } catch (ignore) {
       throw new APIError(`Failed to fetch file from filtered url, ${fileURL}`, 400)
     }
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers?.get('cookie') }
+      : { cookie: req.headers.get('cookie')! }
 
     const res = await fetch(fileURL, {
       credentials: 'include',
@@ -50,7 +50,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     return {
       name: filename,
       data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined,
+      mimetype: res.headers.get('content-type') || undefined!,
       size: Number(res.headers.get('content-length')) || 0,
     }
   }
