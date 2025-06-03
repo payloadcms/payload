@@ -21,9 +21,11 @@ import {
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customTabAdminDescription,
+  customTabComponent,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  overriddenDefaultRouteTabLabel,
 } from '../../shared.js'
 import {
   customFieldsSlug,
@@ -294,9 +296,21 @@ describe('Document View', () => {
 
       // wait for the update view to load
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
-      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
+      const editTab = page.locator(`.doc-tab:has-text("${customEditLabel}")`)
 
-      await expect(editTab).toContainText(customEditLabel)
+      await expect(editTab).toBeVisible()
+    })
+
+    test('collection - should allow to override the tab for the default view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      const customTab = page.locator(
+        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+      )
+
+      await expect(customTab).toBeVisible()
     })
 
     test('collection — should render custom tab component', async () => {
@@ -304,7 +318,7 @@ describe('Document View', () => {
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
 
-      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
+      const customTab = page.locator(`a.doc-tab:has-text("${customTabLabel}")`)
 
       await expect(customTab).toBeVisible()
     })
@@ -314,7 +328,7 @@ describe('Document View', () => {
 
       const title = page.locator('#custom-view-title')
 
-      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+      const docTab = page.locator('.doc-tab:has-text("Custom")')
 
       await expect(docTab).toBeVisible()
       await expect(title).toContainText('Custom Tab Label View')
@@ -327,8 +341,18 @@ describe('Document View', () => {
       const docTab = page.locator('.custom-doc-tab').first()
 
       await expect(docTab).toBeVisible()
-      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(docTab).toContainText(customTabComponent)
       await expect(title).toContainText('Custom View With Tab Component')
+    })
+
+    test('global — should allow to override the tab for the default view', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
+
+      const customTab = page.locator(
+        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+      )
+
+      await expect(customTab).toBeVisible()
     })
   })
 
@@ -370,24 +394,30 @@ describe('Document View', () => {
 
       // change the relationship to a document which is a different one than the current one
       await page.locator('#field-relationship').click()
+      await wait(200)
+
       await page.locator('#field-relationship .rs__option').nth(2).click()
+      await wait(500)
       await saveDocAndAssert(page)
 
       // open relationship drawer
       await page
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
+      await wait(200)
 
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
 
       // modify the title to trigger the leave page modal
       await page.locator('.drawer__content #field-title').fill('New Title')
+      await wait(200)
 
       // Open link in a new tab by holding down the Meta or Control key
       const documentLink = page.locator('.id-label a')
       const documentId = String(await documentLink.textContent())
       await documentLink.click()
+      await wait(200)
 
       const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
       await expect(leavePageModal).toBeVisible()

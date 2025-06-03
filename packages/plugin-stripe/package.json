@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.35.1",
+  "version": "3.40.0",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -28,6 +28,7 @@
     }
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": "./src/index.ts",

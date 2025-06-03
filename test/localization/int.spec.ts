@@ -27,6 +27,7 @@ import {
   defaultLocale as englishLocale,
   englishTitle,
   hungarianLocale,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -428,6 +429,32 @@ describe('Localization', () => {
             })
           })
         }
+      })
+    })
+
+    describe('Localized date', () => {
+      it('can create a localized date', async () => {
+        const document = await payload.create({
+          collection: localizedDateFieldsSlug,
+          data: {
+            localizedDate: new Date().toISOString(),
+            date: new Date().toISOString(),
+          },
+        })
+        expect(document.localizedDate).toBeTruthy()
+      })
+
+      it('data is typed as string', async () => {
+        const document = await payload.create({
+          collection: localizedDateFieldsSlug,
+          data: {
+            localizedDate: new Date().toISOString(),
+            date: new Date().toISOString(),
+          },
+        })
+
+        expect(typeof document.localizedDate).toBe('string')
+        expect(typeof document.date).toBe('string')
       })
     })
 

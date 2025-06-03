@@ -3,13 +3,23 @@ import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 import type { Readable } from 'stream'
 
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+
+export type SignedDownloadsConfig =
+  | {
+      /** @default 7200 */
+      expiresIn?: number
+    }
+  | boolean
 
 interface Args {
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
+  signedDownloads?: SignedDownloadsConfig
 }
 
 // Type guard for NodeJS.Readable streams
@@ -40,13 +50,29 @@ const streamToBuffer = async (readableStream: any) => {
   return Buffer.concat(chunks)
 }
 
-export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({
+  bucket,
+  collection,
+  getStorageClient,
+  signedDownloads,
+}: Args): StaticHandler => {
   return async (req, { params: { clientUploadContext, filename } }) => {
     let object: AWS.GetObjectOutput | undefined = undefined
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
 
       const key = path.posix.join(prefix, filename)
+
+      if (signedDownloads && !clientUploadContext) {
+        const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+        const signedUrl = await getSignedUrl(
+          // @ts-expect-error mismatch versions
+          getStorageClient(),
+          command,
+          typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
+        )
+        return Response.redirect(signedUrl)
+      }
 
       object = await getStorageClient().getObject({
         Bucket: bucket,

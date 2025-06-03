@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
@@ -308,6 +309,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,
@@ -326,7 +328,6 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
-      redirectAfterCreate,
     ],
   )
 

@@ -60,6 +60,7 @@ import {
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
   draftWithValidateCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
@@ -86,6 +87,7 @@ describe('Versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
+  let errorOnUnpublishURL: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -124,23 +126,25 @@ describe('Versions', () => {
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
+      errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
     })
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
 
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
-
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('collection — tab displays proper number of versions', async () => {
@@ -156,9 +160,9 @@ describe('Versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count')
+      const versionsPill = versionsTab.locator('.pill-version-count')
       await versionsPill.waitFor({ state: 'visible' })
-      const versionCount = versionsTab.locator('.doc-tab__count').first()
+      const versionCount = versionsTab.locator('.pill-version-count').first()
       await expect(versionCount).toHaveText('11')
     })
 
@@ -203,6 +207,118 @@ describe('Versions', () => {
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
+    })
+
+    test('should show currently published version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Current Published Version')
+    })
+
+    test('should show unpublished version status in versions view', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+          description: 'description',
+        },
+        overrideAccess: true,
+      })
+
+      // Unpublish the document
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: publishedDoc.id,
+        data: {
+          _status: 'draft',
+        },
+        draft: false,
+      })
+
+      await page.goto(`${url.edit(publishedDoc.id)}/versions`)
+      await expect(page.locator('main.versions')).toContainText('Previously Published')
+    })
+
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    test('global — has versions tab', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
+      await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    test('global — respects max number of versions', async () => {
+      await payload.updateGlobal({
+        slug: draftWithMaxGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+
+      const global = new AdminUrlUtil(serverURL, draftWithMaxGlobalSlug)
+      await page.goto(global.global(draftWithMaxGlobalSlug))
+
+      const titleFieldInitial = page.locator('#field-title')
+      await titleFieldInitial.fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldInitial).toHaveValue('updated title')
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTab.waitFor({ state: 'visible' })
+
+      expect(versionsTab).toBeTruthy()
+
+      const titleFieldUpdated = page.locator('#field-title')
+      await titleFieldUpdated.fill('latest title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(titleFieldUpdated).toHaveValue('latest title')
+
+      const versionsTabUpdated = page.locator('.doc-tab', {
+        hasText: '1',
+      })
+
+      await versionsTabUpdated.waitFor({ state: 'visible' })
+
+      expect(versionsTabUpdated).toBeTruthy()
+    })
+
+    test('global — has versions route', async () => {
+      const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
+      await page.goto(versionsURL)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('collection - should autosave', async () => {
@@ -394,7 +510,7 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .doc-tab__count').textContent(),
+            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')
@@ -469,6 +585,22 @@ describe('Versions', () => {
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
+    test('collections — should show custom error message when unpublishing fails', async () => {
+      const publishedDoc = await payload.create({
+        collection: errorOnUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+        },
+      })
+      await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await expect(
+        page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
+      ).toBeVisible()
+    })
+
     test('should show documents title in relationship even if draft document', async () => {
       await payload.create({
         collection: autosaveCollectionSlug,
@@ -502,7 +634,7 @@ describe('Versions', () => {
 
       await page.goto(url.edit(createdDoc.id))
 
-      const versionsCountSelector = `.doc-tabs__tabs .doc-tab__count`
+      const versionsCountSelector = `.doc-tabs__tabs .pill-version-count`
       const initialCount = await page.locator(versionsCountSelector).textContent()
 
       const field = page.locator('#field-description')
@@ -591,14 +723,16 @@ describe('Versions', () => {
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
 
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('global — respects max number of versions', async () => {

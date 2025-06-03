@@ -577,6 +577,27 @@ describe('database', () => {
     })
   })
 
+  it('should run migrate:reset', async () => {
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+    let error
+    try {
+      await payload.db.migrateReset()
+    } catch (e) {
+      error = e
+    }
+
+    const migrations = await payload.find({
+      collection: 'payload-migrations',
+    })
+
+    expect(error).toBeUndefined()
+    expect(migrations.docs).toHaveLength(0)
+  })
+
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
@@ -1650,6 +1671,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 
@@ -1997,6 +2019,43 @@ describe('database', () => {
       expect(draft.docs[0]?.postTitle).toBe('my-title')
     })
 
+    it('should not break when using select', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        select: { postTitle: true },
+      })
+      expect(doc.postTitle).toBe('my-title-10')
+    })
+
+    it('should respect hidden: true for virtual fields with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postTitleHidden).toBeUndefined()
+
+      const doc_show = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id,
+        showHiddenFields: true,
+      })
+      expect(doc_show.postTitleHidden).toBe('my-title-3')
+    })
+
     it('should allow virtual field as reference to ID', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
@@ -2114,8 +2173,6 @@ describe('database', () => {
       expect(descDocs[0]?.id).toBe(doc_2.id)
     })
 
-    it.todo('should allow to sort by a virtual field with reference')
-
     it('should allow virtual field 2x deep', async () => {
       const category = await payload.create({
         collection: 'categories',
@@ -2127,6 +2184,26 @@ describe('database', () => {
       })
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       expect(doc.postCategoryTitle).toBe('1-category')
+    })
+
+    it('should not break when using select 2x deep', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '3-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '3-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+
+      const docWithSelect = await payload.findByID({
+        collection: 'virtual-relations',
+        depth: 0,
+        id: doc.id,
+        select: { postCategoryTitle: true },
+      })
+      expect(docWithSelect.postCategoryTitle).toBe('3-category')
     })
 
     it('should allow to query by virtual field 2x deep', async () => {
@@ -2155,6 +2232,77 @@ describe('database', () => {
         depth: 0,
       })
       expect(globalData.postTitle).toBe('post')
+    })
+
+    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1 },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2 },
+      })
+
+      const queryDesc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "-postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlDesc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryDesc }) })
+        .then((res) => res.json())
+
+      const { docs: localDesc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlDesc[0].id).toBe(doc_2.id)
+      expect(graphqlDesc[1].id).toBe(doc_1.id)
+      expect(localDesc[0].id).toBe(doc_2.id)
+      expect(localDesc[1].id).toBe(doc_1.id)
+
+      const queryAsc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlAsc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryAsc }) })
+        .then((res) => res.json())
+
+      const { docs: localAsc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlAsc[1].id).toBe(doc_2.id)
+      expect(graphqlAsc[0].id).toBe(doc_1.id)
+      expect(localAsc[1].id).toBe(doc_2.id)
+      expect(localAsc[0].id).toBe(doc_1.id)
     })
   })
 
@@ -2413,5 +2561,62 @@ describe('database', () => {
     })
 
     expect(res.docs[0].id).toBe(customID.id)
+  })
+
+  it('deep nested arrays', async () => {
+    await payload.updateGlobal({
+      slug: 'header',
+      data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
+    })
+
+    const header = await payload.findGlobal({ slug: 'header' })
+
+    expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
+  })
+
+  it('should count with a query that contains subqueries', async () => {
+    const category = await payload.create({
+      collection: 'categories',
+      data: { title: 'new-category' },
+    })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { title: 'new-post', category: category.id },
+    })
+
+    const result_1 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'new-category',
+        },
+      },
+    })
+
+    expect(result_1.totalDocs).toBe(1)
+
+    const result_2 = await payload.count({
+      collection: 'posts',
+      where: {
+        'category.title': {
+          equals: 'non-existing-category',
+        },
+      },
+    })
+
+    expect(result_2.totalDocs).toBe(0)
+  })
+
+  it('can have localized and non localized blocks', async () => {
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 })

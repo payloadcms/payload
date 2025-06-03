@@ -14,6 +14,7 @@ export const findTenantOptions = async ({
   useAsTitle,
   user,
 }: Args): Promise<PaginatedDocs> => {
+  const isOrderable = payload.collections[tenantsCollectionSlug]?.config?.orderable || false
   return payload.find({
     collection: tenantsCollectionSlug,
     depth: 0,
@@ -21,8 +22,9 @@ export const findTenantOptions = async ({
     overrideAccess: false,
     select: {
       [useAsTitle]: true,
+      ...(isOrderable ? { _order: true } : {}),
     },
-    sort: useAsTitle,
+    sort: isOrderable ? '_order' : useAsTitle,
     user,
   })
 }
