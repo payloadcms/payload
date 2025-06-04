@@ -4,10 +4,9 @@ import React from 'react'
  * Extracts plain text content from a React node by traversing its structure.
  * Use cases:
  *   - Make React elements (field labels) searchable in filter dropdowns
- *   - Etc.
  */
 export const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
-  if (reactNode === null || reactNode === undefined || reactNode === false) {
+  if (reactNode === null || reactNode === undefined || typeof reactNode === 'boolean') {
     return ''
   }
 
@@ -20,10 +19,23 @@ export const extractTextFromReactNode = (reactNode: React.ReactNode): string => 
   }
 
   if (React.isValidElement(reactNode)) {
-    const { children } = reactNode.props as Record<string, React.ReactNode>
-    return extractTextFromReactNode(children)
+    const textParts: string[] = []
+
+    for (const [key, value] of Object.entries(reactNode.props)) {
+      // Only recurse into props that might contain React content
+      if (
+        key === 'children' ||
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        React.isValidElement(value) ||
+        Array.isArray(value)
+      ) {
+        textParts.push(extractTextFromReactNode(reactNode))
+      }
+    }
+
+    return textParts.join('')
   }
 
-  // Handle other cases (e.g., symbols, functions) explicitly if needed
   return ''
 }
