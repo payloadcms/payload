@@ -53,7 +53,7 @@ export const connect: Connect = async function connect(
       this.beginTransaction = defaultBeginTransaction()
     }
 
-    if (!this.mongoMemoryServer && !hotReload) {
+    if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
         await mongoose.connection.dropDatabase()
