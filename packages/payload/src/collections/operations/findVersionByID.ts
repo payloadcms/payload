@@ -24,6 +24,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
@@ -41,6 +42,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     req,
     select: incomingSelect,
     showHiddenFields,
+    trash = false,
   } = args
 
   if (!id) {
@@ -63,7 +65,19 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     const hasWhereAccess = typeof accessResults === 'object'
 
-    const fullWhere = combineQueries({ id: { equals: id } }, accessResults)
+    const where = { id: { equals: id } }
+
+    let fullWhere = combineQueries(where, accessResults)
+
+    if (collectionConfig.softDeletes && !trash) {
+      const notTrashedFilter = { 'version.deletedAt': { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
 
     // /////////////////////////////////////
     // Find by ID

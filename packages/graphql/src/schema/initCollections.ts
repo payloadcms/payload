@@ -340,11 +340,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: 'date',
           label: ({ t }) => t('general:updatedAt'),
         },
-        {
-          name: 'deletedAt',
-          type: 'date',
-          label: ({ t }) => t('general:deletedAt'),
-        },
       ]
 
       collection.graphQL.versionType = buildObjectType({
@@ -368,6 +363,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                   locale: { type: graphqlResult.types.localeInputType },
                 }
               : {}),
+            trash: { type: GraphQLBoolean },
           },
           resolve: findVersionByIDResolver(collection),
         }
