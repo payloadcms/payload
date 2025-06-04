@@ -1,8 +1,9 @@
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type { Document, PayloadRequest, Where } from '../../types/index.js'
 import type { FolderOrDocument } from '../types.js'
 
+import { APIError } from '../../errors/APIError.js'
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type QueryDocumentsAndFoldersResults = {
@@ -10,40 +11,37 @@ type QueryDocumentsAndFoldersResults = {
   subfolders: FolderOrDocument[]
 }
 type QueryDocumentsAndFoldersArgs = {
-  collectionSlug?: CollectionSlug
+  /**
+   * Optional where clause to filter documents by
+   * @default undefined
+   */
+  documentWhere?: Where
+  /** Optional where clause to filter subfolders by
+   * @default undefined
+   */
+  folderWhere?: Where
   parentFolderID: number | string
   req: PayloadRequest
 }
 export async function queryDocumentsAndFoldersFromJoin({
-  collectionSlug,
+  documentWhere,
+  folderWhere,
   parentFolderID,
   req,
 }: QueryDocumentsAndFoldersArgs): Promise<QueryDocumentsAndFoldersResults> {
   const { payload, user } = req
-  const folderCollectionSlugs: string[] = payload.config.collections.reduce<string[]>(
-    (acc, collection) => {
-      if (collection?.folders) {
-        acc.push(collection.slug)
-      }
-      return acc
-    },
-    [],
-  )
+
+  if (payload.config.folders === false) {
+    throw new APIError('Folders are not enabled', 500)
+  }
 
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
     joins: {
       documentsAndFolders: {
-        limit: 100_000,
+        limit: 100_000_000,
         sort: 'name',
-        where: {
-          relationTo: {
-            in: [
-              payload.config.folders.slug,
-              ...(collectionSlug ? [collectionSlug] : folderCollectionSlugs),
-            ],
-          },
-        },
+        where: combineWhereConstraints([folderWhere, documentWhere], 'or'),
       },
     },
     limit: 1,
@@ -61,6 +59,9 @@ export async function queryDocumentsAndFoldersFromJoin({
 
   const results: QueryDocumentsAndFoldersResults = childrenDocs.reduce(
     (acc: QueryDocumentsAndFoldersResults, doc: Document) => {
+      if (!payload.config.folders) {
+        return acc
+      }
       const { relationTo, value } = doc
       const item = formatFolderOrDocumentItem({
         folderFieldName: payload.config.folders.fieldName,

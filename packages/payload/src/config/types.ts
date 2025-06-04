@@ -991,7 +991,7 @@ export type Config = {
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
-  folders?: RootFoldersConfiguration
+  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */

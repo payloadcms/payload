@@ -176,6 +176,14 @@ export const sanitizeCollection = async (
     }
   }
 
+  if (sanitized.folders === true) {
+    sanitized.folders = {
+      browseByFolder: true,
+    }
+  } else if (sanitized.folders) {
+    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
+  }
+
   if (sanitized.upload) {
     if (sanitized.upload === true) {
       sanitized.upload = {}
