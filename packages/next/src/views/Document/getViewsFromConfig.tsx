@@ -144,6 +144,14 @@ export const getViewsFromConfig = ({
                     Component: defaultViewsByKey[customViewKey as ViewKey],
                   }
                 }
+              } else {
+                CustomView = {
+                  ComponentConfig: getCustomViewByKey(views, 'default'),
+                }
+
+                DefaultView = {
+                  Component: DefaultEditView,
+                }
               }
 
               break
