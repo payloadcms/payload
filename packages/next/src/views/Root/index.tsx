@@ -1,22 +1,23 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewClientProps,
-  AdminViewServerPropsOnly,
-  ImportMap,
-  SanitizedConfig,
-} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import {
+  type AdminViewClientProps,
+  type AdminViewServerPropsOnly,
+  type ImportMap,
+  parseDocumentID,
+  type SanitizedConfig,
+} from 'payload'
 import { formatAdminURL } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
+import { getRouteData } from './getRouteData.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -62,14 +63,16 @@ export const RootPage = async ({
   const searchParams = await searchParamsPromise
 
   const {
+    browseByFolderSlugs,
     DefaultView,
     documentSubViewType,
+    folderID: folderIDParam,
     initPageOptions,
     serverProps,
     templateClassName,
     templateType,
     viewType,
-  } = getViewFromConfig({
+  } = getRouteData({
     adminRoute,
     config,
     currentRoute,
@@ -89,6 +92,10 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc))
 
+  /**
+   * This function is responsible for handling the case where the view is not found.
+   * The current route did not match any default views or custom route views.
+   */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
@@ -132,8 +139,22 @@ export const RootPage = async ({
     importMap,
   })
 
+  const payload = initPageResult?.req.payload
+  const folderID = payload.config.folders
+    ? parseDocumentID({
+        id: folderIDParam,
+        collectionSlug: payload.config.folders.slug,
+        payload,
+      })
+    : undefined
+
   const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+    clientProps: {
+      browseByFolderSlugs,
+      clientConfig,
+      documentSubViewType,
+      viewType,
+    } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
     importMap,
@@ -141,6 +162,7 @@ export const RootPage = async ({
       ...serverProps,
       clientConfig,
       docID: initPageResult?.docID,
+      folderID,
       i18n: initPageResult?.req.i18n,
       importMap,
       initPageResult,
@@ -151,8 +173,8 @@ export const RootPage = async ({
   })
 
   return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
+    <React.Fragment>
+      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
@@ -182,6 +204,6 @@ export const RootPage = async ({
           {RenderedView}
         </DefaultTemplate>
       )}
-    </Fragment>
+    </React.Fragment>
   )
 }

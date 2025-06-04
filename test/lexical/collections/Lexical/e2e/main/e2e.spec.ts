@@ -92,11 +92,8 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -674,7 +671,7 @@ describe('lexicalMain', () => {
     await relationshipSelectButton.click()
     await expect(slashMenuPopover).toBeHidden()
 
-    const relationshipListDrawer = page.locator('.list-drawer__header-text')
+    const relationshipListDrawer = page.locator('.list-header__title')
     await expect(relationshipListDrawer).toHaveText('Array Fields')
   })
 

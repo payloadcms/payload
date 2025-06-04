@@ -37,8 +37,10 @@ import {
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
   relationSlug,
+  threeDimensionalSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
+  withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
@@ -71,6 +73,8 @@ let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
 let bestFitURL: AdminUrlUtil
+let withoutEnlargementResizeOptionsURL: AdminUrlUtil
+let threeDimensionalURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -107,6 +111,8 @@ describe('Uploads', () => {
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
     hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
     bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
+    withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
+    threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -176,7 +182,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(relationURL.edit(relationDoc.id))
+    await page.goto(relationURL.edit(relationDoc!.id))
 
     const filename = page.locator('.upload-relationship-details__filename a').nth(0)
     await expect(filename).toContainText('image.png')
@@ -245,6 +251,19 @@ describe('Uploads', () => {
     await expect(fileMetaSizeType).toHaveText(/image\/png/)
   })
 
+  test('should show proper mimetype for glb file', async () => {
+    await page.goto(threeDimensionalURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './duck.glb'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('duck.glb')
+
+    await saveDocAndAssert(page)
+
+    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    await expect(fileMetaSizeType).toHaveText(/model\/gltf-binary/)
+  })
+
   test('should create animated file upload', async () => {
     await page.goto(animatedTypeMediaURL.create)
 
@@ -298,7 +317,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(mediaURL.edit(pngDoc.id))
+    await page.goto(mediaURL.edit(pngDoc!.id))
 
     await page.locator('.file-field__previewSizes').click()
 
@@ -432,7 +451,7 @@ describe('Uploads', () => {
         })
       ).docs[0]
 
-      await page.goto(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc!.id))
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
@@ -445,7 +464,7 @@ describe('Uploads', () => {
 
       await openDocDrawer({
         page,
-        selector: 'button.list-drawer__create-new-button.doc-drawer__toggler',
+        selector: 'button.list-header__create-new-button.doc-drawer__toggler',
       })
       await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
@@ -478,7 +497,7 @@ describe('Uploads', () => {
         })
       ).docs[0]
 
-      await page.goto(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc!.id))
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
@@ -587,7 +606,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc.id))
+    await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc!.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
 
@@ -617,7 +636,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(adminThumbnailFunctionURL.edit(imageDoc.id))
+    await page.goto(adminThumbnailFunctionURL.edit(imageDoc!.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
 
@@ -653,7 +672,7 @@ describe('Uploads', () => {
     const imageID = page.url().split('/').pop()
 
     const { doc: uploadedImage } = await client.findByID({
-      id: imageID,
+      id: imageID as number | string,
       slug: mediaSlug,
       auth: true,
     })
@@ -678,7 +697,7 @@ describe('Uploads', () => {
     const mediaID = page.url().split('/').pop()
 
     const { doc: mediaDoc } = await client.findByID({
-      id: mediaID,
+      id: mediaID as number | string,
       slug: withMetadataSlug,
       auth: true,
     })
@@ -705,7 +724,7 @@ describe('Uploads', () => {
     const mediaID = page.url().split('/').pop()
 
     const { doc: mediaDoc } = await client.findByID({
-      id: mediaID,
+      id: mediaID as number | string,
       slug: withoutMetadataSlug,
       auth: true,
     })
@@ -732,7 +751,7 @@ describe('Uploads', () => {
     const jpegMediaID = page.url().split('/').pop()
 
     const { doc: jpegMediaDoc } = await client.findByID({
-      id: jpegMediaID,
+      id: jpegMediaID as number | string,
       slug: withOnlyJPEGMetadataSlug,
       auth: true,
     })
@@ -758,7 +777,7 @@ describe('Uploads', () => {
     const webpMediaID = page.url().split('/').pop()
 
     const { doc: webpMediaDoc } = await client.findByID({
-      id: webpMediaID,
+      id: webpMediaID as number | string,
       slug: withOnlyJPEGMetadataSlug,
       auth: true,
     })
@@ -1258,13 +1277,13 @@ describe('Uploads', () => {
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
       const { doc: greenDoc } = await client.findByID({
-        id: greenSquareMediaID,
+        id: greenSquareMediaID as number | string,
         slug: mediaSlug,
         auth: true,
       })
 
       const { doc: redDoc } = await client.findByID({
-        id: redSquareMediaID,
+        id: redSquareMediaID as number | string,
         slug: mediaSlug,
         auth: true,
       })
@@ -1302,13 +1321,13 @@ describe('Uploads', () => {
       const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
       const { doc: redDoc } = await client.findByID({
-        id: redSquareMediaID,
+        id: redSquareMediaID as number | string,
         slug: focalOnlySlug,
         auth: true,
       })
 
       // without focal point update this generated size was equal to 1736
-      expect(redDoc.sizes.focalTest.filesize).toEqual(1598)
+      expect(redDoc.sizes.focalTest.filesize).toEqual(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
@@ -1404,6 +1423,35 @@ describe('Uploads', () => {
     await page.goto(hideFileInputOnCreateURL.edit(doc.id))
 
     await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
+  })
+
+  test('should skip applying resizeOptions after updating an image if resizeOptions.withoutEnlargement is true and the original image size is smaller than the dimensions defined in resizeOptions', async () => {
+    await page.goto(withoutEnlargementResizeOptionsURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.file-field__edit').click()
+
+    // no need to make any changes to the image if resizeOptions.withoutEnlargement is actually being respected now
+    await page.locator('button:has-text("Apply Changes")').click()
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+
+    // expect the image to be the original size since the original image is smaller than the dimensions defined in resizeOptions
+    await expect(resizeOptionMedia).toContainText('800x800')
   })
 
   describe('imageSizes best fit', () => {

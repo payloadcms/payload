@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -89,16 +88,16 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc[field.name],
+          previousValue: previousDoc[field.name!],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
-          value: siblingDoc[field.name],
+          siblingFields: siblingFields!,
+          value: siblingDoc[field.name!],
         })
 
         if (hookedValue !== undefined) {
-          siblingDoc[field.name] = hookedValue
+          siblingDoc[field.name!] = hookedValue
         }
       }
     }
@@ -110,7 +109,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
@@ -144,7 +143,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType

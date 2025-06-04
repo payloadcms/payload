@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest, PopulateType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
@@ -25,17 +24,9 @@ export type Arguments = {
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {
-  const {
-    id,
-    depth,
-    draft,
-    globalConfig,
-    overrideAccess,
-    populate,
-    req: { fallbackLocale, locale, payload },
-    req,
-    showHiddenFields,
-  } = args
+  const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
+  const req = args.req!
+  const { fallbackLocale, locale, payload } = req
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -63,7 +54,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       throw new NotFound(req.t)
     }
 
-    const rawVersion = versionDocs[0]
+    const rawVersion = versionDocs[0]!
 
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
@@ -127,16 +118,16 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     result = await afterRead({
       collection: null,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

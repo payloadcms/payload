@@ -5,6 +5,7 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Предстои да промените собствеността от <0>{{fromTenant}}</0> на <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Потвърдете промяната на {{tenantLabel}}',
+    'field-assignedTentant-label': 'Назначен наемател',
   },
 }
 

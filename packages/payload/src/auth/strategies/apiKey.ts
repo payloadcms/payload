@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
@@ -46,14 +45,14 @@ export const APIKeyAuthentication =
 
         if (userQuery.docs && userQuery.docs.length > 0) {
           const user = userQuery.docs[0]
-          user.collection = collectionConfig.slug
-          user._strategy = 'api-key'
+          user!.collection = collectionConfig.slug
+          user!._strategy = 'api-key'
 
           return {
             user: user as User,
           }
         }
-      } catch (err) {
+      } catch (ignore) {
         return { user: null }
       }
     }

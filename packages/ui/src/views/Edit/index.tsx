@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentSlots, DocumentViewClientProps, FormState } from 'payload'
@@ -44,6 +45,7 @@ const baseClass = 'collection-edit'
 export function DefaultEditView({
   BeforeDocumentControls,
   Description,
+  EditMenuItems,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -309,6 +311,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,
@@ -327,7 +330,6 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
-      redirectAfterCreate,
     ],
   )
 
@@ -530,6 +532,7 @@ export function DefaultEditView({
             data={savedDocumentData}
             disableActions={disableActions}
             disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}

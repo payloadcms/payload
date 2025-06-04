@@ -157,6 +157,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                     <Pill
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
                       pillStyle="white"
+                      size="small"
                     >
                       {getTranslation(block.labels.singular, i18n)}
                     </Pill>

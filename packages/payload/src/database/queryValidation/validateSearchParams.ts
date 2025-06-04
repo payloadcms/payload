@@ -5,9 +5,8 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
-import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
-import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
@@ -56,12 +55,12 @@ export async function validateSearchParam({
     sanitizedPath = incomingPath.replace(/__/g, '.')
   }
   let paths: PathToQuery[] = []
-  const { slug } = collectionConfig || globalConfig
+  const { slug } = (collectionConfig || globalConfig)!
 
   const blockPolicies = {}
 
-  if (globalConfig && !policies.globals[slug]) {
-    policies.globals[slug] = await getEntityPolicies({
+  if (globalConfig && !policies.globals![slug]) {
+    policies.globals![slug] = await getEntityPolicies({
       type: 'global',
       blockPolicies,
       entity: globalConfig,
@@ -76,13 +75,13 @@ export async function validateSearchParam({
       fields,
       globalSlug: globalConfig?.slug,
       incomingPath: sanitizedPath,
-      locale: req.locale,
+      locale: req.locale!,
       overrideAccess,
       parentIsLocalized,
       payload: req.payload,
     })
   }
-  const promises = []
+  const promises: Promise<void>[] = []
 
   // Sanitize relation.otherRelation.id to relation.otherRelation
   if (paths.at(-1)?.path === 'id') {
@@ -99,7 +98,10 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        errors.push({ path })
+        if (!polymorphicJoin) {
+          errors.push({ path })
+        }
+
         return
       }
 
@@ -118,11 +120,11 @@ export async function validateSearchParam({
 
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
-          if (!policies.collections[collectionSlug]) {
-            policies.collections[collectionSlug] = await getEntityPolicies({
+          if (!policies.collections![collectionSlug]) {
+            policies.collections![collectionSlug] = await getEntityPolicies({
               type: 'collection',
               blockPolicies,
-              entity: req.payload.collections[collectionSlug].config,
+              entity: req.payload.collections[collectionSlug]!.config,
               operations: ['read'],
               req: isolateObjectProperty(req, 'transactionID'),
             })
@@ -130,8 +132,8 @@ export async function validateSearchParam({
 
           if (
             ['hash', 'salt'].includes(incomingPath) &&
-            collectionConfig.auth &&
-            !collectionConfig.auth?.disableLocalStrategy
+            collectionConfig!.auth &&
+            !collectionConfig!.auth?.disableLocalStrategy
           ) {
             errors.push({ path: incomingPath })
           }
@@ -139,7 +141,7 @@ export async function validateSearchParam({
         let fieldPath = path
         // remove locale from end of path
         if (path.endsWith(`.${req.locale}`)) {
-          fieldPath = path.slice(0, -(req.locale.length + 1))
+          fieldPath = path.slice(0, -(req.locale!.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
         if (
@@ -150,19 +152,19 @@ export async function validateSearchParam({
         }
 
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
-        const entitySlug = collectionSlug || globalConfig.slug
+        const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
         let fieldAccess
 
         if (versionFields) {
-          fieldAccess = policies[entityType][entitySlug]
+          fieldAccess = policies[entityType]![entitySlug]!
 
           if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
           }
         } else {
-          fieldAccess = policies[entityType][entitySlug].fields
+          fieldAccess = policies[entityType]![entitySlug]!.fields
         }
 
         segments.forEach((segment) => {
@@ -197,7 +199,7 @@ export async function validateSearchParam({
             if (pathToQueryIndex === 0) {
               promises.push(
                 validateQueryPaths({
-                  collectionConfig: req.payload.collections[pathCollectionSlug].config,
+                  collectionConfig: req.payload.collections[pathCollectionSlug!]!.config,
                   errors,
                   globalConfig: undefined,
                   overrideAccess,

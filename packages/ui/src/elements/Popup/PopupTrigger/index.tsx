@@ -30,9 +30,9 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
-  const handleClick = () => {
+  const handleClick = React.useCallback(() => {
     setActive(!active)
-  }
+  }, [active, setActive])
 
   if (buttonType === 'none') {
     return null

@@ -67,6 +67,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     path,
+    selectFilterOptions,
     setValue,
     showError,
     value,
@@ -109,6 +110,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ value }) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}

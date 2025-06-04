@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const lvTranslations = {
+export const lvTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konts',
     accountOfCurrentUser: 'Pašreizējā lietotāja konts',
@@ -27,11 +27,9 @@ export const lvTranslations = {
     forgotPassword: 'Aizmirsi paroli?',
     forgotPasswordEmailInstructions:
       'Lūdzu, ievadiet savu e-pastu zemāk. Saņemsiet ziņojumu ar norādījumiem paroles atiestatīšanai.',
+    forgotPasswordQuestion: 'Aizmirsi paroli?',
     forgotPasswordUsernameInstructions:
       'Lūdzu, ievadiet savu lietotājvārdu zemāk. Norādījumi paroles atiestatīšanai tiks nosūtīti uz e-pastu, kas saistīts ar jūsu lietotājvārdu.',
-    usernameNotValid: 'Norādītais lietotājvārds nav derīgs',
-
-    forgotPasswordQuestion: 'Aizmirsi paroli?',
     generate: 'Ģenerēt',
     generateNewAPIKey: 'Ģenerēt jaunu API atslēgu',
     generatingNewAPIKeyWillInvalidate:
@@ -68,6 +66,7 @@ export const lvTranslations = {
     tokenRefreshSuccessful: 'Tokens veiksmīgi atjaunots.',
     unableToVerify: 'Neizdevās verificēt',
     username: 'Lietotājvārds',
+    usernameNotValid: 'Norādītais lietotājvārds nav derīgs',
     verified: 'Verificēts',
     verifiedSuccessfully: 'Veiksmīgi verificēts',
     verify: 'Verificēt',
@@ -175,7 +174,34 @@ export const lvTranslations = {
     toggleBlock: 'Pārslēgt bloku',
     uploadNewLabel: 'Augšupielādēt jaunu {{label}}',
   },
+  folder: {
+    browseByFolder: 'Pārlūkot pēc mapes',
+    byFolder: 'Pēc mapi',
+    deleteFolder: 'Dzēst mapi',
+    folderName: 'Mapes nosaukums',
+    folders: 'Mapes',
+    itemHasBeenMoved: '{{title}} ir pārvietots uz {{folderName}}',
+    itemHasBeenMovedToRoot: '{{title}} ir pārvietots uz saknes mapi',
+    itemsMovedToFolder: '{{title}} pārvietots uz {{folderName}}',
+    itemsMovedToRoot: '{{title}} pārvietots uz saknes mapi',
+    moveFolder: 'Pārvietot mapi',
+    moveItemsToFolderConfirmation:
+      'Jūs esat gatavs pārvietot <1>{{count}} {{label}}</1> uz <2>{{toFolder}}</2>. Vai esat pārliecināts?',
+    moveItemsToRootConfirmation:
+      'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes mapi. Vai esat pārliecināts?',
+    moveItemToFolderConfirmation:
+      'Jūs gatavojaties pārvietot <1>{{title}}</1> uz <2>{{toFolder}}</2>. Vai esat pārliecināts?',
+    moveItemToRootConfirmation:
+      'Jūs gatavojaties pārvietot <1>{{title}}</1> uz saknes mapi. Vai esat pārliecināts?',
+    movingFromFolder: 'Pārvietojot {{title}} no {{fromFolder}}',
+    newFolder: 'Jauna Mape',
+    noFolder: 'Nav mapes',
+    renameFolder: 'Pārdēvēt mapi',
+    searchByNameInFolder: 'Meklēšana pēc vārda mapē {{folderName}}',
+    selectFolderForItem: 'Izvēlieties mapi priekš {{title}}',
+  },
   general: {
+    name: 'Vārds',
     aboutToDelete: 'Jūs grasāties dzēst {{label}} <1>{{title}}</1>. Vai esat pārliecināts?',
     aboutToDeleteCount_many: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_one: 'Jūs grasāties dzēst {{count}} {{label}}',
@@ -185,6 +211,7 @@ export const lvTranslations = {
     adminTheme: 'Administratora tēma',
     all: 'Visi',
     allCollections: 'Visas kolekcijas',
+    allLocales: 'Visi lokalizācijas variants',
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
@@ -204,6 +231,7 @@ export const lvTranslations = {
     confirmCopy: 'Apstiprināt kopēšanu',
     confirmDeletion: 'Apstiprināt dzēšanu',
     confirmDuplication: 'Apstiprināt dublēšanu',
+    confirmMove: 'Apstiprināt pārvietošanu',
     confirmReindex: 'Pārindeksēt visus {{collections}}?',
     confirmReindexAll: 'Pārindeksēt visas kolekcijas?',
     confirmReindexDescription:
@@ -253,6 +281,7 @@ export const lvTranslations = {
     enterAValue: 'Ievadiet vērtību',
     error: 'Kļūda',
     errors: 'Kļūdas',
+    export: 'Eksports',
     fallbackToDefaultLocale: 'Izmantot noklusēto lokalizāciju',
     false: 'Nepatiesi',
     filter: 'Filtrs',
@@ -260,7 +289,10 @@ export const lvTranslations = {
     filterWhere: 'Filtrēt {{label}} kur',
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
+    import: 'Imports',
     isEditing: 'redzē',
+    item: 'vienība',
+    items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
     leaveAnyway: 'Pamest tāpat',
@@ -272,10 +304,17 @@ export const lvTranslations = {
     locales: 'Lokalizācijas',
     menu: 'Izvēlne',
     moreOptions: 'Vairāk opciju',
+    move: 'Pārvietoties',
+    moveConfirm:
+      'Jūs gatavojaties pārvietot {{count}} {{label}} uz <1>{{destination}}</1>. Vai esat pārliecināts?',
+    moveCount: 'Pārvietot {{count}} {{label}}',
     moveDown: 'Pārvietot uz leju',
     moveUp: 'Pārvietot uz augšu',
+    moving: 'Pārvietojas',
+    movingCount: 'Pārvietojot {{count}} {{label}}',
     newPassword: 'Jauna parole',
     next: 'Nākamais',
+    no: 'Nē',
     noDateSelected: 'Datums nav izvēlēts',
     noFiltersSet: 'Nav uzstādīti filtri',
     noLabel: '<Nav {{label}}>',
@@ -301,6 +340,7 @@ export const lvTranslations = {
     reindex: 'Pārindeksēt',
     reindexingAll: 'Pārindeksē visus {{collections}}.',
     remove: 'Noņemt',
+    rename: 'Pārdēvēt',
     reset: 'Atiestatīt',
     resetPreferences: 'Atiestatīt iestatījumus',
     resetPreferencesDescription: 'Tas atjaunos visus jūsu iestatījumus uz noklusētajiem.',
@@ -311,6 +351,7 @@ export const lvTranslations = {
     saving: 'Saglabā...',
     schedulePublishFor: 'Ieplānot publicēšanu priekš {{title}}',
     searchBy: 'Meklēt pēc {{label}}',
+    select: 'Izvēlieties',
     selectAll: 'Atlasīt visus {{count}} {{label}}',
     selectAllRows: 'Atlasīt visas rindas',
     selectedCount: 'Atlasīti {{count}} {{label}}',
@@ -354,6 +395,7 @@ export const lvTranslations = {
     value: 'Vērtība',
     viewReadOnly: 'Skatīt tikai lasāmu',
     welcome: 'Laipni lūdzam',
+    yes: 'Jā',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',
@@ -388,6 +430,7 @@ export const lvTranslations = {
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',
+    download: 'Lejupielādēt',
     dragAndDrop: 'Ievelciet un nometiet failu',
     dragAndDropHere: 'vai ievelciet un nometiet failu šeit',
     editImage: 'Rediģēt attēlu',

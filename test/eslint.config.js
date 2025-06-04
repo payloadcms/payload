@@ -11,12 +11,6 @@ export const testEslintConfig = [
     ignores: [...defaultESLintIgnores, '**/payload-types.ts', 'jest.setup.js'],
   },
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
     },
@@ -71,6 +65,9 @@ export const testEslintConfig = [
             'runFilterOptionsTest',
             'assertNetworkRequests',
             'assertRequestBody',
+            'expectNoResultsAndCreateFolderButton',
+            'createFolder',
+            'createFolderFromDoc',
           ],
         },
       ],

@@ -577,6 +577,27 @@ describe('database', () => {
     })
   })
 
+  it('should run migrate:reset', async () => {
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+    let error
+    try {
+      await payload.db.migrateReset()
+    } catch (e) {
+      error = e
+    }
+
+    const migrations = await payload.find({
+      collection: 'payload-migrations',
+    })
+
+    expect(error).toBeUndefined()
+    expect(migrations.docs).toHaveLength(0)
+  })
+
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
@@ -1650,6 +1671,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 
@@ -2151,8 +2173,6 @@ describe('database', () => {
       expect(descDocs[0]?.id).toBe(doc_2.id)
     })
 
-    it.todo('should allow to sort by a virtual field with reference')
-
     it('should allow virtual field 2x deep', async () => {
       const category = await payload.create({
         collection: 'categories',
@@ -2212,6 +2232,77 @@ describe('database', () => {
         depth: 0,
       })
       expect(globalData.postTitle).toBe('post')
+    })
+
+    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const doc_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1 },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2 },
+      })
+
+      const queryDesc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "-postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlDesc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryDesc }) })
+        .then((res) => res.json())
+
+      const { docs: localDesc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlDesc[0].id).toBe(doc_2.id)
+      expect(graphqlDesc[1].id).toBe(doc_1.id)
+      expect(localDesc[0].id).toBe(doc_2.id)
+      expect(localDesc[1].id).toBe(doc_1.id)
+
+      const queryAsc = `query {
+        VirtualRelations(
+          where: {OR: [{ id: { equals: ${JSON.stringify(doc_1.id)} } }, { id: { equals: ${JSON.stringify(doc_2.id)} } }],
+        }, sort: "postTitle") {
+          docs {
+            id
+          }
+        }
+      }`
+
+      const {
+        data: {
+          VirtualRelations: { docs: graphqlAsc },
+        },
+      } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryAsc }) })
+        .then((res) => res.json())
+
+      const { docs: localAsc } = await payload.find({
+        collection: 'virtual-relations',
+        sort: 'postTitle',
+        where: { id: { in: [doc_1.id, doc_2.id] } },
+      })
+
+      expect(graphqlAsc[1].id).toBe(doc_2.id)
+      expect(graphqlAsc[0].id).toBe(doc_1.id)
+      expect(localAsc[1].id).toBe(doc_2.id)
+      expect(localAsc[0].id).toBe(doc_1.id)
     })
   })
 
@@ -2527,5 +2618,34 @@ describe('database', () => {
 
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+  })
+
+  it('should support in with null', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-1' },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-2' },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-3' },
+    })
+    const post_null = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: null },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'posts',
+      where: { text: { in: ['text-1', 'text-3', null] } },
+    })
+    expect(docs).toHaveLength(3)
+    expect(docs[0].id).toBe(post_null.id)
+    expect(docs[1].id).toBe(post_3.id)
+    expect(docs[2].id).toBe(post_1.id)
   })
 })
