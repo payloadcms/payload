@@ -21,6 +21,10 @@ export default buildConfigWithDefaults({
     // debug: true,
     collectionOverrides: [
       ({ collection }) => {
+        collection.fields.push({
+          name: 'folderSlug',
+          type: 'text',
+        })
         return collection
       },
     ],

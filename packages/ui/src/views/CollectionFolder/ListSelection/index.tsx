@@ -9,8 +9,8 @@ import { toast } from 'sonner'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
+import { EditFolderAction } from '../../../elements/FolderView/Drawers/EditFolderAction/index.js'
 import { MoveItemsToFolderDrawer } from '../../../elements/FolderView/Drawers/MoveToFolder/index.js'
-import { RenameFolderDrawer } from '../../../elements/FolderView/Drawers/RenameFolder/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
@@ -19,7 +19,6 @@ import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 const moveToFolderDrawerSlug = 'move-to-folder--list'
-const renameFolderDrawerSlug = 'rename-folder--list'
 
 type GroupedSelections = {
   [relationTo: string]: {
@@ -41,6 +40,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const {
     clearSelections,
     currentFolder,
+    folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
     folderID,
@@ -117,22 +117,17 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           </Fragment>
         ),
         count === 1 && !singleNonFolderCollectionSelected && (
-          <React.Fragment key="rename-folder">
-            <ListSelectionButton onClick={() => openModal(renameFolderDrawerSlug)} type="button">
-              {t('general:rename')}
-            </ListSelectionButton>
-            <RenameFolderDrawer
-              drawerSlug={renameFolderDrawerSlug}
-              folderToRename={items[0]}
-              onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
-                renameFolder({
-                  folderID: updatedFolderID,
-                  newName: updatedName,
-                })
-                closeModal(renameFolderDrawerSlug)
-              }}
-            />
-          </React.Fragment>
+          <EditFolderAction
+            folderCollectionSlug={folderCollectionSlug}
+            id={groupedSelections[folderCollectionSlug].ids[0]}
+            key="edit-folder-action"
+            onSave={({ doc }) => {
+              renameFolder({
+                folderID: doc.id,
+                newName: doc[folderCollectionConfig.admin.useAsTitle],
+              })
+            }}
+          />
         ),
         count > 0 ? (
           <React.Fragment key={moveToFolderDrawerSlug}>
