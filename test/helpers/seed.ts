@@ -3,6 +3,7 @@ import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
+import { isErrorWithCode } from './isErrorWithCode.js'
 import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
@@ -53,8 +54,8 @@ export async function seedDB({
         for (const file of files) {
           await fs.promises.rm(path.join(dir, file))
         }
-      } catch (error: any) {
-        if (error?.code !== 'ENOENT') {
+      } catch (error) {
+        if (isErrorWithCode(error, 'ENOENT')) {
           // If the error is not because the directory doesn't exist
           console.error('Error in operation (deleting uploads dir):', dir, error)
           throw error
@@ -174,7 +175,7 @@ export async function seedDB({
         let newObj: {
           cacheDir: string
           originalDir: string
-        } = null
+        } | null = null
         if (!uploadsDirCache[snapshotKey].find((cache) => cache.originalDir === dir)) {
           // Define new cache folder path to the OS temp directory (well a random folder inside it)
           newObj = {

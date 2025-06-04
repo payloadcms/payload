@@ -46,8 +46,8 @@ export const reInitializeDB = async ({
       const timeTaken = Date.now() - startTime
       console.log(`Successfully reinitialized DB (took ${timeTaken}ms)`)
       return
-    } catch (error: any) {
-      console.error(`Failed to reinitialize DB: ${error.message}`)
+    } catch (error) {
+      console.error(`Failed to reinitialize DB`, error)
 
       if (attempt === maxAttempts) {
         console.error('Max retry attempts reached. Giving up.')
