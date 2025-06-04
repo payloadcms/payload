@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
@@ -137,7 +136,9 @@ export type WhereField = {
 
 export type Where = {
   [key: string]: Where[] | WhereField
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   and?: Where[]
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   or?: Where[]
 }
 

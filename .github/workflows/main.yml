@@ -6,6 +6,7 @@ on:
       - opened
       - reopened
       - synchronize
+      - labeled
   push:
     branches:
       - main
@@ -62,12 +63,6 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
-    # Follows same github's ci skip: [skip lint], [lint skip], [no lint]
-    if: >
-      github.event_name == 'pull_request' &&
-      !contains(github.event.pull_request.title, '[skip lint]') &&
-      !contains(github.event.pull_request.title, '[lint skip]') &&
-      !contains(github.event.pull_request.title, '[no lint]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +76,8 @@ jobs:
           pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Lint staged
-        run: |
-          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
-          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
+      - name: Lint
+        run: pnpm lint -- --quiet
 
   build:
     needs: changes
@@ -380,6 +373,142 @@ jobs:
         if: always()
         with:
           name: test-results-${{ matrix.suite }}
+          path: test/test-results/
+          if-no-files-found: ignore
+          retention-days: 1
+
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
+
+  tests-e2e-turbo:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: >-
+      needs.changes.outputs.needs_tests == 'true' &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
+        github.event.label.name == 'run-e2e-turbo'
+      )
+    name: e2e-turbo-${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
+        suite:
+          - _community
+          - access-control
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
+          - admin-bar
+          - admin-root
+          - auth
+          - auth-basic
+          - bulk-edit
+          - joins
+          - field-error-states
+          - fields-relationship
+          - fields__collections__Array
+          - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
+          - fields__collections__Checkbox
+          - fields__collections__Collapsible
+          - fields__collections__ConditionalLogic
+          - fields__collections__CustomID
+          - fields__collections__Date
+          - fields__collections__Email
+          - fields__collections__Indexed
+          - fields__collections__JSON
+          - fields__collections__Number
+          - fields__collections__Point
+          - fields__collections__Radio
+          - fields__collections__Relationship
+          - fields__collections__Row
+          - fields__collections__Select
+          - fields__collections__Tabs
+          - fields__collections__Tabs2
+          - fields__collections__Text
+          - fields__collections__UI
+          - fields__collections__Upload
+          - hooks
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
+          - query-presets
+          - form-state
+          - live-preview
+          - localization
+          - locked-documents
+          - i18n
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-import-export
+          - plugin-nested-docs
+          - plugin-seo
+          - sort
+          - versions
+          - uploads
+    env:
+      SUITE_NAME: ${{ matrix.suite }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start LocalStack
+        run: pnpm docker:start
+        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:turbo ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-turbo${{ matrix.suite }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1

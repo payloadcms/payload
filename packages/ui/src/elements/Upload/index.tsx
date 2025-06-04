@@ -1,6 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -15,7 +16,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
@@ -49,6 +50,7 @@ export const UploadActions = ({
   mimeType,
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
+  const { openModal } = useModal()
 
   const fileTypeIsAdjustable =
     isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
@@ -62,14 +64,30 @@ export const UploadActions = ({
       {fileTypeIsAdjustable && (
         <React.Fragment>
           {enablePreviewSizes && (
-            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__previewSizes`}
+              margin={false}
+              onClick={() => {
+                openModal(sizePreviewSlug)
+              }}
+              size="small"
+            >
               {t('upload:previewSizes')}
-            </DrawerToggler>
+            </Button>
           )}
           {enableAdjustments && (
-            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__edit`}
+              margin={false}
+              onClick={() => {
+                openModal(editDrawerSlug)
+              }}
+              size="small"
+            >
               {t('upload:editImage')}
-            </DrawerToggler>
+            </Button>
           )}
         </React.Fragment>
       )}
@@ -378,6 +396,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                     setFileUrl(e.target.value)
                   }}
                   ref={urlInputRef}
+                  title={fileUrl}
                   type="text"
                   value={fileUrl}
                 />
@@ -419,6 +438,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
+                  title={filename || value.name}
                   type="text"
                   value={filename || value.name}
                 />

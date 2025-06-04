@@ -147,7 +147,7 @@ const copyFile: CopyFile = (src, dst, callback) => {
       return
     }
     cbCalled = true
-    callback(err)
+    callback(err!)
   }
   // Create read stream
   const readable = fs.createReadStream(src)
@@ -180,7 +180,7 @@ export const moveFile: MoveFile = (src, dst, callback) =>
       return
     }
     // File was renamed successfully: Add true to the callback to indicate that.
-    callback(null, true)
+    callback(null!, true)
   })
 
 /**
@@ -197,7 +197,7 @@ export const saveBufferToFile = (buffer, filePath, callback) => {
   const readStream = new Readable()
   readStream._read = () => {
     readStream.push(streamData)
-    streamData = null
+    streamData = null!
   }
   // Setup file system writable stream.
   const fstream = fs.createWriteStream(filePath)
@@ -228,14 +228,14 @@ const uriDecodeFileName = (opts, fileName) => {
   // See Issue https://github.com/richardgirges/express-fileupload/issues/342.
   try {
     return decodeURIComponent(fileName)
-  } catch (err) {
+  } catch (ignore) {
     const matcher = /(%[a-f\d]{2})/gi
     return fileName
       .split(matcher)
       .map((str) => {
         try {
           return decodeURIComponent(str)
-        } catch (err) {
+        } catch (ignore) {
           return ''
         }
       })
@@ -272,14 +272,14 @@ export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension
   }
 
   let extension = nameParts.pop()
-  if (extension.length > maxExtLength && maxExtLength > 0) {
-    nameParts[nameParts.length - 1] += '.' + extension.substr(0, extension.length - maxExtLength)
-    extension = extension.substr(-maxExtLength)
+  if (extension!.length > maxExtLength && maxExtLength > 0) {
+    nameParts[nameParts.length - 1] += '.' + extension!.substr(0, extension!.length - maxExtLength)
+    extension = extension!.substr(-maxExtLength)
   }
 
   return {
     name: nameParts.join('.'),
-    extension: maxExtLength ? extension : '',
+    extension: maxExtLength ? extension! : '',
   }
 }
 
@@ -306,7 +306,7 @@ export const parseFileName: ParseFileName = (opts, fileName) => {
       ? opts.safeFileNames
       : SAFE_FILE_NAME_REGEX
   // Parse file name extension.
-  const parsedFileName = parseFileNameExtension(opts.preserveExtension, parsedName)
+  const parsedFileName = parseFileNameExtension(opts.preserveExtension!, parsedName)
   if (parsedFileName.extension.length) {
     parsedFileName.extension = '.' + parsedFileName.extension.replace(nameRegex, '')
   }

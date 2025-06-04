@@ -35,22 +35,7 @@ export const Posts: CollectionConfig = {
       ],
       listMenuItems: [
         {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'listMenuItems',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Many of them',
-          },
-        },
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'Ok last one',
-          },
+          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
         },
       ],
       afterList: [
@@ -140,6 +125,68 @@ export const Posts: CollectionConfig = {
           admin: {
             description: () => `t:${customTabAdminDescription}`,
           },
+        },
+      ],
+    },
+    {
+      name: 'someTextField',
+      type: 'text',
+    },
+    {
+      name: 'namedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'someTextField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed group',
+      fields: [
+        {
+          name: 'textFieldInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'groupWithCustomCell',
+      type: 'group',
+      admin: {
+        components: {
+          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
+        },
+      },
+      fields: [
+        {
+          name: 'nestedTextFieldInGroupWithCustomCell',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'namedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInNamedTab',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'unnamedTab',
+          fields: [
+            {
+              name: 'nestedTextFieldInUnnamedTab',
+              type: 'text',
+            },
+          ],
         },
       ],
     },

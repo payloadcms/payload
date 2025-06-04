@@ -1,4 +1,6 @@
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
+export { FolderTableCell } from '../../elements/FolderView/Cell/index.server.js'
+export { FolderEditField } from '../../elements/FolderView/Field/index.server.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'

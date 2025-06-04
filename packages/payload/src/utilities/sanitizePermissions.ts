@@ -151,7 +151,9 @@ function checkAndSanitizePermissions(
  * Check if an object is a permission object.
  */
 function isPermissionObject(data: unknown): boolean {
-  return typeof data === 'object' && 'permission' in data && typeof data['permission'] === 'boolean'
+  return (
+    typeof data === 'object' && 'permission' in data! && typeof data['permission'] === 'boolean'
+  )
 }
 
 /**

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -21,7 +20,7 @@ export const updateHandler: PayloadHandler = async (req) => {
   const result = await updateOperation({
     slug: globalConfig.slug,
     autosave,
-    data: req.data,
+    data: req.data!,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     globalConfig,

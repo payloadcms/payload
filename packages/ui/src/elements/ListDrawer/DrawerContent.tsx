@@ -75,7 +75,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [selectedCollectionFromProps])
 
   const renderList = useCallback(
-    async (slug: string, query?: ListQuery) => {
+    async ({ slug, query }: { query?: ListQuery; slug: string }) => {
       try {
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
@@ -85,22 +85,26 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOption)
         }
 
-        const { List: ViewResult } = (await serverFunction({
-          name: 'render-list',
-          args: {
-            allowCreate,
-            collectionSlug: slug,
-            disableBulkDelete: true,
-            disableBulkEdit: true,
-            disableQueryPresets,
-            drawerSlug,
-            enableRowSelections,
-            overrideEntityVisibility,
-            query: newQuery,
-          },
-        })) as { List: React.ReactNode }
+        if (slug) {
+          const result: { List: React.ReactNode } = (await serverFunction({
+            name: 'render-list',
+            args: {
+              allowCreate,
+              collectionSlug: slug,
+              disableBulkDelete: true,
+              disableBulkEdit: true,
+              disableQueryPresets,
+              drawerSlug,
+              enableRowSelections,
+              overrideEntityVisibility,
+              query: newQuery,
+            },
+          })) as { List: React.ReactNode }
 
-        setListView(ViewResult)
+          setListView(result?.List || null)
+        } else {
+          setListView(null)
+        }
         setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
@@ -125,7 +129,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   useEffect(() => {
     if (!ListView) {
-      void renderList(selectedOption.value)
+      void renderList({ slug: selectedOption?.value })
     }
   }, [renderList, ListView, selectedOption.value])
 
@@ -133,7 +137,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ({ doc }) => {
       if (typeof onSelect === 'function') {
         onSelect({
-          collectionSlug: selectedOption.value,
+          collectionSlug: selectedOption?.value,
           doc,
           docID: doc.id,
         })
@@ -147,7 +151,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const onQueryChange = useCallback(
     (query: ListQuery) => {
-      void renderList(selectedOption.value, query)
+      void renderList({ slug: selectedOption?.value, query })
     },
     [renderList, selectedOption.value],
   )
@@ -155,7 +159,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const setMySelectedOption = useCallback(
     (incomingSelection: Option<string>) => {
       setSelectedOption(incomingSelection)
-      void renderList(incomingSelection.value)
+      void renderList({ slug: incomingSelection?.value })
     },
     [renderList],
   )

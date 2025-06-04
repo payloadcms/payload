@@ -1,12 +1,28 @@
 import { getTranslation } from '@payloadcms/translations'
 
 import type { Config } from '../config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { Field, Option } from '../fields/config/types.js'
+import type { QueryPresetConstraint } from './types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import { toWords } from '../utilities/formatLabels.js'
 import { preventLockout } from './preventLockout.js'
-import { operations, type QueryPresetConstraint } from './types.js'
+import { operations } from './types.js'
+
+const defaultConstraintOptions: Option[] = [
+  {
+    label: 'Everyone',
+    value: 'everyone',
+  },
+  {
+    label: 'Only Me',
+    value: 'onlyMe',
+  },
+  {
+    label: 'Specific Users',
+    value: 'specificUsers',
+  },
+]
 
 export const getConstraints = (config: Config): Field => ({
   name: 'access',
@@ -17,11 +33,11 @@ export const getConstraints = (config: Config): Field => ({
     },
     condition: (data) => Boolean(data?.isShared),
   },
-  fields: operations.map((operation) => ({
+  fields: operations.map((constraintOperation) => ({
     type: 'collapsible',
     fields: [
       {
-        name: operation,
+        name: constraintOperation,
         type: 'group',
         admin: {
           hideGutter: true,
@@ -31,22 +47,15 @@ export const getConstraints = (config: Config): Field => ({
             name: 'constraint',
             type: 'select',
             defaultValue: 'onlyMe',
+            filterOptions: (args) =>
+              typeof config?.queryPresets?.filterConstraints === 'function'
+                ? config.queryPresets.filterConstraints(args)
+                : args.options,
             label: ({ i18n }) =>
-              `Specify who can ${operation} this ${getTranslation(config.queryPresets?.labels?.singular || 'Preset', i18n)}`,
+              `Specify who can ${constraintOperation} this ${getTranslation(config.queryPresets?.labels?.singular || 'Preset', i18n)}`,
             options: [
-              {
-                label: 'Everyone',
-                value: 'everyone',
-              },
-              {
-                label: 'Only Me',
-                value: 'onlyMe',
-              },
-              {
-                label: 'Specific Users',
-                value: 'specificUsers',
-              },
-              ...(config?.queryPresets?.constraints?.[operation]?.map(
+              ...defaultConstraintOptions,
+              ...(config?.queryPresets?.constraints?.[constraintOperation]?.map(
                 (option: QueryPresetConstraint) => ({
                   label: option.label,
                   value: option.value,
@@ -59,34 +68,37 @@ export const getConstraints = (config: Config): Field => ({
             type: 'relationship',
             admin: {
               condition: (data) =>
-                Boolean(data?.access?.[operation]?.constraint === 'specificUsers'),
+                Boolean(data?.access?.[constraintOperation]?.constraint === 'specificUsers'),
             },
             hasMany: true,
             hooks: {
               beforeChange: [
                 ({ data, req }) => {
-                  if (data?.access?.[operation]?.constraint === 'onlyMe') {
-                    if (req.user) {
-                      return [req.user.id]
-                    }
+                  if (data?.access?.[constraintOperation]?.constraint === 'onlyMe' && req.user) {
+                    return [req.user.id]
                   }
 
-                  return data?.access?.[operation]?.users
+                  if (
+                    data?.access?.[constraintOperation]?.constraint === 'specificUsers' &&
+                    req.user
+                  ) {
+                    return [...(data?.access?.[constraintOperation]?.users || []), req.user.id]
+                  }
                 },
               ],
             },
             relationTo: config.admin?.user ?? 'users', // TODO: remove this fallback when the args are properly typed as `SanitizedConfig`
           },
-          ...(config?.queryPresets?.constraints?.[operation]?.reduce(
+          ...(config?.queryPresets?.constraints?.[constraintOperation]?.reduce(
             (acc: Field[], option: QueryPresetConstraint) => {
               option.fields?.forEach((field, index) => {
                 acc.push({ ...field })
 
                 if (fieldAffectsData(field)) {
-                  acc[index].admin = {
+                  acc[index]!.admin = {
                     ...(acc[index]?.admin || {}),
                     condition: (data) =>
-                      Boolean(data?.access?.[operation]?.constraint === option.value),
+                      Boolean(data?.access?.[constraintOperation]?.constraint === option.value),
                   }
                 }
               })
@@ -99,7 +111,7 @@ export const getConstraints = (config: Config): Field => ({
         label: false,
       },
     ],
-    label: () => toWords(operation),
+    label: () => toWords(constraintOperation),
   })),
   label: 'Sharing settings',
   validate: preventLockout,

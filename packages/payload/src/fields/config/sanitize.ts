@@ -87,7 +87,7 @@ export const sanitizeFields = async ({
   }
 
   for (let i = 0; i < fields.length; i++) {
-    const field = fields[i]
+    const field = fields[i]!
 
     if ('_sanitized' in field && field._sanitized === true) {
       continue
@@ -121,10 +121,12 @@ export const sanitizeFields = async ({
         }
 
         if (collectionConfig.auth.verify) {
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedAPIKeyFieldNames.includes(field.name)) {
             throw new ReservedFieldName(field, field.name)
           }
 
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           if (reservedVerifyFieldNames.includes(field.name)) {
             throw new ReservedFieldName(field, field.name)
           }
@@ -242,6 +244,7 @@ export const sanitizeFields = async ({
       if (!field.hooks) {
         field.hooks = {}
       }
+
       if (!field.access) {
         field.access = {}
       }
@@ -269,12 +272,12 @@ export const sanitizeFields = async ({
           field.editor = await field.editor({
             config: _config,
             isRoot: requireFieldLevelRichTextEditor,
-            parentIsLocalized: parentIsLocalized || field.localized,
+            parentIsLocalized: (parentIsLocalized || field.localized)!,
           })
         }
 
         if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-          config.i18n.translations = deepMergeSimple(config.i18n.translations, field.editor.i18n)
+          config.i18n!.translations = deepMergeSimple(config.i18n!.translations!, field.editor.i18n)
         }
       }
       if (richTextSanitizationPromises) {
@@ -289,13 +292,25 @@ export const sanitizeFields = async ({
         throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
       }
 
+      const blockSlugs: string[] = []
+
       for (const block of field.blockReferences ?? field.blocks) {
+        const blockSlug = typeof block === 'string' ? block : block.slug
+
+        if (blockSlugs.includes(blockSlug)) {
+          throw new DuplicateFieldName(blockSlug)
+        }
+
+        blockSlugs.push(blockSlug)
+
         if (typeof block === 'string') {
           continue
         }
+
         if (block._sanitized === true) {
           continue
         }
+
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
@@ -305,7 +320,7 @@ export const sanitizeFields = async ({
           existingFieldNames: new Set(),
           fields: block.fields,
           isTopLevelField: false,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          parentIsLocalized: (parentIsLocalized || field.localized)!,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -332,7 +347,7 @@ export const sanitizeFields = async ({
 
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
-        const tab = field.tabs[j]
+        const tab = field.tabs[j]!
 
         const isNamedTab = tabHasName(tab)
 
@@ -358,7 +373,7 @@ export const sanitizeFields = async ({
           isTopLevelField: isTopLevelField && !isNamedTab,
           joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
-          parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized),
+          parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
           polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
@@ -378,9 +393,9 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin.timezones.defaultTimezone
+      const defaultTimezone = config.admin?.timezones?.defaultTimezone
 
-      const supportedTimezones = config.admin.timezones.supportedTimezones
+      const supportedTimezones = config.admin?.timezones?.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'

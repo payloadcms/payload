@@ -5,6 +5,7 @@ export const csTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Chystáte se změnit vlastnictví z <0>{{fromTenant}}</0> na <0>{{toTenant}}</0>',
     'confirm-tenant-switch--heading': 'Potvrďte změnu {{tenantLabel}}',
+    'field-assignedTentant-label': 'Přiřazený nájemce',
   },
 }
 

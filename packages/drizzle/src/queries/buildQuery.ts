@@ -37,7 +37,8 @@ export type BuildQueryResult = {
   selectFields: Record<string, GenericColumn>
   where: SQL
 }
-const buildQuery = function buildQuery({
+
+export const buildQuery = function buildQuery({
   adapter,
   aliasTable,
   fields,
@@ -79,6 +80,7 @@ const buildQuery = function buildQuery({
     joins,
     locale,
     parentIsLocalized,
+    rawSort: context.rawSort,
     selectFields,
     sort: context.sort,
     tableName,
@@ -91,5 +93,3 @@ const buildQuery = function buildQuery({
     where,
   }
 }
-
-export default buildQuery

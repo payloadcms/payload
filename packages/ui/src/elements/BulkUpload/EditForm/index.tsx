@@ -19,6 +19,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
+import { MoveDocToFolder } from '../../FolderView/MoveDocToFolder/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { BulkUploadProvider } from '../index.js'
@@ -54,6 +55,7 @@ export function EditForm({
 
   const {
     config: {
+      folders,
       routes: { admin: adminRoute },
     },
     getEntityConfig,
@@ -166,6 +168,19 @@ export function EditForm({
                 {CustomUpload || (
                   <Upload_v4
                     collectionSlug={collectionConfig.slug}
+                    customActions={[
+                      folders && collectionConfig.folders && (
+                        <MoveDocToFolder
+                          buttonProps={{
+                            buttonStyle: 'pill',
+                            size: 'small',
+                          }}
+                          folderCollectionSlug={folders.slug}
+                          folderFieldName={folders.fieldName}
+                          key="move-doc-to-folder"
+                        />
+                      ),
+                    ].filter(Boolean)}
                     initialState={initialState}
                     resetUploadEdits={resetUploadEdits}
                     updateUploadEdits={updateUploadEdits}
@@ -192,6 +207,7 @@ function GetFieldProxy() {
   const { getFormDataRef } = useFormsManager()
 
   useEffect(() => {
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
   }, [getFields, getFormDataRef])
 

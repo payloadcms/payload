@@ -1,8 +1,10 @@
 import { status as httpStatus } from 'http-status'
 
-import type { Collection } from '../../collections/config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
+import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError, Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -28,7 +30,9 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
+export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
+  args: Arguments,
+): Promise<Result> => {
   const {
     collection: { config: collectionConfig },
     data,
@@ -54,6 +58,19 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
 
   try {
     const shouldCommit = await initTransaction(req)
+
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection?.config,
+            context: args.req.context,
+            operation: 'resetPassword',
+            req: args.req,
+          })) || args
+      }
+    }
 
     // /////////////////////////////////////
     // Reset Password
@@ -135,6 +152,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       overrideAccess,
       req,
     })
+
     if (shouldCommit) {
       await commitTransaction(req)
     }
@@ -144,10 +162,21 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       fullUser._strategy = 'local-jwt'
     }
 
-    const result = {
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       token,
       user: fullUser,
     }
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: args.collection?.config,
+      operation: 'resetPassword',
+      result,
+    })
 
     return result
   } catch (error: unknown) {

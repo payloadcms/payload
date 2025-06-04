@@ -6,6 +6,8 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
+import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
+import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -96,6 +98,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
   withinArrayOrBlockLocale,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
+  const localeCodes =
+    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
 
   const formatted = fields.reduce((result, field) => {
     if (fieldIsVirtual(field)) {
@@ -121,9 +125,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
       )
 
-      if (field.dbName) {
-        fieldData = table[`_${arrayTableName}`]
-      }
+      fieldData = table[getArrayRelationName({ field, path: fieldName, tableName: arrayTableName })]
 
       if (Array.isArray(fieldData)) {
         if (isLocalized) {
@@ -249,8 +251,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   (block) => typeof block !== 'string' && block.slug === row.blockType,
                 ) as FlattenedBlock | undefined)
 
-              const tableName = adapter.tableNameMap.get(
-                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              const tableName = resolveBlockTableName(
+                block,
+                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
               )
 
               if (block) {
@@ -328,8 +331,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   delete row._index
                 }
 
-                const tableName = adapter.tableNameMap.get(
-                  `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                const tableName = resolveBlockTableName(
+                  block,
+                  adapter.tableNameMap.get(
+                    `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                  ),
                 )
 
                 acc.push(
@@ -502,6 +508,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'text' && field?.hasMany) {
       const textPathMatch = texts[`${sanitizedPath}${field.name}`]
       if (!textPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -541,6 +551,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'number' && field.hasMany) {
       const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
       if (!numberPathMatch) {
+        result[field.name] =
+          isLocalized && localeCodes
+            ? Object.fromEntries(localeCodes.map((locale) => [locale, []]))
+            : []
         return result
       }
 
@@ -602,10 +616,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (isLocalized && Array.isArray(table._locales)) {
-      if (!table._locales.length && adapter.payload.config.localization) {
-        adapter.payload.config.localization.localeCodes.forEach((_locale) =>
-          (table._locales as unknown[]).push({ _locale }),
-        )
+      if (!table._locales.length && localeCodes) {
+        localeCodes.forEach((_locale) => (table._locales as unknown[]).push({ _locale }))
       }
 
       table._locales.forEach((localeRow) => {
@@ -666,10 +678,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
             withinArrayOrBlockLocale: locale || withinArrayOrBlockLocale,
           })
 
-          if ('_order' in ref) {
-            delete ref._order
-          }
-
           return
         }
 
@@ -723,8 +731,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (Object.keys(localizedFieldData).length > 0) {
       result[field.name] = localizedFieldData
     }
-
-    return result
 
     return result
   }, dataRef)

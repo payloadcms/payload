@@ -9,7 +9,12 @@ import type {
   TextField,
 } from './types.js'
 
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
+import {
+  DuplicateFieldName,
+  InvalidFieldName,
+  InvalidFieldRelationship,
+  MissingFieldType,
+} from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
 import { CollectionConfig } from '../../index.js'
 
@@ -53,6 +58,68 @@ describe('sanitizeFields', () => {
         validRelationships: [],
       })
     }).rejects.toThrow(InvalidFieldName)
+  })
+
+  it('should throw on duplicate field name', async () => {
+    const fields: Field[] = [
+      {
+        name: 'someField',
+        type: 'text',
+        label: 'someField',
+      },
+      {
+        name: 'someField',
+        type: 'text',
+        label: 'someField',
+      },
+    ]
+
+    await expect(async () => {
+      await sanitizeFields({
+        config,
+        collectionConfig,
+        fields,
+        validRelationships: [],
+      })
+    }).rejects.toThrow(DuplicateFieldName)
+  })
+
+  it('should throw on duplicate block slug', async () => {
+    const fields: Field[] = [
+      {
+        name: 'blocks',
+        type: 'blocks',
+        blocks: [
+          {
+            slug: 'block',
+            fields: [
+              {
+                name: 'blockField',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            slug: 'block',
+            fields: [
+              {
+                name: 'blockField',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+      },
+    ]
+
+    await expect(async () => {
+      await sanitizeFields({
+        config,
+        collectionConfig,
+        fields,
+        validRelationships: [],
+      })
+    }).rejects.toThrow(DuplicateFieldName)
   })
 
   describe('auto-labeling', () => {

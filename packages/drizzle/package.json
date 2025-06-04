@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.37.0",
+  "version": "3.40.0",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -18,6 +18,7 @@
     }
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": "./src/index.ts",
