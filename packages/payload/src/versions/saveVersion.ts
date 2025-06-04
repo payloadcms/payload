@@ -5,7 +5,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 

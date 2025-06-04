@@ -5,8 +5,6 @@ import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
 
-import type { BinScript } from '../config/types.js'
-
 import { findConfig } from '../config/find.js'
 import payload, { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'

@@ -34,7 +34,7 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
     }
 
     return null
-  } catch (err) {
+  } catch (ignore) {
     return null
   }
 }
