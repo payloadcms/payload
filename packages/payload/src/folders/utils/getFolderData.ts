@@ -1,5 +1,5 @@
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { GetFolderDataResult } from '../types.js'
 
 import { parseDocumentID } from '../../index.js'
@@ -15,26 +15,37 @@ type Args = {
    */
   collectionSlug?: CollectionSlug
   /**
+   * Optional where clause to filter documents by
+   * @default undefined
+   */
+  documentWhere?: Where
+  /**
    * The ID of the folder to query documents from
    * @default undefined
    */
   folderID?: number | string
-  req: PayloadRequest
-  /**
-   * Search term to filter documents by - only applicable IF `collectionSlug` exists and NO `folderID` is provided
+  /** Optional where clause to filter subfolders by
+   * @default undefined
    */
-  search?: string
+  folderWhere?: Where
+  req: PayloadRequest
 }
 /**
  * Query for documents, subfolders and breadcrumbs for a given folder
  */
 export const getFolderData = async ({
   collectionSlug,
+  documentWhere,
   folderID: _folderID,
+  folderWhere,
   req,
-  search,
 }: Args): Promise<GetFolderDataResult> => {
   const { payload } = req
+
+  if (payload.config.folders === false) {
+    throw new Error('Folders are not enabled')
+  }
+
   const parentFolderID = parseDocumentID({
     id: _folderID,
     collectionSlug: payload.config.folders.slug,
@@ -49,7 +60,8 @@ export const getFolderData = async ({
   if (parentFolderID) {
     // subfolders and documents are queried together
     const documentAndSubfolderPromise = queryDocumentsAndFoldersFromJoin({
-      collectionSlug,
+      documentWhere,
+      folderWhere,
       parentFolderID,
       req,
     })
@@ -67,14 +79,16 @@ export const getFolderData = async ({
     // subfolders and documents are queried separately
     const subfoldersPromise = getOrphanedDocs({
       collectionSlug: payload.config.folders.slug,
+      folderFieldName: payload.config.folders.fieldName,
       req,
-      search,
+      where: folderWhere,
     })
     const documentsPromise = collectionSlug
       ? getOrphanedDocs({
           collectionSlug,
+          folderFieldName: payload.config.folders.fieldName,
           req,
-          search,
+          where: documentWhere,
         })
       : Promise.resolve([])
     const [breadcrumbs, subfolders, documents] = await Promise.all([

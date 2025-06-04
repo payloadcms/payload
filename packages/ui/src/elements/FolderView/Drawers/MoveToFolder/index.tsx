@@ -46,6 +46,8 @@ type ActionProps =
     }
 export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
+  readonly folderCollectionSlug: string
+  readonly folderFieldName: string
   readonly fromFolderID?: number | string
   readonly fromFolderName?: string
   readonly itemsToMove: FolderOrDocument[]
@@ -75,11 +77,7 @@ export function MoveItemsToFolderDrawer(props: MoveToFolderDrawerProps) {
 
 function LoadFolderData(props: MoveToFolderDrawerProps) {
   const {
-    config: {
-      folders: { slug: folderCollectionSlug },
-      routes,
-      serverURL,
-    },
+    config: { routes, serverURL },
   } = useConfig()
   const [subfolders, setSubfolders] = React.useState<FolderOrDocument[]>([])
   const [documents, setDocuments] = React.useState<FolderOrDocument[]>([])
@@ -92,7 +90,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
 
       try {
         const folderDataReq = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
+          `${serverURL}${routes.api}/${props.folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
           {
             credentials: 'include',
             headers: {
@@ -122,7 +120,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
     if (!hasLoaded) {
       void onLoad()
     }
-  }, [folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
+  }, [props.folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
 
   if (!hasLoaded) {
     return <LoadingOverlay />
@@ -134,6 +132,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
       breadcrumbs={breadcrumbs}
       documents={documents}
       folderCollectionSlugs={[]}
+      folderFieldName={props.folderFieldName}
       folderID={props.fromFolderID}
       subfolders={subfolders}
     >

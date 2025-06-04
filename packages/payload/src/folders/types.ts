@@ -71,6 +71,12 @@ export type GetFolderDataResult = {
 
 export type RootFoldersConfiguration = {
   /**
+   * If true, the browse by folder view will be enabled
+   *
+   * @default true
+   */
+  browseByFolder?: boolean
+  /**
    * An array of functions to be ran when the folder collection is initialized
    * This allows plugins to modify the collection configuration
    */
@@ -99,4 +105,11 @@ export type RootFoldersConfiguration = {
   slug?: string
 }
 
-export type CollectionFoldersConfiguration = boolean
+export type CollectionFoldersConfiguration = {
+  /**
+   * If true, the collection will be included in the browse by folder view
+   *
+   * @default true
+   */
+  browseByFolder?: boolean
+}
