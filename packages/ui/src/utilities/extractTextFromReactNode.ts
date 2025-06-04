@@ -5,7 +5,6 @@ import React from 'react'
  * Use cases:
  *   - Make React elements (field labels) searchable in filter dropdowns
  */
-
 export const extractTextFromReactNode = (node: React.ReactNode): string => {
   if (node === null || node === undefined || typeof node === 'boolean') {
     return ''
@@ -37,6 +36,6 @@ export const extractTextFromReactNode = (node: React.ReactNode): string => {
 
     return textParts.join('')
   }
-
+  
   return ''
 }

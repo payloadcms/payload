@@ -64,6 +64,8 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     filterItems,
     focusedRowIndex,
     folderCollectionConfig,
+    folderCollectionSlug,
+    folderFieldName,
     getSelectedItems,
     isDragging,
     lastSelectedIndex,
@@ -110,7 +112,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
       const collectionConfig = getEntityConfig({ collectionSlug })
       void addItems([
         formatFolderOrDocumentItem({
-          folderFieldName: config.folders.fieldName,
+          folderFieldName,
           isUpload: Boolean(collectionConfig?.upload),
           relationTo: collectionSlug,
           useAsTitle: collectionConfig.admin.useAsTitle,
@@ -118,7 +120,7 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
         }),
       ])
     },
-    [getEntityConfig, addItems, config.folders.fieldName],
+    [getEntityConfig, addItems, folderFieldName],
   )
 
   const selectedItemKeys = React.useMemo(() => {
@@ -134,12 +136,15 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
     )
   }, [getSelectedItems])
 
-  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
-    void setPreference(`${collectionSlug}-collection-folder`, {
-      viewPreference: view,
-    })
-    setActiveView(view)
-  }, [])
+  const handleSetViewType = React.useCallback(
+    (view: 'grid' | 'list') => {
+      void setPreference(`${collectionSlug}-collection-folder`, {
+        viewPreference: view,
+      })
+      setActiveView(view)
+    },
+    [collectionSlug, setPreference],
+  )
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -213,11 +218,14 @@ export function DefaultCollectionFolderView(props: FolderListViewClientProps) {
                   key="list-selection"
                 />
               ),
-              <ListFolderPills
-                collectionConfig={collectionConfig}
-                key="list-header-buttons"
-                viewType="folders"
-              />,
+              config.folders && collectionConfig.folders && (
+                <ListFolderPills
+                  collectionConfig={collectionConfig}
+                  folderCollectionSlug={folderCollectionSlug}
+                  key="list-header-buttons"
+                  viewType="folders"
+                />
+              ),
             ].filter(Boolean)}
             AfterListHeaderContent={Description}
             title={getTranslation(labels?.plural, i18n)}

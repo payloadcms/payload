@@ -13,13 +13,22 @@ import './index.scss'
 const baseClass = 'list-folder-pills'
 
 type ListFolderPillsProps = {
-  collectionConfig: ClientCollectionConfig
-  viewType: 'folders' | 'list'
+  readonly collectionConfig: ClientCollectionConfig
+  readonly folderCollectionSlug: string
+  readonly viewType: 'folders' | 'list'
 }
 
-export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsProps) {
+export function ListFolderPills({
+  collectionConfig,
+  folderCollectionSlug,
+  viewType,
+}: ListFolderPillsProps) {
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
+
+  if (!folderCollectionSlug) {
+    return null
+  }
 
   return (
     <div className={baseClass}>
@@ -35,7 +44,7 @@ export function ListFolderPills({ collectionConfig, viewType }: ListFolderPillsP
         el={viewType === 'list' ? 'link' : 'div'}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
-          path: `/collections/${collectionConfig.slug}/${config.folders.slug}`,
+          path: `/collections/${collectionConfig.slug}/${folderCollectionSlug}`,
           serverURL: config.serverURL,
         })}
       >

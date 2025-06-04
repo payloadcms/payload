@@ -28,6 +28,7 @@ export function CurrentFolderActions({ className }: Props) {
     currentFolder,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderFieldName,
     folderID,
     moveToFolder,
     renameFolder,
@@ -84,6 +85,8 @@ export function CurrentFolderActions({ className }: Props) {
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={moveToFolderDrawerSlug}
+        folderCollectionSlug={folderCollectionSlug}
+        folderFieldName={folderFieldName}
         fromFolderID={currentFolder?.value.id}
         fromFolderName={currentFolder?.value._folderOrDocumentTitle}
         itemsToMove={[currentFolder]}

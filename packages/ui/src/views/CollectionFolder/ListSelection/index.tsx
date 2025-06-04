@@ -41,6 +41,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const {
     clearSelections,
     currentFolder,
+    folderCollectionSlug,
+    folderFieldName,
     folderID,
     getSelectedItems,
     moveToFolder,
@@ -71,7 +73,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const count = items.length
   const singleNonFolderCollectionSelected =
     Object.keys(groupedSelections).length === 1 &&
-    Object.keys(groupedSelections)[0] !== config.folders.slug
+    Object.keys(groupedSelections)[0] !== folderCollectionSlug
   const collectionConfig = singleNonFolderCollectionSelected
     ? config.collections.find((collection) => {
         return collection.slug === Object.keys(groupedSelections)[0]
@@ -146,6 +148,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             <MoveItemsToFolderDrawer
               action="moveItemsToFolder"
               drawerSlug={moveToFolderDrawerSlug}
+              folderCollectionSlug={folderCollectionSlug}
+              folderFieldName={folderFieldName}
               fromFolderID={folderID}
               fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
               itemsToMove={getSelectedItems()}
