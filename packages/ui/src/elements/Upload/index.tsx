@@ -14,7 +14,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useUploadControls } from '../../providers/UploadControls/index.js'
+import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
@@ -95,12 +95,14 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   return (
-    <Upload_v4
-      {...props}
-      resetUploadEdits={resetUploadEdits}
-      updateUploadEdits={updateUploadEdits}
-      uploadEdits={uploadEdits}
-    />
+    <UploadControlsProvider>
+      <Upload_v4
+        {...props}
+        resetUploadEdits={resetUploadEdits}
+        updateUploadEdits={updateUploadEdits}
+        uploadEdits={uploadEdits}
+      />
+    </UploadControlsProvider>
   )
 }
 
