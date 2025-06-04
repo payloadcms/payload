@@ -958,6 +958,7 @@ describe('lexicalMain', () => {
 
   test('ensure internal links can be created', async () => {
     await navigateToLexicalFields()
+    await wait(200)
     const richTextField = page.locator('.rich-text-lexical').first()
     await richTextField.scrollIntoViewIfNeeded()
     await expect(richTextField).toBeVisible()
@@ -970,11 +971,15 @@ describe('lexicalMain', () => {
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
     await expect(paragraph).toBeVisible()
+    await wait(200)
+
     /**
      * Type some text
      */
     await paragraph.click()
+    await wait(200)
     await page.keyboard.type('Link')
+    await wait(200)
 
     // Select "Link" by pressing shift + arrow left
     for (let i = 0; i < 4; i++) {
@@ -986,6 +991,7 @@ describe('lexicalMain', () => {
 
     const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
     await expect(linkButton).toBeVisible()
+    await wait(200)
     await linkButton.click()
 
     /**
@@ -1005,16 +1011,20 @@ describe('lexicalMain', () => {
       .locator('.radio-input__styled-radio')
 
     await radioInternalLink.click()
+    await wait(200)
 
     const internalLinkSelect = linkDrawer
       .locator('#field-doc .rs__control .value-container')
       .first()
     await internalLinkSelect.click()
+    await wait(200)
 
     await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
+
     await expect(internalLinkSelect).toContainText('Rich Text')
+    await wait(200)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()

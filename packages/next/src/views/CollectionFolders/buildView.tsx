@@ -8,9 +8,10 @@ import type {
 
 import { DefaultCollectionFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData, parseDocumentID } from 'payload'
+import { getFolderData } from 'payload'
+import { buildFolderWhereConstraints } from 'payload/shared'
 import React from 'react'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
@@ -37,7 +38,6 @@ export const buildCollectionFolderView = async (
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
-    folderCollectionSlugs,
     folderID,
     initPageResult,
     isInDrawer,
@@ -69,12 +69,12 @@ export const buildCollectionFolderView = async (
   if (collectionConfig) {
     const query = queryFromArgs || queryFromReq
 
-    const collectionFolderPreferences = await getPreferences<{ viewPreference: string }>(
-      `${collectionSlug}-collection-folder`,
-      payload,
-      user.id,
-      user.collection,
-    )
+    const collectionFolderPreferences = await getPreferences<{
+      sort?: string
+      viewPreference: string
+    }>(`${collectionSlug}-collection-folder`, payload, user.id, user.collection)
+
+    const sortPreference = collectionFolderPreferences?.value.sort
 
     const {
       routes: { admin: adminRoute },
@@ -82,38 +82,45 @@ export const buildCollectionFolderView = async (
 
     if (
       (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) ||
-      !folderCollectionSlugs.includes(collectionSlug)
+      !config.folders
     ) {
       throw new Error('not-found')
     }
 
-    const whereConstraints = [
-      mergeListSearchAndWhere({
-        collectionConfig,
-        search: typeof query?.search === 'string' ? query.search : undefined,
-        where: (query?.where as Where) || undefined,
-      }),
-    ]
+    let folderWhere: undefined | Where
+    const folderCollectionConfig = payload.collections[config.folders.slug].config
+    const folderCollectionConstraints = await buildFolderWhereConstraints({
+      collectionConfig: folderCollectionConfig,
+      folderID,
+      localeCode: fullLocale?.code,
+      req: initPageResult.req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      sort: sortPreference,
+    })
 
-    if (folderID) {
-      whereConstraints.push({
-        [config.folders.fieldName]: {
-          equals: parseDocumentID({ id: folderID, collectionSlug, payload }),
-        },
-      })
-    } else {
-      whereConstraints.push({
-        [config.folders.fieldName]: {
-          exists: false,
-        },
-      })
+    if (folderCollectionConstraints) {
+      folderWhere = folderCollectionConstraints
+    }
+
+    let documentWhere: undefined | Where
+    const collectionConstraints = await buildFolderWhereConstraints({
+      collectionConfig,
+      folderID,
+      localeCode: fullLocale?.code,
+      req: initPageResult.req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      sort: sortPreference,
+    })
+    if (collectionConstraints) {
+      documentWhere = collectionConstraints
     }
 
     const { breadcrumbs, documents, subfolders } = await getFolderData({
       collectionSlug,
+      documentWhere,
       folderID,
+      folderWhere,
       req: initPageResult.req,
-      search: query?.search as string,
     })
 
     const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
@@ -175,7 +182,8 @@ export const buildCollectionFolderView = async (
           breadcrumbs={breadcrumbs}
           collectionSlug={collectionSlug}
           documents={documents}
-          folderCollectionSlugs={folderCollectionSlugs}
+          folderCollectionSlugs={[collectionSlug]}
+          folderFieldName={config.folders.fieldName}
           folderID={folderID}
           search={search}
           subfolders={subfolders}

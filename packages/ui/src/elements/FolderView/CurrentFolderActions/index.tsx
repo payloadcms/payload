@@ -8,12 +8,11 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
+import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { Translation } from '../../Translation/index.js'
 import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
-import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 
-const renameFolderDrawerSlug = 'rename-folder--current-folder'
 const moveToFolderDrawerSlug = 'move-to-folder--current-folder'
 const confirmDeleteDrawerSlug = 'confirm-many-delete'
 
@@ -28,11 +27,17 @@ export function CurrentFolderActions({ className }: Props) {
     currentFolder,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderFieldName,
     folderID,
     moveToFolder,
     renameFolder,
     setFolderID,
   } = useFolder()
+  const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
+    useDocumentDrawer({
+      id: folderID,
+      collectionSlug: folderCollectionSlug,
+    })
   const { config } = useConfig()
   const { routes, serverURL } = config
   const { closeModal, openModal } = useModal()
@@ -59,10 +64,12 @@ export function CurrentFolderActions({ className }: Props) {
           <PopupList.ButtonGroup>
             <PopupList.Button
               onClick={() => {
-                openModal(renameFolderDrawerSlug)
+                openFolderDrawer()
               }}
             >
-              {t('folder:renameFolder')}
+              {t('general:editLabel', {
+                label: getTranslation(folderCollectionConfig.labels.singular, i18n),
+              })}
             </PopupList.Button>
             <PopupList.Button
               onClick={() => {
@@ -84,6 +91,8 @@ export function CurrentFolderActions({ className }: Props) {
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={moveToFolderDrawerSlug}
+        folderCollectionSlug={folderCollectionSlug}
+        folderFieldName={folderFieldName}
         fromFolderID={currentFolder?.value.id}
         fromFolderName={currentFolder?.value._folderOrDocumentTitle}
         itemsToMove={[currentFolder]}
@@ -133,15 +142,13 @@ export function CurrentFolderActions({ className }: Props) {
         onConfirm={deleteCurrentFolder}
       />
 
-      <RenameFolderDrawer
-        drawerSlug={renameFolderDrawerSlug}
-        folderToRename={currentFolder}
-        onRenameConfirm={({ folderID: updatedFolderID, updatedName }) => {
+      <FolderDocumentDrawer
+        onSave={(result) => {
           renameFolder({
-            folderID: updatedFolderID,
-            newName: updatedName,
+            folderID: result.doc.id,
+            newName: result.doc[folderCollectionConfig.admin.useAsTitle],
           })
-          closeModal(renameFolderDrawerSlug)
+          closeFolderDrawer()
         }}
       />
     </>

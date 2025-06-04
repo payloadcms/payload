@@ -40,7 +40,7 @@ export const routeError = async ({
   if (!payload) {
     try {
       payload = await getPayload({ config: configArg })
-    } catch (e) {
+    } catch (ignore) {
       return Response.json(
         {
           message: 'There was an error initializing Payload',

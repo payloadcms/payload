@@ -9,7 +9,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -40,13 +40,14 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     page,
     pagination = true,
     populate,
-    req: { fallbackLocale, locale, payload },
-    req,
     select: incomingSelect,
     showHiddenFields,
     sort,
     where,
   } = args
+
+  const req = args.req!
+  const { fallbackLocale, locale, payload } = req
 
   try {
     // /////////////////////////////////////
@@ -63,13 +64,13 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       versionFields,
-      where,
+      where: where!,
     })
 
-    const fullWhere = combineQueries(where, accessResults)
+    const fullWhere = combineQueries(where!, accessResults)
 
     const select = sanitizeSelect({
       fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
@@ -85,7 +86,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     const paginatedDocs = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: limit ?? 10,
-      locale,
+      locale: locale!,
       page: page || 1,
       pagination,
       req,
@@ -131,18 +132,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         data.version = await afterRead({
           collection: collectionConfig,
           context: req.context,
-          depth,
+          depth: depth!,
           doc: data.version,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
-          fallbackLocale,
+          fallbackLocale: fallbackLocale!,
           findMany: true,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select: typeof select?.version === 'object' ? select.version : undefined,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         })
         return data
       }),
