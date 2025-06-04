@@ -21,6 +21,37 @@ export default buildConfigWithDefaults({
     // debug: true,
     collectionOverrides: [
       ({ collection }) => {
+        // collection.admin?.baseListFilter = ({req}) => {
+        //   req.routeParams.collectionSlug
+        // }
+        collection.fields.push({
+          name: 'belongsToCollections',
+          type: 'select',
+          options: [
+            {
+              label: 'Posts',
+              value: 'posts',
+            },
+            {
+              label: 'Media',
+              value: 'media',
+            },
+            {
+              label: 'Drafts',
+              value: 'drafts',
+            },
+            {
+              label: 'Autosave',
+              value: 'autosave',
+            },
+            {
+              label: 'All',
+              value: 'all',
+            },
+          ],
+          defaultValue: ['all'],
+          hasMany: true,
+        })
         return collection
       },
     ],
