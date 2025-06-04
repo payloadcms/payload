@@ -121,6 +121,24 @@ describe('List View', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(2)
   })
 
+  test('should search for nested fields in field dropdown', async () => {
+    await page.goto(postsUrl.list)
+
+    await openListFilters(page, {})
+
+    const whereBuilder = page.locator('.where-builder')
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+    const conditionField = whereBuilder.locator('.condition__field')
+    await conditionField.click()
+    await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+
+    await expect(
+      conditionField.locator('.rs__menu-list').locator('div', {
+        hasText: exactText('Tab 1 > Title'),
+      }),
+    ).toBeVisible()
+  })
+
   const tableRowLocator = 'table > tbody > tr'
 
   describe('list view descriptions', () => {
@@ -413,7 +431,7 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
-    // eslint-disable-next-line playwright/expect-expect
+     
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 

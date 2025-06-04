@@ -9,6 +9,7 @@ import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
+import { extractTextFromReactNode } from '../../utilities/extractTextFromReactNode.js'
 import fieldTypes from './field-types.js'
 
 type ReduceFieldOptionsArgs = {
@@ -152,10 +153,15 @@ export const reduceFields = ({
           })
         : localizedLabel
 
+      // React elements in filter options are not searchable in React Select
+      // Extract plain text to make them filterable in dropdowns
+      const textFromLabel = extractTextFromReactNode(formattedLabel)
+
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
       const formattedField: ReducedField = {
         label: formattedLabel,
+        plainLabel: textFromLabel,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,
