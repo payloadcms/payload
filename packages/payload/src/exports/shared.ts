@@ -76,7 +76,7 @@ export { extractID } from '../utilities/extractID.js'
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
-export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
+export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
@@ -113,7 +113,7 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
-export { default as toKebabCase } from '../utilities/toKebabCase.js'
+export { toKebabCase } from '../utilities/toKebabCase.js'
 
 export {
   transformColumnsToPreferences,
@@ -126,7 +126,7 @@ export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
 export { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 export { wait } from '../utilities/wait.js'
-export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
+export { wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'
 
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

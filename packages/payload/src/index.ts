@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -811,6 +813,7 @@ export class BasePayload {
 
 const initialized = new BasePayload()
 
+// eslint-disable-next-line no-restricted-exports
 export default initialized
 
 let cached: {
@@ -1336,7 +1339,7 @@ export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validations } from './fields/validations.js'
 export type {
@@ -1477,7 +1480,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { flattenAllFields } from './utilities/flattenAllFields.js'
-export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'
