@@ -5,23 +5,23 @@ import React from 'react'
  * Use cases:
  *   - Make React elements (field labels) searchable in filter dropdowns
  */
-export const extractTextFromReactNode = (node: React.ReactNode): string => {
-  if (node === null || node === undefined || typeof node === 'boolean') {
+export const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
+  if (reactNode === null || reactNode === undefined || typeof reactNode === 'boolean') {
     return ''
   }
 
-  if (typeof node === 'string' || typeof node === 'number') {
-    return node.toString()
+  if (typeof reactNode === 'string' || typeof reactNode === 'number') {
+    return reactNode.toString()
   }
 
-  if (Array.isArray(node)) {
-    return node.map(extractTextFromReactNode).join('')
+  if (Array.isArray(reactNode)) {
+    return reactNode.map(extractTextFromReactNode).join('')
   }
 
-  if (React.isValidElement(node)) {
+  if (React.isValidElement(reactNode)) {
     const textParts: string[] = []
 
-    for (const [key, value] of Object.entries(node.props)) {
+    for (const [key, value] of Object.entries(reactNode.props)) {
       // Only recurse into props that might contain React content
       if (
         key === 'children' ||
@@ -30,12 +30,12 @@ export const extractTextFromReactNode = (node: React.ReactNode): string => {
         React.isValidElement(value) ||
         Array.isArray(value)
       ) {
-        textParts.push(extractTextFromReactNode(value))
+        textParts.push(extractTextFromReactNode(reactNode))
       }
     }
 
     return textParts.join('')
   }
-  
+
   return ''
 }
