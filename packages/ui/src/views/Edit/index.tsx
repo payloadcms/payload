@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentSlots, DocumentViewClientProps, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -106,6 +106,7 @@ export function DefaultEditView({
     getEntityConfig,
   } = useConfig()
 
+  const [documentSlots, setDocumentSlots] = useState<DocumentSlots>({})
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
 
@@ -115,7 +116,7 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState } = useServerFunctions()
+  const { getDocumentSlots, getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -432,6 +433,13 @@ export function DefaultEditView({
     }
   }, [])
 
+  useEffect(() => {
+    void (async () => {
+      const slots = await getDocumentSlots({ collectionSlug })
+      setDocumentSlots(slots)
+    })()
+  }, [getDocumentSlots, collectionSlug])
+
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
@@ -577,6 +585,7 @@ export function DefaultEditView({
                       {CustomUpload || (
                         <Upload
                           collectionSlug={collectionConfig.slug}
+                          documentSlots={documentSlots}
                           initialState={initialState}
                           uploadConfig={upload}
                         />
