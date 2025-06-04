@@ -16,7 +16,6 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
-import { UploadControlsProvider } from '../../../providers/UploadControls/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -165,16 +164,14 @@ export function EditForm({
             BeforeFields={
               <React.Fragment>
                 {CustomUpload || (
-                  <UploadControlsProvider>
-                    <Upload_v4
-                      collectionSlug={collectionConfig.slug}
-                      initialState={initialState}
-                      resetUploadEdits={resetUploadEdits}
-                      updateUploadEdits={updateUploadEdits}
-                      uploadConfig={collectionConfig.upload}
-                      uploadEdits={uploadEdits}
-                    />
-                  </UploadControlsProvider>
+                  <Upload_v4
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                    resetUploadEdits={resetUploadEdits}
+                    updateUploadEdits={updateUploadEdits}
+                    uploadConfig={collectionConfig.upload}
+                    uploadEdits={uploadEdits}
+                  />
                 )}
               </React.Fragment>
             }

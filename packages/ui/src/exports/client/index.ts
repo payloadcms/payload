@@ -280,7 +280,7 @@ export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentI
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 
-export { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
+export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,
