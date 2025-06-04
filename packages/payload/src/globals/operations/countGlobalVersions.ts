@@ -19,6 +19,7 @@ export type Arguments = {
   where?: Where
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {

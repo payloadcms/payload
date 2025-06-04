@@ -52,7 +52,7 @@ export const APIKeyAuthentication =
             user: user as User,
           }
         }
-      } catch (err) {
+      } catch (ignore) {
         return { user: null }
       }
     }

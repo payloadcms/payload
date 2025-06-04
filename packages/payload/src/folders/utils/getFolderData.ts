@@ -34,7 +34,7 @@ export const getFolderData = async ({
   req,
   search,
 }: Args): Promise<GetFolderDataResult> => {
-  const { payload, user } = req
+  const { payload } = req
   const parentFolderID = parseDocumentID({
     id: _folderID,
     collectionSlug: payload.config.folders.slug,

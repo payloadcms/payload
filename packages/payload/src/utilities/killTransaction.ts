@@ -12,7 +12,7 @@ export async function killTransaction(
   if (transactionID && !(transactionID instanceof Promise)) {
     try {
       await payload.db.rollbackTransaction(req.transactionID!)
-    } catch (error) {
+    } catch (ignore) {
       // swallow any errors while attempting to rollback
     }
     delete req.transactionID

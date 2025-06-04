@@ -5,6 +5,8 @@ import ObjectIdImport from 'bson-objectid'
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
+import type { JSONSchema4 } from 'json-schema'
+
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
 import type { Where } from '../types/index.js'
@@ -330,11 +332,10 @@ export const json: JSONFieldValidation = (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
     if (uri && schema) {
       return schema
     }
-    // @ts-expect-error
     return fetch(uri)
       .then((response) => {
         if (!response.ok) {
@@ -365,7 +366,7 @@ export const json: JSONFieldValidation = (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error
+      // @ts-expect-error missing types
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
@@ -539,7 +540,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
