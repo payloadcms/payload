@@ -697,6 +697,22 @@ describe('soft-delete', () => {
       })
     })
 
+    // describe('update endpoint', () => {
+    //   it.todo('should update only normal document when trash: false')
+
+    //   it.todo('should update all documents including soft-deleted documents when trash: true')
+
+    //   it.todo(
+    //     'should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true',
+    //   )
+    // })
+
+    // describe('delete endpoint', () => {
+    //   it.todo('should perma delete all docs including soft-deleted documents when trash: true')
+
+    //   it.todo('should only perma delete normal docs when trash: false')
+    // })
+
     describe('deleteByID endpoint', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         const query = `
