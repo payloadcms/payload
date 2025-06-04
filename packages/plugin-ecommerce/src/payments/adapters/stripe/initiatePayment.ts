@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 
 import type { PaymentAdapter } from '../../../types.js'
-import type { StripeAdapterArgs } from './index.js'
+import type { InitiatePaymentReturnType, StripeAdapterArgs } from './index.js'
 
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
@@ -58,8 +58,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
       })
 
       // Create a record of the payment intent in the database
-      const paymentRecord = await payload.create({
-        collection: 'paymentRecords',
+      const transaction = await payload.create({
+        collection: 'transactions',
         data: {
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
           amount: paymentIntent.amount,
@@ -73,11 +73,13 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         },
       })
 
-      return {
-        client_secret: paymentIntent.client_secret,
+      const returnData: InitiatePaymentReturnType = {
+        clientSecret: paymentIntent.client_secret || '',
         message: 'Payment initiated successfully',
-        paymentIntent: paymentIntent.id,
+        paymentIntentID: paymentIntent.id,
       }
+
+      return returnData
     } catch (error) {
       payload.logger.error(error, 'Error initiating payment with Stripe')
 

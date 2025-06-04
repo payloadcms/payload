@@ -53,8 +53,8 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       }
 
       // Find our existing payment record by the payment intent ID
-      const paymentRecordsResults = await payload.find({
-        collection: 'paymentRecords',
+      const transactionsResults = await payload.find({
+        collection: 'transactions',
         where: {
           'stripe.paymentIntentID': {
             equals: paymentIntentID,
@@ -62,9 +62,9 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         },
       })
 
-      const paymentRecord = paymentRecordsResults.docs[0]
+      const transaction = transactionsResults.docs[0]
 
-      if (!paymentRecordsResults.totalDocs || !paymentRecord) {
+      if (!transactionsResults.totalDocs || !transaction) {
         throw new Error('No payment record found for the provided PaymentIntent ID')
       }
 
@@ -78,14 +78,14 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           cart,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
-          paymentRecord: paymentRecord.id,
           status: 'processing',
+          transactions: [transaction.id],
         },
       })
 
       await payload.update({
-        id: paymentRecord.id,
-        collection: 'paymentRecords',
+        id: transaction.id,
+        collection: 'transactions',
         data: {
           order: order.id,
           status: 'succeeded',

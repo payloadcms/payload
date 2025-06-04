@@ -1,7 +1,13 @@
-import type { DefaultDocumentIDType } from 'payload'
+import type { DefaultDocumentIDType, GeneratedTypes } from 'payload'
 import type React from 'react'
 
-import type { CartClient, CartItemClient, CurrenciesConfig, Currency } from '../../types.js'
+import type {
+  CartClient,
+  CartItemClient,
+  CurrenciesConfig,
+  Currency,
+  PaymentAdapterClient,
+} from '../../types.js'
 
 export type SyncLocalStorageConfig = {
   /**
@@ -11,9 +17,14 @@ export type SyncLocalStorageConfig = {
   key?: string
 }
 
+type TestType = {
+  test: GeneratedTypes
+}
+
 export type ContextProps = {
   children?: React.ReactNode
   currenciesConfig: CurrenciesConfig
+  paymentMethods?: PaymentAdapterClient[]
   /**
    * Whether to enable localStorage for cart persistence.
    * Defaults to true.
@@ -28,7 +39,9 @@ export type EcommerceContext = {
   currency: Currency
   decrementItem: (item: DefaultDocumentIDType) => void
   incrementItem: (item: DefaultDocumentIDType) => void
+  initiatePayment: (paymentMethod: string) => Promise<any>
   removeItem: (item: DefaultDocumentIDType) => void
+  selectedPaymentMethod?: string
   setCurrency: (currency: string) => void
 }
 

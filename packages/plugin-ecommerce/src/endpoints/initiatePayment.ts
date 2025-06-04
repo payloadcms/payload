@@ -5,6 +5,18 @@ import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
 type Args = {
   currenciesConfig: CurrenciesConfig
   paymentMethod: PaymentAdapter
+  /**
+   * The slug of the products collection, defaults to 'products'.
+   */
+  productsSlug?: string
+  /**
+   * The slug of the transactions collection, defaults to 'transactions'.
+   */
+  transactionsSlug?: string
+  /**
+   * The slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
 }
 
 type InitiatePayment = (args: Args) => Endpoint['handler']
@@ -14,7 +26,13 @@ type InitiatePayment = (args: Args) => Endpoint['handler']
  * This is the first step in the payment process.
  */
 export const initiatePaymentHandler: InitiatePayment =
-  ({ currenciesConfig, paymentMethod }) =>
+  ({
+    currenciesConfig,
+    paymentMethod,
+    productsSlug = 'products',
+    transactionsSlug = 'transactions',
+    variantsSlug = 'variants',
+  }) =>
   async (req) => {
     await addDataAndFileToRequest(req)
     const data = req.data
@@ -89,7 +107,7 @@ export const initiatePaymentHandler: InitiatePayment =
       if (item.variant) {
         const variant = await payload.findByID({
           id: item.variant,
-          collection: 'variants',
+          collection: variantsSlug,
           depth: 0,
           select: {
             [priceField]: true,
@@ -124,7 +142,7 @@ export const initiatePaymentHandler: InitiatePayment =
       if (item.product) {
         const product = await payload.findByID({
           id: item.product,
-          collection: 'products',
+          collection: productsSlug,
           depth: 0,
           select: {
             [priceField]: true,

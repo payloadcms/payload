@@ -1,9 +1,8 @@
-import type { ArrayField, GroupField } from 'payload'
+import type { GroupField } from 'payload'
 
 import type { CurrenciesConfig } from '../types.js'
 
 import { amountField } from './amountField.js'
-import { currencyField } from './currencyField.js'
 
 type Props = {
   /**
@@ -11,15 +10,11 @@ type Props = {
    */
   conditionalPath?: string
   currenciesConfig: CurrenciesConfig
-  enableVariants?: boolean
-  overrides?: Partial<ArrayField>
 }
 
 export const pricesField: (props: Props) => GroupField[] = ({
   conditionalPath,
   currenciesConfig,
-  enableVariants,
-  overrides,
 }) => {
   const currencies = currenciesConfig.supportedCurrencies
 

@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, Currency, FieldsOverride } from '../../types.js'
+import type { CollectionSlugMap, CurrenciesConfig, Currency, FieldsOverride } from '../../types.js'
 
 import { pricesField } from '../../fields/pricesField.js'
 import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeChange.js'
@@ -9,10 +9,23 @@ import { validateOptions } from './hooks/validateOptions.js'
 type Props = {
   currenciesConfig?: CurrenciesConfig
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Slug of the products collection, defaults to 'products'.
+   */
+  productsSlug?: string
+  /**
+   * Slug of the variant options collection, defaults to 'variantOptions'.
+   */
+  variantOptionsSlug?: string
 }
 
-export const variantsCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { currenciesConfig, overrides } = props || {}
+export const variantsCollection: (props: Props) => CollectionConfig = (props) => {
+  const {
+    currenciesConfig,
+    overrides,
+    productsSlug = 'products',
+    variantOptionsSlug = 'variantOptions',
+  } = props || {}
   const { defaultCurrency, supportedCurrencies } = currenciesConfig || {}
   const fieldsOverride = overrides?.fields
 
@@ -33,7 +46,7 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
           'this should not be editable, or at least, should be able to be pre-filled via default',
         readOnly: true,
       },
-      relationTo: 'products',
+      relationTo: productsSlug,
       required: true,
     },
     {
@@ -54,7 +67,7 @@ export const variantsCollection: (props?: Props) => CollectionConfig = (props) =
       },
       hasMany: true,
       label: 'Variant options',
-      relationTo: 'variantOptions',
+      relationTo: variantOptionsSlug,
       required: true,
       validate: validateOptions(),
     },

@@ -31,7 +31,9 @@ const defaultContext: EcommerceContext = {
   },
   decrementItem: () => {},
   incrementItem: () => {},
+  initiatePayment: async () => {},
   removeItem: () => {},
+  selectedPaymentMethod: undefined,
   setCurrency: () => {},
 }
 
@@ -44,6 +46,7 @@ const defaultLocalStorage = {
 export const EcommerceProvider: React.FC<ContextProps> = ({
   children,
   currenciesConfig,
+  paymentMethods = [],
   syncLocalStorage = true,
 }) => {
   const hasRendered = useRef(false)
@@ -58,6 +61,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         (c) => c.code === currenciesConfig.defaultCurrency,
       )!,
   )
+
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<null | string>(null)
 
   const localStorageConfig = useMemo<NonNullable<SyncLocalStorageConfig>>(() => {
     let localStorageConfig: SyncLocalStorageConfig = defaultLocalStorage
@@ -106,6 +111,53 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setSelectedCurrency(foundCurrency)
     },
     [currenciesConfig.supportedCurrencies, selectedCurrency.code],
+  )
+
+  const initiatePayment = useCallback(
+    async (paymentMethodID: string, paymentData: Record<string, any>) => {
+      const paymentMethod = paymentMethods.find((pm) => pm.name === paymentMethodID)
+
+      if (!paymentMethod) {
+        throw new Error(`Payment method with ID "${paymentMethodID}" not found`)
+      }
+
+      setSelectedPaymentMethod(paymentMethodID)
+
+      if (paymentMethod.initiatePayment) {
+        const fetchURL = `/api/payments/${paymentMethodID}/initiate-payment`
+
+        const data = {
+          cart: Array.from(cart.values()),
+          currency: selectedCurrency.code,
+        }
+
+        const response = await fetch(fetchURL, {
+          body: JSON.stringify({
+            data,
+            ...paymentData,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to initiate payment: ${errorText}`)
+        }
+
+        const responseData = await response.json()
+
+        if (responseData.error) {
+          throw new Error(`Payment initiation error: ${responseData.error}`)
+        }
+        return responseData
+      } else {
+        throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
+      }
+    },
+    [cart, paymentMethods, selectedCurrency.code],
   )
 
   // If localStorage is enabled, we can add logic to persist the cart state
@@ -161,7 +213,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           currency: selectedCurrency,
           decrementItem,
           incrementItem,
+          initiatePayment,
           removeItem,
+          selectedPaymentMethod,
           setCurrency,
         } as EcommerceContext
       }
@@ -218,4 +272,14 @@ export const useCart = () => {
   }
 
   return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
+}
+
+export const usePayments = () => {
+  const { initiatePayment, selectedPaymentMethod } = useEcommerce()
+
+  if (!initiatePayment) {
+    throw new Error('usePayments must be used within an EcommerceProvider')
+  }
+
+  return { initiatePayment, selectedPaymentMethod }
 }

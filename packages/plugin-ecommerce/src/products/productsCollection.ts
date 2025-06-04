@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride } from '../types.js'
+import type { CollectionSlugMap, CurrenciesConfig, FieldsOverride } from '../types.js'
 
 import { pricesField } from '../fields/pricesField.js'
 import { variantsFields } from '../fields/variantsFields.js'
@@ -9,10 +9,23 @@ type Props = {
   currenciesConfig: CurrenciesConfig
   enableVariants?: boolean
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
+  /**
+   * Slug of the variant types collection, defaults to 'variantTypes'.
+   */
+  variantTypesSlug?: string
 }
 
-export const productsCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { currenciesConfig, overrides } = props || {}
+export const productsCollection: (props: Props) => CollectionConfig = (props) => {
+  const {
+    currenciesConfig,
+    overrides,
+    variantsSlug = 'variants',
+    variantTypesSlug = 'variantTypes',
+  } = props || {}
   const fieldsOverride = overrides?.fields
   const enableVariants = props?.enableVariants ?? false
 
@@ -25,8 +38,8 @@ export const productsCollection: (props?: Props) => CollectionConfig = (props) =
 
   const baseFields = [
     ...defaultFields,
-    ...(enableVariants ? variantsFields() : []),
-    ...(currenciesConfig ? [...pricesField({ currenciesConfig, enableVariants })] : []),
+    ...(enableVariants ? variantsFields({ variantsSlug, variantTypesSlug }) : []),
+    ...(currenciesConfig ? [...pricesField({ currenciesConfig })] : []),
   ]
 
   const fields =

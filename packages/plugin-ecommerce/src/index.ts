@@ -2,15 +2,16 @@ import type { Config, Endpoint } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
-import type { EcommercePluginConfig, PaymentAdapter } from './types.js'
+import type { EcommercePluginConfig } from './types.js'
 
-import { USD } from './currencies/index.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
 import { ordersCollection } from './orders/ordersCollection.js'
-import { paymentRecordsCollection } from './payments/collection/paymentRecordsCollection.js'
 import { productsCollection } from './products/productsCollection.js'
+import { transactionsCollection } from './transactions/transactionsCollection.js'
 import { translations } from './translations/index.js'
+import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
+import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 import { variantOptionsCollection } from './variants/variantOptionsCollection.js'
 import { variantsCollection } from './variants/variantsCollection/index.js'
 import { variantTypesCollection } from './variants/variantTypesCollection.js'
@@ -22,7 +23,8 @@ export const ecommercePlugin =
       return incomingConfig
     }
 
-    const customersCollectionSlug = pluginConfig.customersCollectionSlug || 'users'
+    const sanitizedPluginConfig = sanitizePluginConfig({ pluginConfig })
+    const collectionSlugMap = getCollectionSlugMap({ sanitizedPluginConfig })
 
     // Ensure collections exists
     if (!incomingConfig.collections) {
@@ -30,22 +32,15 @@ export const ecommercePlugin =
     }
 
     const currenciesConfig: NonNullable<EcommercePluginConfig['currencies']> =
-      pluginConfig.currencies ?? {
-        defaultCurrency: 'USD',
-        supportedCurrencies: [USD],
-      }
+      sanitizedPluginConfig.currencies
 
-    if (!currenciesConfig.defaultCurrency) {
-      currenciesConfig.defaultCurrency = currenciesConfig.supportedCurrencies[0]?.code
-    }
-
-    if (pluginConfig.products) {
+    if (sanitizedPluginConfig.products) {
       const productsConfig =
-        typeof pluginConfig.products === 'boolean'
+        typeof sanitizedPluginConfig.products === 'boolean'
           ? {
               variants: true,
             }
-          : pluginConfig.products
+          : sanitizedPluginConfig.products
 
       if (productsConfig.variants) {
         const overrides =
@@ -54,12 +49,18 @@ export const ecommercePlugin =
         const variants = variantsCollection({
           currenciesConfig,
           overrides: overrides?.variantsCollection,
+          productsSlug: collectionSlugMap.products,
+          variantOptionsSlug: collectionSlugMap.variantOptions,
         })
+
         const variantTypes = variantTypesCollection({
           overrides: overrides?.variantTypesCollection,
+          variantOptionsSlug: collectionSlugMap.variantOptions,
         })
+
         const variantOptions = variantOptionsCollection({
           overrides: overrides?.variantOptionsCollection,
+          variantTypesSlug: collectionSlugMap.variantTypes,
         })
 
         incomingConfig.collections.push(variants, variantTypes, variantOptions)
@@ -68,22 +69,30 @@ export const ecommercePlugin =
       const products = productsCollection({
         currenciesConfig,
         enableVariants: Boolean(productsConfig.variants),
+        ...('productsCollection' in productsConfig && productsConfig.productsCollection
+          ? { overrides: productsConfig.productsCollection }
+          : {}),
+
+        variantsSlug: collectionSlugMap.variants,
+        variantTypesSlug: collectionSlugMap.variantTypes,
       })
 
       incomingConfig.collections.push(products)
     }
 
-    if (pluginConfig.orders) {
-      const orders = ordersCollection({ currenciesConfig, customersCollectionSlug })
+    if (sanitizedPluginConfig.orders) {
+      const orders = ordersCollection({
+        currenciesConfig,
+        customersSlug: collectionSlugMap.customers,
+        productsSlug: collectionSlugMap.products,
+        variantsSlug: collectionSlugMap.variants,
+      })
       incomingConfig.collections.push(orders)
     }
 
-    if (pluginConfig.payments) {
-      const paymentMethods =
-        typeof pluginConfig.payments === 'object' && pluginConfig.payments?.paymentMethods?.length
-          ? pluginConfig.payments?.paymentMethods
-          : []
+    const paymentMethods = sanitizedPluginConfig.payments.paymentMethods
 
+    if (sanitizedPluginConfig.payments) {
       if (paymentMethods.length) {
         if (!Array.isArray(incomingConfig.endpoints)) {
           incomingConfig.endpoints = []
@@ -94,7 +103,12 @@ export const ecommercePlugin =
           const endpoints: Endpoint[] = []
 
           const initiatePayment: Endpoint = {
-            handler: initiatePaymentHandler({ currenciesConfig, paymentMethod }),
+            handler: initiatePaymentHandler({
+              currenciesConfig,
+              paymentMethod,
+              productsSlug: collectionSlugMap.products,
+              variantsSlug: collectionSlugMap.variants,
+            }),
             method: 'post',
             path: `${methodPath}/initiate-payment`,
           }
@@ -124,13 +138,17 @@ export const ecommercePlugin =
           incomingConfig.endpoints!.push(...endpoints)
         })
       }
+    }
 
-      const paymentRecords = paymentRecordsCollection({
+    if (sanitizedPluginConfig.transactions) {
+      const transactions = transactionsCollection({
         currenciesConfig,
-        customersCollectionSlug,
+        customersSlug: collectionSlugMap.customers,
+        ordersSlug: collectionSlugMap.orders,
         paymentMethods,
       })
-      incomingConfig.collections.push(paymentRecords)
+
+      incomingConfig.collections.push(transactions)
     }
 
     if (!incomingConfig.i18n) {
@@ -149,6 +167,36 @@ export const ecommercePlugin =
     if (!incomingConfig.endpoints) {
       incomingConfig.endpoints = []
     }
+
+    // incomingConfig.typescript = {
+    //   ...incomingConfig.typescript,
+    //   schema: [
+    //     ({ jsonSchema }) => {
+    //       if (jsonSchema.definitions) {
+    //         const supportedCurrencies = pluginConfig.currencies?.supportedCurrencies || []
+    //         const defaultCurrency = pluginConfig.currencies?.defaultCurrency || 'USD'
+
+    //         // Generate JSON Schema4 for supported currencies
+
+    //         const currenciesSchema = {
+    //           type: 'array',
+    //           description: 'A list of supported currency codes.',
+    //           items: {
+    //             type: 'string',
+    //             enum: (supportedCurrencies || []).map((currency) => currency.code),
+    //           },
+    //           title: 'Supported Currencies',
+    //         }
+
+    //         console.log({ defs: jsonSchema.definitions })
+
+    //         jsonSchema.definitions.SupportedCurrencies = currenciesSchema
+    //       }
+
+    //       return jsonSchema
+    //     },
+    //   ],
+    // }
 
     return {
       ...incomingConfig,

@@ -1,22 +1,30 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../../types.js'
+import type { CurrenciesConfig, FieldsOverride, PaymentAdapter } from '../types.js'
 
-import { amountField } from '../../fields/amountField.js'
-import { currencyField } from '../../fields/currencyField.js'
-import { statusField } from '../../fields/statusField.js'
+import { amountField } from '../fields/amountField.js'
+import { currencyField } from '../fields/currencyField.js'
+import { statusField } from '../fields/statusField.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
-  customersCollectionSlug?: string
+  /**
+   * Slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
+  /**
+   * Slug of the orders collection, defaults to 'orders'.
+   */
+  ordersSlug?: string
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   paymentMethods?: PaymentAdapter[]
 }
 
-export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (props) => {
+export const transactionsCollection: (props?: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
-    customersCollectionSlug = 'users',
+    customersSlug = 'users',
+    ordersSlug = 'orders',
     overrides,
     paymentMethods,
   } = props || {}
@@ -27,7 +35,7 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
     {
       name: 'customer',
       type: 'relationship',
-      relationTo: customersCollectionSlug,
+      relationTo: customersSlug,
     },
     {
       name: 'customerEmail',
@@ -36,7 +44,7 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
     {
       name: 'order',
       type: 'relationship',
-      relationTo: 'orders',
+      relationTo: ordersSlug,
     },
     statusField(),
   ]
@@ -67,7 +75,7 @@ export const paymentRecordsCollection: (props?: Props) => CollectionConfig = (pr
       : defaultFields
 
   const baseConfig: CollectionConfig = {
-    slug: 'paymentRecords',
+    slug: 'transactions',
     ...overrides,
     access: {
       read: () => true,

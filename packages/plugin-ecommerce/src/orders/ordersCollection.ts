@@ -8,28 +8,51 @@ import { currencyField } from '../fields/currencyField.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
-  customersCollectionSlug?: string
+  /**
+   * Slug of the customers collection, defaults to 'users'.
+   */
+  customersSlug?: string
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Slug of the products collection, defaults to 'products'.
+   */
+  productsSlug?: string
+  /**
+   * Slug of the transactions collection, defaults to 'transactions'.
+   */
+  transactionsSlug?: string
+  /**
+   * Slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
 }
 
 export const ordersCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { currenciesConfig, customersCollectionSlug = 'users', overrides } = props || {}
+  const {
+    currenciesConfig,
+    customersSlug = 'users',
+    overrides,
+    productsSlug = 'products',
+    transactionsSlug = 'transactions',
+    variantsSlug = 'variants',
+  } = props || {}
   const fieldsOverride = overrides?.fields
 
   const defaultFields: Field[] = [
     {
       name: 'customer',
       type: 'relationship',
-      relationTo: customersCollectionSlug,
+      relationTo: customersSlug,
     },
     {
       name: 'customerEmail',
       type: 'email',
     },
     {
-      name: 'paymentRecord',
+      name: 'transactions',
       type: 'relationship',
-      relationTo: 'paymentRecords',
+      hasMany: true,
+      relationTo: transactionsSlug,
     },
     {
       name: 'status',
@@ -58,7 +81,7 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     ...(currenciesConfig
       ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
       : []),
-    cartField({ currenciesConfig, individualPrices: true }),
+    cartField({ currenciesConfig, individualPrices: true, productsSlug, variantsSlug }),
   ]
 
   const fields =

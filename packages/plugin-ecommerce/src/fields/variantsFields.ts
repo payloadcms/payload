@@ -1,6 +1,20 @@
 import type { Field } from 'payload'
 
-export const variantsFields: () => Field[] = () => {
+type Props = {
+  /**
+   * Slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
+  /**
+   * Slug of the variant types collection, defaults to 'variantTypes'.
+   */
+  variantTypesSlug?: string
+}
+
+export const variantsFields: (props: Props) => Field[] = ({
+  variantsSlug = 'variants',
+  variantTypesSlug = 'variantTypes',
+}) => {
   const fields: Field[] = [
     {
       name: 'enableVariants',
@@ -13,7 +27,7 @@ export const variantsFields: () => Field[] = () => {
         condition: ({ enableVariants }) => Boolean(enableVariants),
       },
       hasMany: true,
-      relationTo: 'variantTypes',
+      relationTo: variantTypesSlug,
     },
     {
       name: 'variants',
@@ -23,7 +37,7 @@ export const variantsFields: () => Field[] = () => {
         defaultColumns: ['title', 'options', 'inventory', 'prices'],
         disableListColumn: true,
       },
-      collection: 'variants',
+      collection: variantsSlug,
       label: 'Available Variants',
       maxDepth: 2,
       on: 'product',

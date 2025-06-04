@@ -12,10 +12,24 @@ type Props = {
    */
   individualPrices?: boolean
   overrides?: Partial<ArrayField>
+  /**
+   * Slug of the products collection, defaults to 'products'.
+   */
+  productsSlug?: string
+  /**
+   * Slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
 }
 
 export const cartField: (props?: Props) => ArrayField = (props) => {
-  const { currenciesConfig, individualPrices, overrides } = props || {}
+  const {
+    currenciesConfig,
+    individualPrices,
+    overrides,
+    productsSlug = 'products',
+    variantsSlug = 'variants',
+  } = props || {}
 
   const field: ArrayField = {
     name: 'cart',
@@ -24,12 +38,12 @@ export const cartField: (props?: Props) => ArrayField = (props) => {
       {
         name: 'product',
         type: 'relationship',
-        relationTo: 'products',
+        relationTo: productsSlug,
       },
       {
         name: 'variant',
         type: 'relationship',
-        relationTo: 'variants',
+        relationTo: variantsSlug,
       },
       {
         name: 'quantity',

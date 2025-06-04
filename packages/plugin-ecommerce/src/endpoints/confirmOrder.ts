@@ -5,6 +5,14 @@ import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
 type Args = {
   currenciesConfig: CurrenciesConfig
   paymentMethod: PaymentAdapter
+  /**
+   * The slug of the products collection, defaults to 'products'.
+   */
+  productsSlug?: string
+  /**
+   * The slug of the variants collection, defaults to 'variants'.
+   */
+  variantsSlug?: string
 }
 
 type ConfirmOrder = (args: Args) => Endpoint['handler']
@@ -14,7 +22,7 @@ type ConfirmOrder = (args: Args) => Endpoint['handler']
  * This is the first step in the payment process.
  */
 export const confirmOrderHandler: ConfirmOrder =
-  ({ currenciesConfig, paymentMethod }) =>
+  ({ currenciesConfig, paymentMethod, productsSlug = 'products', variantsSlug = 'variants' }) =>
   async (req) => {
     await addDataAndFileToRequest(req)
 

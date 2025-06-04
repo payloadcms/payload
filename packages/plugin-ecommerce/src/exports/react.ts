@@ -1,1 +1,7 @@
-export { EcommerceProvider, useCart, useCurrency, useEcommerce } from '../react/provider/index.js'
+export {
+  EcommerceProvider,
+  useCart,
+  useCurrency,
+  useEcommerce,
+  usePayments,
+} from '../react/provider/index.js'

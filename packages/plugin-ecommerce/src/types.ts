@@ -37,14 +37,6 @@ type CartItemWithProductClient = {
   variantID?: DefaultDocumentIDType
 }
 
-type CartItemWithVariantClient = {
-  product: Record<string, unknown>
-  productID: DefaultDocumentIDType
-  quantity: number
-  variant: Record<string, unknown>
-  variantID: DefaultDocumentIDType
-}
-
 export type CartItemClient = CartItemWithProductClient //| CartItemWithVariantClient
 
 export type CartClient = CartItemClient[]
@@ -127,6 +119,11 @@ export type PaymentAdapter = {
   name: string
 }
 
+export type PaymentAdapterClient = {
+  confirmOrder: boolean
+  initiatePayment: boolean
+} & Pick<PaymentAdapter, 'label' | 'name'>
+
 export type Currency = {
   /**
    * The ISO 4217 currency code
@@ -166,6 +163,17 @@ export type BasePaymentAdapterArgs = {
   label?: string
 }
 
+/**
+ * Commonly used arguments for a Payment Adapter function, it's use is entirely optional.
+ */
+export type BasePaymentAdapterClientArgs = {
+  /**
+   * The visually readable label for the payment method.
+   * @example 'Bank Transfer'
+   */
+  label?: string
+}
+
 export type VariantsConfig = {
   variantOptionsCollection?: CollectionOverride
   variantsCollection?: CollectionOverride
@@ -181,9 +189,16 @@ export type OrdersConfig = {
   ordersCollection?: CollectionOverride
 }
 
+export type TransactionsConfig = {
+  transactionsCollection?: CollectionOverride
+}
+
 export type PaymentsConfig = {
   paymentMethods?: PaymentAdapter[]
-  paymentRecordsCollection?: CollectionOverride
+}
+
+export type CustomersConfig = {
+  slug: string
 }
 
 export type SubscriptionsConfig = {
@@ -203,6 +218,20 @@ export type CurrenciesConfig = {
   supportedCurrencies: Currency[]
 }
 
+/**
+ * A map of collection slugs used by the Ecommerce plugin.
+ * Provides an easy way to track the slugs of collections even when they are overridden.
+ */
+export type CollectionSlugMap = {
+  customers: string
+  orders: string
+  products: string
+  transactions: string
+  variantOptions: string
+  variants: string
+  variantTypes: string
+}
+
 export type EcommercePluginConfig = {
   /**
    * Configure supported currencies and default settings.
@@ -211,11 +240,16 @@ export type EcommercePluginConfig = {
    */
   currencies?: CurrenciesConfig
   /**
-   * Slug of the collection to use for customers. Referenced in places such as orders and transactions.
+   * Configure the target collection used for customers.
    *
-   * @default 'users'
+   * @example
+   * ```ts
+   * customers: {
+   *  slug: 'users', // default
+   * }
+   *
    */
-  customersCollectionSlug?: string
+  customers: CustomersConfig
   /**
    * Enable tracking of inventory for products, variants, and orders.
    *
@@ -228,6 +262,18 @@ export type EcommercePluginConfig = {
    *
    * Defaults to true when the paymentMethods array is provided.
    */
-  payments?: PaymentsConfig | true
+  payments?: PaymentsConfig
   products?: boolean | ProductsConfig
+  /**
+   * Enable tracking of transactions. Accepts a config object to override the default collection settings.
+   *
+   * Defaults to true when the paymentMethods array is provided.
+   */
+  transactions?: boolean | TransactionsConfig
 }
+
+export type SanitizedEcommercePluginConfig = {
+  payments: {
+    paymentMethods: [] | PaymentAdapter[]
+  }
+} & Omit<Required<EcommercePluginConfig>, 'payments'>

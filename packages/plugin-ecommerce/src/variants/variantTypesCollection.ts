@@ -4,30 +4,34 @@ import type { FieldsOverride } from '../types.js'
 
 type Props = {
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Slug of the variant options collection, defaults to 'variantOptions'.
+   */
+  variantOptionsSlug?: string
 }
 
-export const variantTypesDefaultFields: Field[] = [
-  {
-    name: 'label',
-    type: 'text',
-    required: true,
-  },
-  {
-    name: 'name',
-    type: 'text',
-    required: true,
-  },
-  {
-    name: 'options',
-    type: 'join',
-    collection: 'variantOptions',
-    on: 'variantType',
-  },
-]
-
 export const variantTypesCollection: (props?: Props) => CollectionConfig = (props) => {
-  const { overrides } = props || {}
+  const { overrides, variantOptionsSlug = 'variantOptions' } = props || {}
   const fieldsOverride = overrides?.fields
+
+  const variantTypesDefaultFields: Field[] = [
+    {
+      name: 'label',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'options',
+      type: 'join',
+      collection: variantOptionsSlug,
+      on: 'variantType',
+    },
+  ]
 
   const fields =
     fieldsOverride && typeof fieldsOverride === 'function'
