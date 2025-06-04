@@ -9,6 +9,7 @@ import type { ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import './index.scss'
+import { useRunDeprioritized } from '../../../../utilities/useRunDeprioritized.js'
 
 const baseClass = 'toolbar-popup__button'
 
@@ -59,16 +60,19 @@ export const ToolbarButton = ({
     })
   }, [editor, editorConfigContext, item])
 
+  const runDeprioritized = useRunDeprioritized()
+
   useEffect(() => {
-    const listener = () => requestIdleCallback(updateStates)
+    const listener = () => runDeprioritized(updateStates)
+
     const cleanup = mergeRegister(editor.registerUpdateListener(listener))
-    document.addEventListener('mouseup', updateStates)
+    document.addEventListener('mouseup', listener)
 
     return () => {
       cleanup()
-      document.removeEventListener('mouseup', updateStates)
+      document.removeEventListener('mouseup', listener)
     }
-  }, [editor, updateStates])
+  }, [editor, runDeprioritized, updateStates])
 
   const handleClick = useCallback(() => {
     if (!_state.enabled) {

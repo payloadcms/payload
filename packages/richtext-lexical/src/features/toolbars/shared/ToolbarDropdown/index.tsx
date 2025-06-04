@@ -12,8 +12,9 @@ import { $getSelection } from 'lexical'
 import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { DropDown, DropDownItem } from './DropDown.js'
+import { useRunDeprioritized } from '../../../../utilities/useRunDeprioritized.js'
 import './index.scss'
+import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({
   active,
@@ -119,6 +120,8 @@ export const ToolbarDropdown = ({
   const editorConfigContext = useEditorConfigContext()
   const { items, key: groupKey } = group
 
+  const runDeprioritized = useRunDeprioritized()
+
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
@@ -164,13 +167,11 @@ export const ToolbarDropdown = ({
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(() => {
-        requestIdleCallback(() => {
-          updateStates()
-        })
+      editor.registerUpdateListener(async () => {
+        await runDeprioritized(updateStates)
       }),
     )
-  }, [editor, updateStates])
+  }, [editor, runDeprioritized, updateStates])
 
   const renderedItems = useMemo(() => {
     return items?.length
