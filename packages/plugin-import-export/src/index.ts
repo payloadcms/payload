@@ -3,7 +3,7 @@ import type { Config, JobsConfig } from 'payload'
 import { deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
-import type { ImportExportPluginConfig } from './types.js'
+import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
 import { getExportCollection } from './getExportCollection.js'
@@ -91,3 +91,15 @@ export const importExportPlugin =
 
     return config
   }
+
+declare module 'payload' {
+  interface FieldBase {
+    // TODO: fix
+    //   TS2717: Subsequent property declarations must have the same type. Property custom must be of type Record<string, any> | undefined, but here has type
+    // custom?: {
+    //   'plugin-import-export'?: {
+    //     toCSVFunction?: ToCSVFunction
+    //   }
+    // } & Record<string, any>
+  }
+}
