@@ -11,6 +11,8 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = mongooseAdapter({
     ensureIndexes: true,
+    // required for connect to detect that we are using a memory server
+    mongoMemoryServer:  global._mongoMemoryServer,
     url:
       process.env.MONGODB_MEMORY_SERVER_URI ||
       process.env.DATABASE_URI ||
