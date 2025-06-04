@@ -48,15 +48,18 @@ export async function seedDB({
     const uploadsDirs = Array.isArray(uploadsDir) ? uploadsDir : [uploadsDir]
     for (const dir of uploadsDirs) {
       try {
-        // Attempt to clear the uploads directory if it exists
         await fs.promises.access(dir)
         const files = await fs.promises.readdir(dir)
         for (const file of files) {
-          await fs.promises.rm(path.join(dir, file))
+          const filePath = path.join(dir, file)
+          await fs.promises.rm(filePath, { recursive: true, force: true })
         }
       } catch (error) {
         if (isErrorWithCode(error, 'ENOENT')) {
-          // If the error is not because the directory doesn't exist
+          // Directory does not exist - that's okay, skip it
+          continue
+        } else {
+          // Some other error occurred - rethrow it
           console.error('Error in operation (deleting uploads dir):', dir, error)
           throw error
         }
