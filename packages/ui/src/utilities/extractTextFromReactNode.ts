@@ -30,7 +30,7 @@ export const extractTextFromReactNode = (reactNode: React.ReactNode): string => 
         React.isValidElement(value) ||
         Array.isArray(value)
       ) {
-        textParts.push(extractTextFromReactNode(reactNode))
+        textParts.push(extractTextFromReactNode(value))
       }
     }
 
