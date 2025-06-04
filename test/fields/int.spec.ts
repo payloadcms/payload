@@ -33,6 +33,7 @@ import {
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
   groupFieldsSlug,
+  numberFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -400,6 +401,31 @@ describe('Fields', () => {
       expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
 
       expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'hasMany deletion test',
+          hasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      await payload.update({
+        collection: textFieldsSlug,
+        id: createdDocId,
+        data: {
+          hasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: textFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.hasMany).toHaveLength(0)
     })
   })
 
@@ -1041,6 +1067,30 @@ describe('Fields', () => {
       })
 
       expect(numbersNotExists.docs).toHaveLength(1)
+    })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: numberFieldsSlug,
+        data: {
+          localizedHasMany: [1, 2, 3],
+        },
+      })
+
+      await payload.update({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+        data: {
+          localizedHasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.localizedHasMany).toHaveLength(0)
     })
   })
 

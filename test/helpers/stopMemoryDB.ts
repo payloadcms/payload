@@ -5,4 +5,5 @@ export default async () => {
     await global._mongoMemoryServer.stop()
     console.log('Stopped memorydb')
   }
+  process.exit(0)
 }

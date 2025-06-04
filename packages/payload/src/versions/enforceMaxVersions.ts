@@ -76,8 +76,9 @@ export const enforceMaxVersions = async ({
       })
     }
   } catch (err) {
-    payload.logger.error(
-      `There was an error cleaning up old versions for the ${entityType} ${slug}`,
-    )
+    payload.logger.error({
+      err,
+      msg: `There was an error cleaning up old versions for the ${entityType} ${slug}`,
+    })
   }
 }

@@ -114,7 +114,6 @@ describe('Versions', () => {
     })
 
     await ensureCompilationIsDone({ page, serverURL })
-    //await clearAndSeedEverything(payload)
   })
 
   describe('draft collections', () => {

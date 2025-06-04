@@ -169,12 +169,13 @@ export function EditForm({
                   <Upload_v4
                     collectionSlug={collectionConfig.slug}
                     customActions={[
-                      collectionConfig.folders && (
+                      folders && collectionConfig.folders && (
                         <MoveDocToFolder
                           buttonProps={{
                             buttonStyle: 'pill',
                             size: 'small',
                           }}
+                          folderCollectionSlug={folders.slug}
                           folderFieldName={folders.fieldName}
                           key="move-doc-to-folder"
                         />

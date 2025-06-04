@@ -7,7 +7,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
 import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
@@ -394,7 +394,7 @@ export default buildConfigWithDefaults({
   editor: lexicalEditor(),
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   typescript: {
