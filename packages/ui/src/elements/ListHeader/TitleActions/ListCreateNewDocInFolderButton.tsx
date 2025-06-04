@@ -143,6 +143,7 @@ export function ListCreateNewDocInFolderButton({
             }
             closeFolderDrawer()
           }}
+          redirectAfterCreate={false}
         />
       )}
     </React.Fragment>
