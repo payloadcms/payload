@@ -577,6 +577,27 @@ describe('database', () => {
     })
   })
 
+  it('should run migrate:reset', async () => {
+    // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!isMongoose(payload)) {
+      return
+    }
+    let error
+    try {
+      await payload.db.migrateReset()
+    } catch (e) {
+      error = e
+    }
+
+    const migrations = await payload.find({
+      collection: 'payload-migrations',
+    })
+
+    expect(error).toBeUndefined()
+    expect(migrations.docs).toHaveLength(0)
+  })
+
   describe('predefined migrations', () => {
     it('mongoose - should execute migrateVersionsV1_V2', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
@@ -1650,6 +1671,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 
@@ -2596,5 +2618,34 @@ describe('database', () => {
 
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+  })
+
+  it('should support in with null', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-1' },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-2' },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-3' },
+    })
+    const post_null = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: null },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'posts',
+      where: { text: { in: ['text-1', 'text-3', null] } },
+    })
+    expect(docs).toHaveLength(3)
+    expect(docs[0].id).toBe(post_null.id)
+    expect(docs[1].id).toBe(post_3.id)
+    expect(docs[2].id).toBe(post_1.id)
   })
 })

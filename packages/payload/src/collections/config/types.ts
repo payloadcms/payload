@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
@@ -32,6 +33,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
+import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -81,6 +83,7 @@ export type HookOperationType =
   | 'login'
   | 'read'
   | 'refresh'
+  | 'resetPassword'
   | 'update'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
@@ -211,6 +214,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -218,6 +222,7 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -236,6 +241,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -255,6 +261,11 @@ export type AfterForgotPasswordHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
 }) => any
+
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
 
 export type BaseListFilter = (args: {
   limit: number
@@ -283,6 +294,10 @@ export type CollectionAdminOptions = {
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
@@ -435,6 +450,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Enables folders for this collection
+   */
+  folders?: boolean | CollectionFoldersConfiguration
+  /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
   forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
@@ -583,8 +602,9 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
@@ -596,6 +616,7 @@ export interface SanitizedCollectionConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
+  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
 
   /**

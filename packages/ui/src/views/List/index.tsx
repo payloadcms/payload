@@ -12,7 +12,6 @@ import { Button } from '../../elements/Button/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
@@ -28,7 +27,8 @@ import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListHeader } from './ListHeader/index.js'
+import { CollectionListHeader } from './ListHeader/index.js'
+import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -59,12 +59,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const {
-    allowCreate,
-    createNewDrawerSlug,
-    drawerSlug: listDrawerSlug,
-    onBulkSelect,
-  } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
     allowCreate !== undefined
@@ -91,8 +86,12 @@ export function DefaultListView(props: ListViewClientProps) {
   } = useListQuery()
 
   const { openModal } = useModal()
-  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
-  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
+  const {
+    drawerSlug: bulkUploadDrawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -102,9 +101,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  const isInDrawer = Boolean(listDrawerSlug)
-
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
 
@@ -157,7 +154,7 @@ export function DefaultListView(props: ListViewClientProps) {
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
-              <ListHeader
+              <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
                   <div className={`${baseClass}__sub-header`}>
@@ -180,7 +177,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                t={t}
+                viewType="list"
               />
               <ListControls
                 beforeActions={

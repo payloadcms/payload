@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
+  JsonObject,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -12,6 +12,7 @@ import type {
   Collection,
   DataFromCollectionSlug,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -23,7 +24,7 @@ import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -102,7 +103,7 @@ export const findByIDOperation = async <
 
     // If errors are disabled, and access returns false, return null
     if (accessResult === false) {
-      return null
+      return null!
     }
 
     const where = { id: { equals: id } }
@@ -120,7 +121,7 @@ export const findByIDOperation = async <
       collection: collectionConfig.slug,
       draftsEnabled: draftEnabled,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale,
+      locale: locale!,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
@@ -129,7 +130,7 @@ export const findByIDOperation = async <
     }
 
     // execute only if there's a custom ID and potentially overwriten access on id
-    if (req.payload.collections[collectionConfig.slug].customIDType) {
+    if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
         collectionConfig,
         overrideAccess,
@@ -141,18 +142,18 @@ export const findByIDOperation = async <
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) {
+    if (!findOneArgs.where?.and?.[0]?.id) {
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
+    let result: DataFromCollectionSlug<TSlug> = (await req.payload.db.findOne(findOneArgs))!
 
     if (!result) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
 
-      return null
+      return null!
     }
 
     // /////////////////////////////////////
@@ -160,7 +161,7 @@ export const findByIDOperation = async <
     // /////////////////////////////////////
 
     if (includeLockStatus && id) {
-      let lockStatus = null
+      let lockStatus: (JsonObject & TypeWithID) | null = null
 
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
@@ -200,7 +201,7 @@ export const findByIDOperation = async <
         })
 
         if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]
+          lockStatus = lockedDocument.docs[0]!
         }
       } catch {
         // swallow error
@@ -251,17 +252,17 @@ export const findByIDOperation = async <
       collection: collectionConfig,
       context: req.context,
       currentDepth,
-      depth,
+      depth: depth!,
       doc: result,
       draft: draftEnabled,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
+      locale: locale!,
       overrideAccess,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

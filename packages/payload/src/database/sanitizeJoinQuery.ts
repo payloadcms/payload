@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
-import type { FlattenedField } from '../fields/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
@@ -38,7 +37,7 @@ const sanitizeJoinFieldQuery = async ({
     return
   }
 
-  const joinCollectionConfig = req.payload.collections[collectionSlug].config
+  const joinCollectionConfig = req.payload.collections[collectionSlug]!.config
 
   const accessResult = !overrideAccess
     ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
@@ -103,7 +102,7 @@ export const sanitizeJoinQuery = async ({
   const promises: Promise<void>[] = []
 
   for (const collectionSlug in collectionConfig.joins) {
-    for (const join of collectionConfig.joins[collectionSlug]) {
+    for (const join of collectionConfig.joins[collectionSlug]!) {
       await sanitizeJoinFieldQuery({
         collectionSlug,
         errors,

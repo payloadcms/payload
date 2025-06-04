@@ -545,6 +545,89 @@ describe('Query Presets', () => {
       }
     })
 
+    it('should only allow admins to select the "onlyAdmins" preset (via `filterOptions`)', async () => {
+      try {
+        const presetForAdminsCreatedByEditor = await payload.create({
+          collection: queryPresetsCollectionSlug,
+          user: editorUser,
+          overrideAccess: false,
+          data: {
+            title: 'Admins (Created by Editor)',
+            where: {
+              text: {
+                equals: 'example page',
+              },
+            },
+            access: {
+              read: {
+                constraint: 'onlyAdmins',
+              },
+              update: {
+                constraint: 'onlyAdmins',
+              },
+            },
+            relatedCollection: 'pages',
+          },
+        })
+
+        expect(presetForAdminsCreatedByEditor).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe(
+          'The following fields are invalid: Sharing settings > Read > Specify who can read this Preset, Sharing settings > Update > Specify who can update this Preset',
+        )
+      }
+
+      const presetForAdminsCreatedByAdmin = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user: adminUser,
+        overrideAccess: false,
+        data: {
+          title: 'Admins (Created by Admin)',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          access: {
+            read: {
+              constraint: 'onlyAdmins',
+            },
+            update: {
+              constraint: 'onlyAdmins',
+            },
+          },
+          relatedCollection: 'pages',
+        },
+      })
+
+      expect(presetForAdminsCreatedByAdmin).toBeDefined()
+
+      // attempt to update the preset using an editor user
+      try {
+        const presetUpdatedByEditorUser = await payload.update({
+          collection: queryPresetsCollectionSlug,
+          id: presetForAdminsCreatedByAdmin.id,
+          user: editorUser,
+          overrideAccess: false,
+          data: {
+            title: 'From `onlyAdmins` to `onlyMe` (Updated by Editor)',
+            access: {
+              read: {
+                constraint: 'onlyMe',
+              },
+              update: {
+                constraint: 'onlyMe',
+              },
+            },
+          },
+        })
+
+        expect(presetUpdatedByEditorUser).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      }
+    })
+
     it('should respect access when set to "specificRoles"', async () => {
       const presetForSpecificRoles = await payload.create({
         collection: queryPresetsCollectionSlug,
