@@ -53,8 +53,8 @@ export async function seedDB({
         for (const file of files) {
           await fs.promises.rm(path.join(dir, file))
         }
-      } catch (error) {
-        if (error.code !== 'ENOENT') {
+      } catch (error: any) {
+        if (error?.code !== 'ENOENT') {
           // If the error is not because the directory doesn't exist
           console.error('Error in operation (deleting uploads dir):', dir, error)
           throw error
@@ -124,16 +124,20 @@ export async function seedDB({
   try {
     if (isMongoose(_payload)) {
       await Promise.all([
-        ...collectionSlugs.map(async (collectionSlug) => {
-          await _payload.db.collections[collectionSlug].createIndexes()
-        }),
+        ...collectionSlugs
+          .filter(
+            (collectionSlug) =>
+              ['payload-migrations', 'payload-preferences', 'payload-locked-documents'].indexOf(
+                collectionSlug,
+              ) === -1,
+          )
+          .map(async (collectionSlug) => {
+            await _payload.db.collections[collectionSlug]?.createIndexes({
+              // Blocks writes (doesn't matter here) but faster
+              background: false,
+            })
+          }),
       ])
-
-      await Promise.all(
-        _payload.config.collections.map(async (coll) => {
-          await _payload.db?.collections[coll.slug]?.ensureIndexes()
-        }),
-      )
     }
   } catch (e) {
     console.error('Error in operation (re-creating indexes):', e)
