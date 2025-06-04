@@ -156,7 +156,7 @@
     "jest": "29.7.0",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "^10",
+    "mongodb-memory-server": "10.1.4",
     "next": "15.3.2",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
