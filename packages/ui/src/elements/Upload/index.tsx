@@ -12,7 +12,6 @@ import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
@@ -87,6 +86,7 @@ export const UploadActions = ({
 export type UploadProps = {
   readonly collectionSlug: string
   readonly customActions?: React.ReactNode[]
+  readonly documentSlots?: DocumentSlots
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
@@ -107,6 +107,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 }
 
 export type UploadProps_v4 = {
+  readonly documentSlots?: DocumentSlots
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadEdits?: UploadEdits
@@ -116,6 +117,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {
     collectionSlug,
     customActions,
+    documentSlots,
     initialState,
     onChange,
     resetUploadEdits,
@@ -123,8 +125,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     uploadConfig,
     uploadEdits,
   } = props
-  const { getDocumentSlots } = useServerFunctions()
-  const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
+
   const {
     setUploadControlFile,
     setUploadControlFileName,
@@ -331,13 +332,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
   const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
-
-  useEffect(() => {
-    void (async () => {
-      const slots = await getDocumentSlots({ collectionSlug })
-      setDocumentSlots(slots)
-    })()
-  }, [getDocumentSlots, collectionSlug])
 
   useEffect(() => {
     const handleControlFileUrl = async () => {
