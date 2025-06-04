@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
