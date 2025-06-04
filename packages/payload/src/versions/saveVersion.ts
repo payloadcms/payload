@@ -5,7 +5,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 
@@ -78,7 +78,7 @@ export const saveVersion = async ({
       } else {
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
-          global: global.slug,
+          global: global!.slug,
           limit: 1,
           pagination: false,
           req,
@@ -115,7 +115,7 @@ export const saveVersion = async ({
         } else {
           result = await payload.db.updateGlobalVersion({
             ...updateVersionArgs,
-            global: global.slug,
+            global: global!.slug,
             req,
           })
         }
@@ -125,9 +125,9 @@ export const saveVersion = async ({
     if (createNewVersion) {
       const createVersionArgs = {
         autosave: Boolean(autosave),
-        collectionSlug: undefined,
+        collectionSlug: undefined as string | undefined,
         createdAt: now,
-        globalSlug: undefined,
+        globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
@@ -138,12 +138,12 @@ export const saveVersion = async ({
 
       if (collection) {
         createVersionArgs.collectionSlug = collection.slug
-        result = await payload.db.createVersion(createVersionArgs)
+        result = await payload.db.createVersion(createVersionArgs as CreateVersionArgs)
       }
 
       if (global) {
         createVersionArgs.globalSlug = global.slug
-        result = await payload.db.createGlobalVersion(createVersionArgs)
+        result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
       if (publishSpecificLocale && snapshot) {
@@ -183,10 +183,10 @@ export const saveVersion = async ({
       errorMessage = `There was an error while saving a version for the global ${typeof global.label === 'string' ? global.label : global.slug}.`
     }
     payload.logger.error({ err, msg: errorMessage })
-    return
+    return undefined!
   }
 
-  const max = collection ? collection.versions.maxPerDoc : global.versions.max
+  const max = collection ? collection.versions.maxPerDoc : global!.versions.max
 
   if (createNewVersion && max > 0) {
     await enforceMaxVersions({

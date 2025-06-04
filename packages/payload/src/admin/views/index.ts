@@ -29,9 +29,9 @@ export type AdminViewConfig = {
 }
 
 export type AdminViewClientProps = {
+  browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
   documentSubViewType?: DocumentSubViewTypes
-  folderCollectionSlugs?: SanitizedCollectionConfig['slug'][]
   viewType: ViewTypes
 }
 

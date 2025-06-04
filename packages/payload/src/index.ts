@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -542,7 +544,7 @@ export class BasePayload {
       })
 
       spawned.on('exit', (code) => {
-        resolve({ code })
+        resolve({ code: code! })
       })
 
       spawned.on('error', (error) => {
@@ -585,7 +587,7 @@ export class BasePayload {
       void checkPayloadDependencies()
     }
 
-    this.importMap = options.importMap
+    this.importMap = options.importMap!
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
@@ -605,7 +607,7 @@ export class BasePayload {
     }
 
     for (const collection of this.config.collections) {
-      let customIDType = undefined
+      let customIDType: string | undefined = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
@@ -637,7 +639,7 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks.reduce((blocks, block) => {
+    this.blocks = this.config.blocks!.reduce((blocks, block) => {
       blocks[block.slug] = block
       return blocks
     }, {})
@@ -811,6 +813,7 @@ export class BasePayload {
 
 const initialized = new BasePayload()
 
+// eslint-disable-next-line no-restricted-exports
 export default initialized
 
 let cached: {
@@ -843,7 +846,7 @@ export const reload = async (
     return collections
   }, {})
 
-  payload.blocks = config.blocks.reduce((blocks, block) => {
+  payload.blocks = config.blocks!.reduce((blocks, block) => {
     blocks[block.slug] = block
     return blocks
   }, {})
@@ -871,7 +874,7 @@ export const reload = async (
     })
   }
 
-  await payload.db.init()
+  await payload.db.init?.()
 
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
@@ -894,7 +897,7 @@ export const getPayload = async (
 
   if (cached.payload) {
     if (cached.reload === true) {
-      let resolve: () => void
+      let resolve!: () => void
 
       // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
@@ -915,7 +918,6 @@ export const getPayload = async (
     return cached.payload
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
@@ -1337,7 +1339,7 @@ export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validations } from './fields/validations.js'
 export type {
@@ -1478,7 +1480,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { flattenAllFields } from './utilities/flattenAllFields.js'
-export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'

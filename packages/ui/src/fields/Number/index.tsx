@@ -26,7 +26,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       admin: {
         className,
         description,
-        placeholder,
+        placeholder: placeholderFromProps,
         step = 1,
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
@@ -126,6 +126,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const placeholder = getTranslation(placeholderFromProps, i18n)
+
   return (
     <div
       className={[
@@ -174,7 +176,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
             // numberOnly
             onChange={handleHasManyChange}
             options={[]}
-            placeholder={t('general:enterAValue')}
+            placeholder={placeholder}
             showError={showError}
             value={valueToRender as Option[]}
           />
@@ -191,7 +193,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
                 // @ts-expect-error
                 e.target.blur()
               }}
-              placeholder={getTranslation(placeholder, i18n)}
+              placeholder={placeholder}
               step={step}
               type="number"
               value={typeof value === 'number' ? value : ''}

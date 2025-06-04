@@ -72,7 +72,7 @@ export const sanitizeLocales = ({
       fallbackLocale,
       locale,
       localization,
-    })
+    })!
   }
 
   if (['*', 'all'].includes(locale)) {

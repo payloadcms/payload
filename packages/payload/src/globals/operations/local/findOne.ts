@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
@@ -7,6 +6,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -107,7 +107,7 @@ export default async function findOneLocal<
     includeLockStatus,
     overrideAccess,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   })

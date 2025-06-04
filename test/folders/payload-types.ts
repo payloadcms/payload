@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     drafts: Draft;
     autosave: Autosave;
+    'omitted-from-browse-by': OmittedFromBrowseBy;
     users: User;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,7 +80,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave';
+      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by';
     };
   };
   collectionsSelect: {
@@ -87,6 +88,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -191,6 +193,10 @@ export interface FolderInterface {
           relationTo?: 'autosave';
           value: string | Autosave;
         }
+      | {
+          relationTo?: 'omitted-from-browse-by';
+          value: string | OmittedFromBrowseBy;
+        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -221,6 +227,17 @@ export interface Autosave {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "omitted-from-browse-by".
+ */
+export interface OmittedFromBrowseBy {
+  id: string;
+  title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -261,6 +278,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave';
         value: string | Autosave;
+      } | null)
+    | ({
+        relationTo: 'omitted-from-browse-by';
+        value: string | OmittedFromBrowseBy;
       } | null)
     | ({
         relationTo: 'users';
@@ -363,6 +384,16 @@ export interface AutosaveSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "omitted-from-browse-by_select".
+ */
+export interface OmittedFromBrowseBySelect<T extends boolean = true> {
+  title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
