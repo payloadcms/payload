@@ -4,12 +4,12 @@ import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
-import { renderToStaticMarkup } from 'react-dom/server'
 
 import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
+import { extractTextFromReactNode } from '../../utilities/extractTextFromReactNode.js'
 import fieldTypes, { arrayOperators } from './field-types.js'
 
 type ReduceFieldOptionsArgs = {
@@ -215,30 +215,4 @@ export const reduceFields = ({
     }
     return reduced
   }, [])
-}
-
-/**
- * Extracts plain text content from a React node by removing HTML tags.
- * Used to make React elements searchable in filter dropdowns.
- */
-const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
-  if (!reactNode) {
-    return ''
-  }
-  if (typeof reactNode === 'string') {
-    return reactNode
-  }
-
-  const html = renderToStaticMarkup(reactNode)
-
-  // Handle different environments (server vs browser)
-  if (typeof document !== 'undefined') {
-    // Browser environment - use actual DOM
-    const div = document.createElement('div')
-    div.innerHTML = html
-    return div.textContent || ''
-  } else {
-    // Server environment - use regex to strip HTML tags
-    return html.replace(/<[^>]*>/g, '')
-  }
 }
