@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -52,15 +53,11 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
     livePreview: {
-      collections: [customViewsTabsSlug],
+      collections: [customViewsTabsSlug, editMenuItemsSlug],
       url: 'http://localhost:3000',
     },
     importMap: {
       baseDir: path.resolve(dirname),
-    },
-    livePreview: {
-      url: 'http://localhost:3000/',
-      collections: [editMenuItemsSlug],
     },
     components: {
       actions: ['/components/actions/AdminButton/index.js#AdminButton'],

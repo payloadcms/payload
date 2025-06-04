@@ -651,18 +651,13 @@ describe('Document View', () => {
   })
 
   describe('custom view paths', () => {
-    beforeAll(async () => {
-      await page.goto(customViewTabsURL.list)
-      const firstDoc = await page.locator('.collection-list .table a').first().getAttribute('href')
-      const id = firstDoc?.split('/').pop()
-      if (id) {
-        collectionCustomViewPathId = id
-      }
+    beforeEach(async () => {
+      await page.goto(customViewTabsURL.create)
+      await page.locator('#field-title').fill('Test Custom View Tabs')
+      await saveDocAndAssert(page)
     })
 
     test('collection — should show live preview as first tab and default view', async () => {
-      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
-
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
       await expect(firstTab).toContainText('Live Preview')
@@ -672,16 +667,12 @@ describe('Document View', () => {
     })
 
     test('collection — should show edit as third tab', async () => {
-      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
-
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const secondTab = tabs.nth(2)
       await expect(secondTab).toContainText('Edit')
     })
 
     test('collection — should have `/edit` path', async () => {
-      await page.goto(customViewTabsURL.edit(collectionCustomViewPathId))
-
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const secondTab = tabs.nth(2)
       await secondTab.click()
