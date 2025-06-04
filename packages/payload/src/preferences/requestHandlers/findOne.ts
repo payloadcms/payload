@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -12,7 +11,7 @@ export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Resp
   let data
 
   try {
-    data = await incomingReq.json()
+    data = await incomingReq.json?.()
   } catch (error) {
     data = {}
   }

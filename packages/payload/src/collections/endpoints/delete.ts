@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 
@@ -29,7 +28,7 @@ export const deleteHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
-    where,
+    where: where!,
   })
 
   const headers = headersWithCors({

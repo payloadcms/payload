@@ -25,6 +25,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     description,
     Error,
     hasMany,
+    htmlAttributes,
     inputRef,
     Label,
     label,
@@ -158,6 +159,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             ref={inputRef}
             type="text"
             value={value || ''}
+            {...(htmlAttributes ?? {})}
           />
         )}
         {AfterInput}

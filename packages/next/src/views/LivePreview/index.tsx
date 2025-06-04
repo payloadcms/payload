@@ -1,6 +1,7 @@
 import type {
   BeforeDocumentControlsServerPropsOnly,
   DocumentViewServerProps,
+  EditMenuItemsServerPropsOnly,
   LivePreviewConfig,
   ServerProps,
 } from 'payload'
@@ -10,7 +11,6 @@ import React from 'react'
 
 import './index.scss'
 import { LivePreviewClient } from './index.client.js'
-
 export async function LivePreviewView(props: DocumentViewServerProps) {
   const { doc, initPageResult } = props
 
@@ -42,6 +42,8 @@ export async function LivePreviewView(props: DocumentViewServerProps) {
   const BeforeDocumentControls =
     collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
     globalConfig?.admin?.components?.elements?.beforeDocumentControls
+
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),
@@ -82,6 +84,15 @@ export async function LivePreviewView(props: DocumentViewServerProps) {
       }
       breakpoints={breakpoints}
       Description={props.Description}
+      EditMenuItems={
+        EditMenuItems
+          ? RenderServerComponent({
+              Component: EditMenuItems,
+              importMap: req.payload.importMap,
+              serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
+            })
+          : null
+      }
       initialData={doc}
       PreviewButton={props.PreviewButton}
       PublishButton={props.PublishButton}
