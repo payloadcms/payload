@@ -1,4 +1,4 @@
-import type { PaginatedDocs, PayloadRequest, SelectIncludeType, Sort, User, Where } from 'payload'
+import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'

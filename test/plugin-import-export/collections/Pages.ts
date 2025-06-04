@@ -32,7 +32,7 @@ export const Pages: CollectionConfig = {
       defaultValue: 'my custom csv transformer',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, data, siblingData }) => {
+          toCSV: ({ value, columnName, row, siblingDoc }) => {
             return value + ' toCSV'
           },
         },
@@ -44,9 +44,9 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, data, siblingData }) => {
-            data[`${columnName}_id`] = value.id
-            data[`${columnName}_email`] = value.email
+          toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+            row[`${columnName}_id`] = value.id
+            row[`${columnName}_email`] = value.email
           },
         },
       },
@@ -84,7 +84,7 @@ export const Pages: CollectionConfig = {
           defaultValue: 'my custom csv transformer',
           custom: {
             'plugin-import-export': {
-              toCSV: ({ value, columnName, data, siblingData }) => {
+              toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
                 return value + ' toCSV'
               },
             },

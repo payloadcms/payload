@@ -15,10 +15,10 @@ export const flattenObject = ({
   prefix,
   toCSVFunctions,
 }: Args): Record<string, unknown> => {
-  const result: Record<string, unknown> = {}
+  const row: Record<string, unknown> = {}
 
-  const flatten = (doc: Document, prefix?: string) => {
-    Object.entries(doc).forEach(([key, value]) => {
+  const flatten = (siblingDoc: Document, prefix?: string) => {
+    Object.entries(siblingDoc).forEach(([key, value]) => {
       const newKey = prefix ? `${prefix}_${key}` : key
 
       if (Array.isArray(value)) {
@@ -28,14 +28,15 @@ export const flattenObject = ({
           } else {
             if (toCSVFunctions?.[newKey]) {
               const columnName = `${newKey}_${index}`
-              result[columnName] = toCSVFunctions[newKey]({
+              row[columnName] = toCSVFunctions[newKey]({
                 columnName,
-                data: result,
-                siblingData: doc,
+                doc,
+                row,
+                siblingDoc,
                 value: item,
               })
             } else {
-              result[`${newKey}_${index}`] = item
+              row[`${newKey}_${index}`] = item
             }
           }
         })
@@ -43,23 +44,25 @@ export const flattenObject = ({
         if (!toCSVFunctions?.[newKey]) {
           flatten(value, newKey)
         } else {
-          result[newKey] = toCSVFunctions[newKey]({
+          row[newKey] = toCSVFunctions[newKey]({
             columnName: newKey,
-            data: result,
-            siblingData: doc,
+            doc,
+            row,
+            siblingDoc,
             value,
           })
         }
       } else {
         if (toCSVFunctions?.[newKey]) {
-          result[newKey] = toCSVFunctions[newKey]({
+          row[newKey] = toCSVFunctions[newKey]({
             columnName: newKey,
-            data: result,
-            siblingData: doc,
+            doc,
+            row,
+            siblingDoc,
             value,
           })
         } else {
-          result[newKey] = value
+          row[newKey] = value
         }
       }
     })
@@ -77,14 +80,14 @@ export const flattenObject = ({
     }
 
     fields.forEach((field) => {
-      if (result[field.replace(/\./g, '_')]) {
+      if (row[field.replace(/\./g, '_')]) {
         const sanitizedField = field.replace(/\./g, '_')
-        orderedResult[sanitizedField] = result[sanitizedField]
+        orderedResult[sanitizedField] = row[sanitizedField]
       } else {
         const regex = fieldToRegex(field)
-        Object.keys(result).forEach((key) => {
+        Object.keys(row).forEach((key) => {
           if (regex.test(key)) {
-            orderedResult[key] = result[key]
+            orderedResult[key] = row[key]
           }
         })
       }
@@ -93,5 +96,5 @@ export const flattenObject = ({
     return orderedResult
   }
 
-  return result
+  return row
 }
