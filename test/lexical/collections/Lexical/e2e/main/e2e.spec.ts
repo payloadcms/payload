@@ -767,6 +767,7 @@ describe('lexicalMain', () => {
 
     // make text bold
     await boldButton.click()
+    await wait(300)
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
@@ -1015,6 +1016,7 @@ describe('lexicalMain', () => {
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
     await expect(internalLinkSelect).toContainText('Rich Text')
+    await wait(300)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
     await expect(linkDrawer).toBeHidden()
