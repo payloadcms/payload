@@ -161,7 +161,7 @@ export const reduceFields = ({
 
       const formattedField: ReducedField = {
         label: formattedLabel,
-        plainLabel: textFromLabel,
+        plainTextLabel: textFromLabel,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,

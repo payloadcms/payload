@@ -121,8 +121,8 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               disabled={disabled}
-              filterOption={(candidate, inputValue) =>
-                ((candidate.data?.plainLabel as string) ?? candidate.label)
+              filterOption={(option, inputValue) =>
+                ((option?.data?.plainTextLabel as string) || option.label)
                   .toLowerCase()
                   .includes(inputValue.toLowerCase())
               }
