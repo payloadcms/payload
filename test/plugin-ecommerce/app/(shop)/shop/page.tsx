@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import { Product } from '@/components/Product.js'
 import { CurrencySelector } from '@/components/CurrencySelector.js'
+import { PaymentsStripe } from '@/components/PaymentsStripe.js'
 
 export const Page = async () => {
   const payload = await getPayload({
@@ -37,6 +38,8 @@ export const Page = async () => {
       <Cart />
 
       <CurrencySelector currenciesConfig={currenciesConfig} />
+
+      <PaymentsStripe currenciesConfig={currenciesConfig} />
     </div>
   )
 }

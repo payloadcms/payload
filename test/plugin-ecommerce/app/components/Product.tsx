@@ -12,6 +12,7 @@ export const Product: React.FC<Props> = ({ product }) => {
   const { formatCurrency, currency } = useCurrency()
 
   const pricePath = `priceIn${currency.code.toUpperCase()}`
+  // @ts-expect-error
   const productPrice = pricePath in product ? product[pricePath] : undefined
 
   const hasVariants =

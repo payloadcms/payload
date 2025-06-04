@@ -79,7 +79,7 @@ export interface Config {
     variantOptions: VariantOption;
     products: Product;
     orders: Order;
-    paymentRecords: PaymentRecord;
+    transactions: Transaction;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -100,7 +100,7 @@ export interface Config {
     variantOptions: VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
-    paymentRecords: PaymentRecordsSelect<false> | PaymentRecordsSelect<true>;
+    transactions: TransactionsSelect<false> | TransactionsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -259,7 +259,7 @@ export interface Order {
   id: string;
   customer?: (string | null) | User;
   customerEmail?: string | null;
-  paymentRecord?: (string | null) | PaymentRecord;
+  transactions?: (string | Transaction)[] | null;
   status?: OrderStatus;
   amount?: number | null;
   currency?: ('USD' | 'JPY' | 'EUR') | null;
@@ -278,9 +278,9 @@ export interface Order {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "paymentRecords".
+ * via the `definition` "transactions".
  */
-export interface PaymentRecord {
+export interface Transaction {
   id: string;
   customer?: (string | null) | User;
   customerEmail?: string | null;
@@ -332,8 +332,8 @@ export interface PayloadLockedDocument {
         value: string | Order;
       } | null)
     | ({
-        relationTo: 'paymentRecords';
-        value: string | PaymentRecord;
+        relationTo: 'transactions';
+        value: string | Transaction;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -474,7 +474,7 @@ export interface ProductsSelect<T extends boolean = true> {
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
   customerEmail?: T;
-  paymentRecord?: T;
+  transactions?: T;
   status?: T;
   amount?: T;
   currency?: T;
@@ -493,9 +493,9 @@ export interface OrdersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "paymentRecords_select".
+ * via the `definition` "transactions_select".
  */
-export interface PaymentRecordsSelect<T extends boolean = true> {
+export interface TransactionsSelect<T extends boolean = true> {
   customer?: T;
   customerEmail?: T;
   order?: T;

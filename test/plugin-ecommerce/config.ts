@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
@@ -44,10 +45,12 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     ecommercePlugin({
+      customers: {
+        slug: 'users',
+      },
       products: {
         variants: true,
       },
-      orders: true,
       payments: {
         paymentMethods: [
           stripeAdapter({

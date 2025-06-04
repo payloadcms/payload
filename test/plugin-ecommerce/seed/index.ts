@@ -109,7 +109,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const pendingPaymentRecord = await payload.create({
-      collection: 'paymentRecords',
+      collection: 'transactions',
       data: {
         currency: 'USD',
         customer: customer.id,
@@ -123,7 +123,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const succeededPaymentRecord = await payload.create({
-      collection: 'paymentRecords',
+      collection: 'transactions',
       data: {
         currency: 'USD',
         customer: customer.id,

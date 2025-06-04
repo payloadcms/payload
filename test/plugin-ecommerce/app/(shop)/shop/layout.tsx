@@ -1,5 +1,6 @@
 import { currenciesConfig } from '@payload-config'
 import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/react'
+import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
 export const metadata = {
   title: 'Next.js',
@@ -10,7 +11,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <EcommerceProvider currenciesConfig={currenciesConfig}>{children}</EcommerceProvider>
+        <EcommerceProvider
+          currenciesConfig={currenciesConfig}
+          paymentMethods={[
+            stripeAdapterClient({
+              publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+            }),
+          ]}
+        >
+          {children}
+        </EcommerceProvider>
       </body>
     </html>
   )
