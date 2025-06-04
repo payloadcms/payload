@@ -69,7 +69,7 @@ type FlattenFieldsOptions = {
  * @param fields - Array of fields to flatten
  * @param options - Options to control the flattening behavior
  */
-function flattenFields<TField extends ClientField | Field>(
+export function flattenTopLevelFields<TField extends ClientField | Field>(
   fields: TField[],
   options?: boolean | FlattenFieldsOptions,
 ): FlattenedField<TField>[] {
@@ -112,7 +112,7 @@ function flattenFields<TField extends ClientField | Field>(
           // has a custom admin Cell component defined in its configuration.
           // See: packages/ui/src/providers/TableColumns/buildColumnState/index.tsx
           field as FlattenedField<TField>,
-          ...flattenFields(field.fields as TField[], {
+          ...flattenTopLevelFields(field.fields as TField[], {
             i18n,
             keepPresentationalFields,
             labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
@@ -145,7 +145,7 @@ function flattenFields<TField extends ClientField | Field>(
 
               return [
                 ...tabFields,
-                ...flattenFields(tab.fields as TField[], {
+                ...flattenTopLevelFields(tab.fields as TField[], {
                   i18n,
                   keepPresentationalFields,
                   labelPrefix: labelWithPrefixForTab,
@@ -165,13 +165,13 @@ function flattenFields<TField extends ClientField | Field>(
             }
           } else {
             // Unnamed tab: always hoist its fields
-            return [...tabFields, ...flattenFields<TField>(tab.fields as TField[], options)]
+            return [...tabFields, ...flattenTopLevelFields<TField>(tab.fields as TField[], options)]
           }
         }, []),
       ]
     } else if (fieldHasSubFields(field) && ['collapsible', 'row'].includes(field.type)) {
       // Recurse into row and collapsible
-      acc.push(...flattenFields(field.fields as TField[], options))
+      acc.push(...flattenTopLevelFields(field.fields as TField[], options))
     } else if (
       fieldAffectsData(field) ||
       (keepPresentationalFields && fieldIsPresentationalOnly(field))
@@ -203,5 +203,3 @@ function flattenFields<TField extends ClientField | Field>(
     return acc
   }, [])
 }
-
-export default flattenFields

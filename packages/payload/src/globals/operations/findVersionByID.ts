@@ -10,7 +10,6 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 

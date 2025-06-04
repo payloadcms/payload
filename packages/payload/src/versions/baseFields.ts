@@ -12,7 +12,7 @@ export const statuses = [
   },
 ]
 
-const baseVersionFields: Field[] = [
+export const baseVersionFields: Field[] = [
   {
     name: '_status',
     type: 'select',
@@ -43,5 +43,3 @@ export const versionSnapshotField: CheckboxField = {
   },
   index: true,
 }
-
-export default baseVersionFields

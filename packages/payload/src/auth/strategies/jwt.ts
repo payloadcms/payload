@@ -1,7 +1,7 @@
 import { jwtVerify } from 'jose'
 
 import type { Payload, Where } from '../../types/index.js'
-import type { AuthStrategyFunction, AuthStrategyResult, User } from '../index.js'
+import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
 
