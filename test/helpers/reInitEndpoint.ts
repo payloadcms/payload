@@ -7,7 +7,6 @@ import { path } from './reInitializeDB.js'
 import { seedDB } from './seed.js'
 
 const handler: PayloadHandler = async (req) => {
-  console.log('Inside handler')
   process.env.SEED_IN_CONFIG_ONINIT = 'true'
   const { payload } = req
 
