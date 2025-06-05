@@ -60,9 +60,8 @@
       flex-wrap: wrap;
     }
 
-    &__previewSizes,
-    &__edit {
-      margin-top: calc(var(--base) * 1.2);
+    &__upload-actions {
+      margin-top: calc(var(--base) * 0.5);
     }
 
     &__previewDrawer {
