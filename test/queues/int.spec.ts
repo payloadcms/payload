@@ -1400,7 +1400,9 @@ describe('Queues', () => {
 
     const job = await payload.jobs.queue({
       workflow: 'parallelTask',
-      input: {},
+      input: {
+        amount,
+      },
     })
 
     await payload.jobs.run()
