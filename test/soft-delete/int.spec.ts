@@ -7,6 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -839,7 +840,7 @@ describe('soft-delete', () => {
       it('should return a soft-deleted doc by ID with trash=true', async () => {
         const query = `
           query {
-            Post(id: "${postTwo.id}", trash: true) {
+            Post(id: ${idToString(postTwo.id, payload)}, trash: true) {
               id
               deletedAt
             }
@@ -857,7 +858,7 @@ describe('soft-delete', () => {
       it('should 404 when trying to get a soft-deleted doc without trash=true', async () => {
         const query = `
           query {
-            Post(id: "${postTwo.id}") {
+            Post(id: ${idToString(postTwo.id, payload)}) {
               id
             }
           }
@@ -1015,7 +1016,7 @@ describe('soft-delete', () => {
 
         const detailQuery = `
           query {
-            versionPost(id: "${softDeletedVersion.id}", trash: true) {
+            versionPost(id: ${idToString(softDeletedVersion.id, payload)}, trash: true) {
               id
               version {
                 deletedAt
@@ -1057,7 +1058,7 @@ describe('soft-delete', () => {
 
         const detailQuery = `
           query {
-            versionPost(id: "${softDeletedVersion.id}") {
+            versionPost(id: ${idToString(softDeletedVersion.id, payload)}) {
               id
             }
           }
@@ -1074,7 +1075,7 @@ describe('soft-delete', () => {
       it('should update a single soft-deleted doc when trash=true', async () => {
         const query = `
           mutation {
-            updatePost(id: "${postTwo.id}", trash: true, data: { title: "Updated Soft Deleted via GQL" }) {
+            updatePost(id: ${idToString(postTwo.id, payload)}, trash: true, data: { title: "Updated Soft Deleted via GQL" }) {
               id
               title
               deletedAt
@@ -1093,7 +1094,7 @@ describe('soft-delete', () => {
       it('should throw NotFound error when trying to update a soft-deleted document w/o trash: true', async () => {
         const query = `
           mutation {
-            updatePost(id: "${postTwo.id}", data: { title: "Should Fail" }) {
+            updatePost(id: ${idToString(postTwo.id, payload)}, data: { title: "Should Fail" }) {
               id
             }
           }
@@ -1107,7 +1108,7 @@ describe('soft-delete', () => {
       it('should update a single normal document when trash: false', async () => {
         const query = `
           mutation {
-            updatePost(id: "${postOne.id}", trash: false, data: { title: "Updated Normal via GQL" }) {
+            updatePost(id: ${idToString(postOne.id, payload)}, trash: false, data: { title: "Updated Normal via GQL" }) {
               id
               title
               deletedAt
@@ -1144,7 +1145,7 @@ describe('soft-delete', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         const query = `
           mutation {
-            deletePost(id: "${postTwo.id}") {
+            deletePost(id: ${idToString(postTwo.id, payload)}) {
                 id
             }
           }
@@ -1160,7 +1161,7 @@ describe('soft-delete', () => {
       it('should delete a soft-deleted document when trash: true', async () => {
         const query = `
           mutation {
-            deletePost(id: "${postTwo.id}", trash: true) {
+            deletePost(id: ${idToString(postTwo.id, payload)}, trash: true) {
                 id
             }
           }
