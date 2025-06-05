@@ -342,7 +342,16 @@ export type Endpoint = {
 
 export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
+export type EditViewCondition = (args: {
+  collectionConfig: SanitizedCollectionConfig
+  config: SanitizedConfig
+  globalConfig: SanitizedGlobalConfig
+  permissions: SanitizedPermissions
+  user: TypedUser
+}) => boolean
+
 export type EditViewConfig = {
+  condition?: EditViewCondition
   meta?: MetaConfig
 } & (
   | {

@@ -224,6 +224,7 @@ export const renderDocument = async ({
         config,
         docPermissions,
         routeSegments: segments,
+        user,
       })
 
       CustomView = collectionViews?.CustomView
@@ -271,6 +272,7 @@ export const renderDocument = async ({
         docPermissions,
         globalConfig,
         routeSegments: segments,
+        user,
       })
 
       CustomView = globalViews?.CustomView
@@ -378,6 +380,7 @@ export const renderDocument = async ({
             i18n={i18n}
             payload={payload}
             permissions={permissions}
+            user={user}
           />
         )}
         <HydrateAuthProvider permissions={permissions} />

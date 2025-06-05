@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -21,6 +22,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { TabConditions } from './collections/TabConditions.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
@@ -174,6 +176,7 @@ export default buildConfigWithDefaults({
     with300Documents,
     ListDrawer,
     Placeholder,
+    TabConditions,
   ],
   globals: [
     GlobalHidden,
@@ -219,6 +222,15 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
     }
+
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'admin@payloadcms.com',
+        password: 'demo',
+        roles: ['admin'],
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

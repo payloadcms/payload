@@ -4,6 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
+  TypedUser,
 } from 'payload'
 
 import { Gutter, RenderTitle } from '@payloadcms/ui'
@@ -21,8 +22,9 @@ export const DocumentHeader: React.FC<{
   i18n: I18n
   payload: Payload
   permissions: SanitizedPermissions
+  user?: TypedUser
 }> = (props) => {
-  const { collectionConfig, globalConfig, hideTabs, i18n, payload, permissions } = props
+  const { collectionConfig, globalConfig, hideTabs, i18n, payload, permissions, user } = props
 
   return (
     <Gutter className={baseClass}>
@@ -34,6 +36,7 @@ export const DocumentHeader: React.FC<{
           i18n={i18n}
           payload={payload}
           permissions={permissions}
+          user={user}
         />
       )}
     </Gutter>

@@ -7,6 +7,7 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
+  TypedUser,
 } from 'payload'
 import type React from 'react'
 
@@ -18,6 +19,7 @@ import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getViewCondition } from './getViewCondition.js'
 
 export type ViewFromConfig<TProps extends object> = {
   Component?: React.FC<TProps>
@@ -31,11 +33,13 @@ export const getViewsFromConfig = ({
   globalConfig,
   overrideDocPermissions,
   routeSegments,
+  user,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
+  user: TypedUser
 } & (
   | {
       docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
@@ -73,6 +77,21 @@ export const getViewsFromConfig = ({
     config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug) ||
     (globalConfig && globalConfig?.admin?.livePreview) ||
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
+
+  const viewCondition = (viewKey: string, type: 'collection' | 'global'): boolean => {
+    const conditionResult = getViewCondition({
+      name: viewKey,
+      collectionConfig: type === 'collection' ? collectionConfig : undefined,
+      config,
+      globalConfig: type === 'global' ? globalConfig : undefined,
+      user,
+    })
+
+    if (conditionResult) {
+      return true
+    }
+    return false
+  }
 
   if (collectionConfig) {
     const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
@@ -148,7 +167,9 @@ export const getViewsFromConfig = ({
         case 4: {
           switch (segment4) {
             case 'api': {
-              if (collectionConfig?.admin?.hideAPIURL !== true) {
+              const passesCondition = viewCondition('api', 'collection')
+
+              if (passesCondition && collectionConfig?.admin?.hideAPIURL !== true) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'api'),
                 }
@@ -160,7 +181,9 @@ export const getViewsFromConfig = ({
             }
 
             case 'preview': {
-              if (livePreviewEnabled) {
+              const passesCondition = viewCondition('preview', 'collection')
+
+              if (passesCondition && livePreviewEnabled) {
                 DefaultView = {
                   Component: DefaultLivePreviewView,
                 }
@@ -172,7 +195,9 @@ export const getViewsFromConfig = ({
             }
 
             case 'versions': {
-              if (!overrideDocPermissions && docPermissions?.readVersions) {
+              const passesCondition = viewCondition('versions', 'collection')
+
+              if (passesCondition && !overrideDocPermissions && docPermissions?.readVersions) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
@@ -295,7 +320,9 @@ export const getViewsFromConfig = ({
           // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
           switch (segment3) {
             case 'api': {
-              if (globalConfig?.admin?.hideAPIURL !== true) {
+              const passesCondition = viewCondition('api', 'global')
+
+              if (passesCondition && globalConfig?.admin?.hideAPIURL !== true) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'api'),
                 }
@@ -307,7 +334,9 @@ export const getViewsFromConfig = ({
             }
 
             case 'preview': {
-              if (livePreviewEnabled) {
+              const passesCondition = viewCondition('preview', 'global')
+
+              if (passesCondition && livePreviewEnabled) {
                 DefaultView = {
                   Component: DefaultLivePreviewView,
                 }
@@ -319,7 +348,9 @@ export const getViewsFromConfig = ({
             }
 
             case 'versions': {
-              if (!overrideDocPermissions && docPermissions?.readVersions) {
+              const passesCondition = viewCondition('versions', 'global')
+
+              if (passesCondition && !overrideDocPermissions && docPermissions?.readVersions) {
                 CustomView = {
                   ComponentConfig: getCustomViewByKey(views, 'versions'),
                 }
