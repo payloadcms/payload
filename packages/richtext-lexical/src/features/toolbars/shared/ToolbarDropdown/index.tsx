@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useDeferredValue, useEffect, useMemo } from 'react'
 
 const baseClass = 'toolbar-popup__dropdown'
 
@@ -12,8 +12,9 @@ import { $getSelection } from 'lexical'
 import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { DropDown, DropDownItem } from './DropDown.js'
+import { useRunDeprioritized } from '../../../../utilities/useRunDeprioritized.js'
 import './index.scss'
+import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({
   active,
@@ -78,6 +79,8 @@ const ToolbarItem = ({
   )
 }
 
+const MemoToolbarItem = React.memo(ToolbarItem)
+
 export const ToolbarDropdown = ({
   anchorElem,
   classNames,
@@ -103,11 +106,21 @@ export const ToolbarDropdown = ({
   maxActiveItems?: number
   onActiveChange?: ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => void
 }) => {
-  const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
-  const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
-  const [enabledGroup, setEnabledGroup] = React.useState<boolean>(true)
+  const [toolbarState, setToolbarState] = React.useState<{
+    activeItemKeys: string[]
+    enabledGroup: boolean
+    enabledItemKeys: string[]
+  }>({
+    activeItemKeys: [],
+    enabledGroup: true,
+    enabledItemKeys: [],
+  })
+  const deferredToolbarState = useDeferredValue(toolbarState)
+
   const editorConfigContext = useEditorConfigContext()
   const { items, key: groupKey } = group
+
+  const runDeprioritized = useRunDeprioritized()
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -137,11 +150,14 @@ export const ToolbarDropdown = ({
           _enabledItemKeys.push(item.key)
         }
       }
-      if (group.isEnabled) {
-        setEnabledGroup(group.isEnabled({ editor, editorConfigContext, selection }))
-      }
-      setActiveItemKeys(_activeItemKeys)
-      setEnabledItemKeys(_enabledItemKeys)
+
+      setToolbarState({
+        activeItemKeys: _activeItemKeys,
+        enabledGroup: group.isEnabled
+          ? group.isEnabled({ editor, editorConfigContext, selection })
+          : true,
+        enabledItemKeys: _enabledItemKeys,
+      })
 
       if (onActiveChange) {
         onActiveChange({ activeItems: _activeItems })
@@ -150,16 +166,27 @@ export const ToolbarDropdown = ({
   }, [editor, editorConfigContext, group, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
-    updateStates()
-  }, [updateStates])
-
-  useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(() => {
-        updateStates()
+      editor.registerUpdateListener(async () => {
+        await runDeprioritized(updateStates)
       }),
     )
-  }, [editor, updateStates])
+  }, [editor, runDeprioritized, updateStates])
+
+  const renderedItems = useMemo(() => {
+    return items?.length
+      ? items.map((item) => (
+          <MemoToolbarItem
+            active={deferredToolbarState.activeItemKeys.includes(item.key)}
+            anchorElem={anchorElem}
+            editor={editor}
+            enabled={deferredToolbarState.enabledItemKeys.includes(item.key)}
+            item={item}
+            key={item.key}
+          />
+        ))
+      : null
+  }, [items, deferredToolbarState, anchorElem, editor])
 
   return (
     <DropDown
@@ -167,26 +194,13 @@ export const ToolbarDropdown = ({
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
-      disabled={!enabledGroup}
+      disabled={!deferredToolbarState.enabledGroup}
       Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}
     >
-      {items.length
-        ? items.map((item) => {
-            return (
-              <ToolbarItem
-                active={activeItemKeys.includes(item.key)}
-                anchorElem={anchorElem}
-                editor={editor}
-                enabled={enabledItemKeys.includes(item.key)}
-                item={item}
-                key={item.key}
-              />
-            )
-          })
-        : null}
+      {renderedItems}
     </DropDown>
   )
 }
