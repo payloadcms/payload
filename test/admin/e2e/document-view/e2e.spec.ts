@@ -38,6 +38,8 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  viewConditionsCollectionSlug,
+  viewConditionsGlobalSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -68,6 +70,8 @@ describe('Document View', () => {
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
   let editMenuItemsURL: AdminUrlUtil
+  let viewConditionsURL: AdminUrlUtil
+  let viewConditionsGlobalURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -84,6 +88,8 @@ describe('Document View', () => {
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
+    viewConditionsURL = new AdminUrlUtil(serverURL, viewConditionsCollectionSlug)
+    viewConditionsGlobalURL = new AdminUrlUtil(serverURL, viewConditionsGlobalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -679,6 +685,32 @@ describe('Document View', () => {
       })
 
       await expect(customEditMenuItem).toBeVisible()
+    })
+  })
+
+  describe('conditional document views and tabs', () => {
+    test('collection - should hide API tab and view when user does not meet condition', async () => {
+      await page.goto(viewConditionsURL.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      const docTabs = page.locator('.doc-tabs__tabs')
+      await expect(docTabs).not.toContainText('API')
+      const apiViewURL = `${page.url()}/api`
+      await page.goto(apiViewURL)
+      const notFound = page.locator('.not-found__content')
+      await expect(notFound).toBeVisible()
+    })
+
+    test('global - should hide API tab and view in global when user does not meet condition', async () => {
+      await page.goto(viewConditionsGlobalSlug)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      const docTabs = page.locator('.doc-tabs__tabs')
+      await expect(docTabs).not.toContainText('API')
+      const apiViewURL = `${page.url()}/api`
+      await page.goto(apiViewURL)
+      const notFound = page.locator('.not-found__content')
+      await expect(notFound).toBeVisible()
     })
   })
 })

@@ -1,4 +1,5 @@
 import type {
+  Data,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -10,11 +11,12 @@ import { getViewConfig } from '../../elements/DocumentHeader/Tabs/getViewConfig.
 export const getViewCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
+  doc: Data
   globalConfig: SanitizedGlobalConfig
   name: string
   user: TypedUser
 }): boolean => {
-  const { name, collectionConfig, config, globalConfig, user } = args
+  const { name, collectionConfig, config, doc, globalConfig, user } = args
 
   const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
 
@@ -23,11 +25,7 @@ export const getViewCondition = (args: {
   const meetsCondition =
     !condition ||
     (condition &&
-      Boolean(condition({ collectionConfig, config, globalConfig, permissions: {}, user })))
+      Boolean(condition({ collectionConfig, config, doc, globalConfig, permissions: {}, user })))
 
-  if (meetsCondition) {
-    return true
-  }
-
-  return false
+  return meetsCondition
 }

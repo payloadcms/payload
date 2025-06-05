@@ -1,5 +1,6 @@
 import type {
   AdminViewServerProps,
+  Data,
   DocumentViewServerProps,
   PayloadComponent,
   SanitizedCollectionConfig,
@@ -29,6 +30,7 @@ export type ViewFromConfig<TProps extends object> = {
 export const getViewsFromConfig = ({
   collectionConfig,
   config,
+  doc,
   docPermissions,
   globalConfig,
   overrideDocPermissions,
@@ -37,6 +39,7 @@ export const getViewsFromConfig = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
+  doc: Data
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
   user: TypedUser
@@ -83,6 +86,7 @@ export const getViewsFromConfig = ({
       name: viewKey,
       collectionConfig: type === 'collection' ? collectionConfig : undefined,
       config,
+      doc,
       globalConfig: type === 'global' ? globalConfig : undefined,
       user,
     })

@@ -1,5 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Data,
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
   Payload,
@@ -23,13 +24,14 @@ const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
+  doc: Data
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
   payload: Payload
   permissions: SanitizedPermissions
   user: TypedUser
 }> = (props) => {
-  const { collectionConfig, globalConfig, i18n, payload, permissions, user } = props
+  const { collectionConfig, doc, globalConfig, i18n, payload, permissions, user } = props
   const { config } = payload
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
@@ -70,7 +72,14 @@ export const DocumentTabs: React.FC<{
                   !viewCondition ||
                   (viewCondition &&
                     Boolean(
-                      viewCondition({ collectionConfig, config, globalConfig, permissions, user }),
+                      viewCondition({
+                        collectionConfig,
+                        config,
+                        doc,
+                        globalConfig,
+                        permissions,
+                        user,
+                      }),
                     ))
 
                 const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''

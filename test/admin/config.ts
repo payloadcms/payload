@@ -22,10 +22,10 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
-import { TabConditions } from './collections/TabConditions.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
+import { ViewConditions } from './collections/ViewConditions.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -36,6 +36,7 @@ import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
+import { ViewConditionsGlobal } from './globals/ViewConditionsGlobal.js'
 import { seed } from './seed.js'
 import {
   customAdminRoutes,
@@ -176,7 +177,7 @@ export default buildConfigWithDefaults({
     with300Documents,
     ListDrawer,
     Placeholder,
-    TabConditions,
+    ViewConditions,
   ],
   globals: [
     GlobalHidden,
@@ -188,6 +189,7 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
     Settings,
+    ViewConditionsGlobal,
   ],
   i18n: {
     translations: {

@@ -1,16 +1,16 @@
-import type { CollectionConfig } from 'payload'
+import type { GlobalConfig } from 'payload'
 
-import { tabConditionsSlug } from '../slugs.js'
+import { notInViewGlobalSlug } from '../slugs.js'
 
-export const TabConditions: CollectionConfig = {
-  slug: tabConditionsSlug,
+export const ViewConditionsGlobal: GlobalConfig = {
+  slug: notInViewGlobalSlug,
   admin: {
     components: {
       views: {
         edit: {
           api: {
             condition: ({ user }) => {
-              const isAdmin = 'roles' in user && user.roles && user?.roles?.includes('admin')
+              const isAdmin = 'roles' in user && user?.roles?.includes('admin')
               if (isAdmin) {
                 return true
               }

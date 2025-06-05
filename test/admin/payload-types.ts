@@ -90,7 +90,7 @@ export interface Config {
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
     placeholder: Placeholder;
-    'tab-conditions': TabCondition;
+    'view-conditions': ViewCondition;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -120,7 +120,7 @@ export interface Config {
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
-    'tab-conditions': TabConditionsSelect<false> | TabConditionsSelect<true>;
+    'view-conditions': ViewConditionsSelect<false> | ViewConditionsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -528,9 +528,9 @@ export interface Placeholder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tab-conditions".
+ * via the `definition` "view-conditions".
  */
-export interface TabCondition {
+export interface ViewCondition {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -636,8 +636,8 @@ export interface PayloadLockedDocument {
         value: string | Placeholder;
       } | null)
     | ({
-        relationTo: 'tab-conditions';
-        value: string | TabCondition;
+        relationTo: 'view-conditions';
+        value: string | ViewCondition;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1007,9 +1007,9 @@ export interface PlaceholderSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tab-conditions_select".
+ * via the `definition` "view-conditions_select".
  */
-export interface TabConditionsSelect<T extends boolean = true> {
+export interface ViewConditionsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

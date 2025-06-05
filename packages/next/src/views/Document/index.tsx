@@ -222,6 +222,7 @@ export const renderDocument = async ({
       const collectionViews = getViewsFromConfig({
         collectionConfig,
         config,
+        doc,
         docPermissions,
         routeSegments: segments,
         user,
@@ -269,6 +270,7 @@ export const renderDocument = async ({
     if (!RootViewOverride) {
       const globalViews = getViewsFromConfig({
         config,
+        doc,
         docPermissions,
         globalConfig,
         routeSegments: segments,
@@ -376,6 +378,7 @@ export const renderDocument = async ({
         {!RootViewOverride && !drawerSlug && (
           <DocumentHeader
             collectionConfig={collectionConfig}
+            doc={doc}
             globalConfig={globalConfig}
             i18n={i18n}
             payload={payload}
