@@ -702,7 +702,7 @@ describe('Document View', () => {
     })
 
     test('global - should hide API tab and view in global when user does not meet condition', async () => {
-      await page.goto(viewConditionsGlobalSlug)
+      await page.goto(viewConditionsGlobalURL.global(viewConditionsGlobalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       const docTabs = page.locator('.doc-tabs__tabs')

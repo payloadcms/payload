@@ -1,9 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
-import { notInViewGlobalSlug } from '../slugs.js'
+import { viewConditionsGlobalSlug } from '../slugs.js'
 
 export const ViewConditionsGlobal: GlobalConfig = {
-  slug: notInViewGlobalSlug,
+  slug: viewConditionsGlobalSlug,
   admin: {
     components: {
       views: {
