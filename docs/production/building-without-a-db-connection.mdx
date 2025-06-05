@@ -6,8 +6,6 @@ desc: You don't want to have a DB connection while building your Docker containe
 keywords: deployment, production, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-# Building without a DB connection
-
 One of the most common problems when building a site for production, especially with Docker - is the DB connection requirement.
 
 The important note is that Payload by itself does not have this requirement, But [Next.js' SSG ](https://nextjs.org/docs/pages/building-your-application/rendering/static-site-generation) does if any of your route segments have SSG enabled (which is default, unless you opted out or used a [Dynamic API](https://nextjs.org/docs/app/deep-dive/caching#dynamic-apis)) and use the Payload Local API.
