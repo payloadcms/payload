@@ -128,7 +128,7 @@ export const bin = async () => {
         queue,
       })
 
-      await payload.db.destroy!() // close database connections after running jobs so process can exit cleanly
+      await payload.destroy() // close database connections after running jobs so process can exit cleanly
 
       return
     }

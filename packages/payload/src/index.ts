@@ -322,8 +322,22 @@ export class BasePayload {
     return create<TSlug, TSelect>(this, options)
   }
 
+  crons: Cron[] = []
   db: DatabaseAdapter
+
   decrypt = decrypt
+
+  destroy = async () => {
+    if (this.crons.length) {
+      // Remove all crons from the list before stopping them
+      const cronsToStop = this.crons.splice(0, this.crons.length)
+      await Promise.all(cronsToStop.map((cron) => cron.stop()))
+    }
+
+    if (this.db?.destroy && typeof this.db.destroy === 'function') {
+      await this.db.destroy()
+    }
+  }
 
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DuplicateOptions<TSlug, TSelect>,
@@ -334,10 +348,10 @@ export class BasePayload {
 
   email: InitializedEmailAdapter
 
-  encrypt = encrypt
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -783,6 +797,8 @@ export class BasePayload {
               queue: cronConfig.queue,
             })
           })
+
+          this.crons.push(job)
         }),
       )
     }
@@ -832,9 +848,7 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  if (typeof payload.db.destroy === 'function') {
-    await payload.db.destroy()
-  }
+  await payload.destroy()
 
   payload.config = config
 
