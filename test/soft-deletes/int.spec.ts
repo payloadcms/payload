@@ -4,12 +4,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Post } from './payload-types.js'
+import type { Page, Post } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { regularUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { usersSlug } from './collections/Users/index.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -32,20 +34,28 @@ describe('soft-delete', () => {
     }
   })
 
+  let pageOne: Page
   let postOne: Post
   let postTwo: Post
 
   beforeEach(async () => {
     await restClient.login({
-      slug: 'users',
-      credentials: devUser,
+      slug: usersSlug,
+      credentials: regularUser,
     })
 
     user = await payload.login({
-      collection: 'users',
+      collection: usersSlug,
       data: {
-        email: devUser.email,
-        password: devUser.password,
+        email: regularUser.email,
+        password: regularUser.password,
+      },
+    })
+
+    pageOne = await payload.create({
+      collection: pagesSlug,
+      data: {
+        title: 'Page one',
       },
     })
 
@@ -77,7 +87,52 @@ describe('soft-delete', () => {
     })
   })
 
-  describe('LOCAL', () => {
+  // Access control tests use the Pages collection because it has delete access control enabled.
+  // The Posts collection does not have any access restrictions and is used for general CRUD tests.
+  describe('Access control', () => {
+    it('should not allow bulk soft-deleting documents when restricted by delete access', async () => {
+      await expect(
+        payload.update({
+          collection: pagesSlug,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+          user, // Regular user does not have delete access
+          where: {
+            // Using where to target multiple documents
+            title: {
+              equals: pageOne.title,
+            },
+          },
+          overrideAccess: false, // Override access to false to test access control
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+        name: 'Forbidden',
+        message: expect.stringContaining('You are not allowed'),
+      })
+    })
+
+    it('should not allow soft-deleting a document when restricted by delete access', async () => {
+      await expect(
+        payload.update({
+          collection: pagesSlug,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+          id: pageOne.id, // Using ID to target specific document
+          user, // Regular user does not have delete access
+          overrideAccess: false, // Override access to false to test access control
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+        name: 'Forbidden',
+        message: expect.stringContaining('You are not allowed'),
+      })
+    })
+  })
+
+  describe('LOCAL API', () => {
     describe('find / findByID operation', () => {
       it('should return all docs including soft-deleted docs in find with trash: true', async () => {
         const allDocs = await payload.find({
@@ -497,7 +552,7 @@ describe('soft-delete', () => {
     })
   })
 
-  describe('REST', () => {
+  describe('REST API', () => {
     describe('find endpoint', () => {
       it('should return all docs including soft-deleted docs in find with trash=true', async () => {
         const res = await restClient.GET(`/${postsSlug}?trash=true`)
@@ -769,7 +824,7 @@ describe('soft-delete', () => {
     })
   })
 
-  describe('GRAPHQL', () => {
+  describe('GRAPHQL API', () => {
     describe('find query', () => {
       it('should return all docs including soft-deleted docs in find with trash=true', async () => {
         const query = `

@@ -129,6 +129,19 @@ export const updateByIDOperation = async <
 
     let fullWhere = combineQueries(where, accessResults)
 
+    const isSoftDeleteAttempt =
+      collectionConfig.softDeletes &&
+      typeof data === 'object' &&
+      data !== null &&
+      'deletedAt' in data &&
+      data.deletedAt != null &&
+      !overrideAccess
+
+    if (isSoftDeleteAttempt) {
+      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      fullWhere = combineQueries(fullWhere, deleteAccessResult)
+    }
+
     // If trash is false, restrict to non-trashed documents only
     if (collectionConfig.softDeletes && !trash) {
       const notTrashedFilter = { deletedAt: { exists: false } }
