@@ -7,6 +7,7 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { CustomViews3 } from './collections/CustomViews3.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
@@ -47,6 +48,7 @@ import {
 import { editMenuItemsSlug } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -160,6 +162,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    CustomViews3,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,

@@ -2,7 +2,6 @@ import type {
   AdminViewServerProps,
   Data,
   DocumentViewClientProps,
-  DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   PayloadComponent,
 } from 'payload'
@@ -16,8 +15,8 @@ import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { ViewToRender } from './createViewMap.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
-import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -27,7 +26,7 @@ import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getViewFromConfig } from './getViewFromConfig.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -90,9 +89,7 @@ export const renderDocument = async ({
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<DocumentViewServerProps>
-  let DefaultView: ViewFromConfig<DocumentViewServerProps>
-  let ErrorView: ViewFromConfig<AdminViewServerProps>
+  let View: ViewToRender = null
 
   let apiURL: string
 
@@ -219,22 +216,16 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      const collectionViews = getViewsFromConfig({
+      ;({ View } = getViewFromConfig({
         collectionConfig,
         config,
         docPermissions,
         routeSegments: segments,
-      })
-
-      CustomView = collectionViews?.CustomView
-      DefaultView = collectionViews?.DefaultView
-      ErrorView = collectionViews?.ErrorView
+      }))
     }
 
-    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-      ErrorView = {
-        Component: NotFoundView,
-      }
+    if (!View && !RootViewOverride) {
+      View = NotFoundView
     }
   }
 
@@ -266,21 +257,15 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      const globalViews = getViewsFromConfig({
+      ;({ View } = getViewFromConfig({
         config,
         docPermissions,
         globalConfig,
         routeSegments: segments,
-      })
+      }))
 
-      CustomView = globalViews?.CustomView
-      DefaultView = globalViews?.DefaultView
-      ErrorView = globalViews?.ErrorView
-
-      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-        ErrorView = {
-          Component: NotFoundView,
-        }
+      if (!View && !RootViewOverride) {
+        View = NotFoundView
       }
     }
   }
@@ -382,23 +367,12 @@ export const renderDocument = async ({
         )}
         <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
-          {ErrorView
-            ? RenderServerComponent({
-                clientProps,
-                Component: ErrorView.ComponentConfig || ErrorView.Component,
-                importMap,
-                serverProps: documentViewServerProps,
-              })
-            : RenderServerComponent({
-                clientProps,
-                Component: RootViewOverride
-                  ? RootViewOverride
-                  : CustomView?.ComponentConfig || CustomView?.Component
-                    ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component,
-                importMap,
-                serverProps: documentViewServerProps,
-              })}
+          {RenderServerComponent({
+            clientProps,
+            Component: RootViewOverride ? RootViewOverride : View,
+            importMap,
+            serverProps: documentViewServerProps,
+          })}
         </EditDepthProvider>
       </DocumentInfoProvider>
     ),
