@@ -43,9 +43,9 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
         })
         res = await safeOfetch(fileURL, fetchOptions)
       }
-      // @ts-ignore - The expected error is nested
     } catch (error) {
       // Retrieve nested error from dispatcher if available
+      // @ts-ignore - The expected error is nested
       if (error && error?.cause && error.cause?.cause) {
         throw new APIError(error.cause.cause.message, 500, error.cause.cause)
       } else {
