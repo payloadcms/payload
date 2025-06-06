@@ -10,11 +10,11 @@
     "strictBindCallApply": true,
     "strictBuiltinIteratorReturn": true,
     "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
 
-    "strictPropertyInitialization": false, // 13 errors in 1 file
     "noImplicitAny": false, // 277 errors in 55 files
     "noImplicitThis": false, // 2 errors in 1 file
-    "useUnknownInCatchVariables": true, // 18 errors in 13 files
+    "useUnknownInCatchVariables": false, // 18 errors in 13 files
   },
   "references": [{ "path": "../translations" }]
 }

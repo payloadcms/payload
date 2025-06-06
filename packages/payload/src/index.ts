@@ -267,13 +267,13 @@ export class BasePayload {
     return auth(this, options)
   }
 
-  authStrategies: AuthStrategy[]
+  authStrategies!: AuthStrategy[]
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
-  config: SanitizedConfig
+  config!: SanitizedConfig
   /**
    * @description Performs count operation
    * @param options
@@ -323,7 +323,7 @@ export class BasePayload {
   }
 
   crons: Cron[] = []
-  db: DatabaseAdapter
+  db!: DatabaseAdapter
 
   decrypt = decrypt
 
@@ -346,14 +346,14 @@ export class BasePayload {
     return duplicate<TSlug, TSelect>(this, options)
   }
 
-  email: InitializedEmailAdapter
+  email!: InitializedEmailAdapter
 
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
 
   encrypt = encrypt
 
-  extensions: (args: {
+  extensions!: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
     result: ExecutionResult
@@ -453,13 +453,13 @@ export class BasePayload {
 
   getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
 
-  globals: Globals
+  globals!: Globals
 
-  importMap: ImportMap
+  importMap!: ImportMap
 
   jobs = getJobsLocalAPI(this)
 
-  logger: Logger
+  logger!: Logger
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
@@ -499,13 +499,13 @@ export class BasePayload {
     return restoreVersion<TSlug>(this, options)
   }
 
-  schema: GraphQLSchema
+  schema!: GraphQLSchema
 
-  secret: string
+  secret!: string
 
-  sendEmail: InitializedEmailAdapter['sendEmail']
+  sendEmail!: InitializedEmailAdapter['sendEmail']
 
-  types: {
+  types!: {
     arrayTypes: any
     blockInputTypes: any
     blockTypes: any
@@ -529,7 +529,7 @@ export class BasePayload {
     return update<TSlug, TSelect>(this, options)
   }
 
-  validationRules: (args: OperationArgs<any>) => ValidationRule[]
+  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
     options: VerifyEmailOptions<TSlug>,
