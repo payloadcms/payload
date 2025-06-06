@@ -27,6 +27,31 @@ export const Pages: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'custom',
+      type: 'text',
+      defaultValue: 'my custom csv transformer',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row, siblingDoc }) => {
+            return value + ' toCSV'
+          },
+        },
+      },
+    },
+    {
+      name: 'customRelationship',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+            row[`${columnName}_id`] = value.id
+            row[`${columnName}_email`] = value.email
+          },
+        },
+      },
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
@@ -52,6 +77,18 @@ export const Pages: CollectionConfig = {
               type: 'text',
             },
           ],
+        },
+        {
+          name: 'custom',
+          type: 'text',
+          defaultValue: 'my custom csv transformer',
+          custom: {
+            'plugin-import-export': {
+              toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                return value + ' toCSV'
+              },
+            },
+          },
         },
       ],
     },
