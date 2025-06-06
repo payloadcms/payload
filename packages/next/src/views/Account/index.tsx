@@ -136,6 +136,7 @@ export async function Account({ initPageResult, params, searchParams }: AdminVie
         <EditDepthProvider>
           <DocumentHeader
             collectionConfig={collectionConfig}
+            doc={data}
             hideTabs
             i18n={i18n}
             payload={payload}
