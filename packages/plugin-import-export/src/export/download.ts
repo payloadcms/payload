@@ -1,10 +1,10 @@
-import type { PayloadHandler } from 'payload'
+import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
 import { createExport } from './createExport.js'
 
-export const download: PayloadHandler = async (req) => {
+export const download = async (req: PayloadRequest, debug = false) => {
   let body
   if (typeof req?.json === 'function') {
     body = await req.json()
@@ -20,7 +20,7 @@ export const download: PayloadHandler = async (req) => {
 
   return createExport({
     download: true,
-    input: body.data,
+    input: { ...body.data, debug },
     req,
   }) as Promise<Response>
 }
