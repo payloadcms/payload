@@ -1,9 +1,11 @@
-import type { Payload, SanitizedConfig } from 'payload'
+import type { PayloadSDK } from '@payloadcms/sdk'
+import type { GeneratedTypes, Payload, SanitizedConfig } from 'payload'
 
 import path from 'path'
 import { getPayload } from 'payload'
 
 import { runInit } from '../runInit.js'
+import { getSDK } from './getSDK.js'
 import { NextRESTClient } from './NextRESTClient.js'
 
 /**
@@ -13,7 +15,12 @@ export async function initPayloadInt(
   dirname: string,
   testSuiteNameOverride?: string,
   initializePayload = true,
-): Promise<{ config: SanitizedConfig; payload?: Payload; restClient?: NextRESTClient }> {
+): Promise<{
+  config: SanitizedConfig
+  payload?: Payload
+  restClient?: NextRESTClient
+  sdk?: PayloadSDK<GeneratedTypes>
+}> {
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
   await runInit(testSuiteName, false, true)
   console.log('importing config', path.resolve(dirname, 'config.ts'))
@@ -29,5 +36,8 @@ export async function initPayloadInt(
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')
-  return { config: payload.config, payload, restClient }
+
+  const sdk = getSDK(payload.config)
+
+  return { config: payload.config, payload, restClient, sdk }
 }
