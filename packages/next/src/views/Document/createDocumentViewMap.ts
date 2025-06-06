@@ -2,10 +2,13 @@ import type {
   DocumentViewClientProps,
   DocumentViewServerProps,
   EditViewComponent,
+  EditViewConfig,
   PayloadComponent,
   SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  SanitizedGlobalPermission,
 } from 'payload'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
@@ -21,10 +24,14 @@ export type ViewToRender =
   | React.FC<DocumentViewClientProps>
 
 export type ViewMap = {
-  [path: string]: ViewToRender
+  [path: string]: {
+    key: string
+    View: ViewToRender
+    viewConfig: EditViewConfig
+  }
 }
 
-const defaultViews: {
+const defaultDocumentViews: {
   [key: string]: {
     /**
      * A function used to conditionally mount the view.
@@ -32,7 +39,9 @@ const defaultViews: {
     condition?: (args: {
       collectionConfig: SanitizedCollectionConfig
       config: SanitizedConfig
+      docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
       globalConfig: SanitizedGlobalConfig
+      overrideDocPermissions?: boolean
     }) => boolean
     DefaultView: React.FC<DocumentViewClientProps> | React.FC<DocumentViewServerProps>
     path: string
@@ -45,6 +54,7 @@ const defaultViews: {
     path: '/:id/api',
   },
   create: {
+    condition: ({ collectionConfig }) => Boolean(collectionConfig),
     DefaultView: DefaultEditView,
     path: '/create',
   },
@@ -90,34 +100,43 @@ const defaultViews: {
  * @returns {ViewMap}
  * @example
  * {
- *   '/admin/collections/posts/:id': React.FC,
- *   '/admin/collections/posts/:id/api': React.FC,
+ *   '/admin/collections/posts/:id': {
+ *     View: React.FC,
+ *     viewConfig: EditViewConfig
+ *   },
  * }
  */
-export const createViewMap = ({
+export const createDocumentViewMap = ({
   baseRoute,
   collectionConfig,
   config,
+  docPermissions,
   globalConfig,
+  overrideDocPermissions,
 }: {
   baseRoute: string
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
+  docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
+  overrideDocPermissions?: boolean
 }): ViewMap => {
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
 
   const viewMap: ViewMap = Object.entries(views?.edit || {}).reduce((acc, [key, viewConfig]) => {
-    const viewDefaults = defaultViews[key]
+    const viewDefaults = defaultDocumentViews[key]
 
     if (viewDefaults?.condition) {
-      const shouldContinue = viewDefaults.condition({
-        collectionConfig,
-        config,
-        globalConfig,
-      })
+      const shouldContinue =
+        viewDefaults.condition({
+          collectionConfig,
+          config,
+          docPermissions,
+          globalConfig,
+          overrideDocPermissions,
+        }) || true
 
       if (!shouldContinue) {
         return acc
@@ -127,31 +146,43 @@ export const createViewMap = ({
     // Allow the `api` view's route to mount to `/my-api`, and another view to mount to the `/api` route
     const pathToUse = `${baseRoute}${'path' in viewConfig && viewConfig.path ? `/:id${viewConfig.path}` : viewDefaults?.path}`
 
-    acc[pathToUse] =
-      'Component' in viewConfig && viewConfig.Component
-        ? viewConfig.Component
-        : viewDefaults?.DefaultView
+    acc[pathToUse] = {
+      View:
+        'Component' in viewConfig && viewConfig.Component
+          ? viewConfig.Component
+          : viewDefaults?.DefaultView,
+      viewConfig,
+    }
 
     return acc
   }, {})
 
   // Map over the defaults to ensure they are included in the viewMap
-  Object.entries(defaultViews).forEach(([key, defaultViewConfig]) => {
+  Object.entries(defaultDocumentViews).forEach(([key, defaultViewConfig]) => {
     // Do not override path that have already been handled, as these have already been added to the map
     if (!views?.edit?.[key]) {
-      const shouldContinue =
-        defaultViewConfig?.condition({
-          collectionConfig,
-          config,
-          globalConfig,
-        }) || true // default to true if no condition is provided
+      if (defaultViewConfig?.condition) {
+        const shouldContinue =
+          defaultViewConfig.condition({
+            collectionConfig,
+            config,
+            docPermissions,
+            globalConfig,
+            overrideDocPermissions,
+          }) || true
 
-      if (!shouldContinue) {
-        return
+        if (!shouldContinue) {
+          return
+        }
       }
 
       const pathToUse = `${baseRoute}${defaultViewConfig.path}`
-      viewMap[pathToUse] = defaultViewConfig.DefaultView
+
+      viewMap[pathToUse] = {
+        key,
+        View: defaultViewConfig.DefaultView,
+        viewConfig: defaultViewConfig,
+      }
     }
   })
 

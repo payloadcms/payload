@@ -15,7 +15,7 @@ import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { ViewToRender } from './createViewMap.js'
+import type { ViewToRender } from './createDocumentViewMap.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'

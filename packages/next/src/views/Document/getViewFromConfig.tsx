@@ -1,4 +1,5 @@
 import type {
+  EditViewConfig,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedConfig,
@@ -6,12 +7,12 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import type { ViewToRender } from './createViewMap.js'
+import type { ViewToRender } from './createDocumentViewMap.js'
 
 import { NotFoundView } from '../NotFound/index.js'
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
-import { createViewMap } from './createViewMap.js'
+import { createDocumentViewMap } from './createDocumentViewMap.js'
 
 export const getViewsFromConfig = ({
   collectionConfig,
@@ -36,9 +37,13 @@ export const getViewsFromConfig = ({
     }
 )): {
   View: ViewToRender
+  viewConfig: EditViewConfig
+  viewKey: string
 } => {
   // Conditionally import and lazy load the default view
   let View: ViewToRender = null
+  let viewConfig: EditViewConfig = {} as EditViewConfig
+  let viewKey: string = ''
 
   const {
     routes: { admin: adminRoute },
@@ -48,7 +53,7 @@ export const getViewsFromConfig = ({
   let currentRoute: string
 
   if (globalConfig) {
-    const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
+    const [, globalSlug, segment3, ...remainingSegments] = routeSegments
 
     if (!overrideDocPermissions) {
       if (!docPermissions?.read) {
@@ -62,7 +67,7 @@ export const getViewsFromConfig = ({
   }
 
   if (collectionConfig) {
-    const [collectionEntity, collectionSlug, ...remainingSegments] = routeSegments
+    const [, collectionSlug, ...remainingSegments] = routeSegments
 
     if (!overrideDocPermissions) {
       if (remainingSegments[0] === 'create') {
@@ -83,16 +88,17 @@ export const getViewsFromConfig = ({
     currentRoute = [baseRoute, ...remainingSegments].filter(Boolean).join('/')
   }
 
-  const viewMap = createViewMap({
+  const viewMap = createDocumentViewMap({
     baseRoute,
     collectionConfig,
     config,
+    docPermissions,
     globalConfig,
+    overrideDocPermissions,
   })
 
   // use a for...of loop in order to early once a match is found
-  for (const [viewPath, ViewComponent] of Object.entries(viewMap)) {
-    // try and match the view to the route
+  for (const [viewPath, MappedView] of Object.entries(viewMap)) {
     const isMatching = isPathMatchingRoute({
       currentRoute,
       exact: true,
@@ -100,12 +106,16 @@ export const getViewsFromConfig = ({
     })
 
     if (isMatching) {
-      View = ViewComponent
+      View = MappedView.View
+      viewConfig = MappedView.viewConfig
+      viewKey = MappedView.key
       break
     }
   }
 
   return {
     View,
+    viewConfig,
+    viewKey,
   }
 }

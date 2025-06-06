@@ -121,7 +121,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       isEditing,
     })
   } else {
-    const { viewKey } = getViewsFromConfig({
+    const { viewConfig, viewKey } = getViewsFromConfig({
       collectionConfig,
       config,
       globalConfig,
@@ -129,21 +129,15 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 
-    if (viewKey) {
-      const customViewConfig =
-        collectionConfig?.admin?.components?.views?.edit?.[viewKey] ||
-        globalConfig?.admin?.components?.views?.edit?.[viewKey]
-
-      if (customViewConfig) {
-        return generateEditViewMetadata({
-          collectionConfig,
-          config,
-          globalConfig,
-          i18n,
-          isEditing,
-          view: viewKey as keyof EditConfig,
-        })
-      }
+    if (viewConfig) {
+      return generateEditViewMetadata({
+        collectionConfig,
+        config,
+        globalConfig,
+        i18n,
+        isEditing,
+        view: viewKey as keyof EditConfig,
+      })
     }
   }
 
