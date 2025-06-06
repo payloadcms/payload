@@ -168,7 +168,7 @@ export const promise = async ({
         try {
           JSON.parse(siblingData[field.name] as string)
         } catch (e) {
-          jsonError = e
+          jsonError = e as object
         }
       }
 

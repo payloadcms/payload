@@ -4,6 +4,7 @@ import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../config/types.js'
+import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -232,7 +233,8 @@ export const handleEndpoints = async ({
       status: response.status,
       statusText: response.statusText,
     })
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as APIError
     return routeError({
       collection,
       config: incomingConfig,

@@ -977,7 +977,7 @@ export const getPayload = async (
   } catch (e) {
     cached.promise = null
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
-    e.payloadInitError = true
+    ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e
   }
 

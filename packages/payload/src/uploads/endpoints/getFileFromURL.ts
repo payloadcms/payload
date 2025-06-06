@@ -76,7 +76,10 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
         'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
       },
     })
-  } catch (error) {
-    throw new APIError(`Error fetching file: ${error.message}`, 500)
+  } catch (err) {
+    throw new APIError(
+      `Error fetching file: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      500,
+    )
   }
 }

@@ -97,7 +97,8 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           skipEmpty,
         })
       } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`)
+        const error = err instanceof Error ? err.message : 'Unknown error'
+        throw new Error(`Error creating migration: ${error}`)
       }
       break
     case 'migrate:down':

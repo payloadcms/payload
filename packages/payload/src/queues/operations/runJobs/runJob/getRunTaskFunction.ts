@@ -313,7 +313,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
       } catch (err) {
         await handleTaskFailed({
-          error: err,
+          error: err as Error | undefined,
           executedAt,
           input: input!,
           job,

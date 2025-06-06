@@ -236,7 +236,7 @@ export const updateOperation = async <
       } catch (error) {
         errors.push({
           id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null

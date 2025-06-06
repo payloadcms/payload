@@ -374,7 +374,7 @@ export const json: JSONFieldValidation = (
         return ajv.errorsText()
       }
     } catch (error) {
-      return error.message
+      return error instanceof Error ? error.message : 'Unknown error'
     }
   }
   return true
