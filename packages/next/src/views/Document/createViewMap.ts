@@ -74,14 +74,13 @@ export const createViewMap = ({
     const viewDefaults = defaultDocumentViews[key]
 
     if (viewDefaults?.condition) {
-      const shouldContinue =
-        viewDefaults.condition({
-          collectionConfig,
-          config,
-          docPermissions,
-          globalConfig,
-          overrideDocPermissions,
-        }) || true
+      const shouldContinue = viewDefaults.condition({
+        collectionConfig,
+        config,
+        docPermissions,
+        globalConfig,
+        overrideDocPermissions,
+      })
 
       if (!shouldContinue) {
         return acc
@@ -110,14 +109,13 @@ export const createViewMap = ({
     // E.g. if a user has added a custom view on the `api` key
     if (!views?.edit?.[key]) {
       if (defaultViewConfig?.condition) {
-        const shouldContinue =
-          defaultViewConfig.condition({
-            collectionConfig,
-            config,
-            docPermissions,
-            globalConfig,
-            overrideDocPermissions,
-          }) || true
+        const shouldContinue = defaultViewConfig.condition({
+          collectionConfig,
+          config,
+          docPermissions,
+          globalConfig,
+          overrideDocPermissions,
+        })
 
         if (!shouldContinue) {
           return

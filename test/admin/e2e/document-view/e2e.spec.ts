@@ -141,7 +141,7 @@ describe('Document View', () => {
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('global — should not enable API route when disabled in config', async () => {
+    test('global — should not mount API route when disabled in config', async () => {
       await page.goto(`${postsUrl.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
