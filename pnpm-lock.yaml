@@ -44,7 +44,7 @@ importers:
         version: 1.50.0
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))
       '@sentry/node':
         specifier: ^8.33.1
         version: 8.37.1
@@ -128,7 +128,7 @@ importers:
         version: 10.1.3(@aws-sdk/credential-providers@3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0)))(socks@2.8.3)
       next:
         specifier: 15.3.2
-        version: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -825,6 +825,9 @@ importers:
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
+      dns-sync:
+        specifier: 0.2.1
+        version: 0.2.1
       file-type:
         specifier: 19.3.0
         version: 19.3.0
@@ -840,6 +843,9 @@ importers:
       image-size:
         specifier: 2.0.2
         version: 2.0.2
+      ipaddr.js:
+        specifier: 2.2.0
+        version: 2.2.0
       jose:
         specifier: 5.9.6
         version: 5.9.6
@@ -849,6 +855,9 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
+      ofetch:
+        specifier: 1.4.1
+        version: 1.4.1
       path-to-regexp:
         specifier: 6.3.0
         version: 6.3.0
@@ -870,15 +879,15 @@ importers:
       scmp:
         specifier: 2.1.0
         version: 2.1.0
-      ssrf-req-filter:
-        specifier: 1.1.1
-        version: 1.1.1
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
       tsx:
         specifier: 4.19.2
         version: 4.19.2
+      undici:
+        specifier: 7.10.0
+        version: 7.10.0
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -1140,7 +1149,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.37.1
@@ -1499,7 +1508,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: 7.3.0
-        version: 7.3.0(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
+        version: 7.3.0(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1785,7 +1794,7 @@ importers:
         version: link:../packages/ui
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))
+        version: 8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.119.2(react@19.1.0)
@@ -1848,7 +1857,7 @@ importers:
         version: 8.9.5(@aws-sdk/credential-providers@3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0)))(socks@2.8.3)
       next:
         specifier: 15.3.2
-        version: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+        version: 15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       nodemailer:
         specifier: 6.9.16
         version: 6.9.16
@@ -5219,6 +5228,10 @@ packages:
     resolution: {integrity: sha512-DMXYoYeL4QkElr216n1yodTFeATbfb4jwYM9gKn71Rw/FNA1/Sm36tkTSCsZEs7mgpG3OINmkxL9vgVFzyGPaw==}
     engines: {node: '>=18.0.0'}
 
+  '@smithy/types@3.0.0':
+    resolution: {integrity: sha512-VvWuQk2RKFuOr98gFhjca7fkBS+xLLURT8bUjk5XQoV0ZLm7WPwWPPY3/AwzTLuUBDeoKDCthfe1AsTUWaSEhw==}
+    engines: {node: '>=16.0.0'}
+
   '@smithy/types@3.6.0':
     resolution: {integrity: sha512-8VXK/KzOHefoC65yRgCn5vG1cysPJjHnOVt9d0ybFQSmJgQj152vMn4EkYhGuaOmnnZvCPav/KnYyE6/KsNZ2w==}
     engines: {node: '>=16.0.0'}
@@ -6716,6 +6729,9 @@ packages:
     resolution: {integrity: sha512-GYqKi1aH7PJXxdhTeZBFrg8vUBeKXi+cNprXsC1kpJcbcVnV9wBsrOu1cQEdG0WeQwlfHiy3XvnKfIrJ2R0NzQ==}
     hasBin: true
 
+  dns-sync@0.2.1:
+    resolution: {integrity: sha512-VB1pDSVs82kFsZuoHQ5/Ysx62WiIfDGn9sx/x55EoVyk8pLwdqWGB2XCaDDOusBllb+1y3XRijscFPJJfpbFiw==}
+
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
@@ -6908,7 +6924,7 @@ packages:
   esbuild-register@3.6.0:
     resolution: {integrity: sha512-H2/S7Pm8a9CL1uhp9OvjwrBh5Pvx0H8qVOxNu8Wed9Y7qv56MPtq+GGM8RJpq6glYJn9Wspr8uw7l55uyinNeg==}
     peerDependencies:
-      esbuild: '>=0.12 <1'
+      esbuild: 0.25.0
 
   esbuild-sass-plugin@3.3.1:
     resolution: {integrity: sha512-SnO1ls+d52n6j8gRRpjexXI8MsHEaumS0IdDHaYM29Y6gakzZYMls6i9ql9+AWMSQk/eryndmUpXEgT34QrX1A==}
@@ -8264,6 +8280,7 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   license-checker@25.0.1:
@@ -8727,6 +8744,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch-native@1.6.4:
     resolution: {integrity: sha512-IhOigYzAKHd244OC0JIMIUrjzctirCmPkaIfhDeGcEETWof5zKYUW7e7MYvChGWh/4CJeXEgsRyGzuF334rOOQ==}
@@ -9887,9 +9905,6 @@ packages:
   sqids@0.3.0:
     resolution: {integrity: sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==}
 
-  ssrf-req-filter@1.1.1:
-    resolution: {integrity: sha512-z0duj5tuvr5YetayhTdQWHf5gEncHvY6nL1HoqiFaF0gfK8Gc3VpTlxvAf4DaOVwcoczfqsL97H5TJRfYFtEYg==}
-
   stable-hash@0.0.4:
     resolution: {integrity: sha512-LjdcbuBeLcdETCrPn9i8AYAZ1eCtu4ECAWtP7UleOiZ9LzVxRzzUZEoZ8zB24nhkQnDWyET0I+3sWokSDS3E7g==}
 
@@ -10346,6 +10361,10 @@ packages:
   undici@5.28.4:
     resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
     engines: {node: '>=14.0'}
+
+  undici@7.10.0:
+    resolution: {integrity: sha512-u5otvFBOBZvmdjWLVW+5DAc9Nkq8f24g0O9oY7qw2JVIF1VocIFoyz9JFkuVOS2j41AufeO0xnlweJ2RLT8nGw==}
+    engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
     resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}
@@ -14326,7 +14345,7 @@ snapshots:
       '@sentry/utils': 7.119.2
       localforage: 1.10.0
 
-  '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29))':
+  '@sentry/nextjs@8.37.1(@opentelemetry/core@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.54.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(react@19.1.0)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation-http': 0.53.0(@opentelemetry/api@1.9.0)
@@ -14340,9 +14359,9 @@ snapshots:
       '@sentry/types': 8.37.1
       '@sentry/utils': 8.37.1
       '@sentry/vercel-edge': 8.37.1
-      '@sentry/webpack-plugin': 2.22.6(webpack@5.96.1(@swc/core@1.11.29))
+      '@sentry/webpack-plugin': 2.22.6(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))
       chalk: 3.0.0
-      next: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.10
@@ -14450,12 +14469,12 @@ snapshots:
       '@sentry/types': 8.37.1
       '@sentry/utils': 8.37.1
 
-  '@sentry/webpack-plugin@2.22.6(webpack@5.96.1(@swc/core@1.11.29))':
+  '@sentry/webpack-plugin@2.22.6(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))':
     dependencies:
       '@sentry/bundler-plugin-core': 2.22.6
       unplugin: 1.0.1
       uuid: 9.0.0
-      webpack: 5.96.1(@swc/core@1.11.29)
+      webpack: 5.96.1(@swc/core@1.11.29)(esbuild@0.19.12)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -14675,7 +14694,7 @@ snapshots:
 
   '@smithy/middleware-serde@4.0.2':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/middleware-stack@3.0.8':
@@ -14699,7 +14718,7 @@ snapshots:
     dependencies:
       '@smithy/property-provider': 4.0.1
       '@smithy/shared-ini-file-loader': 4.0.1
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/node-http-handler@3.2.5':
@@ -14725,7 +14744,7 @@ snapshots:
 
   '@smithy/property-provider@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/protocol-http@4.1.5':
@@ -14735,7 +14754,7 @@ snapshots:
 
   '@smithy/protocol-http@5.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/querystring-builder@3.0.8':
@@ -14746,7 +14765,7 @@ snapshots:
 
   '@smithy/querystring-builder@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       '@smithy/util-uri-escape': 4.0.0
       tslib: 2.8.1
 
@@ -14771,7 +14790,7 @@ snapshots:
 
   '@smithy/shared-ini-file-loader@4.0.1':
     dependencies:
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/signature-v4@4.2.1':
@@ -14816,6 +14835,10 @@ snapshots:
       '@smithy/util-stream': 4.1.1
       tslib: 2.8.1
 
+  '@smithy/types@3.0.0':
+    dependencies:
+      tslib: 2.8.1
+
   '@smithy/types@3.6.0':
     dependencies:
       tslib: 2.8.1
@@ -14833,7 +14856,7 @@ snapshots:
   '@smithy/url-parser@4.0.1':
     dependencies:
       '@smithy/querystring-parser': 4.0.1
-      '@smithy/types': 4.1.0
+      '@smithy/types': 3.0.0
       tslib: 2.8.1
 
   '@smithy/util-base64@3.0.0':
@@ -16545,6 +16568,13 @@ snapshots:
       path-type: 4.0.0
 
   direction@1.0.4: {}
+
+  dns-sync@0.2.1:
+    dependencies:
+      debug: 4.3.7
+      shelljs: 0.8.5
+    transitivePeerDependencies:
+      - supports-color
 
   doctrine@3.0.0:
     dependencies:
@@ -19049,7 +19079,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
+  next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4):
     dependencies:
       '@next/env': 15.3.2
       '@swc/counter': 0.1.3
@@ -20326,10 +20356,6 @@ snapshots:
 
   sqids@0.3.0: {}
 
-  ssrf-req-filter@1.1.1:
-    dependencies:
-      ipaddr.js: 2.2.0
-
   stable-hash@0.0.4: {}
 
   stack-utils@2.0.6:
@@ -20577,16 +20603,17 @@ snapshots:
       ansi-escapes: 4.3.2
       supports-hyperlinks: 2.3.0
 
-  terser-webpack-plugin@5.3.10(@swc/core@1.11.29)(webpack@5.96.1(@swc/core@1.11.29)):
+  terser-webpack-plugin@5.3.10(@swc/core@1.11.29)(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.36.0
-      webpack: 5.96.1(@swc/core@1.11.29)
+      webpack: 5.96.1(@swc/core@1.11.29)(esbuild@0.19.12)
     optionalDependencies:
       '@swc/core': 1.11.29
+      esbuild: 0.19.12
 
   terser@5.36.0:
     dependencies:
@@ -20808,6 +20835,8 @@ snapshots:
     dependencies:
       '@fastify/busboy': 2.1.1
 
+  undici@7.10.0: {}
+
   unfetch@4.2.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
@@ -20871,14 +20900,14 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  uploadthing@7.3.0(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
+  uploadthing@7.3.0(next@15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)):
     dependencies:
       '@effect/platform': 0.69.8(effect@3.10.3)
       '@uploadthing/mime-types': 0.3.2
       '@uploadthing/shared': 7.1.1
       effect: 3.10.3
     optionalDependencies:
-      next: 15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      next: 15.3.2(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
 
   uri-js@4.4.1:
     dependencies:
@@ -20983,7 +21012,7 @@ snapshots:
 
   webpack-virtual-modules@0.5.0: {}
 
-  webpack@5.96.1(@swc/core@1.11.29):
+  webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6
@@ -20991,7 +21020,7 @@ snapshots:
       '@webassemblyjs/wasm-edit': 1.14.1
       '@webassemblyjs/wasm-parser': 1.14.1
       acorn: 8.14.0
-      browserslist: 4.24.2
+      browserslist: 4.25.0
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.1
       es-module-lexer: 1.5.4
@@ -21005,7 +21034,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.11.29)(webpack@5.96.1(@swc/core@1.11.29))
+      terser-webpack-plugin: 5.3.10(@swc/core@1.11.29)(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.11.29)(esbuild@0.19.12))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:

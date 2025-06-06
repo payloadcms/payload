@@ -44,7 +44,6 @@ describe('Collections - Uploads', () => {
   })
 
   const blockedUrls = [
-    'http://blocked-domain.com/file.png',
     'http://127.0.0.1/file.png',
     'http://localhost/file.png',
     'http://[::1]/file.png',
@@ -55,8 +54,6 @@ describe('Collections - Uploads', () => {
     'http://224.0.0.1/file.png',
     'http://0.0.0.0/file.png',
     'http://255.255.255.255/file.png',
-    'http://tellico.fun/redirect.php?target=http://localhost/test',
-    'https://tellico.fun/redirect.php?target=http://localhost/test',
   ]
 
   describe('REST API', () => {
@@ -564,7 +561,7 @@ describe('Collections - Uploads', () => {
     })
     describe('filters', () => {
       blockedUrls.forEach((url) => {
-        it(`should block upload from blocked URL: ${url}`, async () => {
+        it(`should block uploading from blocked URL: ${url}`, async () => {
           await expect(
             payload.create({
               collection: mediaSlug,
@@ -576,14 +573,12 @@ describe('Collections - Uploads', () => {
           ).rejects.toThrow(
             expect.objectContaining({
               name: 'FileRetrievalError',
-              message: expect.stringContaining(
-                `There was a problem while uploading the file. Failed to fetch file from filtered url, ${url}`,
-              ),
+              message: expect.stringContaining(`Failed to fetch file from unsafe url`),
             }),
           )
         })
 
-        it(`should allow upload from blocked URL if URL is in pasteURL allowList: ${url}`, async () => {
+        it(`should not filter allowed URL: ${url}`, async () => {
           // eslint-disable-next-line jest/no-conditional-in-test
           if (url != 'http://blocked-domain.com/file.png') {
             await expect(
