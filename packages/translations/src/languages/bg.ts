@@ -256,6 +256,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     dark: 'Тъмна',
     dashboard: 'Табло',
     delete: 'Изтрий',
+    deletedAt: 'Изтрито на',
     deletedCountSuccessfully: 'Изтрити {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Изтрито успешно.',
     deleting: 'Изтриване...',

@@ -26,6 +26,7 @@ export type Arguments = {
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -43,6 +44,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     select: incomingSelect,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = args
 
@@ -70,7 +72,18 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       where: where!,
     })
 
-    const fullWhere = combineQueries(where!, accessResults)
+    let fullWhere = combineQueries(where!, accessResults)
+
+    // If trash is false, restrict to non-trashed documents only
+    if (collectionConfig.softDeletes && !trash) {
+      const notTrashedFilter = { 'version.deletedAt': { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
 
     const select = sanitizeSelect({
       fields: buildVersionCollectionFields(payload.config, collectionConfig, true),

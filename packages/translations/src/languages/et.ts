@@ -254,6 +254,7 @@ export const etTranslations: DefaultTranslationsObject = {
     dark: 'Tume',
     dashboard: 'Töölaud',
     delete: 'Kustuta',
+    deletedAt: 'Kustutatud',
     deletedCountSuccessfully: 'Kustutatud {{count}} {{label}} edukalt.',
     deletedSuccessfully: 'Edukalt kustutatud.',
     deleting: 'Kustutamine...',

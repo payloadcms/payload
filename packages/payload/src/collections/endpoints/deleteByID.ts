@@ -14,6 +14,7 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const overrideLock = searchParams.get('overrideLock')
+  const trash = searchParams.get('trash') === 'true'
 
   const doc = await deleteByIDOperation({
     id,
@@ -23,6 +24,7 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(req.query.populate),
     req,
     select: sanitizeSelectParam(req.query.select),
+    trash,
   })
 
   const headers = headersWithCors({
