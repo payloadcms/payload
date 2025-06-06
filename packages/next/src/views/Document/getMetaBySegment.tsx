@@ -129,8 +129,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 
-    console.log(viewKey)
-
     if (viewConfig) {
       return generateEditViewMetadata({
         collectionConfig,

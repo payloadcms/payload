@@ -37,8 +37,8 @@ export const getViewFromConfig = ({
     }
 )): {
   View: ViewToRender
-  viewConfig: EditViewConfig
-  viewKey: string
+  viewConfig?: EditViewConfig
+  viewKey?: string
 } => {
   // Conditionally import and lazy load the default view
   let View: ViewToRender = null
@@ -55,14 +55,12 @@ export const getViewFromConfig = ({
   if (collectionConfig) {
     const [, collectionSlug, segment3, ...remainingSegments] = routeSegments
 
-    if (!overrideDocPermissions) {
-      if (segment3 === 'create') {
-        if ('create' in docPermissions && docPermissions.create) {
-          View = UnauthorizedView
-        }
-      } else {
-        if (!docPermissions?.read) {
-          View = NotFoundView
+    if (!overrideDocPermissions && !docPermissions?.read) {
+      throw new Error('not-found')
+    } else {
+      if (segment3 === 'create' && 'create' in docPermissions && !docPermissions.create) {
+        return {
+          View: UnauthorizedView,
         }
       }
     }
@@ -84,7 +82,9 @@ export const getViewFromConfig = ({
 
     if (!overrideDocPermissions) {
       if (!docPermissions?.read) {
-        View = NotFoundView
+        return {
+          View: NotFoundView,
+        }
       }
     }
 
