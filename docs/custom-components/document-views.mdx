@@ -182,50 +182,57 @@ export function MyCustomTabComponent(props: DocumentTabClientProps) {
 }
 ```
 
-## Replacing the Default View
+## Reordering Tabs
 
-In some cases, you may want to replace the default document view with a different view, such as a Live Preview or a custom view. It is possible to do this by adjusting properties on the `view` option.
+You can control the order in which tabs appear in the Document View by using the order property on each tab's configuration. This applies to both default system tabs (like Edit or API) and custom tabs you define.
 
-To swap the default view with another, follow these steps:
+Tabs are rendered in ascending order based on their order value. Lower numbers appear first. Tabs without an order value will appear after all tabs that have one, in the order they were defined in the config.
 
-1. **Update the `default` key's `path` and `tab.href`**: Set these to a new path (for example, `/edit`) so the original default view is no longer mounted at the root path.
+#### Example
 
-2. **Set your new view's `path` and `tab.href` to the root**: For the new default view, set its `path` and `tab.href` to an empty string (`''`). This mounts your chosen view at the root and ensures it is the initial view shown.
-
-3. _(Optional)_ **Reorder tabs**: If you want the new default view's tab to appear first in the navigation, adjust its `order` property to a lower number (e.g., `0`).
-
-**Example: Swapping the Default Edit View with Live Preview**
-
-The following example swaps the default Edit View with the Live Preview view. When a user visits a document, the Live Preview will now be displayed first, and the Edit View will be available under the `/edit` path:
+The following configuration places the Edit tab first, a Custom tab second, and the Live Preview tab third:
 
 ```ts
-import { buildConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-const config = buildConfig({
-  // ...
+export const MyCollection: CollectionConfig = {
+  slug: 'my-collection',
   admin: {
     components: {
       views: {
         edit: {
-          // highlight-start
           default: {
-            path: '/edit',
             tab: {
-              href: '/edit',
-              order: 100,
+              // highlight-start
+              order: 0,
+              // highlight-end
+            },
+          },
+          customTab: {
+            path: '/custom-tab',
+            Component: '/path/to/MyCustomTab',
+            tab: {
+              // highlight-start
+              order: 10,
+              // highlight-end
+              label: 'Custom',
+              href: '/custom-tab',
             },
           },
           livePreview: {
-            path: '',
             tab: {
-              href: '',
-              order: 0,
+              // highlight-start
+              order: 20,
+              // highlight-end
             },
           },
         },
-        // highlight-end
       },
     },
   },
-})
+}
 ```
+
+<Banner type="info">
+  **Note:** This applies to _both_ Collections _and_ Globals.
+</Banner>

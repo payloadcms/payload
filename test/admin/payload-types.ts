@@ -76,7 +76,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
-    'custom-views-tabs': CustomViewsTab;
+    'reorder-tabs': ReorderTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
@@ -106,7 +106,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
-    'custom-views-tabs': CustomViewsTabsSelect<false> | CustomViewsTabsSelect<true>;
+    'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
@@ -342,9 +342,9 @@ export interface CustomViewsTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-views-tabs".
+ * via the `definition` "reorder-tabs".
  */
-export interface CustomViewsTab {
+export interface ReorderTab {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -579,8 +579,8 @@ export interface PayloadLockedDocument {
         value: string | CustomViewsTwo;
       } | null)
     | ({
-        relationTo: 'custom-views-tabs';
-        value: string | CustomViewsTab;
+        relationTo: 'reorder-tabs';
+        value: string | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
@@ -836,9 +836,9 @@ export interface CustomViewsTwoSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-views-tabs_select".
+ * via the `definition` "reorder-tabs_select".
  */
-export interface CustomViewsTabsSelect<T extends boolean = true> {
+export interface ReorderTabsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

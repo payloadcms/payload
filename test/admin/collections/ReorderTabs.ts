@@ -1,24 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
-import { customViewsTabsSlug } from '../slugs.js'
+import { reorderTabsSlug } from '../slugs.js'
 
-export const CustomViewsTabs: CollectionConfig = {
-  slug: customViewsTabsSlug,
+export const ReorderTabs: CollectionConfig = {
+  slug: reorderTabsSlug,
   admin: {
     components: {
       views: {
         edit: {
           default: {
-            path: '/edit',
             tab: {
-              href: '/edit',
               order: 100,
             },
           },
           livePreview: {
-            path: '',
             tab: {
-              href: '',
               order: 0,
             },
           },

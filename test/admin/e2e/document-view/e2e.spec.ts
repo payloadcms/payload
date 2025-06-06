@@ -31,7 +31,6 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
-  customViewsTabsSlug,
   editMenuItemsSlug,
   globalSlug,
   group1Collection1Slug,
@@ -39,6 +38,7 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  reorderTabsSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -68,7 +68,7 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
-  let customViewTabsURL: AdminUrlUtil
+  let reorderTabsURL: AdminUrlUtil
   let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
 
@@ -86,7 +86,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
-    customViewTabsURL = new AdminUrlUtil(serverURL, customViewsTabsSlug)
+    reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
 
     const context = await browser.newContext()
@@ -650,33 +650,23 @@ describe('Document View', () => {
     })
   })
 
-  describe('custom view paths', () => {
+  describe('reordering tabs', () => {
     beforeEach(async () => {
-      await page.goto(customViewTabsURL.create)
-      await page.locator('#field-title').fill('Test Custom View Tabs')
+      await page.goto(reorderTabsURL.create)
+      await page.locator('#field-title').fill('Reorder Tabs')
       await saveDocAndAssert(page)
     })
 
-    test('collection — should show live preview as first tab and default view', async () => {
+    test('collection — should show live preview as first tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
       await expect(firstTab).toContainText('Live Preview')
-
-      const iframe = page.locator('.live-preview-iframe')
-      await expect(iframe).toBeVisible()
     })
 
     test('collection — should show edit as third tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const secondTab = tabs.nth(2)
       await expect(secondTab).toContainText('Edit')
-    })
-
-    test('collection — should have `/edit` path', async () => {
-      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
-      const secondTab = tabs.nth(2)
-      await secondTab.click()
-      await expect(page).toHaveURL(/\/edit/)
     })
   })
 

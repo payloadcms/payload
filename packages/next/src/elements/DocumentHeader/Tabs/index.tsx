@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
   DocumentTabClientProps,
-  DocumentTabConfig,
   DocumentTabServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
@@ -63,31 +62,70 @@ export const DocumentTabs: React.FC<{
           <ul className={`${baseClass}__tabs`}>
             {combinedTabs.map((tab, index) => {
               if (tab.type === 'default') {
-                const { name, tab: tabConfig } = tab.config as {
-                  name: string
-                  tab: DocumentTabConfig
+                if ('name' in tab.config && 'tab' in tab.config) {
+                  const { name, tab: tabConfig } = tab.config
+                  const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
+                  const tabFromConfig =
+                    viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
+
+                  const { condition } = tabFromConfig || {}
+
+                  const meetsCondition =
+                    !condition ||
+                    (condition &&
+                      Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
+
+                  const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
+
+                  if (meetsCondition) {
+                    if (tabFromConfig?.Component) {
+                      return RenderServerComponent({
+                        clientProps: {
+                          path,
+                        } satisfies DocumentTabClientProps,
+                        Component: tabFromConfig.Component,
+                        importMap: payload.importMap,
+                        key: `tab-${index}`,
+                        serverProps: {
+                          collectionConfig,
+                          globalConfig,
+                          i18n,
+                          payload,
+                          permissions,
+                        } satisfies DocumentTabServerPropsOnly,
+                      })
+                    }
+
+                    return (
+                      <DocumentTab
+                        key={`tab-${index}`}
+                        path={path}
+                        {...{
+                          ...props,
+                          ...(tabConfig || {}),
+                          ...(tabFromConfig || {}),
+                        }}
+                      />
+                    )
+                  }
+
+                  return null
                 }
-                const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
+                return null
+              }
 
-                const { condition } = tabFromConfig || {}
+              if (tab.type === 'custom') {
+                if ('path' in tab.config && 'tab' in tab.config) {
+                  const { path, tab: tabConfig } = tab.config
 
-                const meetsCondition =
-                  !condition ||
-                  (condition &&
-                    Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
-
-                const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
-
-                if (meetsCondition) {
-                  if (tabFromConfig?.Component) {
+                  if (tabConfig.Component) {
                     return RenderServerComponent({
                       clientProps: {
                         path,
                       } satisfies DocumentTabClientProps,
-                      Component: tabFromConfig.Component,
+                      Component: tabConfig.Component,
                       importMap: payload.importMap,
-                      key: `tab-${index}`,
+                      key: `tab-custom-${index}`,
                       serverProps: {
                         collectionConfig,
                         globalConfig,
@@ -100,54 +138,16 @@ export const DocumentTabs: React.FC<{
 
                   return (
                     <DocumentTab
-                      key={`tab-${index}`}
+                      key={`tab-custom-${index}`}
                       path={path}
                       {...{
                         ...props,
-                        ...(tabConfig || {}),
-                        ...(tabFromConfig || {}),
+                        ...tabConfig,
                       }}
                     />
                   )
                 }
-
                 return null
-              }
-
-              if (tab.type === 'custom') {
-                const { path, tab: tabConfig } = tab.config as {
-                  path: string
-                  tab: DocumentTabConfig
-                }
-
-                if (tabConfig.Component) {
-                  return RenderServerComponent({
-                    clientProps: {
-                      path,
-                    } satisfies DocumentTabClientProps,
-                    Component: tabConfig.Component,
-                    importMap: payload.importMap,
-                    key: `tab-custom-${index}`,
-                    serverProps: {
-                      collectionConfig,
-                      globalConfig,
-                      i18n,
-                      payload,
-                      permissions,
-                    } satisfies DocumentTabServerPropsOnly,
-                  })
-                }
-
-                return (
-                  <DocumentTab
-                    key={`tab-custom-${index}`}
-                    path={path}
-                    {...{
-                      ...props,
-                      ...tabConfig,
-                    }}
-                  />
-                )
               }
               return null
             })}

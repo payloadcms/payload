@@ -8,7 +8,6 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
-import { CustomViewsTabs } from './collections/CustomViewsTabs.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
@@ -23,6 +22,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
@@ -46,14 +46,14 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { customViewsTabsSlug, editMenuItemsSlug } from './slugs.js'
+import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
     livePreview: {
-      collections: [customViewsTabsSlug, editMenuItemsSlug],
+      collections: [reorderTabsSlug, editMenuItemsSlug],
       url: 'http://localhost:3000',
     },
     importMap: {
@@ -163,7 +163,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
-    CustomViewsTabs,
+    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,

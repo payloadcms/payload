@@ -24,17 +24,6 @@ export type ViewFromConfig<TProps extends object> = {
   ComponentConfig?: PayloadComponent<TProps>
 }
 
-type ViewKey = 'api' | 'create' | 'default' | 'livePreview' | 'version' | 'versions'
-
-export const defaultViewsByKey: Record<ViewKey, React.FC<DocumentViewServerProps>> = {
-  api: DefaultAPIView,
-  create: DefaultEditView,
-  default: DefaultEditView,
-  livePreview: DefaultLivePreviewView,
-  version: DefaultVersionView,
-  versions: DefaultVersionsView,
-}
-
 export const getViewsFromConfig = ({
   collectionConfig,
   config,
@@ -135,14 +124,9 @@ export const getViewsFromConfig = ({
 
               if (customViewKey) {
                 viewKey = customViewKey
-                if (CustomViewComponent) {
-                  CustomView = {
-                    ComponentConfig: CustomViewComponent,
-                  }
-                } else {
-                  DefaultView = {
-                    Component: defaultViewsByKey[customViewKey as ViewKey],
-                  }
+
+                CustomView = {
+                  ComponentConfig: CustomViewComponent,
                 }
               } else {
                 CustomView = {
@@ -227,14 +211,8 @@ export const getViewsFromConfig = ({
               if (customViewKey) {
                 viewKey = customViewKey
 
-                if (CustomViewComponent) {
-                  CustomView = {
-                    ComponentConfig: CustomViewComponent,
-                  }
-                } else {
-                  DefaultView = {
-                    Component: defaultViewsByKey[customViewKey as ViewKey],
-                  }
+                CustomView = {
+                  ComponentConfig: CustomViewComponent,
                 }
               }
 
@@ -284,14 +262,8 @@ export const getViewsFromConfig = ({
             if (customViewKey) {
               viewKey = customViewKey
 
-              if (CustomViewComponent) {
-                CustomView = {
-                  ComponentConfig: CustomViewComponent,
-                }
-              } else {
-                DefaultView = {
-                  Component: defaultViewsByKey[customViewKey as ViewKey],
-                }
+              CustomView = {
+                ComponentConfig: CustomViewComponent,
               }
             }
           }
@@ -379,17 +351,16 @@ export const getViewsFromConfig = ({
                     currentRoute,
                     views,
                   })
+
                 if (customViewKey) {
                   viewKey = customViewKey
 
-                  if (CustomViewComponent) {
-                    CustomView = {
-                      ComponentConfig: CustomViewComponent,
-                    }
-                  } else {
-                    DefaultView = {
-                      Component: defaultViewsByKey[customViewKey as ViewKey],
-                    }
+                  CustomView = {
+                    ComponentConfig: CustomViewComponent,
+                  }
+                } else {
+                  DefaultView = {
+                    Component: DefaultEditView,
                   }
                 }
               } else {
@@ -438,14 +409,8 @@ export const getViewsFromConfig = ({
             if (customViewKey) {
               viewKey = customViewKey
 
-              if (CustomViewComponent) {
-                CustomView = {
-                  ComponentConfig: CustomViewComponent,
-                }
-              } else {
-                DefaultView = {
-                  Component: defaultViewsByKey[customViewKey as ViewKey],
-                }
+              CustomView = {
+                ComponentConfig: CustomViewComponent,
               }
             }
           }
