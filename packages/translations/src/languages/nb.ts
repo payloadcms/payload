@@ -193,7 +193,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Du er i ferd med å flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
     moveItemToRootConfirmation:
       'Du er i ferd med å flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
-    movingFromFolder: 'Flytte {{title}} fra {{folderName}}',
+    movingFromFolder: 'Flytte {{title}} fra {{fromFolder}}',
     newFolder: 'Ny mappe',
     noFolder: 'Ingen mappe',
     renameFolder: 'Endre mappenavn',

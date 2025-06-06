@@ -194,7 +194,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Ви збираєтеся перемістити <1>{{title}}</1> до <2>{{toFolder}}</2>. Ви впевнені?',
     moveItemToRootConfirmation:
       'Ви збираєтеся перемістити <1>{{title}}</1> до кореневої папки. Ви впевнені?',
-    movingFromFolder: 'Переміщення {{title}} з {{folderName}}',
+    movingFromFolder: 'Переміщення {{title}} з {{fromFolder}}',
     newFolder: 'Нова папка',
     noFolder: 'Немає папки',
     renameFolder: 'Перейменувати папку',
