@@ -90,6 +90,7 @@ export interface Config {
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
     placeholder: Placeholder;
+    'view-conditions': ViewCondition;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -119,6 +120,7 @@ export interface Config {
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
+    'view-conditions': ViewConditionsSelect<false> | ViewConditionsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -136,6 +138,7 @@ export interface Config {
     'group-globals-one': GroupGlobalsOne;
     'group-globals-two': GroupGlobalsTwo;
     settings: Setting;
+    'view-conditions-global': ViewConditionsGlobal;
   };
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
@@ -147,6 +150,7 @@ export interface Config {
     'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
     'group-globals-two': GroupGlobalsTwoSelect<false> | GroupGlobalsTwoSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'view-conditions-global': ViewConditionsGlobalSelect<false> | ViewConditionsGlobalSelect<true>;
   };
   locale: 'es' | 'en';
   user: User & {
@@ -278,6 +282,7 @@ export interface User {
   id: string;
   textField?: string | null;
   sidebarField?: string | null;
+  roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -525,6 +530,16 @@ export interface Placeholder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "view-conditions".
+ */
+export interface ViewCondition {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -621,6 +636,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'placeholder';
         value: string | Placeholder;
+      } | null)
+    | ({
+        relationTo: 'view-conditions';
+        value: string | ViewCondition;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -764,6 +783,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   textField?: T;
   sidebarField?: T;
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -989,6 +1009,15 @@ export interface PlaceholderSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "view-conditions_select".
+ */
+export interface ViewConditionsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1112,6 +1141,16 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "view-conditions-global".
+ */
+export interface ViewConditionsGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hidden-global_select".
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
@@ -1197,6 +1236,16 @@ export interface GroupGlobalsTwoSelect<T extends boolean = true> {
  */
 export interface SettingsSelect<T extends boolean = true> {
   canAccessProtected?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "view-conditions-global_select".
+ */
+export interface ViewConditionsGlobalSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

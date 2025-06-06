@@ -1,11 +1,13 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Data,
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
+  TypedUser,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -22,12 +24,14 @@ const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
+  doc: Data
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
   payload: Payload
   permissions: SanitizedPermissions
+  user: TypedUser
 }> = (props) => {
-  const { collectionConfig, globalConfig, i18n, payload, permissions } = props
+  const { collectionConfig, doc, globalConfig, i18n, payload, permissions, user } = props
   const { config } = payload
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
@@ -62,9 +66,25 @@ export const DocumentTabs: React.FC<{
                   (condition &&
                     Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
 
+                const { condition: viewCondition } = viewConfig || {}
+
+                const meetsViewCondition =
+                  !viewCondition ||
+                  (viewCondition &&
+                    Boolean(
+                      viewCondition({
+                        collectionConfig,
+                        config,
+                        doc,
+                        globalConfig,
+                        permissions,
+                        user,
+                      }),
+                    ))
+
                 const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
 
-                if (meetsCondition) {
+                if (meetsCondition && meetsViewCondition) {
                   if (tabFromConfig?.Component) {
                     return RenderServerComponent({
                       clientProps: {

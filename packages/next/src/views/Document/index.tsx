@@ -222,8 +222,10 @@ export const renderDocument = async ({
       const collectionViews = getViewsFromConfig({
         collectionConfig,
         config,
+        doc,
         docPermissions,
         routeSegments: segments,
+        user,
       })
 
       CustomView = collectionViews?.CustomView
@@ -268,9 +270,11 @@ export const renderDocument = async ({
     if (!RootViewOverride) {
       const globalViews = getViewsFromConfig({
         config,
+        doc,
         docPermissions,
         globalConfig,
         routeSegments: segments,
+        user,
       })
 
       CustomView = globalViews?.CustomView
@@ -374,10 +378,12 @@ export const renderDocument = async ({
         {!RootViewOverride && !drawerSlug && (
           <DocumentHeader
             collectionConfig={collectionConfig}
+            doc={doc}
             globalConfig={globalConfig}
             i18n={i18n}
             payload={payload}
             permissions={permissions}
+            user={user}
           />
         )}
         <HydrateAuthProvider permissions={permissions} />
