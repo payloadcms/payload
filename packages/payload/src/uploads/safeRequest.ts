@@ -85,6 +85,7 @@ export class SafeDispatcher extends Dispatcher {
       hostname = hostname.hostname
     }
     if (typeof hostname === 'string') {
+      // @ts-ignore - dns-sync does not have types
       const ip: string = dnsSync.resolve(hostname)
       if (!isSafeIp(ip)) {
         const error = new APIError(`Failed to fetch file from unsafe url, ${hostname} (${ip})`, 400)
