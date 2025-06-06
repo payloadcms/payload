@@ -193,7 +193,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'Pravkar boste premaknili <1>{{title}}</1> v <2>{{toFolder}}</2>. Ste prepričani?',
     moveItemToRootConfirmation:
       'Pravkar boste premaknili <1>{{title}}</1> v korensko mapo. Ali ste prepričani?',
-    movingFromFolder: 'Premik {{title}} iz {{folderName}}',
+    movingFromFolder: 'Premik {{title}} iz {{fromFolder}}',
     newFolder: 'Nova mapa',
     noFolder: 'Brez mape',
     renameFolder: 'Preimenuj Mapo',

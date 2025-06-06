@@ -1,7 +1,5 @@
 'use client'
 
-import type { FolderOrDocument } from 'payload/shared'
-
 import { useModal } from '@faceless-ui/modal'
 import { extractID } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -41,6 +39,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const {
     clearSelections,
     currentFolder,
+    folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
     folderID,
