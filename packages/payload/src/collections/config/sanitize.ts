@@ -11,12 +11,12 @@ import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import {
@@ -174,6 +174,14 @@ export const sanitizeCollection = async (
 
       sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
     }
+  }
+
+  if (sanitized.folders === true) {
+    sanitized.folders = {
+      browseByFolder: true,
+    }
+  } else if (sanitized.folders) {
+    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
   }
 
   if (sanitized.upload) {

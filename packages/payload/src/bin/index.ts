@@ -5,8 +5,6 @@ import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
 
-import type { BinScript } from '../config/types.js'
-
 import { findConfig } from '../config/find.js'
 import payload, { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
@@ -130,7 +128,7 @@ export const bin = async () => {
         queue,
       })
 
-      await payload.db.destroy!() // close database connections after running jobs so process can exit cleanly
+      await payload.destroy() // close database connections after running jobs so process can exit cleanly
 
       return
     }

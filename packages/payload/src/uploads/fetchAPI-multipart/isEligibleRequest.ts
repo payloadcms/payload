@@ -19,7 +19,7 @@ const hasAcceptableContentType = (req: Request): boolean => {
 export const isEligibleRequest = (req: Request): boolean => {
   try {
     return hasBody(req) && hasAcceptableMethod(req) && hasAcceptableContentType(req)
-  } catch (e) {
+  } catch (ignore) {
     return false
   }
 }

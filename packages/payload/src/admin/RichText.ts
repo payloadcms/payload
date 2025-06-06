@@ -1,13 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type {
-  Config,
-  ImportMapGenerators,
-  PayloadComponent,
-  SanitizedConfig,
-} from '../config/types.js'
+import type { ImportMapGenerators, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
   FieldAffectingData,
@@ -22,8 +18,11 @@ import type { RichTextFieldClientProps, RichTextFieldServerProps } from './field
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TData extends TypeWithID = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   currentDepth?: number
@@ -58,6 +57,7 @@ export type AfterReadRichTextHookArgs<
 export type AfterChangeRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
@@ -73,6 +73,7 @@ export type AfterChangeRichTextHookArgs<
 export type BeforeValidateRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
@@ -87,6 +88,7 @@ export type BeforeValidateRichTextHookArgs<
 export type BeforeChangeRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /**

@@ -34,7 +34,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     onChange,
     onKeyDown,
     path,
-    placeholder,
+    placeholder: placeholderFromProps,
     readOnly,
     required,
     rtl,
@@ -91,6 +91,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     }
   }
 
+  const placeholder = getTranslation(placeholderFromProps, i18n)
+
   return (
     <div
       className={[
@@ -143,7 +145,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             }}
             onChange={onChange}
             options={[]}
-            placeholder={t('general:enterAValue')}
+            placeholder={placeholder}
             showError={showError}
             value={valueToRender}
           />
@@ -155,7 +157,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             name={path}
             onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
             onKeyDown={onKeyDown}
-            placeholder={getTranslation(placeholder, i18n)}
+            placeholder={placeholder}
             ref={inputRef}
             type="text"
             value={value || ''}
