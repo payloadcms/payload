@@ -12,7 +12,6 @@ import {
   customTabViewPath,
   customVersionsTabMetaTitle,
   customViewMetaTitle,
-  overriddenDefaultRouteTabLabel,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
@@ -26,10 +25,8 @@ export const CustomViews2: CollectionConfig = {
       views: {
         edit: {
           api: {
-            path: '/my-api',
-            // Override the default tab component for the default route
+            // Override the default tab component for the default API View
             tab: {
-              href: '/something',
               Component: {
                 path: '/components/CustomTabComponent/index.js#CustomTabComponent',
                 clientProps: {

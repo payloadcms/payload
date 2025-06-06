@@ -51,7 +51,7 @@ const defaultDocumentViews: {
     condition: ({ collectionConfig, globalConfig }) =>
       collectionConfig?.admin?.hideAPIURL !== true && globalConfig?.admin?.hideAPIURL !== true,
     DefaultView: DefaultAPIView,
-    path: '/:id/api',
+    path: '/api',
   },
   create: {
     condition: ({ collectionConfig }) => Boolean(collectionConfig),
@@ -60,7 +60,7 @@ const defaultDocumentViews: {
   },
   default: {
     DefaultView: DefaultEditView,
-    path: '/:id',
+    path: '/',
   },
   livePreview: {
     condition: ({
@@ -79,19 +79,19 @@ const defaultDocumentViews: {
           config?.admin?.livePreview?.globals?.includes(globalConfig?.slug),
       ),
     DefaultView: LivePreviewView,
-    path: '/:id/preview',
+    path: '/preview',
   },
   version: {
     condition: ({ docPermissions, overrideDocPermissions }) =>
       Boolean(!overrideDocPermissions && docPermissions?.readVersions),
     DefaultView: VersionView,
-    path: '/:id/versions/:versionId',
+    path: '/versions/:versionId',
   },
   versions: {
     condition: ({ docPermissions, overrideDocPermissions }) =>
       Boolean(!overrideDocPermissions && docPermissions?.readVersions),
     DefaultView: VersionsView,
-    path: '/:id/versions',
+    path: '/versions',
   },
 }
 
@@ -106,7 +106,7 @@ const defaultDocumentViews: {
  *   },
  * }
  */
-export const createDocumentViewMap = ({
+export const createViewMap = ({
   baseRoute,
   collectionConfig,
   config,
@@ -143,8 +143,12 @@ export const createDocumentViewMap = ({
       }
     }
 
-    // Allow the `api` view's route to mount to `/my-api`, and another view to mount to the `/api` route
-    const pathToUse = `${baseRoute}${'path' in viewConfig && viewConfig.path ? `/:id${viewConfig.path}` : viewDefaults?.path}`
+    // allow the `api` view's route to mount to `/my-api`, and another view to mount to the `/api` route
+    let pathToUse = `${baseRoute}${'path' in viewConfig && viewConfig.path ? viewConfig.path : viewDefaults?.path}`
+
+    if (pathToUse.endsWith('/')) {
+      pathToUse = pathToUse.slice(0, -1)
+    }
 
     acc[pathToUse] = {
       View:
@@ -176,7 +180,11 @@ export const createDocumentViewMap = ({
         }
       }
 
-      const pathToUse = `${baseRoute}${defaultViewConfig.path}`
+      let pathToUse = `${baseRoute}${defaultViewConfig.path}`
+
+      if (pathToUse.endsWith('/')) {
+        pathToUse = pathToUse.slice(0, -1)
+      }
 
       viewMap[pathToUse] = {
         key,

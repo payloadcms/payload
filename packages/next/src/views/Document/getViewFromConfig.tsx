@@ -7,12 +7,12 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import type { ViewToRender } from './createDocumentViewMap.js'
+import type { ViewToRender } from './createViewMap.js'
 
 import { NotFoundView } from '../NotFound/index.js'
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
-import { createDocumentViewMap } from './createDocumentViewMap.js'
+import { createViewMap } from './createViewMap.js'
 
 export const getViewsFromConfig = ({
   collectionConfig,
@@ -52,6 +52,33 @@ export const getViewsFromConfig = ({
   let baseRoute: string
   let currentRoute: string
 
+  if (collectionConfig) {
+    const [, collectionSlug, segment3, ...remainingSegments] = routeSegments
+
+    if (!overrideDocPermissions) {
+      if (segment3 === 'create') {
+        if ('create' in docPermissions && docPermissions.create) {
+          View = UnauthorizedView
+        }
+      } else {
+        if (!docPermissions?.read) {
+          View = NotFoundView
+        }
+      }
+    }
+
+    baseRoute = [
+      adminRoute !== '/' && adminRoute,
+      'collections',
+      collectionSlug,
+      segment3 !== 'create' ? ':id' : '',
+    ]
+      .filter(Boolean)
+      .join('/')
+
+    currentRoute = [baseRoute, ...remainingSegments].filter(Boolean).join('/')
+  }
+
   if (globalConfig) {
     const [, globalSlug, segment3, ...remainingSegments] = routeSegments
 
@@ -66,29 +93,7 @@ export const getViewsFromConfig = ({
     currentRoute = [baseRoute, segment3, ...remainingSegments].filter(Boolean).join('/')
   }
 
-  if (collectionConfig) {
-    const [, collectionSlug, ...remainingSegments] = routeSegments
-
-    if (!overrideDocPermissions) {
-      if (remainingSegments[0] === 'create') {
-        if ('create' in docPermissions && docPermissions.create) {
-          View = UnauthorizedView
-        }
-      } else {
-        if (!docPermissions?.read) {
-          View = NotFoundView
-        }
-      }
-    }
-
-    baseRoute = [adminRoute !== '/' && adminRoute, 'collections', collectionSlug]
-      .filter(Boolean)
-      .join('/')
-
-    currentRoute = [baseRoute, ...remainingSegments].filter(Boolean).join('/')
-  }
-
-  const viewMap = createDocumentViewMap({
+  const viewMap = createViewMap({
     baseRoute,
     collectionConfig,
     config,
