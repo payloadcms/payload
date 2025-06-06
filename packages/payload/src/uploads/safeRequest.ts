@@ -1,6 +1,7 @@
-import dnsSync from 'dns-sync'
 import ipaddr from 'ipaddr.js'
 import { Dispatcher } from 'undici'
+// @ts-ignore - dns-sync does not have types
+import dnsSync from 'dns-sync'
 
 import { APIError } from '../errors/APIError.js'
 
