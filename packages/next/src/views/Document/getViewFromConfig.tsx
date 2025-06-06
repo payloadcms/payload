@@ -1,23 +1,17 @@
 import type {
-  AdminViewServerProps,
-  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedConfig,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
 } from 'payload'
-import type React from 'react'
 
-import type { ViewMap } from './createViewMap.js'
+import type { ViewToRender } from './createViewMap.js'
 
+import { NotFoundView } from '../NotFound/index.js'
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
+import { UnauthorizedView } from '../Unauthorized/index.js'
 import { createViewMap } from './createViewMap.js'
-
-export type ViewFromConfig<TProps extends object> = {
-  Component?: React.FC<TProps>
-  ComponentConfig?: PayloadComponent<TProps>
-}
 
 export const getViewsFromConfig = ({
   collectionConfig,
@@ -41,29 +35,26 @@ export const getViewsFromConfig = ({
       overrideDocPermissions: true
     }
 )): {
-  /**
-   * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
-   */
-  ErrorView: ViewFromConfig<AdminViewServerProps>
-  View: ViewMap[string]
+  View: ViewToRender
 } => {
   // Conditionally import and lazy load the default view
-  let View: ViewMap[string] = null
-  const ErrorView: ViewFromConfig<AdminViewServerProps> = null
+  let View: ViewToRender = null
 
   const {
     routes: { admin: adminRoute },
   } = config
-
-  const views =
-    (collectionConfig && collectionConfig?.admin?.components?.views) ||
-    (globalConfig && globalConfig?.admin?.components?.views)
 
   let baseRoute: string
   let currentRoute: string
 
   if (globalConfig) {
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
+
+    if (!overrideDocPermissions) {
+      if (!docPermissions?.read) {
+        View = NotFoundView
+      }
+    }
 
     baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
 
@@ -76,11 +67,11 @@ export const getViewsFromConfig = ({
     if (!overrideDocPermissions) {
       if (remainingSegments[0] === 'create') {
         if ('create' in docPermissions && docPermissions.create) {
-          throw new Error('not-found')
+          View = UnauthorizedView
         }
       } else {
         if (!docPermissions?.read) {
-          throw new Error('not-found')
+          View = NotFoundView
         }
       }
     }
@@ -94,7 +85,9 @@ export const getViewsFromConfig = ({
 
   const viewMap = createViewMap({
     baseRoute,
-    views,
+    collectionConfig,
+    config,
+    globalConfig,
   })
 
   // use a for...of loop in order to early once a match is found
@@ -113,7 +106,6 @@ export const getViewsFromConfig = ({
   }
 
   return {
-    ErrorView,
     View,
   }
 }

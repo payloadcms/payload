@@ -15,9 +15,8 @@ import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { ViewMap } from './createViewMap.js'
+import type { ViewToRender } from './createViewMap.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
-import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -27,7 +26,7 @@ import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getViewsFromConfig } from './getViewFromConfig.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -90,8 +89,7 @@ export const renderDocument = async ({
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
-  let View: ViewMap[string] = null
-  let ErrorView: ViewFromConfig<AdminViewServerProps>
+  let View: ViewToRender = null
 
   let apiURL: string
 
@@ -218,7 +216,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ ErrorView, View } = getViewsFromConfig({
+      ;({ View } = getViewsFromConfig({
         collectionConfig,
         config,
         docPermissions,
@@ -226,10 +224,8 @@ export const renderDocument = async ({
       }))
     }
 
-    if (!View && !RootViewOverride && !ErrorView) {
-      ErrorView = {
-        Component: NotFoundView,
-      }
+    if (!View && !RootViewOverride) {
+      View = NotFoundView
     }
   }
 
@@ -261,17 +257,15 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ ErrorView, View } = getViewsFromConfig({
+      ;({ View } = getViewsFromConfig({
         config,
         docPermissions,
         globalConfig,
         routeSegments: segments,
       }))
 
-      if (!View && !RootViewOverride && !ErrorView) {
-        ErrorView = {
-          Component: NotFoundView,
-        }
+      if (!View && !RootViewOverride) {
+        View = NotFoundView
       }
     }
   }
@@ -373,19 +367,12 @@ export const renderDocument = async ({
         )}
         <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
-          {ErrorView
-            ? RenderServerComponent({
-                clientProps,
-                Component: ErrorView.ComponentConfig || ErrorView.Component,
-                importMap,
-                serverProps: documentViewServerProps,
-              })
-            : RenderServerComponent({
-                clientProps,
-                Component: RootViewOverride ? RootViewOverride : View,
-                importMap,
-                serverProps: documentViewServerProps,
-              })}
+          {RenderServerComponent({
+            clientProps,
+            Component: RootViewOverride ? RootViewOverride : View,
+            importMap,
+            serverProps: documentViewServerProps,
+          })}
         </EditDepthProvider>
       </DocumentInfoProvider>
     ),
