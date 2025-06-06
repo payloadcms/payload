@@ -11,11 +11,7 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import { APIView as DefaultAPIView } from '../API/index.js'
-import { EditView as DefaultEditView } from '../Edit/index.js'
-import { LivePreviewView } from '../LivePreview/index.js'
-import { VersionView } from '../Version/index.js'
-import { VersionsView } from '../Versions/index.js'
+import { defaultDocumentViews } from './defaults.js'
 
 export type ViewToRender =
   | EditViewComponent
@@ -31,72 +27,21 @@ export type ViewMap = {
   }
 }
 
-const defaultDocumentViews: {
-  [key: string]: {
-    /**
-     * A function used to conditionally mount the view.
-     */
-    condition?: (args: {
-      collectionConfig: SanitizedCollectionConfig
-      config: SanitizedConfig
-      docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
-      globalConfig: SanitizedGlobalConfig
-      overrideDocPermissions?: boolean
-    }) => boolean
-    DefaultView: React.FC<DocumentViewClientProps> | React.FC<DocumentViewServerProps>
-    path: string
+const sanitizePath = ({ baseRoute, path }: { baseRoute: string; path: string }): string => {
+  let sanitizedPath = `${baseRoute}${path}`
+
+  // Ensure the path does not end with a slash
+  if (sanitizedPath.endsWith('/')) {
+    sanitizedPath = sanitizedPath.slice(0, -1)
   }
-} = {
-  api: {
-    condition: ({ collectionConfig, globalConfig }) =>
-      collectionConfig?.admin?.hideAPIURL !== true && globalConfig?.admin?.hideAPIURL !== true,
-    DefaultView: DefaultAPIView,
-    path: '/api',
-  },
-  create: {
-    condition: ({ collectionConfig }) => Boolean(collectionConfig),
-    DefaultView: DefaultEditView,
-    path: '/create',
-  },
-  default: {
-    DefaultView: DefaultEditView,
-    path: '/',
-  },
-  livePreview: {
-    condition: ({
-      collectionConfig,
-      config,
-      globalConfig,
-    }: {
-      collectionConfig: SanitizedCollectionConfig
-      config: SanitizedConfig
-      globalConfig: SanitizedGlobalConfig
-    }) =>
-      Boolean(
-        (collectionConfig && collectionConfig?.admin?.livePreview) ||
-          config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug) ||
-          (globalConfig && globalConfig?.admin?.livePreview) ||
-          config?.admin?.livePreview?.globals?.includes(globalConfig?.slug),
-      ),
-    DefaultView: LivePreviewView,
-    path: '/preview',
-  },
-  version: {
-    condition: ({ docPermissions, overrideDocPermissions }) =>
-      Boolean(!overrideDocPermissions && docPermissions?.readVersions),
-    DefaultView: VersionView,
-    path: '/versions/:versionId',
-  },
-  versions: {
-    condition: ({ docPermissions, overrideDocPermissions }) =>
-      Boolean(!overrideDocPermissions && docPermissions?.readVersions),
-    DefaultView: VersionsView,
-    path: '/versions',
-  },
+
+  return sanitizedPath
 }
 
 /**
  * Create a map of all paths that point to the view that should mount on that path.
+ * Ensure that all views can be mounted on any given route.
+ * E.g. the API view can be mounted on `/my-api` and a custom view can be mounted on the `/api` route.
  * @returns {ViewMap}
  * @example
  * {
@@ -143,12 +88,10 @@ export const createViewMap = ({
       }
     }
 
-    // allow the `api` view's route to mount to `/my-api`, and another view to mount to the `/api` route
-    let pathToUse = `${baseRoute}${'path' in viewConfig && viewConfig.path ? viewConfig.path : viewDefaults?.path}`
-
-    if (pathToUse.endsWith('/')) {
-      pathToUse = pathToUse.slice(0, -1)
-    }
+    const pathToUse = sanitizePath({
+      baseRoute,
+      path: 'path' in viewConfig && viewConfig.path ? viewConfig.path : viewDefaults?.path,
+    })
 
     acc[pathToUse] = {
       View:
@@ -161,9 +104,10 @@ export const createViewMap = ({
     return acc
   }, {})
 
-  // Map over the defaults to ensure they are included in the viewMap
+  // Map over the defaults to ensure they are also included in the `viewMap` alongside any custom views
   Object.entries(defaultDocumentViews).forEach(([key, defaultViewConfig]) => {
-    // Do not override path that have already been handled, as these have already been added to the map
+    // Do not override paths that have already been handled, as these have already been added to the map
+    // E.g. if a user has added a custom view on the `api` key
     if (!views?.edit?.[key]) {
       if (defaultViewConfig?.condition) {
         const shouldContinue =
@@ -180,11 +124,7 @@ export const createViewMap = ({
         }
       }
 
-      let pathToUse = `${baseRoute}${defaultViewConfig.path}`
-
-      if (pathToUse.endsWith('/')) {
-        pathToUse = pathToUse.slice(0, -1)
-      }
+      const pathToUse = sanitizePath({ baseRoute, path: defaultViewConfig.path })
 
       viewMap[pathToUse] = {
         key,
