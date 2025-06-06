@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
+import type { DocumentSlots, FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
@@ -14,15 +14,16 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
+import './index.scss'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
-import './index.scss'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -103,6 +104,7 @@ export const UploadActions = ({
 export type UploadProps = {
   readonly collectionSlug: string
   readonly customActions?: React.ReactNode[]
+  readonly documentSlots?: DocumentSlots
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
@@ -111,16 +113,19 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   return (
-    <Upload_v4
-      {...props}
-      resetUploadEdits={resetUploadEdits}
-      updateUploadEdits={updateUploadEdits}
-      uploadEdits={uploadEdits}
-    />
+    <UploadControlsProvider>
+      <Upload_v4
+        {...props}
+        resetUploadEdits={resetUploadEdits}
+        updateUploadEdits={updateUploadEdits}
+        uploadEdits={uploadEdits}
+      />
+    </UploadControlsProvider>
   )
 }
 
 export type UploadProps_v4 = {
+  readonly documentSlots?: DocumentSlots
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadEdits?: UploadEdits
@@ -130,6 +135,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {
     collectionSlug,
     customActions,
+    documentSlots,
     initialState,
     onChange,
     resetUploadEdits,
@@ -137,6 +143,15 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     uploadConfig,
     uploadEdits,
   } = props
+
+  const {
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+    uploadControlFile,
+    uploadControlFileName,
+    uploadControlFileUrl,
+  } = useUploadControls()
 
   const {
     config: {
@@ -174,12 +189,15 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
 
       setValue(newFile)
       setShowUrlInput(false)
+      setUploadControlFileUrl('')
+      setUploadControlFileName(null)
+      setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
       }
     },
-    [onChange, setValue],
+    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -218,7 +236,16 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     setFileUrl('')
     resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange, resetUploadEdits])
+    setUploadControlFileUrl('')
+    setUploadControlFileName(null)
+    setUploadControlFile(null)
+  }, [
+    handleFileChange,
+    resetUploadEdits,
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+  ])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
@@ -228,7 +255,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     [setModified, updateUploadEdits],
   )
 
-  const handleUrlSubmit = async () => {
+  const handleUrlSubmit = useCallback(async () => {
     if (!fileUrl || uploadConfig?.pasteURL === false) {
       return
     }
@@ -243,7 +270,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       }
 
       const blob = await clientResponse.blob()
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange(file)
@@ -277,7 +304,17 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       toast.error('The provided URL is not allowed.')
       setUploadStatus('failed')
     }
-  }
+  }, [
+    fileUrl,
+    uploadConfig,
+    setUploadStatus,
+    handleFileChange,
+    useServerSideFetch,
+    collectionSlug,
+    id,
+    serverURL,
+    api,
+  ])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
@@ -314,9 +351,26 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
 
   const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
 
-  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
-    return null
-  }
+  useEffect(() => {
+    const handleControlFileUrl = async () => {
+      if (uploadControlFileUrl) {
+        setFileUrl(uploadControlFileUrl)
+        await handleUrlSubmit()
+      }
+    }
+
+    void handleControlFileUrl()
+  }, [uploadControlFileUrl, handleUrlSubmit])
+
+  useEffect(() => {
+    const handleControlFile = () => {
+      if (uploadControlFile) {
+        handleFileChange(uploadControlFile)
+      }
+    }
+
+    void handleControlFile()
+  }, [uploadControlFile, handleFileChange])
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -371,6 +425,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                         buttonStyle="pill"
                         onClick={() => {
                           setShowUrlInput(true)
+                          setUploadControlFileUrl('')
+                          setUploadControlFile(null)
+                          setUploadControlFileName(null)
                         }}
                         size="small"
                       >
@@ -378,8 +435,12 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                       </Button>
                     </Fragment>
                   )}
-                </div>
 
+                  {uploadConfig?.admin?.components?.controls &&
+                    documentSlots?.UploadControls !== undefined && (
+                      <Fragment>{documentSlots.UploadControls}</Fragment>
+                    )}
+                </div>
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>
@@ -419,6 +480,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
+                  setUploadControlFileUrl('')
+                  setUploadControlFile(null)
+                  setUploadControlFileName(null)
                 }}
                 round
                 tooltip={t('general:cancel')}

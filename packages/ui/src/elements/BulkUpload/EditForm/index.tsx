@@ -22,8 +22,8 @@ import { DocumentFields } from '../../DocumentFields/index.js'
 import { MoveDocToFolder } from '../../FolderView/MoveDocToFolder/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { BulkUploadProvider } from '../index.js'
 import './index.scss'
+import { BulkUploadProvider } from '../index.js'
 
 const baseClass = 'collection-edit'
 
