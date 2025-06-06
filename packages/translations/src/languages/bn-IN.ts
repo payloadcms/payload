@@ -258,6 +258,7 @@ export const bnINTranslations = {
     dark: 'ডার্ক',
     dashboard: 'ড্যাশবোর্ড',
     delete: 'মুছুন',
+    deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
     deleting: 'মুছে ফেলা হচ্ছে...',
