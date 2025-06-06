@@ -4,7 +4,7 @@ import type { CollectionSlug } from '../index.js'
 import { createFolderCollection } from './createFolderCollection.js'
 
 export async function addFolderCollections(config: NonNullable<Config>): Promise<void> {
-  if (!config.collections) {
+  if (!config.collections || !config.folders) {
     return
   }
 

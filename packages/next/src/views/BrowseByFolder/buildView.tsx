@@ -3,6 +3,7 @@ import type {
   BuildCollectionFolderViewResult,
   FolderListViewServerPropsOnly,
   ListQuery,
+  Where,
 } from 'payload'
 
 import { DefaultBrowseByFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
@@ -10,6 +11,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import { getFolderData } from 'payload'
+import { buildFolderWhereConstraints } from 'payload/shared'
 import React from 'react'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
@@ -29,10 +31,10 @@ export const buildBrowseByFolderView = async (
   args: BuildFolderViewArgs,
 ): Promise<BuildCollectionFolderViewResult> => {
   const {
+    browseByFolderSlugs: browseByFolderSlugsFromArgs = [],
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
-    folderCollectionSlugs,
     folderID,
     initPageResult,
     isInDrawer,
@@ -54,30 +56,83 @@ export const buildBrowseByFolderView = async (
     visibleEntities,
   } = initPageResult
 
-  const collections = folderCollectionSlugs.filter(
+  const browseByFolderSlugs = browseByFolderSlugsFromArgs.filter(
     (collectionSlug) =>
       permissions?.collections?.[collectionSlug]?.read &&
       visibleEntities.collections.includes(collectionSlug),
   )
 
-  if (!collections.length) {
+  if (config.folders === false || config.folders.browseByFolder === false) {
     throw new Error('not-found')
   }
 
   const query = queryFromArgs || queryFromReq
   const selectedCollectionSlugs: string[] =
     Array.isArray(query?.relationTo) && query.relationTo.length
-      ? query.relationTo
-      : [...folderCollectionSlugs, config.folders.slug]
+      ? query.relationTo.filter(
+          (slug) =>
+            browseByFolderSlugs.includes(slug) || (config.folders && slug === config.folders.slug),
+        )
+      : [...browseByFolderSlugs, config.folders.slug]
 
   const {
     routes: { admin: adminRoute },
   } = config
 
+  const folderCollectionConfig = payload.collections[config.folders.slug].config
+
+  const browseByFolderPreferences = await getPreferences<{ viewPreference: string }>(
+    'browse-by-folder',
+    payload,
+    user.id,
+    user.collection,
+  )
+
+  let documentWhere: undefined | Where = undefined
+  let folderWhere: undefined | Where = undefined
+  // if folderID, dont make a documentWhere since it only queries root folders
+  for (const collectionSlug of selectedCollectionSlugs) {
+    if (collectionSlug === config.folders.slug) {
+      const folderCollectionConstraints = await buildFolderWhereConstraints({
+        collectionConfig: folderCollectionConfig,
+        folderID,
+        localeCode: fullLocale?.code,
+        req: initPageResult.req,
+        search: typeof query?.search === 'string' ? query.search : undefined,
+      })
+
+      if (folderCollectionConstraints) {
+        folderWhere = folderCollectionConstraints
+      }
+    } else if (folderID) {
+      if (!documentWhere) {
+        documentWhere = {
+          or: [],
+        }
+      }
+
+      const collectionConfig = payload.collections[collectionSlug].config
+      if (collectionConfig.folders && collectionConfig.folders.browseByFolder === true) {
+        const collectionConstraints = await buildFolderWhereConstraints({
+          collectionConfig,
+          folderID,
+          localeCode: fullLocale?.code,
+          req: initPageResult.req,
+          search: typeof query?.search === 'string' ? query.search : undefined,
+        })
+
+        if (collectionConstraints) {
+          documentWhere.or.push(collectionConstraints)
+        }
+      }
+    }
+  }
+
   const { breadcrumbs, documents, subfolders } = await getFolderData({
+    documentWhere,
     folderID,
+    folderWhere,
     req: initPageResult.req,
-    search: query?.search as string,
   })
 
   const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
@@ -95,13 +150,6 @@ export const buildBrowseByFolderView = async (
       }),
     )
   }
-
-  const browseByFolderPreferences = await getPreferences<{ viewPreference: string }>(
-    'browse-by-folder',
-    payload,
-    user.id,
-    user.collection,
-  )
 
   const serverProps: Omit<FolderListViewServerPropsOnly, 'collectionConfig' | 'listPreferences'> = {
     documents,
@@ -125,7 +173,7 @@ export const buildBrowseByFolderView = async (
 
   // documents cannot be created without a parent folder in this view
   const hasCreatePermissionCollectionSlugs = folderID
-    ? [config.folders.slug, ...folderCollectionSlugs]
+    ? [config.folders.slug, ...browseByFolderSlugs]
     : [config.folders.slug]
 
   return {
@@ -134,7 +182,8 @@ export const buildBrowseByFolderView = async (
         breadcrumbs={breadcrumbs}
         documents={documents}
         filteredCollectionSlugs={selectedCollectionSlugs}
-        folderCollectionSlugs={folderCollectionSlugs}
+        folderCollectionSlugs={browseByFolderSlugs}
+        folderFieldName={config.folders.fieldName}
         folderID={folderID}
         subfolders={subfolders}
       >

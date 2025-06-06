@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "3.40.0",
+  "version": "3.41.0",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,8 +17,8 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "type": "module",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",

@@ -39,9 +39,7 @@ describe('@payloadcms/storage-s3', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
   afterEach(async () => {
     await clearTestBucket()

@@ -18,7 +18,7 @@ import {
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'

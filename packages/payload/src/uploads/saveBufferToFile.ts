@@ -6,7 +6,7 @@ import { Readable } from 'stream'
  * @param {Buffer} buffer - buffer to save to a file.
  * @param {string} filePath - path to a file.
  */
-const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void> => {
+export const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void> => {
   // Setup readable stream from buffer.
   let streamData = buffer
   const readStream = new Readable()
@@ -17,5 +17,3 @@ const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void>
   // Setup file system writable stream.
   return await fs.writeFile(filePath, buffer)
 }
-
-export default saveBufferToFile

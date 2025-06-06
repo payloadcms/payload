@@ -12,7 +12,7 @@ export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Resp
 
   try {
     data = await incomingReq.json?.()
-  } catch (error) {
+  } catch (ignore) {
     data = {}
   }
 

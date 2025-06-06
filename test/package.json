@@ -83,6 +83,7 @@
     "next": "15.3.2",
     "nodemailer": "6.9.16",
     "payload": "workspace:*",
+    "pg": "8.11.3",
     "qs-esm": "7.0.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
