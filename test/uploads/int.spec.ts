@@ -12,6 +12,7 @@ import type { Enlarge, Media } from './payload-types.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  allowListMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -39,6 +40,19 @@ describe('Collections - Uploads', () => {
   afterAll(async () => {
     await payload.destroy()
   })
+
+  const blockedUrls = [
+    'http://127.0.0.1/file.png',
+    'http://localhost/file.png',
+    'http://[::1]/file.png',
+    'http://10.0.0.1/file.png',
+    'http://192.168.1.1/file.png',
+    'http://172.16.0.1/file.png',
+    'http://169.254.1.1/file.png',
+    'http://224.0.0.1/file.png',
+    'http://0.0.0.0/file.png',
+    'http://255.255.255.255/file.png',
+  ]
 
   describe('REST API', () => {
     describe('create', () => {
@@ -541,6 +555,43 @@ describe('Collections - Uploads', () => {
         })
 
         expect(doc.docs[0].image).toBeFalsy()
+      })
+    })
+    describe('filters', () => {
+      blockedUrls.forEach((url) => {
+        it(`should block uploading from blocked URL: ${url}`, async () => {
+          await expect(
+            payload.create({
+              collection: mediaSlug,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(`Failed to fetch file from unsafe url`),
+            }),
+          )
+        })
+
+        it(`should not filter allowed URL: ${url}`, async () => {
+          await expect(
+            payload.create({
+              collection: allowListMediaSlug,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(`There was a problem while uploading the file.`),
+            }),
+          )
+        })
       })
     })
   })
