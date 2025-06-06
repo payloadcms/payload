@@ -9,7 +9,6 @@ import type {
 
 import type { ViewToRender } from './createViewMap.js'
 
-import { NotFoundView } from '../NotFound/index.js'
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { createViewMap } from './createViewMap.js'
@@ -52,16 +51,19 @@ export const getViewFromConfig = ({
   let baseRoute: string
   let currentRoute: string
 
+  if (!overrideDocPermissions && !docPermissions?.read) {
+    throw new Error('not-found')
+  }
+
   if (collectionConfig) {
     const [, collectionSlug, segment3, ...remainingSegments] = routeSegments
 
-    if (!overrideDocPermissions && !docPermissions?.read) {
-      throw new Error('not-found')
-    } else {
-      if (segment3 === 'create' && 'create' in docPermissions && !docPermissions.create) {
-        return {
-          View: UnauthorizedView,
-        }
+    if (
+      (segment3 === 'create' && !('create' in docPermissions)) ||
+      ('create' in docPermissions && !docPermissions.create)
+    ) {
+      return {
+        View: UnauthorizedView,
       }
     }
 
@@ -79,14 +81,6 @@ export const getViewFromConfig = ({
 
   if (globalConfig) {
     const [, globalSlug, segment3, ...remainingSegments] = routeSegments
-
-    if (!overrideDocPermissions) {
-      if (!docPermissions?.read) {
-        return {
-          View: NotFoundView,
-        }
-      }
-    }
 
     baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
 
