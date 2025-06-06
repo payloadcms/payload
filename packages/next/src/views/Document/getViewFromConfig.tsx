@@ -59,8 +59,8 @@ export const getViewFromConfig = ({
     const [, collectionSlug, segment3, ...remainingSegments] = routeSegments
 
     if (
-      (segment3 === 'create' && !('create' in docPermissions)) ||
-      ('create' in docPermissions && !docPermissions.create)
+      segment3 === 'create' &&
+      (!docPermissions || ('create' in docPermissions && !docPermissions.create))
     ) {
       return {
         View: UnauthorizedView,
