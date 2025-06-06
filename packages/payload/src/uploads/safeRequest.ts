@@ -71,8 +71,9 @@ export const isSafeIp = (ip: null | string | undefined): boolean => {
  * @throws APIError - Throws an error if the hostname resolves to an unsafe IP address.
  */
 export class SafeDispatcher extends Dispatcher {
-  override dispatch(options, handler) {
+  override dispatch(options: Dispatcher.DispatchOptions, handler: Dispatcher.DispatchHandler) {
     let hostname = options.origin
+
     if (typeof hostname === 'string') {
       try {
         const url = new URL(hostname)
