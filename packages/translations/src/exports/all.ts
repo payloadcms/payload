@@ -3,6 +3,8 @@ import type { SupportedLanguages } from '../types.js'
 import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
+import { bnBD } from '../languages/bn-BD.js'
+import { bnIN } from '../languages/bn-IN.js'
 import { ca } from '../languages/ca.js'
 import { cs } from '../languages/cs.js'
 import { da } from '../languages/da.js'
@@ -44,6 +46,8 @@ export const translations = {
   ar,
   az,
   bg,
+  'bn-BD': bnBD,
+  'bn-IN': bnIN,
   ca,
   cs,
   da,

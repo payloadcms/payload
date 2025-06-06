@@ -781,7 +781,9 @@ export interface WorkflowLongRunning {
  * via the `definition` "WorkflowParallelTask".
  */
 export interface WorkflowParallelTask {
-  input?: unknown;
+  input: {
+    amount: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

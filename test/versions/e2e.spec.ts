@@ -114,7 +114,6 @@ describe('Versions', () => {
     })
 
     await ensureCompilationIsDone({ page, serverURL })
-    //await clearAndSeedEverything(payload)
   })
 
   describe('draft collections', () => {
@@ -133,17 +132,18 @@ describe('Versions', () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
 
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
-
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('collection — tab displays proper number of versions', async () => {
@@ -159,9 +159,9 @@ describe('Versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count')
+      const versionsPill = versionsTab.locator('.pill-version-count')
       await versionsPill.waitFor({ state: 'visible' })
-      const versionCount = versionsTab.locator('.doc-tab__count').first()
+      const versionCount = versionsTab.locator('.pill-version-count').first()
       await expect(versionCount).toHaveText('11')
     })
 
@@ -261,14 +261,16 @@ describe('Versions', () => {
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
 
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('global — respects max number of versions', async () => {
@@ -507,7 +509,7 @@ describe('Versions', () => {
       await expect
         .poll(
           async () =>
-            await page.locator('.doc-tab[aria-label="Versions"] .doc-tab__count').textContent(),
+            await page.locator('.doc-tab[aria-label="Versions"] .pill-version-count').textContent(),
           { timeout: POLL_TOPASS_TIMEOUT },
         )
         .toEqual('2')
@@ -631,7 +633,7 @@ describe('Versions', () => {
 
       await page.goto(url.edit(createdDoc.id))
 
-      const versionsCountSelector = `.doc-tabs__tabs .doc-tab__count`
+      const versionsCountSelector = `.doc-tabs__tabs .pill-version-count`
       const initialCount = await page.locator(versionsCountSelector).textContent()
 
       const field = page.locator('#field-description')
@@ -720,14 +722,16 @@ describe('Versions', () => {
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
 
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
+      const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
+      await expect(() => expect(versionsTab).toBeTruthy()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
 
-      expect(versionsTab).toBeTruthy()
-      const href = versionsTab.locator('a').first()
-      await expect(href).toHaveAttribute('href', `${pathname}/versions`)
+      const href = await versionsTab.getAttribute('href')
+      await expect(() => expect(href).toBe(`${pathname}/versions`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('global — respects max number of versions', async () => {

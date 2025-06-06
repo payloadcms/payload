@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 
 import type {
@@ -31,7 +30,7 @@ import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
@@ -170,7 +169,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -299,7 +298,7 @@ export const createOperation = async <
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
-        disableEmail: disableVerificationEmail,
+        disableEmail: disableVerificationEmail!,
         email: payload.email,
         req,
         token: verificationToken,
@@ -314,17 +313,17 @@ export const createOperation = async <
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
       draft,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

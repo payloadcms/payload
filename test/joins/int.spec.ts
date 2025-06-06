@@ -122,9 +122,7 @@ describe('Joins Field', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should populate joins using findByID', async () => {
@@ -287,6 +285,64 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphic.docs[0]).toHaveProperty('id')
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
+  })
+
+  it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'sharedFolder',
+      },
+    })
+
+    await payload.create({
+      collection: 'folderPoly1',
+      data: {
+        folderPoly1Title: 'Poly 1 title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    await payload.create({
+      collection: 'folderPoly2',
+      data: {
+        folderPoly2Title: 'Poly 2 Title',
+        folder: folderDoc.id,
+      },
+      depth: 0,
+    })
+
+    const result = await payload.find({
+      collection: 'payload-folders',
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  in: ['folderPoly1', 'folderPoly2'],
+                },
+              },
+              {
+                folderPoly2Title: {
+                  equals: 'Poly 2 Title',
+                },
+              },
+            ],
+          },
+        },
+      },
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+    })
+
+    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
   })
 
   it('should filter joins using where query', async () => {

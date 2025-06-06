@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "3.38.0",
+  "version": "3.41.0",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -25,6 +25,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {

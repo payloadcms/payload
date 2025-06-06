@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.38.0",
+  "version": "3.41.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -115,7 +115,7 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
@@ -127,7 +127,7 @@
     "concurrently": "9.1.2",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.24.2",
+    "esbuild": "0.25.5",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",

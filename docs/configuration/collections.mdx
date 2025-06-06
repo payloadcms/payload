@@ -132,6 +132,7 @@ The following options are available:
 | `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                                                                          |
 | `enableRichTextLink`         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                                              |
 | `enableRichTextRelationship` | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                                      |
+| `folders`                    | A boolean to enable folders for a given collection. Defaults to `false`. [More details](../folders/overview).                                                                                                                                           |
 | `meta`                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                                                          |
 | `preview`                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                                                  |
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                                           |
@@ -176,7 +177,7 @@ The following options are available:
 #### Edit View Options
 
 ```ts
-import type { CollectionCOnfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const MyCollection: CollectionConfig = {
   // ...
@@ -193,13 +194,15 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Option            | Description                                                                                                                                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`      | Replace the default Save Button within the Edit View. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
-| `SaveDraftButton` | Replace the default Save Draft Button within the Edit View. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
-| `PublishButton`   | Replace the default Publish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
-| `PreviewButton`   | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
-| `Upload`          | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload).                                         |
+| Option                   | Description                                                                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](../custom-components/edit-view#beforedocumentcontrols).                                                                      |
+| `editMenuItems`          | Inject custom components within the 3-dot menu dropdown located in the document controls bar. [More details](../custom-components/edit-view#editmenuitems).                                             |
+| `SaveButton`             | Replace the default Save Button within the Edit View. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
+| `SaveDraftButton`        | Replace the default Save Draft Button within the Edit View. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
+| `PublishButton`          | Replace the default Publish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
+| `PreviewButton`          | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
+| `Upload`                 | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload).                                         |
 
 <Banner type="success">
   **Note:** For details on how to build Custom Components, see [Building Custom
@@ -274,7 +277,7 @@ You can also pass an object to the collection's `graphQL` property, which allows
 
 ## TypeScript
 
-You can import types from Payload to help make writing your Collection configs easier and type-safe. There are two main types that represent the Collection Config, `CollectionConfig` and `SanitizeCollectionConfig`.
+You can import types from Payload to help make writing your Collection configs easier and type-safe. There are two main types that represent the Collection Config, `CollectionConfig` and `SanitizedCollectionConfig`.
 
 The `CollectionConfig` type represents a raw Collection Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedCollectionConfig` type represents a Collection Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 

@@ -677,7 +677,7 @@ describe('General', () => {
 
       await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
         'title',
-        'Tablero',
+        'Panel de Control',
       )
 
       await field.click()
@@ -708,7 +708,6 @@ describe('General', () => {
       await checkLocaleLabels('Spanish (es)', 'English (en)')
 
       // Change locale to Spanish
-      await localizerButton.click()
       await expect(localeListItem1).toContainText('Spanish (es)')
       await localeListItem1.click()
 

@@ -1,11 +1,11 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@payloadcms/translations'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { format, formatDistanceToNow, transpose } from 'date-fns'
 
-type FormatDateArgs = {
+export type FormatDateArgs = {
   date: Date | number | string | undefined
-  i18n: I18n<any, any>
+  i18n: I18n<unknown, unknown> | I18nClient<unknown>
   pattern: string
   timezone?: string
 }
@@ -34,7 +34,7 @@ export const formatDate = ({ date, i18n, pattern, timezone }: FormatDateArgs): s
 
 type FormatTimeToNowArgs = {
   date: Date | number | string | undefined
-  i18n: I18n<any, any>
+  i18n: I18n<unknown, unknown> | I18nClient<unknown>
 }
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {

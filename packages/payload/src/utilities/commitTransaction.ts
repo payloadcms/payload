@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
@@ -11,6 +10,6 @@ export async function commitTransaction(
 ): Promise<void> {
   const { payload, transactionID } = req
 
-  await payload.db.commitTransaction(transactionID)
+  await payload.db.commitTransaction(transactionID!)
   delete req.transactionID
 }

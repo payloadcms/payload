@@ -2,7 +2,7 @@ import type { CollectionConfig } from '../../index.js'
 
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import flattenFields from '../../utilities/flattenTopLevelFields.js'
+import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 /**
  * Validate useAsTitle for collections.
@@ -15,7 +15,7 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
   }
 
   if (config?.admin && config.admin?.useAsTitle && config.admin.useAsTitle !== 'id') {
-    const fields = flattenFields(config.fields)
+    const fields = flattenTopLevelFields(config.fields)
     const useAsTitleField = fields.find((field) => {
       if (fieldAffectsData(field) && config.admin) {
         return field.name === config.admin.useAsTitle

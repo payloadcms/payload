@@ -37,7 +37,7 @@ export const MyGroupField: Field = {
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`**             | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
 | **`fields`** \*        | Array of field types to nest within this Group.                                                                                                                                                                                                                                    |
-| **`label`**            | Used as a heading in the Admin Panel and to name the generated GraphQL type. Required when name is undefined, defaults to name converted to words.                                                                                                                                 |
+| **`label`**            | Used as a heading in the Admin Panel and to name the generated GraphQL type. Defaults to the field name, if defined.                                                                                                                                                               |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                    |
 | **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                              |
@@ -69,7 +69,7 @@ export const MyGroupField: Field = {
 }
 ```
 
-The Group Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
+The Group Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Option           | Description                                                                                                                                                                                                                                      |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -113,8 +113,7 @@ export const ExampleCollection: CollectionConfig = {
 
 ## Presentational group fields
 
-You can also use the Group field to create a presentational group of fields. This is useful when you want to group fields together visually without affecting the data structure.
-The label will be required when a `name` is not provided.
+You can also use the Group field to only visually group fields without affecting the data structure. Not defining a label will render just the grouped fields.
 
 ```ts
 import type { CollectionConfig } from 'payload'

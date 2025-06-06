@@ -96,16 +96,16 @@ export const virtualFieldPopulationPromise = async ({
 
     const select = {}
     let currentSelectRef: any = select
-    const currentFields = req.payload.collections[currentField.relationTo].config.flattenedFields
+    const currentFields = req.payload.collections[currentField.relationTo]?.config.flattenedFields
 
     for (let i = 0; i < segments.length; i++) {
-      const field = currentFields.find((each) => each.name === segments[i])
+      const field = currentFields?.find((each) => each.name === segments[i])
 
       const shouldBreak =
         i === segments.length - 1 || field?.type === 'relationship' || field?.type === 'upload'
 
-      currentSelectRef[segments[i]] = shouldBreak ? true : {}
-      currentSelectRef = currentSelectRef[segments[i]]
+      currentSelectRef[segments[i]!] = shouldBreak ? true : {}
+      currentSelectRef = currentSelectRef[segments[i]!]
 
       if (shouldBreak) {
         break
@@ -136,7 +136,7 @@ export const virtualFieldPopulationPromise = async ({
       name,
       draft,
       fallbackLocale,
-      fields: req.payload.collections[currentField.relationTo].config.flattenedFields,
+      fields: req.payload.collections[currentField.relationTo]!.config.flattenedFields,
       locale,
       overrideAccess,
       ref: populatedDoc,

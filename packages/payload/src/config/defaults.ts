@@ -2,6 +2,7 @@ import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import defaultAccess from '../auth/defaultAccess.js'
+import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -23,6 +24,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     routes: {
       account: '/account',
+      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -98,6 +100,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
     routes: {
       account: '/account',
+      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -157,6 +160,19 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  const hasFolderCollections = config.collections.some((collection) => Boolean(collection.folders))
+  if (hasFolderCollections) {
+    config.folders = {
+      slug: foldersSlug,
+      browseByFolder: true,
+      debug: false,
+      fieldName: parentFolderFieldName,
+      ...(config.folders || {}),
+    }
+  } else {
+    config.folders = false
   }
 
   return config
