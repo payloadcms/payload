@@ -579,25 +579,20 @@ describe('Collections - Uploads', () => {
         })
 
         it(`should not filter allowed URL: ${url}`, async () => {
-          // eslint-disable-next-line jest/no-conditional-in-test
-          if (url != 'http://blocked-domain.com/file.png') {
-            await expect(
-              payload.create({
-                collection: allowListMediaSlug,
-                data: {
-                  filename: 'test.png',
-                  url,
-                },
-              }),
-            ).rejects.toThrow(
-              expect.objectContaining({
-                name: 'FileRetrievalError',
-                message: expect.stringContaining(`There was a problem while uploading the file.`),
-              }),
-            )
-          } else {
-            expect(true).toBe(true) // Skip test for the one URL that will fail because it will upload an actual file
-          }
+          await expect(
+            payload.create({
+              collection: allowListMediaSlug,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(`There was a problem while uploading the file.`),
+            }),
+          )
         })
       })
     })
