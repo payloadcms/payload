@@ -55,7 +55,7 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
       previousLabel: t('version:draft'),
     },
     published: {
-      currentLabel: t('version:currentPublishedVersion'),
+      currentLabel: t('version:currentlyPublished'),
       latestVersion: latestPublishedVersion,
       pillStyle: 'success',
       previousLabel: t('version:previouslyPublished'),

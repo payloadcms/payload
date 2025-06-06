@@ -1,4 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
+
 export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
@@ -502,13 +503,17 @@ export const esTranslations: DefaultTranslationsObject = {
     changed: 'Modificado',
     changedFieldsCount_one: '{{count}} campo modificado',
     changedFieldsCount_other: '{{count}} campos modificados',
+    compareAgainst: 'Comparar contra',
     compareVersion: 'Comparar versión con:',
+    compareVersions: 'Comparar Versiones',
     confirmPublish: 'Confirmar publicación',
     confirmRevertToSaved: 'Confirmar revertir a guardado',
     confirmUnpublish: 'Confirmar despublicación',
     confirmVersionRestoration: 'Confirmar restauración de versión',
     currentDocumentStatus: 'Documento actual: {{docStatus}}',
     currentDraft: 'Borrador actual',
+    currentlyPublished: 'Actualmente Publicado',
+    currentlyViewing: 'Actualmente viendo',
     currentPublishedVersion: 'Versión publicada actual',
     draft: 'Borrador',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',

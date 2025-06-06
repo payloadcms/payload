@@ -96,7 +96,9 @@ const Restore: React.FC<Props> = ({
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Button
           buttonStyle="pill"
-          className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
+          className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
+            .filter(Boolean)
+            .join(' ')}
           onClick={() => toggleModal(modalSlug)}
           size="small"
           SubMenuPopupContent={

@@ -8,8 +8,14 @@ import { ShimmerEffect } from '@payloadcms/ui'
 import React, { Fragment, useEffect } from 'react'
 
 export const RenderVersionFieldsToDiff = ({
+  parent = false,
   versionFields,
 }: {
+  /**
+   * If true, this is the parent render version fields component, not one nested in
+   * a field with children (e.g. group)
+   */
+  parent?: boolean
   versionFields: VersionField[]
 }): React.ReactNode => {
   const [hasMounted, setHasMounted] = React.useState(false)
@@ -21,7 +27,7 @@ export const RenderVersionFieldsToDiff = ({
   }, [])
 
   return (
-    <div className={baseClass}>
+    <div className={`${baseClass}${parent ? ` ${baseClass}--parent` : ''}`}>
       {!hasMounted ? (
         <Fragment>
           <ShimmerEffect height="8rem" width="100%" />
