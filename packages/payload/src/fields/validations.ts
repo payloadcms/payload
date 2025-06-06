@@ -5,6 +5,7 @@ import ObjectIdImport from 'bson-objectid'
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
+import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
@@ -444,7 +445,7 @@ const validateArrayLength = (
     maxRows?: number
     minRows?: number
     required?: boolean
-    t: (key: string, options?: { [key: string]: number | string }) => string
+    t: TFunction
   },
 ) => {
   const { maxRows, minRows, required, t } = options

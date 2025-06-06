@@ -127,7 +127,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...acc,
-        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab) => {
           if (tabHasName(tab)) {
             if (moveSubFieldsToTop) {
               const translatedLabel =

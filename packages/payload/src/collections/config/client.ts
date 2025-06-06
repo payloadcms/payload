@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
@@ -139,7 +139,7 @@ export const createClientCollectionConfig = ({
                   clientCollection.admin.description = collection.admin.description
                 }
               } else if (typeof collection.admin.description === 'function') {
-                const description = collection.admin.description({ t: i18n.t })
+                const description = collection.admin.description({ t: i18n.t as TFunction })
                 if (description) {
                   clientCollection.admin.description = description
                 }
@@ -215,11 +215,11 @@ export const createClientCollectionConfig = ({
         clientCollection.labels = {
           plural:
             typeof collection.labels.plural === 'function'
-              ? collection.labels.plural({ i18n, t: i18n.t })
+              ? collection.labels.plural({ i18n, t: i18n.t as TFunction })
               : collection.labels.plural,
           singular:
             typeof collection.labels.singular === 'function'
-              ? collection.labels.singular({ i18n, t: i18n.t })
+              ? collection.labels.singular({ i18n, t: i18n.t as TFunction })
               : collection.labels.singular,
         }
         break

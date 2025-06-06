@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type {
   AdminClient,
@@ -145,12 +145,12 @@ export const createClientBlocks = ({
 
       if (block.labels.singular) {
         if (typeof block.labels.singular === 'function') {
-          clientBlock.labels.singular = block.labels.singular({ i18n, t: i18n.t })
+          clientBlock.labels.singular = block.labels.singular({ i18n, t: i18n.t as TFunction })
         } else {
           clientBlock.labels.singular = block.labels.singular
         }
         if (typeof block.labels.plural === 'function') {
-          clientBlock.labels.plural = block.labels.plural({ i18n, t: i18n.t })
+          clientBlock.labels.plural = block.labels.plural({ i18n, t: i18n.t as TFunction })
         } else {
           clientBlock.labels.plural = block.labels.plural
         }
@@ -251,12 +251,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -292,12 +292,12 @@ export const createClientField = ({
 
         if (incomingField.labels.singular) {
           if (typeof incomingField.labels.singular === 'function') {
-            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t })
+            field.labels.singular = incomingField.labels.singular({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.singular = incomingField.labels.singular
           }
           if (typeof incomingField.labels.plural === 'function') {
-            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t })
+            field.labels.plural = incomingField.labels.plural({ i18n, t: i18n.t as TFunction })
           } else {
             field.labels.plural = incomingField.labels.plural
           }
@@ -350,7 +350,7 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ i18n, t: i18n.t }),
+              label: option.label({ i18n, t: i18n.t as TFunction }),
               value: option.value,
             }
           }
@@ -414,7 +414,10 @@ export const createClientField = ({
                   case 'description':
                     if ('description' in tab.admin) {
                       if (typeof tab.admin?.description === 'function') {
-                        clientTab.admin.description = tab.admin.description({ i18n, t: i18n.t })
+                        clientTab.admin.description = tab.admin.description({
+                          i18n,
+                          t: i18n.t as TFunction,
+                        })
                       } else {
                         clientTab.admin.description = tab.admin.description
                       }

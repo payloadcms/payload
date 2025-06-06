@@ -22,7 +22,7 @@ import { isValidID } from '../utilities/isValidID.js'
 
 const batchAndLoadDocs =
   (req: PayloadRequest): BatchLoadFn<string, TypeWithID> =>
-  async (keys: string[]): Promise<TypeWithID[]> => {
+  async (keys: readonly string[]): Promise<TypeWithID[]> => {
     const { payload } = req
 
     // Create docs array of same length as keys, using null as value

@@ -2,16 +2,19 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     /* TODO: remove the following lines */
-    "strict": false,
+    // "strict": false,
     "strictNullChecks": true,
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin"
-      },
-      {
-        "name": "tsc-strict"
-      }
-    ],
+
+
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictBuiltinIteratorReturn": true,
+    "strictFunctionTypes": true,
+
+    "strictPropertyInitialization": false, // 13 errors in 1 file
+    "noImplicitAny": false, // 277 errors in 55 files
+    "noImplicitThis": false, // 2 errors in 1 file
+    "useUnknownInCatchVariables": true, // 18 errors in 13 files
   },
   "references": [{ "path": "../translations" }]
 }

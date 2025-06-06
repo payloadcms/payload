@@ -188,7 +188,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
 
       let inlineRunner: TaskHandler<TaskType> = null!
       if (isInline) {
-        inlineRunner = task
+        inlineRunner = task as TaskHandler<TaskType>
       }
 
       let taskConfig!: TaskConfig<string>
@@ -386,7 +386,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
   } else {
     const tasks: RunTaskFunctions = {}
     for (const task of req?.payload?.config?.jobs?.tasks ?? []) {
-      tasks[task.slug] = runTask(task.slug)
+      tasks[task.slug] = runTask(task.slug) as RunTaskFunction<string>
     }
     return tasks as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
   }
