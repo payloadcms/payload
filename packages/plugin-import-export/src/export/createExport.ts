@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable perfectionist/sort-objects */
 import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
@@ -61,10 +61,14 @@ export const createExport = async (args: CreateExportArgs) => {
     req,
   } = args
 
-  console.log('debug createExport', debug)
-
   if (debug) {
-    console.log('Starting export process with args:', { collectionSlug, drafts, fields, format })
+    req.payload.logger.info({
+      message: 'Starting export process with args:',
+      collectionSlug,
+      drafts,
+      fields,
+      format,
+    })
   }
 
   const locale = localeInput ?? localeArg
@@ -77,7 +81,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const isCSV = format === 'csv'
 
   if (debug) {
-    console.log('Export configuration:', { name, isCSV, locale })
+    req.payload.logger.info({ message: 'Export configuration:', name, isCSV, locale })
   }
 
   const findArgs = {
@@ -95,14 +99,14 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    console.log('Find arguments:', findArgs)
+    req.payload.logger.info({ message: 'Find arguments:', findArgs })
   }
 
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
 
   if (download) {
     if (debug) {
-      console.log('Starting download stream')
+      req.payload.logger.info('Starting download stream')
     }
     const encoder = new TextEncoder()
     const stream = new Readable({
@@ -112,7 +116,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
         while (result.docs.length > 0) {
           if (debug) {
-            console.log(
+            req.payload.logger.info(
               `Processing batch ${findArgs.page + 1} with ${result.docs.length} documents`,
             )
           }
@@ -123,7 +127,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
           if (!result.hasNextPage) {
             if (debug) {
-              console.log('Stream complete - no more pages')
+              req.payload.logger.info('Stream complete - no more pages')
             }
             this.push(null) // End the stream
             break
@@ -144,7 +148,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    console.log('Starting file generation')
+    req.payload.logger.info('Starting file generation')
   }
   const outputData: string[] = []
   let isFirstBatch = true
@@ -154,7 +158,9 @@ export const createExport = async (args: CreateExportArgs) => {
     result = await payload.find(findArgs)
 
     if (debug) {
-      console.log(`Processing batch ${findArgs.page} with ${result.docs.length} documents`)
+      req.payload.logger.info(
+        `Processing batch ${findArgs.page} with ${result.docs.length} documents`,
+      )
     }
 
     if (isCSV) {
@@ -169,12 +175,12 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
   if (debug) {
-    console.log('File generation complete:', { bufferSize: buffer.length, format })
+    req.payload.logger.info(`${format} file generation complete`)
   }
 
   if (!id) {
     if (debug) {
-      console.log('Creating new export file')
+      req.payload.logger.info('Creating new export file')
     }
     req.file = {
       name,
@@ -184,7 +190,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
   } else {
     if (debug) {
-      console.log('Updating existing export:', { id })
+      req.payload.logger.info(`Updating existing export with id: ${id}`)
     }
     await req.payload.update({
       id,
@@ -200,6 +206,6 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
   if (debug) {
-    console.log('Export process completed successfully')
+    req.payload.logger.info('Export process completed successfully')
   }
 }

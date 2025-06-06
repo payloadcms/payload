@@ -36,7 +36,9 @@ export const getExportCollection = ({
     disableDuplicate: true,
     endpoints: [
       {
-        handler: download,
+        handler: (req) => {
+          return download(req, pluginConfig.debug)
+        },
         method: 'post',
         path: '/download',
       },
