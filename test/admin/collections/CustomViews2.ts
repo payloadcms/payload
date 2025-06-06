@@ -26,12 +26,14 @@ export const CustomViews2: CollectionConfig = {
       views: {
         edit: {
           api: {
+            path: '/my-api',
             // Override the default tab component for the default route
             tab: {
+              href: '/something',
               Component: {
                 path: '/components/CustomTabComponent/index.js#CustomTabComponent',
                 clientProps: {
-                  label: overriddenDefaultRouteTabLabel,
+                  label: 'sup',
                 },
               },
             },
@@ -58,6 +60,7 @@ export const CustomViews2: CollectionConfig = {
             tab: {
               href: '/custom-tab-view',
               label: customTabLabel,
+              condition: () => false,
             },
             path: '/custom-tab-view',
             meta: {

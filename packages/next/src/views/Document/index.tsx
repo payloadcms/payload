@@ -2,7 +2,6 @@ import type {
   AdminViewServerProps,
   Data,
   DocumentViewClientProps,
-  DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   PayloadComponent,
 } from 'payload'
@@ -16,6 +15,7 @@ import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { ViewMap } from './createViewMap.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
 
@@ -90,8 +90,7 @@ export const renderDocument = async ({
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<DocumentViewServerProps>
-  let DefaultView: ViewFromConfig<DocumentViewServerProps>
+  let View: ViewMap[string] = null
   let ErrorView: ViewFromConfig<AdminViewServerProps>
 
   let apiURL: string
@@ -219,19 +218,15 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      const collectionViews = getViewsFromConfig({
+      ;({ ErrorView, View } = getViewsFromConfig({
         collectionConfig,
         config,
         docPermissions,
         routeSegments: segments,
-      })
-
-      CustomView = collectionViews?.CustomView
-      DefaultView = collectionViews?.DefaultView
-      ErrorView = collectionViews?.ErrorView
+      }))
     }
 
-    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
+    if (!View && !RootViewOverride && !ErrorView) {
       ErrorView = {
         Component: NotFoundView,
       }
@@ -266,18 +261,14 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      const globalViews = getViewsFromConfig({
+      ;({ ErrorView, View } = getViewsFromConfig({
         config,
         docPermissions,
         globalConfig,
         routeSegments: segments,
-      })
+      }))
 
-      CustomView = globalViews?.CustomView
-      DefaultView = globalViews?.DefaultView
-      ErrorView = globalViews?.ErrorView
-
-      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
+      if (!View && !RootViewOverride && !ErrorView) {
         ErrorView = {
           Component: NotFoundView,
         }
@@ -391,11 +382,7 @@ export const renderDocument = async ({
               })
             : RenderServerComponent({
                 clientProps,
-                Component: RootViewOverride
-                  ? RootViewOverride
-                  : CustomView?.ComponentConfig || CustomView?.Component
-                    ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component,
+                Component: RootViewOverride ? RootViewOverride : View,
                 importMap,
                 serverProps: documentViewServerProps,
               })}
