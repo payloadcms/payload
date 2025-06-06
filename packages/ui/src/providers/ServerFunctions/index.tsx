@@ -4,6 +4,7 @@ import type {
   Data,
   DocumentSlots,
   ErrorResult,
+  GetFolderResultsComponentAndDataArgs,
   Locale,
   ServerFunctionClient,
 } from 'payload'
@@ -13,6 +14,7 @@ import React, { createContext, useCallback } from 'react'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
+import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
 import type {
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
@@ -63,9 +65,16 @@ type GetDocumentSlots = (args: {
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 
+type GetFolderResultsComponentAndDataClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
+) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
+
 type ServerFunctionsContextType = {
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
+  getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   renderDocument: RenderDocument
@@ -218,11 +227,32 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'get-folder-results-component-and-data',
+          args: rest,
+        })) as Awaited<ReturnType<typeof getFolderResultsComponentAndDataHandler>>
+
+        if (!remoteSignal?.aborted) {
+          return result
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
         copyDataFromLocale,
         getDocumentSlots,
+        getFolderResultsComponentAndData,
         getFormState,
         getTableState,
         renderDocument,

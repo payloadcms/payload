@@ -13,8 +13,12 @@ import './index.scss'
 const baseClass = 'collection-type'
 
 export function CollectionTypePill() {
-  const { filterItems, folderCollectionSlug, folderCollectionSlugs, visibleCollectionSlugs } =
-    useFolder()
+  const {
+    activeCollectionFolderSlugs: visibleCollectionSlugs,
+    allCollectionFolderSlugs: folderCollectionSlugs,
+    folderCollectionSlug,
+    refineFolderData,
+  } = useFolder()
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
 
@@ -53,8 +57,8 @@ export function CollectionTypePill() {
         </Button>
       }
       key="relation-to-selection-popup"
-      onChange={({ selectedValues }) => {
-        void filterItems({ relationTo: selectedValues })
+      onChange={({ selectedValues: relationTo }) => {
+        void refineFolderData({ query: { relationTo }, updateURL: true })
       }}
       options={allCollectionOptions}
       selectedValues={visibleCollectionSlugs}

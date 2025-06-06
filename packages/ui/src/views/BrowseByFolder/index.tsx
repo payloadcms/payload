@@ -1,12 +1,11 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { CollectionSlug, Document, FolderListViewClientProps } from 'payload'
-import type { FolderDocumentItemKey } from 'payload/shared'
+import type { FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
-import { formatFolderOrDocumentItem } from 'payload/shared'
+import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
@@ -26,9 +25,10 @@ import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useFolder } from '../../providers/Folders/index.js'
+import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../CollectionFolder/ListSelection/index.js'
@@ -36,12 +36,54 @@ import './index.scss'
 
 const baseClass = 'folder-list'
 
-export function DefaultBrowseByFolderView(
-  props: {
-    hasCreatePermissionCollectionSlugs?: string[]
-    selectedCollectionSlugs?: string[]
-  } & FolderListViewClientProps,
-) {
+export function DefaultBrowseByFolderView({
+  activeCollectionFolderSlugs,
+  allCollectionFolderSlugs,
+  allowCreateCollectionSlugs,
+  baseFolderPath,
+  breadcrumbs,
+  documents,
+  folderFieldName,
+  folderID,
+  FolderResultsComponent,
+  search,
+  subfolders,
+  ...restOfProps
+}: FolderListViewClientProps) {
+  return (
+    <FolderProvider
+      activeCollectionFolderSlugs={activeCollectionFolderSlugs}
+      allCollectionFolderSlugs={allCollectionFolderSlugs}
+      allowCreateCollectionSlugs={allowCreateCollectionSlugs}
+      baseFolderPath={baseFolderPath}
+      breadcrumbs={breadcrumbs}
+      documents={documents}
+      folderFieldName={folderFieldName}
+      folderID={folderID}
+      FolderResultsComponent={FolderResultsComponent}
+      search={search}
+      subfolders={subfolders}
+    >
+      <BrowseByFolderViewInContext {...restOfProps} />
+    </FolderProvider>
+  )
+}
+
+type BrowseByFolderViewInContextProps = Omit<
+  FolderListViewClientProps,
+  | 'activeCollectionFolderSlugs'
+  | 'allCollectionFolderSlugs'
+  | 'allowCreateCollectionSlugs'
+  | 'baseFolderPath'
+  | 'breadcrumbs'
+  | 'documents'
+  | 'folderFieldName'
+  | 'folderID'
+  | 'FolderResultsComponent'
+  | 'subfolders'
+>
+
+function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const {
     AfterFolderList,
     AfterFolderListTable,
@@ -50,40 +92,36 @@ export function DefaultBrowseByFolderView(
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    hasCreatePermissionCollectionSlugs,
     viewPreference,
   } = props
 
-  const { config, getEntityConfig } = useConfig()
+  const router = useRouter()
+  const { getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
+  const { startRouteTransition } = useRouteTransition()
   const { clearRouteCache } = useRouteCache()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
   const { setPreference } = usePreferences()
   const {
-    addItems,
+    activeCollectionFolderSlugs: visibleCollectionSlugs,
+    allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
-    filterItems,
-    focusedRowIndex,
     folderCollectionConfig,
-    folderFieldName,
     folderID,
+    getFolderRoute,
     getSelectedItems,
-    isDragging,
     lastSelectedIndex,
     moveToFolder,
-    onItemClick,
-    onItemKeyPress,
+    refineFolderData,
     search,
-    selectedIndexes,
-    setFolderID,
+    selectedItemKeys,
     setIsDragging,
     subfolders,
-    visibleCollectionSlugs,
   } = useFolder()
 
   const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
@@ -129,35 +167,6 @@ export function DefaultBrowseByFolderView(
     return `${acc}, ${getTranslation(collectionConfig.labels?.plural, i18n)}`
   }, '')
 
-  const onCreateSuccess = React.useCallback(
-    ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
-      const collectionConfig = getEntityConfig({ collectionSlug })
-      void addItems([
-        formatFolderOrDocumentItem({
-          folderFieldName,
-          isUpload: Boolean(collectionConfig?.upload),
-          relationTo: collectionSlug,
-          useAsTitle: collectionConfig.admin.useAsTitle,
-          value: doc,
-        }),
-      ])
-    },
-    [getEntityConfig, addItems, folderFieldName],
-  )
-
-  const selectedItemKeys = React.useMemo(() => {
-    return new Set(
-      getSelectedItems().reduce<FolderDocumentItemKey[]>((acc, item) => {
-        if (item) {
-          if (item.relationTo && item.value) {
-            acc.push(`${item.relationTo}-${item.value.id}`)
-          }
-        }
-        return acc
-      }, []),
-    )
-  }, [getSelectedItems])
-
   const handleSetViewType = React.useCallback(
     (view: 'grid' | 'list') => {
       void setPreference('browse-by-folder', {
@@ -192,7 +201,9 @@ export function DefaultBrowseByFolderView(
                   id={null}
                   key="root"
                   onClick={() => {
-                    void setFolderID({ folderID: null })
+                    startRouteTransition(() => {
+                      router.push(getFolderRoute(null))
+                    })
                   }}
                 >
                   <ColoredFolderIcon />
@@ -211,7 +222,9 @@ export function DefaultBrowseByFolderView(
                   id={crumb.id}
                   key={crumb.id}
                   onClick={() => {
-                    void setFolderID({ folderID: crumb.id })
+                    startRouteTransition(() => {
+                      router.push(getFolderRoute(crumb.id))
+                    })
                   }}
                 >
                   {crumb.name}
@@ -221,7 +234,7 @@ export function DefaultBrowseByFolderView(
         }),
       ])
     }
-  }, [setStepNav, drawerDepth, i18n, breadcrumbs, setFolderID, t])
+  }, [breadcrumbs, drawerDepth, getFolderRoute, router, setStepNav, startRouteTransition, t])
 
   return (
     <Fragment>
@@ -242,13 +255,15 @@ export function DefaultBrowseByFolderView(
             AfterListHeaderContent={Description}
             title={listHeaderTitle}
             TitleActions={[
-              <ListCreateNewDocInFolderButton
-                buttonLabel={t('general:createNew')}
-                collectionSlugs={hasCreatePermissionCollectionSlugs}
-                key="create-new-button"
-                onCreateSuccess={onCreateSuccess}
-                slugPrefix="create-document--header-pill"
-              />,
+              allowCreateCollectionSlugs.length && (
+                <ListCreateNewDocInFolderButton
+                  buttonLabel={t('general:createNew')}
+                  collectionSlugs={allowCreateCollectionSlugs}
+                  key="create-new-button"
+                  onCreateSuccess={clearRouteCache}
+                  slugPrefix="create-document--header-pill"
+                />
+              ),
             ].filter(Boolean)}
           />
           <SearchBar
@@ -263,7 +278,7 @@ export function DefaultBrowseByFolderView(
               <CurrentFolderActions key="current-folder-actions" />,
             ].filter(Boolean)}
             label={searchPlaceholder}
-            onSearchChange={(search) => filterItems({ search })}
+            onSearchChange={(search) => refineFolderData({ query: { search }, updateURL: true })}
             searchQueryParam={search}
           />
           {BeforeFolderListTable}
@@ -273,12 +288,7 @@ export function DefaultBrowseByFolderView(
                 <div>
                   {subfolders.length ? (
                     <>
-                      <ItemCardGrid
-                        items={subfolders}
-                        selectedItemKeys={selectedItemKeys}
-                        title={'Folders'}
-                        type="folder"
-                      />
+                      <ItemCardGrid items={subfolders} title={'Folders'} type="folder" />
                     </>
                   ) : null}
 
@@ -286,7 +296,6 @@ export function DefaultBrowseByFolderView(
                     <>
                       <ItemCardGrid
                         items={documents}
-                        selectedItemKeys={selectedItemKeys}
                         subfolderCount={subfolders.length}
                         title={'Documents'}
                         type="file"
@@ -295,41 +304,35 @@ export function DefaultBrowseByFolderView(
                   ) : null}
                 </div>
               ) : (
-                <FolderFileTable
-                  dateFormat={config.admin.dateFormat}
-                  documents={documents}
-                  focusedRowIndex={focusedRowIndex}
-                  i18n={i18n}
-                  isMovingItems={isDragging}
-                  onRowClick={onItemClick}
-                  onRowPress={onItemKeyPress}
-                  selectedItems={selectedItemKeys}
-                  subfolders={subfolders}
-                />
+                <FolderFileTable />
               )}
             </>
           )}
           {totalDocsAndSubfolders === 0 && (
             <NoListResults
               Actions={[
-                <ListCreateNewDocInFolderButton
-                  buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
-                  collectionSlugs={[folderCollectionConfig.slug]}
-                  key="create-folder"
-                  onCreateSuccess={onCreateSuccess}
-                  slugPrefix="create-folder--no-results"
-                />,
-                folderID && (
+                allowCreateCollectionSlugs.includes(folderCollectionConfig.slug) && (
                   <ListCreateNewDocInFolderButton
-                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                    collectionSlugs={hasCreatePermissionCollectionSlugs.filter(
-                      (slug) => slug !== folderCollectionConfig.slug,
-                    )}
-                    key="create-document"
-                    onCreateSuccess={onCreateSuccess}
-                    slugPrefix="create-document--no-results"
+                    buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    collectionSlugs={[folderCollectionConfig.slug]}
+                    key="create-folder"
+                    onCreateSuccess={clearRouteCache}
+                    slugPrefix="create-folder--no-results"
                   />
                 ),
+                folderID &&
+                  allowCreateCollectionSlugs.filter((slug) => slug !== folderCollectionConfig.slug)
+                    .length > 0 && (
+                    <ListCreateNewDocInFolderButton
+                      buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                      collectionSlugs={allowCreateCollectionSlugs.filter(
+                        (slug) => slug !== folderCollectionConfig.slug,
+                      )}
+                      key="create-document"
+                      onCreateSuccess={clearRouteCache}
+                      slugPrefix="create-document--no-results"
+                    />
+                  ),
               ].filter(Boolean)}
               Message={
                 <p>
@@ -347,7 +350,7 @@ export function DefaultBrowseByFolderView(
       <DragOverlaySelection
         allItems={[...subfolders, ...documents]}
         lastSelected={lastSelectedIndex}
-        selectedCount={selectedIndexes.size}
+        selectedCount={selectedItemKeys.size}
       />
     </Fragment>
   )

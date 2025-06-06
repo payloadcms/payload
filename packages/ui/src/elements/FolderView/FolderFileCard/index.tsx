@@ -1,10 +1,13 @@
 'use client'
 
+import type { FolderOrDocument } from 'payload/shared'
+
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { ThreeDotsIcon } from '../../../icons/ThreeDots/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
 import { Popup } from '../../Popup/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
@@ -125,5 +128,43 @@ export function FolderFileCard({
         ) : null}
       </div>
     </div>
+  )
+}
+
+type ContextCardProps = {
+  readonly className?: string
+  readonly index: number // todo: possibly remove
+  readonly item: FolderOrDocument
+  readonly type: 'file' | 'folder'
+}
+export function ContextFolderFileCard({ type, className, index, item }: ContextCardProps) {
+  const {
+    focusedRowIndex,
+    isDragging,
+    itemKeysToMove,
+    onItemClick,
+    onItemKeyPress,
+    selectedItemKeys,
+  } = useFolder()
+  const isSelected = selectedItemKeys.has(item.itemKey)
+
+  return (
+    <FolderFileCard
+      className={className}
+      disabled={(isDragging && isSelected) || itemKeysToMove.has(item.itemKey)}
+      id={item.value.id}
+      isFocused={focusedRowIndex === index}
+      isSelected={isSelected}
+      itemKey={item.itemKey}
+      onClick={(event) => {
+        void onItemClick({ event, index, item })
+      }}
+      onKeyDown={(event) => {
+        void onItemKeyPress({ event, index, item })
+      }}
+      previewUrl={item.value.url}
+      title={item.value._folderOrDocumentTitle}
+      type={type}
+    />
   )
 }

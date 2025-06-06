@@ -101,7 +101,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const valueRef = useRef(value)
   // the line below seems odd
-   
+
+  // eslint-disable-next-line react-compiler/react-compiler
   valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
