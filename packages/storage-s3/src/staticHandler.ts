@@ -16,7 +16,7 @@ export type SignedDownloadsConfig =
         collection: CollectionConfig
         filename: string
         req: PayloadRequest
-      }): Promise<boolean>
+      }): boolean | Promise<boolean>
     }
   | boolean
 
