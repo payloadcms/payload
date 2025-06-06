@@ -1,0 +1,48 @@
+import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from '../types.js'
+
+import { USD } from '../currencies/index.js'
+
+type Props = {
+  pluginConfig: EcommercePluginConfig
+}
+
+export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommercePluginConfig => {
+  const config = {
+    ...pluginConfig,
+  } as Partial<SanitizedEcommercePluginConfig>
+
+  if (typeof config.customers === 'undefined') {
+    config.customers = {
+      slug: 'users',
+    }
+  }
+
+  if (!config.currencies) {
+    config.currencies = {
+      defaultCurrency: 'USD',
+      supportedCurrencies: [USD],
+    }
+  }
+
+  if (typeof config.inventory === 'undefined') {
+    config.inventory = true
+  }
+
+  if (typeof config.orders === 'undefined') {
+    config.orders = true
+  }
+
+  if (typeof config.transactions === 'undefined') {
+    config.transactions = true
+  }
+
+  if (typeof config.payments === 'undefined') {
+    config.payments = {
+      paymentMethods: [],
+    }
+  } else if (!config.payments.paymentMethods) {
+    config.payments.paymentMethods = []
+  }
+
+  return config as SanitizedEcommercePluginConfig
+}
