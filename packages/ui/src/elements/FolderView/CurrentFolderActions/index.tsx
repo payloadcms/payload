@@ -1,11 +1,14 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 import { toast } from 'sonner'
 
 import { Dots } from '../../../icons/Dots/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
+import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
@@ -22,6 +25,8 @@ type Props = {
   className?: string
 }
 export function CurrentFolderActions({ className }: Props) {
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
   const {
     breadcrumbs,
     currentFolder,
@@ -29,15 +34,15 @@ export function CurrentFolderActions({ className }: Props) {
     folderCollectionSlug,
     folderFieldName,
     folderID,
+    getFolderRoute,
     moveToFolder,
-    renameFolder,
-    setFolderID,
   } = useFolder()
   const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
     useDocumentDrawer({
       id: folderID,
       collectionSlug: folderCollectionSlug,
     })
+  const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { routes, serverURL } = config
   const { closeModal, openModal } = useModal()
@@ -48,8 +53,19 @@ export function CurrentFolderActions({ className }: Props) {
       credentials: 'include',
       method: 'DELETE',
     })
-    await setFolderID({ folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null })
-  }, [breadcrumbs, folderCollectionSlug, folderID, routes.api, serverURL, setFolderID])
+    startRouteTransition(() => {
+      router.push(getFolderRoute(breadcrumbs[breadcrumbs.length - 2]?.id || null))
+    })
+  }, [
+    breadcrumbs,
+    folderCollectionSlug,
+    folderID,
+    getFolderRoute,
+    router,
+    serverURL,
+    routes.api,
+    startRouteTransition,
+  ])
 
   if (!folderID) {
     return null
@@ -143,12 +159,9 @@ export function CurrentFolderActions({ className }: Props) {
       />
 
       <FolderDocumentDrawer
-        onSave={(result) => {
-          renameFolder({
-            folderID: result.doc.id,
-            newName: result.doc[folderCollectionConfig.admin.useAsTitle],
-          })
+        onSave={() => {
           closeFolderDrawer()
+          clearRouteCache()
         }}
       />
     </>

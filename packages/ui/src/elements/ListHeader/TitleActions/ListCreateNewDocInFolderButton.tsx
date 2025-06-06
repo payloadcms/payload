@@ -118,12 +118,12 @@ export function ListCreateNewDocInFolderButton({
           initialData={{
             [folderFieldName]: folderID,
           }}
-          onSave={({ doc }) => {
-            closeModal(newDocInFolderDrawerSlug)
-            void onCreateSuccess({
+          onSave={async ({ doc }) => {
+            await onCreateSuccess({
               collectionSlug: createCollectionSlug,
               doc,
             })
+            closeModal(newDocInFolderDrawerSlug)
           }}
           redirectAfterCreate={false}
         />
@@ -134,13 +134,11 @@ export function ListCreateNewDocInFolderButton({
           initialData={{
             [folderFieldName]: folderID,
           }}
-          onSave={(result) => {
-            if (typeof onCreateSuccess === 'function') {
-              void onCreateSuccess({
-                collectionSlug: folderCollectionConfig.slug,
-                doc: result.doc,
-              })
-            }
+          onSave={async (result) => {
+            await onCreateSuccess({
+              collectionSlug: folderCollectionConfig.slug,
+              doc: result.doc,
+            })
             closeFolderDrawer()
           }}
           redirectAfterCreate={false}

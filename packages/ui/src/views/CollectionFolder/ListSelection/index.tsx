@@ -16,6 +16,7 @@ import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
 const moveToFolderDrawerSlug = 'move-to-folder--list'
@@ -40,15 +41,13 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const {
     clearSelections,
     currentFolder,
-    folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
     folderID,
     getSelectedItems,
     moveToFolder,
-    removeItems,
-    renameFolder,
   } = useFolder()
+  const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { t } = useTranslation()
   const { closeModal, openModal } = useModal()
@@ -121,12 +120,6 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             folderCollectionSlug={folderCollectionSlug}
             id={groupedSelections[folderCollectionSlug].ids[0]}
             key="edit-folder-action"
-            onSave={({ doc }) => {
-              renameFolder({
-                folderID: doc.id,
-                newName: doc[folderCollectionConfig.admin.useAsTitle],
-              })
-            }}
           />
         ),
         count > 0 ? (
@@ -178,25 +171,9 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         ) : null,
         !disableBulkDelete && (
           <DeleteMany_v4
-            afterDelete={(groupedCollections) => {
-              const itemsToRemove = Object.entries(groupedCollections).reduce<FolderOrDocument[]>(
-                (acc, [slug, res]) => {
-                  if (res.ids.length) {
-                    res.ids.forEach((id) => {
-                      acc.push({
-                        itemKey: `${slug}-${id}`,
-                        relationTo: slug,
-                        value: {
-                          id,
-                        } as FolderOrDocument['value'],
-                      })
-                    })
-                  }
-                  return acc
-                },
-                [],
-              )
-              void removeItems(itemsToRemove)
+            afterDelete={() => {
+              clearRouteCache()
+              clearSelections()
             }}
             key="bulk-delete"
             selections={groupedSelections}
