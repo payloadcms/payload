@@ -1,11 +1,10 @@
-import ssrfFilter from 'ssrf-req-filter'
+import { ofetch } from 'ofetch'
 
-// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
-import { isURLAllowed } from '../utilities/isURLAllowed.js'
+import { dispatcher } from './safeRequest.js'
 
 type Args = {
   data: FileData
@@ -22,24 +21,37 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       fileURL = `${baseUrl}${url}`
     }
 
-    const allowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
+    let res
     try {
-      if (allowList.length === 0 || !isURLAllowed(fileURL, allowList)) {
-        ssrfFilter({ url: fileURL })
+      const headers = uploadConfig.externalFileHeaderFilter
+        ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
+        : { cookie: req.headers.get('cookie')! }
+      const fetchOptions: RequestInit = {
+        credentials: 'include',
+        headers,
+        method: 'GET',
       }
-    } catch (ignore) {
-      throw new APIError(`Failed to fetch file from filtered url, ${fileURL}`, 400)
+      const allowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
+
+      // Use native Fetch if allowList is populated
+      if (allowList.length) {
+        res = await fetch(fileURL, fetchOptions)
+      } else {
+        // Use ofetch with custom dispatcher for safety
+        const safeOfetch = ofetch.create({
+          // @ts-expect-error - dispatcher is custom
+          dispatcher,
+        })
+        res = await safeOfetch(fileURL, fetchOptions)
+      }
+    } catch (error) {
+      // Retrieve nested error from dispatcher if available
+      if (error && error?.cause && error.cause?.cause) {
+        throw new APIError(error.cause.cause.message, 500, error.cause.cause)
+      } else {
+        throw new APIError(`Failed to fetch file from ${fileURL}`, error.statusCode, error)
+      }
     }
-
-    const headers = uploadConfig.externalFileHeaderFilter
-      ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers.get('cookie')! }
-
-    const res = await fetch(fileURL, {
-      credentials: 'include',
-      headers,
-      method: 'GET',
-    })
 
     if (!res.ok) {
       throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
