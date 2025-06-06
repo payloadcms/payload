@@ -203,7 +203,7 @@ export const createClientConfig = ({
         }
         break
       default:
-        clientConfig[key] = config[key]
+        ;(clientConfig as any)[key] = config[key as keyof SanitizedConfig]
     }
   }
   return clientConfig as ClientConfig

@@ -159,7 +159,8 @@ export const createClientCollectionConfig = ({
               }
               break
             default:
-              clientCollection.admin[adminKey] = collection.admin[adminKey]
+              ;(clientCollection as any).admin[adminKey] =
+                collection.admin[adminKey as keyof SanitizedCollectionConfig['admin']]
           }
         }
         break
@@ -241,13 +242,14 @@ export const createClientCollectionConfig = ({
               return sanitizedSize
             })
           } else {
-            clientCollection.upload[uploadKey] = collection.upload[uploadKey]
+            ;(clientCollection.upload as any)[uploadKey] =
+              collection.upload[uploadKey as keyof SanitizedUploadConfig]
           }
         }
         break
 
       default:
-        clientCollection[key] = collection[key]
+        ;(clientCollection as any)[key] = collection[key as keyof SanitizedCollectionConfig]
     }
   }
 

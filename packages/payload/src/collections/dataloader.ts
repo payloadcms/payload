@@ -47,7 +47,7 @@ const batchAndLoadDocs =
     *
     **/
 
-    const batchByFindArgs = {}
+    const batchByFindArgs: Record<string, string[]> = {}
 
     for (const key of keys) {
       const [

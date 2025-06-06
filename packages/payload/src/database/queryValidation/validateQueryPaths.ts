@@ -82,7 +82,7 @@ export async function validateQueryPaths({
         }
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
-          const val = constraint[operator]
+          const val = constraint[operator as keyof typeof constraint]
           if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
