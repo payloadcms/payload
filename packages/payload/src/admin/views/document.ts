@@ -66,6 +66,11 @@ export type DocumentTabConfig = {
   readonly isActive?: ((args: { href: string }) => boolean) | boolean
   readonly label?: ((args: { t: (key: string) => string }) => string) | string
   readonly newTab?: boolean
+  /**
+   * Sets the order to render the tab in the admin panel
+   * Recommended to use increments of 100 (e.g. 0, 100, 200)
+   */
+  readonly order?: number
   readonly Pill?: PayloadComponent
 }
 

@@ -123,6 +123,7 @@ export const MyCollection: CollectionConfig = {
             tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
+              order: '100',
             },
             // highlight-end
           },
@@ -143,6 +144,7 @@ The following options are available for tabs:
 | ----------- | ------------------------------------------------------------------------------------------------------------- |
 | `label`     | The label to display in the tab.                                                                              |
 | `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.            |
+| `order`     | The order in which the tab appears in the navigation. Can be set on default and custom tabs.                  |
 | `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
 
 ### Tab Components
@@ -179,3 +181,58 @@ export function MyCustomTabComponent(props: DocumentTabClientProps) {
   )
 }
 ```
+
+## Reordering Tabs
+
+You can control the order in which tabs appear in the Document View by using the order property on each tab's configuration. This applies to both default system tabs (like Edit or API) and custom tabs you define.
+
+Tabs are rendered in ascending order based on their order value. Lower numbers appear first. Tabs without an order value will appear after all tabs that have one, in the order they were defined in the config.
+
+#### Example
+
+The following configuration places the Edit tab first, a Custom tab second, and the Live Preview tab third:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  slug: 'my-collection',
+  admin: {
+    components: {
+      views: {
+        edit: {
+          default: {
+            tab: {
+              // highlight-start
+              order: 0,
+              // highlight-end
+            },
+          },
+          customTab: {
+            path: '/custom-tab',
+            Component: '/path/to/MyCustomTab',
+            tab: {
+              // highlight-start
+              order: 10,
+              // highlight-end
+              label: 'Custom',
+              href: '/custom-tab',
+            },
+          },
+          livePreview: {
+            tab: {
+              // highlight-start
+              order: 20,
+              // highlight-end
+            },
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+<Banner type="info">
+  **Note:** This applies to _both_ Collections _and_ Globals.
+</Banner>

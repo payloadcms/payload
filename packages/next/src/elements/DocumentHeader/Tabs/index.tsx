@@ -16,7 +16,7 @@ import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
-import { tabs as defaultTabs } from './tabs/index.js'
+import { tabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
 
@@ -32,47 +32,100 @@ export const DocumentTabs: React.FC<{
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
+  const defaultTabs = tabs(collectionConfig, globalConfig)
+
+  const combinedTabs = [
+    ...Object.entries(defaultTabs).map(([name, tab]) => {
+      return {
+        type: 'default',
+        config: { name, tab },
+        order: tab.order ?? Infinity,
+      }
+    }),
+
+    ...customViews.map((CustomView) => {
+      if ('tab' in CustomView) {
+        return {
+          type: 'custom',
+          config: CustomView,
+          order: (CustomView.tab.order && CustomView.tab.order) ?? Infinity,
+        }
+      }
+      return null
+    }),
+  ].sort((a, b) => a.order - b.order)
+
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultTabs)
-              // sort `defaultViews` based on `order` property from smallest to largest
-              // if no `order`, append the view to the end
-              // TODO: open `order` to the config and merge `defaultViews` with `customViews`
-              ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) {
-                  return 0
-                } else if (a.order === undefined) {
-                  return 1
-                } else if (b.order === undefined) {
-                  return -1
+            {combinedTabs.map((tab, index) => {
+              if (tab.type === 'default') {
+                if ('name' in tab.config && 'tab' in tab.config) {
+                  const { name, tab: tabConfig } = tab.config
+                  const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
+                  const tabFromConfig =
+                    viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
+
+                  const { condition } = tabFromConfig || {}
+
+                  const meetsCondition =
+                    !condition ||
+                    (condition &&
+                      Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
+
+                  const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
+
+                  if (meetsCondition) {
+                    if (tabFromConfig?.Component) {
+                      return RenderServerComponent({
+                        clientProps: {
+                          path,
+                        } satisfies DocumentTabClientProps,
+                        Component: tabFromConfig.Component,
+                        importMap: payload.importMap,
+                        key: `tab-${index}`,
+                        serverProps: {
+                          collectionConfig,
+                          globalConfig,
+                          i18n,
+                          payload,
+                          permissions,
+                        } satisfies DocumentTabServerPropsOnly,
+                      })
+                    }
+
+                    return (
+                      <DocumentTab
+                        key={`tab-${index}`}
+                        path={path}
+                        {...{
+                          ...props,
+                          ...(tabConfig || {}),
+                          ...(tabFromConfig || {}),
+                        }}
+                      />
+                    )
+                  }
+
+                  return null
                 }
-                return a.order - b.order
-              })
-              ?.map(([name, tab], index) => {
-                const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
+                return null
+              }
 
-                const { condition } = tabFromConfig || {}
+              if (tab.type === 'custom') {
+                if ('path' in tab.config && 'tab' in tab.config) {
+                  const { path, tab: tabConfig } = tab.config
 
-                const meetsCondition =
-                  !condition ||
-                  (condition &&
-                    Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
-
-                const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
-
-                if (meetsCondition) {
-                  if (tabFromConfig?.Component) {
+                  if (tabConfig.Component) {
                     return RenderServerComponent({
                       clientProps: {
                         path,
                       } satisfies DocumentTabClientProps,
-                      Component: tabFromConfig.Component,
+                      Component: tabConfig.Component,
                       importMap: payload.importMap,
-                      key: `tab-${index}`,
+                      key: `tab-custom-${index}`,
                       serverProps: {
                         collectionConfig,
                         globalConfig,
@@ -85,53 +138,17 @@ export const DocumentTabs: React.FC<{
 
                   return (
                     <DocumentTab
-                      key={`tab-${index}`}
+                      key={`tab-custom-${index}`}
                       path={path}
                       {...{
                         ...props,
-                        ...(tab || {}),
-                        ...(tabFromConfig || {}),
+                        ...tabConfig,
                       }}
                     />
                   )
                 }
-
                 return null
-              })}
-            {customViews?.map((CustomView, index) => {
-              if ('tab' in CustomView) {
-                const { path, tab } = CustomView
-
-                if (tab.Component) {
-                  return RenderServerComponent({
-                    clientProps: {
-                      path,
-                    } satisfies DocumentTabClientProps,
-                    Component: tab.Component,
-                    importMap: payload.importMap,
-                    key: `tab-custom-${index}`,
-                    serverProps: {
-                      collectionConfig,
-                      globalConfig,
-                      i18n,
-                      payload,
-                      permissions,
-                    } satisfies DocumentTabServerPropsOnly,
-                  })
-                }
-
-                return (
-                  <DocumentTab
-                    key={`tab-custom-${index}`}
-                    path={path}
-                    {...{
-                      ...props,
-                      ...tab,
-                    }}
-                  />
-                )
               }
-
               return null
             })}
           </ul>
