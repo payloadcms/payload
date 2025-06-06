@@ -93,6 +93,7 @@ export const createViewMap = ({
     })
 
     acc[pathToUse] = {
+      key,
       View:
         'Component' in viewConfig && viewConfig.Component
           ? viewConfig.Component
@@ -101,7 +102,7 @@ export const createViewMap = ({
     }
 
     return acc
-  }, {})
+  }, {} as ViewMap)
 
   // Map over the defaults to ensure they are also included in the `viewMap` alongside any custom views
   Object.entries(defaultDocumentViews).forEach(([key, defaultViewConfig]) => {

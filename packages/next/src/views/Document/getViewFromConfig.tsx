@@ -14,7 +14,7 @@ import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { createViewMap } from './createViewMap.js'
 
-export const getViewsFromConfig = ({
+export const getViewFromConfig = ({
   collectionConfig,
   config,
   docPermissions,
@@ -102,7 +102,7 @@ export const getViewsFromConfig = ({
     overrideDocPermissions,
   })
 
-  // use a for...of loop in order to early once a match is found
+  // use a for...of loop in order to early exit once a match is found
   for (const [viewPath, MappedView] of Object.entries(viewMap)) {
     const isMatching = isPathMatchingRoute({
       currentRoute,

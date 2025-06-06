@@ -26,7 +26,7 @@ import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewsFromConfig } from './getViewFromConfig.js'
+import { getViewFromConfig } from './getViewFromConfig.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -216,7 +216,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = getViewsFromConfig({
+      ;({ View } = getViewFromConfig({
         collectionConfig,
         config,
         docPermissions,
@@ -257,7 +257,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = getViewsFromConfig({
+      ;({ View } = getViewFromConfig({
         config,
         docPermissions,
         globalConfig,
