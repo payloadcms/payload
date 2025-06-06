@@ -39,11 +39,11 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       } else {
         // Use ofetch with custom dispatcher for safety
         const safeOfetch = ofetch.create({
-          // @ts-expect-error - dispatcher is custom
           dispatcher,
         })
         res = await safeOfetch(fileURL, fetchOptions)
       }
+      // @ts-ignore - The expected error is nested
     } catch (error) {
       // Retrieve nested error from dispatcher if available
       if (error && error?.cause && error.cause?.cause) {
