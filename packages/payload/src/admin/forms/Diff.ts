@@ -1,5 +1,3 @@
-// @ts-strict-ignore
-
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { ClientField, Field, FieldTypes, Tab } from '../../fields/config/types.js'
@@ -7,7 +5,6 @@ import type {
   ClientFieldWithOptionalType,
   PayloadRequest,
   SanitizedFieldPermissions,
-  TypedLocale,
 } from '../../index.js'
 
 export type VersionTab = {
@@ -27,7 +24,7 @@ export type BaseVersionField = {
 
 export type VersionField = {
   field?: BaseVersionField
-  fieldByLocale?: Record<TypedLocale, BaseVersionField>
+  fieldByLocale?: Record<string, BaseVersionField>
 }
 
 /**

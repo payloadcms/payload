@@ -8,7 +8,7 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
@@ -22,7 +22,7 @@ type Arguments<T> = {
   select?: SelectType
 }
 
-const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   accessResult,
   doc,
   entity,
@@ -43,7 +43,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (entityType === 'collection') {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       parent: {
         equals: doc.id,
       },
@@ -51,7 +51,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (docHasTimestamps(doc)) {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       or: [
         {
           updatedAt: {
@@ -77,7 +77,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    locale,
+    locale: locale!,
     pagination: false,
     req,
     select: getQueryDraftsSelect({ select }),
@@ -118,5 +118,3 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   return draft.version
 }
-
-export default replaceWithDraftIfAvailable

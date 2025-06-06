@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 // This gets dynamically reassigned during compilation
@@ -35,6 +34,7 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
  */
 export class APIError<
   TData extends null | object = { [key: string]: unknown } | null,
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
 > extends ExtendableError<TData> {
   /**
    * Creates an API error.
@@ -46,7 +46,7 @@ export class APIError<
   constructor(
     message: string,
     status: number = httpStatus.INTERNAL_SERVER_ERROR,
-    data: TData = null,
+    data: TData = null!,
     isPublic = false,
   ) {
     super(message, status, data, isPublic)

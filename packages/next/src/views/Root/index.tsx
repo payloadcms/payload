@@ -63,9 +63,9 @@ export const RootPage = async ({
   const searchParams = await searchParamsPromise
 
   const {
+    browseByFolderSlugs,
     DefaultView,
     documentSubViewType,
-    folderCollectionSlugs,
     folderID: folderIDParam,
     initPageOptions,
     serverProps,
@@ -140,17 +140,19 @@ export const RootPage = async ({
   })
 
   const payload = initPageResult?.req.payload
-  const folderID = parseDocumentID({
-    id: folderIDParam,
-    collectionSlug: payload.config.folders.slug,
-    payload,
-  })
+  const folderID = payload.config.folders
+    ? parseDocumentID({
+        id: folderIDParam,
+        collectionSlug: payload.config.folders.slug,
+        payload,
+      })
+    : undefined
 
   const RenderedView = RenderServerComponent({
     clientProps: {
+      browseByFolderSlugs,
       clientConfig,
       documentSubViewType,
-      folderCollectionSlugs,
       viewType,
     } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,

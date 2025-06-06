@@ -13,14 +13,15 @@ import './index.scss'
 const baseClass = 'collection-type'
 
 export function CollectionTypePill() {
-  const { filterItems, folderCollectionSlug, visibleCollectionSlugs } = useFolder()
+  const { filterItems, folderCollectionSlug, folderCollectionSlugs, visibleCollectionSlugs } =
+    useFolder()
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
 
   const [allCollectionOptions] = React.useState(() => {
     return config.collections.reduce(
       (acc, collection) => {
-        if (collection.folders) {
+        if (collection.folders && folderCollectionSlugs.includes(collection.slug)) {
           acc.push({
             label: getTranslation(collection.labels?.plural, i18n),
             value: collection.slug,

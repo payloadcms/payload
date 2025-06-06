@@ -45,6 +45,7 @@ const baseClass = 'collection-edit'
 export function DefaultEditView({
   BeforeDocumentControls,
   Description,
+  EditMenuItems,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -444,6 +445,8 @@ export function DefaultEditView({
     !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
+  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+
   return (
     <main className={classes.filter(Boolean).join(' ')}>
       <OperationProvider operation={operation}>
@@ -459,8 +462,10 @@ export function DefaultEditView({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {isInDrawer && <DocumentDrawerHeader drawerSlug={drawerSlug} />}
-          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
+          {isInDrawer && (
+            <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />
+          )}
+          {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
               handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
               isActive={shouldShowDocumentLockedModal}
@@ -521,8 +526,9 @@ export function DefaultEditView({
               SaveDraftButton,
             }}
             data={savedDocumentData}
-            disableActions={disableActions}
+            disableActions={disableActions || isFolderCollection}
             disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}

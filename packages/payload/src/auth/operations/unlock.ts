@@ -89,7 +89,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
 
     const user = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       where: whereConstraint,
     })

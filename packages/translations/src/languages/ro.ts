@@ -197,7 +197,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'Sunteți pe cale să mutați <1>{{title}}</1> în <2>{{toFolder}}</2>. Sunteți sigur?',
     moveItemToRootConfirmation:
       'Sunteți pe cale să mutați <1>{{title}}</1> în dosarul rădăcină. Sigur?',
-    movingFromFolder: 'Mutarea {{title}} din {{folderName}}',
+    movingFromFolder: 'Mutarea {{title}} din {{fromFolder}}',
     newFolder: 'Dosar nou',
     noFolder: 'Niciun dosar',
     renameFolder: 'Redenumiți dosarul',

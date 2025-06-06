@@ -196,7 +196,7 @@ export const skTranslations: DefaultTranslationsObject = {
       'Chystáte sa presunúť <1>{{title}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
     moveItemToRootConfirmation:
       'Chystáte sa presunúť <1>{{title}}</1> do koreňového priečinka. Ste si istý?',
-    movingFromFolder: 'Presun {{title}} z {{folderName}}',
+    movingFromFolder: 'Presun {{title}} z {{fromFolder}}',
     newFolder: 'Nový priečinok',
     noFolder: 'Žiadna zložka',
     renameFolder: 'Premenovať priečinok',

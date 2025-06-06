@@ -35,8 +35,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   })
 
   const result: FetchAPIFileUploadResponse = {
-    fields: undefined,
-    files: undefined,
+    fields: undefined!,
+    files: undefined!,
   }
 
   const headersObject = {}
@@ -44,7 +44,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     headersObject[name] = value
   })
 
-  const reader = request.body.getReader()
+  const reader = request.body?.getReader()
 
   const busboy = Busboy({ ...options, headers: headersObject })
 
@@ -78,7 +78,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         : memHandler(options, field, filename) // Upload into RAM.
 
     const writePromise = options.useTempFiles
-      ? getWritePromise().catch((err) => {
+      ? getWritePromise().catch(() => {
           busboy.end()
           cleanup()
         })
@@ -105,7 +105,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         cleanup()
         abortAndDestroyFile(
           file,
-          new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+          new APIError(options.responseOnLimit!, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
             size: getFileSize(),
           }),
         )
@@ -202,7 +202,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   )
 
   while (parsingRequest) {
-    const { done, value } = await reader.read()
+    const { done, value } = await reader!.read()
 
     if (done) {
       parsingRequest = false

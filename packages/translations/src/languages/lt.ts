@@ -195,7 +195,7 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jūs ketinate perkelti <1>{{title}}</1> į <2>{{toFolder}}</2>. Ar esate įsitikinęs?',
     moveItemToRootConfirmation:
       'Jūs ketinate perkelti <1>{{title}}</1> į pagrindinį aplanką. Ar esate tikras?',
-    movingFromFolder: 'Perkeliamas {{title}} iš {{folderName}}',
+    movingFromFolder: 'Perkeliamas {{title}} iš {{fromFolder}}',
     newFolder: 'Naujas aplankas',
     noFolder: 'Nėra aplanko',
     renameFolder: 'Pervadinti aplanką',

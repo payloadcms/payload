@@ -58,7 +58,6 @@ export {
   useBulkUpload,
   useBulkUploadDrawerSlug,
 } from '../../elements/BulkUpload/index.js'
-export { DrawerActionHeader } from '../../elements/DrawerActionHeader/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'

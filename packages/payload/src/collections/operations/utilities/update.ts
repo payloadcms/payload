@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
@@ -231,6 +230,7 @@ export const updateDocument = async <
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     docWithLocales: undefined,
     global: null,
     operation: 'update',
