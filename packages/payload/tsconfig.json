@@ -12,9 +12,9 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "useUnknownInCatchVariables": true,
+    "noImplicitThis": true,
 
     "noImplicitAny": false, // 277 errors in 55 files
-    "noImplicitThis": false, // 2 errors in 1 file
   },
   "references": [{ "path": "../translations" }]
 }
