@@ -2,6 +2,12 @@ import dotenv from 'dotenv'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 dotenv.config()
 
+declare global {
+  // Add the custom property to the NodeJS global type
+  // eslint-disable-next-line no-var
+  var _mongoMemoryServer: MongoMemoryReplSet | undefined
+}
+
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
   // @ts-expect-error

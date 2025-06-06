@@ -767,6 +767,7 @@ describe('lexicalMain', () => {
 
     // make text bold
     await boldButton.click()
+    await wait(300)
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
