@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
@@ -10,6 +11,10 @@ import { getSelect } from './getSelect.js'
 
 type Export = {
   collectionSlug: string
+  /**
+   * If true, enables debug logging
+   */
+  debug?: boolean
   drafts?: 'no' | 'yes'
   exportsCollection: string
   fields?: string[]
@@ -42,6 +47,7 @@ export const createExport = async (args: CreateExportArgs) => {
       id,
       name: nameArg,
       collectionSlug,
+      debug = false,
       drafts,
       exportsCollection,
       fields,
@@ -54,6 +60,13 @@ export const createExport = async (args: CreateExportArgs) => {
     req: { locale: localeArg, payload },
     req,
   } = args
+
+  console.log('debug createExport', debug)
+
+  if (debug) {
+    console.log('Starting export process with args:', { collectionSlug, drafts, fields, format })
+  }
+
   const locale = localeInput ?? localeArg
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
@@ -62,6 +75,10 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
   const isCSV = format === 'csv'
+
+  if (debug) {
+    console.log('Export configuration:', { name, isCSV, locale })
+  }
 
   const findArgs = {
     collection: collectionSlug,
@@ -77,9 +94,16 @@ export const createExport = async (args: CreateExportArgs) => {
     where,
   }
 
+  if (debug) {
+    console.log('Find arguments:', findArgs)
+  }
+
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
 
   if (download) {
+    if (debug) {
+      console.log('Starting download stream')
+    }
     const encoder = new TextEncoder()
     const stream = new Readable({
       async read() {
@@ -87,12 +111,20 @@ export const createExport = async (args: CreateExportArgs) => {
         let isFirstBatch = true
 
         while (result.docs.length > 0) {
+          if (debug) {
+            console.log(
+              `Processing batch ${findArgs.page + 1} with ${result.docs.length} documents`,
+            )
+          }
           const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
           const csvString = stringify(csvInput, { header: isFirstBatch })
           this.push(encoder.encode(csvString))
           isFirstBatch = false
 
           if (!result.hasNextPage) {
+            if (debug) {
+              console.log('Stream complete - no more pages')
+            }
             this.push(null) // End the stream
             break
           }
@@ -111,12 +143,19 @@ export const createExport = async (args: CreateExportArgs) => {
     })
   }
 
+  if (debug) {
+    console.log('Starting file generation')
+  }
   const outputData: string[] = []
   let isFirstBatch = true
 
   while (result.hasNextPage) {
     findArgs.page += 1
     result = await payload.find(findArgs)
+
+    if (debug) {
+      console.log(`Processing batch ${findArgs.page} with ${result.docs.length} documents`)
+    }
 
     if (isCSV) {
       const csvInput = result.docs.map((doc) => flattenObject({ doc, fields }))
@@ -129,8 +168,14 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
+  if (debug) {
+    console.log('File generation complete:', { bufferSize: buffer.length, format })
+  }
 
   if (!id) {
+    if (debug) {
+      console.log('Creating new export file')
+    }
     req.file = {
       name,
       data: buffer,
@@ -138,6 +183,9 @@ export const createExport = async (args: CreateExportArgs) => {
       size: buffer.length,
     }
   } else {
+    if (debug) {
+      console.log('Updating existing export:', { id })
+    }
     await req.payload.update({
       id,
       collection: exportsCollection,
@@ -150,5 +198,8 @@ export const createExport = async (args: CreateExportArgs) => {
       },
       user,
     })
+  }
+  if (debug) {
+    console.log('Export process completed successfully')
   }
 }
