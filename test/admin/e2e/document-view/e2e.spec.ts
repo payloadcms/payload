@@ -31,6 +31,7 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
+  customViews3CollectionSlug,
   editMenuItemsSlug,
   globalSlug,
   group1Collection1Slug,
@@ -99,6 +100,41 @@ describe('Document View', () => {
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+  })
+
+  describe('routing', () => {
+    let customViewDocID: string
+    let customViewURL: AdminUrlUtil
+
+    beforeEach(async () => {
+      customViewURL = new AdminUrlUtil(serverURL, customViews3CollectionSlug)
+
+      const doc = await payload.create({
+        collection: customViews3CollectionSlug,
+        data: {
+          title: 'Test Document',
+        },
+      })
+
+      customViewDocID = doc.id
+    })
+
+    test('should mount the live preview view to the `/:id` route', async () => {
+      await page.goto(customViewURL.create)
+      await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+      await page.goto(customViewURL.edit(customViewDocID))
+      await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+    })
+
+    test('should mount the default edit view to the `/:id/edit` route', async () => {
+      await page.goto(`${customViewURL.edit(customViewDocID)}/edit`)
+      await expect(page.locator('#field-title')).toBeVisible()
+    })
+
+    test('should free up the old `/:id/preview` route', async () => {
+      await page.goto(`${customViewURL.edit(customViewDocID)}/preview`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
+    })
   })
 
   describe('API view', () => {

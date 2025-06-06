@@ -89,7 +89,10 @@ export const createViewMap = ({
 
     const pathToUse = sanitizePath({
       baseRoute,
-      path: 'path' in viewConfig && viewConfig.path ? viewConfig.path : viewDefaults?.path,
+      path:
+        'path' in viewConfig && typeof viewConfig.path === 'string'
+          ? viewConfig.path
+          : viewDefaults?.path,
     })
 
     acc[pathToUse] = {
