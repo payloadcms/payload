@@ -1583,6 +1583,30 @@ describe('Versions', () => {
       })
     })
 
+    it('should properly clean up old versions when reached versions.max', async () => {
+      const getLatestVersion = () =>
+        payload
+          .findGlobalVersions({
+            slug: 'max-versions',
+            sort: '-createdAt',
+            limit: 1,
+          })
+          .then((r) => r.docs[0])
+
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' } })
+      const version_1 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' } })
+      const version_2 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' } })
+      const version_3 = await getLatestVersion()
+      const version_1_deleted = await payload.findGlobalVersionByID({
+        slug: 'max-versions',
+        id: version_1?.id as string,
+        disableErrors: true,
+      })
+      expect(version_1_deleted).toBeFalsy()
+    })
+
     describe('Read', () => {
       it('should allow a version to be retrieved by ID', async () => {
         const version = await payload.findGlobalVersionByID({
