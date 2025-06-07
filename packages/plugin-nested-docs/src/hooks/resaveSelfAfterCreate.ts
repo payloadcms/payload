@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 
@@ -6,10 +6,15 @@ import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 // so that we can build its breadcrumbs with the newly created document's ID.
 
 export const resaveSelfAfterCreate =
-  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  (pluginConfig: NestedDocsPluginConfig, collectionSlug: string): CollectionAfterChangeHook =>
   async ({ doc, operation, req }) => {
     if (operation !== 'create') {
       return undefined
+    }
+
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!collection) {
+      throw new Error(`Collection ${collectionSlug} not found`)
     }
 
     const { locale, payload } = req

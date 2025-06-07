@@ -47,19 +47,28 @@ export const nestedDocsPlugin =
           fields.push(createBreadcrumbsField(collection.slug))
         }
 
+        const collectionSlug = collection.slug
+
         return {
           ...collection,
           fields,
           hooks: {
             ...(collection.hooks || {}),
             afterChange: [
-              resaveChildren(pluginConfig, collection),
-              resaveSelfAfterCreate(pluginConfig, collection),
+              resaveChildren(pluginConfig, collection.slug),
+              resaveSelfAfterCreate(pluginConfig, collection.slug),
               ...(collection?.hooks?.afterChange || []),
             ],
             beforeChange: [
-              async ({ data, originalDoc, req }) =>
-                populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
+              async ({ data, originalDoc, req }) => {
+                const collectionConfig = req.payload.collections[collectionSlug]?.config
+                if (!collectionConfig) {
+                  throw new Error(`Collection ${collectionSlug} not found`)
+                }
+
+                return populateBreadcrumbs(req, pluginConfig, collectionConfig, data, originalDoc)
+              },
+
               ...(collection?.hooks?.beforeChange || []),
             ],
           },
