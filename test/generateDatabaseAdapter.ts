@@ -20,6 +20,7 @@ export const allDatabaseAdapters = {
     collation: {
       strength: 1,
     },
+    manualJoins: process.env.PAYLOAD_MANUAL_JOINS === 'true',
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
