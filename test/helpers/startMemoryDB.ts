@@ -14,6 +14,9 @@ declare global {
  */
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
+  if (process.env.DATABASE_URI) {
+    return
+  }
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
