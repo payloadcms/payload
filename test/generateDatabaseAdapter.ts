@@ -10,7 +10,7 @@ export const allDatabaseAdapters = {
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    ensureIndexes: true,
+    ensureIndexes: process.env.PAYLOAD_MANUAL_JOINS === 'true' ? false : true,
     // required for connect to detect that we are using a memory server
     mongoMemoryServer:  global._mongoMemoryServer,
     url:

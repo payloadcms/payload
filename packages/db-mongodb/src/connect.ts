@@ -56,7 +56,15 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
-        await mongoose.connection.dropDatabase()
+        if (process.env.DATABASE_URI) {
+          await Promise.all(
+            this.payload.config.collections.map(async (collection) => {
+              await mongoose.connection.collection(collection.slug).deleteMany({})
+            }),
+          )
+        } else {
+          await mongoose.connection.dropDatabase()
+        }
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
