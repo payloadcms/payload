@@ -125,6 +125,7 @@ export interface Args {
    * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
+  manualJoins?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -200,6 +201,7 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
+  manualJoins = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -223,6 +225,7 @@ export function mongooseAdapter({
       ensureIndexes,
       // @ts-expect-error don't have globals model yet
       globals: undefined,
+      manualJoins,
       // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},

@@ -51,6 +51,9 @@ const relationshipSort = ({
   sortDirection: SortDirection
   versions?: boolean
 }) => {
+  if (adapter.manualJoins) {
+    return false
+  }
   let currentFields = fields
   const segments = path.split('.')
   if (segments.length < 2) {
