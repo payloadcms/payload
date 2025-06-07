@@ -1,5 +1,9 @@
 import { spawn } from 'child_process'
 
+if (process.env.DATABASE_URI) {
+  process.exit(0)
+}
+
 try {
   if (global._mongoMemoryServer) {
     // Spawn a detached process to stop the memory server.
