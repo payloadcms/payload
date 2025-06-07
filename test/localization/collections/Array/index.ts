@@ -17,5 +17,20 @@ export const ArrayCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'itemsReadOnly',
+      type: 'array',
+      localized: true,
+      admin: {
+        readOnly: true,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
 }
