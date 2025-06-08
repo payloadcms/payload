@@ -51,9 +51,6 @@ const relationshipSort = ({
   sortDirection: SortDirection
   versions?: boolean
 }) => {
-  if (adapter.manualJoins) {
-    return false
-  }
   let currentFields = fields
   const segments = path.split('.')
   if (segments.length < 2) {
@@ -99,28 +96,33 @@ const relationshipSort = ({
         sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
       }
 
+      const thePath = relationshipPath
       if (
         !sortAggregation.some((each) => {
-          return '$lookup' in each && each.$lookup.as === `__${path}`
+          return '$lookup' in each && each.$lookup.as === `__${thePath}`
         })
       ) {
         sortAggregation.push({
           $lookup: {
-            as: `__${path}`,
+            as: `__${thePath}`,
             foreignField: '_id',
             from: foreignCollection.Model.collection.name,
-            localField: versions ? `version.${relationshipPath}` : relationshipPath,
-            pipeline: [
-              {
-                $project: {
-                  [sortFieldPath]: true,
-                },
-              },
-            ],
+            localField: versions ? `version.${thePath}` : thePath,
+            ...(adapter.manualJoins
+              ? {}
+              : {
+                  pipeline: [
+                    {
+                      $project: {
+                        [sortFieldPath]: true,
+                      },
+                    },
+                  ],
+                }),
           },
         })
 
-        sort[`__${path}.${sortFieldPath}`] = sortDirection
+        sort[`__${thePath}.${sortFieldPath}`] = sortDirection
 
         return true
       }

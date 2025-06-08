@@ -15,6 +15,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = mongooseAdapter({
     ensureIndexes: false,
+    disableIndexHints: true,
     url: process.env.DATABASE_URI,
     collation: {
       strength: 1,
