@@ -96,33 +96,62 @@ const relationshipSort = ({
         sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
       }
 
-      const thePath = relationshipPath
       if (
         !sortAggregation.some((each) => {
-          return '$lookup' in each && each.$lookup.as === `__${thePath}`
+          return '$lookup' in each && each.$lookup.as === `__${path}`
         })
       ) {
+        let localField = versions ? `version.${relationshipPath}` : relationshipPath
+
+        let flattenedField: string | undefined
+
+        if (adapter.compatabilityMode === 'firestore' && localField.includes('.')) {
+          flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
+          if (
+            !sortAggregation.some(
+              (each) =>
+                '$addFields' in each &&
+                each.$addFields &&
+                flattenedField &&
+                flattenedField in each.$addFields,
+            )
+          ) {
+            sortAggregation.push({
+              $addFields: {
+                [flattenedField]: `$${localField}`,
+              },
+            })
+          }
+          localField = flattenedField
+        }
+
         sortAggregation.push({
           $lookup: {
-            as: `__${thePath}`,
+            as: `__${path}`,
             foreignField: '_id',
             from: foreignCollection.Model.collection.name,
-            localField: versions ? `version.${thePath}` : thePath,
-            ...(adapter.manualJoins
-              ? {}
-              : {
-                  pipeline: [
-                    {
-                      $project: {
-                        [sortFieldPath]: true,
-                      },
-                    },
-                  ],
-                }),
+            localField,
+            ...(adapter.compatabilityMode !== 'firestore' && {
+              pipeline: [
+                {
+                  $project: {
+                    [sortFieldPath]: true,
+                  },
+                },
+              ],
+            }),
           },
         })
 
-        sort[`__${thePath}.${sortFieldPath}`] = sortDirection
+        if (flattenedField) {
+          sortAggregation.push({
+            $project: {
+              [flattenedField]: 0,
+            },
+          })
+        }
+
+        sort[`__${path}.${sortFieldPath}`] = sortDirection
 
         return true
       }
