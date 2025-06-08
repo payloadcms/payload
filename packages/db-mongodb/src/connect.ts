@@ -39,13 +39,15 @@ export const connect: Connect = async function connect(
     if (this.compatabilityMode === 'firestore') {
       if (this.connection.db) {
         // Firestore doesn't support dropDatabase, so we monkey patch
-        // it to delete all documents from all collections instead
+        // dropDatabase to delete all documents from all collections instead
         this.connection.db.dropDatabase = async function (): Promise<boolean> {
-          const collections = await this.collections()
-          for (const collName of Object.keys(collections)) {
-            const coll = this.collection(collName)
-            await coll.deleteMany({})
-          }
+          const existingCollections = await this.listCollections().toArray()
+          await Promise.all(
+            existingCollections.map(async (collectionInfo) => {
+              const collection = this.collection(collectionInfo.name)
+              await collection.deleteMany({})
+            }),
+          )
           return true
         }
         this.connection.dropDatabase = async function () {
