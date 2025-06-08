@@ -36,6 +36,23 @@ export const connect: Connect = async function connect(
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (this.compatabilityMode === 'firestore') {
+      if (this.connection.db) {
+        // Firestore doesn't support dropDatabase, so we monkey patch
+        // it to delete all documents from all collections instead
+        this.connection.db.dropDatabase = async function (): Promise<boolean> {
+          const collections = await this.collections()
+          for (const collName of Object.keys(collections)) {
+            const coll = this.collection(collName)
+            await coll.deleteMany({})
+          }
+          return true
+        }
+        this.connection.dropDatabase = async function () {
+          await this.db?.dropDatabase()
+        }
+      }
+    }
 
     // If we are running a replica set with MongoDB Memory Server,
     // wait until the replica set elects a primary before proceeding
@@ -56,15 +73,7 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
-        if (process.env.DATABASE_URI) {
-          await Promise.all(
-            this.payload.config.collections.map(async (collection) => {
-              await mongoose.connection.collection(collection.slug).deleteMany({})
-            }),
-          )
-        } else {
-          await mongoose.connection.dropDatabase()
-        }
+        await mongoose.connection.dropDatabase()
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
