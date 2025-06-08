@@ -414,6 +414,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:changedFieldsCount',
   'version:confirmRevertToSaved',
   'version:compareVersions',
+  'version:comparingAgainst',
+  'version:currentlyViewing',
   'version:confirmPublish',
   'version:confirmUnpublish',
   'version:confirmVersionRestoration',
