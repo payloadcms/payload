@@ -470,7 +470,7 @@ formBuilderPlugin({
 })
 ```
 
-### Preventing Generated Schema Naming Conflicts
+### Preventing generated schema naming conflicts
 
 Plugin fields can cause GraphQL type name collisions with your own blocks or collections. This results in errors like:
 
@@ -481,6 +481,7 @@ Error: Schema must contain uniquely named types but contains multiple types name
 You can resolve this by overriding:
 
 - `graphQL.singularName` in your collection config (for GraphQL schema conflicts)
+- `interfaceName` in your block config
 - `interfaceName` in the plugin field config
 
 ```ts
