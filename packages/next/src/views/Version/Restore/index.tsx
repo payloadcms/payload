@@ -95,12 +95,12 @@ const Restore: React.FC<Props> = ({
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Button
-          buttonStyle="pill"
+          buttonStyle="primary"
           className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
             .filter(Boolean)
             .join(' ')}
           onClick={() => toggleModal(modalSlug)}
-          size="small"
+          size="xsmall"
           SubMenuPopupContent={
             canRestoreAsDraft
               ? () => (

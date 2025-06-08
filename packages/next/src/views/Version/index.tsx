@@ -16,7 +16,7 @@ import React from 'react'
 import { getLatestVersion, type GetLatestVersionReturnType } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
-import { formatVersionPill } from './SelectComparison/formatVersionPill.js'
+import { formatVersionPill } from './VersionPillLabel/formatVersionPill.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
   const { i18n, initPageResult, routeSegments, searchParams } = props
@@ -305,7 +305,10 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromPill={formatVersionPill({
         doc: versionFrom,
         hasPublishedDoc: !!latestPublishedVersion,
+        labelFirst: true,
+        labelStyle: 'text',
         latestDraftVersionID: latestDraftVersion?.id,
+
         latestPublishedVersionID: latestPublishedVersion?.id,
       })}
       versionTo={JSON.parse(JSON.stringify(versionTo))}
@@ -314,6 +317,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         formatVersionPill({
           doc: versionTo,
           hasPublishedDoc: !!latestPublishedVersion,
+          labelFirst: true,
           latestDraftVersionID: latestDraftVersion?.id,
           latestPublishedVersionID: latestPublishedVersion?.id,
         }).Label

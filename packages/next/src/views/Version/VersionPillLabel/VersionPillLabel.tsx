@@ -5,14 +5,32 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { useMemo } from 'react'
 
 import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
+import './index.scss'
+
+const baseClass = 'version-pill-label'
 
 export const VersionPillLabel: React.FC<{
   doc: any
   hasPublishedDoc: boolean
+  /**
+   * By default, the date is displayed first, followed by the version label.
+   */
+  labelFirst?: boolean
+  /**
+   * @default 'pill'
+   */
+  labelStyle?: 'pill' | 'text'
   latestDraftVersionID?: string
   latestPublishedVersionID?: string
 }> = (args) => {
-  const { doc, hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID } = args
+  const {
+    doc,
+    hasPublishedDoc,
+    labelFirst,
+    labelStyle = 'pill',
+    latestDraftVersionID,
+    latestPublishedVersionID,
+  } = args
 
   const {
     config: {
@@ -59,11 +77,33 @@ export const VersionPillLabel: React.FC<{
     }
   }
 
-  return (
-    <div className={`version-pill-label`}>
+  const Label: React.ReactNode =
+    labelStyle === 'pill' ? (
+      renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)
+    ) : (
+      <span className={`${baseClass}-text`}>{currentLabel}</span>
+    )
+
+  const Date = (
+    <span className={`${baseClass}-date`}>
       {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
-      &nbsp;&nbsp;
-      {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}
+    </span>
+  )
+
+  if (labelFirst) {
+    return (
+      <div className={baseClass}>
+        {Label}
+        {Date}
+        {publishedLocalePill}
+      </div>
+    )
+  }
+
+  return (
+    <div className={baseClass}>
+      {Date}
+      {Label}
       {publishedLocalePill}
     </div>
   )

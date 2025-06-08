@@ -208,7 +208,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       </Gutter>
       <Gutter className={`${baseClass}-controls-bottom`}>
         <div className={`${baseClass}-controls-bottom__wrapper`}>
-          <div className={`${baseClass}-controls-bottom__version-from`}>
+          <div className={`${baseClass}__version-from`}>
+            <div className={`${baseClass}__version-from-labels`}>
+              <span>{t('version:comparingAgainst')}</span>
+              <span className={`${baseClass}__time-elapsed`}>A few seconds ago</span>
+            </div>
             <SelectComparison
               baseURL={compareBaseURL}
               draftsEnabled={draftsEnabled}
@@ -224,20 +228,26 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             />
           </div>
 
-          <div className={`${baseClass}-controls-bottom__version-to`}>
-            {VersionToCreatedAtLabel}
-            {canUpdate && (
-              <Restore
-                className={`${baseClass}__restore`}
-                collectionSlug={collectionSlug}
-                globalSlug={globalSlug}
-                label={collectionConfig?.labels.singular || globalConfig?.label}
-                originalDocID={originalDocID}
-                status={versionTo?.version?._status}
-                versionDate={versionToCreatedAt}
-                versionID={versionTo?.id}
-              />
-            )}
+          <div className={`${baseClass}__version-to`}>
+            <div className={`${baseClass}__version-to-labels`}>
+              <span>{t('version:currentlyViewing')}</span>
+              <span className={`${baseClass}__time-elapsed`}>A few seconds ago</span>
+            </div>
+            <div className={`${baseClass}__version-to-version`}>
+              {VersionToCreatedAtLabel}
+              {canUpdate && (
+                <Restore
+                  className={`${baseClass}__restore`}
+                  collectionSlug={collectionSlug}
+                  globalSlug={globalSlug}
+                  label={collectionConfig?.labels.singular || globalConfig?.label}
+                  originalDocID={originalDocID}
+                  status={versionTo?.version?._status}
+                  versionDate={versionToCreatedAt}
+                  versionID={versionTo?.id}
+                />
+              )}
+            </div>
           </div>
         </div>
       </Gutter>

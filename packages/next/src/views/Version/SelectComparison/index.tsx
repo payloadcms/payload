@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Props } from './types.js'
 
 import './index.scss'
-import { formatVersionPill } from './formatVersionPill.js'
+import { formatVersionPill } from '../VersionPillLabel/formatVersionPill.js'
 
 const baseClass = 'compare-version'
 
@@ -108,6 +108,8 @@ export const SelectComparison: React.FC<Props> = (props) => {
             const pill = formatVersionPill({
               doc,
               hasPublishedDoc,
+              labelFirst: true,
+              labelStyle: 'text',
               latestDraftVersionID,
               latestPublishedVersionID,
             })
