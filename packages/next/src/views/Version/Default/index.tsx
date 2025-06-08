@@ -13,11 +13,11 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { type FormEventHandler, useCallback, useEffect, useState } from 'react'
+import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import Restore from '../Restore/index.js'
+import { Restore } from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'
 import { type SelectedLocaleOnChange, SelectLocales } from '../SelectLocales/index.js'
@@ -66,9 +66,12 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const { id: originalDocID, collectionSlug, globalSlug } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
 
-  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
-
-  const [globalConfig] = useState(() => getEntityConfig({ globalSlug }))
+  const { collectionConfig, globalConfig } = useMemo(() => {
+    return {
+      collectionConfig: getEntityConfig({ collectionSlug }),
+      globalConfig: getEntityConfig({ globalSlug }),
+    }
+  }, [collectionSlug, globalSlug, getEntityConfig])
 
   const router = useRouter()
   const pathname = usePathname()
@@ -121,7 +124,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     (event) => {
       const newModified = (event.target as HTMLInputElement).checked
       setModifiedOnly(newModified)
-
       updateSearchParams({
         modifiedOnly: newModified,
       })

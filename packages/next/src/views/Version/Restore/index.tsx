@@ -23,7 +23,7 @@ import './index.scss'
 const baseClass = 'restore-version'
 const modalSlug = 'restore-version'
 
-const Restore: React.FC<Props> = ({
+export const Restore: React.FC<Props> = ({
   className,
   collectionSlug,
   globalSlug,
@@ -126,5 +126,3 @@ const Restore: React.FC<Props> = ({
     </Fragment>
   )
 }
-
-export default Restore
