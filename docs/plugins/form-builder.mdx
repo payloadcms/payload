@@ -430,25 +430,9 @@ formBuilderPlugin({
         plural: 'Custom Text Fields',
       },
     },
-    country: {
-      interfaceName: 'CountrySelect',
-    },
   },
 })
 ```
-
-<Banner type="warning">
-  Some field names defined by this plugin may result in GraphQL type name collisions with your own Blocks or Collections.
-
-  Example: `Error: Schema must contain uniquely named types but contains multiple types named "Country"`.
-
-  To resolve this, you can:
-
-  1. Change the `slug` in your [Collection Config](https://payloadcms.com/docs/configuration/collections#config-options)  
-  2. Override `graphQL.singularName` in your [Collection Config](https://payloadcms.com/docs/configuration/collections#graphql)  
-  3. Override `interfaceName` in your [Block Config](https://payloadcms.com/docs/fields/blocks#block-configs)  
-  4. Override `interfaceName` in the plugin's field config, as shown above
-</Banner>
 
 ### Customizing the date field default value
 
@@ -481,6 +465,30 @@ formBuilderPlugin({
             })
           : []),
       ],
+    },
+  },
+})
+```
+
+### Preventing Generated Schema Naming Conflicts
+
+Plugin fields can cause GraphQL type name collisions with your own blocks or collections. This results in errors like:
+
+```txt
+Error: Schema must contain uniquely named types but contains multiple types named "Country"
+```
+
+You can resolve this by overriding:
+
+- `graphQL.singularName` in your collection config (for GraphQL schema conflicts)
+- `interfaceName` in the plugin field config
+
+```ts
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    country: {
+      interfaceName: 'CountryFormBlock', // overrides the generated type name to avoid a conflict
     },
   },
 })
