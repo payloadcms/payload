@@ -135,7 +135,7 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
-        alert(err)
+        console.log(err)
       }
     }
 
