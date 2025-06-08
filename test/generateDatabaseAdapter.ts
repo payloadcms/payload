@@ -6,11 +6,26 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const allDatabaseAdapters = {
+  firestore: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  if (!process.env.DATABASE_URI) {
+    throw new Error('DATABASE_URI must be set when using firestore')
+  }
+
+  export const databaseAdapter = mongooseAdapter({
+    ensureIndexes: false,
+    url: process.env.DATABASE_URI,
+    collation: {
+      strength: 1,
+    },
+    compatabilityMode: 'firestore'
+  })`,
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    ensureIndexes: process.env.PAYLOAD_MANUAL_JOINS === 'true' ? false : true,
+    ensureIndexes: true,
     // required for connect to detect that we are using a memory server
     mongoMemoryServer:  global._mongoMemoryServer,
     url:
@@ -20,7 +35,6 @@ export const allDatabaseAdapters = {
     collation: {
       strength: 1,
     },
-    manualJoins: process.env.PAYLOAD_MANUAL_JOINS === 'true',
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'

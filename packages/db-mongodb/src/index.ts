@@ -110,6 +110,7 @@ export interface Args {
   collation?: Omit<CollationOptions, 'locale'>
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
+  compatabilityMode?: 'firestore'
   /** Extra configuration options */
   connectOptions?: {
     /**
@@ -125,7 +126,6 @@ export interface Args {
    * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
-  manualJoins?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -142,9 +142,11 @@ export type MongooseAdapter = {
   collections: {
     [slug: string]: CollectionModel
   }
+  compatabilityMode?: 'firestore'
   connection: Connection
   ensureIndexes: boolean
   globals: GlobalModel
+  manualJoins: boolean
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -198,10 +200,10 @@ export function mongooseAdapter({
   allowIDOnCreate = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
+  compatabilityMode,
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
-  manualJoins = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -218,6 +220,7 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
+      compatabilityMode,
       // @ts-expect-error initialize without a connection
       connection: undefined,
       connectOptions: connectOptions || {},
@@ -225,7 +228,7 @@ export function mongooseAdapter({
       ensureIndexes,
       // @ts-expect-error don't have globals model yet
       globals: undefined,
-      manualJoins,
+      manualJoins: compatabilityMode === 'firestore',
       // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},

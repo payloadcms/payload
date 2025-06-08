@@ -13,7 +13,7 @@ const dirname = path.dirname(filename)
 const writeDBAdapter = process.env.WRITE_DB_ADAPTER !== 'false'
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE || 'true'
 
-if (process.env.PAYLOAD_DATABASE === 'mongodb') {
+if (process.env.PAYLOAD_DATABASE === 'mongodb' || process.env.PAYLOAD_DATABASE === 'firestore') {
   throw new Error('Not supported')
 }
 
