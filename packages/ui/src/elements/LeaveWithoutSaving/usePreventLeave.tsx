@@ -135,7 +135,7 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
-        console.log(err)
+        console.log('An unexpected exception was thrown in LeaveWithoutSaving:usePreventLeave', err)
       }
     }
 
