@@ -1238,6 +1238,9 @@ export {
 } from './fields/config/client.js'
 
 export { sanitizeFields } from './fields/config/sanitize.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
 export type {
   AdminClient,
   ArrayField,

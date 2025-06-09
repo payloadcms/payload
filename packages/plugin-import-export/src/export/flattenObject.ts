@@ -1,16 +1,24 @@
 import type { Document } from 'payload'
 
+import type { ToCSVFunction } from '../types.js'
+
 type Args = {
   doc: Document
   fields?: string[]
   prefix?: string
+  toCSVFunctions: Record<string, ToCSVFunction>
 }
 
-export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unknown> => {
-  const result: Record<string, unknown> = {}
+export const flattenObject = ({
+  doc,
+  fields,
+  prefix,
+  toCSVFunctions,
+}: Args): Record<string, unknown> => {
+  const row: Record<string, unknown> = {}
 
-  const flatten = (doc: Document, prefix?: string) => {
-    Object.entries(doc).forEach(([key, value]) => {
+  const flatten = (siblingDoc: Document, prefix?: string) => {
+    Object.entries(siblingDoc).forEach(([key, value]) => {
       const newKey = prefix ? `${prefix}_${key}` : key
 
       if (Array.isArray(value)) {
@@ -18,13 +26,44 @@ export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unk
           if (typeof item === 'object' && item !== null) {
             flatten(item, `${newKey}_${index}`)
           } else {
-            result[`${newKey}_${index}`] = item
+            if (toCSVFunctions?.[newKey]) {
+              const columnName = `${newKey}_${index}`
+              row[columnName] = toCSVFunctions[newKey]({
+                columnName,
+                doc,
+                row,
+                siblingDoc,
+                value: item,
+              })
+            } else {
+              row[`${newKey}_${index}`] = item
+            }
           }
         })
       } else if (typeof value === 'object' && value !== null) {
-        flatten(value, newKey)
+        if (!toCSVFunctions?.[newKey]) {
+          flatten(value, newKey)
+        } else {
+          row[newKey] = toCSVFunctions[newKey]({
+            columnName: newKey,
+            doc,
+            row,
+            siblingDoc,
+            value,
+          })
+        }
       } else {
-        result[newKey] = value
+        if (toCSVFunctions?.[newKey]) {
+          row[newKey] = toCSVFunctions[newKey]({
+            columnName: newKey,
+            doc,
+            row,
+            siblingDoc,
+            value,
+          })
+        } else {
+          row[newKey] = value
+        }
       }
     })
   }
@@ -41,14 +80,14 @@ export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unk
     }
 
     fields.forEach((field) => {
-      if (result[field.replace(/\./g, '_')]) {
+      if (row[field.replace(/\./g, '_')]) {
         const sanitizedField = field.replace(/\./g, '_')
-        orderedResult[sanitizedField] = result[sanitizedField]
+        orderedResult[sanitizedField] = row[sanitizedField]
       } else {
         const regex = fieldToRegex(field)
-        Object.keys(result).forEach((key) => {
+        Object.keys(row).forEach((key) => {
           if (regex.test(key)) {
-            orderedResult[key] = result[key]
+            orderedResult[key] = row[key]
           }
         })
       }
@@ -57,5 +96,5 @@ export const flattenObject = ({ doc, fields, prefix }: Args): Record<string, unk
     return orderedResult
   }
 
-  return result
+  return row
 }
