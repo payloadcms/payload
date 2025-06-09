@@ -220,7 +220,7 @@ describe('Versions', () => {
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
-      await expect(page.locator('main.versions')).toContainText('Current Published Version')
+      await expect(page.locator('main.versions')).toContainText('Currently Published')
     })
 
     test('should show unpublished version status in versions view', async () => {
