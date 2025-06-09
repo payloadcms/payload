@@ -2,9 +2,6 @@ import type {
   DocumentViewClientProps,
   DocumentViewCondition,
   DocumentViewServerProps,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
 } from 'payload'
 
 import { UnauthorizedError } from 'payload'
@@ -40,6 +37,8 @@ export const defaultDocumentViews: {
           throw new UnauthorizedError()
         }
       }
+
+      return true
     },
     path: '/',
     View: DefaultEditView,
@@ -56,12 +55,24 @@ export const defaultDocumentViews: {
     View: LivePreviewView,
   },
   version: {
-    condition: ({ docPermissions }) => Boolean(docPermissions?.readVersions),
+    condition: ({ docPermissions }) => {
+      if (!docPermissions?.readVersions) {
+        throw new UnauthorizedError()
+      }
+
+      return true
+    },
     path: '/versions/:versionId',
     View: VersionView,
   },
   versions: {
-    condition: ({ docPermissions }) => Boolean(docPermissions?.readVersions),
+    condition: ({ docPermissions }) => {
+      if (!docPermissions?.readVersions) {
+        throw new UnauthorizedError()
+      }
+
+      return true
+    },
     path: '/versions',
     View: VersionsView,
   },

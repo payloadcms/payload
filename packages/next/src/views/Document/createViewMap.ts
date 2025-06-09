@@ -13,7 +13,7 @@ import type {
 
 import { UnauthorizedError } from 'payload'
 
-import { UnauthorizedView } from '../Unauthorized/index.js'
+import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { defaultDocumentViews } from './defaults.js'
 
 export type ViewToRender =
@@ -118,7 +118,7 @@ export const createViewMap = ({
       } catch (error) {
         // If the condition throws an unauthorized error, we should still add the view
         if (error instanceof UnauthorizedError) {
-          View = UnauthorizedView
+          View = UnauthorizedViewWithGutter
         }
       }
     }
