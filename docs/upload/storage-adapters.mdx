@@ -102,8 +102,10 @@ export default buildConfig({
         },
         'media-with-presigned-downloads': {
           // Filter only mp4 files
-          shouldUseSignedURL: ({ collection, filename, req }) => {
-            return filename.endsWith('.mp4')
+          signedDownloads: {
+            shouldUseSignedURL: ({ collection, filename, req }) => {
+              return filename.endsWith('.mp4')
+            },
           },
         },
       },
