@@ -36,7 +36,7 @@ export const saveVersion = async ({
   select,
   snapshot,
 }: Args): Promise<TypeWithID> => {
-  let result
+  let result: TypeWithID | undefined
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
@@ -87,7 +87,7 @@ export const saveVersion = async ({
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if (latestVersion?.autosave === true) {
+      if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -199,10 +199,10 @@ export const saveVersion = async ({
     })
   }
 
-  let createdVersion = result.version
+  let createdVersion = (result as any).version
 
   createdVersion = sanitizeInternalFields(createdVersion)
-  createdVersion.id = result.parent
+  createdVersion.id = (result as any).parent
 
   return createdVersion
 }

@@ -1,20 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    /* TODO: remove the following lines */
-    // "strict": false,
-    "strictNullChecks": true,
-
-
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
-    "strictBuiltinIteratorReturn": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "useUnknownInCatchVariables": true,
-    "noImplicitThis": true,
-
-    "noImplicitAny": false, // 277 errors in 55 files
-  },
   "references": [{ "path": "../translations" }]
 }
