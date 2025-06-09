@@ -295,6 +295,7 @@ export const getRouteData = ({
           // --> /collections/:collectionSlug/:id/versions
           // --> /collections/:collectionSlug/:id/versions/:versionID
           initPageOptions.routeParams.id = segmentThree
+          initPageOptions.routeParams.versionID = segmentFive
 
           ViewToRender = {
             Component: DocumentView,
@@ -320,6 +321,7 @@ export const getRouteData = ({
         // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
         initPageOptions.routeParams.global = matchedGlobal.slug
+        initPageOptions.routeParams.versionID = segmentFour
 
         ViewToRender = {
           Component: DocumentView,
