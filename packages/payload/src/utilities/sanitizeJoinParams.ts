@@ -19,8 +19,9 @@ export type JoinParams =
  * Convert request JoinQuery object from strings to numbers
  * @param joins
  */
-export const sanitizeJoinParams = (joins: JoinParams = {}): JoinQuery => {
-  const joinQuery = {}
+export const sanitizeJoinParams = (_joins: JoinParams = {}): JoinQuery => {
+  const joinQuery: Record<string, any> = {}
+  const joins = _joins as Record<string, any>
 
   Object.keys(joins).forEach((schemaPath) => {
     if (joins[schemaPath] === 'false' || joins[schemaPath] === false) {
