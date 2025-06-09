@@ -10,7 +10,7 @@ import { getCustomFieldFunctions } from './getCustomFieldFunctions.js'
 import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
-type Export = {
+export type Export = {
   collectionSlug: string
   /**
    * If true, enables debug logging
