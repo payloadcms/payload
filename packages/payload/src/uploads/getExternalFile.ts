@@ -29,9 +29,8 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       const headers = uploadConfig.externalFileHeaderFilter
         ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
         : { cookie: req.headers.get('cookie')! }
-      const allowList = uploadConfig.pasteURL && uploadConfig.pasteURL.allowList
 
-      if (allowList) {
+      if (uploadConfig.pasteURL && uploadConfig.pasteURL.allowList) {
         res = await fetch(fileURL, {
           credentials: 'include',
           headers,
