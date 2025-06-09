@@ -57,6 +57,16 @@ export const allDatabaseAdapters = {
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
   `,
+  'vercel-postgres-read-replica': `
+  import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+
+  export const databaseAdapter = vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL,
+    },
+    readReplicas: [process.env.POSTGRES_REPLICA_URL],
+  })
+  `,
   sqlite: `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
