@@ -14,7 +14,7 @@ export const reduceFieldsToValues = (
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
 ): Data => {
-  let data = {}
+  let data: Record<string, any> = {}
 
   if (!fields) {
     return data
