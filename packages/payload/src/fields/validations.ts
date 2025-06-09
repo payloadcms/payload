@@ -344,7 +344,10 @@ export const json: JSONFieldValidation = (
         }
         return response.json()
       })
-      .then((json) => {
+      .then((_json) => {
+        const json = _json as {
+          id: string
+        }
         const jsonSchemaSanitizations = {
           id: undefined,
           $id: json.id,
