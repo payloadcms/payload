@@ -825,9 +825,6 @@ importers:
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
-      dns-sync:
-        specifier: 0.2.1
-        version: 0.2.1
       file-type:
         specifier: 19.3.0
         version: 19.3.0
@@ -855,6 +852,9 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
+      node-fetch:
+        specifier: 3.3.2
+        version: 3.3.2
       ofetch:
         specifier: 1.4.1
         version: 1.4.1
@@ -879,6 +879,9 @@ importers:
       scmp:
         specifier: 2.1.0
         version: 2.1.0
+      ssrf-req-filter:
+        specifier: 1.1.1
+        version: 1.1.1
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
@@ -6729,9 +6732,6 @@ packages:
     resolution: {integrity: sha512-GYqKi1aH7PJXxdhTeZBFrg8vUBeKXi+cNprXsC1kpJcbcVnV9wBsrOu1cQEdG0WeQwlfHiy3XvnKfIrJ2R0NzQ==}
     hasBin: true
 
-  dns-sync@0.2.1:
-    resolution: {integrity: sha512-VB1pDSVs82kFsZuoHQ5/Ysx62WiIfDGn9sx/x55EoVyk8pLwdqWGB2XCaDDOusBllb+1y3XRijscFPJJfpbFiw==}
-
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
@@ -9904,6 +9904,9 @@ packages:
 
   sqids@0.3.0:
     resolution: {integrity: sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==}
+
+  ssrf-req-filter@1.1.1:
+    resolution: {integrity: sha512-z0duj5tuvr5YetayhTdQWHf5gEncHvY6nL1HoqiFaF0gfK8Gc3VpTlxvAf4DaOVwcoczfqsL97H5TJRfYFtEYg==}
 
   stable-hash@0.0.4:
     resolution: {integrity: sha512-LjdcbuBeLcdETCrPn9i8AYAZ1eCtu4ECAWtP7UleOiZ9LzVxRzzUZEoZ8zB24nhkQnDWyET0I+3sWokSDS3E7g==}
@@ -16569,13 +16572,6 @@ snapshots:
 
   direction@1.0.4: {}
 
-  dns-sync@0.2.1:
-    dependencies:
-      debug: 4.3.7
-      shelljs: 0.8.5
-    transitivePeerDependencies:
-      - supports-color
-
   doctrine@3.0.0:
     dependencies:
       esutils: 2.0.3
@@ -20355,6 +20351,10 @@ snapshots:
     optional: true
 
   sqids@0.3.0: {}
+
+  ssrf-req-filter@1.1.1:
+    dependencies:
+      ipaddr.js: 2.2.0
 
   stable-hash@0.0.4: {}
 

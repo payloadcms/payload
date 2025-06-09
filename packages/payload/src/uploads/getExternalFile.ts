@@ -1,10 +1,10 @@
-import { ofetch } from 'ofetch'
+import { default as nodeFetch } from 'node-fetch'
+import ssrfFilter from 'ssrf-req-filter'
 
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
-import { dispatcher } from './safeRequest.js'
 
 type Args = {
   data: FileData
@@ -26,32 +26,30 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       const headers = uploadConfig.externalFileHeaderFilter
         ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
         : { cookie: req.headers.get('cookie')! }
-      const fetchOptions: RequestInit = {
-        credentials: 'include',
-        headers,
-        method: 'GET',
-      }
       const allowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
 
       // Use native Fetch if allowList is populated
       if (allowList.length) {
-        res = await fetch(fileURL, fetchOptions)
-      } else {
-        // Use ofetch with custom dispatcher for safety
-        const safeOfetch = ofetch.create({
-          dispatcher,
+        res = await fetch(fileURL, {
+          credentials: 'include',
+          headers,
+          method: 'GET',
         })
-        res = await safeOfetch(fileURL, fetchOptions)
-      }
-    } catch (error) {
-      // Retrieve nested error from dispatcher if available
-      // @ts-ignore - The expected error is nested
-      if (error && error?.cause && error.cause?.cause) {
-        // @ts-ignore - The expected error is nested
-        throw new APIError(error.cause.cause.message, 500, error.cause.cause)
       } else {
-        // @ts-ignore - The expected error is nested
-        throw new APIError(`Failed to fetch file from ${fileURL}`, error.statusCode, error)
+        res = await nodeFetch(url, {
+          agent: ssrfFilter(url),
+        })
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message.startsWith('Call to') && error.message.endsWith('is blocked.')) {
+          throw new APIError(
+            `Failed to fetch file from unsafe url, ${fileURL}. ${error.message}`,
+            400,
+          )
+        } else {
+          throw new APIError(`Failed to fetch file from ${fileURL}, ${error.message}`, 500)
+        }
       }
     }
 

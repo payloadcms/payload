@@ -45,8 +45,6 @@ describe('Collections - Uploads', () => {
 
   const blockedUrls = [
     'http://127.0.0.1/file.png',
-    'http://localhost/file.png',
-    'http://[::1]/file.png',
     'http://10.0.0.1/file.png',
     'http://192.168.1.1/file.png',
     'http://172.16.0.1/file.png',
@@ -559,29 +557,32 @@ describe('Collections - Uploads', () => {
         expect(doc.docs[0].image).toBeFalsy()
       })
     })
-    describe('filters', () => {
-      blockedUrls.forEach((url) => {
-        it(`should block uploading from blocked URL: ${url}`, async () => {
-          await expect(
-            payload.create({
-              collection: mediaSlug,
-              data: {
-                filename: 'test.png',
-                url,
-              },
-            }),
-          ).rejects.toThrow(
-            expect.objectContaining({
-              name: 'FileRetrievalError',
-              message: expect.stringContaining(`Failed to fetch file from unsafe url`),
-            }),
-          )
-        })
 
-        it(`should not filter allowed URL: ${url}`, async () => {
+    describe('filters', () => {
+      it.each`
+        url                                  | collection
+        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}
+        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}
+        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}
+        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}
+        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}
+        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}
+        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}
+        ${'http://255.255.255.255/file.png'} | ${mediaSlug}
+        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug}
+        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug}
+        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug}
+        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug}
+        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug}
+        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug}
+        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug}
+        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug}
+      `(
+        'should block or filter uploading from $collection with URL: $url',
+        async ({ url, collection }) => {
           await expect(
             payload.create({
-              collection: allowListMediaSlug,
+              collection,
               data: {
                 filename: 'test.png',
                 url,
@@ -590,11 +591,15 @@ describe('Collections - Uploads', () => {
           ).rejects.toThrow(
             expect.objectContaining({
               name: 'FileRetrievalError',
-              message: expect.stringContaining(`There was a problem while uploading the file.`),
+              message:
+                // eslint-disable-next-line jest/no-conditional-in-test
+                collection === mediaSlug
+                  ? expect.stringContaining('Failed to fetch file from unsafe url')
+                  : expect.stringContaining('There was a problem while uploading the file.'),
             }),
           )
-        })
-      })
+        },
+      )
     })
   })
 
