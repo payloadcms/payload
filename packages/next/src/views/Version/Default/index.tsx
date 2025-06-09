@@ -240,8 +240,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               {canUpdate && (
                 <Restore
                   className={`${baseClass}__restore`}
-                  collectionSlug={collectionSlug}
-                  globalSlug={globalSlug}
+                  collectionConfig={collectionConfig}
+                  globalConfig={globalConfig}
                   label={collectionConfig?.labels.singular || globalConfig?.label}
                   originalDocID={originalDocID}
                   status={versionTo?.version?._status}
@@ -255,11 +255,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       </Gutter>
       <SetStepNav
         collectionConfig={collectionConfig}
-        collectionSlug={collectionSlug}
         doc={versionTo}
-        fields={(collectionConfig || globalConfig)?.fields}
         globalConfig={globalConfig}
-        globalSlug={globalSlug}
         id={originalDocID}
       />
       <Gutter className={`${baseClass}__diff-wrap`}>

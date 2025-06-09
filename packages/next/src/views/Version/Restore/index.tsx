@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -14,19 +16,29 @@ import {
 import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
-import React, { Fragment, useCallback, useState } from 'react'
-
-import type { Props } from './types.js'
 
 import './index.scss'
+
+import React, { Fragment, useCallback, useState } from 'react'
 
 const baseClass = 'restore-version'
 const modalSlug = 'restore-version'
 
+type Props = {
+  className?: string
+  collectionConfig?: ClientCollectionConfig
+  globalConfig?: ClientGlobalConfig
+  label: SanitizedCollectionConfig['labels']['singular']
+  originalDocID: number | string
+  status?: string
+  versionDate: string
+  versionID: string
+}
+
 export const Restore: React.FC<Props> = ({
   className,
-  collectionSlug,
-  globalSlug,
+  collectionConfig,
+  globalConfig,
   label,
   originalDocID,
   status,
@@ -38,10 +50,7 @@ export const Restore: React.FC<Props> = ({
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
-    getEntityConfig,
   } = useConfig()
-
-  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
   const router = useRouter()
@@ -54,28 +63,28 @@ export const Restore: React.FC<Props> = ({
     versionDate,
   })
 
-  let fetchURL = `${serverURL}${apiRoute}`
-  let redirectURL: string
-
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
-  if (collectionSlug) {
-    fetchURL = `${fetchURL}/${collectionSlug}/versions/${versionID}?draft=${draft}`
-    redirectURL = formatAdminURL({
-      adminRoute,
-      path: `/collections/${collectionSlug}/${originalDocID}`,
-    })
-  }
-
-  if (globalSlug) {
-    fetchURL = `${fetchURL}/globals/${globalSlug}/versions/${versionID}?draft=${draft}`
-    redirectURL = formatAdminURL({
-      adminRoute,
-      path: `/globals/${globalSlug}`,
-    })
-  }
-
   const handleRestore = useCallback(async () => {
+    let fetchURL = `${serverURL}${apiRoute}`
+    let redirectURL: string
+
+    if (collectionConfig) {
+      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?draft=${draft}`
+      redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionConfig.slug}/${originalDocID}`,
+      })
+    }
+
+    if (globalConfig) {
+      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}`
+      redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/globals/${globalConfig.slug}`,
+      })
+    }
+
     const res = await requests.post(fetchURL, {
       headers: {
         'Accept-Language': i18n.language,
@@ -89,7 +98,20 @@ export const Restore: React.FC<Props> = ({
     } else {
       toast.error(t('version:problemRestoringVersion'))
     }
-  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
+  }, [
+    serverURL,
+    apiRoute,
+    collectionConfig,
+    globalConfig,
+    i18n.language,
+    versionID,
+    draft,
+    adminRoute,
+    originalDocID,
+    startRouteTransition,
+    router,
+    t,
+  ])
 
   return (
     <Fragment>
