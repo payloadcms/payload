@@ -9,7 +9,7 @@ export const getCreateCollectionExportTask = (
   config: Config,
 ): TaskConfig<{
   input: Export
-  output: { success: boolean }
+  output: object
 }> => {
   const inputSchema = getFields(config).concat(
     {
@@ -45,17 +45,9 @@ export const getCreateCollectionExportTask = (
       await createExport({ input, req, user })
 
       return {
-        output: {
-          success: true,
-        },
+        output: {},
       }
     },
     inputSchema,
-    outputSchema: [
-      {
-        name: 'success',
-        type: 'checkbox',
-      },
-    ],
   }
 }

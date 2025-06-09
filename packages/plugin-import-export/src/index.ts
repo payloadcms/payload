@@ -28,13 +28,7 @@ export const importExportPlugin =
     )
 
     // inject the createExport job into the config
-    config.jobs = config.jobs || { tasks: [] }
-
-    if (!config.jobs.tasks) {
-      config.jobs.tasks = []
-    }
-
-    config.jobs.tasks.push(getCreateCollectionExportTask(config))
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
 
     let collectionsToUpdate = config.collections
 
