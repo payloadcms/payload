@@ -368,6 +368,47 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
 
+    it('should run custom toCSV function on a field', async () => {
+      const fields = [
+        'id',
+        'custom',
+        'group.custom',
+        'customRelationship',
+        'tabToCSV',
+        'namedTab.tabToCSV',
+      ]
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Custom ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains the expected virtual fields
+      expect(data[0].custom).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].group_custom).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].tabToCSV).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].namedTab_tabToCSV).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].customRelationship_id).toBeDefined()
+      expect(data[0].customRelationship_email).toBeDefined()
+      expect(data[0].customRelationship_createdAt).toBeUndefined()
+    })
+
     it('should create a JSON file for collection', async () => {
       let doc = await payload.create({
         collection: 'exports',
