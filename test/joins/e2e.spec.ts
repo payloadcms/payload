@@ -217,6 +217,14 @@ describe('Join Field', () => {
     }
   })
 
+  test('should hide collection type column when disableRowTypes set', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-noRowTypes.field-type.join')
+    const tableHeaderRow = joinField.locator('.table thead > tr')
+    const firstColumnHeader = tableHeaderRow.locator('th').first()
+    await expect(firstColumnHeader).toHaveId('heading-title')
+  })
+
   test('should render drawer toggler without document link in second column of relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')

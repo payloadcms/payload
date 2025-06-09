@@ -196,5 +196,16 @@ export const Categories: CollectionConfig = {
       type: 'checkbox',
       defaultValue: false,
     },
+    {
+      name: 'noRowTypes',
+      type: 'join',
+      collection: postsSlug,
+      defaultLimit: 5,
+      on: 'category',
+      maxDepth: 1,
+      admin: {
+        disableRowTypes: true,
+      },
+    },
   ],
 }
