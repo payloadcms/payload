@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
 import type {
@@ -79,7 +78,8 @@ export const runJSONJob = async ({
         }
       }),
     )
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as Error
     const errorResult = handleWorkflowError({
       error: err,
       job,

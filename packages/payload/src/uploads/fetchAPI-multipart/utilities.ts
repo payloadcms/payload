@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
@@ -132,8 +131,7 @@ export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) =>
  * Delete a file.
  */
 type DeleteFile = (filePath: string, callback: (args: any) => void) => void
-export const deleteFile: DeleteFile = (filePath, callback: (args) => void) =>
-  fs.unlink(filePath, callback)
+export const deleteFile: DeleteFile = (filePath, callback) => fs.unlink(filePath, callback)
 
 /**
  * Copy file via streams
@@ -188,7 +186,11 @@ export const moveFile: MoveFile = (src, dst, callback) =>
  * @param {Buffer} buffer - buffer to save to a file.
  * @param {string} filePath - path to a file.
  */
-export const saveBufferToFile = (buffer, filePath, callback) => {
+export const saveBufferToFile = (
+  buffer: Buffer,
+  filePath: string,
+  callback: (err?: Error) => void,
+) => {
   if (!Buffer.isBuffer(buffer)) {
     return callback(new Error('buffer variable should be type of Buffer!'))
   }
@@ -220,7 +222,7 @@ export const saveBufferToFile = (buffer, filePath, callback) => {
  * @param fileName {String} - file name to decode.
  * @returns {String}
  */
-const uriDecodeFileName = (opts, fileName) => {
+const uriDecodeFileName = (opts: FetchAPIFileUploadOptions, fileName: string) => {
   if (!opts || !opts.uriDecodeFileNames) {
     return fileName
   }

@@ -1,17 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
-    "strictNullChecks": true,
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin"
-      },
-      {
-        "name": "tsc-strict"
-      }
-    ],
-  },
   "references": [{ "path": "../translations" }]
 }

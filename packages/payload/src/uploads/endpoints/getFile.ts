@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Stats } from 'fs'
 
 import { fileTypeFromFile } from 'file-type'
@@ -61,7 +60,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   try {
     stats = await fsPromises.stat(filePath)
   } catch (err) {
-    if (err.code === 'ENOENT') {
+    if ((err as { code?: string }).code === 'ENOENT') {
       req.payload.logger.error(
         `File ${filename} for collection ${collection.config.slug} is missing on the disk. Expected path: ${filePath}`,
       )
