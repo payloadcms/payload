@@ -73,12 +73,12 @@ export type Options<TSlug extends CollectionSlug> = {
   /**
    * When set to `true`, the operation will return a document by ID, even if it is soft-deleted (trashed).
    * By default (`false`), the operation will exclude soft-deleted documents.
-   * To fetch a soft-deleted document, set `trash: true`.
+   * To fetch a soft-deleted document, set `softDeletes: true`.
    *
    * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
-  trash?: boolean
+  softDeletes?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -98,7 +98,7 @@ export default async function findVersionByIDLocal<TSlug extends CollectionSlug>
     populate,
     select,
     showHiddenFields,
-    trash = false,
+    softDeletes = false,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -121,6 +121,6 @@ export default async function findVersionByIDLocal<TSlug extends CollectionSlug>
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
-    trash,
+    softDeletes,
   })
 }

@@ -41,7 +41,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-  trash?: boolean
+  softDeletes?: boolean
 }
 
 export const findByIDOperation = async <
@@ -86,7 +86,7 @@ export const findByIDOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
-      trash = false,
+      softDeletes = false,
     } = args
 
     const select = sanitizeSelect({
@@ -112,14 +112,14 @@ export const findByIDOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.softDeletes && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
+    // If softDeletes is false, restrict to non-softDeleted documents only
+    if (collectionConfig.softDeletes && !softDeletes) {
+      const notSoftDeletedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
+        fullWhere.and.push(notSoftDeletedFilter)
       } else {
-        fullWhere = { and: [notTrashedFilter] }
+        fullWhere = { and: [notSoftDeletedFilter] }
       }
     }
 

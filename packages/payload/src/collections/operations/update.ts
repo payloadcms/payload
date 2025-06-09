@@ -47,13 +47,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  softDeletes?: boolean
   /**
    * Sort the documents, can be a string or an array of strings
    * @example '-createdAt' // Sort DESC by createdAt
    * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
-  trash?: boolean
   where: Where
 }
 
@@ -105,8 +105,8 @@ export const updateOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
+      softDeletes = false,
       sort: incomingSort,
-      trash = false,
       where,
     } = args
 
@@ -152,14 +152,14 @@ export const updateOperation = async <
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.softDeletes && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
+    // If softDeletes is false, restrict to non-softDeleted documents only
+    if (collectionConfig.softDeletes && !softDeletes) {
+      const notSoftDeletedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
+        fullWhere.and.push(notSoftDeletedFilter)
       } else {
-        fullWhere = { and: [notTrashedFilter] }
+        fullWhere = { and: [notSoftDeletedFilter] }
       }
     }
 

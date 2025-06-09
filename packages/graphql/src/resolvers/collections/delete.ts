@@ -11,7 +11,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     fallbackLocale?: string
     id: number | string
     locale?: string
-    trash?: boolean
+    softDeletes?: boolean
   },
   context: {
     req: PayloadRequest
@@ -50,7 +50,7 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
       collection,
       depth: 0,
       req: isolateObjectProperty(req, 'transactionID'),
-      trash: args.trash,
+      softDeletes: args.softDeletes,
     }
 
     const result = await deleteByIDOperation(options)

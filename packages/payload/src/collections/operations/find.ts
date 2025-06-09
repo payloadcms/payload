@@ -46,8 +46,8 @@ export type Arguments = {
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  softDeletes?: boolean
   sort?: Sort
-  trash?: boolean
   where?: Where
 }
 
@@ -95,8 +95,8 @@ export const findOperation = async <
       populate,
       select: incomingSelect,
       showHiddenFields,
+      softDeletes = false,
       sort: incomingSort,
-      trash = false,
       where,
     } = args
 
@@ -147,14 +147,14 @@ export const findOperation = async <
 
     let fullWhere = combineQueries(where!, accessResult!)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.softDeletes && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
+    // If softDeletes is false, restrict to non-softDeleted documents only
+    if (collectionConfig.softDeletes && !softDeletes) {
+      const notSoftDeletedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
+        fullWhere.and.push(notSoftDeletedFilter)
       } else {
-        fullWhere = { and: [notTrashedFilter] }
+        fullWhere = { and: [notSoftDeletedFilter] }
       }
     }
 

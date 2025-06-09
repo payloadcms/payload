@@ -75,12 +75,12 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   showHiddenFields?: boolean
   /**
    * When set to `true`, the operation will permanently delete both normal and soft-deleted (trashed) documents.
-   * By default (`false`), only normal (non-trashed) documents will be permanently deleted.
+   * By default (`false`), only normal (non-softDeleted) documents will be permanently deleted.
    *
    * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
-  trash?: boolean
+  softDeletes?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -158,7 +158,7 @@ async function deleteLocal<
     populate,
     select,
     showHiddenFields,
-    trash = false,
+    softDeletes = false,
     where,
   } = options
 
@@ -181,7 +181,7 @@ async function deleteLocal<
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
-    trash,
+    softDeletes,
     where,
   }
 

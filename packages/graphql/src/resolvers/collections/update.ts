@@ -13,7 +13,7 @@ export type Resolver<TSlug extends CollectionSlug> = (
     fallbackLocale?: string
     id: number | string
     locale?: string
-    trash?: boolean
+    softDeletes?: boolean
   },
   context: {
     req: PayloadRequest
@@ -55,7 +55,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
-      trash: args.trash,
+      softDeletes: args.softDeletes,
     }
 
     const result = await updateByIDOperation<TSlug>(options)

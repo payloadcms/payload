@@ -81,20 +81,20 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   showHiddenFields?: boolean
   /**
-   * Sort the documents, can be a string or an array of strings
-   * @example '-version.createdAt' // Sort DESC by createdAt
-   * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
-   */
-  sort?: Sort
-  /**
    * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
-   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * To query only softDeleted documents, pass `softDeletes: true` and combine with a `where` clause filtering by `deletedAt`.
    * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
    *
    * This argument has no effect unless `softDeletes` is enabled on the collection.
    * @default false
    */
-  trash?: boolean
+  softDeletes?: boolean
+  /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-version.createdAt' // Sort DESC by createdAt
+   * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: Sort
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -118,8 +118,8 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     populate,
     select,
     showHiddenFields,
+    softDeletes = false,
     sort,
-    trash = false,
     where,
   } = options
 
@@ -141,8 +141,8 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    softDeletes,
     sort,
-    trash,
     where,
   })
 }
