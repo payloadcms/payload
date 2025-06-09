@@ -18,7 +18,7 @@ import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchema
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
-const fieldIsRequired = (field: FlattenedField) => {
+const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
   if (isConditional) {
     return false
@@ -50,13 +50,16 @@ function buildOptionEnums(options: Option[]): string[] {
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
-  const properties = [...entities].reduce((acc, { slug }) => {
-    acc[slug] = {
-      $ref: `#/definitions/${slug}`,
-    }
+  const properties = [...entities].reduce(
+    (acc, { slug }) => {
+      acc[slug] = {
+        $ref: `#/definitions/${slug}`,
+      }
 
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -69,13 +72,16 @@ function generateEntitySchemas(
 function generateEntitySelectSchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
-  const properties = [...entities].reduce((acc, { slug }) => {
-    acc[slug] = {
-      $ref: `#/definitions/${slug}_select`,
-    }
+  const properties = [...entities].reduce(
+    (acc, { slug }) => {
+      acc[slug] = {
+        $ref: `#/definitions/${slug}_select`,
+      }
 
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -97,7 +103,7 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
 
       for (const collectionSlug in joins) {
         for (const join of joins[collectionSlug]!) {
-          schema.properties[join.joinPath] = {
+          ;(schema.properties as any)[join.joinPath] = {
             type: 'string',
             enum: [collectionSlug],
           }
@@ -106,7 +112,7 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
       }
 
       for (const join of polymorphicJoins) {
-        schema.properties[join.joinPath] = {
+        ;(schema.properties as any)[join.joinPath] = {
           type: 'string',
           enum: join.field.collection,
         }
@@ -1079,14 +1085,17 @@ export function timezonesToJSONSchema(
 }
 
 function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
-  const properties = collections.reduce((acc, collection) => {
-    if (collection.auth) {
-      acc[collection.slug] = {
-        $ref: `#/definitions/auth/${collection.slug}`,
+  const properties = collections.reduce(
+    (acc, collection) => {
+      if (collection.auth) {
+        acc[collection.slug] = {
+          $ref: `#/definitions/auth/${collection.slug}`,
+        }
       }
-    }
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
 
   return {
     type: 'object',
@@ -1157,7 +1166,7 @@ export function configToJSONSchema(
 
       return acc
     },
-    {},
+    {} as Record<string, JSONSchema4>,
   )
 
   const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezones.supportedTimezones)
@@ -1169,7 +1178,7 @@ export function configToJSONSchema(
         acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
         return acc
       },
-      { auth: {} },
+      { auth: {} as Record<string, JSONSchema4> },
     )
 
   const jobsSchemas = config.jobs

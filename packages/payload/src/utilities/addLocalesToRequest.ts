@@ -16,8 +16,8 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
   if (data) {
     const localeOnReq = req.locale
     const fallbackLocaleOnReq = req.fallbackLocale
-    let localeFromData
-    let fallbackLocaleFromData
+    let localeFromData!: string
+    let fallbackLocaleFromData!: string
 
     if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
       localeFromData = data.locale
