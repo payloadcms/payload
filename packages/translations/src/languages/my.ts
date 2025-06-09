@@ -262,6 +262,7 @@ export const myTranslations: DefaultTranslationsObject = {
     deletedAt: 'Dihapus Pada',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
+    deletePermanently: 'ပယ်ဖျက်ရန်ပြီးဆုံး',
     deleting: 'ဖျက်နေဆဲ ...',
     depth: 'ထိုင်းအောက်မှု',
     descending: 'ဆင်းသက်လာသည်။',
@@ -380,6 +381,7 @@ export const myTranslations: DefaultTranslationsObject = {
     time: 'Masa',
     timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
+    titleSoftDeleted: '"{{title}}" "{{label}}" telah berjaya dihapuskan secara lembut.',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unsavedChanges:

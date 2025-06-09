@@ -260,6 +260,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
+    deletePermanently: 'Մշտապես ջնջել',
     deleting: 'Ջնջվում է...',
     depth: 'Խորություն',
     descending: 'Նվազող',
@@ -378,6 +379,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     time: 'Ժամ',
     timezone: 'Ժամային գոտի',
     titleDeleted: '{{label}} "{{title}}" հաջողությամբ ջնջվել է։',
+    titleSoftDeleted: '{{label}} "{{title}}" հաջողությամբ եղավ soft ջնջված:',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
     unsavedChanges:

@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const bnBDTranslations = {
+export const bnBdTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'অ্যাকাউন্ট',
     accountOfCurrentUser: 'বর্তমান ব্যবহারকারীর অ্যাকাউন্ট',
@@ -261,6 +261,7 @@ export const bnBDTranslations = {
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
+    deletePermanently: 'স্থায়ীভাবে মুছুন',
     deleting: 'মুছে ফেলা হচ্ছে...',
     depth: 'গভীরতা',
     descending: 'অবরোহী',
@@ -378,6 +379,7 @@ export const bnBDTranslations = {
     time: 'সময়',
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
+    titleSoftDeleted: '"{{title}}" নামের "{{label}}" সফলভাবে ম্যাগ মুছে ফেলা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:
@@ -555,7 +557,7 @@ export const bnBDTranslations = {
   },
 }
 
-export const bnBD: Language = {
+export const bnBd: Language = {
   dateFNSKey: 'bn-BD',
-  translations: bnBDTranslations,
+  translations: bnBdTranslations,
 }

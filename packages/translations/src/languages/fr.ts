@@ -267,6 +267,7 @@ export const frTranslations: DefaultTranslationsObject = {
     deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
+    deletePermanently: 'Supprimer définitivement',
     deleting: 'Suppression en cours...',
     depth: 'Profondeur',
     descending: 'Descendant(e)',
@@ -385,6 +386,7 @@ export const frTranslations: DefaultTranslationsObject = {
     time: 'Temps',
     timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
+    titleSoftDeleted: '{{label}} "{{title}}" supprimé avec succès de manière douce.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
     unsavedChanges:

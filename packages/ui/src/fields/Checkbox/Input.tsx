@@ -58,6 +58,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         {BeforeInput}
         <input
           aria-label=""
+          aria-labelledby={name}
           defaultChecked={Boolean(checked)}
           disabled={readOnly}
           id={id}
@@ -65,6 +66,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           onInput={onToggle}
           ref={inputRef}
           required={required}
+          title={name}
           type="checkbox"
         />
         <span

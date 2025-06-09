@@ -5,11 +5,12 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
@@ -62,6 +63,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const modalSlug = `delete-${id}`
 
+  const [deletePermanently, setDeletePermanently] = useState(false)
+
   const addDefaultError = useCallback(() => {
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
@@ -70,58 +73,63 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     setModified(false)
 
     try {
-      await requests
-        .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(async (res) => {
-          try {
-            const json = await res.json()
+      const res = deletePermanently
+        ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+        : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
+            body: JSON.stringify({
+              deletedAt: new Date().toISOString(),
+            }),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
 
-            if (res.status < 400) {
-              toast.success(
-                t('general:titleDeleted', {
-                  label: getTranslation(singularLabel, i18n),
-                  title,
-                }) || json.message,
-              )
+      const json = await res.json()
 
-              if (redirectAfterDelete) {
-                return startRouteTransition(() =>
-                  router.push(
-                    formatAdminURL({
-                      adminRoute,
-                      path: `/collections/${collectionSlug}`,
-                    }),
-                  ),
-                )
-              }
+      if (res.status < 400) {
+        toast.success(
+          t(deletePermanently ? 'general:titleDeleted' : 'general:titleSoftDeleted', {
+            label: getTranslation(singularLabel, i18n),
+            title,
+          }) || json.message,
+        )
 
-              if (typeof onDelete === 'function') {
-                await onDelete({ id, collectionConfig })
-              }
+        if (redirectAfterDelete) {
+          return startRouteTransition(() =>
+            router.push(
+              formatAdminURL({
+                adminRoute,
+                path: `/collections/${collectionSlug}`,
+              }),
+            ),
+          )
+        }
 
-              return
-            }
+        if (typeof onDelete === 'function') {
+          await onDelete({ id, collectionConfig })
+        }
 
-            if (json.errors) {
-              json.errors.forEach((error) => toast.error(error.message))
-            } else {
-              addDefaultError()
-            }
+        return
+      }
 
-            return false
-          } catch (_err) {
-            return addDefaultError()
-          }
-        })
+      if (json.errors) {
+        json.errors.forEach((error) => toast.error(error.message))
+      } else {
+        addDefaultError()
+      }
+
+      return
     } catch (_err) {
       return addDefaultError()
     }
   }, [
+    deletePermanently,
     setModified,
     serverURL,
     api,
@@ -153,17 +161,28 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         </PopupList.Button>
         <ConfirmationModal
           body={
-            <Translation
-              elements={{
-                '1': ({ children }) => <strong>{children}</strong>,
-              }}
-              i18nKey="general:aboutToDelete"
-              t={t}
-              variables={{
-                label: getTranslation(singularLabel, i18n),
-                title: titleFromProps || title || id,
-              }}
-            />
+            <Fragment>
+              <Translation
+                elements={{
+                  '1': ({ children }) => <strong>{children}</strong>,
+                }}
+                i18nKey="general:aboutToDelete"
+                t={t}
+                variables={{
+                  label: getTranslation(singularLabel, i18n),
+                  title: titleFromProps || title || id,
+                }}
+              />
+              {collectionConfig.softDeletes && (
+                <CheckboxInput
+                  checked={deletePermanently}
+                  id="delete-forever"
+                  label={t('general:deletePermanently')}
+                  name="delete-forever"
+                  onToggle={(e) => setDeletePermanently(e.target.checked)}
+                />
+              )}
+            </Fragment>
           }
           confirmingLabel={t('general:deleting')}
           heading={t('general:confirmDeletion')}
