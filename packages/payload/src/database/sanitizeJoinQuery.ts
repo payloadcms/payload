@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 

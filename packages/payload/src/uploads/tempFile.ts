@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs/promises'
 import os from 'node:os'
 import path from 'node:path'

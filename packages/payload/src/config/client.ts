@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 

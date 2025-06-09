@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SelectType } from '../types/index.js'
 
 /**

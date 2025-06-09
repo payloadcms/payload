@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs'
 
 export function iteratorToStream(iterator: AsyncIterator<Uint8Array>) {

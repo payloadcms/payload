@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'

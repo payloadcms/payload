@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'

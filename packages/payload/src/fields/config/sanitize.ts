@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import { v4 as uuid } from 'uuid'
 

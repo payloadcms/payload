@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Stats } from 'fs'
 
 import { fileTypeFromFile } from 'file-type'

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
 

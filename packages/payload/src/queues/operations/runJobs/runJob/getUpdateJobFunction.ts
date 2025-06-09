@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob } from '../../../config/types/workflowTypes.js'
 
