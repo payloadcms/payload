@@ -1,11 +1,16 @@
 import type { Config, TaskConfig, User } from 'payload'
 
-import type { CreateExportArgs } from './createExport.js'
+import type { CreateExportArgs, Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
 
-export const getCreateCollectionExportTask = (config: Config): TaskConfig<any> => {
+export const getCreateCollectionExportTask = (
+  config: Config,
+): TaskConfig<{
+  input: Export
+  output: { success: boolean }
+}> => {
   const inputSchema = getFields(config).concat(
     {
       name: 'user',
@@ -40,7 +45,9 @@ export const getCreateCollectionExportTask = (config: Config): TaskConfig<any> =
       await createExport({ input, req, user })
 
       return {
-        success: true,
+        output: {
+          success: true,
+        },
       }
     },
     inputSchema,
