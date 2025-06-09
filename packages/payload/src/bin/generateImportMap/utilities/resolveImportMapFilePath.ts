@@ -17,7 +17,11 @@ export function resolveImportMapFilePath({
 
   if (importMapFile?.length) {
     if (!fs.existsSync(importMapFile)) {
-      throw new Error(`Could not find the import map file at ${importMapFile}`)
+      try {
+        fs.writeFileSync(importMapFile, '', { flag: 'wx' })
+      } catch (err) {
+        throw new Error(`Could not find the import map file at ${importMapFile}`, err)
+      }
     }
     importMapFilePath = importMapFile
   } else {
@@ -25,9 +29,17 @@ export function resolveImportMapFilePath({
     const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${adminRoute}/`)
 
     if (fs.existsSync(appLocation)) {
-      importMapFilePath = path.resolve(appLocation, 'importMap.js')
+      const importMapJsPath = path.resolve(appLocation, 'importMap.js')
+      if (!fs.existsSync(importMapJsPath)) {
+        fs.writeFileSync(importMapJsPath, '', { flag: 'wx' })
+      }
+      importMapFilePath = importMapJsPath
     } else if (fs.existsSync(srcAppLocation)) {
-      importMapFilePath = path.resolve(srcAppLocation, 'importMap.js')
+      const importMapJsPath = path.resolve(srcAppLocation, 'importMap.js')
+      if (!fs.existsSync(importMapJsPath)) {
+        fs.writeFileSync(importMapJsPath, '', { flag: 'wx' })
+      }
+      importMapFilePath = importMapJsPath
     } else {
       throw new Error(
         `Could not find Payload import map folder. Looked in ${appLocation} and ${srcAppLocation}`,
