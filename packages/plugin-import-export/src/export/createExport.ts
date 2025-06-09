@@ -69,7 +69,6 @@ export const createExport = async (args: CreateExportArgs) => {
     collection: collectionSlug,
     depth: 1,
     draft: drafts === 'yes',
-    joins: false,
     limit: 100,
     locale,
     overrideAccess: false,

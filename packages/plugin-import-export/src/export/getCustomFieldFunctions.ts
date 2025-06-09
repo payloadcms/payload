@@ -16,7 +16,7 @@ export const getCustomFieldFunctions = ({
   fields,
   select,
 }: Args): Record<string, ToCSVFunction> => {
-  const result = {}
+  const result: Record<string, ToCSVFunction> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
     // @ts-expect-error ref is untyped
@@ -37,7 +37,7 @@ export const getCustomFieldFunctions = ({
           // monomorphic single
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({ value }) =>
-            typeof value === 'object' ? value.id : value
+            typeof value === 'object' && value && 'id' in value ? value.id : value
         } else {
           // polymorphic single
           // @ts-expect-error ref is untyped
@@ -53,14 +53,24 @@ export const getCustomFieldFunctions = ({
         if (!Array.isArray(field.relationTo)) {
           // monomorphic many
           // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ value }) =>
+          result[`${ref.prefix}${field.name}`] = ({
+            value,
+          }: {
+            value: Record<string, unknown>[]
+          }) =>
             value.map((val: number | Record<string, unknown> | string) =>
               typeof val === 'object' ? val.id : val,
             )
         } else {
           // polymorphic many
           // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ data, value }) =>
+          result[`${ref.prefix}${field.name}`] = ({
+            data,
+            value,
+          }: {
+            data: Record<string, unknown>
+            value: Record<string, unknown>[]
+          }) =>
             value.map((val: number | Record<string, unknown> | string, i) => {
               // @ts-expect-error ref is untyped
               data[`${ref.prefix}${field.name}_${i}_id`] = val.id

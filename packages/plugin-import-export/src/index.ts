@@ -93,13 +93,9 @@ export const importExportPlugin =
   }
 
 declare module 'payload' {
-  interface FieldBase {
-    // TODO: fix
-    //   TS2717: Subsequent property declarations must have the same type. Property custom must be of type Record<string, any> | undefined, but here has type
-    // custom?: {
-    //   'plugin-import-export'?: {
-    //     toCSVFunction?: ToCSVFunction
-    //   }
-    // } & Record<string, any>
+  export interface FieldCustom {
+    'plugin-import-export'?: {
+      toCSVFunction?: ToCSVFunction
+    }
   }
 }
