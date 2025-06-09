@@ -43,17 +43,6 @@ describe('Collections - Uploads', () => {
     }
   })
 
-  const blockedUrls = [
-    'http://127.0.0.1/file.png',
-    'http://10.0.0.1/file.png',
-    'http://192.168.1.1/file.png',
-    'http://172.16.0.1/file.png',
-    'http://169.254.1.1/file.png',
-    'http://224.0.0.1/file.png',
-    'http://0.0.0.0/file.png',
-    'http://255.255.255.255/file.png',
-  ]
-
   describe('REST API', () => {
     describe('create', () => {
       it('creates from form data given a png', async () => {
@@ -562,6 +551,7 @@ describe('Collections - Uploads', () => {
       it.each`
         url                                  | collection
         ${'http://127.0.0.1/file.png'}       | ${mediaSlug}
+        ${'http://[::1]/file.png'}           | ${mediaSlug}
         ${'http://10.0.0.1/file.png'}        | ${mediaSlug}
         ${'http://192.168.1.1/file.png'}     | ${mediaSlug}
         ${'http://172.16.0.1/file.png'}      | ${mediaSlug}
@@ -570,6 +560,7 @@ describe('Collections - Uploads', () => {
         ${'http://0.0.0.0/file.png'}         | ${mediaSlug}
         ${'http://255.255.255.255/file.png'} | ${mediaSlug}
         ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug}
+        ${'http://[::1]/file.png'}           | ${allowListMediaSlug}
         ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug}
         ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug}
         ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug}

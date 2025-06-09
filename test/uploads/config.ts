@@ -412,7 +412,6 @@ export default buildConfigWithDefaults({
       upload: {
         pasteURL: {
           allowList: [
-            { protocol: 'http', hostname: 'blocked-domain.com', port: '', search: '' },
             { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: 'localhost', port: '', search: '' },
             { protocol: 'http', hostname: '[::1]', port: '', search: '' },
@@ -423,18 +422,6 @@ export default buildConfigWithDefaults({
             { protocol: 'http', hostname: '224.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: '0.0.0.0', port: '', search: '' },
             { protocol: 'http', hostname: '255.255.255.255', port: '', search: '' },
-            {
-              protocol: 'http',
-              hostname: 'tellico.fun',
-              port: '',
-              search: 'target=http://localhost/test',
-            },
-            {
-              protocol: 'https',
-              hostname: 'tellico.fun',
-              port: '',
-              search: 'target=http://localhost/test',
-            },
           ],
         },
         staticDir: path.resolve(dirname, './media'),

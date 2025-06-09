@@ -104,7 +104,6 @@
     "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",
     "node-fetch": "3.3.2",
-    "ofetch": "1.4.1",
     "path-to-regexp": "6.3.0",
     "pino": "9.5.0",
     "pino-pretty": "13.0.0",
@@ -115,7 +114,6 @@
     "ssrf-req-filter": "1.1.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.19.2",
-    "undici": "7.10.0",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },

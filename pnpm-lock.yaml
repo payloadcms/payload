@@ -855,9 +855,6 @@ importers:
       node-fetch:
         specifier: 3.3.2
         version: 3.3.2
-      ofetch:
-        specifier: 1.4.1
-        version: 1.4.1
       path-to-regexp:
         specifier: 6.3.0
         version: 6.3.0
@@ -888,9 +885,6 @@ importers:
       tsx:
         specifier: 4.19.2
         version: 4.19.2
-      undici:
-        specifier: 7.10.0
-        version: 7.10.0
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -10364,10 +10358,6 @@ packages:
   undici@5.28.4:
     resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
     engines: {node: '>=14.0'}
-
-  undici@7.10.0:
-    resolution: {integrity: sha512-u5otvFBOBZvmdjWLVW+5DAc9Nkq8f24g0O9oY7qw2JVIF1VocIFoyz9JFkuVOS2j41AufeO0xnlweJ2RLT8nGw==}
-    engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
     resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}
@@ -20834,8 +20824,6 @@ snapshots:
   undici@5.28.4:
     dependencies:
       '@fastify/busboy': 2.1.1
-
-  undici@7.10.0: {}
 
   unfetch@4.2.0: {}
 
