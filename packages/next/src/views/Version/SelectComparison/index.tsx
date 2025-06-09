@@ -168,7 +168,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      {!errorLoading && (
+      {errorLoading ? (
+        <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
+      ) : (
         <ReactSelect
           isClearable={false}
           isSearchable={false}
@@ -181,7 +183,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
           value={versionFromOption}
         />
       )}
-      {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
     </div>
   )
 }
