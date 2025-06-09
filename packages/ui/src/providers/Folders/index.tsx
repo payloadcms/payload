@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug, FolderSortKeys } from 'payload'
 import type { FolderBreadcrumb, FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
@@ -22,12 +22,7 @@ type FolderQueryParams = {
   search?: string
   sort?: string
 }
-type BaseSortKeys = keyof Pick<
-  FolderOrDocument['value'],
-  '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
->
 
-type SortKeys = `-${BaseSortKeys}` | BaseSortKeys
 export type FileCardData = {
   filename: string
   id: number | string
@@ -78,7 +73,7 @@ export type FolderContextValue = {
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
-  sort: SortKeys
+  sort: FolderSortKeys
   subfolders?: FolderOrDocument[]
 }
 
@@ -176,7 +171,7 @@ export type FolderProviderProps = {
    * `name` for descending
    * `-name` for ascending
    */
-  readonly sort?: SortKeys
+  readonly sort?: FolderSortKeys
   /**
    * All subfolders in the current folder
    */

@@ -1,5 +1,5 @@
 import type { ServerProps } from '../../config/types.js'
-import type { FolderBreadcrumb, FolderOrDocument } from '../../folders/types.js'
+import type { FolderBreadcrumb, FolderOrDocument, FolderSortKeys } from '../../folders/types.js'
 import type { SanitizedCollectionConfig } from '../../index.js'
 export type FolderListViewSlots = {
   AfterFolderList?: React.ReactNode
@@ -34,6 +34,7 @@ export type FolderListViewClientProps = {
   folderID: null | number | string
   FolderResultsComponent: React.ReactNode
   search?: string
+  sort?: FolderSortKeys
   subfolders: FolderOrDocument[]
   viewPreference: 'grid' | 'list'
 } & FolderListViewSlots

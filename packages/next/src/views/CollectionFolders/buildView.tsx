@@ -3,6 +3,7 @@ import type {
   BuildCollectionFolderViewResult,
   FolderListViewClientProps,
   FolderListViewServerPropsOnly,
+  FolderSortKeys,
   ListQuery,
 } from 'payload'
 
@@ -86,17 +87,18 @@ export const buildCollectionFolderView = async (
      * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
      */
     const collectionFolderPreferences = await upsertPreferences<{
-      sort?: string
+      sort?: FolderSortKeys
       viewPreference?: 'grid' | 'list'
     }>({
       key: `${collectionSlug}-collection-folder`,
       req: initPageResult.req,
       value: {
-        sort: query?.sort as string,
+        sort: query?.sort as FolderSortKeys,
       },
     })
 
-    const sortPreference = collectionFolderPreferences?.sort
+    const sortPreference: FolderSortKeys =
+      collectionFolderPreferences?.sort || '_folderOrDocumentTitle'
     const viewPreference = collectionFolderPreferences?.viewPreference || 'grid'
 
     const {
@@ -167,6 +169,12 @@ export const buildCollectionFolderView = async (
             clientProps: {
               // ...folderViewSlots,
               allCollectionFolderSlugs: [config.folders.slug, collectionSlug],
+              allowCreateCollectionSlugs: [
+                permissions?.collections?.[config.folders.slug]?.create
+                  ? config.folders.slug
+                  : null,
+                permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
+              ].filter(Boolean),
               baseFolderPath: `/collections/${collectionSlug}/${config.folders.slug}`,
               breadcrumbs,
               collectionSlug,
@@ -178,13 +186,7 @@ export const buildCollectionFolderView = async (
               folderID: resolvedFolderID || null,
               FolderResultsComponent,
               search,
-              // sort,
-              allowCreateCollectionSlugs: [
-                permissions?.collections?.[config.folders.slug]?.create
-                  ? config.folders.slug
-                  : null,
-                permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
-              ].filter(Boolean),
+              sort: sortPreference,
               subfolders,
               viewPreference,
             } satisfies FolderListViewClientProps,

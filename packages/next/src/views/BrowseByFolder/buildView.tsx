@@ -3,6 +3,7 @@ import type {
   BuildCollectionFolderViewResult,
   FolderListViewClientProps,
   FolderListViewServerPropsOnly,
+  FolderSortKeys,
   ListQuery,
 } from 'payload'
 
@@ -82,17 +83,17 @@ export const buildBrowseByFolderView = async (
    * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
   const browseByFolderPreferences = await upsertPreferences<{
-    sort?: string
+    sort?: FolderSortKeys
     viewPreference?: 'grid' | 'list'
   }>({
     key: 'browse-by-folder',
     req: initPageResult.req,
     value: {
-      sort: query?.sort as string,
+      sort: query?.sort as FolderSortKeys,
     },
   })
 
-  const sortPreference = browseByFolderPreferences?.sort
+  const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || '_folderOrDocumentTitle'
   const viewPreference = browseByFolderPreferences?.viewPreference || 'grid'
 
   const { breadcrumbs, documents, FolderResultsComponent, subfolders } =
@@ -153,20 +154,19 @@ export const buildBrowseByFolderView = async (
         {RenderServerComponent({
           clientProps: {
             // ...folderViewSlots,
-            disableBulkDelete,
-            disableBulkEdit,
-            enableRowSelections,
-            // hasCreatePermissionCollectionSlugs,
-            // selectedCollectionSlugs,
             activeCollectionFolderSlugs,
             allCollectionFolderSlugs: browseByFolderSlugs,
             allowCreateCollectionSlugs,
             baseFolderPath: `/browse-by-folder`,
             breadcrumbs,
+            disableBulkDelete,
+            disableBulkEdit,
             documents,
+            enableRowSelections,
             folderFieldName: config.folders.fieldName,
             folderID: resolvedFolderID || null,
             FolderResultsComponent,
+            sort: sortPreference,
             subfolders,
             viewPreference,
           } satisfies FolderListViewClientProps,

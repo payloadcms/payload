@@ -48,6 +48,7 @@ export function DefaultCollectionFolderView({
   folderID,
   FolderResultsComponent,
   search,
+  sort,
   subfolders,
   ...restOfProps
 }: FolderListViewClientProps) {
@@ -62,6 +63,7 @@ export function DefaultCollectionFolderView({
       folderID={folderID}
       FolderResultsComponent={FolderResultsComponent}
       search={search}
+      sort={sort}
       subfolders={subfolders}
     >
       <CollectionFolderViewInContext {...restOfProps} />
