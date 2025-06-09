@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import { isSafeFromPollution } from './utilities.js'
 
-export const processNested = function (data) {
+export const processNested = function (data: Record<string, any>) {
   if (!data || data.length < 1) {
     return Object.create(null)
   }

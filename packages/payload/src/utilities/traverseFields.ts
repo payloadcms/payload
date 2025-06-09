@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
@@ -199,12 +198,15 @@ export const traverseFields = ({
         }
 
         if ('name' in tab && tab.name) {
-          if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
+          if (
+            !ref[tab.name as keyof typeof ref] ||
+            typeof ref[tab.name as keyof typeof ref] !== 'object'
+          ) {
             if (fillEmpty) {
               if (tab.localized) {
-                ref[tab.name] = { en: {} }
+                ;(ref as Record<string, any>)[tab.name] = { en: {} }
               } else {
-                ref[tab.name] = {}
+                ;(ref as Record<string, any>)[tab.name] = {}
               }
             } else {
               continue
@@ -235,11 +237,14 @@ export const traverseFields = ({
             )
           }
 
-          tabRef = tabRef[tab.name]
+          tabRef = tabRef[tab.name as keyof typeof tabRef]
 
           if (tab.localized) {
             for (const key in tabRef as Record<string, unknown>) {
-              if (tabRef[key] && typeof tabRef[key] === 'object') {
+              if (
+                tabRef[key as keyof typeof tabRef] &&
+                typeof tabRef[key as keyof typeof tabRef] === 'object'
+              ) {
                 traverseFields({
                   callback,
                   callbackStack,
@@ -250,7 +255,7 @@ export const traverseFields = ({
                   leavesFirst,
                   parentIsLocalized: true,
                   parentRef: currentParentRef,
-                  ref: tabRef[key],
+                  ref: tabRef[key as keyof typeof tabRef],
                 })
               }
             }
@@ -307,30 +312,26 @@ export const traverseFields = ({
     if (field.type === 'tab' || fieldHasSubFields(field) || field.type === 'blocks') {
       if ('name' in field && field.name) {
         currentParentRef = currentRef
-        if (!ref[field.name]) {
+        if (!ref[field.name as keyof typeof ref]) {
           if (fillEmpty) {
             if (field.type === 'group' || field.type === 'tab') {
               if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
-                ref[field.name] = {
-                  en: {},
-                }
+                ;(ref as Record<string, any>)[field.name] = { en: {} }
               } else {
-                ref[field.name] = {}
+                ;(ref as Record<string, any>)[field.name] = {}
               }
             } else if (field.type === 'array' || field.type === 'blocks') {
               if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
-                ref[field.name] = {
-                  en: [],
-                }
+                ;(ref as Record<string, any>)[field.name] = { en: [] }
               } else {
-                ref[field.name] = []
+                ;(ref as Record<string, any>)[field.name] = []
               }
             }
           } else {
             return
           }
         }
-        currentRef = ref[field.name]
+        currentRef = ref[field.name as keyof typeof ref]
       }
 
       if (
@@ -341,7 +342,7 @@ export const traverseFields = ({
       ) {
         if (fieldAffectsData(field)) {
           for (const key in currentRef as Record<string, unknown>) {
-            if (currentRef[key]) {
+            if (currentRef[key as keyof typeof currentRef]) {
               traverseFields({
                 callback,
                 callbackStack,
@@ -352,7 +353,7 @@ export const traverseFields = ({
                 leavesFirst,
                 parentIsLocalized: true,
                 parentRef: currentParentRef,
-                ref: currentRef[key],
+                ref: currentRef[key as keyof typeof currentRef],
               })
             }
           }
@@ -385,7 +386,7 @@ export const traverseFields = ({
           }
 
           for (const key in currentRef as Record<string, unknown>) {
-            const localeData = currentRef[key]
+            const localeData = currentRef[key as keyof typeof currentRef]
             if (!Array.isArray(localeData)) {
               continue
             }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
@@ -315,7 +314,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         if (hooks && config?.jobs?.runHooks !== true) {
           for (const hook of Object.keys(hooks)) {
             const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
-            if (hooks[hook]?.length > defaultAmount) {
+            if (hooks[hook as keyof typeof hooks]!.length > defaultAmount) {
               // eslint-disable-next-line no-console
               console.warn(
                 `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
