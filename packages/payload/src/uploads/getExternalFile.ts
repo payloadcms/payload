@@ -1,4 +1,7 @@
+import type { Response as NodeFetchResponse } from 'node-fetch'
+
 import { default as nodeFetch } from 'node-fetch'
+// @ts-ignore - ssrf-req-filter is not typed
 import ssrfFilter from 'ssrf-req-filter'
 
 import type { PayloadRequest } from '../types/index.js'
@@ -21,7 +24,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       fileURL = `${baseUrl}${url}`
     }
 
-    let res
+    let res: NodeFetchResponse | Response
     try {
       const headers = uploadConfig.externalFileHeaderFilter
         ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
@@ -42,6 +45,19 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
           method: 'GET',
         })
       }
+
+      if (!res.ok) {
+        throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
+      }
+
+      const data = await res.arrayBuffer()
+
+      return {
+        name: filename,
+        data: Buffer.from(data),
+        mimetype: res.headers.get('content-type') || undefined!,
+        size: Number(res.headers.get('content-length')) || 0,
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.message.startsWith('Call to') && error.message.endsWith('is blocked.')) {
@@ -53,19 +69,6 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
           throw new APIError(`Failed to fetch file from ${fileURL}, ${error.message}`, 500)
         }
       }
-    }
-
-    if (!res.ok) {
-      throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
-    }
-
-    const data = await res.arrayBuffer()
-
-    return {
-      name: filename,
-      data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined!,
-      size: Number(res.headers.get('content-length')) || 0,
     }
   }
 
