@@ -1,10 +1,19 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
+
+async function pathOrFileExists(path: string): Promise<boolean> {
+  try {
+    await fs.access(path)
+    return true
+  } catch {
+    return false
+  }
+}
 
 /**
  * Returns the path to the import map file. If the import map file is not found, it throws an error.
  */
-export function resolveImportMapFilePath({
+export async function resolveImportMapFilePath({
   adminRoute = '/admin',
   importMapFile,
   rootDir,
@@ -16,9 +25,9 @@ export function resolveImportMapFilePath({
   let importMapFilePath: string | undefined = undefined
 
   if (importMapFile?.length) {
-    if (!fs.existsSync(importMapFile)) {
+    if (!(await pathOrFileExists(importMapFile))) {
       try {
-        fs.writeFileSync(importMapFile, '', { flag: 'wx' })
+        await fs.writeFile(importMapFile, '', { flag: 'wx' })
       } catch (err) {
         throw new Error(`Could not find the import map file at ${importMapFile}`, err)
       }
@@ -28,15 +37,15 @@ export function resolveImportMapFilePath({
     const appLocation = path.resolve(rootDir, `app/(payload)${adminRoute}/`)
     const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${adminRoute}/`)
 
-    if (fs.existsSync(appLocation)) {
+    if (appLocation && (await pathOrFileExists(appLocation))) {
       importMapFilePath = path.resolve(appLocation, 'importMap.js')
-      if (!fs.existsSync(importMapFilePath)) {
-        fs.writeFileSync(importMapFilePath, '', { flag: 'wx' })
+      if (!(await pathOrFileExists(importMapFilePath))) {
+        await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
       }
-    } else if (fs.existsSync(srcAppLocation)) {
+    } else if (srcAppLocation && (await pathOrFileExists(srcAppLocation))) {
       importMapFilePath = path.resolve(srcAppLocation, 'importMap.js')
-      if (!fs.existsSync(importMapFilePath)) {
-        fs.writeFileSync(importMapFilePath, '', { flag: 'wx' })
+      if (!(await pathOrFileExists(importMapFilePath))) {
+        await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
       }
     } else {
       throw new Error(
