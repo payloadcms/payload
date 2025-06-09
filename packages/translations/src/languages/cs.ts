@@ -540,6 +540,7 @@ export const csTranslations: DefaultTranslationsObject = {
     unpublish: 'Zrušit publikování',
     unpublishing: 'Zrušuji publikování...',
     version: 'Verze',
+    versionAgo: 'před {{distance}}',
     versionCount_many: '{{count}} verzí nalezeno',
     versionCount_none: 'Žádné verze nenalezeny',
     versionCount_one: '{{count}} verze nalezena',

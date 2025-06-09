@@ -544,6 +544,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     unpublish: 'Despublicar',
     unpublishing: 'Despublicando...',
     version: 'Versão',
+    versionAgo: 'há {{distance}}',
     versionCount_many: '{{count}} versões encontradas',
     versionCount_none: 'Nenhuma versão encontrada',
     versionCount_one: '{{count}} versão encontrada',

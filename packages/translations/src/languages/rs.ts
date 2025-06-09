@@ -539,6 +539,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     unpublish: 'Поништи објаву',
     unpublishing: 'Поништавање објаве...',
     version: 'Верзија',
+    versionAgo: 'pre {{distance}}',
     versionCount_many: '{{count}} пронађених верзија',
     versionCount_none: 'Нема пронађених верзија',
     versionCount_one: '{{count}} пронађена верзија',

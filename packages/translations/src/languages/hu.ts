@@ -547,6 +547,7 @@ export const huTranslations: DefaultTranslationsObject = {
     unpublish: 'Közzététel visszavonása',
     unpublishing: 'Közzététel visszavonása...',
     version: 'Verzió',
+    versionAgo: '{{distance}} ezelőtt',
     versionCount_many: '{{count}} verzió található',
     versionCount_none: 'Nem található verzió',
     versionCount_one: '{{count}} verzió található',

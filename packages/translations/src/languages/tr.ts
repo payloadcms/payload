@@ -545,6 +545,7 @@ export const trTranslations: DefaultTranslationsObject = {
     unpublish: 'Yayından Kaldır',
     unpublishing: 'Yayından kaldırılıyor...',
     version: 'Sürüm',
+    versionAgo: '{{distance}} önce',
     versionCount_many: '{{count}} sürüm bulundu',
     versionCount_none: 'Sürüm bulunamadı',
     versionCount_one: '{{count}} sürüm bulundu',

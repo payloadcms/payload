@@ -541,6 +541,7 @@ export const daTranslations: DefaultTranslationsObject = {
     unpublish: 'Afpublicer',
     unpublishing: 'Afpublicerer...',
     version: 'Version',
+    versionAgo: '{{distance}} siden',
     versionCount_many: '{{count}} versioner fundet',
     versionCount_none: 'Ingen versioner fundet',
     versionCount_one: '{{count}} version fundet',

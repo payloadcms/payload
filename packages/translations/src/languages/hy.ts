@@ -550,6 +550,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     unpublish: 'Բերել չհրապարակված վիճակի։',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',
     version: 'Տարբերակ',
+    versionAgo: '{{distance}} առաջ',
     versionCount_many: 'Գտնվել են {{count}} տարբերակներ',
     versionCount_none: 'Ոչ մի տարբերակ չի գտնվել',
     versionCount_one: '{{count}} տարբերակ է գտնվել',

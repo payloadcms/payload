@@ -538,6 +538,7 @@ export const viTranslations: DefaultTranslationsObject = {
     unpublish: 'Ẩn tài liệu',
     unpublishing: 'Đang ẩn tài liệu...',
     version: 'Phiên bản',
+    versionAgo: '{{distance}} trước',
     versionCount_many: '{{count}} phiên bản được tìm thấy',
     versionCount_none: 'Không có phiên bản nào được tìm thấy',
     versionCount_one: '{{count}} phiên bản được tìm thấy',

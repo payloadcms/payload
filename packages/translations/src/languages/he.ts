@@ -527,6 +527,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unpublish: 'בטל פרסום',
     unpublishing: 'מבטל פרסום...',
     version: 'גרסה',
+    versionAgo: 'לפני {{distance}}',
     versionCount_many: '{{count}} גרסאות נמצאו',
     versionCount_none: 'לא נמצאו גרסאות',
     versionCount_one: 'נמצאה גרסה אחת',

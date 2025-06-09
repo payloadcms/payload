@@ -542,6 +542,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     unpublish: 'Atcelt publicēšanu',
     unpublishing: 'Atceļ publicēšanu...',
     version: 'Versija',
+    versionAgo: '{{distance}} pirms',
     versionCount_many: 'Atrastas {{count}} versijas',
     versionCount_none: 'Nav atrastu versiju',
     versionCount_one: 'Atrasta {{count}} versija',

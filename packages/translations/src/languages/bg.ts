@@ -543,6 +543,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     unpublish: 'Скрий',
     unpublishing: 'Скриване...',
     version: 'Версия',
+    versionAgo: 'преди {{distance}}',
     versionCount_many: '{{count}} открити версии',
     versionCount_none: 'Няма открити версии',
     versionCount_one: '{{count}} открита версия',

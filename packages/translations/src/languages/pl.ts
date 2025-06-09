@@ -543,6 +543,7 @@ export const plTranslations: DefaultTranslationsObject = {
     unpublish: 'Cofnij publikację',
     unpublishing: 'Cofanie publikacji...',
     version: 'Wersja',
+    versionAgo: '{{distance}} temu',
     versionCount_many: 'Znalezionych wersji: {{count}}',
     versionCount_none: 'Nie znaleziono wersji',
     versionCount_one: 'Znaleziono {{count}} wersję',

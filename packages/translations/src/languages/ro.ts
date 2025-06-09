@@ -551,6 +551,7 @@ export const roTranslations: DefaultTranslationsObject = {
     unpublish: 'Dezpublicare',
     unpublishing: 'Dezpublicare...',
     version: 'Versiune',
+    versionAgo: '{{distance}} în urmă',
     versionCount_many: '{{count}} versiuni găsite',
     versionCount_none: 'Nici o versiune găsită',
     versionCount_one: '{{count}} versiune găsită',

@@ -539,6 +539,7 @@ export const faTranslations: DefaultTranslationsObject = {
     unpublish: 'لغو انتشار',
     unpublishing: 'در حال لغو انتشار...',
     version: 'نگارش',
+    versionAgo: '{{distance}} پیش',
     versionCount_many: '{{count}} نگارش‌ یافت شد',
     versionCount_none: 'هیچ نگارشی یافت نشد',
     versionCount_one: '{{count}} نگارش یافت شد',

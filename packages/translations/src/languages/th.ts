@@ -532,6 +532,7 @@ export const thTranslations: DefaultTranslationsObject = {
     unpublish: 'หยุดเผยแพร่',
     unpublishing: 'กำลังหยุดการเผยแพร่...',
     version: 'เวอร์ชัน',
+    versionAgo: '{{distance}} ที่แล้ว',
     versionCount_many: 'พบ {{count}} เวอร์ชัน',
     versionCount_none: 'ไม่พบเวอร์ชันอื่น',
     versionCount_one: 'พบ {{count}} เวอร์ชัน',

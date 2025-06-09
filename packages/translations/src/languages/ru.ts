@@ -546,6 +546,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     unpublish: 'Отменить публикацию',
     unpublishing: 'Отмена публикации...',
     version: 'Версия',
+    versionAgo: '{{distance}} назад',
     versionCount_many: '{{count}} версий найдено',
     versionCount_none: 'Версий не найдено',
     versionCount_one: '{{count}} версия найдена',

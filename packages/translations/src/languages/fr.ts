@@ -556,6 +556,7 @@ export const frTranslations: DefaultTranslationsObject = {
     unpublish: 'Annuler la publication',
     unpublishing: 'Annulation en cours...',
     version: 'Version',
+    versionAgo: 'il y a {{distance}}',
     versionCount_many: '{{count}} versions trouvées',
     versionCount_none: 'Aucune version trouvée',
     versionCount_one: '{{count}} version trouvée',

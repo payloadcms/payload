@@ -547,6 +547,7 @@ export const itTranslations: DefaultTranslationsObject = {
     unpublish: 'Annulla pubblicazione',
     unpublishing: 'Annullamento pubblicazione...',
     version: 'Versione',
+    versionAgo: '{{distance}} fa',
     versionCount_many: '{{count}} versioni trovate',
     versionCount_none: 'Nessuna versione trovata',
     versionCount_one: '{{count}} versione trovata',

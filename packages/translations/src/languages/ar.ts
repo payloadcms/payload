@@ -533,6 +533,7 @@ export const arTranslations: DefaultTranslationsObject = {
     unpublish: 'الغاء النّشر',
     unpublishing: 'يتمّ الغاء النّشر...',
     version: 'النّسخة',
+    versionAgo: 'منذ {{distance}}',
     versionCount_many: 'تمّ العثور على {{count}} نُسخ',
     versionCount_none: 'لم يتمّ العثور على أيّ من النّسخ',
     versionCount_one: 'تمّ العثور على {{count}} من النّسخ',

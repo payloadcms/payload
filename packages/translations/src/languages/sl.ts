@@ -540,6 +540,7 @@ export const slTranslations: DefaultTranslationsObject = {
     unpublish: 'Razveljavi objavo',
     unpublishing: 'Razveljavljanje objave...',
     version: 'Različica',
+    versionAgo: 'pred {{distance}}',
     versionCount_many: 'Najdenih {{count}} različic',
     versionCount_none: 'Ni najdenih različic',
     versionCount_one: 'Najdena {{count}} različica',

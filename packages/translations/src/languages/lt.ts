@@ -547,6 +547,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     unpublish: 'Nebepublikuoti',
     unpublishing: 'Nebepublikuojama...',
     version: 'Versija',
+    versionAgo: 'prieš {{distance}}',
     versionCount_many: 'Rasta {{count}} versijų',
     versionCount_none: 'Nerasta jokių versijų',
     versionCount_one: 'Rasta {{count}} versija',

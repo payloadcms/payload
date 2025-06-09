@@ -543,6 +543,7 @@ export const svTranslations: DefaultTranslationsObject = {
     unpublish: 'Avpublicera',
     unpublishing: 'Avpublicerar...',
     version: 'Version',
+    versionAgo: '{{distance}} sedan',
     versionCount_many: '{{count}} versioner hittades',
     versionCount_none: 'Inga versioner hittades',
     versionCount_one: '{{count}} version hittades',

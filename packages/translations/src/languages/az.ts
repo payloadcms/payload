@@ -544,6 +544,7 @@ export const azTranslations: DefaultTranslationsObject = {
     unpublish: 'Dərcdən çıxart',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',
+    versionAgo: '{{distance}} əvvəl',
     versionCount_many: '{{count}} versiya tapıldı',
     versionCount_none: 'Versiya tapılmadı',
     versionCount_one: '{{count}} versiya tapıldı',

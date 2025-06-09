@@ -535,6 +535,7 @@ export const koTranslations: DefaultTranslationsObject = {
     unpublish: '게시 해제',
     unpublishing: '게시 해제 중...',
     version: '버전',
+    versionAgo: '{{distance}} 전',
     versionCount_many: '{{count}}개의 버전을 찾았습니다',
     versionCount_none: '버전을 찾을 수 없습니다',
     versionCount_one: '{{count}}개의 버전을 찾았습니다',

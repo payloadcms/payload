@@ -541,6 +541,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     unpublish: 'Poništi objavu',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
+    versionAgo: 'pre {{distance}}',
     versionCount_many: '{{count}} pronađenih verzija',
     versionCount_none: 'Nema pronađenih verzija',
     versionCount_one: '{{count}} pronađena verzija',

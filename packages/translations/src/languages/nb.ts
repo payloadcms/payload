@@ -544,6 +544,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     unpublish: 'Avpubliser',
     unpublishing: 'Avpubliserer...',
     version: 'Versjon',
+    versionAgo: '{{distance}} siden',
     versionCount_many: '{{count}} versjoner funnet',
     versionCount_none: 'Ingen versjoner funnet',
     versionCount_one: '{{count}} versjon funnet',

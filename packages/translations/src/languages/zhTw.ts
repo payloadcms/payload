@@ -520,6 +520,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unpublish: '取消發佈',
     unpublishing: '取消發佈中...',
     version: '版本',
+    versionAgo: '{{distance}}前',
     versionCount_many: '發現 {{count}}個版本',
     versionCount_none: '沒有發現任何版本',
     versionCount_one: '找到 {{count}} 個版本',

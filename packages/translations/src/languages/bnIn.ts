@@ -544,6 +544,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     unpublish: 'প্রকাশ বাতিল করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',
     version: 'সংস্করণ',
+    versionAgo: '{{distance}} পূর্বে',
     versionCount_many: '{{count}}টি সংস্করণ পাওয়া গেছে',
     versionCount_none: 'কোনো সংস্করণ পাওয়া যায়নি',
     versionCount_one: '{{count}}টি সংস্করণ পাওয়া গেছে',

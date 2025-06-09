@@ -550,6 +550,7 @@ export const deTranslations: DefaultTranslationsObject = {
     unpublish: 'Veröffentlichung aufheben',
     unpublishing: 'Veröffentlichung aufheben...',
     version: 'Version',
+    versionAgo: 'vor {{distance}}',
     versionCount_many: '{{count}} Versionen gefunden',
     versionCount_none: 'Keine Versionen gefunden',
     versionCount_one: '{{count}} Version gefunden',

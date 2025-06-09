@@ -541,6 +541,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     unpublish: '非公開',
     unpublishing: '非公開中...',
     version: 'バージョン',
+    versionAgo: '{{distance}}前',
     versionCount_many: '{{count}} バージョンがあります',
     versionCount_none: 'バージョンがありません',
     versionCount_one: '{{count}} バージョンがあります',

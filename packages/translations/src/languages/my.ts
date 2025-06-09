@@ -551,6 +551,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unpublish: 'ပြန်ဖြုတ်မည်။',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',
     version: 'ဗားရှင်း',
+    versionAgo: '{{distance}} ကြာပြီ',
     versionCount_many: '{{count}} ဗားရှင်းများကို တွေ့ပါသည်။',
     versionCount_none: 'ဗားရှင်းရှာဖွေ့ပါ။',
     versionCount_one: '{{count}} ဗားရှင်အား တွေ့ပါသည်။',

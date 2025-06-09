@@ -548,6 +548,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     unpublish: 'Publicatie ongedaan maken',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',
+    versionAgo: '{{distance}} geleden',
     versionCount_many: '{{count}} versies gevonden',
     versionCount_none: 'Geen versies gevonden',
     versionCount_one: '{{count}} versie gevonden',

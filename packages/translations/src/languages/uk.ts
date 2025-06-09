@@ -541,6 +541,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     unpublish: 'Скасувати публікацію',
     unpublishing: 'Скасування публікації...',
     version: 'Версія',
+    versionAgo: '{{distance}} тому',
     versionCount_many: '{{count}} версій знайдено',
     versionCount_none: 'Версій не знайдено',
     versionCount_one: '{{count}} версія знайдена',

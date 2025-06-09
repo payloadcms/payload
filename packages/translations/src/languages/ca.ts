@@ -546,6 +546,7 @@ export const caTranslations: DefaultTranslationsObject = {
     unpublish: 'Despublicar',
     unpublishing: 'Despublicant...',
     version: 'Versió',
+    versionAgo: 'fa {{distance}}',
     versionCount_many: '{{count}} versions trobades',
     versionCount_none: "No s'han trobat versions",
     versionCount_one: '{{count}} versió trobada',

@@ -536,6 +536,7 @@ export const etTranslations: DefaultTranslationsObject = {
     unpublish: 'Tühista avaldamine',
     unpublishing: 'Avaldamise tühistamine...',
     version: 'Versioon',
+    versionAgo: '{{distance}} tagasi',
     versionCount_many: '{{count}} versiooni leitud',
     versionCount_none: 'Versioone ei leitud',
     versionCount_one: '{{count}} versioon leitud',

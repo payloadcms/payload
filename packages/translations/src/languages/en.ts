@@ -544,6 +544,7 @@ export const enTranslations = {
     unpublish: 'Unpublish',
     unpublishing: 'Unpublishing...',
     version: 'Version',
+    versionAgo: '{{distance}} ago',
     versionCount_many: '{{count}} versions found',
     versionCount_none: 'No versions found',
     versionCount_one: '{{count}} version found',
