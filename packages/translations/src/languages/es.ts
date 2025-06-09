@@ -1,4 +1,5 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
+
 export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
