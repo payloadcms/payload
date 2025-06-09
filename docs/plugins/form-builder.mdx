@@ -470,6 +470,31 @@ formBuilderPlugin({
 })
 ```
 
+### Preventing generated schema naming conflicts
+
+Plugin fields can cause GraphQL type name collisions with your own blocks or collections. This results in errors like:
+
+```txt
+Error: Schema must contain uniquely named types but contains multiple types named "Country"
+```
+
+You can resolve this by overriding:
+
+- `graphQL.singularName` in your collection config (for GraphQL schema conflicts)
+- `interfaceName` in your block config
+- `interfaceName` in the plugin field config
+
+```ts
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    country: {
+      interfaceName: 'CountryFormBlock', // overrides the generated type name to avoid a conflict
+    },
+  },
+})
+```
+
 ## Email
 
 This plugin relies on the [email configuration](../email/overview) defined in your Payload configuration. It will read from your config and attempt to send your emails using the credentials provided.
