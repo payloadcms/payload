@@ -70,6 +70,7 @@ export function StatePlugin() {
 
             const css = stateEntry.stateValues[stateValue]?.css
             if (css) {
+              // merge existing styles with the new ones
               Object.assign(mergedStyles, css)
             }
           })
