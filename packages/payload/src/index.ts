@@ -1222,6 +1222,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
   ValidationErrorName,

@@ -10,7 +10,6 @@ import type {
 import type { ViewToRender } from './createViewMap.js'
 
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
-import { UnauthorizedView } from '../Unauthorized/index.js'
 import { createViewMap } from './createViewMap.js'
 
 export const getViewFromConfig = ({
@@ -56,23 +55,10 @@ export const getViewFromConfig = ({
   }
 
   if (collectionConfig) {
-    const [, collectionSlug, segment3, ...remainingSegments] = routeSegments
+    // Skip segment 3 bc it may be `create` and exists in the viewMap as `/:id`
+    const [, collectionSlug, , ...remainingSegments] = routeSegments
 
-    if (
-      segment3 === 'create' &&
-      (!docPermissions || ('create' in docPermissions && !docPermissions.create))
-    ) {
-      return {
-        View: UnauthorizedView,
-      }
-    }
-
-    baseRoute = [
-      adminRoute !== '/' && adminRoute,
-      'collections',
-      collectionSlug,
-      segment3 !== 'create' ? ':id' : '',
-    ]
+    baseRoute = [adminRoute !== '/' && adminRoute, 'collections', collectionSlug, ':id']
       .filter(Boolean)
       .join('/')
 
@@ -81,9 +67,7 @@ export const getViewFromConfig = ({
 
   if (globalConfig) {
     const [, globalSlug, segment3, ...remainingSegments] = routeSegments
-
     baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
-
     currentRoute = [baseRoute, segment3, ...remainingSegments].filter(Boolean).join('/')
   }
 
@@ -94,10 +78,11 @@ export const getViewFromConfig = ({
     docPermissions,
     globalConfig,
     overrideDocPermissions,
+    routeSegments,
   })
 
-  // use a for...of loop in order to early exit once a match is found
-  for (const [viewPath, MappedView] of Object.entries(viewMap)) {
+  // Use a for...of loop in order to early exit once a match is found
+  for (const [viewPath, mappedView] of Object.entries(viewMap)) {
     const isMatching = isPathMatchingRoute({
       currentRoute,
       exact: true,
@@ -105,9 +90,9 @@ export const getViewFromConfig = ({
     })
 
     if (isMatching) {
-      View = MappedView.View
-      viewConfig = MappedView.viewConfig
-      viewKey = MappedView.key
+      View = mappedView.View
+      viewConfig = mappedView.viewConfig
+      viewKey = mappedView.key
       break
     }
   }

@@ -8,6 +8,8 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
+import { UnauthorizedError } from 'payload'
+
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView } from '../LivePreview/index.js'
@@ -25,25 +27,30 @@ export const defaultDocumentViews: {
       docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
       globalConfig: SanitizedGlobalConfig
       overrideDocPermissions?: boolean
+      routeSegments: string[]
     }) => boolean
-    DefaultView: React.FC<DocumentViewClientProps> | React.FC<DocumentViewServerProps>
     path: string
+    View: React.FC<DocumentViewClientProps> | React.FC<DocumentViewServerProps>
   }
 } = {
   api: {
     condition: ({ collectionConfig, globalConfig }) =>
       collectionConfig?.admin?.hideAPIURL !== true && globalConfig?.admin?.hideAPIURL !== true,
-    DefaultView: DefaultAPIView,
     path: '/api',
-  },
-  create: {
-    condition: ({ collectionConfig }) => Boolean(collectionConfig),
-    DefaultView: DefaultEditView,
-    path: '/create',
+    View: DefaultAPIView,
   },
   default: {
-    DefaultView: DefaultEditView,
+    condition: ({ collectionConfig, docPermissions, routeSegments }) => {
+      if (routeSegments[2] === 'create') {
+        if (!collectionConfig) {
+          return false
+        } else if (!('create' in docPermissions) || !docPermissions.create) {
+          throw new UnauthorizedError()
+        }
+      }
+    },
     path: '/',
+    View: DefaultEditView,
   },
   livePreview: {
     condition: ({
@@ -61,19 +68,19 @@ export const defaultDocumentViews: {
           (globalConfig && globalConfig?.admin?.livePreview) ||
           config?.admin?.livePreview?.globals?.includes(globalConfig?.slug),
       ),
-    DefaultView: LivePreviewView,
     path: '/preview',
+    View: LivePreviewView,
   },
   version: {
     condition: ({ docPermissions, overrideDocPermissions }) =>
       Boolean(!overrideDocPermissions && docPermissions?.readVersions),
-    DefaultView: VersionView,
     path: '/versions/:versionId',
+    View: VersionView,
   },
   versions: {
     condition: ({ docPermissions, overrideDocPermissions }) =>
       Boolean(!overrideDocPermissions && docPermissions?.readVersions),
-    DefaultView: VersionsView,
     path: '/versions',
+    View: VersionsView,
   },
 }
