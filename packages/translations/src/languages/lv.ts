@@ -513,6 +513,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Melnraksts veiksmīgi saglabāts.',
     lastSavedAgo: 'Pēdējo reizi saglabāts pirms {{distance}}',
     modifiedOnly: 'Tikai modificētie',
+    moreVersions: 'Vairāk versijas...',
     noFurtherVersionsFound: 'Papildu versijas nav atrastas',
     noRowsFound: 'Nav atrasts neviens {{label}}',
     noRowsSelected: 'Nav atlasīts neviens {{label}}',

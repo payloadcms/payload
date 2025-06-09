@@ -518,6 +518,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Juosmuo sėkmingai išsaugotas.',
     lastSavedAgo: 'Paskutinį kartą išsaugota prieš {{distance}}',
     modifiedOnly: 'Tik modifikuotas',
+    moreVersions: 'Daugiau versijų...',
     noFurtherVersionsFound: 'Nerasta daugiau versijų',
     noRowsFound: 'Nerasta {{label}}',
     noRowsSelected: 'Pasirinkta ne viena {{label}}',

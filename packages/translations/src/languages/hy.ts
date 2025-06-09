@@ -521,6 +521,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
     lastSavedAgo: 'Վերջին անգամ պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',
+    moreVersions: 'Ավելի շատ տարբերակներ...',
     noFurtherVersionsFound: 'Այլ տարբերակներ չեն գտնվել',
     noRowsFound: ' Ոչ մի {{label}} չի գտնվել',
     noRowsSelected: 'Ոչ մի {{label}} ընտրված չէ',

@@ -491,6 +491,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: '草稿成功保存。',
     lastSavedAgo: '上次保存{{distance}}之前',
     modifiedOnly: '仅修改过的',
+    moreVersions: '更多版本...',
     noFurtherVersionsFound: '没有发现其他版本',
     noRowsFound: '没有发现{{label}}',
     noRowsSelected: '未选择{{label}}',

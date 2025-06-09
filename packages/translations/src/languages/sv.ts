@@ -514,6 +514,7 @@ export const svTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Utkastet sparades',
     lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     modifiedOnly: 'Endast modifierad',
+    moreVersions: 'Fler versioner...',
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noRowsFound: 'Inga {{label}} hittades',
     noRowsSelected: 'Inget {{etikett}} valt',

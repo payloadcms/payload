@@ -512,6 +512,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: '下書きは正常に保存されました。',
     lastSavedAgo: '{{distance}}前に最後に保存されました',
     modifiedOnly: '変更済みのみ',
+    moreVersions: 'さらに多くのバージョン...',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',
     noRowsFound: '{{label}} は未設定です',
     noRowsSelected: '選択された{{label}}はありません',

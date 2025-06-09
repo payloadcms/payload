@@ -507,6 +507,7 @@ export const etTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
     lastSavedAgo: 'Viimati salvestatud {{distance}} tagasi',
     modifiedOnly: 'Muudetud ainult',
+    moreVersions: 'Rohkem versioone...',
     noFurtherVersionsFound: 'Rohkem versioone ei leitud',
     noRowsFound: '{{label}} ei leitud',
     noRowsSelected: '{{label}} pole valitud',

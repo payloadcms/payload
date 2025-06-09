@@ -517,6 +517,7 @@ export const caTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
     lastSavedAgo: 'Últim desament fa {{distance}}',
     modifiedOnly: 'Només modificat',
+    moreVersions: 'Més versions...',
     noFurtherVersionsFound: "No s'han trobat més versions",
     noRowsFound: "No s'han trobat {{label}}",
     noRowsSelected: "No s'han seleccionat {{label}}",

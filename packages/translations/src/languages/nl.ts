@@ -519,6 +519,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',
+    moreVersions: 'Meer versies...',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
     noRowsFound: 'Geen {{label}} gevonden',
     noRowsSelected: 'Geen {{label}} geselecteerd',

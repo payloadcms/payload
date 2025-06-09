@@ -517,6 +517,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
     lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     modifiedOnly: 'Модифицирован только',
+    moreVersions: 'Больше версий...',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
     noRowsSelected: 'Не выбран {{label}}',

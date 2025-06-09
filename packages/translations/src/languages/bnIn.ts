@@ -515,6 +515,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
+    moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',
     noRowsFound: 'কোনো {{label}} পাওয়া যায়নি',
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',

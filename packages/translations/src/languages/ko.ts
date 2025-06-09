@@ -506,6 +506,7 @@ export const koTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: '초안이 저장되었습니다.',
     lastSavedAgo: '마지막으로 저장한지 {{distance}} 전',
     modifiedOnly: '수정된 것만',
+    moreVersions: '더 많은 버전...',
     noFurtherVersionsFound: '더 이상의 버전을 찾을 수 없습니다.',
     noRowsFound: '{{label}}을(를) 찾을 수 없음',
     noRowsSelected: '선택된 {{label}} 없음',

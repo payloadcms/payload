@@ -511,6 +511,7 @@ export const csTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',
+    moreVersions: 'Více verzí...',
     noFurtherVersionsFound: 'Nenalezeny další verze',
     noRowsFound: 'Nenalezen {{label}}',
     noRowsSelected: 'Nebyl vybrán žádný {{label}}',

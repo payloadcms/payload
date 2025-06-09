@@ -518,6 +518,7 @@ export const itTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Bozza salvata con successo.',
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     modifiedOnly: 'Modificato solo',
+    moreVersions: 'Altre versioni...',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
     noRowsFound: 'Nessun {{label}} trovato',
     noRowsSelected: 'Nessuna {{etichetta}} selezionata',

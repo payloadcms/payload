@@ -515,6 +515,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
     modifiedOnly: 'Modificado apenas',
+    moreVersions: 'Mais versões...',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',
     noRowsFound: 'Nenhum(a) {{label}} encontrado(a)',
     noRowsSelected: 'Nenhum {{rótulo}} selecionado',

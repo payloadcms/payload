@@ -511,6 +511,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
     lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
     modifiedOnly: 'Samo modificirano',
+    moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',
     noRowsFound: '{{label}} nije pronađeno',
     noRowsSelected: 'Nije odabrana {{oznaka}}',

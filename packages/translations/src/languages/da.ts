@@ -512,6 +512,7 @@ export const daTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Kladde gemt.',
     lastSavedAgo: 'Sidst gemt {{distance}}',
     modifiedOnly: 'Kun ændret',
+    moreVersions: 'Flere versioner...',
     noFurtherVersionsFound: 'Ingen yderligere versioner fundet',
     noRowsFound: 'Ingen {{label}} fundet',
     noRowsSelected: 'Ingen {{label}} valgt',

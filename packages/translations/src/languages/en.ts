@@ -515,6 +515,7 @@ export const enTranslations = {
     draftSavedSuccessfully: 'Draft saved successfully.',
     lastSavedAgo: 'Last saved {{distance}} ago',
     modifiedOnly: 'Modified only',
+    moreVersions: 'More versions...',
     noFurtherVersionsFound: 'No further versions found',
     noRowsFound: 'No {{label}} found',
     noRowsSelected: 'No {{label}} selected',

@@ -510,6 +510,7 @@ export const faTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
     lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     modifiedOnly: 'تنها تغییر یافته',
+    moreVersions: 'نسخه های بیشتر...',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
     noRowsSelected: 'هیچ {{label}} ای انتخاب نشده است',

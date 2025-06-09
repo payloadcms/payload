@@ -512,6 +512,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
     lastSavedAgo: 'Востаннє збережено {{distance}} тому',
     modifiedOnly: 'Модифіковано тільки',
+    moreVersions: 'Більше версій...',
     noFurtherVersionsFound: 'Інших версій не знайдено',
     noRowsFound: 'Не знайдено {{label}}',
     noRowsSelected: 'Не вибрано {{label}}',

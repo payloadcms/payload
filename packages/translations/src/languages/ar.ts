@@ -504,6 +504,7 @@ export const arTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'تمّ حفظ المسودّة بنجاح.',
     lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
     modifiedOnly: 'تم التعديل فقط',
+    moreVersions: 'المزيد من الإصدارات...',
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
     noRowsSelected: 'لم يتم اختيار {{label}}',

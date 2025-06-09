@@ -503,6 +503,7 @@ export const thTranslations: DefaultTranslationsObject = {
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
     lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
     modifiedOnly: 'แก้ไขเท่านั้น',
+    moreVersions: 'เพิ่มเวอร์ชั่น...',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
     noRowsFound: 'ไม่พบ {{label}}',
     noRowsSelected: 'ไม่มี {{label}} ที่ถูกเลือก',
