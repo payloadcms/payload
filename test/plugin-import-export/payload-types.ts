@@ -165,6 +165,10 @@ export interface Page {
       | null;
     custom?: string | null;
   };
+  tabToCSV?: string | null;
+  namedTab?: {
+    tabToCSV?: string | null;
+  };
   array?:
     | {
         field1?: string | null;
@@ -483,6 +487,12 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         custom?: T;
+      };
+  tabToCSV?: T;
+  namedTab?:
+    | T
+    | {
+        tabToCSV?: T;
       };
   array?:
     | T

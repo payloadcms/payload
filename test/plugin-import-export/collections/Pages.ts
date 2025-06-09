@@ -93,6 +93,46 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'tabs',
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'No Name',
+          fields: [
+            {
+              name: 'tabToCSV',
+              type: 'text',
+              defaultValue: 'my custom csv transformer',
+              custom: {
+                'plugin-import-export': {
+                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                    return value + ' toCSV'
+                  },
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: 'namedTab',
+          fields: [
+            {
+              name: 'tabToCSV',
+              type: 'text',
+              defaultValue: 'my custom csv transformer',
+              custom: {
+                'plugin-import-export': {
+                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                    return value + ' toCSV'
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'array',
       type: 'array',
       fields: [
