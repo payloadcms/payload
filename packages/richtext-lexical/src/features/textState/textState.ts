@@ -77,9 +77,7 @@ export function StatePlugin() {
 
           // wipe previous inline styles once, then set the merged ones
           dom.style.cssText = ''
-          for (const [prop, val] of Object.entries(mergedStyles)) {
-            dom.style.setProperty(prop, val)
-          }
+          Object.assign(dom.style, mergedStyles)
         }
       })
     })
