@@ -25,6 +25,7 @@ import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
+import { MaxVersions } from './globals/MaxVersions.js'
 import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
@@ -60,6 +61,7 @@ export default buildConfigWithDefaults({
     DraftWithMaxGlobal,
     DisablePublishGlobal,
     LocalizedGlobal,
+    MaxVersions,
   ],
   indexSortableFields: true,
   localization: {

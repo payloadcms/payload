@@ -123,6 +123,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
     'localized-global': LocalizedGlobal;
+    'max-versions': MaxVersion;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -131,6 +132,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
     'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
+    'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -1180,6 +1182,17 @@ export interface LocalizedGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "max-versions".
+ */
+export interface MaxVersion {
+  id: string;
+  title?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1240,6 +1253,17 @@ export interface DisablePublishGlobalSelect<T extends boolean = true> {
 export interface LocalizedGlobalSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "max-versions_select".
+ */
+export interface MaxVersionsSelect<T extends boolean = true> {
+  title?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
