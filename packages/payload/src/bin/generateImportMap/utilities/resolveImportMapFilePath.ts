@@ -30,7 +30,7 @@ export async function resolveImportMapFilePath({
         await fs.writeFile(importMapFile, '', { flag: 'wx' })
       } catch (err) {
         throw new Error(
-          `Could not find the import map file at ${importMapFile}${err?.message ? `: ${err.message}` : ''}`,
+          `Could not find the import map file at ${importMapFile}${err instanceof Error && err?.message ? `: ${err.message}` : ''}`,
         )
       }
     }
