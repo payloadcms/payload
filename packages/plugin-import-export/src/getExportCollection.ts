@@ -35,7 +35,9 @@ export const getExportCollection = ({
     disableDuplicate: true,
     endpoints: [
       {
-        handler: download,
+        handler: (req) => {
+          return download(req, pluginConfig.debug)
+        },
         method: 'post',
         path: '/download',
       },
@@ -62,7 +64,8 @@ export const getExportCollection = ({
         return
       }
       const { user } = req
-      await createExport({ input: { ...args.data, user }, req })
+      const debug = pluginConfig.debug
+      await createExport({ input: { ...args.data, debug, user }, req })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {

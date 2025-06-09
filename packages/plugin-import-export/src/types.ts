@@ -12,6 +12,10 @@ export type ImportExportPluginConfig = {
    */
   collections?: string[]
   /**
+   * If true, enables debug logging
+   */
+  debug?: boolean
+  /**
    * Enable to force the export to run synchronously
    */
   disableJobsQueue?: boolean
