@@ -304,12 +304,12 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
+    if (field.type === 'tab' || fieldHasSubFields(field) || field.type === 'blocks') {
       if ('name' in field && field.name) {
         currentParentRef = currentRef
         if (!ref[field.name]) {
           if (fillEmpty) {
-            if (field.type === 'group') {
+            if (field.type === 'group' || field.type === 'tab') {
               if (fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! })) {
                 ref[field.name] = {
                   en: {},
@@ -334,7 +334,7 @@ export const traverseFields = ({
       }
 
       if (
-        field.type === 'group' &&
+        (field.type === 'tab' || field.type === 'group') &&
         fieldShouldBeLocalized({ field, parentIsLocalized: parentIsLocalized! }) &&
         currentRef &&
         typeof currentRef === 'object'

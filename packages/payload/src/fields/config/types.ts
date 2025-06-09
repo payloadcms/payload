@@ -128,6 +128,7 @@ import type {
   CollectionSlug,
   DateFieldValidation,
   EmailFieldValidation,
+  FieldCustom,
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
@@ -482,7 +483,7 @@ export interface FieldBase {
   }
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: FieldCustom
   defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
