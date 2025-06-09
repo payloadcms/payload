@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -127,7 +126,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...acc,
-        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab) => {
           if (tabHasName(tab)) {
             if (moveSubFieldsToTop) {
               const translatedLabel =

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob } from '../../../config/types/workflowTypes.js'
 
@@ -30,7 +29,7 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
           }
         }
       } else {
-        job[key] = updatedJob[key]
+        ;(job as any)[key] = updatedJob[key as keyof BaseJob]
       }
     }
 

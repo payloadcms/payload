@@ -1,4 +1,4 @@
-// @ts-strict-ignore
+import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -54,7 +54,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // Access
     // /////////////////////////////////////
 
-    let accessResults
+    let accessResults!: AccessResult
 
     if (!overrideAccess) {
       accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
