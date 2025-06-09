@@ -99,7 +99,6 @@
     "get-tsconfig": "4.8.1",
     "http-status": "2.1.0",
     "image-size": "2.0.2",
-    "ipaddr.js": "2.2.0",
     "jose": "5.9.6",
     "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",

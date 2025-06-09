@@ -840,9 +840,6 @@ importers:
       image-size:
         specifier: 2.0.2
         version: 2.0.2
-      ipaddr.js:
-        specifier: 2.2.0
-        version: 2.2.0
       jose:
         specifier: 5.9.6
         version: 5.9.6
