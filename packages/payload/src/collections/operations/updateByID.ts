@@ -134,10 +134,9 @@ export const updateByIDOperation = async <
       typeof data === 'object' &&
       data !== null &&
       'deletedAt' in data &&
-      data.deletedAt != null &&
-      !overrideAccess
+      data.deletedAt != null
 
-    if (isSoftDeleteAttempt) {
+    if (isSoftDeleteAttempt && !overrideAccess) {
       const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }

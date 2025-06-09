@@ -144,11 +144,10 @@ export const updateOperation = async <
       typeof bulkUpdateData === 'object' &&
       bulkUpdateData !== null &&
       'deletedAt' in bulkUpdateData &&
-      bulkUpdateData.deletedAt != null &&
-      !overrideAccess
+      bulkUpdateData.deletedAt != null
 
     // Enforce delete access if performing a soft-delete
-    if (isSoftDeleteAttempt) {
+    if (isSoftDeleteAttempt && !overrideAccess) {
       const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
