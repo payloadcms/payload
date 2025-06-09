@@ -1,20 +1,28 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig, TypeWithVersion } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
 import { fieldAffectsData, formatAdminURL } from 'payload/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
   readonly collectionConfig?: ClientCollectionConfig
-  readonly doc: TypeWithVersion<unknown>
   readonly globalConfig?: ClientGlobalConfig
   readonly id?: number | string
-}> = ({ id, collectionConfig, doc, globalConfig }) => {
+  versionToCreatedAtFormatted?: string
+  versionToID?: string
+  versionToUseAsTitle?: string
+}> = ({
+  id,
+  collectionConfig,
+  globalConfig,
+  versionToCreatedAtFormatted,
+  versionToID,
+  versionToUseAsTitle,
+}) => {
   const { config } = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
@@ -22,13 +30,8 @@ export const SetStepNav: React.FC<{
 
   useEffect(() => {
     const {
-      admin: { dateFormat },
       routes: { admin: adminRoute },
     } = config
-
-    const createdAtLabel = doc?.createdAt
-      ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
-      : ''
 
     if (collectionConfig) {
       const collectionSlug = collectionConfig.slug
@@ -37,22 +40,19 @@ export const SetStepNav: React.FC<{
       const pluralLabel = collectionConfig.labels?.plural
       let docLabel = `[${t('general:untitled')}]`
 
-      if (doc.version) {
-        const versionTitle = doc.version[useAsTitle]
-        const fields = collectionConfig.fields
+      const fields = collectionConfig.fields
 
-        const titleField = fields.find(
-          (f) => fieldAffectsData(f) && 'name' in f && f.name === useAsTitle,
-        )
+      const titleField = fields.find(
+        (f) => fieldAffectsData(f) && 'name' in f && f.name === useAsTitle,
+      )
 
-        if (titleField && versionTitle) {
-          docLabel =
-            'localized' in titleField && titleField.localized
-              ? versionTitle?.[locale.code] || docLabel
-              : versionTitle
-        } else if (useAsTitle === 'id') {
-          docLabel = doc.id
-        }
+      if (titleField && versionToUseAsTitle) {
+        docLabel =
+          'localized' in titleField && titleField.localized
+            ? versionToUseAsTitle?.[locale.code] || docLabel
+            : versionToUseAsTitle
+      } else if (useAsTitle === 'id') {
+        docLabel = versionToID
       }
 
       setStepNav([
@@ -78,7 +78,7 @@ export const SetStepNav: React.FC<{
           }),
         },
         {
-          label: createdAtLabel,
+          label: versionToCreatedAtFormatted,
         },
       ])
       return
@@ -103,11 +103,23 @@ export const SetStepNav: React.FC<{
           }),
         },
         {
-          label: createdAtLabel,
+          label: versionToCreatedAtFormatted,
         },
       ])
     }
-  }, [config, setStepNav, doc, id, locale, t, i18n, collectionConfig, globalConfig])
+  }, [
+    config,
+    setStepNav,
+    id,
+    locale,
+    t,
+    i18n,
+    collectionConfig,
+    globalConfig,
+    versionToUseAsTitle,
+    versionToCreatedAtFormatted,
+    versionToID,
+  ])
 
   return null
 }

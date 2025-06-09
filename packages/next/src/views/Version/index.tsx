@@ -443,7 +443,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromCreatedAt={versionFrom?.createdAt}
       versionFromID={versionFrom?.id}
       versionFromOptions={versionFromOptions}
-      versionTo={JSON.parse(JSON.stringify(versionTo))}
+      versionToCreatedAt={versionTo?.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={
         formatVersionPill({
@@ -454,6 +454,9 @@ export async function VersionView(props: DocumentViewServerProps) {
           latestPublishedVersionID: latestPublishedVersion?.id,
         }).Label
       }
+      versionToID={versionTo.id}
+      versionToStatus={versionTo?.version?._status}
+      versionToUseAsTitle={versionTo?.[collectionConfig.admin?.useAsTitle || 'id']}
     />
   )
 }

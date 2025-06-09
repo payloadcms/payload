@@ -35,9 +35,12 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   versionFromCreatedAt,
   versionFromID,
   versionFromOptions,
-  versionTo,
+  versionToCreatedAt,
   versionToCreatedAtFormatted,
   VersionToCreatedAtLabel,
+  versionToID,
+  versionToStatus,
+  versionToUseAsTitle,
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { code } = useLocale()
@@ -157,11 +160,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     () =>
       t('version:versionAgo', {
         distance: formatTimeToNow({
-          date: versionTo?.createdAt,
+          date: versionToCreatedAt,
           i18n,
         }),
       }),
-    [versionTo?.createdAt, i18n, t],
+    [versionToCreatedAt, i18n, t],
   )
 
   const versionFromTimeAgo = useMemo(
@@ -253,9 +256,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                   globalConfig={globalConfig}
                   label={collectionConfig?.labels.singular || globalConfig?.label}
                   originalDocID={originalDocID}
-                  status={versionTo?.version?._status}
+                  status={versionToStatus}
                   versionDateFormatted={versionToCreatedAtFormatted}
-                  versionID={versionTo?.id}
+                  versionID={versionToID}
                 />
               )}
             </div>
@@ -264,13 +267,15 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       </Gutter>
       <SetStepNav
         collectionConfig={collectionConfig}
-        doc={versionTo}
         globalConfig={globalConfig}
         id={originalDocID}
+        versionToCreatedAtFormatted={versionToCreatedAtFormatted}
+        versionToID={versionToID}
+        versionToUseAsTitle={versionToUseAsTitle}
       />
       <Gutter className={`${baseClass}__diff-wrap`}>
         <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>
-          {versionTo?.version && RenderedDiff}
+          {versionToCreatedAt && RenderedDiff}
         </SelectedLocalesContext>
       </Gutter>
     </main>

@@ -1,5 +1,3 @@
-import type { TypeWithVersion } from 'payload'
-
 export type CompareOption = {
   label: React.ReactNode | string
   value: string
@@ -18,7 +16,10 @@ export type DefaultVersionsViewProps = {
   versionFromCreatedAt?: string
   versionFromID?: string
   versionFromOptions: CompareOption[]
-  versionTo: TypeWithVersion<any>
+  versionToCreatedAt?: string
   versionToCreatedAtFormatted: string
   VersionToCreatedAtLabel: React.ReactNode
+  versionToID?: string
+  versionToStatus?: string
+  versionToUseAsTitle?: string
 }
