@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const bnINTranslations = {
+export const bnBdTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'অ্যাকাউন্ট',
     accountOfCurrentUser: 'বর্তমান ব্যবহারকারীর অ্যাকাউন্ট',
@@ -500,12 +500,16 @@ export const bnINTranslations = {
     changedFieldsCount_one: '{{count}} পরিবর্তিত ক্ষেত্র',
     changedFieldsCount_other: '{{count}} পরিবর্তিত ক্ষেত্রগুলি',
     compareVersion: 'সংস্করণের সাথে তুলনা করুন:',
+    compareVersions: 'সংস্করণ তুলনা করুন',
+    comparingAgainst: 'তুলনা করা যাচ্ছে',
     confirmPublish: 'প্রকাশ নিশ্চিত করুন',
     confirmRevertToSaved: 'সংরক্ষিত অবস্থায় ফিরে যাওয়া নিশ্চিত করুন',
     confirmUnpublish: 'আনপাবলিশ নিশ্চিত করুন',
     confirmVersionRestoration: 'সংস্করণ পুনরুদ্ধার নিশ্চিত করুন',
     currentDocumentStatus: 'বর্তমান {{docStatus}} ডকুমেন্ট',
     currentDraft: 'বর্তমান খসড়া',
+    currentlyPublished: 'বর্তমানে প্রকাশিত',
+    currentlyViewing: 'বর্তমানে দেখছেন',
     currentPublishedVersion: 'বর্তমান প্রকাশিত সংস্করণ',
     draft: 'খসড়া',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
@@ -554,7 +558,7 @@ export const bnINTranslations = {
   },
 }
 
-export const bnIN: Language = {
-  dateFNSKey: 'bn-IN',
-  translations: bnINTranslations,
+export const bnBd: Language = {
+  dateFNSKey: 'bn-BD',
+  translations: bnBdTranslations,
 }
