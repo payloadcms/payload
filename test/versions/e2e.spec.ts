@@ -1299,25 +1299,25 @@ describe('Versions', () => {
       versionDiffID = versionDiff.id
     })
 
-    async function navigateToVersionDiff() {
+    async function navigateToDraftVersionView() {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
-    async function navigateToVersionFieldsDiff() {
+    async function navigateToDiffVersionView() {
       const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     test('should render diff', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
       expect(true).toBe(true)
     })
 
     test('should render diff for nested fields', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1336,7 +1336,7 @@ describe('Versions', () => {
     })
 
     test('should render diff collapser for nested fields', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1385,7 +1385,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArray = page.locator('[data-field-path="array.0.textInArray"]')
 
@@ -1394,7 +1394,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for localized array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArray = page
         .locator('[data-field-path="arrayLocalized"][data-locale="en"]')
@@ -1409,7 +1409,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders modified-only diff for localized array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
@@ -1421,7 +1421,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.0.textInBlock"]')
 
@@ -1430,7 +1430,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for collapsibles within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator(
         '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
@@ -1445,7 +1445,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for rows within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
 
@@ -1458,7 +1458,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for named tabs within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator(
         '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
@@ -1473,7 +1473,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for unnamed tabs within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
 
@@ -1486,7 +1486,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for checkbox fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
@@ -1495,7 +1495,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for code fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const code = page.locator('[data-field-path="code"]')
 
@@ -1504,7 +1504,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for collapsible fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const collapsible = page.locator('[data-field-path="textInCollapsible"]')
 
@@ -1517,7 +1517,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for date fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const date = page.locator('[data-field-path="date"]')
 
@@ -1530,7 +1530,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for email fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const email = page.locator('[data-field-path="email"]')
 
@@ -1539,7 +1539,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for group fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const group = page.locator('[data-field-path="group.textInGroup"]')
 
@@ -1548,7 +1548,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for number fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const number = page.locator('[data-field-path="number"]')
 
@@ -1557,7 +1557,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for point fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const point = page.locator('[data-field-path="point"]')
 
@@ -1566,7 +1566,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for radio fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const radio = page.locator('[data-field-path="radio"]')
 
@@ -1575,7 +1575,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for relationship fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const relationship = page.locator('[data-field-path="relationship"]')
 
@@ -1594,7 +1594,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for richtext fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
@@ -1612,7 +1612,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const richtextWithCustomDiff = page.locator('[data-field-path="richtextWithCustomDiff"]')
 
@@ -1620,7 +1620,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for row fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInRow = page.locator('[data-field-path="textInRow"]')
 
@@ -1629,7 +1629,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for select fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const select = page.locator('[data-field-path="select"]')
 
@@ -1638,7 +1638,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for named tabs', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInNamedTab1 = page.locator('[data-field-path="namedTab1.textInNamedTab1"]')
 
@@ -1651,7 +1651,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for unnamed tabs', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInUnamedTab2 = page.locator('[data-field-path="textInUnnamedTab2"]')
 
@@ -1664,7 +1664,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for text fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const text = page.locator('[data-field-path="text"]')
 
@@ -1673,7 +1673,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for textArea fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textArea = page.locator('[data-field-path="textArea"]')
 
@@ -1682,7 +1682,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for upload fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const upload = page.locator('[data-field-path="upload"]')
 
