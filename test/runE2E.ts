@@ -20,9 +20,9 @@ if (prod) {
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
-const turbo = process.argv.includes('--turbo')
+const turbo = process.argv.includes('--no-turbo') ? false : true
 
-process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--turbo')
+process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -125,8 +125,8 @@ function executePlaywright(
     spawnDevArgs.push('--prod')
   }
 
-  if (turbo) {
-    spawnDevArgs.push('--turbo')
+  if (!turbo) {
+    spawnDevArgs.push('--no-turbo')
   }
 
   process.env.START_MEMORY_DB = 'true'
