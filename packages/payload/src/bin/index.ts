@@ -69,7 +69,7 @@ export const bin = async () => {
   }
 
   const userBinScript = Array.isArray(config.bin)
-    ? config.bin.find(({ key }) => key === script)
+    ? config.bin.find(({ key }: { key: string }) => key === script)
     : false
 
   if (userBinScript) {

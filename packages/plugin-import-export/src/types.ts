@@ -26,3 +26,29 @@ export type ImportExportPluginConfig = {
    */
   overrideExportCollection?: (collection: CollectionOverride) => CollectionOverride
 }
+
+/**
+ * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+ */
+export type ToCSVFunction = (args: {
+  /**
+   * The path of the column for the field, for arrays this includes the index (zero-based)
+   */
+  columnName: string
+  /**
+   * The top level document
+   */
+  doc: Document
+  /**
+   * The object data that can be manipulated to assign data to the CSV
+   */
+  row: Record<string, unknown>
+  /**
+   * The document data at the level where it belongs
+   */
+  siblingDoc: Record<string, unknown>
+  /**
+   * The data for the field.
+   */
+  value: unknown
+}) => unknown
