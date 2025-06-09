@@ -38,6 +38,8 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       } else {
         res = await nodeFetch(url, {
           agent: ssrfFilter(url),
+          headers,
+          method: 'GET',
         })
       }
     } catch (error: unknown) {
