@@ -81,7 +81,9 @@ export const VersionPillLabel: React.FC<{
     labelStyle === 'pill' ? (
       renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)
     ) : (
-      <span className={`${baseClass}-text`}>{currentLabel}</span>
+      <span className={`${baseClass}-text`}>
+        {doc?.id === latestVersion ? currentLabel : previousLabel}
+      </span>
     )
 
   const Date = (
