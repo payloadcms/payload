@@ -21,8 +21,6 @@ const baseClass = 'compare-version'
 
 const maxResultsPerRequest = 10
 
-const baseOptions = []
-
 export const SelectComparison: React.FC<Props> = (props) => {
   const {
     baseURL,
@@ -47,7 +45,8 @@ export const SelectComparison: React.FC<Props> = (props) => {
       label: React.ReactNode | string
       value: string
     }[]
-  >(baseOptions)
+  >([])
+
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
   const loadedAllOptionsRef = React.useRef(false)
