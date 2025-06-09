@@ -276,7 +276,7 @@ export const getRouteData = ({
           // Collection Folder Views
           // --> /collections/:collectionSlug/:folderCollectionSlug
           // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
-          initPageOptions.routeParams.folderSlug = segmentThree
+          initPageOptions.routeParams.folderCollection = segmentThree
           initPageOptions.routeParams.folderID = segmentFour
 
           ViewToRender = {
