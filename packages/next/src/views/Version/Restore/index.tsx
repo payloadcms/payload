@@ -31,7 +31,7 @@ type Props = {
   label: SanitizedCollectionConfig['labels']['singular']
   originalDocID: number | string
   status?: string
-  versionDate: string
+  versionDateFormatted: string
   versionID: string
 }
 
@@ -42,7 +42,7 @@ export const Restore: React.FC<Props> = ({
   label,
   originalDocID,
   status,
-  versionDate,
+  versionDateFormatted,
   versionID,
 }) => {
   const {
@@ -60,7 +60,7 @@ export const Restore: React.FC<Props> = ({
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
     label: getTranslation(label, i18n),
-    versionDate,
+    versionDate: versionDateFormatted,
   })
 
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts

@@ -17,8 +17,9 @@ export type DefaultVersionsViewProps = {
   modifiedOnly: boolean
   readonly RenderedDiff: React.ReactNode
   readonly selectedLocales: string[]
+  versionFromCreatedAt?: string
   readonly versionFromPill: VersionPill
   readonly versionTo: TypeWithVersion<any>
-  versionToCreatedAt: string
+  versionToCreatedAtFormatted: string
   VersionToCreatedAtLabel: React.ReactNode
 }

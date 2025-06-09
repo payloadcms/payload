@@ -3,6 +3,7 @@
 import {
   CheckboxInput,
   ChevronIcon,
+  formatTimeToNow,
   Gutter,
   Pill,
   type SelectablePill,
@@ -18,8 +19,8 @@ import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
 import { Restore } from '../Restore/index.js'
-import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'
+import { SelectComparison } from '../SelectComparison/index.js'
 import { type SelectedLocaleOnChange, SelectLocales } from '../SelectLocales/index.js'
 import { SelectedLocalesContext } from './SelectedLocalesContext.js'
 import { SetStepNav } from './SetStepNav.js'
@@ -33,9 +34,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
   selectedLocales: selectedLocalesFromProps,
+  versionFromCreatedAt,
   versionFromPill,
   versionTo,
-  versionToCreatedAt,
+  versionToCreatedAtFormatted,
   VersionToCreatedAtLabel,
 }) => {
   const { config, getEntityConfig } = useConfig()
@@ -162,6 +164,30 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
 
+  const versionToTimeAgo = useMemo(
+    () =>
+      t('version:versionAgo', {
+        distance: formatTimeToNow({
+          date: versionTo?.createdAt,
+          i18n,
+        }),
+      }),
+    [versionTo?.createdAt, i18n, t],
+  )
+
+  const versionFromTimeAgo = useMemo(
+    () =>
+      versionFromCreatedAt
+        ? t('version:versionAgo', {
+            distance: formatTimeToNow({
+              date: versionFromCreatedAt,
+              i18n,
+            }),
+          })
+        : undefined,
+    [versionFromCreatedAt, i18n, t],
+  )
+
   return (
     <main className={baseClass}>
       <Gutter className={`${baseClass}-controls-top`}>
@@ -213,7 +239,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <div className={`${baseClass}__version-from`}>
             <div className={`${baseClass}__version-from-labels`}>
               <span>{t('version:comparingAgainst')}</span>
-              <span className={`${baseClass}__time-elapsed`}>A few seconds ago</span>
+              {versionFromTimeAgo && (
+                <span className={`${baseClass}__time-elapsed`}>{versionFromTimeAgo}</span>
+              )}
             </div>
             <SelectComparison
               baseURL={compareBaseURL}
@@ -233,7 +261,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <div className={`${baseClass}__version-to`}>
             <div className={`${baseClass}__version-to-labels`}>
               <span>{t('version:currentlyViewing')}</span>
-              <span className={`${baseClass}__time-elapsed`}>A few seconds ago</span>
+              <span className={`${baseClass}__time-elapsed`}>{versionToTimeAgo}</span>
             </div>
             <div className={`${baseClass}__version-to-version`}>
               {VersionToCreatedAtLabel}
@@ -245,7 +273,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                   label={collectionConfig?.labels.singular || globalConfig?.label}
                   originalDocID={originalDocID}
                   status={versionTo?.version?._status}
-                  versionDate={versionToCreatedAt}
+                  versionDateFormatted={versionToCreatedAtFormatted}
                   versionID={versionTo?.id}
                 />
               )}

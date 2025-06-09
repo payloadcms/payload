@@ -283,7 +283,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     },
   })
 
-  const versionToCreatedAt = versionTo?.updatedAt
+  const versionToCreatedAtFormatted = versionTo?.updatedAt
     ? formatDate({
         date:
           typeof versionTo.updatedAt === 'string'
@@ -302,6 +302,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}
+      versionFromCreatedAt={versionFrom?.createdAt}
       versionFromPill={formatVersionPill({
         doc: versionFrom,
         hasPublishedDoc: !!latestPublishedVersion,
@@ -312,7 +313,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         latestPublishedVersionID: latestPublishedVersion?.id,
       })}
       versionTo={JSON.parse(JSON.stringify(versionTo))}
-      versionToCreatedAt={versionToCreatedAt}
+      versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={
         formatVersionPill({
           doc: versionTo,
