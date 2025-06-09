@@ -56,8 +56,8 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     showHiddenFields,
   } = args
 
-  const fieldPromises = []
-  const populationPromises = []
+  const fieldPromises: Promise<void>[] = []
+  const populationPromises: Promise<void>[] = []
 
   let depth =
     incomingDepth || incomingDepth === 0

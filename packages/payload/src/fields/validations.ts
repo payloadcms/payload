@@ -32,6 +32,7 @@ import type {
   TextField,
   UploadField,
   Validate,
+  ValueWithRelation,
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
@@ -317,7 +318,7 @@ export const json: JSONFieldValidation = (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
-  const isNotEmpty = (value) => {
+  const isNotEmpty = (value: null | string | undefined) => {
     if (value === undefined || value === null) {
       return false
     }
@@ -401,7 +402,7 @@ export const date: DateFieldValidation = (
   // We need to also check for the timezone data based on this field's config
   // We cannot do this inside the timezone field validation as it's visually hidden
   const hasRequiredTimezone = timezone && required
-  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  const selectedTimezone: string = siblingData?.[`${name}_tz` as keyof typeof siblingData]
   // Always resolve to true if the field is not required, as timezone may be optional too then
   const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
 
@@ -440,7 +441,7 @@ export const richText: RichTextFieldValidation = async (value, options) => {
 }
 
 const validateArrayLength = (
-  value,
+  value: unknown,
   options: {
     maxRows?: number
     minRows?: number
@@ -450,7 +451,7 @@ const validateArrayLength = (
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : value || 0
+  const arrayLength = Array.isArray(value) ? value.length : (value as number) || 0
 
   if (!required && arrayLength === 0) {
     return true
@@ -818,7 +819,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 
     const invalidRelationships = values.filter((val) => {
       let collectionSlug: string
-      let requestedID
+      let requestedID: number | string | undefined | ValueWithRelation
 
       if (typeof relationTo === 'string') {
         collectionSlug = relationTo
@@ -841,7 +842,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
       const idType =
         payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      return !isValidID(requestedID, idType)
+      return !isValidID(requestedID as number | string, idType)
     })
 
     if (invalidRelationships.length > 0) {

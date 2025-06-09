@@ -109,8 +109,8 @@ export async function validateSearchParam({
         if (field.virtual === true) {
           errors.push({ path })
         } else {
-          constraint[`${field.virtual}`] = constraint[path]
-          delete constraint[path]
+          constraint[`${field.virtual}` as keyof WhereField] = constraint[path as keyof WhereField]
+          delete constraint[path as keyof WhereField]
         }
       }
 
@@ -155,7 +155,7 @@ export async function validateSearchParam({
         const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
-        let fieldAccess
+        let fieldAccess: any
 
         if (versionFields) {
           fieldAccess = policies[entityType]![entitySlug]!

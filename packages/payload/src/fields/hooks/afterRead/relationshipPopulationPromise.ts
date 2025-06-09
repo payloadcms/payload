@@ -47,7 +47,8 @@ const populate = async ({
     relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
   }
 
-  const relatedCollection = req.payload.collections[relation]
+  const relatedCollection =
+    req.payload.collections[relation as keyof typeof req.payload.collections]
 
   if (relatedCollection) {
     let id: unknown
@@ -173,7 +174,7 @@ export const relationshipPopulationPromise = async ({
     ) {
       Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
         if (Array.isArray(siblingDoc[field.name][localeKey])) {
-          siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
+          siblingDoc[field.name][localeKey].forEach((_relatedDoc: any, index: number) => {
             const rowPromise = async () => {
               await populate({
                 currentDepth,
@@ -203,7 +204,7 @@ export const relationshipPopulationPromise = async ({
       ;(Array.isArray(siblingDoc[field.name])
         ? siblingDoc[field.name]
         : siblingDoc[field.name].docs
-      ).forEach((relatedDoc, index) => {
+      ).forEach((relatedDoc: any, index: number) => {
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
