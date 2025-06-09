@@ -1,11 +1,10 @@
 import type {
   DocumentViewClientProps,
+  DocumentViewCondition,
   DocumentViewServerProps,
   SanitizedCollectionConfig,
-  SanitizedCollectionPermission,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  SanitizedGlobalPermission,
 } from 'payload'
 
 import { UnauthorizedError } from 'payload'
@@ -21,14 +20,7 @@ export const defaultDocumentViews: {
     /**
      * A function used to conditionally mount the view.
      */
-    condition?: (args: {
-      collectionConfig: SanitizedCollectionConfig
-      config: SanitizedConfig
-      docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
-      globalConfig: SanitizedGlobalConfig
-      overrideDocPermissions?: boolean
-      routeSegments: string[]
-    }) => boolean
+    condition?: DocumentViewCondition
     path: string
     View: React.FC<DocumentViewClientProps> | React.FC<DocumentViewServerProps>
   }
@@ -53,15 +45,7 @@ export const defaultDocumentViews: {
     View: DefaultEditView,
   },
   livePreview: {
-    condition: ({
-      collectionConfig,
-      config,
-      globalConfig,
-    }: {
-      collectionConfig: SanitizedCollectionConfig
-      config: SanitizedConfig
-      globalConfig: SanitizedGlobalConfig
-    }) =>
+    condition: ({ collectionConfig, config, globalConfig }) =>
       Boolean(
         (collectionConfig && collectionConfig?.admin?.livePreview) ||
           config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug) ||
@@ -72,14 +56,12 @@ export const defaultDocumentViews: {
     View: LivePreviewView,
   },
   version: {
-    condition: ({ docPermissions, overrideDocPermissions }) =>
-      Boolean(!overrideDocPermissions && docPermissions?.readVersions),
+    condition: ({ docPermissions }) => Boolean(docPermissions?.readVersions),
     path: '/versions/:versionId',
     View: VersionView,
   },
   versions: {
-    condition: ({ docPermissions, overrideDocPermissions }) =>
-      Boolean(!overrideDocPermissions && docPermissions?.readVersions),
+    condition: ({ docPermissions }) => Boolean(docPermissions?.readVersions),
     path: '/versions',
     View: VersionsView,
   },

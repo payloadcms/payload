@@ -17,23 +17,14 @@ export const getViewFromConfig = ({
   config,
   docPermissions,
   globalConfig,
-  overrideDocPermissions,
   routeSegments,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
+  docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-} & (
-  | {
-      docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
-      overrideDocPermissions?: false | undefined
-    }
-  | {
-      docPermissions?: never
-      overrideDocPermissions: true
-    }
-)): {
+}): {
   View: ViewToRender
   viewConfig?: EditViewConfig
   viewKey?: string
@@ -50,7 +41,7 @@ export const getViewFromConfig = ({
   let baseRoute: string
   let currentRoute: string
 
-  if (!overrideDocPermissions && !docPermissions?.read) {
+  if (!docPermissions?.read) {
     throw new Error('not-found')
   }
 
@@ -77,7 +68,6 @@ export const getViewFromConfig = ({
     config,
     docPermissions,
     globalConfig,
-    overrideDocPermissions,
     routeSegments,
   })
 

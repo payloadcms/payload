@@ -71,7 +71,6 @@ export const createViewMap = ({
   config,
   docPermissions,
   globalConfig,
-  overrideDocPermissions,
   routeSegments,
 }: {
   baseRoute: string
@@ -79,7 +78,6 @@ export const createViewMap = ({
   config: SanitizedConfig
   docPermissions?: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
-  overrideDocPermissions?: boolean
   routeSegments: string[]
 }): ViewMap => {
   const customViews =
@@ -98,21 +96,18 @@ export const createViewMap = ({
 
     const customViewConfig = customViews?.edit?.[key]
 
-    const condition = viewDefaults?.condition || customViewConfig?.condition
-
     let View =
       customViewConfig && 'Component' in customViewConfig && customViewConfig.Component
         ? customViewConfig.Component
         : viewDefaults?.View
 
-    if (typeof condition === 'function') {
+    if (typeof viewDefaults?.condition === 'function') {
       try {
-        const shouldContinue = condition({
+        const shouldContinue = viewDefaults?.condition({
           collectionConfig,
           config,
           docPermissions,
           globalConfig,
-          overrideDocPermissions,
           routeSegments,
         })
 

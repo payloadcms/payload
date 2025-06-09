@@ -1,4 +1,8 @@
-import type { SanitizedPermissions } from '../../auth/types.js'
+import type {
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
+} from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -82,3 +86,11 @@ export type BeforeDocumentControlsClientProps = {}
 export type BeforeDocumentControlsServerPropsOnly = {} & ServerProps
 export type BeforeDocumentControlsServerProps = BeforeDocumentControlsClientProps &
   BeforeDocumentControlsServerPropsOnly
+
+export type DocumentViewCondition = (args: {
+  collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
+  docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
+  globalConfig?: SanitizedGlobalConfig
+  routeSegments: string[]
+}) => boolean

@@ -614,6 +614,7 @@ export type {
    */
   DocumentViewClientProps as ClientSideEditViewProps,
   DocumentViewClientProps,
+  DocumentViewCondition,
   /**
    * @deprecated
    * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
