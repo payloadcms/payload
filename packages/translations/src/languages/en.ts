@@ -505,7 +505,7 @@ export const enTranslations = {
     confirmPublish: 'Confirm publish',
     confirmRevertToSaved: 'Confirm revert to saved',
     confirmUnpublish: 'Confirm unpublish',
-    confirmVersionRestoration: 'Confirm version Restoration',
+    confirmVersionRestoration: 'Confirm Version Restoration',
     currentDocumentStatus: 'Current {{docStatus}} document',
     currentDraft: 'Current Draft',
     currentlyPublished: 'Currently Published',
