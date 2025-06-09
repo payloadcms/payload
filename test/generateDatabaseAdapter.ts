@@ -47,6 +47,16 @@ export const allDatabaseAdapters = {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   })`,
+  'postgres-read-replica': `
+  import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL,
+    },
+    readReplicas: [process.env.POSTGRES_REPLICA_URL],
+  })
+  `,
   sqlite: `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'
 

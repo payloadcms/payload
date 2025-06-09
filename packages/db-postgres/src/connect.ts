@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Migration, Payload } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
@@ -58,30 +58,6 @@ export const connect: Connect = async function connect(
       await connectWithReconnect({ adapter: this, pool: this.pool })
     }
 
-    // read replicas docs: https://orm.drizzle.team/docs/read-replicas
-    // const primaryDb = drizzle("postgres://user:password@host:port/primary_db");
-    // const read1 = drizzle("postgres://user:password@host:port/read_replica_1");
-    // const read2 = drizzle("postgres://user:password@host:port/read_replica_2");
-    // const db = withReplicas(primaryDb, [read1, read2]);
-
-    // AI recommendation
-    // import { Pool } from "pg";
-    // import { drizzle } from "drizzle-orm/node-postgres";
-    // import { withReplicas } from 'drizzle-orm/pg-core';
-    //
-    // // Create pool connections for each database
-    // const primaryPool = new Pool({ connectionString: "postgres://user:password@host:port/primary_db" });
-    // const read1Pool = new Pool({ connectionString: "postgres://user:password@host:port/read_replica_1" });
-    // const read2Pool = new Pool({ connectionString: "postgres://user:password@host:port/read_replica_2" });
-    //
-    // // Create Drizzle instances from the pools
-    // const primaryDb = drizzle({ client: primaryPool });
-    // const read1 = drizzle({ client: read1Pool });
-    // const read2 = drizzle({ client: read2Pool });
-    //
-    // // Use withReplicas to manage routing
-    // const db = withReplicas(primaryDb, [read1, read2]);
-
     const logger = this.logger || false
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
@@ -98,7 +74,7 @@ export const connect: Connect = async function connect(
         })
         return drizzle({ client: pool, logger, schema: this.schema })
       })
-      const myReplicas = withReplicas(this.drizzle, [readReplicas[0], readReplicas[1]])
+      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas
     }
 
