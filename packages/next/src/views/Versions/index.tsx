@@ -4,15 +4,26 @@ import { type DocumentViewServerProps, logError, type PaginatedDocs } from 'payl
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
+import type { CreatedAtCellProps } from './cells/CreatedAt/index.js'
+
 import { buildVersionColumns } from './buildColumns.js'
 import { getLatestVersion } from './getLatestVersion.js'
-import { VersionsViewClient } from './index.client.js'
 import './index.scss'
+import { VersionsViewClient } from './index.client.js'
 
 export const baseClass = 'versions'
 
-export async function VersionsView(props: DocumentViewServerProps) {
-  const { initPageResult, searchParams } = props
+export async function VersionsView(
+  props: {
+    CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
+    // Optional props that are passed if this view is rendered from the Version view SelectComparison drawer
+    /**
+     * @default false
+     */
+    disableGutter?: boolean
+  } & DocumentViewServerProps,
+) {
+  const { CreatedAtCellOverride, disableGutter, initPageResult, searchParams } = props
 
   const {
     collectionConfig,
@@ -183,6 +194,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const columns = buildVersionColumns({
     collectionConfig,
     config,
+    CreatedAtCellOverride,
     docID: id,
     docs: versionsData?.docs,
     globalConfig,
@@ -197,6 +209,8 @@ export async function VersionsView(props: DocumentViewServerProps) {
       : collectionConfig.labels.plural
     : globalConfig?.label
 
+  const GutterComponent = disableGutter ? React.Fragment : Gutter
+
   return (
     <React.Fragment>
       <SetDocumentStepNav
@@ -208,7 +222,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
         view={i18n.t('version:versions')}
       />
       <main className={baseClass}>
-        <Gutter className={`${baseClass}__wrap`}>
+        <GutterComponent className={`${baseClass}__wrap`}>
           <ListQueryProvider
             data={versionsData}
             defaultLimit={limitToUse}
@@ -223,7 +237,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
               paginationLimits={collectionConfig?.admin?.pagination?.limits}
             />
           </ListQueryProvider>
-        </Gutter>
+        </GutterComponent>
       </main>
     </React.Fragment>
   )

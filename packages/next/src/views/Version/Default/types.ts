@@ -16,6 +16,7 @@ export type DefaultVersionsViewProps = {
   versionFromCreatedAt?: string
   versionFromID?: string
   versionFromOptions: CompareOption[]
+  VersionsView: React.ReactNode
   versionToCreatedAt?: string
   versionToCreatedAtFormatted: string
   VersionToCreatedAtLabel: React.ReactNode

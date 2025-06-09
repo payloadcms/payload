@@ -1,21 +1,48 @@
 'use client'
 
 import { fieldBaseClass, ReactSelect, useTranslation } from '@payloadcms/ui'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
+
+import type { CompareOption } from '../Default/types.js'
+
+import './index.scss'
 
 import type { Props } from './types.js'
 
-import './index.scss'
+import { useVersionDrawer } from './VersionDrawer/index.js'
 
 const baseClass = 'compare-version'
 
 export const SelectComparison: React.FC<Props> = (props) => {
-  const { onChange, versionFromID, versionFromOptions } = props
+  const { onChange: onChangeFromProps, versionFromID, versionFromOptions, VersionsView } = props
   const { t } = useTranslation()
 
-  const currentOption = React.useMemo(
+  const { Drawer, openDrawer } = useVersionDrawer({ VersionsView })
+
+  const options = useMemo(() => {
+    return [
+      ...versionFromOptions,
+      {
+        label: <span className={`${baseClass}-moreVersions`}>{t('version:moreVersions')}</span>,
+        value: 'more',
+      },
+    ]
+  }, [t, versionFromOptions])
+
+  const currentOption = useMemo(
     () => versionFromOptions.find((option) => option.value === versionFromID),
     [versionFromOptions, versionFromID],
+  )
+
+  const onChange = useCallback(
+    (val: CompareOption) => {
+      if (val.value === 'more') {
+        openDrawer()
+        return
+      }
+      onChangeFromProps(val)
+    },
+    [onChangeFromProps, openDrawer],
   )
 
   return (
@@ -24,10 +51,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
         isClearable={false}
         isSearchable={false}
         onChange={onChange}
-        options={versionFromOptions}
+        options={options}
         placeholder={t('version:selectVersionToCompare')}
         value={currentOption}
       />
+      <Drawer />
     </div>
   )
 }

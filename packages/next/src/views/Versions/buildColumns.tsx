@@ -12,11 +12,13 @@ import { SortColumn } from '@payloadcms/ui'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'
-import { CreatedAtCell } from './cells/CreatedAt/index.js'
+import { CreatedAtCell, type CreatedAtCellProps } from './cells/CreatedAt/index.js'
 import { IDCell } from './cells/ID/index.js'
 
 export const buildVersionColumns = ({
   collectionConfig,
+  config,
+  CreatedAtCellOverride,
   docID,
   docs,
   globalConfig,
@@ -26,6 +28,7 @@ export const buildVersionColumns = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
+  CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
   docID?: number | string
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
@@ -34,6 +37,8 @@ export const buildVersionColumns = ({
   latestPublishedVersion?: string
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
+
+  const CreatedAtCellComponent = CreatedAtCellOverride ?? CreatedAtCell
 
   const columns: Column[] = [
     {
@@ -46,7 +51,7 @@ export const buildVersionColumns = ({
       Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
       renderedCells: docs.map((doc, i) => {
         return (
-          <CreatedAtCell
+          <CreatedAtCellComponent
             collectionSlug={collectionConfig?.slug}
             docID={docID}
             globalSlug={globalConfig?.slug}
