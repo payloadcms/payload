@@ -56,7 +56,6 @@ export const connect: Connect = async function connect(
         const pool = new VercelPool(options)
         return drizzle({ client: pool, logger, schema: this.schema })
       })
-      this.payload.logger.info('read replicas')
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas
     }
