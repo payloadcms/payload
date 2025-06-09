@@ -29,13 +29,12 @@ const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   canUpdate,
-  latestDraftVersionID,
-  latestPublishedVersionID,
   modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
   selectedLocales: selectedLocalesFromProps,
   versionFromCreatedAt,
-  versionFromPill,
+  versionFromID,
+  versionFromOptions,
   versionTo,
   versionToCreatedAtFormatted,
   VersionToCreatedAtLabel,
@@ -152,17 +151,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     [updateSearchParams],
   )
 
-  const {
-    localization,
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
-
-  const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
-    collectionSlug || globalSlug
-  }/versions`
-
-  const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
+  const { localization } = config
 
   const versionToTimeAgo = useMemo(
     () =>
@@ -244,17 +233,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               )}
             </div>
             <SelectComparison
-              baseURL={compareBaseURL}
-              draftsEnabled={draftsEnabled}
-              latestDraftVersionID={latestDraftVersionID}
-              latestPublishedVersionID={latestPublishedVersionID}
               onChange={onChangeVersionFrom}
-              parentID={originalDocID}
-              versionFromOption={{
-                label: versionFromPill.Label,
-                value: versionFromPill.id,
-              }}
-              versionToID={versionTo.id}
+              versionFromID={versionFromID}
+              versionFromOptions={versionFromOptions}
             />
           </div>
 

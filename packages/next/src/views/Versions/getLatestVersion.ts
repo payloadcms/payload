@@ -1,13 +1,11 @@
-import type { Payload, PayloadRequest, Where } from 'payload'
+import type { Payload, PayloadRequest, TypeWithVersion, Where } from 'payload'
 
 import { logError } from 'payload'
 
-export type GetLatestVersionReturnType = {
-  id: string
-  updatedAt: string
-} | null
+export type GetLatestVersionReturnType = null | TypeWithVersion<any>
 
 type Args = {
+  additionalWheres?: Where[]
   locale?: string
   overrideAccess?: boolean
   parentID?: number | string
@@ -18,7 +16,17 @@ type Args = {
   type: 'collection' | 'global'
 }
 export async function getLatestVersion(args: Args): Promise<GetLatestVersionReturnType> {
-  const { slug, type = 'collection', locale, overrideAccess, parentID, payload, req, status } = args
+  const {
+    slug,
+    type = 'collection',
+    additionalWheres,
+    locale,
+    overrideAccess,
+    parentID,
+    payload,
+    req,
+    status,
+  } = args
 
   const and: Where[] = [
     {
@@ -26,6 +34,7 @@ export async function getLatestVersion(args: Args): Promise<GetLatestVersionRetu
         equals: status,
       },
     },
+    ...(additionalWheres || []),
   ]
 
   if (type === 'collection' && parentID) {
@@ -64,10 +73,7 @@ export async function getLatestVersion(args: Args): Promise<GetLatestVersionRetu
       return null
     }
 
-    return {
-      id: response.docs[0].id,
-      updatedAt: response.docs[0].updatedAt,
-    }
+    return response.docs[0]
   } catch (err) {
     logError({ err, payload })
 

@@ -1,16 +1,11 @@
 import type { PaginatedDocs, SanitizedCollectionConfig } from 'payload'
 
-import type { CompareOption } from '../Default/types.js'
+import type { CompareOption, VersionPill } from '../Default/types.js'
 
 export type Props = {
-  baseURL: string
-  draftsEnabled?: boolean
-  latestDraftVersionID?: string
-  latestPublishedVersionID?: string
   onChange: (val: CompareOption) => void
-  parentID?: number | string
-  versionFromOption: CompareOption
-  versionToID: string
+  versionFromID?: string
+  versionFromOptions: CompareOption[]
 }
 
 type CLEAR = {
