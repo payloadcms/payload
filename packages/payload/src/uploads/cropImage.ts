@@ -8,8 +8,8 @@ import type { UploadEdits } from './types.js'
 
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
-export const percentToPixel = (value, dimension) => {
-  return Math.floor((parseFloat(value) / 100) * dimension)
+const percentToPixel = (value: number, dimension: number) => {
+  return Math.floor((value / 100) * dimension)
 }
 
 type CropImageArgs = {

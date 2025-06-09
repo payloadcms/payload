@@ -16,6 +16,12 @@ import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 
+declare global {
+  interface Request {
+    [waitFlushProperty]?: Promise<any>[]
+  }
+}
+
 type ProcessMultipart = (args: {
   options: FetchAPIFileUploadOptions
   request: Request
@@ -39,7 +45,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     files: undefined!,
   }
 
-  const headersObject = {}
+  const headersObject: Record<string, string> = {}
   request.headers.forEach((value, name) => {
     headersObject[name] = value
   })
