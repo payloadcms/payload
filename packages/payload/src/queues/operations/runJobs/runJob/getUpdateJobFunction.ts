@@ -30,7 +30,7 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
           }
         }
       } else {
-        job[key] = updatedJob[key]
+        ;(job as any)[key] = updatedJob[key as keyof BaseJob]
       }
     }
 

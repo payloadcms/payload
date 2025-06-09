@@ -89,7 +89,8 @@ export const createClientGlobalConfig = ({
               clientGlobal.admin.preview = true
               break
             default:
-              clientGlobal.admin[adminKey] = global.admin[adminKey]
+              ;(clientGlobal.admin as any)[adminKey] =
+                global.admin[adminKey as keyof typeof global.admin]
           }
         }
         break
@@ -108,7 +109,7 @@ export const createClientGlobalConfig = ({
             : global.label
         break
       default: {
-        clientGlobal[key] = global[key]
+        ;(clientGlobal as any)[key] = global[key as keyof typeof global]
         break
       }
     }

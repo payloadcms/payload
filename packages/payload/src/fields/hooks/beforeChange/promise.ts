@@ -214,7 +214,7 @@ export const promise = async ({
     // Push merge locale action if applicable
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(() => {
-        const localeData = {}
+        const localeData: Record<string, unknown> = {}
 
         for (const locale of localization.localeCodes) {
           const fieldValue =

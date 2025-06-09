@@ -213,7 +213,8 @@ export const createClientField = ({
               break
 
             default:
-              clientField.admin[adminKey] = incomingField.admin[adminKey]
+              ;(clientField.admin as any)[adminKey] =
+                incomingField.admin[adminKey as keyof typeof incomingField.admin]
           }
         }
 
@@ -238,7 +239,7 @@ export const createClientField = ({
         break
 
       default:
-        clientField[key] = incomingField[key]
+        ;(clientField as any)[key] = incomingField[key as keyof Field]
     }
   }
 
@@ -387,7 +388,7 @@ export const createClientField = ({
               continue
             }
 
-            const tabProp = tab[key]
+            const tabProp = tab[key as keyof typeof tab]
 
             if (key === 'fields') {
               clientTab.fields = createClientFields({
@@ -401,6 +402,7 @@ export const createClientField = ({
               (key === 'label' || key === 'description') &&
               typeof tabProp === 'function'
             ) {
+              // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
               clientTab[key] = tabProp({ t: i18n.t })
             } else if (key === 'admin') {
               clientTab.admin = {} as AdminClient
@@ -426,11 +428,12 @@ export const createClientField = ({
                     break
 
                   default:
-                    clientField.admin![adminKey] = tab.admin[adminKey]
+                    ;(clientTab.admin as any)[adminKey] =
+                      tab.admin[adminKey as keyof typeof tab.admin]
                 }
               }
             } else {
-              clientTab[key] = tabProp
+              ;(clientTab as any)[key] = tabProp
             }
           }
           field.tabs[i] = clientTab

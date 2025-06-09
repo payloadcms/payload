@@ -653,10 +653,13 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks!.reduce((blocks, block) => {
-      blocks[block.slug] = block
-      return blocks
-    }, {})
+    this.blocks = this.config.blocks!.reduce(
+      (blocks, block) => {
+        blocks[block.slug] = block
+        return blocks
+      },
+      {} as Record<string, FlattenedBlock>,
+    )
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -837,10 +840,10 @@ let cached: {
   promise: null | Promise<Payload>
   reload: boolean | Promise<void>
   ws: null | WebSocket
-} = global._payload
+} = (global as any)._payload
 
 if (!cached) {
-  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
+  cached = (global as any)._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
 export const reload = async (
@@ -852,18 +855,24 @@ export const reload = async (
 
   payload.config = config
 
-  payload.collections = config.collections.reduce((collections, collection) => {
-    collections[collection.slug] = {
-      config: collection,
-      customIDType: payload.collections[collection.slug]?.customIDType,
-    }
-    return collections
-  }, {})
+  payload.collections = config.collections.reduce(
+    (collections, collection) => {
+      collections[collection.slug] = {
+        config: collection,
+        customIDType: payload.collections[collection.slug]?.customIDType,
+      }
+      return collections
+    },
+    {} as Record<string, any>,
+  )
 
-  payload.blocks = config.blocks!.reduce((blocks, block) => {
-    blocks[block.slug] = block
-    return blocks
-  }, {})
+  payload.blocks = config.blocks!.reduce(
+    (blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    },
+    {} as Record<string, FlattenedBlock>,
+  )
 
   payload.globals = {
     config: config.globals,
@@ -894,12 +903,12 @@ export const reload = async (
     await payload.db.connect({ hotReload: true })
   }
 
-  global._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  global._payload_schemaMap = null
-  global._payload_clientSchemaMap = null
-  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  global._payload_doNotCacheSchemaMap = true
-  global._payload_doNotCacheClientSchemaMap = true
+  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
+  ;(global as any)._payload_schemaMap = null
+  ;(global as any)._payload_clientSchemaMap = null
+  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  ;(global as any)._payload_doNotCacheSchemaMap = true
+  ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
 export const getPayload = async (
