@@ -55,9 +55,7 @@ const sanitizePath = ({
 }
 
 /**
- * Create a map of all paths that point to the view that should mount on that path.
- * Ensure that all views can be mounted on any given route.
- * E.g. the API view can be mounted on `/my-api` and a custom view can be mounted on the `/api` route.
+ * Create a map of all available routes and their respective views.
  * @returns {ViewMap}
  * @example
  * {
@@ -132,7 +130,7 @@ export const createViewMap = ({
 
     const pathToUse = sanitizePath({
       baseRoute,
-      path: customViewConfig?.path || viewDefaults?.path,
+      path: customViewConfig?.path !== undefined ? customViewConfig.path : viewDefaults?.path,
       viewKey: key,
     })
 
