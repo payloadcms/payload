@@ -791,6 +791,47 @@ describe('Relationships', () => {
           expect(localized_res_2.docs).toStrictEqual([movie_1, movie_2])
         })
 
+        it('should sort by multiple properties of a relationship', async () => {
+          await payload.delete({ collection: 'directors', where: {} })
+          await payload.delete({ collection: 'movies', where: {} })
+
+          const createDirector = {
+            collection: 'directors',
+            data: {
+              name: 'Dan',
+            },
+          } as const
+
+          const director_1 = await payload.create(createDirector)
+          const director_2 = await payload.create(createDirector)
+
+          const movie_1 = await payload.create({
+            collection: 'movies',
+            depth: 0,
+            data: { director: director_1.id, name: 'Some Movie 1' },
+          })
+
+          const movie_2 = await payload.create({
+            collection: 'movies',
+            depth: 0,
+            data: { director: director_2.id, name: 'Some Movie 2' },
+          })
+
+          const res_1 = await payload.find({
+            collection: 'movies',
+            sort: ['director.name', 'director.createdAt'],
+            depth: 0,
+          })
+          const res_2 = await payload.find({
+            collection: 'movies',
+            sort: ['director.name', '-director.createdAt'],
+            depth: 0,
+          })
+
+          expect(res_1.docs).toStrictEqual([movie_1, movie_2])
+          expect(res_2.docs).toStrictEqual([movie_2, movie_1])
+        })
+
         it('should sort by a property of a hasMany relationship', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
