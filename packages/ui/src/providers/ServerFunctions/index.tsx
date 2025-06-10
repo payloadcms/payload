@@ -136,7 +136,7 @@ export const ServerFunctionsProvider: React.FC<{
         error += ` for document with ID ${rest.doc.value} in collection ${rest.doc.relationTo}`
       }
 
-      return { error: '' }
+      return { error }
     },
     [serverFunction],
   )
