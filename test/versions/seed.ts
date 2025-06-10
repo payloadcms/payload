@@ -239,7 +239,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       checkbox: true,
       code: 'code',
-      date: '2021-01-01T00:00:00.000Z',
+      date: '2021-04-01T00:00:00.000Z',
       email: 'email@email.com',
       group: {
         textInGroup: 'textInGroup',
@@ -371,7 +371,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       checkbox: false,
       code: 'code2',
-      date: '2023-01-01T00:00:00.000Z',
+      date: '2023-04-01T00:00:00.000Z',
       email: 'email2@email.com',
       group: {
         textInGroup: 'textInGroup2',

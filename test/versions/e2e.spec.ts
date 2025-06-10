@@ -1526,8 +1526,8 @@ describe('Versions', () => {
 
       const date = page.locator('[data-field-path="date"]')
 
-      await expect(date.locator('.html-diff__diff-old')).toContainText(' 2020, ')
-      await expect(date.locator('.html-diff__diff-new')).toContainText(' 2022, ')
+      await expect(date.locator('.html-diff__diff-old')).toContainText(' 2021, ')
+      await expect(date.locator('.html-diff__diff-new')).toContainText(' 2023, ')
       // Do not check for exact date, as it may vary based on
       // timezone of the test runner which could cause flakiness
     })
