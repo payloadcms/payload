@@ -95,10 +95,15 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
       if (res.status < 400) {
         toast.success(
-          t(deletePermanently ? 'general:titleDeleted' : 'general:titleSoftDeleted', {
-            label: getTranslation(singularLabel, i18n),
-            title,
-          }) || json.message,
+          t(
+            deletePermanently || !collectionConfig.softDeletes
+              ? 'general:titleDeleted'
+              : 'general:titleSoftDeleted',
+            {
+              label: getTranslation(singularLabel, i18n),
+              title,
+            },
+          ) || json.message,
         )
 
         if (redirectAfterDelete) {
