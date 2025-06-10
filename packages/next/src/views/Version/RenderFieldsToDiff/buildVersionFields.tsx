@@ -324,13 +324,17 @@ const buildVersionField = ({
     }
   } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
-    if (field.type === 'array' && valueTo) {
-      const arrayValue = Array.isArray(valueTo) ? valueTo : []
+    if (field.type === 'array' && (valueTo || valueFrom)) {
+      const maxLength = Math.max(
+        Array.isArray(valueTo) ? valueTo.length : 0,
+        Array.isArray(valueFrom) ? valueFrom.length : 0,
+      )
       baseVersionField.rows = []
 
-      for (let i = 0; i < arrayValue.length; i++) {
-        const fromRow = valueFrom?.[i] || {}
-        const toRow = arrayValue?.[i] || {}
+      for (let i = 0; i < maxLength; i++) {
+        const fromRow = (Array.isArray(valueFrom) && valueFrom?.[i]) || {}
+        const toRow = (Array.isArray(valueTo) && valueTo?.[i]) || {}
+
         baseVersionField.rows[i] = buildVersionFields({
           clientSchemaMap,
           customDiffComponents,
@@ -349,6 +353,10 @@ const buildVersionField = ({
           versionFromSiblingData: fromRow,
           versionToSiblingData: toRow,
         }).versionFields
+      }
+
+      if (!baseVersionField.rows?.length && modifiedOnly) {
+        return null
       }
     } else {
       baseVersionField.fields = buildVersionFields({
@@ -377,13 +385,16 @@ const buildVersionField = ({
   } else if (field.type === 'blocks') {
     baseVersionField.rows = []
 
-    const blocksValue = Array.isArray(valueTo) ? valueTo : []
+    const maxLength = Math.max(
+      Array.isArray(valueTo) ? valueTo.length : 0,
+      Array.isArray(valueFrom) ? valueFrom.length : 0,
+    )
 
-    for (let i = 0; i < blocksValue.length; i++) {
-      const fromRow = valueFrom?.[i] || {}
-      const toRow = blocksValue[i] || {}
+    for (let i = 0; i < maxLength; i++) {
+      const fromRow = (Array.isArray(valueFrom) && valueFrom?.[i]) || {}
+      const toRow = (Array.isArray(valueTo) && valueTo?.[i]) || {}
 
-      const blockSlugToMatch: string = toRow.blockType
+      const blockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
       const toBlock =
         req.payload.blocks[blockSlugToMatch] ??
         ((field.blockReferences ?? field.blocks).find(
@@ -395,7 +406,7 @@ const buildVersionField = ({
       if (toRow.blockType === fromRow.blockType) {
         fields = toBlock.fields
       } else {
-        const fromBlockSlugToMatch: string = toRow.blockType // TODO: Verify this is correct
+        const fromBlockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
 
         const fromBlock =
           req.payload.blocks[fromBlockSlugToMatch] ??
@@ -428,6 +439,9 @@ const buildVersionField = ({
         versionFromSiblingData: fromRow,
         versionToSiblingData: toRow,
       }).versionFields
+    }
+    if (!baseVersionField.rows?.length && modifiedOnly) {
+      return null
     }
   }
 
