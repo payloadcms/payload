@@ -58,16 +58,9 @@ export const Drawer: React.FC<Props> = ({
   const { closeModal, modalState } = useModal()
   const drawerDepth = useDrawerDepth()
 
-  const [isOpen, setIsOpen] = useState(modalState[slug]?.isOpen || false)
-  const [animateIn, setAnimateIn] = useState(modalState[slug]?.isOpen || false)
+  const isOpen = !!modalState[slug]?.isOpen
 
-  const openFromContext = modalState[slug]?.isOpen
-
-  useEffect(() => {
-    setIsOpen(openFromContext)
-    // By depending on openFromContext instead of [slug, modalState] we avoid
-    // running the effect when some other, unrelated modal in the same context changes.
-  }, [openFromContext])
+  const [animateIn, setAnimateIn] = useState(isOpen)
 
   useLayoutEffect(() => {
     setAnimateIn(isOpen)
