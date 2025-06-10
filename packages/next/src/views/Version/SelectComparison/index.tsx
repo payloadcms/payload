@@ -1,7 +1,7 @@
 'use client'
 
 import { fieldBaseClass, ReactSelect, useTranslation } from '@payloadcms/ui'
-import React, { useCallback, useMemo } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 
 import type { CompareOption } from '../Default/types.js'
 
@@ -13,7 +13,7 @@ import { useVersionDrawer } from './VersionDrawer/index.js'
 
 const baseClass = 'compare-version'
 
-export const SelectComparison: React.FC<Props> = (props) => {
+export const SelectComparison: React.FC<Props> = memo((props) => {
   const { onChange: onChangeFromProps, versionFromID, versionFromOptions, VersionsView } = props
   const { t } = useTranslation()
 
@@ -58,4 +58,4 @@ export const SelectComparison: React.FC<Props> = (props) => {
       <Drawer />
     </div>
   )
-}
+})
