@@ -159,16 +159,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     result = await Model.paginate(versionQuery, paginationOptions)
   }
 
-  if (this.manualJoins) {
-    await resolveJoins({
-      adapter: this,
-      collectionSlug,
-      docs: result.docs as Record<string, unknown>[],
-      joins,
-      locale,
-    })
-  }
-
   transform({
     adapter: this,
     data: result.docs,
@@ -180,6 +170,16 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     const id = result.docs[i].parent
     result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
+  }
+
+  if (this.manualJoins) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+    })
   }
 
   return result
