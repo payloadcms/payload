@@ -417,7 +417,7 @@ export const sanitizeQueryValue = ({
       return buildExistsQuery(
         formattedValue,
         path,
-        !['relationship', 'upload'].includes(field.type),
+        !['checkbox', 'relationship', 'upload'].includes(field.type),
       )
     }
   }

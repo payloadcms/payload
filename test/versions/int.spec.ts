@@ -56,9 +56,7 @@ describe('Versions', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -1583,6 +1581,30 @@ describe('Versions', () => {
         // When creating a new version - updatedAt should match
         expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
+    })
+
+    it('should properly clean up old versions when reached versions.max', async () => {
+      const getLatestVersion = () =>
+        payload
+          .findGlobalVersions({
+            slug: 'max-versions',
+            sort: '-createdAt',
+            limit: 1,
+          })
+          .then((r) => r.docs[0])
+
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' } })
+      const version_1 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' } })
+      const version_2 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' } })
+      const version_3 = await getLatestVersion()
+      const version_1_deleted = await payload.findGlobalVersionByID({
+        slug: 'max-versions',
+        id: version_1?.id as string,
+        disableErrors: true,
+      })
+      expect(version_1_deleted).toBeFalsy()
     })
 
     describe('Read', () => {

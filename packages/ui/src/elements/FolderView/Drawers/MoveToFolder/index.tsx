@@ -10,6 +10,7 @@ import type {
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatFolderOrDocumentItem } from 'payload/shared'
 import React from 'react'
 
 import { useConfig } from '../../../../providers/Config/index.js'
@@ -17,6 +18,7 @@ import { FolderProvider, useFolder } from '../../../../providers/Folders/index.j
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
+import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
@@ -27,13 +29,11 @@ import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../ColoredFolderIcon/index.js'
 import { ItemCardGrid } from '../../ItemCardGrid/index.js'
-import { NewFolderDrawer } from '../NewFolder/index.js'
 import './index.scss'
 
 const baseClass = 'move-folder-drawer'
 const baseModalSlug = 'move-folder-drawer'
 const confirmModalSlug = `${baseModalSlug}-confirm-move`
-const newFolderDrawerSlug = `${baseModalSlug}-new-folder`
 
 type ActionProps =
   | {
@@ -45,6 +45,8 @@ type ActionProps =
     }
 export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
+  readonly folderCollectionSlug: string
+  readonly folderFieldName: string
   readonly fromFolderID?: number | string
   readonly fromFolderName?: string
   readonly itemsToMove: FolderOrDocument[]
@@ -74,11 +76,7 @@ export function MoveItemsToFolderDrawer(props: MoveToFolderDrawerProps) {
 
 function LoadFolderData(props: MoveToFolderDrawerProps) {
   const {
-    config: {
-      folders: { slug: folderCollectionSlug },
-      routes,
-      serverURL,
-    },
+    config: { routes, serverURL },
   } = useConfig()
   const [subfolders, setSubfolders] = React.useState<FolderOrDocument[]>([])
   const [documents, setDocuments] = React.useState<FolderOrDocument[]>([])
@@ -91,7 +89,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
 
       try {
         const folderDataReq = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
+          `${serverURL}${routes.api}/${props.folderCollectionSlug}/populate-folder-data${props.fromFolderID ? `?folderID=${props.fromFolderID}` : ''}`,
           {
             credentials: 'include',
             headers: {
@@ -121,7 +119,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
     if (!hasLoaded) {
       void onLoad()
     }
-  }, [folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
+  }, [props.folderCollectionSlug, routes.api, serverURL, hasLoaded, props.fromFolderID])
 
   if (!hasLoaded) {
     return <LoadingOverlay />
@@ -133,6 +131,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
       breadcrumbs={breadcrumbs}
       documents={documents}
       folderCollectionSlugs={[]}
+      folderFieldName={props.folderFieldName}
       folderID={props.fromFolderID}
       subfolders={subfolders}
     >
@@ -158,10 +157,16 @@ function Content({
     folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
+    folderID,
     getSelectedItems,
     setFolderID,
     subfolders,
   } = useFolder()
+  const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
+    useDocumentDrawer({
+      collectionSlug: folderCollectionSlug,
+    })
+  const { getEntityConfig } = useConfig()
 
   const getSelectedFolder = React.useCallback((): {
     id: null | number | string
@@ -187,23 +192,18 @@ function Content({
 
   const onCreateSuccess = React.useCallback(
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
-      const itemValue: FolderOrDocument['value'] = {
-        id: doc?.id,
-        _folderOrDocumentTitle: doc?.[folderCollectionConfig.admin.useAsTitle ?? 'id'],
-        createdAt: doc?.createdAt,
-        folderID: doc?.[folderFieldName],
-        updatedAt: doc?.updatedAt,
-      }
-
+      const collectionConfig = getEntityConfig({ collectionSlug })
       void addItems([
-        {
-          itemKey: `${collectionSlug}-${doc.id}`,
+        formatFolderOrDocumentItem({
+          folderFieldName,
+          isUpload: Boolean(collectionConfig?.upload),
           relationTo: collectionSlug,
-          value: itemValue,
-        },
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          value: doc,
+        }),
       ])
     },
-    [addItems, folderCollectionConfig.admin.useAsTitle],
+    [addItems, folderFieldName, getEntityConfig],
   )
 
   const onConfirmMove = React.useCallback(() => {
@@ -270,25 +270,29 @@ function Content({
             <Button
               buttonStyle="pill"
               className={`${baseClass}__add-folder-button`}
+              margin={false}
               onClick={() => {
-                openModal(newFolderDrawerSlug)
+                openFolderDrawer()
               }}
             >
               {t('fields:addLabel', {
                 label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
               })}
             </Button>
-            <NewFolderDrawer
-              drawerSlug={newFolderDrawerSlug}
-              onNewFolderSuccess={(doc) => {
-                closeModal(newFolderDrawerSlug)
+            <FolderDocumentDrawer
+              initialData={{
+                [folderFieldName]: folderID,
+              }}
+              onSave={(result) => {
                 if (typeof onCreateSuccess === 'function') {
                   void onCreateSuccess({
                     collectionSlug: folderCollectionConfig.slug,
-                    doc,
+                    doc: result.doc,
                   })
                 }
+                closeFolderDrawer()
               }}
+              redirectAfterCreate={false}
             />
           </>
         )}

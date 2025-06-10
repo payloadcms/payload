@@ -191,7 +191,7 @@ export const daTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'Du er ved at flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
     moveItemToRootConfirmation: 'Du er ved at flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
-    movingFromFolder: 'Flytter {{title}} fra {{folderName}}',
+    movingFromFolder: 'Flytter {{title}} fra {{fromFolder}}',
     newFolder: 'Ny Mappe',
     noFolder: 'Ingen Mappe',
     renameFolder: 'Omdøb mappe',

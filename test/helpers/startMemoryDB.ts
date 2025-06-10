@@ -1,7 +1,12 @@
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import dotenv from 'dotenv'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 dotenv.config()
 
+declare global {
+  // Add the custom property to the NodeJS global type
+  // eslint-disable-next-line no-var
+  var _mongoMemoryServer: MongoMemoryReplSet | undefined
+}
 
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
@@ -23,8 +28,11 @@ export default async () => {
       },
     })
 
+    await db.waitUntilRunning()
+
     global._mongoMemoryServer = db
 
     process.env.MONGODB_MEMORY_SERVER_URI = `${global._mongoMemoryServer.getUri()}&retryWrites=true`
+    console.log('Started memory db')
   }
 }

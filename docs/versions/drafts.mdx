@@ -51,11 +51,36 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 
 #### Updating or creating drafts
 
-If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a **draft**, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `create` or `update` operation, your action will be treated as if you are creating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
+If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a **draft**, or if you're just sending your changes straight to the published document.
+
+For example:
+
+```ts
+// REST API
+POST /api/your-collection?draft=true
+
+// Local API
+await payload.create({
+  collection: 'your-collection',
+  data: {
+    // your data here
+  },
+  draft: true, // This is required to create a draft
+})
+
+// GraphQL
+mutation {
+  createYourCollection(data: { ... }, draft: true) {
+    // ...
+  }
+}
+```
 
 **Required fields**
 
 If `draft` is enabled while creating or updating a document, all fields are considered as not required, so that you can save drafts that are incomplete.
+
+Setting `_status: "draft"` will not bypass the required fields. You need to set `draft: true` as shown in the previous examples.
 
 #### Reading drafts vs. published documents
 

@@ -37,6 +37,10 @@ export type FolderContextValue = {
   focusedRowIndex: number
   folderCollectionConfig: ClientCollectionConfig
   folderCollectionSlug: string
+  /**
+   * Folder enabled collection slugs that can be populated within the provider
+   */
+  readonly folderCollectionSlugs?: CollectionSlug[]
   folderFieldName: string
   folderID?: number | string
   getSelectedItems?: () => FolderOrDocument[]
@@ -86,6 +90,7 @@ const Context = React.createContext<FolderContextValue>({
   focusedRowIndex: -1,
   folderCollectionConfig: null,
   folderCollectionSlug: '',
+  folderCollectionSlugs: [],
   folderFieldName: 'folder',
   folderID: undefined,
   getSelectedItems: () => [],
@@ -158,9 +163,13 @@ export type FolderProviderProps = {
    */
   readonly filteredCollectionSlugs?: CollectionSlug[]
   /**
-   * Folder enabled collection slugs
+   * Folder enabled collection slugs that can be populated within the provider
    */
   readonly folderCollectionSlugs: CollectionSlug[]
+  /**
+   * The name of the field that contains the folder relation
+   */
+  readonly folderFieldName: string
   /**
    * The ID of the current folder
    */
@@ -190,13 +199,14 @@ export function FolderProvider({
   documents: allDocumentsFromProps = [],
   filteredCollectionSlugs,
   folderCollectionSlugs = [],
+  folderFieldName,
   folderID: _folderIDFromProps = undefined,
   search: _searchFromProps,
   sort,
   subfolders: subfoldersFromProps = [],
 }: FolderProviderProps) {
+  const parentFolderContext = useFolder()
   const { config, getEntityConfig } = useConfig()
-  const folderFieldName = config.folders.fieldName
   const { routes, serverURL } = config
   const drawerDepth = useDrawerDepth()
   const { t } = useTranslation()
@@ -204,7 +214,9 @@ export function FolderProvider({
   const { startRouteTransition } = useRouteTransition()
 
   const [folderCollectionConfig] = React.useState(() =>
-    config.collections.find((collection) => collection.slug === config.folders.slug),
+    config.collections.find(
+      (collection) => config.folders && collection.slug === config.folders.slug,
+    ),
   )
   const folderCollectionSlug = folderCollectionConfig.slug
 
@@ -806,8 +818,36 @@ export function FolderProvider({
    * Does NOT handle the request to the server.
    * Used when a document needs to be added to the current state.
    */
-  const addItems = React.useCallback(
-    (items: FolderOrDocument[]) => {
+  const addItems: FolderContextValue['addItems'] = React.useCallback(
+    (itemsToAdd) => {
+      const { items, parentItems } = itemsToAdd.reduce(
+        (acc, item) => {
+          const destinationFolderID = item.value.folderID || null
+          if (
+            (item.value.folderID && item.value.folderID === activeFolderID) ||
+            (!activeFolderID && !item.value.folderID)
+          ) {
+            acc.items.push(item)
+          }
+
+          if (
+            parentFolderContext &&
+            ((parentFolderContext.folderID &&
+              destinationFolderID === parentFolderContext.folderID) ||
+              (!parentFolderContext.folderID && !item.value.folderID))
+          ) {
+            acc.parentItems.push(item)
+          }
+
+          return acc
+        },
+        { items: [], parentItems: [] },
+      )
+
+      if (parentItems.length) {
+        parentFolderContext.addItems(parentItems)
+      }
+
       if (!items.length) {
         return
       }
@@ -845,7 +885,7 @@ export function FolderProvider({
         setAllSubfolders(sortedAllSubfolders)
       }
     },
-    [documents, separateItems, sortItems, subfolders],
+    [activeFolderID, documents, separateItems, sortItems, subfolders, parentFolderContext],
   )
 
   /**
@@ -867,7 +907,7 @@ export function FolderProvider({
 
       if (movingCurrentFolder) {
         const req = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}`,
+          `${serverURL}${routes.api}/${folderCollectionSlug}/${activeFolderID}?depth=0`,
           {
             body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
             credentials: 'include',
@@ -935,7 +975,7 @@ export function FolderProvider({
               const formattedItems: FolderOrDocument[] = docs.map<FolderOrDocument>(
                 (doc: Document) =>
                   formatFolderOrDocumentItem({
-                    folderFieldName: config.folders.fieldName,
+                    folderFieldName,
                     isUpload: Boolean(collectionConfig.upload),
                     relationTo: collectionSlug,
                     useAsTitle: collectionConfig.admin.useAsTitle,
@@ -1010,6 +1050,7 @@ export function FolderProvider({
       clearSelections,
       serverURL,
       routes.api,
+      folderFieldName,
       t,
       getFolderData,
       getEntityConfig,
@@ -1070,21 +1111,20 @@ export function FolderProvider({
         breadcrumbs,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
-          ? {
-              itemKey: `${folderCollectionSlug}-${activeFolderID}`,
+          ? formatFolderOrDocumentItem({
+              folderFieldName,
+              isUpload: false,
               relationTo: folderCollectionSlug,
-              value: {
-                id: activeFolderID,
-                _folderOrDocumentTitle: breadcrumbs[breadcrumbs.length - 1]?.name,
-                folderID: breadcrumbs[breadcrumbs.length - 2]?.id || null,
-              },
-            }
+              useAsTitle: folderCollectionConfig.admin.useAsTitle,
+              value: breadcrumbs[breadcrumbs.length - 1],
+            })
           : null,
         documents,
         filterItems,
         focusedRowIndex,
         folderCollectionConfig,
         folderCollectionSlug,
+        folderCollectionSlugs,
         folderFieldName,
         folderID: activeFolderID,
         getSelectedItems,

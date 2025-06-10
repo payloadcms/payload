@@ -2,10 +2,11 @@
 
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { CollectionSlug, Document, FolderListViewClientProps } from 'payload'
-import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
+import type { FolderDocumentItemKey } from 'payload/shared'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
+import { formatFolderOrDocumentItem } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
@@ -69,6 +70,7 @@ export function DefaultBrowseByFolderView(
     filterItems,
     focusedRowIndex,
     folderCollectionConfig,
+    folderFieldName,
     folderID,
     getSelectedItems,
     isDragging,
@@ -130,29 +132,17 @@ export function DefaultBrowseByFolderView(
   const onCreateSuccess = React.useCallback(
     ({ collectionSlug, doc }: { collectionSlug: CollectionSlug; doc: Document }) => {
       const collectionConfig = getEntityConfig({ collectionSlug })
-      const itemValue: FolderOrDocument['value'] = {
-        id: doc?.id,
-        _folderOrDocumentTitle: doc?.[collectionConfig.admin.useAsTitle ?? 'id'],
-        createdAt: doc?.createdAt,
-        folderID: doc?.[config.folders.fieldName],
-        updatedAt: doc?.updatedAt,
-      }
-
-      if (collectionConfig.upload) {
-        itemValue.filename = doc?.filename
-        itemValue.mimeType = doc?.mimeType
-        itemValue.url = doc?.url
-      }
-
       void addItems([
-        {
-          itemKey: `${collectionSlug}-${doc.id}`,
+        formatFolderOrDocumentItem({
+          folderFieldName,
+          isUpload: Boolean(collectionConfig?.upload),
           relationTo: collectionSlug,
-          value: itemValue,
-        },
+          useAsTitle: collectionConfig.admin.useAsTitle,
+          value: doc,
+        }),
       ])
     },
-    [getEntityConfig, addItems],
+    [getEntityConfig, addItems, folderFieldName],
   )
 
   const selectedItemKeys = React.useMemo(() => {
@@ -168,12 +158,15 @@ export function DefaultBrowseByFolderView(
     )
   }, [getSelectedItems])
 
-  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
-    void setPreference('browse-by-folder', {
-      viewPreference: view,
-    })
-    setActiveView(view)
-  }, [])
+  const handleSetViewType = React.useCallback(
+    (view: 'grid' | 'list') => {
+      void setPreference('browse-by-folder', {
+        viewPreference: view,
+      })
+      setActiveView(view)
+    },
+    [setPreference],
+  )
 
   React.useEffect(() => {
     if (!drawerDepth) {

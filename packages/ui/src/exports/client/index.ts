@@ -58,7 +58,6 @@ export {
   useBulkUpload,
   useBulkUploadDrawerSlug,
 } from '../../elements/BulkUpload/index.js'
-export { DrawerActionHeader } from '../../elements/DrawerActionHeader/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
@@ -224,6 +223,7 @@ export {
   useWatchForm,
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
+export type { FieldAction } from '../../forms/Form/types.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'

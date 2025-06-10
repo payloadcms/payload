@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
@@ -48,6 +47,7 @@ import type {
   JobsConfig,
   Payload,
   RequestContext,
+  SelectField,
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -677,6 +677,16 @@ export type AfterErrorHookArgs = {
   result?: ErrorResult
 }
 
+export type ImportMapGenerators = Array<
+  (props: {
+    addToImportMap: AddToImportMap
+    baseDir: string
+    config: SanitizedConfig
+    importMap: InternalImportMap
+    imports: Imports
+  }) => void
+>
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -784,8 +794,10 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         account?: AdminViewConfig
         /** Replace the admin homepage */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         dashboard?: AdminViewConfig
       }
     }
@@ -820,15 +832,7 @@ export type Config = {
        * You can use generators to add custom components to the component import map.
        * This allows you to import custom components in the admin panel.
        */
-      generators?: Array<
-        (props: {
-          addToImportMap: AddToImportMap
-          baseDir: string
-          config: SanitizedConfig
-          importMap: InternalImportMap
-          imports: Imports
-        }) => void
-      >
+      generators?: ImportMapGenerators
       /**
        * If Payload cannot find the import map file location automatically,
        * you can manually provide it here.
@@ -851,7 +855,7 @@ export type Config = {
        *
        * @default '/browse-by-folder'
        */
-      browseByFolder: `/${string}`
+      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -987,7 +991,7 @@ export type Config = {
    * Options for folder view within the admin panel
    * @experimental this feature may change in minor versions until it is fully stable
    */
-  folders?: RootFoldersConfiguration
+  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1131,6 +1135,7 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */
@@ -1283,11 +1288,17 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   api?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   default?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   livePreview?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   root?: never
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   version?: Partial<EditViewConfig>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   versions?: Partial<EditViewConfig>
 }
 

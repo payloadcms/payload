@@ -329,7 +329,7 @@ available:
 //    responseHeaders: { ... } // returned headers from the response
 // }
 
-const result = await payload.auth({ headers })
+const result = await payload.auth({ headers, canSetHeaders: false })
 ```
 
 ### Login

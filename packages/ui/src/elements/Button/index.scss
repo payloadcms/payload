@@ -175,7 +175,7 @@
     --btn-icon-border-color: currentColor;
     --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
     --btn-icon-content-gap: calc(var(--base) * 0.4);
-    --margin-block: base(1.2);
+    --margin-block: calc(var(--base) * 1.2);
     --btn-line-height: calc(var(--base) * 1.2);
 
     border-radius: var(--style-radius-s);
@@ -233,7 +233,7 @@
       }
 
       &.btn--size-small {
-        padding: base(0.2);
+        padding: calc(var(--base) * (0.2));
       }
     }
 

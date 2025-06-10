@@ -4,13 +4,12 @@ import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
-import { renderToStaticMarkup } from 'react-dom/server'
 
 import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
-import fieldTypes from './field-types.js'
+import fieldTypes, { arrayOperators } from './field-types.js'
 
 type ReduceFieldOptionsArgs = {
   fields: ClientField[]
@@ -170,7 +169,10 @@ export const reduceFields = ({
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
 
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      const fieldOperators =
+        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+
+      const operators = fieldOperators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
@@ -192,15 +194,11 @@ export const reduceFields = ({
           })
         : localizedLabel
 
-      // React elements in filter options are not searchable in React Select
-      // Extract plain text to make them filterable in dropdowns
-      const textFromLabel = extractTextFromReactNode(formattedLabel)
-
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
       const formattedField: ReducedField = {
         label: formattedLabel,
-        plainTextLabel: textFromLabel,
+        plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,
@@ -212,30 +210,4 @@ export const reduceFields = ({
     }
     return reduced
   }, [])
-}
-
-/**
- * Extracts plain text content from a React node by removing HTML tags.
- * Used to make React elements searchable in filter dropdowns.
- */
-const extractTextFromReactNode = (reactNode: React.ReactNode): string => {
-  if (!reactNode) {
-    return ''
-  }
-  if (typeof reactNode === 'string') {
-    return reactNode
-  }
-
-  const html = renderToStaticMarkup(reactNode)
-
-  // Handle different environments (server vs browser)
-  if (typeof document !== 'undefined') {
-    // Browser environment - use actual DOM
-    const div = document.createElement('div')
-    div.innerHTML = html
-    return div.textContent || ''
-  } else {
-    // Server environment - use regex to strip HTML tags
-    return html.replace(/<[^>]*>/g, '')
-  }
 }
