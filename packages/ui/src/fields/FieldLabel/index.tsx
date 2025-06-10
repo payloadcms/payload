@@ -26,11 +26,9 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
 
   const { uuid } = useForm()
   const editDepth = useEditDepth()
-  const htmlFor =
-    htmlForFromProps ||
-    (path && typeof editDepth !== 'undefined' && uuid
-      ? generateFieldID(path, editDepth, uuid)
-      : undefined)
+
+  const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
+
   const { i18n } = useTranslation()
   const { code, label: localLabel } = useLocale()
 
