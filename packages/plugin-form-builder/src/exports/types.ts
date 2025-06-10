@@ -3,6 +3,7 @@ export type {
   BlockConfig,
   CheckboxField,
   CountryField,
+  DateField,
   Email,
   EmailField,
   FieldConfig,

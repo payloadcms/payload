@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -275,11 +274,11 @@ export const promise = async <T>({
 
     // ensure the fallback value is only computed one time
     // either here or when access control returns false
-    const fallbackResult = {
+    const fallbackResult: { executed: boolean; value: unknown } = {
       executed: false,
       value: undefined,
     }
-    if (typeof siblingData[field.name] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined') {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
     }
@@ -291,7 +290,7 @@ export const promise = async <T>({
           blockData,
           collection,
           context,
-          data,
+          data: data as Partial<T>,
           field,
           global,
           indexPath: indexPathSegments,
@@ -300,19 +299,19 @@ export const promise = async <T>({
           overrideAccess,
           path: pathSegments,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name],
+          previousValue: siblingDoc[field.name!],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
+          siblingFields: siblingFields!,
           value:
-            typeof siblingData[field.name] === 'undefined'
+            typeof siblingData[field.name!] === 'undefined'
               ? fallbackResult.value
-              : siblingData[field.name],
+              : siblingData[field.name!],
         })
 
         if (hookedValue !== undefined) {
-          siblingData[field.name] = hookedValue
+          siblingData[field.name!] = hookedValue
         }
       }
     }
@@ -321,15 +320,22 @@ export const promise = async <T>({
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
+        : await field.access[operation]({
+            id,
+            blockData,
+            data: data as Partial<T>,
+            doc,
+            req,
+            siblingData,
+          })
 
       if (!result) {
-        delete siblingData[field.name]
+        delete siblingData[field.name!]
       }
     }
 
-    if (typeof siblingData[field.name] === 'undefined') {
-      siblingData[field.name] = !fallbackResult.executed
+    if (typeof siblingData[field.name!] === 'undefined') {
+      siblingData[field.name!] = !fallbackResult.executed
         ? await getFallbackValue({ field, req, siblingDoc })
         : fallbackResult.value
     }
@@ -341,7 +347,7 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           promises.push(
@@ -376,7 +382,7 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
@@ -504,7 +510,7 @@ export const promise = async <T>({
           const hookedValue = await hook({
             collection,
             context,
-            data,
+            data: data as Partial<T>,
             field,
             global,
             indexPath: indexPathSegments,

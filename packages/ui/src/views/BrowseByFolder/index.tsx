@@ -70,6 +70,7 @@ export function DefaultBrowseByFolderView(
     filterItems,
     focusedRowIndex,
     folderCollectionConfig,
+    folderFieldName,
     folderID,
     getSelectedItems,
     isDragging,
@@ -133,7 +134,7 @@ export function DefaultBrowseByFolderView(
       const collectionConfig = getEntityConfig({ collectionSlug })
       void addItems([
         formatFolderOrDocumentItem({
-          folderFieldName: config.folders.fieldName,
+          folderFieldName,
           isUpload: Boolean(collectionConfig?.upload),
           relationTo: collectionSlug,
           useAsTitle: collectionConfig.admin.useAsTitle,
@@ -141,7 +142,7 @@ export function DefaultBrowseByFolderView(
         }),
       ])
     },
-    [getEntityConfig, addItems, config.folders.fieldName],
+    [getEntityConfig, addItems, folderFieldName],
   )
 
   const selectedItemKeys = React.useMemo(() => {
@@ -157,12 +158,15 @@ export function DefaultBrowseByFolderView(
     )
   }, [getSelectedItems])
 
-  const handleSetViewType = React.useCallback((view: 'grid' | 'list') => {
-    void setPreference('browse-by-folder', {
-      viewPreference: view,
-    })
-    setActiveView(view)
-  }, [])
+  const handleSetViewType = React.useCallback(
+    (view: 'grid' | 'list') => {
+      void setPreference('browse-by-folder', {
+        viewPreference: view,
+      })
+      setActiveView(view)
+    },
+    [setPreference],
+  )
 
   React.useEffect(() => {
     if (!drawerDepth) {

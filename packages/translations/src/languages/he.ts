@@ -188,7 +188,7 @@ export const heTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'אתה עומד להעביר <1>{{title}}</1> ל-<2>{{toFolder}}</2>. האם אתה בטוח?',
     moveItemToRootConfirmation: 'אתה עומד להעביר <1>{{title}}</1> לתיקייה הראשית. האם אתה בטוח?',
-    movingFromFolder: 'מזיז {{title}} מ-{{folderName}}',
+    movingFromFolder: 'מזיז {{title}} מ-{{fromFolder}}',
     newFolder: 'תיקייה חדשה',
     noFolder: 'אין תיקייה',
     renameFolder: 'שנה שם לתיקיה',

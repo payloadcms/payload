@@ -336,3 +336,17 @@ You can customize the placeholder (the text that appears in the editor when it's
   }),
 }
 ```
+
+## Detecting empty editor state
+
+When you first type into a rich text field and subsequently delete everything through the admin panel, its value changes from `null` to a JSON object containing an empty paragraph.
+
+If needed, you can reset the field value to `null` programmatically - for example, by using a custom hook to detect when the editor is empty.
+
+This also applies to fields like `text` and `textArea`, which could be stored as either `null` or an empty value in the database. Since the empty value for richText is a JSON object, checking for emptiness is a bit more involved - so Payload provides a utility for it:
+
+```ts
+import { hasText } from '@payloadcms/richtext-lexical/shared'
+
+hasText(richtextData)
+```
