@@ -70,7 +70,7 @@ export const flattenObject = ({
 
   flatten(doc, prefix)
 
-  if (fields) {
+  if (Array.isArray(fields) && fields.length > 0) {
     const orderedResult: Record<string, unknown> = {}
 
     const fieldToRegex = (field: string): RegExp => {

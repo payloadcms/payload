@@ -380,11 +380,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
-    if (error.code === '23505') {
+    // Unique constraint violation error
+    // '23505' is the code for PostgreSQL, and 'SQLITE_CONSTRAINT_UNIQUE' is for SQLite
+    if (error.code === '23505' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       let fieldName: null | string = null
       // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
-      if (adapter.fieldConstraints?.[tableName]) {
-        if (adapter.fieldConstraints[tableName]?.[error.constraint]) {
+      if (error.code === '23505') {
+        // For PostgreSQL, we can try to extract the field name from the error constraint
+        if (adapter.fieldConstraints?.[tableName]?.[error.constraint]) {
           fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
         } else {
           const replacement = `${tableName}_`
@@ -397,18 +400,36 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             }
           }
         }
-      }
 
-      if (!fieldName) {
-        // Last case scenario we extract the key and value from the detail on the error
-        const detail = error.detail
-        const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
-        const match = detail.match(regex)
+        if (!fieldName) {
+          // Last case scenario we extract the key and value from the detail on the error
+          const detail = error.detail
+          const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
+          const match: string[] = detail.match(regex)
 
-        if (match) {
-          const key = match[1]
+          if (match && match[1]) {
+            const key = match[1]
 
-          fieldName = key
+            fieldName = key
+          }
+        }
+      } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        /**
+         * For SQLite, we can try to extract the field name from the error message
+         * The message typically looks like:
+         * "UNIQUE constraint failed: table_name.field_name"
+         */
+        const regex = /UNIQUE constraint failed: ([^.]+)\.([^.]+)/
+        const match: string[] = error.message.match(regex)
+
+        if (match && match[2]) {
+          if (adapter.fieldConstraints[tableName]) {
+            fieldName = adapter.fieldConstraints[tableName][`${match[2]}_idx`]
+          }
+
+          if (!fieldName) {
+            fieldName = match[2]
+          }
         }
       }
 
