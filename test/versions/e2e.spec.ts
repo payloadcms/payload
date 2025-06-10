@@ -1404,8 +1404,8 @@ describe('Versions', () => {
 
       const textInArray = page.locator('[data-field-path="array.0.textInArray"]')
 
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInArray')
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInArray2')
+      await expect(textInArray.locator('.html-diff__diff-old')).toHaveText('textInArray')
+      await expect(textInArray.locator('.html-diff__diff-new')).toHaveText('textInArray2')
     })
 
     test('correctly renders diff for localized array fields', async () => {
@@ -1415,12 +1415,8 @@ describe('Versions', () => {
         .locator('[data-field-path="arrayLocalized"][data-locale="en"]')
         .locator('[data-field-path="arrayLocalized.0.textInArrayLocalized"]')
 
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInArrayLocalized',
-      )
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInArrayLocalized2',
-      )
+      await expect(textInArray.locator('.html-diff__diff-old')).toHaveText('textInArrayLocalized')
+      await expect(textInArray.locator('.html-diff__diff-new')).toHaveText('textInArrayLocalized2')
     })
 
     test('correctly renders modified-only diff for localized array fields', async () => {
@@ -1440,8 +1436,8 @@ describe('Versions', () => {
 
       const textInBlock = page.locator('[data-field-path="blocks.0.textInBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInBlock')
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText('textInBlock')
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText('textInBlock2')
     })
 
     test('correctly renders diff for collapsibles within block fields', async () => {
@@ -1451,10 +1447,10 @@ describe('Versions', () => {
         '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
       )
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInCollapsibleInCollapsibleBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInCollapsibleInCollapsibleBlock2',
       )
     })
@@ -1464,10 +1460,10 @@ describe('Versions', () => {
 
       const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInRowInCollapsibleBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInRowInCollapsibleBlock2',
       )
     })
@@ -1479,10 +1475,8 @@ describe('Versions', () => {
         '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
       )
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInNamedTab1InBlock',
-      )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText('textInNamedTab1InBlock')
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInNamedTab1InBlock2',
       )
     })
@@ -1492,10 +1486,10 @@ describe('Versions', () => {
 
       const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInUnnamedTab2InBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab2InBlock2',
       )
     })
@@ -1505,8 +1499,8 @@ describe('Versions', () => {
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('tr').nth(1).locator('td').nth(1)).toHaveText('true')
-      await expect(checkbox.locator('tr').nth(1).locator('td').nth(3)).toHaveText('false')
+      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
+      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
     })
 
     test('correctly renders diff for code fields', async () => {
@@ -1514,8 +1508,8 @@ describe('Versions', () => {
 
       const code = page.locator('[data-field-path="code"]')
 
-      await expect(code.locator('tr').nth(1).locator('td').nth(1)).toHaveText('code')
-      await expect(code.locator('tr').nth(1).locator('td').nth(3)).toHaveText('code2')
+      await expect(code.locator('.html-diff__diff-old')).toHaveText('code')
+      await expect(code.locator('.html-diff__diff-new')).toHaveText('code2')
     })
 
     test('correctly renders diff for collapsible fields', async () => {
@@ -1523,12 +1517,8 @@ describe('Versions', () => {
 
       const collapsible = page.locator('[data-field-path="textInCollapsible"]')
 
-      await expect(collapsible.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInCollapsible',
-      )
-      await expect(collapsible.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInCollapsible2',
-      )
+      await expect(collapsible.locator('.html-diff__diff-old')).toHaveText('textInCollapsible')
+      await expect(collapsible.locator('.html-diff__diff-new')).toHaveText('textInCollapsible2')
     })
 
     test('correctly renders diff for date fields', async () => {
@@ -1536,11 +1526,11 @@ describe('Versions', () => {
 
       const date = page.locator('[data-field-path="date"]')
 
-      await expect(date.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        '2021-01-01T00:00:00.000Z',
+      await expect(date.locator('.html-diff__diff-old')).toHaveText(
+        'December 31st 2020, 4:00:00 PM',
       )
-      await expect(date.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        '2023-01-01T00:00:00.000Z',
+      await expect(date.locator('.html-diff__diff-new')).toHaveText(
+        'December 31st 2022, 4:00:00 PM',
       )
     })
 
@@ -1549,8 +1539,8 @@ describe('Versions', () => {
 
       const email = page.locator('[data-field-path="email"]')
 
-      await expect(email.locator('tr').nth(1).locator('td').nth(1)).toHaveText('email@email.com')
-      await expect(email.locator('tr').nth(1).locator('td').nth(3)).toHaveText('email2@email.com')
+      await expect(email.locator('.html-diff__diff-old')).toHaveText('email@email.com')
+      await expect(email.locator('.html-diff__diff-new')).toHaveText('email2@email.com')
     })
 
     test('correctly renders diff for group fields', async () => {
@@ -1558,8 +1548,8 @@ describe('Versions', () => {
 
       const group = page.locator('[data-field-path="group.textInGroup"]')
 
-      await expect(group.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInGroup')
-      await expect(group.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInGroup2')
+      await expect(group.locator('.html-diff__diff-old')).toHaveText('textInGroup')
+      await expect(group.locator('.html-diff__diff-new')).toHaveText('textInGroup2')
     })
 
     test('correctly renders diff for number fields', async () => {
@@ -1567,8 +1557,8 @@ describe('Versions', () => {
 
       const number = page.locator('[data-field-path="number"]')
 
-      await expect(number.locator('tr').nth(1).locator('td').nth(1)).toHaveText('1')
-      await expect(number.locator('tr').nth(1).locator('td').nth(3)).toHaveText('2')
+      await expect(number.locator('.html-diff__diff-old')).toHaveText('1')
+      await expect(number.locator('.html-diff__diff-new')).toHaveText('2')
     })
 
     test('correctly renders diff for point fields', async () => {
@@ -1576,8 +1566,8 @@ describe('Versions', () => {
 
       const point = page.locator('[data-field-path="point"]')
 
-      await expect(point.locator('tr').nth(3).locator('td').nth(1)).toHaveText('2')
-      await expect(point.locator('tr').nth(3).locator('td').nth(3)).toHaveText('3')
+      await expect(point.locator('.html-diff__diff-old')).toHaveText('[\n 1,\n 2\n]')
+      await expect(point.locator('.html-diff__diff-new')).toHaveText('[\n 1,\n 3\n]')
     })
 
     test('correctly renders diff for radio fields', async () => {
@@ -1585,8 +1575,8 @@ describe('Versions', () => {
 
       const radio = page.locator('[data-field-path="radio"]')
 
-      await expect(radio.locator('tr').nth(1).locator('td').nth(1)).toHaveText('Option 1')
-      await expect(radio.locator('tr').nth(1).locator('td').nth(3)).toHaveText('Option 2')
+      await expect(radio.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expect(radio.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
     test('correctly renders diff for relationship fields', async () => {
@@ -1598,14 +1588,15 @@ describe('Versions', () => {
         collection: 'draft-posts',
         sort: 'createdAt',
         limit: 3,
+        depth: 0,
       })
 
-      await expect(relationship.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        String(draftDocs?.docs?.[1]?.id),
-      )
-      await expect(relationship.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        String(draftDocs?.docs?.[2]?.id),
-      )
+      await expect(
+        relationship.locator('.html-diff__diff-old .relationship-diff__info'),
+      ).toHaveText(String(draftDocs?.docs?.[1]?.title))
+      await expect(
+        relationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText(String(draftDocs?.docs?.[2]?.title))
     })
 
     test('correctly renders diff for richtext fields', async () => {
@@ -1613,8 +1604,8 @@ describe('Versions', () => {
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
-      const oldDiff = richtext.locator('.lexical-diff__diff-old')
-      const newDiff = richtext.locator('.lexical-diff__diff-new')
+      const oldDiff = richtext.locator('.html-diff__diff-old')
+      const newDiff = richtext.locator('.html-diff__diff-new')
 
       const oldHTML =
         `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
@@ -1639,8 +1630,8 @@ describe('Versions', () => {
 
       const textInRow = page.locator('[data-field-path="textInRow"]')
 
-      await expect(textInRow.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInRow')
-      await expect(textInRow.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInRow2')
+      await expect(textInRow.locator('.html-diff__diff-old')).toHaveText('textInRow')
+      await expect(textInRow.locator('.html-diff__diff-new')).toHaveText('textInRow2')
     })
 
     test('correctly renders diff for select fields', async () => {
@@ -1648,8 +1639,8 @@ describe('Versions', () => {
 
       const select = page.locator('[data-field-path="select"]')
 
-      await expect(select.locator('tr').nth(1).locator('td').nth(1)).toHaveText('Option 1')
-      await expect(select.locator('tr').nth(1).locator('td').nth(3)).toHaveText('Option 2')
+      await expect(select.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expect(select.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
     test('correctly renders diff for named tabs', async () => {
@@ -1657,12 +1648,8 @@ describe('Versions', () => {
 
       const textInNamedTab1 = page.locator('[data-field-path="namedTab1.textInNamedTab1"]')
 
-      await expect(textInNamedTab1.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInNamedTab1',
-      )
-      await expect(textInNamedTab1.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInNamedTab12',
-      )
+      await expect(textInNamedTab1.locator('.html-diff__diff-old')).toHaveText('textInNamedTab1')
+      await expect(textInNamedTab1.locator('.html-diff__diff-new')).toHaveText('textInNamedTab12')
     })
 
     test('correctly renders diff for unnamed tabs', async () => {
@@ -1670,10 +1657,8 @@ describe('Versions', () => {
 
       const textInUnamedTab2 = page.locator('[data-field-path="textInUnnamedTab2"]')
 
-      await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInUnnamedTab2',
-      )
-      await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInUnamedTab2.locator('.html-diff__diff-old')).toHaveText('textInUnnamedTab2')
+      await expect(textInUnamedTab2.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab22',
       )
     })
@@ -1683,8 +1668,8 @@ describe('Versions', () => {
 
       const text = page.locator('[data-field-path="text"]')
 
-      await expect(text.locator('tr').nth(1).locator('td').nth(1)).toHaveText('text')
-      await expect(text.locator('tr').nth(1).locator('td').nth(3)).toHaveText('text2')
+      await expect(text.locator('.html-diff__diff-old')).toHaveText('text')
+      await expect(text.locator('.html-diff__diff-new')).toHaveText('text2')
     })
 
     test('correctly renders diff for textArea fields', async () => {
@@ -1692,8 +1677,8 @@ describe('Versions', () => {
 
       const textArea = page.locator('[data-field-path="textArea"]')
 
-      await expect(textArea.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textArea')
-      await expect(textArea.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textArea2')
+      await expect(textArea.locator('.html-diff__diff-old')).toHaveText('textArea')
+      await expect(textArea.locator('.html-diff__diff-new')).toHaveText('textArea2')
     })
 
     test('correctly renders diff for upload fields', async () => {
@@ -1704,14 +1689,15 @@ describe('Versions', () => {
       const uploadDocs = await payload.find({
         collection: 'media',
         sort: 'createdAt',
+        depth: 0,
         limit: 2,
       })
 
-      await expect(upload.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        String(uploadDocs?.docs?.[0]?.id),
+      await expect(upload.locator('.html-diff__diff-old .upload-diff__info')).toHaveText(
+        String(uploadDocs?.docs?.[0]?.filename),
       )
-      await expect(upload.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        String(uploadDocs?.docs?.[1]?.id),
+      await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
+        String(uploadDocs?.docs?.[1]?.filename),
       )
     })
   })
