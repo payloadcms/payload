@@ -8,6 +8,57 @@ import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { transform } from './transform.js'
 
+/**
+ * Filters a WHERE clause to only include fields that exist in the target collection
+ * This is needed for polymorphic joins where different collections have different fields
+ * @param where - The original WHERE clause
+ * @param availableFields - The fields available in the target collection
+ * @returns A filtered WHERE clause
+ */
+function filterWhereForCollection(
+  where: Record<string, any>,
+  availableFields: any[],
+  excludeRelationTo: boolean = false,
+): Record<string, any> {
+  if (!where || typeof where !== 'object') {
+    return where
+  }
+
+  const fieldNames = new Set(availableFields.map((f) => f.name))
+  // Add special fields that are available in polymorphic relationships
+  if (!excludeRelationTo) {
+    fieldNames.add('relationTo')
+  }
+
+  const filtered: Record<string, any> = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (key === 'and' || key === 'or') {
+      // Handle logical operators by recursively filtering their conditions
+      if (Array.isArray(value)) {
+        const filteredConditions = value
+          .map((condition) =>
+            filterWhereForCollection(condition, availableFields, excludeRelationTo),
+          )
+          .filter((condition) => Object.keys(condition).length > 0) // Remove empty conditions
+
+        if (filteredConditions.length > 0) {
+          filtered[key] = filteredConditions
+        }
+      }
+    } else if (key === 'relationTo' && excludeRelationTo) {
+      // Skip relationTo field for non-polymorphic collections
+      continue
+    } else if (fieldNames.has(key)) {
+      // Include the condition if the field exists in this collection
+      filtered[key] = value
+    }
+    // Skip conditions for fields that don't exist in this collection
+  }
+
+  return filtered
+}
+
 type Args = {
   adapter: MongooseAdapter
   collectionSlug: string
@@ -119,10 +170,17 @@ export async function resolveJoins({
   // This flattens the nested join structure into a single map keyed by join path
   const joinMap: Record<string, { targetCollection: string } & SanitizedJoin> = {}
 
+  // Add regular joins
   for (const [target, joinList] of Object.entries(collectionConfig.joins)) {
     for (const join of joinList || []) {
       joinMap[join.joinPath] = { ...join, targetCollection: target }
     }
+  }
+
+  // Add polymorphic joins
+  for (const join of collectionConfig.polymorphicJoins || []) {
+    // For polymorphic joins, we use the collections array as the target
+    joinMap[join.joinPath] = { ...join, targetCollection: join.field.collection as any }
   }
 
   // Process each requested join
@@ -137,7 +195,162 @@ export async function resolveJoins({
       continue
     }
 
-    // Get the target collection configuration and Mongoose model
+    // Check if this is a polymorphic collection join (where field.collection is an array)
+    const isPolymorphicCollectionJoin = Array.isArray(joinDef.field.collection)
+
+    if (isPolymorphicCollectionJoin) {
+      // Handle polymorphic collection joins (like documentsAndFolders from folder system)
+      // These joins span multiple collections, so we need to query each collection separately
+      const collections = joinDef.field.collection as string[]
+      const allResults: Record<string, unknown>[] = []
+
+      // Extract all parent document IDs to use in the join query
+      const parentIDs = docs.map((d) => d._id ?? d.id)
+
+      // Use the provided locale or fall back to the default locale for localized fields
+      const localizationConfig = adapter.payload.config.localization
+      const effectiveLocale =
+        locale ||
+        (typeof localizationConfig === 'object' &&
+          localizationConfig &&
+          localizationConfig.defaultLocale)
+
+      // Query each collection in the polymorphic join
+      for (const collectionSlug of collections) {
+        const targetConfig = adapter.payload.collections[collectionSlug]?.config
+        const JoinModel = adapter.collections[collectionSlug]
+        if (!targetConfig || !JoinModel) {
+          continue
+        }
+
+        // Filter WHERE clause to only include fields that exist in this collection
+        const filteredWhere = filterWhereForCollection(
+          joinQuery.where || {},
+          targetConfig.flattenedFields,
+          true, // exclude relationTo field for non-polymorphic collections
+        )
+
+        // Build the base query for this specific collection
+        const whereQuery = await buildQuery({
+          adapter,
+          collectionSlug,
+          fields: targetConfig.flattenedFields,
+          locale,
+          where: filteredWhere,
+        })
+
+        // Add the join condition
+        whereQuery[joinDef.field.on] = { $in: parentIDs }
+
+        // Build the sort parameters for the query
+        const sort = buildSortParam({
+          adapter,
+          config: adapter.payload.config,
+          fields: targetConfig.flattenedFields,
+          locale,
+          sort: joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
+          timestamps: true,
+        })
+
+        // Convert sort object to Mongoose-compatible format
+        const mongooseSort = Object.entries(sort).reduce(
+          (acc, [key, value]) => {
+            acc[key] = value === 'desc' ? -1 : 1
+            return acc
+          },
+          {} as Record<string, -1 | 1>,
+        )
+
+        // Execute the query to get results from this collection
+        const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
+
+        // Transform the results and add relationTo metadata
+        transform({
+          adapter,
+          data: results,
+          fields: targetConfig.fields,
+          operation: 'read',
+        })
+
+        // Add relationTo field to each result to indicate which collection it came from
+        for (const result of results) {
+          result.relationTo = collectionSlug
+          allResults.push(result)
+        }
+      }
+
+      // Group the results by their parent document ID
+      const grouped: Record<string, Record<string, unknown>[]> = {}
+
+      for (const res of allResults) {
+        // Get the parent ID from the result using the join field
+        const parentValue = getByPath(res, joinDef.field.on)
+        if (!parentValue) {
+          continue
+        }
+
+        const parentKey = parentValue as string
+        if (!grouped[parentKey]) {
+          grouped[parentKey] = []
+        }
+        grouped[parentKey].push(res)
+      }
+
+      // Apply pagination settings
+      const limit = joinQuery.limit ?? joinDef.field.defaultLimit ?? 10
+      const page = joinQuery.page ?? 1
+
+      // Determine if the join field should be localized
+      const localeSuffix =
+        fieldShouldBeLocalized({
+          field: joinDef.field,
+          parentIsLocalized: joinDef.parentIsLocalized,
+        }) &&
+        adapter.payload.config.localization &&
+        effectiveLocale
+          ? `.${effectiveLocale}`
+          : ''
+
+      // Adjust the join path with locale suffix if needed
+      const localizedJoinPath = `${joinPath}${localeSuffix}`
+
+      // Attach the joined data to each parent document
+      for (const doc of docs) {
+        const id = (doc._id ?? doc.id) as string
+        const all = grouped[id] || []
+
+        // Calculate the slice for pagination
+        const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
+
+        // Create the join result object with pagination metadata
+        const value: Record<string, unknown> = {
+          docs: slice,
+          hasNextPage: all.length > (page - 1) * limit + slice.length,
+        }
+
+        // Include total count if requested
+        if (joinQuery.count) {
+          value.totalDocs = all.length
+        }
+
+        // Navigate to the correct nested location in the document and set the join data
+        const segments = localizedJoinPath.split('.')
+        let ref = doc
+        for (let i = 0; i < segments.length - 1; i++) {
+          const seg = segments[i]!
+          if (!ref[seg]) {
+            ref[seg] = {}
+          }
+          ref = ref[seg] as Record<string, unknown>
+        }
+        // Set the final join data at the target path
+        ref[segments[segments.length - 1]!] = value
+      }
+
+      continue
+    }
+
+    // Handle regular joins (including regular polymorphic joins)
     const targetConfig = adapter.payload.collections[joinDef.field.collection as string]?.config
     const JoinModel = adapter.collections[joinDef.field.collection as string]
     if (!targetConfig || !JoinModel) {
@@ -184,8 +397,10 @@ export async function resolveJoins({
       dbFieldName = transformedSegments.join('.')
     }
 
-    // Check if the target field is a polymorphic relationship
-    const isPolymorphic = Array.isArray(joinDef.targetField.relationTo)
+    // Check if the target field is a polymorphic relationship (for regular joins)
+    const isPolymorphic = joinDef.targetField
+      ? Array.isArray(joinDef.targetField.relationTo)
+      : false
 
     // Add the join condition: find documents where the join field matches any parent ID
     if (isPolymorphic) {
