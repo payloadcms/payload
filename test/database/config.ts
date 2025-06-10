@@ -750,7 +750,7 @@ export default buildConfigWithDefaults({
       slug: 'unique-fields',
       fields: [
         {
-          name: 'slug',
+          name: 'slugField',
           type: 'text',
           unique: true,
         },

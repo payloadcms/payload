@@ -2651,7 +2651,7 @@ describe('database', () => {
     await payload.create({
       collection: 'unique-fields',
       data: {
-        slug: 'unique-text',
+        slugField: 'unique-text',
       },
     })
 
@@ -2659,12 +2659,11 @@ describe('database', () => {
       await payload.create({
         collection: 'unique-fields',
         data: {
-          slug: 'unique-text',
+          slugField: 'unique-text',
         },
       })
     } catch (e) {
-      console.log(e)
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slug')
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
     }
   })
 })

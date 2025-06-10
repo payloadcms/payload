@@ -403,10 +403,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         // For SQLite, we can try to extract the field name from the error message
         const regex = /UNIQUE constraint failed: ([^.]+)\.([^.]+)/
 
-        const match = error.message.match(regex)
+        const match: string = error.message.match(regex)
 
-        if (match) {
-          fieldName = match[2] // The second group is the field name
+        if (match?.[2] && adapter.fieldConstraints[tableName]) {
+          fieldName = adapter.fieldConstraints[tableName][`${match[2]}_idx`]
         }
       }
 
