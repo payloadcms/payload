@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, use, useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useLayoutEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
