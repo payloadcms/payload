@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -203,7 +202,7 @@ export const createClientConfig = ({
         }
         break
       default:
-        clientConfig[key] = config[key]
+        ;(clientConfig as any)[key] = config[key as keyof SanitizedConfig]
     }
   }
   return clientConfig as ClientConfig

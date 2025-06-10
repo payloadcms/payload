@@ -17,6 +17,12 @@ export type Args = {
    */
   route: string
   /**
+   * The route parameters of the current route
+   *
+   * @example `{ collection: 'posts', id: "post-id" }`.
+   */
+  routeParams?: { [key: string]: string }
+  /**
    * The search parameters of the current route provided to all pages in Next.js.
    */
   searchParams: { [key: string]: string | string[] | undefined }

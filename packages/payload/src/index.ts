@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -267,13 +266,13 @@ export class BasePayload {
     return auth(this, options)
   }
 
-  authStrategies: AuthStrategy[]
+  authStrategies!: AuthStrategy[]
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
-  config: SanitizedConfig
+  config!: SanitizedConfig
   /**
    * @description Performs count operation
    * @param options
@@ -322,8 +321,22 @@ export class BasePayload {
     return create<TSlug, TSelect>(this, options)
   }
 
-  db: DatabaseAdapter
+  crons: Cron[] = []
+  db!: DatabaseAdapter
+
   decrypt = decrypt
+
+  destroy = async () => {
+    if (this.crons.length) {
+      // Remove all crons from the list before stopping them
+      const cronsToStop = this.crons.splice(0, this.crons.length)
+      await Promise.all(cronsToStop.map((cron) => cron.stop()))
+    }
+
+    if (this.db?.destroy && typeof this.db.destroy === 'function') {
+      await this.db.destroy()
+    }
+  }
 
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DuplicateOptions<TSlug, TSelect>,
@@ -332,14 +345,14 @@ export class BasePayload {
     return duplicate<TSlug, TSelect>(this, options)
   }
 
-  email: InitializedEmailAdapter
-
-  encrypt = encrypt
+  email!: InitializedEmailAdapter
 
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
 
-  extensions: (args: {
+  encrypt = encrypt
+
+  extensions!: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
     result: ExecutionResult
@@ -439,13 +452,13 @@ export class BasePayload {
 
   getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
 
-  globals: Globals
+  globals!: Globals
 
-  importMap: ImportMap
+  importMap!: ImportMap
 
   jobs = getJobsLocalAPI(this)
 
-  logger: Logger
+  logger!: Logger
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
@@ -485,13 +498,13 @@ export class BasePayload {
     return restoreVersion<TSlug>(this, options)
   }
 
-  schema: GraphQLSchema
+  schema!: GraphQLSchema
 
-  secret: string
+  secret!: string
 
-  sendEmail: InitializedEmailAdapter['sendEmail']
+  sendEmail!: InitializedEmailAdapter['sendEmail']
 
-  types: {
+  types!: {
     arrayTypes: any
     blockInputTypes: any
     blockTypes: any
@@ -515,7 +528,7 @@ export class BasePayload {
     return update<TSlug, TSelect>(this, options)
   }
 
-  validationRules: (args: OperationArgs<any>) => ValidationRule[]
+  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
     options: VerifyEmailOptions<TSlug>,
@@ -639,10 +652,13 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks!.reduce((blocks, block) => {
-      blocks[block.slug] = block
-      return blocks
-    }, {})
+    this.blocks = this.config.blocks!.reduce(
+      (blocks, block) => {
+        blocks[block.slug] = block
+        return blocks
+      },
+      {} as Record<string, FlattenedBlock>,
+    )
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -783,6 +799,8 @@ export class BasePayload {
               queue: cronConfig.queue,
             })
           })
+
+          this.crons.push(job)
         }),
       )
     }
@@ -821,10 +839,10 @@ let cached: {
   promise: null | Promise<Payload>
   reload: boolean | Promise<void>
   ws: null | WebSocket
-} = global._payload
+} = (global as any)._payload
 
 if (!cached) {
-  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
+  cached = (global as any)._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
 export const reload = async (
@@ -832,24 +850,28 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  if (typeof payload.db.destroy === 'function') {
-    await payload.db.destroy()
-  }
+  await payload.destroy()
 
   payload.config = config
 
-  payload.collections = config.collections.reduce((collections, collection) => {
-    collections[collection.slug] = {
-      config: collection,
-      customIDType: payload.collections[collection.slug]?.customIDType,
-    }
-    return collections
-  }, {})
+  payload.collections = config.collections.reduce(
+    (collections, collection) => {
+      collections[collection.slug] = {
+        config: collection,
+        customIDType: payload.collections[collection.slug]?.customIDType,
+      }
+      return collections
+    },
+    {} as Record<string, any>,
+  )
 
-  payload.blocks = config.blocks!.reduce((blocks, block) => {
-    blocks[block.slug] = block
-    return blocks
-  }, {})
+  payload.blocks = config.blocks!.reduce(
+    (blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    },
+    {} as Record<string, FlattenedBlock>,
+  )
 
   payload.globals = {
     config: config.globals,
@@ -880,12 +902,12 @@ export const reload = async (
     await payload.db.connect({ hotReload: true })
   }
 
-  global._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  global._payload_schemaMap = null
-  global._payload_clientSchemaMap = null
-  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  global._payload_doNotCacheSchemaMap = true
-  global._payload_doNotCacheClientSchemaMap = true
+  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
+  ;(global as any)._payload_schemaMap = null
+  ;(global as any)._payload_clientSchemaMap = null
+  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  ;(global as any)._payload_doNotCacheSchemaMap = true
+  ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
 export const getPayload = async (
@@ -963,7 +985,7 @@ export const getPayload = async (
   } catch (e) {
     cached.promise = null
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
-    e.payloadInitError = true
+    ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e
   }
 
@@ -1224,6 +1246,9 @@ export {
 } from './fields/config/client.js'
 
 export { sanitizeFields } from './fields/config/sanitize.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
 export type {
   AdminClient,
   ArrayField,

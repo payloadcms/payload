@@ -20,7 +20,7 @@ import RichTextFields from './collections/RichText/index.js'
 import TextFields from './collections/Text/index.js'
 import Uploads from './collections/Upload/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -60,8 +60,9 @@ export const baseConfig: Partial<Config> = {
     },
   },
   onInit: async (payload) => {
+    // IMPORTANT: This should only seed, not clear the database.
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   localization: {

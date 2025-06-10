@@ -8,6 +8,8 @@ type DateFNSKeys =
   | 'ar'
   | 'az'
   | 'bg'
+  | 'bn-BD'
+  | 'bn-IN'
   | 'ca'
   | 'cs'
   | 'da'

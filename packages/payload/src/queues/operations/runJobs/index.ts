@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
@@ -207,7 +206,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     ? []
     : undefined
 
-  const runSingleJob = async (job) => {
+  const runSingleJob = async (job: BaseJob) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -330,13 +329,16 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
-    if (cur !== null) {
-      // Check if there's a valid result to include
-      acc[cur.id] = cur.result
-    }
-    return acc
-  }, {})
+  const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce(
+    (acc, cur) => {
+      if (cur !== null) {
+        // Check if there's a valid result to include
+        acc[cur.id] = cur.result
+      }
+      return acc
+    },
+    {} as Record<string, RunJobResult>,
+  )
 
   let remainingJobsFromQueried = 0
   for (const jobID in resultsObject) {

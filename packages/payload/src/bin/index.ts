@@ -69,7 +69,7 @@ export const bin = async () => {
   }
 
   const userBinScript = Array.isArray(config.bin)
-    ? config.bin.find(({ key }) => key === script)
+    ? config.bin.find(({ key }: { key: string }) => key === script)
     : false
 
   if (userBinScript) {
@@ -128,7 +128,7 @@ export const bin = async () => {
         queue,
       })
 
-      await payload.db.destroy!() // close database connections after running jobs so process can exit cleanly
+      await payload.destroy() // close database connections after running jobs so process can exit cleanly
 
       return
     }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
@@ -271,7 +270,7 @@ export const deleteOperation = async <
       } catch (error) {
         errors.push({
           id: doc.id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null

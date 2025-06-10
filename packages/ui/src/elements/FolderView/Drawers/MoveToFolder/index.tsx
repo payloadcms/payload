@@ -18,6 +18,7 @@ import { FolderProvider, useFolder } from '../../../../providers/Folders/index.j
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
+import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
@@ -28,13 +29,11 @@ import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../ColoredFolderIcon/index.js'
 import { ItemCardGrid } from '../../ItemCardGrid/index.js'
-import { NewFolderDrawer } from '../NewFolder/index.js'
 import './index.scss'
 
 const baseClass = 'move-folder-drawer'
 const baseModalSlug = 'move-folder-drawer'
 const confirmModalSlug = `${baseModalSlug}-confirm-move`
-const newFolderDrawerSlug = `${baseModalSlug}-new-folder`
 
 type ActionProps =
   | {
@@ -158,10 +157,15 @@ function Content({
     folderCollectionConfig,
     folderCollectionSlug,
     folderFieldName,
+    folderID,
     getSelectedItems,
     setFolderID,
     subfolders,
   } = useFolder()
+  const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
+    useDocumentDrawer({
+      collectionSlug: folderCollectionSlug,
+    })
   const { getEntityConfig } = useConfig()
 
   const getSelectedFolder = React.useCallback((): {
@@ -268,24 +272,27 @@ function Content({
               className={`${baseClass}__add-folder-button`}
               margin={false}
               onClick={() => {
-                openModal(newFolderDrawerSlug)
+                openFolderDrawer()
               }}
             >
               {t('fields:addLabel', {
                 label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
               })}
             </Button>
-            <NewFolderDrawer
-              drawerSlug={newFolderDrawerSlug}
-              onNewFolderSuccess={(doc) => {
-                closeModal(newFolderDrawerSlug)
+            <FolderDocumentDrawer
+              initialData={{
+                [folderFieldName]: folderID,
+              }}
+              onSave={(result) => {
                 if (typeof onCreateSuccess === 'function') {
                   void onCreateSuccess({
                     collectionSlug: folderCollectionConfig.slug,
-                    doc,
+                    doc: result.doc,
                   })
                 }
+                closeFolderDrawer()
               }}
+              redirectAfterCreate={false}
             />
           </>
         )}

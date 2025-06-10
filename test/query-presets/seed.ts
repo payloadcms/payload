@@ -2,8 +2,7 @@ import type { Payload, QueryPreset } from 'payload'
 
 import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { seedDB } from '../helpers/seed.js'
-import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
+import { pagesSlug, usersSlug } from './slugs.js'
 
 type SeededQueryPreset = {
   relatedCollection: 'pages'
@@ -186,13 +185,4 @@ export const seed = async (_payload: Payload) => {
     ],
     false,
   )
-}
-
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'adminTests',
-  })
 }

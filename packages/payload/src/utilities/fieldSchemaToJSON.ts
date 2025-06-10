@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
 
@@ -43,7 +42,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           type: field.type,
           blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
             const block = typeof _block === 'string' ? config.blocksMap[_block]! : _block
-            acc[block.slug] = {
+            ;(acc as any)[block.slug] = {
               fields: fieldSchemaToJSON(
                 [
                   ...block.fields,

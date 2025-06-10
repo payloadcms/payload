@@ -427,7 +427,7 @@ const PreviewView: React.FC<Props> = ({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    // eslint-disable-next-line react-compiler/react-compiler
+     
     !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
