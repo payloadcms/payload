@@ -1003,6 +1003,40 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-ecommerce:
+    dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0)
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
+      '@types/react':
+        specifier: 19.1.0
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: 19.1.2
+        version: 19.1.2(@types/react@19.1.0)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      stripe:
+        specifier: ^10.2.0
+        version: 10.17.0
+
   packages/plugin-form-builder:
     dependencies:
       '@payloadcms/ui':
@@ -1726,6 +1760,9 @@ importers:
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../packages/plugin-cloud-storage
+      '@payloadcms/plugin-ecommerce':
+        specifier: workspace:*
+        version: link:../packages/plugin-ecommerce
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../packages/plugin-form-builder
@@ -1786,6 +1823,12 @@ importers:
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.119.2(react@19.1.0)
+      '@stripe/react-stripe-js':
+        specifier: 3.7.0
+        version: 3.7.0(@stripe/stripe-js@7.3.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@stripe/stripe-js':
+        specifier: 7.3.1
+        version: 7.3.1
       '@types/jest':
         specifier: 29.5.12
         version: 29.5.12
@@ -1873,6 +1916,9 @@ importers:
       slate:
         specifier: 0.91.4
         version: 0.91.4
+      stripe:
+        specifier: ^10
+        version: 10.17.0
       tempy:
         specifier: ^1.0.1
         version: 1.0.1
@@ -5254,6 +5300,17 @@ packages:
   '@smithy/util-waiter@3.1.7':
     resolution: {integrity: sha512-d5yGlQtmN/z5eoTtIYgkvOw27US2Ous4VycnXatyoImIF9tzlcpnKqQ/V7qhvJmb2p6xZne1NopCLakdTnkBBQ==}
     engines: {node: '>=16.0.0'}
+
+  '@stripe/react-stripe-js@3.7.0':
+    resolution: {integrity: sha512-PYls/2S9l0FF+2n0wHaEJsEU8x7CmBagiH7zYOsxbBlLIHEsqUIQ4MlIAbV9Zg6xwT8jlYdlRIyBTHmO3yM7kQ==}
+    peerDependencies:
+      '@stripe/stripe-js': '>=1.44.1 <8.0.0'
+      react: 19.1.0
+      react-dom: 19.1.0
+
+  '@stripe/stripe-js@7.3.1':
+    resolution: {integrity: sha512-pTzb864TQWDRQBPLgSPFRoyjSDUqpCkbEgTzpsjiTjGz1Z5SxZNXJek28w1s6Dyry4CyW4/Izj5jHE/J9hCJYQ==}
+    engines: {node: '>=12.16'}
 
   '@swc-node/core@1.13.3':
     resolution: {integrity: sha512-OGsvXIid2Go21kiNqeTIn79jcaX4l0G93X2rAnas4LFoDyA9wAwVK7xZdm+QsKoMn5Mus2yFLCc4OtX2dD/PWA==}
@@ -8641,6 +8698,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-fetch-native@1.6.4:
     resolution: {integrity: sha512-IhOigYzAKHd244OC0JIMIUrjzctirCmPkaIfhDeGcEETWof5zKYUW7e7MYvChGWh/4CJeXEgsRyGzuF334rOOQ==}
@@ -14859,6 +14917,15 @@ snapshots:
       '@smithy/abort-controller': 3.1.6
       '@smithy/types': 3.6.0
       tslib: 2.8.1
+
+  '@stripe/react-stripe-js@3.7.0(@stripe/stripe-js@7.3.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@stripe/stripe-js': 7.3.1
+      prop-types: 15.8.1
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
+  '@stripe/stripe-js@7.3.1': {}
 
   '@swc-node/core@1.13.3(@swc/core@1.11.29)(@swc/types@0.1.21)':
     dependencies:
