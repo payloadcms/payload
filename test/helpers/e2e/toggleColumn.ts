@@ -35,7 +35,7 @@ export const toggleColumn = async (
   })
 
   const isActiveBeforeClick = await column.evaluate((el) =>
-    el.classList.contains('pill-selector__pill--active'),
+    el.classList.contains('pill-selector__pill--selected'),
   )
 
   const targetState =
@@ -52,10 +52,10 @@ export const toggleColumn = async (
 
   if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass(/pill-selector__pill--active/)
+    await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
   } else {
     // has class
-    await expect(column).toHaveClass(/pill-selector__pill--active/)
+    await expect(column).toHaveClass(/pill-selector__pill--selected/)
   }
 
   if (expectURLChange && columnName && requiresToggle) {

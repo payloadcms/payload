@@ -338,7 +338,7 @@ describe('Query Presets', () => {
     await clickListMenuItem({ page, menuItemLabel: 'Reset' })
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/pill-selector__pill--active/)
+    await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
   test('should only enter modified state when changes are made to an active preset', async () => {

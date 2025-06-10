@@ -370,7 +370,7 @@ describe('List View', () => {
 
       const buttonClasses = await idButton.getAttribute('class')
 
-      if (buttonClasses && !buttonClasses.includes('pill-selector__pill--active')) {
+      if (buttonClasses && !buttonClasses.includes('pill-selector__pill--selected')) {
         await idButton.click()
         await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
       }
@@ -1154,7 +1154,7 @@ describe('List View', () => {
         hasText: exactText('ID'),
       })
 
-      await expect(column).not.toHaveClass(/pill-selector__pill--active/)
+      await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
     })
 
     test('should retain preferences when changing drawer collections', async () => {
@@ -1217,7 +1217,7 @@ describe('List View', () => {
         page
           .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
           .first(),
-      ).not.toHaveClass('pill-selector__pill--active')
+      ).not.toHaveClass('pill-selector__pill--selected')
 
       // select the "Post" collection again
       await collectionSelector.click()
@@ -1233,7 +1233,7 @@ describe('List View', () => {
         page
           .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
           .first(),
-      ).not.toHaveClass('pill-selector__pill--active')
+      ).not.toHaveClass('pill-selector__pill--selected')
     })
 
     test('should render custom table cell component', async () => {
@@ -1498,7 +1498,7 @@ describe('List View', () => {
         },
       )
 
-      await expect(columnAfterSort).not.toHaveClass('pill-selector__pill--active')
+      await expect(columnAfterSort).not.toHaveClass('pill-selector__pill--selected')
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
     })
@@ -1528,7 +1528,7 @@ describe('List View', () => {
         },
       )
 
-      await expect(columnAfterSort).toHaveClass(/pill-selector__pill--active/)
+      await expect(columnAfterSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
@@ -1572,7 +1572,7 @@ describe('List View', () => {
         },
       )
 
-      await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--active/)
+      await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
