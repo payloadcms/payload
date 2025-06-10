@@ -104,6 +104,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+  const [skipValidationOnLastSubmit, setSkipValidationOnLastSubmit] = useState(false)
 
   /**
    * Tracks wether the form state passes validation.
@@ -214,6 +215,11 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         return
       }
+
+      // Remember the submit's `skipValidation` option,
+      // so that Form knows how to retain the same validation behavior for
+      // `onChange` after the submit.
+      setSkipValidationOnLastSubmit(skipValidation)
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
