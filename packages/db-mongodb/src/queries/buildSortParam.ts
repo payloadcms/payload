@@ -96,38 +96,25 @@ const relationshipSort = ({
         sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
       }
 
-      if (
-        !sortAggregation.some((each) => {
-          return '$lookup' in each && each.$lookup.as === `__${path}`
-        })
-      ) {
+      const as = `__${relationshipPath.replace(/\./g, '__')}`
+
+      // If we have not already sorted on this relationship yet, we need to add a lookup stage
+      if (!sortAggregation.some((each) => '$lookup' in each && each.$lookup.as === as)) {
         let localField = versions ? `version.${relationshipPath}` : relationshipPath
 
-        let flattenedField: string | undefined
-
-        if (adapter.compatabilityMode === 'firestore' && localField.includes('.')) {
-          flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
-          if (
-            !sortAggregation.some(
-              (each) =>
-                '$addFields' in each &&
-                each.$addFields &&
-                flattenedField &&
-                flattenedField in each.$addFields,
-            )
-          ) {
-            sortAggregation.push({
-              $addFields: {
-                [flattenedField]: `$${localField}`,
-              },
-            })
-          }
+        if (adapter.compatabilityMode === 'firestore') {
+          const flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
+          sortAggregation.push({
+            $addFields: {
+              [flattenedField]: `$${localField}`,
+            },
+          })
           localField = flattenedField
         }
 
         sortAggregation.push({
           $lookup: {
-            as: `__${path}`,
+            as,
             foreignField: '_id',
             from: foreignCollection.Model.collection.name,
             localField,
@@ -143,18 +130,23 @@ const relationshipSort = ({
           },
         })
 
-        if (flattenedField) {
+        if (adapter.compatabilityMode === 'firestore') {
           sortAggregation.push({
-            $project: {
-              [flattenedField]: 0,
-            },
+            $unset: localField,
           })
         }
-
-        sort[`__${path}.${sortFieldPath}`] = sortDirection
-
-        return true
       }
+
+      if (adapter.compatabilityMode !== 'firestore') {
+        const lookup = sortAggregation.find(
+          (each) => '$lookup' in each && each.$lookup.as === as,
+        ) as PipelineStage.Lookup
+        const pipeline = lookup.$lookup.pipeline![0] as PipelineStage.Project
+        pipeline.$project[sortFieldPath] = true
+      }
+
+      sort[`${as}.${sortFieldPath}`] = sortDirection
+      return true
     }
   }
 
