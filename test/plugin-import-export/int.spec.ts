@@ -374,7 +374,7 @@ describe('@payloadcms/plugin-import-export', () => {
         user,
         data: {
           collectionSlug: 'pages',
-          // fields: [],
+          fields: [],
           format: 'csv',
           where: {
             title: { contains: 'Title ' },
