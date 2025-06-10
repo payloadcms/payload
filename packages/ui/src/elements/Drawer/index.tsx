@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, use, useCallback, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
@@ -58,14 +58,18 @@ export const Drawer: React.FC<Props> = ({
   const { closeModal, modalState } = useModal()
   const drawerDepth = useDrawerDepth()
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [animateIn, setAnimateIn] = useState(false)
+  const [isOpen, setIsOpen] = useState(modalState[slug]?.isOpen || false)
+  const [animateIn, setAnimateIn] = useState(modalState[slug]?.isOpen || false)
+
+  const openFromContext = modalState[slug]?.isOpen
 
   useEffect(() => {
-    setIsOpen(modalState[slug]?.isOpen)
-  }, [slug, modalState])
+    setIsOpen(openFromContext)
+    // By depending on openFromContext instead of [slug, modalState] we avoid
+    // running the effect when some other, unrelated modal in the same context changes.
+  }, [openFromContext])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setAnimateIn(isOpen)
   }, [isOpen])
 
