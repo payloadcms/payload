@@ -549,28 +549,28 @@ describe('Collections - Uploads', () => {
 
     describe('filters', () => {
       it.each`
-        url                                  | collection
-        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}
-        ${'http://[::1]/file.png'}           | ${mediaSlug}
-        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}
-        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}
-        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}
-        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}
-        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}
-        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}
-        ${'http://255.255.255.255/file.png'} | ${mediaSlug}
-        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug}
-        ${'http://[::1]/file.png'}           | ${allowListMediaSlug}
-        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug}
-        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug}
-        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug}
-        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug}
-        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug}
-        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug}
-        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug}
+        url                                  | collection            | errorContains
+        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'unsafe'}
+        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'unsafe'}
+        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'unsafe'}
+        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'unsafe'}
+        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'unsafe'}
+        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://[::1]/file.png'}           | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
       `(
         'should block or filter uploading from $collection with URL: $url',
-        async ({ url, collection }) => {
+        async ({ url, collection, errorContains }) => {
           await expect(
             payload.create({
               collection,
@@ -582,11 +582,7 @@ describe('Collections - Uploads', () => {
           ).rejects.toThrow(
             expect.objectContaining({
               name: 'FileRetrievalError',
-              message:
-                // eslint-disable-next-line jest/no-conditional-in-test
-                collection === mediaSlug
-                  ? expect.stringContaining('Failed to fetch file from unsafe url')
-                  : expect.stringContaining('There was a problem while uploading the file.'),
+              message: expect.stringContaining(errorContains),
             }),
           )
         },

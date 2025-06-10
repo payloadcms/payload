@@ -16,11 +16,6 @@ const esModules = [
   '@faceless-ui/window-info',
   '@faceless-ui/modal',
   '@faceless-ui/scroll-info',
-  // node-fetch specific
-  'node-fetch',
-  'data-uri-to-buffer',
-  'fetch-blob',
-  'formdata-polyfill',
 ].join('|')
 
 import path from 'path'
