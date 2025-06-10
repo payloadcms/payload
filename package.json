@@ -3,6 +3,10 @@
   "version": "3.42.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "test/*"
+  ],
   "scripts": {
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
@@ -194,9 +198,5 @@
       "react-dom": "$react-dom",
       "typescript": "$typescript"
     }
-  },
-  "workspaces:": [
-    "packages/*",
-    "test/*"
-  ]
+  }
 }
