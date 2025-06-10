@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
@@ -8,6 +7,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -169,15 +169,17 @@ async function deleteLocal<
     overrideAccess,
     overrideLock,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     where,
   }
 
   if (options.id) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return deleteByIDOperation<TSlug, TSelect>(args)
   }
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   return deleteOperation<TSlug, TSelect>(args)
 }
 

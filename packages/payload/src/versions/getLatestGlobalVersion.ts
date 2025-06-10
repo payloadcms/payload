@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 
@@ -35,7 +34,7 @@ export const getLatestGlobalVersion = async ({
         locale,
         pagination: false,
         req,
-        where: whereQuery,
+        where: whereQuery as unknown as Where,
       })
     ).docs[0]
   }
@@ -53,6 +52,9 @@ export const getLatestGlobalVersion = async ({
       global,
       globalExists,
     }
+  }
+  if (!('createdAt' in latestVersion.version) || !('updatedAt' in latestVersion.version)) {
+    throw new Error('Could not find createdAt or updatedAt in latestVersion.version')
   }
 
   if (!latestVersion.version.createdAt) {

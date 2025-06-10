@@ -7,9 +7,15 @@ import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { clickFolderCard } from '../helpers/folders/clickFolderCard.js'
+import { createFolder } from '../helpers/folders/createFolder.js'
+import { createFolderFromDoc } from '../helpers/folders/createFolderFromDoc.js'
+import { expectNoResultsAndCreateFolderButton } from '../helpers/folders/expectNoResultsAndCreateFolderButton.js'
+import { selectFolderAndConfirmMove } from '../helpers/folders/selectFolderAndConfirmMove.js'
+import { selectFolderAndConfirmMoveFromList } from '../helpers/folders/selectFolderAndConfirmMoveFromList.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postSlug } from './shared.js'
+import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,6 +23,7 @@ const dirname = path.dirname(filename)
 test.describe('Folders', () => {
   let page: Page
   let postURL: AdminUrlUtil
+  let OmittedFromBrowseBy: AdminUrlUtil
   let serverURL: string
 
   test.beforeAll(async ({ browser }, testInfo) => {
@@ -25,6 +32,7 @@ test.describe('Folders', () => {
     const { serverURL: serverFromInit } = await initPayloadE2ENoConfig({ dirname })
     serverURL = serverFromInit
     postURL = new AdminUrlUtil(serverURL, postSlug)
+    OmittedFromBrowseBy = new AdminUrlUtil(serverURL, omittedFromBrowseBySlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -40,31 +48,29 @@ test.describe('Folders', () => {
   })
 
   test.describe('No folders', () => {
-    /* eslint-disable playwright/expect-expect */
     test('should show no results and create button in folder view', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await expectNoResultsAndCreateFolderButton()
+      await expectNoResultsAndCreateFolderButton({ page })
     })
-    /* eslint-disable playwright/expect-expect */
+
     test('should show no results and create button in document view', async () => {
       await page.goto(postURL.create)
       const folderButton = page.getByRole('button', { name: 'No Folder' })
       await expect(folderButton).toBeVisible()
       await folderButton.click()
-      await expectNoResultsAndCreateFolderButton()
+      await expectNoResultsAndCreateFolderButton({ page })
     })
   })
 
   test.describe('Creating folders', () => {
     test('should create new folder from folder view', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('New Folder From Root')
+      await createFolder({ folderName: 'New Folder From Root', page })
     })
 
-    /* eslint-disable playwright/expect-expect */
     test('should create new folder from collection view', async () => {
       await page.goto(postURL.byFolder)
-      await createFolder('New Folder From Collection', true)
+      await createFolder({ folderName: 'New Folder From Collection', fromDropdown: true, page })
     })
 
     test('should create new folder from document view', async () => {
@@ -72,7 +78,7 @@ test.describe('Folders', () => {
       await createPostWithNoFolder()
       const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
       await folderPill.click()
-      await createFolderFromDoc('New Folder From Doc')
+      await createFolderFromDoc({ folderName: 'New Folder From Doc', page })
     })
   })
 
@@ -85,8 +91,8 @@ test.describe('Folders', () => {
 
     test('should rename folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Test Folder')
-      await clickFolderCard('Test Folder')
+      await createFolder({ folderName: 'Test Folder', page })
+      await clickFolderCard({ folderName: 'Test Folder', page })
       const renameButton = page.locator('.list-selection__actions button', {
         hasText: 'Rename',
       })
@@ -108,8 +114,8 @@ test.describe('Folders', () => {
 
     test('should delete folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Delete This Folder')
-      await clickFolderCard('Delete This Folder')
+      await createFolder({ folderName: 'Delete This Folder', page })
+      await clickFolderCard({ folderName: 'Delete This Folder', page })
       const deleteButton = page.locator('.list-selection__actions button', {
         hasText: 'Delete',
       })
@@ -125,12 +131,12 @@ test.describe('Folders', () => {
 
     test('should delete folder but not delete documents', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Folder With Documents')
+      await createFolder({ folderName: 'Folder With Documents', page })
       await createPostWithExistingFolder('Document 1', 'Folder With Documents')
       await createPostWithExistingFolder('Document 2', 'Folder With Documents')
 
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await clickFolderCard('Folder With Documents')
+      await clickFolderCard({ folderName: 'Folder With Documents', page })
       const deleteButton = page.locator('.list-selection__actions button', {
         hasText: 'Delete',
       })
@@ -152,9 +158,9 @@ test.describe('Folders', () => {
 
     test('should move folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Move Into This Folder')
-      await createFolder('Move Me')
-      await clickFolderCard('Move Me')
+      await createFolder({ folderName: 'Move Into This Folder', page })
+      await createFolder({ folderName: 'Move Me', page })
+      await clickFolderCard({ folderName: 'Move Me', page })
       const moveButton = page.locator('.list-selection__actions button', {
         hasText: 'Move',
       })
@@ -187,8 +193,8 @@ test.describe('Folders', () => {
     // this test currently fails in postgres
     test('should create new document from folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Create New Here')
-      await clickFolderCard('Create New Here', true)
+      await createFolder({ folderName: 'Create New Here', page })
+      await clickFolderCard({ folderName: 'Create New Here', page, doubleClick: true })
       const createDocButton = page.locator('.create-new-doc-in-folder__popup-button', {
         hasText: 'Create document',
       })
@@ -212,11 +218,10 @@ test.describe('Folders', () => {
       await expect(folderCard).toBeVisible()
     })
 
-    // this test currently fails in postgres
     test('should create nested folder from folder view', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Parent Folder')
-      await clickFolderCard('Parent Folder', true)
+      await createFolder({ folderName: 'Parent Folder', page })
+      await clickFolderCard({ folderName: 'Parent Folder', page, doubleClick: true })
       const pageTitle = page.locator('h1.list-header__title')
       await expect(pageTitle).toHaveText('Parent Folder')
 
@@ -248,7 +253,7 @@ test.describe('Folders', () => {
 
     test('should toggle between grid and list view', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Test Folder')
+      await createFolder({ folderName: 'Test Folder', page })
       const listViewButton = page.locator('.folder-view-toggle-button').nth(1)
       await listViewButton.click()
       const listView = page.locator('.simple-table')
@@ -262,9 +267,9 @@ test.describe('Folders', () => {
 
     test('should sort folders', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('A Folder')
-      await createFolder('B Folder')
-      await createFolder('C Folder')
+      await createFolder({ folderName: 'A Folder', page })
+      await createFolder({ folderName: 'B Folder', page })
+      await createFolder({ folderName: 'C Folder', page })
 
       const firstFolderCard = page.locator('.folder-file-card__name').first()
       await expect(firstFolderCard).toHaveText('A Folder')
@@ -282,8 +287,8 @@ test.describe('Folders', () => {
 
     test('should allow filtering within folders', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Filtering Folder')
-      await clickFolderCard('Filtering Folder', true)
+      await createFolder({ folderName: 'Filtering Folder', page })
+      await clickFolderCard({ folderName: 'Filtering Folder', page, doubleClick: true })
 
       const createNewDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
         hasText: 'Create New',
@@ -328,8 +333,8 @@ test.describe('Folders', () => {
 
     test('should allow searching within folders', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Test')
-      await createFolder('Search Me')
+      await createFolder({ folderName: 'Test', page })
+      await createFolder({ folderName: 'Search Me', page })
 
       const testFolderCard = page.locator('.folder-file-card__name', {
         hasText: 'Test',
@@ -351,7 +356,7 @@ test.describe('Folders', () => {
   test.describe('Collection view actions', () => {
     test.beforeEach(async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Move Into This Folder')
+      await createFolder({ folderName: 'Move Into This Folder', page })
       await createPostWithNoFolder()
       await page.goto(postURL.list)
     })
@@ -375,33 +380,33 @@ test.describe('Folders', () => {
     })
 
     test('should update folder from doc folder pill', async () => {
-      await selectFolderAndConfirmMoveFromList('Move Into This Folder')
+      await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Test Post has been moved',
       )
     })
 
     test('should resolve folder pills and not get stuck as Loading...', async () => {
-      await selectFolderAndConfirmMoveFromList('Move Into This Folder')
+      await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
       await page.reload()
       await expect(folderPill).not.toHaveText('Loading...')
     })
     test('should show updated folder pill after folder change', async () => {
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
-      await selectFolderAndConfirmMoveFromList('Move Into This Folder')
+      await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       await expect(folderPill).toHaveText('Move Into This Folder')
     })
 
     test('should show updated folder pill after removing doc folder', async () => {
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
-      await selectFolderAndConfirmMoveFromList('Move Into This Folder')
+      await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       await expect(folderPill).toHaveText('Move Into This Folder')
       await page.reload()
       await folderPill.click()
       const folderBreadcrumb = page.locator('.folderBreadcrumbs__crumb-item', { hasText: 'Folder' })
       await folderBreadcrumb.click()
-      await selectFolderAndConfirmMove()
+      await selectFolderAndConfirmMove({ page })
       await expect(folderPill).toHaveText('No Folder')
     })
 
@@ -428,7 +433,7 @@ test.describe('Folders', () => {
   test.describe('Document view actions', () => {
     test.beforeEach(async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Test Folder')
+      await createFolder({ folderName: 'Test Folder', page })
       await createPostWithNoFolder()
     })
 
@@ -440,7 +445,7 @@ test.describe('Folders', () => {
     test('should update folder from folder pill in doc controls', async () => {
       const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
       await folderPill.click()
-      await clickFolderCard('Test Folder', true)
+      await clickFolderCard({ folderName: 'Test Folder', doubleClick: true, page })
       const selectButton = page
         .locator('button[aria-label="Apply Changes"]')
         .filter({ hasText: 'Select' })
@@ -453,7 +458,7 @@ test.describe('Folders', () => {
     test('should show updated folder pill after folder change', async () => {
       const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
       await folderPill.click()
-      await clickFolderCard('Test Folder', true)
+      await clickFolderCard({ folderName: 'Test Folder', doubleClick: true, page })
       const selectButton = page
         .locator('button[aria-label="Apply Changes"]')
         .filter({ hasText: 'Select' })
@@ -468,9 +473,9 @@ test.describe('Folders', () => {
   test.describe('Multiple select options', () => {
     test.beforeEach(async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder('Test Folder 1')
-      await createFolder('Test Folder 2')
-      await createFolder('Test Folder 3')
+      await createFolder({ folderName: 'Test Folder 1', page })
+      await createFolder({ folderName: 'Test Folder 2', page })
+      await createFolder({ folderName: 'Test Folder 3', page })
     })
 
     test('should show how many folders are selected', async () => {
@@ -513,7 +518,7 @@ test.describe('Folders', () => {
       await expect(firstFolderCard).toBeHidden()
     })
     test('should move multiple folders', async () => {
-      await createFolder('Move into here')
+      await createFolder({ folderName: 'Move into here', page })
       const firstFolderCard = page.locator('.folder-file-card', {
         hasText: 'Test Folder 1',
       })
@@ -534,121 +539,58 @@ test.describe('Folders', () => {
         hasText: 'Move into here',
       })
       await destinationFolder.click()
-      await selectFolderAndConfirmMove()
+      await selectFolderAndConfirmMove({ page })
       await expect(page.locator('.payload-toast-container')).toContainText('moved')
       await expect(firstFolderCard).toBeHidden()
     })
   })
 
-  async function expectNoResultsAndCreateFolderButton() {
-    const noResultsDiv = page.locator('div.no-results')
-    await expect(noResultsDiv).toBeVisible()
-    const createFolderButton = page.locator('text=Create Folder')
-    await expect(createFolderButton).toBeVisible()
-  }
+  test.describe('Collection with browse by folders disabled', () => {
+    const folderName = 'Folder without omitted Docs'
+    test('should not show omitted collection documents in browse by folder view', async () => {
+      await page.goto(OmittedFromBrowseBy.byFolder)
+      await createFolder({ folderName, page, fromDropdown: true })
 
-  async function createFolder(folderName: string, fromDropdown: boolean = false) {
-    if (fromDropdown) {
-      const folderDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
-        hasText: 'Create',
-      })
-      await folderDropdown.click()
-      const createFolderButton = page.locator('.popup-button-list__button', {
-        hasText: 'Folder',
-      })
-      await createFolderButton.click()
-    } else {
-      const createFolderButton = page.locator(
-        '.create-new-doc-in-folder__button:has-text("Create New")',
-      )
-      await createFolderButton.click()
-    }
+      // create document
+      await page.goto(OmittedFromBrowseBy.create)
+      const titleInput = page.locator('input[name="title"]')
+      await titleInput.fill('Omitted Doc')
+      await saveDocAndAssert(page)
 
-    const folderNameInput = page.locator(
-      'dialog#create-document--header-pill-new-folder-drawer div.drawer-content-container input#field-name',
-    )
+      // assign to folder
+      const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
+      await folderPill.click()
+      await clickFolderCard({ folderName, page })
+      const selectButton = page
+        .locator('button[aria-label="Apply Changes"]')
+        .filter({ hasText: 'Select' })
+      await selectButton.click()
 
-    await folderNameInput.fill(folderName)
+      // go to browse by folder view
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await clickFolderCard({ folderName, page, doubleClick: true })
 
-    const createButton = page.getByRole('button', { name: 'Apply Changes' })
-    await createButton.click()
-
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-
-    const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()
-    await expect(folderCard).toBeVisible()
-  }
-
-  async function createFolderFromDoc(folderName: string) {
-    const addFolderButton = page.locator('.create-new-doc-in-folder__button', {
-      hasText: 'Create folder',
+      // folder should be empty
+      await expectNoResultsAndCreateFolderButton({ page })
     })
-    await addFolderButton.click()
 
-    const folderNameInput = page.locator('div.drawer-content-container input#field-name')
+    test('should not show collection type in browse by folder view', async () => {
+      const folderName = 'omitted collection pill test folder'
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await createFolder({ folderName, page })
+      await clickFolderCard({ folderName, page, doubleClick: true })
 
-    await folderNameInput.fill(folderName)
+      await page.locator('button:has(.collection-type__count)').click()
 
-    const createButton = page
-      .locator('button[aria-label="Apply Changes"]')
-      .filter({ hasText: 'Create' })
-    await createButton.click()
+      await expect(
+        page.locator('.checkbox-input .field-label', {
+          hasText: 'Omitted From Browse By',
+        }),
+      ).toBeHidden()
+    })
+  })
 
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-
-    const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()
-    await expect(folderCard).toBeVisible()
-  }
-
-  async function clickFolderCard(folderName: string, doubleClick: boolean = false) {
-    const folderCard = page
-      .locator('.folder-file-card')
-      .filter({
-        has: page.locator('.folder-file-card__name', { hasText: folderName }),
-      })
-      .first()
-
-    const dragHandleButton = folderCard.locator('div[role="button"].folder-file-card__drag-handle')
-
-    if (doubleClick) {
-      await dragHandleButton.dblclick()
-    } else {
-      await dragHandleButton.click()
-    }
-  }
-  async function selectFolderAndConfirmMoveFromList(folderName: string | undefined = undefined) {
-    const firstListItem = page.locator('tbody .row-1')
-    const folderPill = firstListItem.locator('.move-doc-to-folder')
-    await folderPill.click()
-
-    if (folderName) {
-      await clickFolderCard(folderName, true)
-    }
-
-    const selectButton = page
-      .locator('button[aria-label="Apply Changes"]')
-      .filter({ hasText: 'Select' })
-    await selectButton.click()
-    const confirmMoveButton = page
-      .locator('dialog#move-folder-drawer-confirm-move')
-      .getByRole('button', { name: 'Move' })
-    await confirmMoveButton.click()
-  }
-
-  async function selectFolderAndConfirmMove(folderName: string | undefined = undefined) {
-    if (folderName) {
-      await clickFolderCard(folderName, true)
-    }
-
-    const selectButton = page
-      .locator('button[aria-label="Apply Changes"]')
-      .filter({ hasText: 'Select' })
-    await selectButton.click()
-    const confirmMoveButton = page
-      .locator('dialog#move-folder-drawer-confirm-move')
-      .getByRole('button', { name: 'Move' })
-    await confirmMoveButton.click()
-  }
+  // Helper functions
 
   async function createPostWithNoFolder() {
     await page.goto(postURL.create)
@@ -664,7 +606,7 @@ test.describe('Folders', () => {
     await saveDocAndAssert(page)
     const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
     await folderPill.click()
-    await clickFolderCard(folderName)
+    await clickFolderCard({ folderName, page })
     const selectButton = page
       .locator('button[aria-label="Apply Changes"]')
       .filter({ hasText: 'Select' })

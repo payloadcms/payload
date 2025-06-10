@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
@@ -19,7 +18,7 @@ import type {
 } from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
-import fileExists from './fileExists.js'
+import { fileExists } from './fileExists.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 type ResizeArgs = {
@@ -56,7 +55,7 @@ type SanitizedImageData = {
 const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
   const extension = sourceImage.split('.').pop()
   const name = sanitize(sourceImage.substring(0, sourceImage.lastIndexOf('.')) || sourceImage)
-  return { name, ext: extension }
+  return { name, ext: extension! }
 }
 
 /**
@@ -160,13 +159,9 @@ const getImageResizeAction = ({
   hasFocalPoint?: boolean
   imageResizeConfig: ImageSize
 }): 'omit' | 'resize' | 'resizeWithFocalPoint' => {
-  const {
-    fit,
-    height: targetHeight,
-    width: targetWidth,
-    withoutEnlargement,
-    withoutReduction,
-  } = imageResizeConfig
+  const { fit, withoutEnlargement, withoutReduction } = imageResizeConfig
+  const targetWidth = imageResizeConfig.width!
+  const targetHeight = imageResizeConfig.height!
 
   // prevent upscaling by default when x and y are both smaller than target image size
   if (targetHeight && targetWidth) {
@@ -239,9 +234,9 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
  */
 function extractHeightFromImage(sharpMetadata: SharpMetadata): number {
   if (sharpMetadata?.pages) {
-    return sharpMetadata.height / sharpMetadata.pages
+    return sharpMetadata.height! / sharpMetadata.pages
   }
-  return sharpMetadata.height
+  return sharpMetadata.height!
 }
 
 /**
@@ -273,7 +268,7 @@ export async function resizeAndTransformImageSizes({
   const { focalPoint: focalPointEnabled = true, imageSizes } = config.upload
 
   // Focal point adjustments
-  const incomingFocalPoint = uploadEdits.focalPoint
+  const incomingFocalPoint = uploadEdits?.focalPoint
     ? {
         x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
         y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
@@ -291,21 +286,24 @@ export async function resizeAndTransformImageSizes({
   }
 
   // Determine if the file is animated
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file!.mimetype)
   const sharpOptions: SharpOptions = {}
 
   if (fileIsAnimatedType) {
     sharpOptions.animated = true
   }
 
-  const sharpBase: Sharp | undefined = sharp(file.tempFilePath || file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+  const sharpBase: Sharp | undefined = sharp(
+    file!.tempFilePath || file!.data,
+    sharpOptions,
+  ).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
   const originalImageMeta = await sharpBase.metadata()
 
   let adjustedDimensions = { ...dimensions }
 
   // Images with an exif orientation of 5, 6, 7, or 8 are auto-rotated by sharp
   // Need to adjust the dimensions to match the original image
-  if ([5, 6, 7, 8].includes(originalImageMeta.orientation)) {
+  if ([5, 6, 7, 8].includes(originalImageMeta.orientation!)) {
     adjustedDimensions = {
       ...dimensions,
       height: dimensions.width,
@@ -356,7 +354,7 @@ export async function resizeAndTransformImageSizes({
           resizeWidth = resizeImageMeta.width
         }
 
-        const resizeAspectRatio = resizeWidth / resizeHeight
+        const resizeAspectRatio = resizeWidth! / resizeHeight
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
@@ -368,7 +366,7 @@ export async function resizeAndTransformImageSizes({
         const metadataAppendedFile = await optionallyAppendMetadata({
           req,
           sharpFile: resized,
-          withMetadata,
+          withMetadata: withMetadata!,
         })
 
         // Must read from buffer, resized.metadata will return the original image metadata
@@ -380,15 +378,15 @@ export async function resizeAndTransformImageSizes({
         })
         resizeImageMeta.width = info.width
 
-        const halfResizeX = resizeWidth / 2
-        const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
+        const halfResizeX = resizeWidth! / 2
+        const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint!.x / 100)
         const calculatedRightPixelBound = xFocalCenter + halfResizeX
         let leftBound = xFocalCenter - halfResizeX
 
         // if the right bound is greater than the image width, adjust the left bound
         // keeping focus on the right
         if (calculatedRightPixelBound > resizeImageMeta.width) {
-          leftBound = resizeImageMeta.width - resizeWidth
+          leftBound = resizeImageMeta.width - resizeWidth!
         }
 
         // if the left bound is less than 0, adjust the left bound to 0
@@ -398,7 +396,7 @@ export async function resizeAndTransformImageSizes({
         }
 
         const halfResizeY = resizeHeight / 2
-        const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint.y / 100)
+        const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint!.y / 100)
         const calculatedBottomPixelBound = yFocalCenter + halfResizeY
         let topBound = yFocalCenter - halfResizeY
 
@@ -418,7 +416,7 @@ export async function resizeAndTransformImageSizes({
           height: resizeHeight,
           left: Math.floor(leftBound),
           top: Math.floor(topBound),
-          width: resizeWidth,
+          width: resizeWidth!,
         })
       } else {
         resized = imageToResize.resize(imageResizeConfig)
@@ -438,7 +436,7 @@ export async function resizeAndTransformImageSizes({
       const metadataAppendedFile = await optionallyAppendMetadata({
         req,
         sharpFile: resized,
-        withMetadata,
+        withMetadata: withMetadata!,
       })
 
       const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({

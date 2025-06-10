@@ -112,13 +112,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
   }
 
-  config.folders = {
-    slug: foldersSlug,
-    debug: false,
-    fieldName: parentFolderFieldName,
-    ...(config.folders || {}),
-  }
-
   config.bin = config.bin ?? []
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'
@@ -167,6 +160,19 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  const hasFolderCollections = config.collections.some((collection) => Boolean(collection.folders))
+  if (hasFolderCollections) {
+    config.folders = {
+      slug: foldersSlug,
+      browseByFolder: true,
+      debug: false,
+      fieldName: parentFolderFieldName,
+      ...(config.folders || {}),
+    }
+  } else {
+    config.folders = false
   }
 
   return config
