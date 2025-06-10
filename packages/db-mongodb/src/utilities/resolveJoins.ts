@@ -201,13 +201,6 @@ export async function resolveJoins({
   if (!joins || docs.length === 0) {
     return
   }
-  
-  // Skip documents that already have joins resolved to prevent overwriting
-  const docsToProcess = docs.filter(doc => !doc.__joinsResolved)
-  if (docsToProcess.length === 0) {
-    return
-  }
-  
 
   // Get the collection configuration from the adapter
   const collectionConfig = adapter.payload.collections[collectionSlug]?.config
@@ -254,7 +247,7 @@ export async function resolveJoins({
       const allResults: Record<string, unknown>[] = []
 
       // Extract all parent document IDs to use in the join query
-      const parentIDs = docsToProcess.map((d) => d._id ?? d.id)
+      const parentIDs = docs.map((d) => d._id ?? d.id)
 
       // Use the provided locale or fall back to the default locale for localized fields
       const localizationConfig = adapter.payload.config.localization
@@ -382,7 +375,7 @@ export async function resolveJoins({
       const localizedJoinPath = `${joinPath}${localeSuffix}`
 
       // Attach the joined data to each parent document
-      for (const doc of docsToProcess) {
+      for (const doc of docs) {
         const id = (doc._id ?? doc.id) as string
         const all = grouped[id] || []
 
@@ -410,20 +403,16 @@ export async function resolveJoins({
           }
           ref = ref[seg] as Record<string, unknown>
         }
-        // Only set the join data if it doesn't already exist or if the new data has more results
+
         const finalSegment = segments[segments.length - 1]!
-        const existingValue = ref[finalSegment] as Record<string, unknown> | undefined
-        
-        if (!existingValue || !existingValue.docs || (existingValue.docs as unknown[]).length < value.docs.length) {
-          ref[finalSegment] = value
-        }
+        ref[finalSegment] = value
       }
 
       continue
     }
 
     // Handle regular joins (including regular polymorphic joins)
-    
+
     const targetConfig = adapter.payload.collections[joinDef.field.collection as string]?.config
     const JoinModel = adapter.collections[joinDef.field.collection as string]
     if (!targetConfig || !JoinModel) {
@@ -431,7 +420,7 @@ export async function resolveJoins({
     }
 
     // Extract all parent document IDs to use in the join query
-    const parentIDs = docsToProcess.map((d) => d._id ?? d.id)
+    const parentIDs = docs.map((d) => d._id ?? d.id)
 
     // Build the base query for the target collection
     const whereQuery = await buildQuery({
@@ -576,11 +565,9 @@ export async function resolveJoins({
     const localizedJoinPath = `${joinPath}${localeSuffix}`
 
     // Attach the joined data to each parent document
-    
-    for (const doc of docsToProcess) {
+    for (const doc of docs) {
       const id = (doc._id ?? doc.id) as string
       const all = grouped[id] || []
-
 
       // Calculate the slice for pagination
       const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
@@ -596,7 +583,6 @@ export async function resolveJoins({
         value.totalDocs = all.length
       }
 
-
       // Navigate to the correct nested location in the document and set the join data
       // This handles nested join paths like "user.posts" by creating intermediate objects
       const segments = localizedJoinPath.split('.')
@@ -608,20 +594,9 @@ export async function resolveJoins({
         }
         ref = ref[seg] as Record<string, unknown>
       }
-      // Only set the join data if it doesn't already exist or if the new data has more results
+
       const finalSegment = segments[segments.length - 1]!
-      const existingValue = ref[finalSegment] as Record<string, unknown> | undefined
-      
-      // Always prefer existing join data that has more results (avoid overwriting good data with empty data)
-      if (!existingValue || !existingValue.docs || value.docs.length > (existingValue.docs as unknown[]).length) {
-        ref[finalSegment] = value
-      } else {
-      }
+      ref[finalSegment] = value
     }
-  }
-  
-  // Mark all processed documents as having joins resolved
-  for (const doc of docsToProcess) {
-    doc.__joinsResolved = true
   }
 }
