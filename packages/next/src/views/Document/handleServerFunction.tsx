@@ -4,6 +4,7 @@ import type {
   FormState,
   Locale,
   PayloadRequest,
+  ServerFunction,
   VisibleEntities,
 } from 'payload'
 
@@ -19,20 +20,22 @@ type RenderDocumentResult = {
   preferences: DocumentPreferences
 }
 
-export const renderDocumentHandler = async (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  docID: string
-  drawerSlug?: string
-  initialData?: Data
-  initialState?: FormState
-  locale?: Locale
-  overrideEntityVisibility?: boolean
-  redirectAfterCreate?: boolean
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
-  req: PayloadRequest
-}): Promise<RenderDocumentResult> => {
+export const renderDocumentHandler: ServerFunction<
+  {
+    collectionSlug: string
+    disableActions?: boolean
+    docID: string
+    drawerSlug?: string
+    initialData?: Data
+    initialState?: FormState
+    locale?: Locale
+    overrideEntityVisibility?: boolean
+    redirectAfterCreate?: boolean
+    redirectAfterDelete: boolean
+    redirectAfterDuplicate: boolean
+  },
+  Promise<RenderDocumentResult>
+> = async (args) => {
   const {
     collectionSlug,
     disableActions,
