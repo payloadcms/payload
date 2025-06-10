@@ -2,7 +2,9 @@ import type {
   AdminViewServerProps,
   Data,
   DocumentViewClientProps,
+  DocumentViewServerProps,
   DocumentViewServerPropsOnly,
+  EditViewComponent,
   PayloadComponent,
 } from 'payload'
 
@@ -15,7 +17,6 @@ import { logError } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { ViewToRender } from './createViewMap.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -26,10 +27,16 @@ import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
+import { matchRouteToView } from './matchRouteToView.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
+
+export type ViewToRender =
+  | EditViewComponent
+  | PayloadComponent<DocumentViewServerProps>
+  | React.FC
+  | React.FC<DocumentViewClientProps>
 
 /**
  * This function is responsible for rendering
@@ -216,7 +223,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = getViewFromConfig({
+      ;({ View } = matchRouteToView({
         collectionConfig,
         config,
         docPermissions,
@@ -257,7 +264,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = getViewFromConfig({
+      ;({ View } = matchRouteToView({
         config,
         docPermissions,
         globalConfig,
