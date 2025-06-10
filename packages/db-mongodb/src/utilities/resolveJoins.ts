@@ -403,16 +403,14 @@ export async function resolveJoins({
           }
           ref = ref[seg] as Record<string, unknown>
         }
-
-        const finalSegment = segments[segments.length - 1]!
-        ref[finalSegment] = value
+        // Set the final join data at the target path
+        ref[segments[segments.length - 1]!] = value
       }
 
       continue
     }
 
     // Handle regular joins (including regular polymorphic joins)
-
     const targetConfig = adapter.payload.collections[joinDef.field.collection as string]?.config
     const JoinModel = adapter.collections[joinDef.field.collection as string]
     if (!targetConfig || !JoinModel) {
@@ -594,9 +592,8 @@ export async function resolveJoins({
         }
         ref = ref[seg] as Record<string, unknown>
       }
-
-      const finalSegment = segments[segments.length - 1]!
-      ref[finalSegment] = value
+      // Set the final join data at the target path
+      ref[segments[segments.length - 1]!] = value
     }
   }
 }
