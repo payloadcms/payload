@@ -1245,6 +1245,7 @@ describe('Versions', () => {
     beforeEach(async () => {
       const newPost = await payload.create({
         collection: draftCollectionSlug,
+        depth: 0,
         data: {
           title: 'new post',
           description: 'new description',
@@ -1257,6 +1258,7 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         id: postID,
         draft: true,
+        depth: 0,
         data: {
           title: 'draft post',
           description: 'draft description',
@@ -1272,6 +1274,8 @@ describe('Versions', () => {
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
+        limit: 1,
+        depth: 0,
         where: {
           parent: { equals: postID },
         },
@@ -1282,6 +1286,8 @@ describe('Versions', () => {
       const diffDoc = (
         await payload.find({
           collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
         })
       ).docs[0] as Diff
 
@@ -1290,6 +1296,8 @@ describe('Versions', () => {
       const versionDiff = (
         await payload.findVersions({
           collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
           where: {
             parent: { equals: diffID },
           },
@@ -1345,9 +1353,14 @@ describe('Versions', () => {
       const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
       await expect(blocksDiff).toBeVisible()
 
+      // Collapse to show iterable fields change count
+      await blocksDiff.locator('.diff-collapser__toggle-button').first().click()
+
       // Expect iterable change count to be visible
       const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
       await expect(iterableChangeCount).toHaveText('2 changed fields')
+
+      await blocksDiff.locator('.diff-collapser__toggle-button').first().click()
 
       // Expect iterable rows to be visible
       const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
@@ -1357,11 +1370,13 @@ describe('Versions', () => {
       const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
       await expect(firstBlocksDiffRow).toBeVisible()
 
+      await firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first().click()
       // Expect first row change count to be visible
       const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
         .locator('.diff-collapser__field-change-count')
         .first()
       await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+      await firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first().click()
 
       // Expect collapser content to be visible
       const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')
