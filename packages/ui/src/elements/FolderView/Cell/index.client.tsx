@@ -9,16 +9,18 @@ import React, { useEffect } from 'react'
 import { MoveDocToFolderButton, useConfig, useTranslation } from '../../../exports/client/index.js'
 
 type Props = {
-  collectionSlug: string
-  data: Data
-  docTitle: string
-  folderFieldName: string
+  readonly collectionSlug: string
+  readonly data: Data
+  readonly docTitle: string
+  readonly folderCollectionSlug: string
+  readonly folderFieldName: string
 }
 
 export const FolderTableCellClient = ({
   collectionSlug,
   data,
   docTitle,
+  folderCollectionSlug,
   folderFieldName,
 }: Props) => {
   const docID = data.id
@@ -54,14 +56,14 @@ export const FolderTableCellClient = ({
         console.error('Error moving document to folder', error)
       }
     },
-    [config.routes.api, collectionSlug, docID, t],
+    [config.routes.api, collectionSlug, docID, folderFieldName, t],
   )
 
   useEffect(() => {
     const loadFolderName = async () => {
       try {
         const req = await fetch(
-          `${config.routes.api}/${config.folders.slug}${intialFolderID ? `/${intialFolderID}` : ''}`,
+          `${config.routes.api}/${folderCollectionSlug}${intialFolderID ? `/${intialFolderID}` : ''}`,
           {
             credentials: 'include',
             headers: {
@@ -83,7 +85,7 @@ export const FolderTableCellClient = ({
       void loadFolderName()
       hasLoadedFolderName.current = true
     }
-  }, [])
+  }, [config.routes.api, folderCollectionSlug, intialFolderID, t])
 
   return (
     <MoveDocToFolderButton
@@ -94,6 +96,8 @@ export const FolderTableCellClient = ({
       docData={data as FolderOrDocument['value']}
       docID={docID}
       docTitle={docTitle}
+      folderCollectionSlug={folderCollectionSlug}
+      folderFieldName={folderFieldName}
       fromFolderID={fromFolderID}
       fromFolderName={fromFolderName}
       modalSlug={`move-doc-to-folder-cell--${docID}`}

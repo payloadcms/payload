@@ -193,7 +193,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Zamierzasz przenieść <1>{{title}}</1> do <2>{{toFolder}}</2>. Czy jesteś pewien?',
     moveItemToRootConfirmation:
       'Zamierzasz przenieść <1>{{title}}</1> do folderu głównego. Jesteś pewien?',
-    movingFromFolder: 'Przenoszenie {{title}} z {{folderName}}',
+    movingFromFolder: 'Przenoszenie {{title}} z {{fromFolder}}',
     newFolder: 'Nowy folder',
     noFolder: 'Brak folderu',
     renameFolder: 'Zmień nazwę folderu',

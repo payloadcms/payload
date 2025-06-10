@@ -2,6 +2,7 @@ import type {
   BeforeDocumentControlsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
+  EditMenuItemsServerPropsOnly,
   PayloadRequest,
   PreviewButtonServerPropsOnly,
   PublishButtonServerPropsOnly,
@@ -52,6 +53,16 @@ export const renderDocumentSlots: (args: {
       Component: BeforeDocumentControls,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
+    })
+  }
+
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+
+  if (EditMenuItems) {
+    components.EditMenuItems = RenderServerComponent({
+      Component: EditMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
     })
   }
 

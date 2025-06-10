@@ -31,6 +31,7 @@ import {
   customFieldsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
+  editMenuItemsSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -66,6 +67,7 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
+  let editMenuItemsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -81,6 +83,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
+    editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -640,6 +643,42 @@ describe('Document View', () => {
       const customDraftButton = page.locator('#custom-draft-button')
 
       await expect(customDraftButton).toBeVisible()
+    })
+  })
+
+  describe('custom editMenuItem components', () => {
+    test('should render custom editMenuItems component', async () => {
+      await page.goto(editMenuItemsURL.create)
+      await page.locator('#field-title')?.fill(title)
+      await saveDocAndAssert(page)
+
+      const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
+      await expect(threeDotMenu).toBeVisible()
+      await threeDotMenu.click()
+
+      const customEditMenuItem = page.locator('.popup-button-list__button', {
+        hasText: 'Custom Edit Menu Item',
+      })
+
+      await expect(customEditMenuItem).toBeVisible()
+    })
+    test('should render custom editMenuItems component in live preview tab', async () => {
+      await page.goto(editMenuItemsURL.create)
+      await page.locator('#field-title')?.fill(title)
+      await saveDocAndAssert(page)
+
+      const livePreviewURL = `${page.url()}/preview`
+      await page.goto(livePreviewURL)
+
+      const threeDotMenu = page.locator('.doc-controls__popup')
+      await expect(threeDotMenu).toBeVisible()
+      await threeDotMenu.click()
+
+      const customEditMenuItem = page.locator('.popup-button-list__button', {
+        hasText: 'Custom Edit Menu Item',
+      })
+
+      await expect(customEditMenuItem).toBeVisible()
     })
   })
 })
