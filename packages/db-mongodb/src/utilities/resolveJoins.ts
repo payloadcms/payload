@@ -9,6 +9,48 @@ import { buildSortParam } from '../queries/buildSortParam.js'
 import { transform } from './transform.js'
 
 /**
+ * Extracts relationTo filter values from a WHERE clause
+ * @param where - The WHERE clause to search
+ * @returns Array of collection slugs if relationTo filter found, null otherwise
+ */
+function extractRelationToFilter(where: Record<string, any>): null | string[] {
+  if (!where || typeof where !== 'object') {
+    return null
+  }
+
+  // Check for direct relationTo conditions
+  if (where.relationTo) {
+    if (where.relationTo.in && Array.isArray(where.relationTo.in)) {
+      return where.relationTo.in
+    }
+    if (where.relationTo.equals) {
+      return [where.relationTo.equals]
+    }
+  }
+
+  // Check for relationTo in logical operators
+  if (where.and && Array.isArray(where.and)) {
+    for (const condition of where.and) {
+      const result = extractRelationToFilter(condition)
+      if (result) {
+        return result
+      }
+    }
+  }
+
+  if (where.or && Array.isArray(where.or)) {
+    for (const condition of where.or) {
+      const result = extractRelationToFilter(condition)
+      if (result) {
+        return result
+      }
+    }
+  }
+
+  return null
+}
+
+/**
  * Filters a WHERE clause to only include fields that exist in the target collection
  * This is needed for polymorphic joins where different collections have different fields
  * @param where - The original WHERE clause
@@ -201,7 +243,7 @@ export async function resolveJoins({
     if (isPolymorphicCollectionJoin) {
       // Handle polymorphic collection joins (like documentsAndFolders from folder system)
       // These joins span multiple collections, so we need to query each collection separately
-      const collections = joinDef.field.collection as string[]
+      const allCollections = joinDef.field.collection as string[]
       const allResults: Record<string, unknown>[] = []
 
       // Extract all parent document IDs to use in the join query
@@ -215,6 +257,14 @@ export async function resolveJoins({
           localizationConfig &&
           localizationConfig.defaultLocale)
 
+      // Extract relationTo filter from the where clause to determine which collections to query
+      const relationToFilter = extractRelationToFilter(joinQuery.where || {})
+
+      // Determine which collections to query based on relationTo filter
+      const collections = relationToFilter
+        ? allCollections.filter((col) => relationToFilter.includes(col))
+        : allCollections
+
       // Query each collection in the polymorphic join
       for (const collectionSlug of collections) {
         const targetConfig = adapter.payload.collections[collectionSlug]?.config
@@ -224,11 +274,21 @@ export async function resolveJoins({
         }
 
         // Filter WHERE clause to only include fields that exist in this collection
+        // For polymorphic collection joins, we exclude relationTo from individual collections
+        // since relationTo is metadata added after fetching, not a real field in collections
         const filteredWhere = filterWhereForCollection(
           joinQuery.where || {},
           targetConfig.flattenedFields,
-          true, // exclude relationTo field for non-polymorphic collections
+          true, // exclude relationTo field for individual collections in polymorphic joins
         )
+
+        // For polymorphic collection joins, we should not skip collections just because
+        // some AND conditions were filtered out - the relationTo filter is what determines
+        // if a collection should participate in the join
+        // Only skip if there are literally no conditions after filtering
+        if (Object.keys(filteredWhere).length === 0) {
+          continue
+        }
 
         // Build the base query for this specific collection
         const whereQuery = await buildQuery({
