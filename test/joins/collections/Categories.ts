@@ -4,6 +4,7 @@ import { ValidationError } from 'payload'
 
 import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
+import { versionsSlug } from './Versions.js'
 
 export const Categories: CollectionConfig = {
   slug: categoriesSlug,
@@ -55,9 +56,18 @@ export const Categories: CollectionConfig = {
           beforeInput: ['/components/BeforeInput.js#BeforeInput'],
           Description: '/components/CustomDescription/index.js#FieldDescriptionComponent',
         },
+        disableRowTypes: false,
       },
       collection: postsSlug,
       defaultSort: '-title',
+      defaultLimit: 5,
+      on: 'category',
+      maxDepth: 1,
+    },
+    {
+      name: 'noRowTypes',
+      type: 'join',
+      collection: postsSlug,
       defaultLimit: 5,
       on: 'category',
       maxDepth: 1,
@@ -122,6 +132,21 @@ export const Categories: CollectionConfig = {
       type: 'join',
       collection: 'posts',
       on: 'blocks.category',
+    },
+    {
+      name: 'polymorphicJoin',
+      type: 'join',
+      collection: [postsSlug, versionsSlug],
+      on: 'category',
+    },
+    {
+      name: 'polymorphicJoinNoRowTypes',
+      type: 'join',
+      collection: [postsSlug, versionsSlug],
+      on: 'category',
+      admin: {
+        disableRowTypes: true,
+      },
     },
     {
       name: 'polymorphic',
@@ -195,17 +220,6 @@ export const Categories: CollectionConfig = {
       name: 'enableErrorOnJoin',
       type: 'checkbox',
       defaultValue: false,
-    },
-    {
-      name: 'noRowTypes',
-      type: 'join',
-      collection: postsSlug,
-      defaultLimit: 5,
-      on: 'category',
-      maxDepth: 1,
-      admin: {
-        disableRowTypes: true,
-      },
     },
   ],
 }
