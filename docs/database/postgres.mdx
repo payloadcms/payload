@@ -81,6 +81,7 @@ export default buildConfig({
 | `generateSchemaOutputFile`  | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
 | `allowIDOnCreate`           | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
 | `readReplicas`              | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                      |
+| `blocksAsJSON`              | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
 
 ## Access to Drizzle
 
