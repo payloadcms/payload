@@ -43,7 +43,7 @@ export type ViewToRender =
  * For example, we cannot do something like a "view map" where we generate all possible routes ahead of time, as that would require
  * looping through the entire config once to generate routes, and then a second time to run `path-to-regexp` against every route.
  */
-export const matchRouteToView = ({
+export const getDocumentView = ({
   collectionConfig,
   config,
   docPermissions,

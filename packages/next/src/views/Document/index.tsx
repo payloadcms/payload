@@ -24,10 +24,10 @@ import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getDocumentView } from './getDocumentView.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { matchRouteToView } from './matchRouteToView.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -223,7 +223,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = matchRouteToView({
+      ;({ View } = getDocumentView({
         collectionConfig,
         config,
         docPermissions,
@@ -264,7 +264,7 @@ export const renderDocument = async ({
         : null
 
     if (!RootViewOverride) {
-      ;({ View } = matchRouteToView({
+      ;({ View } = getDocumentView({
         config,
         docPermissions,
         globalConfig,

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
-import type { ViewToRender } from './matchRouteToView.js'
+import type { ViewToRender } from './getDocumentView.js'
 
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { defaultDocumentViews } from './defaults.js'
