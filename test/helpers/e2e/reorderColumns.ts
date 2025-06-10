@@ -51,7 +51,7 @@ export const reorderColumns = async (
   await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
   await page.mouse.up()
 
-  await expect(columnContainer.locator('.pill-selector .pill-selector__column').first()).toHaveText(
+  await expect(columnContainer.locator('.pill-selector .pill-selector__pill').first()).toHaveText(
     fromColumn,
   )
 
