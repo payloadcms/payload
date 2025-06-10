@@ -352,7 +352,7 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
+        skipValidation: true,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
         // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
