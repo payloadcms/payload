@@ -1,14 +1,17 @@
 'use client'
 
-import { useCart } from '@payloadcms/plugin-ecommerce/react'
+import { useCart, useCurrency } from '@payloadcms/plugin-ecommerce/react'
 
 export const Cart = () => {
-  const { cart, incrementItem, decrementItem, removeItem } = useCart()
+  const { cart, incrementItem, decrementItem, removeItem, subTotal, clearCart } = useCart()
+  const { formatCurrency } = useCurrency()
 
   return (
     <div>
       <h1>Cart Component</h1>
       <p>This is a placeholder for the Cart component.</p>
+
+      <p>subTotal: {formatCurrency(subTotal)}</p>
 
       {cart && cart.size > 0 ? (
         <ul>
@@ -41,7 +44,15 @@ export const Cart = () => {
         <p>Your cart is empty.</p>
       )}
 
-      {/* <pre>{JSON.stringify(Array.from(cart.values()), null, 2)}</pre> */}
+      <button
+        onClick={() => {
+          clearCart()
+        }}
+      >
+        Clear all
+      </button>
+
+      {/* <pre>{JSON.stringify(Array.from(cart.entries()), null, 2)}</pre> */}
     </div>
   )
 }

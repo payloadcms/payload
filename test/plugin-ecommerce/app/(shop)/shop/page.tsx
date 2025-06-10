@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import { Product } from '@/components/Product.js'
 import { CurrencySelector } from '@/components/CurrencySelector.js'
-import { PaymentsStripe } from '@/components/PaymentsStripe.js'
+import { Payments } from '@/components/Payments.js'
 
 export const Page = async () => {
   const payload = await getPayload({
@@ -16,8 +16,6 @@ export const Page = async () => {
     depth: 2,
     limit: 10,
   })
-
-  console.log({ products })
 
   return (
     <div>
@@ -39,7 +37,7 @@ export const Page = async () => {
 
       <CurrencySelector currenciesConfig={currenciesConfig} />
 
-      <PaymentsStripe currenciesConfig={currenciesConfig} />
+      <Payments currenciesConfig={currenciesConfig} />
     </div>
   )
 }
