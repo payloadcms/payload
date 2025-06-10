@@ -2,27 +2,33 @@ import type { SelectField } from 'payload'
 
 export const statusOptions: SelectField['options'] = [
   {
-    label: 'Pending',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:pending'),
     value: 'pending',
   },
   {
-    label: 'Succeeded',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:succeeded'),
     value: 'succeeded',
   },
   {
-    label: 'Failed',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:completed'),
     value: 'failed',
   },
   {
-    label: 'Cancelled',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:cancelled'),
     value: 'cancelled',
   },
   {
-    label: 'Expired',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:expired'),
     value: 'expired',
   },
   {
-    label: 'Refunded',
+    // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:refunded'),
     value: 'refunded',
   },
 ]
@@ -39,6 +45,9 @@ export const statusField: (props?: Props) => SelectField = (props) => {
     name: 'status',
     type: 'select',
     defaultValue: 'pending',
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-ecommerce:status'),
     options: statusOptions,
     required: true,
     ...overrides,

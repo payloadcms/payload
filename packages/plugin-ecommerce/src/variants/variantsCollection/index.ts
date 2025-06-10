@@ -1,13 +1,18 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CollectionSlugMap, CurrenciesConfig, Currency, FieldsOverride } from '../../types.js'
+import type { CurrenciesConfig, FieldsOverride, InventoryConfig } from '../../types.js'
 
+import { inventoryField } from '../../fields/inventoryField.js'
 import { pricesField } from '../../fields/pricesField.js'
 import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeChange.js'
 import { validateOptions } from './hooks/validateOptions.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
+  /**
+   * Enables inventory tracking for variants. Defaults to true.
+   */
+  inventory?: InventoryConfig
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the products collection, defaults to 'products'.
@@ -22,11 +27,12 @@ type Props = {
 export const variantsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
+    inventory = true,
     overrides,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
   } = props || {}
-  const { defaultCurrency, supportedCurrencies } = currenciesConfig || {}
+  const { supportedCurrencies } = currenciesConfig || {}
   const fieldsOverride = overrides?.fields
 
   const defaultFields: Field[] = [
@@ -71,14 +77,7 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
       required: true,
       validate: validateOptions(),
     },
-    {
-      name: 'inventory',
-      type: 'number',
-      admin: {
-        step: 1,
-      },
-      required: true,
-    },
+    ...(inventory ? [inventoryField()] : []),
   ]
 
   if (supportedCurrencies?.length && supportedCurrencies.length > 0) {
@@ -106,12 +105,6 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
       useAsTitle: 'title',
       ...overrides?.admin,
     },
-    // defaultPopulate: {
-    //   inventory: true,
-    //   options: true,
-    //   title: true,
-    //   variantOptions: true,
-    // },
     fields,
     hooks: {
       ...overrides?.hooks,

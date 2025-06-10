@@ -114,8 +114,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "workspace:*",
-    "@types/react-dom": "workspace:*",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.2",
     "payload": "workspace:*",
     "stripe": "^10.2.0"
   },

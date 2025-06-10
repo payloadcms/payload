@@ -53,7 +53,9 @@ export function cartReducer(
     }
 
     case 'MERGE_CART': {
-      for (const [key, item] of action.payload.entries()) {
+      for (const item of action.payload.values()) {
+        const key = item.variantID || item.productID
+
         const existing = nextMapState.get(key)
         const quantity = existing ? existing.quantity + item.quantity : item.quantity
         nextMapState.set(key, { ...item, quantity })

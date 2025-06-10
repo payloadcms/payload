@@ -42,16 +42,25 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     {
       name: 'customer',
       type: 'relationship',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
     },
     {
       name: 'customerEmail',
       type: 'email',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:customerEmail'),
     },
     {
       name: 'transactions',
       type: 'relationship',
       hasMany: true,
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:transactions'),
       relationTo: transactionsSlug,
     },
     {
@@ -59,21 +68,28 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       type: 'select',
       defaultValue: 'processing',
       interfaceName: 'OrderStatus',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:status'),
       options: [
         {
-          label: 'Processing',
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:processing'),
           value: 'processing',
         },
         {
-          label: 'Completed',
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:completed'),
           value: 'completed',
         },
         {
-          label: 'Cancelled',
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:cancelled'),
           value: 'cancelled',
         },
         {
-          label: 'Refunded',
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-ecommerce:refunded'),
           value: 'refunded',
         },
       ],
@@ -81,7 +97,26 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
     ...(currenciesConfig
       ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
       : []),
-    cartField({ currenciesConfig, individualPrices: true, productsSlug, variantsSlug }),
+    cartField({
+      currenciesConfig,
+      individualPrices: true,
+      overrides: {
+        name: 'items',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-ecommerce:items'),
+        labels: {
+          plural: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:items'),
+          singular: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-ecommerce:item'),
+        },
+      },
+      productsSlug,
+      variantsSlug,
+    }),
   ]
 
   const fields =

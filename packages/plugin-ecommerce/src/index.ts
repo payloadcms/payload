@@ -2,10 +2,11 @@ import type { Config, Endpoint } from 'payload'
 
 import { deepMergeSimple } from 'payload/shared'
 
-import type { EcommercePluginConfig } from './types.js'
+import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
+import { cartField } from './fields/cartField.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { productsCollection } from './products/productsCollection.js'
 import { transactionsCollection } from './transactions/transactionsCollection.js'
@@ -31,7 +32,7 @@ export const ecommercePlugin =
       incomingConfig.collections = []
     }
 
-    const currenciesConfig: NonNullable<EcommercePluginConfig['currencies']> =
+    const currenciesConfig: Required<SanitizedEcommercePluginConfig['currencies']> =
       sanitizedPluginConfig.currencies
 
     if (sanitizedPluginConfig.products) {
@@ -48,6 +49,7 @@ export const ecommercePlugin =
 
         const variants = variantsCollection({
           currenciesConfig,
+          inventory: sanitizedPluginConfig.inventory,
           overrides: overrides?.variantsCollection,
           productsSlug: collectionSlugMap.products,
           variantOptionsSlug: collectionSlugMap.variantOptions,
@@ -69,6 +71,7 @@ export const ecommercePlugin =
       const products = productsCollection({
         currenciesConfig,
         enableVariants: Boolean(productsConfig.variants),
+        inventory: sanitizedPluginConfig.inventory,
         ...('productsCollection' in productsConfig && productsConfig.productsCollection
           ? { overrides: productsConfig.productsCollection }
           : {}),
@@ -105,16 +108,22 @@ export const ecommercePlugin =
           const initiatePayment: Endpoint = {
             handler: initiatePaymentHandler({
               currenciesConfig,
+              inventory: sanitizedPluginConfig.inventory,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
+              transactionsSlug: collectionSlugMap.transactions,
               variantsSlug: collectionSlugMap.variants,
             }),
             method: 'post',
-            path: `${methodPath}/initiate-payment`,
+            path: `${methodPath}/initiate`,
           }
 
           const confirmOrder: Endpoint = {
-            handler: confirmOrderHandler({ currenciesConfig, paymentMethod }),
+            handler: confirmOrderHandler({
+              ordersSlug: collectionSlugMap.orders,
+              paymentMethod,
+              transactionsSlug: collectionSlugMap.transactions,
+            }),
             method: 'post',
             path: `${methodPath}/confirm-order`,
           }
@@ -167,6 +176,14 @@ export const ecommercePlugin =
     if (!incomingConfig.endpoints) {
       incomingConfig.endpoints = []
     }
+
+    incomingConfig.collections.map((collection) => {
+      if (collection.slug === collectionSlugMap.customers) {
+        collection.fields.push(cartField({ overrides: { name: 'cart' } }))
+      }
+
+      return collection
+    })
 
     // incomingConfig.typescript = {
     //   ...incomingConfig.typescript,

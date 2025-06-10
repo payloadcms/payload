@@ -39,7 +39,9 @@ export const pricesField: (props: Props) => GroupField[] = ({
                   flex: '0 0 auto',
                 },
               },
-              label: `Enable ${currency.code} Price`,
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-ecommerce:enableCurrencyPrice', { currency: currency.code }),
             },
             amountField({
               currenciesConfig,
@@ -49,7 +51,8 @@ export const pricesField: (props: Props) => GroupField[] = ({
                 admin: {
                   condition: (_, siblingData) => Boolean(siblingData?.[path]),
                 },
-                label,
+                // @ts-expect-error - translations are not typed in plugins yet
+                label: ({ t }) => t('plugin-ecommerce:priceIn', { currency: currency.code }),
               },
             }),
           ],

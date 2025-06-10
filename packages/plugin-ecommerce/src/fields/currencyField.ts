@@ -26,6 +26,9 @@ export const currencyField: (props: Props) => SelectField = ({ currenciesConfig,
   const field: SelectField = {
     name: 'currency',
     type: 'select',
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-ecommerce:currency'),
     ...(defaultValue && { defaultValue }),
     options,
     ...overrides,

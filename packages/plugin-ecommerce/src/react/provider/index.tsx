@@ -6,14 +6,13 @@ import React, {
   use,
   useCallback,
   useEffect,
-  useMemo,
   useReducer,
   useRef,
   useState,
 } from 'react'
 
-import type { CartClient, CartItemClient, CurrenciesConfig, Currency } from '../../types.js'
-import type { ContextProps, EcommerceContext, SyncLocalStorageConfig } from './types.js'
+import type { CartClient, CartItemClient, Currency } from '../../types.js'
+import type { ContextProps, EcommerceContext } from './types.js'
 
 import { cartReducer } from './reducer.js'
 
@@ -23,6 +22,7 @@ const defaultContext: EcommerceContext = {
   addItem: () => {},
   cart: initialCart,
   clearCart: () => {},
+  confirmOrder: async () => {},
   currency: {
     code: 'USD',
     decimals: 2,
@@ -32,9 +32,11 @@ const defaultContext: EcommerceContext = {
   decrementItem: () => {},
   incrementItem: () => {},
   initiatePayment: async () => {},
+  paymentData: {},
   removeItem: () => {},
   selectedPaymentMethod: undefined,
   setCurrency: () => {},
+  subTotal: 0,
 }
 
 const EcommerceContext = createContext<EcommerceContext>(defaultContext)
@@ -49,7 +51,22 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
   paymentMethods = [],
   syncLocalStorage = true,
 }) => {
+  const localStorageConfig =
+    syncLocalStorage && typeof syncLocalStorage === 'object'
+      ? {
+          ...defaultLocalStorage,
+          ...syncLocalStorage,
+        }
+      : defaultLocalStorage
+
+  /**
+   * The payment data received from the payment initiation process, this is then threaded through to the payment confirmation process.
+   * Useful for storing things like payment intent IDs, session IDs, etc.
+   */
+  const [paymentData, setPaymentData] = useState<EcommerceContext['paymentData']>({})
+
   const hasRendered = useRef(false)
+  const [subTotal, setSubTotal] = useState(0)
   const [cart, dispatchCart] = useReducer(
     cartReducer,
     new Map<DefaultDocumentIDType, CartItemClient>(),
@@ -64,18 +81,40 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<null | string>(null)
 
-  const localStorageConfig = useMemo<NonNullable<SyncLocalStorageConfig>>(() => {
-    let localStorageConfig: SyncLocalStorageConfig = defaultLocalStorage
+  const updateSubTotal = useCallback(
+    ({ cart }: { cart: EcommerceContext['cart'] }) => {
+      let newSubTotal = 0
+      const priceField = `priceIn${selectedCurrency.code.toUpperCase()}`
 
-    if (syncLocalStorage && typeof syncLocalStorage === 'object') {
-      localStorageConfig = {
-        ...defaultLocalStorage,
-        ...syncLocalStorage,
+      for (const item of cart.values()) {
+        let itemPrice = item.product?.[priceField] || 0
+
+        if (item.variant) {
+          itemPrice = item.variant[priceField] || itemPrice
+        }
+
+        if (itemPrice > 0) {
+          newSubTotal += itemPrice * item.quantity
+        }
       }
-    }
 
-    return localStorageConfig
-  }, [syncLocalStorage])
+      setSubTotal(newSubTotal)
+
+      return newSubTotal
+    },
+    [selectedCurrency],
+  )
+
+  useEffect(() => {
+    const updatedSubTotal = updateSubTotal({ cart })
+
+    if (syncLocalStorage && hasRendered.current) {
+      const cartArray = Array.from(cart.values())
+
+      localStorage.setItem(localStorageConfig.key, JSON.stringify(cartArray))
+      localStorage.setItem('subTotal', JSON.stringify(updatedSubTotal))
+    }
+  }, [cart, localStorageConfig.key, syncLocalStorage, updateSubTotal])
 
   const addItem: EcommerceContext['addItem'] = useCallback((item) => {
     dispatchCart({ type: 'ADD_ITEM', payload: item })
@@ -113,8 +152,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [currenciesConfig.supportedCurrencies, selectedCurrency.code],
   )
 
-  const initiatePayment = useCallback(
-    async (paymentMethodID: string, paymentData: Record<string, any>) => {
+  const initiatePayment = useCallback<EcommerceContext['initiatePayment']>(
+    async (paymentMethodID, options) => {
       const paymentMethod = paymentMethods.find((pm) => pm.name === paymentMethodID)
 
       if (!paymentMethod) {
@@ -124,7 +163,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setSelectedPaymentMethod(paymentMethodID)
 
       if (paymentMethod.initiatePayment) {
-        const fetchURL = `/api/payments/${paymentMethodID}/initiate-payment`
+        const fetchURL = `/api/payments/${paymentMethodID}/initiate`
 
         const data = {
           cart: Array.from(cart.values()),
@@ -133,9 +172,10 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
         const response = await fetch(fetchURL, {
           body: JSON.stringify({
-            data,
-            ...paymentData,
+            ...data,
+            ...(options?.additionalData || {}),
           }),
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -152,6 +192,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         if (responseData.error) {
           throw new Error(`Payment initiation error: ${responseData.error}`)
         }
+
+        setPaymentData(responseData)
+
         return responseData
       } else {
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
@@ -160,65 +203,102 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [cart, paymentMethods, selectedCurrency.code],
   )
 
+  const confirmOrder = useCallback<EcommerceContext['initiatePayment']>(
+    async (paymentMethodID, options) => {
+      if (!cart || cart.size === 0) {
+        throw new Error(`Cart is empty.`)
+      }
+
+      const paymentMethod = paymentMethods.find((pm) => pm.name === paymentMethodID)
+
+      if (!paymentMethod) {
+        throw new Error(`Payment method with ID "${paymentMethodID}" not found`)
+      }
+
+      if (paymentMethod.confirmOrder) {
+        const fetchURL = `/api/payments/${paymentMethodID}/confirm-order`
+
+        const data = {
+          cart: Array.from(cart.values()),
+          currency: selectedCurrency.code,
+          ...paymentData,
+        }
+
+        const response = await fetch(fetchURL, {
+          body: JSON.stringify({
+            ...data,
+            ...(options?.additionalData || {}),
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to confirm order: ${errorText}`)
+        }
+
+        const responseData = await response.json()
+
+        if (responseData.error) {
+          throw new Error(`Order confirmation error: ${responseData.error}`)
+        }
+
+        // Clear the payment data
+        setPaymentData({})
+
+        return responseData
+      } else {
+        throw new Error(`Payment method "${paymentMethodID}" does not support order confirmation`)
+      }
+    },
+    [cart, paymentData, paymentMethods, selectedCurrency.code],
+  )
+
   // If localStorage is enabled, we can add logic to persist the cart state
-  // NEEDS TO BE DEBOUNCED - IGNORE FOR NOW
-  // useEffect(() => {
-  //   if (syncLocalStorage && !hasRendered.current) {
-  //     const storedCart = localStorage.getItem(localStorageConfig.key!)
-  //     if (storedCart) {
-  //       const parsedCart: CartClient = JSON.parse(storedCart)
+  useEffect(() => {
+    if (syncLocalStorage && !hasRendered.current) {
+      const storedCart = localStorage.getItem(localStorageConfig.key)
+      if (storedCart) {
+        const parsedCart: CartClient = JSON.parse(storedCart)
 
-  //       console.log('Restoring cart from localStorage:', {
-  //         cart: parsedCart,
-  //         key: localStorageConfig.key,
-  //       })
+        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+          const cartMap = new Map<DefaultDocumentIDType, CartItemClient>()
 
-  //       if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-  //         const cartMap = new Map<DefaultDocumentIDType, CartItemClient>()
+          for (const item of parsedCart) {
+            const key = item.variantID || item.productID
+            if (key) {
+              cartMap.set(key, item)
+            }
+          }
+          dispatchCart({ type: 'MERGE_CART', payload: parsedCart })
+        }
+      }
 
-  //         for (const item of parsedCart) {
-  //           const key = item.variantID || item.productID
-  //           if (key) {
-  //             cartMap.set(key, item)
-  //           }
-  //         }
-  //         dispatchCart({ type: 'MERGE_CART', payload: Array.from(cartMap.values()) })
-  //       }
-  //     }
-
-  //     hasRendered.current = true
-  //   }
-  // }, [localStorageConfig.key, syncLocalStorage])
-
-  // useEffect(() => {
-  //   if (syncLocalStorage && hasRendered.current) {
-  //     const cartArray = Array.from(cart.values())
-
-  //     console.log('Saving cart to localStorage:', {
-  //       cart: cartArray,
-  //       key: localStorageConfig.key,
-  //     })
-
-  //     localStorage.setItem(localStorageConfig.key!, JSON.stringify(cartArray))
-  //   }
-  // }, [cart, localStorageConfig.key, syncLocalStorage])
+      hasRendered.current = true
+    }
+  }, [localStorageConfig.key, syncLocalStorage])
 
   return (
     <EcommerceContext
-      value={
-        {
-          addItem,
-          cart,
-          clearCart,
-          currency: selectedCurrency,
-          decrementItem,
-          incrementItem,
-          initiatePayment,
-          removeItem,
-          selectedPaymentMethod,
-          setCurrency,
-        } as EcommerceContext
-      }
+      value={{
+        addItem,
+        cart,
+        clearCart,
+        confirmOrder,
+        currency: selectedCurrency,
+        decrementItem,
+        incrementItem,
+        initiatePayment,
+        paymentData,
+        removeItem,
+        selectedPaymentMethod,
+        setCurrency,
+        subTotal,
+      }}
     >
       {children}
     </EcommerceContext>
@@ -239,20 +319,22 @@ export const useCurrency = () => {
   const { currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
-    (value?: null | number): string => {
+    (value?: null | number, options?: { currency?: Currency }): string => {
       if (value === undefined || value === null) {
         return ''
       }
 
-      if (!currency) {
+      const currencyToUse = options?.currency || currency
+
+      if (!currencyToUse) {
         return value.toString()
       }
 
       // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const decimalValue = value / Math.pow(10, currency.decimals)
+      const decimalValue = value / Math.pow(10, currencyToUse.decimals)
 
       // Format with the correct number of decimal places
-      return `${currency.symbol}${decimalValue.toFixed(currency.decimals)}`
+      return `${currencyToUse.symbol}${decimalValue.toFixed(currencyToUse.decimals)}`
     },
     [currency],
   )
@@ -265,21 +347,22 @@ export const useCurrency = () => {
 }
 
 export const useCart = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
+  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem, subTotal } =
+    useEcommerce()
 
   if (!cart) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
+  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem, subTotal }
 }
 
 export const usePayments = () => {
-  const { initiatePayment, selectedPaymentMethod } = useEcommerce()
+  const { confirmOrder, initiatePayment, paymentData, selectedPaymentMethod } = useEcommerce()
 
   if (!initiatePayment) {
     throw new Error('usePayments must be used within an EcommerceProvider')
   }
 
-  return { initiatePayment, selectedPaymentMethod }
+  return { confirmOrder, initiatePayment, paymentData, selectedPaymentMethod }
 }

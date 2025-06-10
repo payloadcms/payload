@@ -1,13 +1,19 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { CollectionSlugMap, CurrenciesConfig, FieldsOverride } from '../types.js'
+import type { CurrenciesConfig, FieldsOverride, InventoryConfig } from '../types.js'
 
+import { inventoryField } from '../fields/inventoryField.js'
 import { pricesField } from '../fields/pricesField.js'
 import { variantsFields } from '../fields/variantsFields.js'
 
 type Props = {
   currenciesConfig: CurrenciesConfig
   enableVariants?: boolean
+  /**
+   * Adds in an inventory field to the product and its variants. This is useful for tracking inventory levels.
+   * Defaults to true.
+   */
+  inventory?: boolean | InventoryConfig
   overrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   /**
    * Slug of the variants collection, defaults to 'variants'.
@@ -22,6 +28,7 @@ type Props = {
 export const productsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
+    inventory = true,
     overrides,
     variantsSlug = 'variants',
     variantTypesSlug = 'variantTypes',
@@ -34,6 +41,17 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
       name: 'name',
       type: 'text',
     },
+    ...(inventory
+      ? [
+          inventoryField({
+            overrides: {
+              admin: {
+                condition: ({ enableVariants }) => !enableVariants,
+              },
+            },
+          }),
+        ]
+      : []),
   ]
 
   const baseFields = [
@@ -51,7 +69,11 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
     slug: 'products',
     ...overrides,
     admin: {
-      defaultColumns: ['name', 'prices', ...(enableVariants ? ['variants'] : [])],
+      defaultColumns: [
+        'name',
+        ...(currenciesConfig ? ['prices'] : []),
+        ...(enableVariants ? ['variants'] : []),
+      ],
       useAsTitle: 'name',
       ...overrides?.admin,
     },

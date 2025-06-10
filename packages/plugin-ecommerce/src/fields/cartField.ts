@@ -38,22 +38,35 @@ export const cartField: (props?: Props) => ArrayField = (props) => {
       {
         name: 'product',
         type: 'relationship',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-ecommerce:product'),
         relationTo: productsSlug,
       },
       {
         name: 'variant',
         type: 'relationship',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-ecommerce:variant'),
         relationTo: variantsSlug,
       },
       {
         name: 'quantity',
         type: 'number',
         defaultValue: 1,
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-ecommerce:quantity'),
+        min: 1,
         required: true,
       },
       ...(currenciesConfig && individualPrices ? [amountField({ currenciesConfig })] : []),
       ...(currenciesConfig ? [currencyField({ currenciesConfig })] : []),
     ],
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-ecommerce:cart'),
     ...overrides,
   }
 

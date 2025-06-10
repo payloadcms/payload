@@ -35,15 +35,24 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
     {
       name: 'customer',
       type: 'relationship',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
     },
     {
       name: 'customerEmail',
       type: 'email',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:customerEmail'),
     },
     {
       name: 'order',
       type: 'relationship',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:order'),
       relationTo: ordersSlug,
     },
     statusField(),
@@ -53,6 +62,9 @@ export const transactionsCollection: (props?: Props) => CollectionConfig = (prop
     defaultFields.push({
       name: 'paymentMethod',
       type: 'select',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:paymentMethod'),
       options: paymentMethods.map((method) => ({
         label: method.label ?? method.name,
         value: method.name,

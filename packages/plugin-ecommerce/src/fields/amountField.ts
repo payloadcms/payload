@@ -20,6 +20,9 @@ export const amountField: (props: Props) => NumberField = ({
   const field: NumberField = {
     name: 'amount',
     type: 'number',
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-ecommerce:amount'),
     ...overrides,
     admin: {
       components: {

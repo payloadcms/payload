@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 
-import type { PaymentAdapter } from '../../../types.js'
+import type { Cart, PaymentAdapter } from '../../../types.js'
 import type { StripeAdapterArgs } from './index.js'
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({ data, req }) => {
+  async ({ data, ordersSlug, req, transactionsSlug }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -52,9 +52,9 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         })
       }
 
-      // Find our existing payment record by the payment intent ID
+      // Find our existing transaction by the payment intent ID
       const transactionsResults = await payload.find({
-        collection: 'transactions',
+        collection: transactionsSlug,
         where: {
           'stripe.paymentIntentID': {
             equals: paymentIntentID,
@@ -65,17 +65,19 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       const transaction = transactionsResults.docs[0]
 
       if (!transactionsResults.totalDocs || !transaction) {
-        throw new Error('No payment record found for the provided PaymentIntent ID')
+        throw new Error('No transaction found for the provided PaymentIntent ID')
       }
 
       // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
+      const cartToUse = (JSON.parse(paymentIntent.metadata.cart || '[]') as Cart) || cart
+
       const order = await payload.create({
-        collection: 'orders',
+        collection: ordersSlug,
         data: {
           amount: paymentIntent.amount,
-          cart,
+          cart: cartToUse,
           currency: paymentIntent.currency.toUpperCase(),
           ...(req.user ? { customer: req.user.id } : { customerEmail }),
           status: 'processing',
@@ -85,7 +87,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
 
       await payload.update({
         id: transaction.id,
-        collection: 'transactions',
+        collection: transactionsSlug,
         data: {
           order: order.id,
           status: 'succeeded',

@@ -1,9 +1,19 @@
 import { addDataAndFileToRequest, type Endpoint } from 'payload'
 
-import type { Cart, CurrenciesConfig, PaymentAdapter } from '../types.js'
+import type {
+  Cart,
+  CurrenciesConfig,
+  PaymentAdapter,
+  SanitizedEcommercePluginConfig,
+} from '../types.js'
 
 type Args = {
   currenciesConfig: CurrenciesConfig
+  /**
+   * Track inventory stock for the products and variants.
+   * Accepts an object to override the default field name.
+   */
+  inventory?: SanitizedEcommercePluginConfig['inventory']
   paymentMethod: PaymentAdapter
   /**
    * The slug of the products collection, defaults to 'products'.
@@ -39,13 +49,30 @@ export const initiatePaymentHandler: InitiatePayment =
     const payload = req.payload
     const user = req.user
 
-    const currency = data?.currency as string
-    const cart = data?.cart
+    const currency = (data?.currency as string) || currenciesConfig.defaultCurrency
+    let cart = data?.cart
 
     let customerEmail: string = user?.email ?? ''
 
-    // Get the email from the data if user is not available
-    if (!user) {
+    if (user) {
+      if (user.cart && Array.isArray(user.cart) && user.cart.length > 0) {
+        // If the user has a cart, use it
+        if (cart && Array.isArray(cart) && cart.length > 0) {
+          return Response.json(
+            {
+              message: 'You cannot initiate a payment with both a user cart and a provided cart.',
+            },
+            {
+              status: 400,
+            },
+          )
+        }
+
+        // Use the user's cart instead
+        cart = user.cart
+      }
+    } else {
+      // Get the email from the data if user is not available
       if (data?.customerEmail && typeof data.customerEmail === 'string') {
         customerEmail = data.customerEmail
       } else {
@@ -98,6 +125,7 @@ export const initiatePaymentHandler: InitiatePayment =
     }
 
     let internalTotal = 0
+    const sanitizedCart: Cart = []
 
     for (const item of cart) {
       // Target field to check the price based on the currency so we can validate the total
@@ -105,11 +133,14 @@ export const initiatePaymentHandler: InitiatePayment =
       const quantity = item.quantity || 1
 
       if (item.variant) {
+        const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+
         const variant = await payload.findByID({
-          id: item.variant,
+          id,
           collection: variantsSlug,
           depth: 0,
           select: {
+            inventory: true,
             [priceField]: true,
           },
         })
@@ -125,7 +156,7 @@ export const initiatePaymentHandler: InitiatePayment =
           )
         }
 
-        if (!variant[priceField] || !variant[priceField].amount) {
+        if (!variant[priceField]) {
           return Response.json(
             {
               message: `Variant with ID ${item.variant} does not have a price in ${currency}`,
@@ -136,18 +167,43 @@ export const initiatePaymentHandler: InitiatePayment =
           )
         }
 
-        internalTotal += variant[priceField].amount * quantity
+        if (variant.inventory === 0 || (variant.inventory && variant.inventory < quantity)) {
+          return Response.json(
+            {
+              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
+            },
+            {
+              status: 400,
+            },
+          )
+        }
+
+        sanitizedCart.push({
+          productID: item.product
+            ? typeof item.product === 'object'
+              ? item.product.id
+              : item.product
+            : null,
+          quantity,
+          variantID: id,
+        })
+
+        internalTotal += variant[priceField] * quantity
       }
 
-      if (item.product) {
+      // If the item has a product but no variant, we assume the product has a price in the specified currency
+      if (item.product && !item.variant) {
+        const id = typeof item.product === 'object' ? item.product.id : item.product
+
         const product = await payload.findByID({
-          id: item.product,
+          id,
           collection: productsSlug,
           depth: 0,
           select: {
             [priceField]: true,
           },
         })
+
         if (!product) {
           return Response.json(
             {
@@ -158,7 +214,7 @@ export const initiatePaymentHandler: InitiatePayment =
             },
           )
         }
-        if (!product[priceField] || !product[priceField].amount) {
+        if (!product[priceField]) {
           return Response.json(
             {
               message: `Product with ID ${item.product} does not have a price in ${currency}`,
@@ -168,21 +224,37 @@ export const initiatePaymentHandler: InitiatePayment =
             },
           )
         }
-        internalTotal += product[priceField].amount * quantity
+
+        if (product.inventory === 0 || (product.inventory && product.inventory < quantity)) {
+          return Response.json(
+            {
+              message: `Variant with ID ${item.variant} is out of stock or does not have enough inventory`,
+            },
+            {
+              status: 400,
+            },
+          )
+        }
+
+        sanitizedCart.push({
+          productID: id,
+          quantity,
+        })
+
+        internalTotal += product[priceField] * quantity
       }
     }
-
-    const sanitisedCart: Cart = cart as Cart
 
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         data: {
-          cart: sanitisedCart,
+          cart: sanitizedCart,
           currency,
           customerEmail,
           total: internalTotal,
         },
         req,
+        transactionsSlug,
       })
 
       return Response.json(paymentResponse)

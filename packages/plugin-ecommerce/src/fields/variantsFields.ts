@@ -19,6 +19,9 @@ export const variantsFields: (props: Props) => Field[] = ({
     {
       name: 'enableVariants',
       type: 'checkbox',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:enableVariants'),
     },
     {
       name: 'variantTypes',
@@ -27,6 +30,9 @@ export const variantsFields: (props: Props) => Field[] = ({
         condition: ({ enableVariants }) => Boolean(enableVariants),
       },
       hasMany: true,
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:variantTypes'),
       relationTo: variantTypesSlug,
     },
     {
@@ -38,7 +44,9 @@ export const variantsFields: (props: Props) => Field[] = ({
         disableListColumn: true,
       },
       collection: variantsSlug,
-      label: 'Available Variants',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-ecommerce:availableVariants'),
       maxDepth: 2,
       on: 'product',
     },

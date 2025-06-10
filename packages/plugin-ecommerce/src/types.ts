@@ -13,31 +13,21 @@ export type CollectionOverride = { fields?: FieldsOverride } & Partial<
   Omit<CollectionConfig, 'fields'>
 >
 
-type CartItemWithProduct = {
-  product: string
+export type CartItem = {
+  productID: DefaultDocumentIDType
   quantity: number
-  variant: never
+  variantID?: DefaultDocumentIDType
 }
-
-type CartItemWithVariant = {
-  product: never
-  quantity: number
-  variant: string
-}
-
-type CartItem = CartItemWithProduct | CartItemWithVariant
 
 export type Cart = CartItem[]
 
-type CartItemWithProductClient = {
+export type CartItemClient = {
   product: TypedCollection['products']
   productID: DefaultDocumentIDType
   quantity: number
   variant?: TypedCollection['variants']
   variantID?: DefaultDocumentIDType
 }
-
-export type CartItemClient = CartItemWithProductClient //| CartItemWithVariantClient
 
 export type CartClient = CartItemClient[]
 
@@ -54,7 +44,16 @@ export type PaymentAdapter = {
       cart: Cart
       customerEmail: string
     }
+    /**
+     * The slug of the orders collection, defaults to 'orders'.
+     */
+    ordersSlug: string
     req: PayloadRequest
+    /**
+     * The slug of the transactions collection, defaults to 'transactions'.
+     * For example, this is used to create a record of the payment intent in the transactions collection.
+     */
+    transactionsSlug: string
   }) => Promise<Record<string, unknown>> | Record<string, unknown>
   /**
    * An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`.
@@ -105,6 +104,11 @@ export type PaymentAdapter = {
       total: number
     }
     req: PayloadRequest
+    /**
+     * The slug of the transactions collection, defaults to 'transactions'.
+     * For example, this is used to create a record of the payment intent in the transactions collection.
+     */
+    transactionsSlug: string
   }) => Promise<Record<string, unknown>> | Record<string, unknown>
   /**
    * The label of the payment method
@@ -205,13 +209,20 @@ export type SubscriptionsConfig = {
   subscriptionsCollection?: CollectionOverride
 }
 
+export type InventoryConfig = {
+  /**
+   * Override the default field used to track inventory levels. Defaults to 'inventory'.
+   */
+  fieldName?: string
+}
+
 export type CurrenciesConfig = {
   /**
    * Defaults to the first supported currency.
    *
    * @example 'USD'
    */
-  defaultCurrency?: string
+  defaultCurrency: string
   /**
    *
    */
@@ -251,11 +262,11 @@ export type EcommercePluginConfig = {
    */
   customers: CustomersConfig
   /**
-   * Enable tracking of inventory for products, variants, and orders.
+   * Enable tracking of inventory for products and variants.
    *
    * Defaults to true.
    */
-  inventory?: boolean
+  inventory?: boolean | InventoryConfig
   orders?: boolean | OrdersConfig
   /**
    * Enable tracking of payments. Accepts a config object to override the default collection settings.
@@ -273,7 +284,9 @@ export type EcommercePluginConfig = {
 }
 
 export type SanitizedEcommercePluginConfig = {
+  currencies: Required<CurrenciesConfig>
+  inventory?: InventoryConfig
   payments: {
     paymentMethods: [] | PaymentAdapter[]
   }
-} & Omit<Required<EcommercePluginConfig>, 'payments'>
+} & Omit<Required<EcommercePluginConfig>, 'currencies' | 'inventory' | 'payments'>
