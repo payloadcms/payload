@@ -73,22 +73,23 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     setModified(false)
 
     try {
-      const res = deletePermanently
-        ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
-        : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
-            body: JSON.stringify({
-              deletedAt: new Date().toISOString(),
-            }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
+      const res =
+        deletePermanently || !collectionConfig.softDeletes
+          ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
+          : await requests.patch(`${serverURL}${api}/${collectionSlug}/${id}`, {
+              body: JSON.stringify({
+                deletedAt: new Date().toISOString(),
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
 
       const json = await res.json()
 
