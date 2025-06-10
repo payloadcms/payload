@@ -1526,12 +1526,10 @@ describe('Versions', () => {
 
       const date = page.locator('[data-field-path="date"]')
 
-      await expect(date.locator('.html-diff__diff-old')).toHaveText(
-        'December 31st 2020, 4:00:00 PM',
-      )
-      await expect(date.locator('.html-diff__diff-new')).toHaveText(
-        'December 31st 2022, 4:00:00 PM',
-      )
+      await expect(date.locator('.html-diff__diff-old')).toContainText(' 2020, ')
+      await expect(date.locator('.html-diff__diff-new')).toContainText(' 2022, ')
+      // Do not check for exact date, as it may vary based on
+      // timezone of the test runner which could cause flakiness
     })
 
     test('correctly renders diff for email fields', async () => {
