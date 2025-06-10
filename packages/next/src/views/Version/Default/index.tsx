@@ -35,7 +35,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   versionFromCreatedAt,
   versionFromID,
   versionFromOptions,
-  VersionsView,
   versionToCreatedAt,
   versionToCreatedAtFormatted,
   VersionToCreatedAtLabel,
@@ -237,10 +236,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               )}
             </div>
             <SelectComparison
+              collectionSlug={collectionSlug}
+              docID={originalDocID}
               onChange={onChangeVersionFrom}
               versionFromID={versionFromID}
               versionFromOptions={versionFromOptions}
-              VersionsView={VersionsView}
             />
           </div>
 

@@ -449,7 +449,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromCreatedAt={versionFrom?.createdAt}
       versionFromID={versionFrom?.id}
       versionFromOptions={versionFromOptions}
-      VersionsView={_VersionsView}
       versionToCreatedAt={versionTo?.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={

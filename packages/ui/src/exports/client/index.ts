@@ -280,6 +280,8 @@ export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/War
 
 // providers
 export {
+  type RenderDocumentResult,
+  type RenderDocumentServerFunction,
   ServerFunctionsProvider,
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'

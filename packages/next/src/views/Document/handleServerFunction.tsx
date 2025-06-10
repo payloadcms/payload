@@ -1,12 +1,5 @@
-import type {
-  Data,
-  DocumentPreferences,
-  FormState,
-  Locale,
-  PayloadRequest,
-  ServerFunction,
-  VisibleEntities,
-} from 'payload'
+import type { RenderDocumentServerFunction } from '@payloadcms/ui'
+import type { DocumentPreferences, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -14,28 +7,7 @@ import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderDocument } from './index.js'
 
-type RenderDocumentResult = {
-  data: any
-  Document: React.ReactNode
-  preferences: DocumentPreferences
-}
-
-export const renderDocumentHandler: ServerFunction<
-  {
-    collectionSlug: string
-    disableActions?: boolean
-    docID: string
-    drawerSlug?: string
-    initialData?: Data
-    initialState?: FormState
-    locale?: Locale
-    overrideEntityVisibility?: boolean
-    redirectAfterCreate?: boolean
-    redirectAfterDelete: boolean
-    redirectAfterDuplicate: boolean
-  },
-  Promise<RenderDocumentResult>
-> = async (args) => {
+export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {
     collectionSlug,
     disableActions,
@@ -44,6 +16,7 @@ export const renderDocumentHandler: ServerFunction<
     initialData,
     locale,
     overrideEntityVisibility,
+    paramsOverride,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -166,8 +139,8 @@ export const renderDocumentHandler: ServerFunction<
       visibleEntities,
     },
     overrideEntityVisibility,
-    params: {
-      segments: ['collections', collectionSlug, docID],
+    params: paramsOverride ?? {
+      segments: ['collections', collectionSlug, String(docID)],
     },
     payload,
     redirectAfterCreate,

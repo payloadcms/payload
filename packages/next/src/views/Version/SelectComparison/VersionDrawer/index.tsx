@@ -1,6 +1,14 @@
 'use client'
-import { Drawer, useEditDepth, useModal, useTranslation } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import {
+  Drawer,
+  LoadingOverlay,
+  toast,
+  useEditDepth,
+  useModal,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import './index.scss'
 
@@ -13,11 +21,73 @@ export const formatVersionDrawerSlug = ({
   uuid: string // supply when creating a new document and no id is available
 }) => `version-drawer_${depth}_${uuid}`
 
-export const VersionDrawer: React.FC<{
+export const VersionDrawerContent: React.FC<{
+  collectionSlug: string
+  docID: number | string
   drawerSlug: string
-  VersionsView: React.ReactNode
 }> = (props) => {
-  const { drawerSlug, VersionsView } = props
+  const { collectionSlug, docID, drawerSlug } = props
+  const { closeModal } = useModal()
+
+  const { renderDocument } = useServerFunctions()
+
+  const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
+  const hasRenderedDocument = useRef(false)
+  const { t } = useTranslation()
+
+  const getDocumentView = useCallback(
+    (docID?: number | string) => {
+      const fetchDocumentView = async () => {
+        setIsLoading(true)
+
+        try {
+          const result = await renderDocument({
+            collectionSlug,
+            docID,
+            drawerSlug,
+            paramsOverride: {
+              segments: ['collections', collectionSlug, String(docID), 'versions'],
+            },
+            redirectAfterDelete: false,
+            redirectAfterDuplicate: false,
+          })
+
+          if (result?.Document) {
+            setDocumentView(result.Document)
+            setIsLoading(false)
+          }
+        } catch (error) {
+          toast.error(error?.message || t('error:unspecific'))
+          closeModal(drawerSlug)
+          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
+        }
+      }
+
+      void fetchDocumentView()
+    },
+    [closeModal, collectionSlug, drawerSlug, renderDocument, t],
+  )
+
+  useEffect(() => {
+    if (!hasRenderedDocument.current) {
+      getDocumentView(docID)
+      hasRenderedDocument.current = true
+    }
+  }, [docID, getDocumentView])
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
+
+  return DocumentView
+}
+export const VersionDrawer: React.FC<{
+  collectionSlug: string
+  docID: number | string
+  drawerSlug: string
+}> = (props) => {
+  const { collectionSlug, docID, drawerSlug } = props
   const { t } = useTranslation()
 
   return (
@@ -27,12 +97,18 @@ export const VersionDrawer: React.FC<{
       slug={drawerSlug}
       title={t('version:selectVersionToCompare')}
     >
-      {VersionsView}
+      <VersionDrawerContent collectionSlug={collectionSlug} docID={docID} drawerSlug={drawerSlug} />
     </Drawer>
   )
 }
 
-export const useVersionDrawer = ({ VersionsView }: { VersionsView: React.ReactNode }) => {
+export const useVersionDrawer = ({
+  collectionSlug,
+  docID,
+}: {
+  collectionSlug: string
+  docID: number | string
+}) => {
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
@@ -60,8 +136,10 @@ export const useVersionDrawer = ({ VersionsView }: { VersionsView: React.ReactNo
   }, [drawerSlug, openModal])
 
   const MemoizedDrawer = useMemo(() => {
-    return () => <VersionDrawer drawerSlug={drawerSlug} VersionsView={VersionsView} />
-  }, [drawerSlug, VersionsView])
+    return () => (
+      <VersionDrawer collectionSlug={collectionSlug} docID={docID} drawerSlug={drawerSlug} />
+    )
+  }, [collectionSlug, docID, drawerSlug])
 
   return useMemo(
     () => ({

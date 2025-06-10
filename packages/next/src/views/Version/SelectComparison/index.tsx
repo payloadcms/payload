@@ -14,10 +14,16 @@ import { useVersionDrawer } from './VersionDrawer/index.js'
 const baseClass = 'compare-version'
 
 export const SelectComparison: React.FC<Props> = memo((props) => {
-  const { onChange: onChangeFromProps, versionFromID, versionFromOptions, VersionsView } = props
+  const {
+    collectionSlug,
+    docID,
+    onChange: onChangeFromProps,
+    versionFromID,
+    versionFromOptions,
+  } = props
   const { t } = useTranslation()
 
-  const { Drawer, openDrawer } = useVersionDrawer({ VersionsView })
+  const { Drawer, openDrawer } = useVersionDrawer({ collectionSlug, docID })
 
   const options = useMemo(() => {
     return [
