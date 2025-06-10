@@ -57,7 +57,7 @@
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
     "@types/uuid": "10.0.0",
-    "mongodb": "6.17.0",
+    "mongodb": "6.16.0",
     "mongodb-memory-server": "10.1.4",
     "payload": "workspace:*"
   },
