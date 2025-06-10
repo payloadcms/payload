@@ -1,7 +1,10 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+
+import { UnauthorizedError } from 'payload'
 
 import type { ViewToRender } from './getDocumentView.js'
 
+import { NotFoundView } from '../NotFound/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { defaultDocumentViews } from './defaults.js'
 import { getViewByRoute } from './getViewByRoute.js'
@@ -12,29 +15,30 @@ import { getViewByRoute } from './getViewByRoute.js'
  */
 export const getViewByKeyOrRoute = ({
   basePath,
-  condition,
+  collectionConfig,
+  config,
   currentRoute,
+  globalConfig,
   viewKey,
-  views,
 }: {
   basePath: Parameters<typeof getViewByRoute>[0]['basePath']
-  condition?: () => boolean
+  collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
   currentRoute: Parameters<typeof getViewByRoute>[0]['currentRoute']
+  globalConfig?: SanitizedGlobalConfig
   /**
    * The key that corresponds to the view in the `views` config.
    * If no view key was provided, will attempt to find the view's config by matching the current route against all paths.
    */
   viewKey?: string
-  /**
-   * The `admin.components.views` config object from the collection or global config.
-   */
-  views:
-    | SanitizedCollectionConfig['admin']['components']['views']
-    | SanitizedGlobalConfig['admin']['components']['views']
 }): {
-  View: ViewToRender
+  Component: ViewToRender
   viewKey?: string
 } => {
+  const views =
+    (collectionConfig && collectionConfig?.admin?.components?.views) ||
+    (globalConfig && globalConfig?.admin?.components?.views)
+
   if (!viewKey) {
     return getViewByRoute({
       basePath,
@@ -48,21 +52,37 @@ export const getViewByKeyOrRoute = ({
   const hasCustomizedPath = views?.edit?.[viewKey] && 'path' in views.edit[viewKey]
 
   if (!hasCustomizedPath) {
-    // Only run this check if the view is located on the config
-    if (condition) {
-      const shouldContinue = condition()
+    const viewConfig = {
+      ...(defaultDocumentViews[viewKey] || {}),
+      ...(views.edit[viewKey] || {}),
+    }
 
-      if (shouldContinue === false) {
-        return { View: UnauthorizedViewWithGutter }
+    /**
+     * Runs conditions returning the found view. For example, to conditionally render the API view based on `hideAPIURL`.
+     * Should not run if another view is mounted to this route. For example, you wouldn't want `hideAPIURL` to apply to `myCustomView`.
+     * If not explicitly false, will return the `NotFoundView`. You can also throw an `UnauthorizedError` to render the `Unauthorized` view.
+     */
+    if (typeof viewConfig.condition === 'function') {
+      try {
+        const meetsCondition = viewConfig.condition({
+          collectionConfig,
+          config,
+          // docPermissions,
+          globalConfig,
+          viewKey,
+        })
+
+        if (meetsCondition === false) {
+          return { Component: NotFoundView }
+        }
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          return { Component: UnauthorizedViewWithGutter }
+        }
       }
     }
 
-    const CustomOrDefaultView =
-      typeof views?.edit?.[viewKey] === 'object' && 'Component' in views.edit[viewKey]
-        ? views?.edit?.[viewKey].Component
-        : defaultDocumentViews[viewKey]
-
-    return { View: CustomOrDefaultView, viewKey }
+    return { Component: viewConfig.Component, viewKey }
   } else {
     // Check for another view that may be occupying this path
     return getViewByRoute({

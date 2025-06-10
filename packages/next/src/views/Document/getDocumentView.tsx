@@ -12,8 +12,6 @@ import {
   type SanitizedGlobalPermission,
 } from 'payload'
 
-import { EditView as DefaultEditView } from '../Edit/index.js'
-import { UnauthorizedView } from '../Unauthorized/index.js'
 import { getViewByKeyOrRoute } from './getViewByKeyOrRoute.js'
 
 export type ViewFromConfig<TProps extends object> = {
@@ -67,16 +65,6 @@ export const getDocumentView = ({
     routes: { admin: adminRoute },
   } = config
 
-  const views =
-    (collectionConfig && collectionConfig?.admin?.components?.views) ||
-    (globalConfig && globalConfig?.admin?.components?.views)
-
-  const livePreviewEnabled =
-    (collectionConfig && collectionConfig?.admin?.livePreview) ||
-    config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug) ||
-    (globalConfig && globalConfig?.admin?.livePreview) ||
-    config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
-
   if (!docPermissions?.read) {
     throw new Error('not-found')
   }
@@ -92,6 +80,15 @@ export const getDocumentView = ({
       .filter(Boolean)
       .join('/')
 
+    const getView = (key?: string) =>
+      getViewByKeyOrRoute({
+        basePath,
+        collectionConfig,
+        config,
+        currentRoute,
+        viewKey: key,
+      })
+
     switch (routeSegments.length) {
       // --> ../collections/posts/create
       // --> ../collections/posts/:id
@@ -99,30 +96,13 @@ export const getDocumentView = ({
         switch (segment3) {
           // --> ../collections/posts/create
           case 'create': {
-            if (!('create' in docPermissions) || !docPermissions.create) {
-              View = UnauthorizedView
-              break
-            }
-
-            ;({ View } = getViewByKeyOrRoute({
-              basePath,
-              currentRoute,
-              viewKey: 'default',
-              views,
-            }))
-
+            View = getView('default').Component
             break
           }
 
           // --> ../collections/posts/:id
           default: {
-            ;({ View } = getViewByKeyOrRoute({
-              basePath,
-              currentRoute,
-              viewKey: 'default',
-              views,
-            }))
-
+            View = getView('default').Component
             break
           }
         }
@@ -138,57 +118,28 @@ export const getDocumentView = ({
         switch (segment4) {
           // --> ../:id/api
           case 'api': {
-            // if (collectionConfig?.admin?.hideAPIURL !== true) {
-            //   View = getViewByKeyOrRoute({ viewKey: 'api', views })
-            // }
-            ;({ View } = getViewByKeyOrRoute({
-              basePath,
-              currentRoute,
-              viewKey: 'api',
-              views,
-            }))
-
+            View = getView('api').Component
             break
           }
 
           // --> ../:id/preview
           case 'preview': {
-            if (livePreviewEnabled) {
-              ;({ View } = getViewByKeyOrRoute({
-                basePath,
-                currentRoute,
-                viewKey: 'livePreview',
-                views,
-              }))
-            }
-
+            View = getView('livePreview').Component
             break
           }
 
           // --> ../:id/versions
           case 'versions': {
-            ;({ View } = getViewByKeyOrRoute({
-              basePath,
-              condition: () => docPermissions?.readVersions,
-              currentRoute,
-              viewKey: 'versions',
-              views,
-            }))
-
+            View = getView('versions').Component
             break
           }
 
           // --> ../:id/<custom-segment>
           default: {
-            const { View: CustomViewComponent, viewKey: customViewKey } = getViewByKeyOrRoute({
-              basePath,
-              currentRoute,
-              views,
-            })
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getView()
 
             if (customViewKey) {
               viewKey = customViewKey
-
               View = CustomViewComponent
             }
 
@@ -204,20 +155,10 @@ export const getDocumentView = ({
       default: {
         // --> ../:id/versions/:version
         if (segment4 === 'versions') {
-          ;({ View } = getViewByKeyOrRoute({
-            basePath,
-            condition: () => docPermissions?.readVersions,
-            currentRoute,
-            viewKey: 'version',
-            views,
-          }))
+          View = getView('version').Component
         } else {
           // --> ../:id/<custom-segment>/<custom-segment>
-          const { View: CustomViewComponent, viewKey: customViewKey } = getViewByKeyOrRoute({
-            basePath,
-            currentRoute,
-            views,
-          })
+          const { Component: CustomViewComponent, viewKey: customViewKey } = getView()
 
           if (customViewKey) {
             viewKey = customViewKey
@@ -241,16 +182,19 @@ export const getDocumentView = ({
       .filter(Boolean)
       .join('/')
 
+    const getView = (key?: string) =>
+      getViewByKeyOrRoute({
+        basePath,
+        config,
+        currentRoute,
+        globalConfig,
+        viewKey: key,
+      })
+
     switch (routeSegments.length) {
       // --> ../:slug
       case 2: {
-        ;({ View } = getViewByKeyOrRoute({
-          basePath,
-          currentRoute,
-          viewKey: 'default',
-          views,
-        }))
-
+        View = getView('default').Component
         break
       }
 
@@ -261,66 +205,29 @@ export const getDocumentView = ({
         switch (segment3) {
           // --> ../:slug/api
           case 'api': {
-            if (globalConfig?.admin?.hideAPIURL !== true) {
-              ;({ View } = getViewByKeyOrRoute({
-                basePath,
-                currentRoute,
-                viewKey: 'api',
-                views,
-              }))
-            }
-
+            View = getView('api').Component
             break
           }
 
           // --> ../:slug/preview
           case 'preview': {
-            if (livePreviewEnabled) {
-              ;({ View } = getViewByKeyOrRoute({
-                basePath,
-                currentRoute,
-                viewKey: 'livePreview',
-                views,
-              }))
-            }
-
+            View = getView('livePreview').Component
             break
           }
 
           // --> ../:slug/versions
           case 'versions': {
-            if (docPermissions?.readVersions) {
-              ;({ View } = getViewByKeyOrRoute({
-                basePath,
-                currentRoute,
-                viewKey: 'versions',
-                views,
-              }))
-            } else {
-              View = UnauthorizedView
-            }
-
+            View = getView('versions').Component
             break
           }
 
           // --> ../:slug/<custom-segment>
           default: {
-            if (docPermissions?.read) {
-              const { View: CustomViewComponent, viewKey: customViewKey } = getViewByKeyOrRoute({
-                basePath,
-                currentRoute,
-                views,
-              })
+            const { Component: CustomViewComponent, viewKey: customViewKey } = getView()
 
-              if (customViewKey) {
-                viewKey = customViewKey
-
-                View = CustomViewComponent
-              } else {
-                View = DefaultEditView
-              }
-            } else {
-              View = UnauthorizedView
+            if (customViewKey) {
+              viewKey = customViewKey
+              View = CustomViewComponent
             }
 
             break
@@ -335,23 +242,10 @@ export const getDocumentView = ({
       default: {
         // --> ../:slug/versions/:version
         if (segment3 === 'versions') {
-          if (docPermissions?.readVersions) {
-            ;({ View } = getViewByKeyOrRoute({
-              basePath,
-              currentRoute,
-              viewKey: 'version',
-              views,
-            }))
-          } else {
-            View = UnauthorizedView
-          }
+          View = getView('version').Component
         } else {
           // --> ../:slug/<custom-segment>/<custom-segment>
-          const { View: CustomViewComponent, viewKey: customViewKey } = getViewByKeyOrRoute({
-            basePath,
-            currentRoute,
-            views,
-          })
+          const { Component: CustomViewComponent, viewKey: customViewKey } = getView()
 
           if (customViewKey) {
             viewKey = customViewKey

@@ -135,6 +135,18 @@ describe('Document View', () => {
       await page.goto(`${customViewURL.edit(customViewDocID)}/preview`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
+
+    test('default view conditions should apply to default views mounted to another route', async () => {
+      // For example, `hideAPIURL` should 404 the "/my-api" route because the `api` key has a custom `path` pointing here
+      await page.goto(`${customViewURL.edit(customViewDocID)}/my-api`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+
+    test('default view conditions should NOT apply to custom views mounted to the default routes', async () => {
+      // For example, `hideAPIURL` should not 404 on the `myCustomView` key that has path of `/api`
+      await page.goto(`${customViewURL.edit(customViewDocID)}/api`)
+      await expect(page.locator('#custom-api-view')).toBeVisible()
+    })
   })
 
   describe('API view', () => {

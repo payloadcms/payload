@@ -8,6 +8,7 @@ export const CustomViews3: CollectionConfig = {
     livePreview: {
       url: '/',
     },
+    hideAPIURL: true,
     components: {
       views: {
         edit: {
@@ -22,6 +23,13 @@ export const CustomViews3: CollectionConfig = {
             tab: {
               href: '/edit',
             },
+          },
+          api: {
+            path: '/my-api',
+          },
+          myCustomView: {
+            path: '/api',
+            Component: '/components/views/CustomAPIView/index.js#CustomAPIView',
           },
         },
       },

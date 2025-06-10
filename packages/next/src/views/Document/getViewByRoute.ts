@@ -31,7 +31,7 @@ export const getViewByRoute = ({
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views']
 }): {
-  View: EditViewComponent
+  Component: EditViewComponent
   viewKey?: string
 } => {
   if (typeof views?.edit === 'object') {
@@ -59,18 +59,19 @@ export const getViewByRoute = ({
 
     if (foundViewConfig && 'Component' in foundViewConfig) {
       return {
-        View: foundViewConfig.Component,
+        Component: foundViewConfig.Component,
         viewKey,
       }
     } else {
+      // Need to run conditions here as well?!?!?!
       return {
-        View: defaultDocumentViews[viewKey] || null,
+        Component: defaultDocumentViews[viewKey]?.Component || null,
         viewKey,
       }
     }
   }
 
   return {
-    View: null,
+    Component: null,
   }
 }
