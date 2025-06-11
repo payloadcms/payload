@@ -85,7 +85,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     // If a group field has subfields and has a name, otherwise we catch it below along with collapsible and row fields
-    if (field.type === 'group' && 'fields' in field && fieldAffectsData(field)) {
+    if (field.type === 'group' && 'fields' in field) {
       if (moveSubFieldsToTop) {
         const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
         const groupName = 'name' in field ? field.name : undefined
@@ -121,8 +121,12 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
           }),
         )
       } else {
-        // Hoisting diabled - keep as top level field
-        acc.push(field as FlattenedField<TField>)
+        if (fieldAffectsData(field)) {
+          // Hoisting diabled - keep as top level field
+          acc.push(field as FlattenedField<TField>)
+        } else {
+          acc.push(...flattenTopLevelFields(field.fields as TField[], options))
+        }
       }
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
@@ -169,7 +173,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
           }
         }, []),
       ]
-    } else if (fieldHasSubFields(field) && ['collapsible', 'group', 'row'].includes(field.type)) {
+    } else if (fieldHasSubFields(field) && ['collapsible', 'row'].includes(field.type)) {
       // Recurse into row and collapsible
       acc.push(...flattenTopLevelFields(field.fields as TField[], options))
     } else if (
