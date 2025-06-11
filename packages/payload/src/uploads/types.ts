@@ -1,4 +1,4 @@
-import type { ResizeOptions, Sharp } from 'sharp'
+import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -125,6 +125,11 @@ export type UploadConfig = {
    */
   cacheTags?: boolean
   /**
+   * Sharp constructor options to be passed to the uploaded file.
+   * @link https://sharp.pixelplumbing.com/api-constructor/#sharp
+   */
+  constructorOptions?: SharpOptions
+  /**
    * Enables cropping of images.
    * @default true
    */
@@ -172,6 +177,7 @@ export type UploadConfig = {
    * - If a handler returns null, the next handler will be run.
    * - If no handlers return a response the file will be returned by default.
    *
+   * @link https://sharp.pixelplumbing.com/api-output/#toformat
    * @default undefined
    */
   handlers?: ((

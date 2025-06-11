@@ -1477,4 +1477,15 @@ describe('Uploads', () => {
     await expect(imageUploadCell).toHaveText('<No Image Upload>')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
   })
+
+  test('should respect Sharp constructorOptions', async () => {
+    await page.goto(animatedTypeMediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './5mb-gif.gif'))
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('5mb-gif.gif')
+    await saveDocAndAssert(page, '#action-save', 'error')
+  })
 })

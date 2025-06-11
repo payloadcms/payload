@@ -409,6 +409,9 @@ export default buildConfigWithDefaults({
       slug: animatedTypeMedia,
       fields: [],
       upload: {
+        constructorOptions: {
+          limitInputPixels: 3000000,
+        },
         staticDir: path.resolve(dirname, './media'),
         resizeOptions: {
           position: 'center',
@@ -1000,10 +1003,10 @@ export default buildConfigWithDefaults({
   serverURL: undefined,
   upload: {
     // debug: true,
-    abortOnLimit: true,
-    limits: {
-      fileSize: 2_000_000, // 2MB
-    },
+    // abortOnLimit: true,
+    // limits: {
+    //   fileSize: 2_000_000, // 2MB
+    // },
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
