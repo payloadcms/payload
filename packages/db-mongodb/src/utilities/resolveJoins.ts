@@ -107,6 +107,7 @@ type Args = {
   docs: Record<string, unknown>[]
   joins?: JoinQuery
   locale?: string
+  versions?: boolean
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]
@@ -196,6 +197,7 @@ export async function resolveJoins({
   docs,
   joins,
   locale,
+  versions = false,
 }: Args): Promise<void> {
   // Early return if no joins are specified or no documents to process
   if (!joins || docs.length === 0) {
@@ -247,7 +249,7 @@ export async function resolveJoins({
       const allResults: Record<string, unknown>[] = []
 
       // Extract all parent document IDs to use in the join query
-      const parentIDs = docs.map((d) => d._id ?? d.id)
+      const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
       // Use the provided locale or fall back to the default locale for localized fields
       const localizationConfig = adapter.payload.config.localization
@@ -376,7 +378,7 @@ export async function resolveJoins({
 
       // Attach the joined data to each parent document
       for (const doc of docs) {
-        const id = (doc._id ?? doc.id) as string
+        const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
         const all = grouped[id] || []
 
         // Calculate the slice for pagination
@@ -395,7 +397,16 @@ export async function resolveJoins({
 
         // Navigate to the correct nested location in the document and set the join data
         const segments = localizedJoinPath.split('.')
-        let ref = doc
+        let ref: Record<string, unknown>
+        if (versions) {
+          if (!doc.version) {
+            doc.version = {}
+          }
+          ref = doc.version as Record<string, unknown>
+        } else {
+          ref = doc
+        }
+
         for (let i = 0; i < segments.length - 1; i++) {
           const seg = segments[i]!
           if (!ref[seg]) {
@@ -418,7 +429,7 @@ export async function resolveJoins({
     }
 
     // Extract all parent document IDs to use in the join query
-    const parentIDs = docs.map((d) => d._id ?? d.id)
+    const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
     // Build the base query for the target collection
     const whereQuery = await buildQuery({
@@ -564,7 +575,7 @@ export async function resolveJoins({
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
-      const id = (doc._id ?? doc.id) as string
+      const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
       const all = grouped[id] || []
 
       // Calculate the slice for pagination
@@ -585,7 +596,16 @@ export async function resolveJoins({
       // Navigate to the correct nested location in the document and set the join data
       // This handles nested join paths like "user.posts" by creating intermediate objects
       const segments = localizedJoinPath.split('.')
-      let ref = doc
+      let ref: Record<string, unknown>
+      if (versions) {
+        if (!doc.version) {
+          doc.version = {}
+        }
+        ref = doc.version as Record<string, unknown>
+      } else {
+        ref = doc
+      }
+
       for (let i = 0; i < segments.length - 1; i++) {
         const seg = segments[i]!
         if (!ref[seg]) {
