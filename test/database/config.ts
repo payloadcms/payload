@@ -73,6 +73,33 @@ export default buildConfigWithDefaults({
           type: 'number',
         },
         {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'nested',
+                  blocks: [
+                    {
+                      slug: 'block',
+                      fields: [
+                        {
+                          type: 'blocks',
+                          name: 'nested',
+                          blocks: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           type: 'tabs',
           tabs: [
             {

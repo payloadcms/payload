@@ -2666,4 +2666,28 @@ describe('database', () => {
       expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
     }
   })
+
+  it('should support x3 nesting blocks', async () => {
+    const res = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'title',
+        blocks: [
+          {
+            blockType: 'block',
+            nested: [
+              {
+                blockType: 'block',
+                nested: [],
+              },
+            ],
+          },
+        ],
+      },
+    })
+
+    expect(res.blocks).toHaveLength(1)
+    expect(res.blocks[0]?.nested).toHaveLength(1)
+    expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
+  })
 })
