@@ -4,13 +4,13 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Page, Post } from './payload-types.js'
+import type { TrashEnabled, TrashEnabledWithAccessControl } from './payload-types.js'
 
 import { regularUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './collections/Pages/index.js'
-import { postsSlug } from './collections/Posts/index.js'
+import { trashEnabledSlug } from './collections/TrashEnabled/index.js'
+import { trashEnabledWithAccessControlSlug } from './collections/TrashEnabledWithAccessControl/index.js'
 import { usersSlug } from './collections/Users/index.js'
 
 let restClient: NextRESTClient
@@ -34,9 +34,9 @@ describe('soft-delete', () => {
     }
   })
 
-  let pageOne: Page
-  let postOne: Post
-  let postTwo: Post
+  let trashEnabledWithACDoc: TrashEnabledWithAccessControl
+  let trashEnabledDocOne: TrashEnabled
+  let trashEnabledDocTwo: TrashEnabled
 
   beforeEach(async () => {
     await restClient.login({
@@ -52,24 +52,24 @@ describe('soft-delete', () => {
       },
     })
 
-    pageOne = await payload.create({
-      collection: pagesSlug,
+    trashEnabledWithACDoc = await payload.create({
+      collection: trashEnabledWithAccessControlSlug,
       data: {
-        title: 'Page one',
+        title: 'With Access Control one',
       },
     })
 
-    postOne = await payload.create({
-      collection: postsSlug,
+    trashEnabledDocOne = await payload.create({
+      collection: trashEnabledSlug,
       data: {
-        title: 'Post one',
+        title: 'Doc one',
       },
     })
 
-    postTwo = await payload.create({
-      collection: postsSlug,
+    trashEnabledDocTwo = await payload.create({
+      collection: trashEnabledSlug,
       data: {
-        title: 'Post two',
+        title: 'Doc two',
         deletedAt: new Date().toISOString(),
       },
     })
@@ -77,7 +77,7 @@ describe('soft-delete', () => {
 
   afterEach(async () => {
     await payload.delete({
-      collection: postsSlug,
+      collection: trashEnabledSlug,
       trash: true,
       where: {
         title: {
@@ -88,12 +88,12 @@ describe('soft-delete', () => {
   })
 
   // Access control tests use the Pages collection because it has delete access control enabled.
-  // The Posts collection does not have any access restrictions and is used for general CRUD tests.
+  // The TrashEnabled collection does not have any access restrictions and is used for general CRUD tests.
   describe('Access control', () => {
     it('should not allow bulk soft-deleting documents when restricted by delete access', async () => {
       await expect(
         payload.update({
-          collection: pagesSlug,
+          collection: trashEnabledWithAccessControlSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
@@ -101,7 +101,7 @@ describe('soft-delete', () => {
           where: {
             // Using where to target multiple documents
             title: {
-              equals: pageOne.title,
+              equals: trashEnabledWithACDoc.title,
             },
           },
           overrideAccess: false, // Override access to false to test access control
@@ -116,11 +116,11 @@ describe('soft-delete', () => {
     it('should not allow soft-deleting a document when restricted by delete access', async () => {
       await expect(
         payload.update({
-          collection: pagesSlug,
+          collection: trashEnabledWithAccessControlSlug,
           data: {
             deletedAt: new Date().toISOString(),
           },
-          id: pageOne.id, // Using ID to target specific document
+          id: trashEnabledWithACDoc.id, // Using ID to target specific document
           user, // Regular user does not have delete access
           overrideAccess: false, // Override access to false to test access control
         }),
@@ -136,7 +136,7 @@ describe('soft-delete', () => {
     describe('find', () => {
       it('should return all docs including soft-deleted docs in find with trash: true', async () => {
         const allDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
         })
 
@@ -145,7 +145,7 @@ describe('soft-delete', () => {
 
       it('should return only soft-deleted docs in find with trash: true', async () => {
         const trashedDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           where: {
             deletedAt: {
               exists: true,
@@ -155,23 +155,23 @@ describe('soft-delete', () => {
         })
 
         expect(trashedDocs.totalDocs).toEqual(1)
-        expect(trashedDocs.docs[0]?.id).toEqual(postTwo.id)
+        expect(trashedDocs.docs[0]?.id).toEqual(trashEnabledDocTwo.id)
       })
 
       it('should return only non-soft-deleted docs in find with trash: false', async () => {
         const normalDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: false,
         })
 
         expect(normalDocs.totalDocs).toEqual(1)
-        expect(normalDocs.docs[0]?.id).toEqual(postOne.id)
+        expect(normalDocs.docs[0]?.id).toEqual(trashEnabledDocOne.id)
       })
 
       it('should find restored documents after setting deletedAt to null', async () => {
         await payload.update({
-          collection: postsSlug,
-          id: postTwo.id,
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           data: {
             deletedAt: null,
           },
@@ -179,11 +179,11 @@ describe('soft-delete', () => {
         })
 
         const result = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: false, // Normal query should return it now
         })
 
-        const restored = result.docs.find((doc) => doc.id === postTwo.id)
+        const restored = result.docs.find((doc) => doc.id === trashEnabledDocTwo.id)
 
         expect(restored).toBeDefined()
         expect(restored?.deletedAt).toBeNull()
@@ -192,30 +192,30 @@ describe('soft-delete', () => {
 
     describe('findByID operation', () => {
       it('should return a soft-deleted document when trash: true', async () => {
-        const trashedPost: Post = await payload.findByID({
-          collection: postsSlug,
-          id: postTwo.id,
+        const trashedDoc: TrashEnabled = await payload.findByID({
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           trash: true,
         })
 
-        expect(trashedPost).toBeDefined()
-        expect(trashedPost?.id).toEqual(postTwo.id)
-        expect(trashedPost?.deletedAt).toBeDefined()
-        expect(trashedPost?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(trashedDoc).toBeDefined()
+        expect(trashedDoc?.id).toEqual(trashEnabledDocTwo.id)
+        expect(trashedDoc?.deletedAt).toBeDefined()
+        expect(trashedDoc?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to find a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.findByID({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.findByID({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -225,7 +225,7 @@ describe('soft-delete', () => {
     describe('findVersions operation', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -239,18 +239,18 @@ describe('soft-delete', () => {
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
         const allVersions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
         })
 
         expect(allVersions.totalDocs).toEqual(2)
-        expect(allVersions.docs[0]?.parent).toEqual(postTwo.id)
-        expect(allVersions.docs[1]?.parent).toEqual(postOne.id)
+        expect(allVersions.docs[0]?.parent).toEqual(trashEnabledDocTwo.id)
+        expect(allVersions.docs[1]?.parent).toEqual(trashEnabledDocOne.id)
       })
 
       it('should return only soft-deleted docs in findVersions with trash: true', async () => {
         const trashedVersions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           where: {
             'version.deletedAt': {
               exists: true,
@@ -260,23 +260,23 @@ describe('soft-delete', () => {
         })
 
         expect(trashedVersions.totalDocs).toEqual(1)
-        expect(trashedVersions.docs[0]?.parent).toEqual(postTwo.id)
+        expect(trashedVersions.docs[0]?.parent).toEqual(trashEnabledDocTwo.id)
       })
 
       it('should return only non-soft-deleted docs in findVersions with trash: false', async () => {
         const normalVersions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: false,
         })
 
         expect(normalVersions.totalDocs).toEqual(1)
-        expect(normalVersions.docs[0]?.parent).toEqual(postOne.id)
+        expect(normalVersions.docs[0]?.parent).toEqual(trashEnabledDocOne.id)
       })
 
       it('should find versions where version.deletedAt is null after restore', async () => {
         await payload.update({
-          collection: postsSlug,
-          id: postTwo.id,
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           data: {
             deletedAt: null,
           },
@@ -284,7 +284,7 @@ describe('soft-delete', () => {
         })
 
         const versions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
           where: {
             'version.deletedAt': {
@@ -293,14 +293,14 @@ describe('soft-delete', () => {
           },
         })
 
-        expect(versions.docs.some((v) => v.parent === postTwo.id)).toBe(true)
+        expect(versions.docs.some((v) => v.parent === trashEnabledDocTwo.id)).toBe(true)
       })
     })
 
     describe('findVersionByID operation', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -315,7 +315,7 @@ describe('soft-delete', () => {
 
       it('should return a soft-deleted version document when trash: true', async () => {
         const trashedVersions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           where: {
             'version.deletedAt': {
               exists: true,
@@ -328,21 +328,21 @@ describe('soft-delete', () => {
 
         const version = trashedVersions.docs[0]
 
-        const trashedVersionPost = await payload.findVersionByID({
-          collection: postsSlug,
+        const trashedVersionDoc = await payload.findVersionByID({
+          collection: trashEnabledSlug,
           id: version!.id,
           trash: true,
         })
 
-        expect(trashedVersionPost).toBeDefined()
-        expect(trashedVersionPost?.parent).toEqual(postTwo.id)
-        expect(trashedVersionPost?.version?.deletedAt).toBeDefined()
-        expect(trashedVersionPost?.version?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(trashedVersionDoc).toBeDefined()
+        expect(trashedVersionDoc?.parent).toEqual(trashEnabledDocTwo.id)
+        expect(trashedVersionDoc?.version?.deletedAt).toBeDefined()
+        expect(trashedVersionDoc?.version?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to find a soft-deleted version document w/o trash: true', async () => {
         const trashedVersions = await payload.findVersions({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           where: {
             'version.deletedAt': {
               exists: true,
@@ -357,14 +357,14 @@ describe('soft-delete', () => {
 
         await expect(
           payload.findVersionByID({
-            collection: postsSlug,
+            collection: trashEnabledSlug,
             id: version!.id,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.findVersionByID({
-            collection: postsSlug,
+            collection: trashEnabledSlug,
             id: version!.id,
             trash: false,
           }),
@@ -374,39 +374,39 @@ describe('soft-delete', () => {
 
     describe('updateByID operation', () => {
       it('should update a single soft-deleted document when trash: true', async () => {
-        const updatedPost: Post = await payload.update({
-          collection: postsSlug,
-          id: postTwo.id,
+        const updatedDoc: TrashEnabled = await payload.update({
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           data: {
-            title: 'Updated Post Two',
+            title: 'Updated Doc Two',
           },
           trash: true,
         })
 
-        expect(updatedPost).toBeDefined()
-        expect(updatedPost.id).toEqual(postTwo.id)
-        expect(updatedPost.title).toEqual('Updated Post Two')
-        expect(updatedPost.deletedAt).toBeDefined()
-        expect(updatedPost.deletedAt).toEqual(postTwo.deletedAt)
+        expect(updatedDoc).toBeDefined()
+        expect(updatedDoc.id).toEqual(trashEnabledDocTwo.id)
+        expect(updatedDoc.title).toEqual('Updated Doc Two')
+        expect(updatedDoc.deletedAt).toBeDefined()
+        expect(updatedDoc.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to update a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.update({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
             data: {
-              title: 'Updated Post Two',
+              title: 'Updated Doc Two',
             },
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.update({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
             data: {
-              title: 'Updated Post Two',
+              title: 'Updated Doc Two',
             },
             trash: false,
           }),
@@ -414,24 +414,24 @@ describe('soft-delete', () => {
       })
 
       it('should update a single normal document when trash: false', async () => {
-        const updatedPost: Post = await payload.update({
-          collection: postsSlug,
-          id: postOne.id,
+        const updatedDoc: TrashEnabled = await payload.update({
+          collection: trashEnabledSlug,
+          id: trashEnabledDocOne.id,
           data: {
-            title: 'Updated Post One',
+            title: 'Updated Doc One',
           },
         })
 
-        expect(updatedPost).toBeDefined()
-        expect(updatedPost.id).toEqual(postOne.id)
-        expect(updatedPost.title).toEqual('Updated Post One')
-        expect(updatedPost.deletedAt).toBeFalsy()
+        expect(updatedDoc).toBeDefined()
+        expect(updatedDoc.id).toEqual(trashEnabledDocOne.id)
+        expect(updatedDoc.title).toEqual('Updated Doc One')
+        expect(updatedDoc.deletedAt).toBeFalsy()
       })
 
       it('should restore a soft-deleted document by setting deletedAt to null', async () => {
         const restored = await payload.update({
-          collection: postsSlug,
-          id: postTwo.id,
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           data: {
             deletedAt: null,
           },
@@ -442,11 +442,11 @@ describe('soft-delete', () => {
 
         // Should now show up in trash: false queries
         const result = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: false,
         })
 
-        const found = result.docs.find((doc) => doc.id === postTwo.id)
+        const found = result.docs.find((doc) => doc.id === trashEnabledDocTwo.id)
         expect(found).toBeDefined()
         expect(found?.deletedAt).toBeNull()
       })
@@ -455,9 +455,9 @@ describe('soft-delete', () => {
     describe('update operation', () => {
       it('should update only normal document when trash: false', async () => {
         const result = await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
-            title: 'Updated Post',
+            title: 'Updated Doc',
           },
           trash: false,
           where: {
@@ -470,18 +470,18 @@ describe('soft-delete', () => {
         expect(result.docs).toBeDefined()
         expect(result.docs.length).toBeGreaterThan(0)
 
-        const updatedPost: Post = result.docs[0]!
+        const updatedDoc = result.docs[0]
 
-        expect(updatedPost?.id).toEqual(postOne.id)
-        expect(updatedPost?.title).toEqual('Updated Post')
-        expect(updatedPost?.deletedAt).toBeFalsy()
+        expect(updatedDoc?.id).toEqual(trashEnabledDocOne.id)
+        expect(updatedDoc?.title).toEqual('Updated Doc')
+        expect(updatedDoc?.deletedAt).toBeFalsy()
       })
 
       it('should update all documents including soft-deleted documents when trash: true', async () => {
         const result = await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
-            title: 'A New Updated Post',
+            title: 'A New Updated Doc',
           },
           trash: true,
           where: {
@@ -494,29 +494,33 @@ describe('soft-delete', () => {
         expect(result.docs).toBeDefined()
         expect(result.docs.length).toBeGreaterThan(0)
 
-        const updatedPostOne: Post = result.docs.find((doc) => doc.id === postOne.id)!
-        const updatedPostTwo: Post = result.docs.find((doc) => doc.id === postTwo.id)!
+        const updatedtrashEnabledDocOne = result.docs.find(
+          (doc) => doc.id === trashEnabledDocOne.id,
+        )
+        const updatedtrashEnabledDocTwo = result.docs.find(
+          (doc) => doc.id === trashEnabledDocTwo.id,
+        )
 
-        expect(updatedPostOne?.title).toEqual('A New Updated Post')
-        expect(updatedPostOne?.deletedAt).toBeFalsy()
+        expect(updatedtrashEnabledDocOne?.title).toEqual('A New Updated Doc')
+        expect(updatedtrashEnabledDocOne?.deletedAt).toBeFalsy()
 
-        expect(updatedPostTwo?.title).toEqual('A New Updated Post')
-        expect(updatedPostTwo?.deletedAt).toBeDefined()
+        expect(updatedtrashEnabledDocTwo?.title).toEqual('A New Updated Doc')
+        expect(updatedtrashEnabledDocTwo?.deletedAt).toBeDefined()
       })
 
       it('should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true', async () => {
-        const postThree = await payload.create({
-          collection: postsSlug,
+        const docThree = await payload.create({
+          collection: trashEnabledSlug,
           data: {
-            title: 'Post three',
+            title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
         })
 
         const result = await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
-            title: 'Updated Soft Deleted Post',
+            title: 'Updated Soft Deleted Doc',
           },
           trash: true,
           where: {
@@ -526,17 +530,17 @@ describe('soft-delete', () => {
           },
         })
         expect(result.docs).toBeDefined()
-        expect(result.docs[0]?.id).toEqual(postThree.id)
-        expect(result.docs[0]?.title).toEqual('Updated Soft Deleted Post')
-        expect(result.docs[0]?.deletedAt).toEqual(postThree.deletedAt)
-        expect(result.docs[1]?.id).toEqual(postTwo.id)
-        expect(result.docs[1]?.title).toEqual('Updated Soft Deleted Post')
-        expect(result.docs[1]?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(result.docs[0]?.id).toEqual(docThree.id)
+        expect(result.docs[0]?.title).toEqual('Updated Soft Deleted Doc')
+        expect(result.docs[0]?.deletedAt).toEqual(docThree.deletedAt)
+        expect(result.docs[1]?.id).toEqual(trashEnabledDocTwo.id)
+        expect(result.docs[1]?.title).toEqual('Updated Soft Deleted Doc')
+        expect(result.docs[1]?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
-          id: postThree.id,
+          collection: trashEnabledSlug,
+          id: docThree.id,
           trash: true,
         })
       })
@@ -545,7 +549,7 @@ describe('soft-delete', () => {
     describe('delete operation', () => {
       it('should perma delete all docs including soft-deleted documents when trash: true', async () => {
         await payload.delete({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
           where: {
             title: {
@@ -555,7 +559,7 @@ describe('soft-delete', () => {
         })
 
         const allDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
         })
 
@@ -564,7 +568,7 @@ describe('soft-delete', () => {
 
       it('should only perma delete normal docs when trash: false', async () => {
         await payload.delete({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: false,
           where: {
             title: {
@@ -574,12 +578,12 @@ describe('soft-delete', () => {
         })
 
         const allDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
-        expect(allDocs.docs[0]?.id).toEqual(postTwo.id)
+        expect(allDocs.docs[0]?.id).toEqual(trashEnabledDocTwo.id)
       })
     })
 
@@ -587,15 +591,15 @@ describe('soft-delete', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         await expect(
           payload.delete({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
           }),
         ).rejects.toThrow('Not Found')
 
         await expect(
           payload.delete({
-            collection: postsSlug,
-            id: postTwo.id,
+            collection: trashEnabledSlug,
+            id: trashEnabledDocTwo.id,
             trash: false,
           }),
         ).rejects.toThrow('Not Found')
@@ -603,18 +607,18 @@ describe('soft-delete', () => {
 
       it('should delete a soft-deleted document when softtrashDeletes: true', async () => {
         await payload.delete({
-          collection: postsSlug,
-          id: postTwo.id,
+          collection: trashEnabledSlug,
+          id: trashEnabledDocTwo.id,
           trash: true,
         })
 
         const allDocs = await payload.find({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           trash: true,
         })
 
         expect(allDocs.totalDocs).toEqual(1)
-        expect(allDocs.docs[0]?.id).toEqual(postOne.id)
+        expect(allDocs.docs[0]?.id).toEqual(trashEnabledDocOne.id)
       })
     })
   })
@@ -622,37 +626,39 @@ describe('soft-delete', () => {
   describe('REST API', () => {
     describe('find endpoint', () => {
       it('should return all docs including soft-deleted docs in find with trash=true', async () => {
-        const res = await restClient.GET(`/${postsSlug}?trash=true`)
+        const res = await restClient.GET(`/${trashEnabledSlug}?trash=true`)
         expect(res.status).toBe(200)
         const data = await res.json()
         expect(data.docs).toHaveLength(2)
       })
 
       it('should return only soft-deleted docs with trash=true and where[deletedAt][exists]=true', async () => {
-        const res = await restClient.GET(`/${postsSlug}?trash=true&where[deletedAt][exists]=true`)
+        const res = await restClient.GET(
+          `/${trashEnabledSlug}?trash=true&where[deletedAt][exists]=true`,
+        )
         const data = await res.json()
         expect(data.docs).toHaveLength(1)
-        expect(data.docs[0]?.id).toEqual(postTwo.id)
+        expect(data.docs[0]?.id).toEqual(trashEnabledDocTwo.id)
       })
 
       it('should return only normal docs when trash=false', async () => {
-        const res = await restClient.GET(`/${postsSlug}?trash=false`)
+        const res = await restClient.GET(`/${trashEnabledSlug}?trash=false`)
         const data = await res.json()
         expect(data.docs).toHaveLength(1)
-        expect(data.docs[0]?.id).toEqual(postOne.id)
+        expect(data.docs[0]?.id).toEqual(trashEnabledDocOne.id)
       })
 
       it('should find restored documents after setting deletedAt to null', async () => {
-        await restClient.PATCH(`/${postsSlug}/${postTwo.id}?trash=true`, {
+        await restClient.PATCH(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`, {
           body: JSON.stringify({
             deletedAt: null,
           }),
         })
 
-        const res = await restClient.GET(`/${postsSlug}?trash=false`)
+        const res = await restClient.GET(`/${trashEnabledSlug}?trash=false`)
         const data = await res.json()
 
-        const restored = data.docs.find((doc: Post) => doc.id === postTwo.id)
+        const restored = data.docs.find((doc: TrashEnabled) => doc.id === trashEnabledDocTwo.id)
 
         expect(restored).toBeDefined()
         expect(restored.deletedAt).toBeNull()
@@ -661,14 +667,14 @@ describe('soft-delete', () => {
 
     describe('findByID endpoint', () => {
       it('should return a soft-deleted doc by ID with trash=true', async () => {
-        const res = await restClient.GET(`/${postsSlug}/${postTwo.id}?trash=true`)
+        const res = await restClient.GET(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`)
         const data = await res.json()
-        expect(data?.id).toEqual(postTwo.id)
-        expect(data?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(data?.id).toEqual(trashEnabledDocTwo.id)
+        expect(data?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should 404 when trying to get a soft-deleted doc without trash=true', async () => {
-        const res = await restClient.GET(`/${postsSlug}/${postTwo.id}`)
+        const res = await restClient.GET(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}`)
         expect(res.status).toBe(404)
       })
     })
@@ -676,7 +682,7 @@ describe('soft-delete', () => {
     describe('find versions endpoint', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -689,7 +695,7 @@ describe('soft-delete', () => {
         })
       })
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
-        const res = await restClient.GET(`/${postsSlug}/versions?trash=true`)
+        const res = await restClient.GET(`/${trashEnabledSlug}/versions?trash=true`)
         expect(res.status).toBe(200)
         const data = await res.json()
         expect(data.docs).toHaveLength(2)
@@ -697,33 +703,33 @@ describe('soft-delete', () => {
 
       it('should return only soft-deleted docs in findVersions with trash: true', async () => {
         const res = await restClient.GET(
-          `/${postsSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
+          `/${trashEnabledSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
         )
         const data = await res.json()
         expect(data.docs).toHaveLength(1)
-        expect(data.docs[0]?.parent).toEqual(postTwo.id)
+        expect(data.docs[0]?.parent).toEqual(trashEnabledDocTwo.id)
       })
 
       it('should return only non-soft-deleted docs in findVersions with trash: false', async () => {
-        const res = await restClient.GET(`/${postsSlug}/versions?trash=false`)
+        const res = await restClient.GET(`/${trashEnabledSlug}/versions?trash=false`)
         const data = await res.json()
         expect(data.docs).toHaveLength(1)
-        expect(data.docs[0]?.parent).toEqual(postOne.id)
+        expect(data.docs[0]?.parent).toEqual(trashEnabledDocOne.id)
       })
 
       it('should find versions where version.deletedAt is null after restore via REST', async () => {
-        await restClient.PATCH(`/${postsSlug}/${postTwo.id}?trash=true`, {
+        await restClient.PATCH(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`, {
           body: JSON.stringify({
             deletedAt: null,
           }),
         })
 
         const res = await restClient.GET(
-          `/${postsSlug}/versions?trash=true&where[version.deletedAt][equals]=null`,
+          `/${trashEnabledSlug}/versions?trash=true&where[version.deletedAt][equals]=null`,
         )
         const data = await res.json()
 
-        const version = data.docs.find((v: any) => v.parent === postTwo.id)
+        const version = data.docs.find((v: any) => v.parent === trashEnabledDocTwo.id)
         expect(version).toBeDefined()
         expect(version.version.deletedAt).toBeNull()
       })
@@ -732,7 +738,7 @@ describe('soft-delete', () => {
     describe('findVersionByID endpoint', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -747,7 +753,7 @@ describe('soft-delete', () => {
 
       it('should return a soft-deleted version document when trash: true', async () => {
         const trashedVersions = await restClient.GET(
-          `/${postsSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
+          `/${trashEnabledSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
         )
 
         const trashedVersionsData = await trashedVersions.json()
@@ -755,18 +761,20 @@ describe('soft-delete', () => {
 
         const version = trashedVersionsData.docs[0]
 
-        const versionPost = await restClient.GET(`/${postsSlug}/versions/${version!.id}?trash=true`)
-        const trashedVersionPost = await versionPost.json()
+        const versionDoc = await restClient.GET(
+          `/${trashEnabledSlug}/versions/${version!.id}?trash=true`,
+        )
+        const trashedVersionDoc = await versionDoc.json()
 
-        expect(trashedVersionPost).toBeDefined()
-        expect(trashedVersionPost?.parent).toEqual(postTwo.id)
-        expect(trashedVersionPost?.version?.deletedAt).toBeDefined()
-        expect(trashedVersionPost?.version?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(trashedVersionDoc).toBeDefined()
+        expect(trashedVersionDoc?.parent).toEqual(trashEnabledDocTwo.id)
+        expect(trashedVersionDoc?.version?.deletedAt).toBeDefined()
+        expect(trashedVersionDoc?.version?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to find a soft-deleted version document w/o trash: true', async () => {
         const trashedVersions = await restClient.GET(
-          `/${postsSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
+          `/${trashEnabledSlug}/versions?trash=true&where[version.deletedAt][exists]=true`,
         )
 
         const trashedVersionsData = await trashedVersions.json()
@@ -774,11 +782,11 @@ describe('soft-delete', () => {
 
         const version = trashedVersionsData.docs[0]
 
-        const withoutTrash = await restClient.GET(`/${postsSlug}/versions/${version!.id}`)
+        const withoutTrash = await restClient.GET(`/${trashEnabledSlug}/versions/${version!.id}`)
         expect(withoutTrash.status).toBe(404)
 
         const withTrashFalse = await restClient.GET(
-          `/${postsSlug}/versions/${version!.id}?trash=false`,
+          `/${trashEnabledSlug}/versions/${version!.id}?trash=false`,
         )
         expect(withTrashFalse.status).toBe(404)
       })
@@ -786,46 +794,55 @@ describe('soft-delete', () => {
 
     describe('updateByID endpoint', () => {
       it('should update a single soft-deleted doc when trash=true', async () => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postTwo.id}?trash=true`, {
-          body: JSON.stringify({
-            title: 'Updated via REST',
-          }),
-        })
+        const res = await restClient.PATCH(
+          `/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`,
+          {
+            body: JSON.stringify({
+              title: 'Updated via REST',
+            }),
+          },
+        )
 
         const result = await res.json()
         expect(result.doc.title).toBe('Updated via REST')
-        expect(result.doc.deletedAt).toEqual(postTwo.deletedAt)
+        expect(result.doc.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to update a soft-deleted document w/o trash: true', async () => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postTwo.id}`, {
+        const res = await restClient.PATCH(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}`, {
           body: JSON.stringify({ title: 'Fail Update' }),
         })
         expect(res.status).toBe(404)
       })
 
       it('should update a single normal document when trash: false', async () => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postOne.id}?trash=false`, {
-          body: JSON.stringify({ title: 'Updated Normal via REST' }),
-        })
+        const res = await restClient.PATCH(
+          `/${trashEnabledSlug}/${trashEnabledDocOne.id}?trash=false`,
+          {
+            body: JSON.stringify({ title: 'Updated Normal via REST' }),
+          },
+        )
         const result = await res.json()
         expect(result.doc.title).toBe('Updated Normal via REST')
         expect(result.doc.deletedAt).toBeFalsy()
       })
 
       it('should restore a soft-deleted document by setting deletedAt to null', async () => {
-        const res = await restClient.PATCH(`/${postsSlug}/${postTwo.id}?trash=true`, {
-          body: JSON.stringify({
-            deletedAt: null,
-          }),
-        })
+        const res = await restClient.PATCH(
+          `/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`,
+          {
+            body: JSON.stringify({
+              deletedAt: null,
+            }),
+          },
+        )
 
         const result = await res.json()
         expect(result.doc.deletedAt).toBeNull()
 
-        const check = await restClient.GET(`/${postsSlug}?trash=false`)
+        const check = await restClient.GET(`/${trashEnabledSlug}?trash=false`)
         const data = await check.json()
-        const restored = data.docs.find((doc: Post) => doc.id === postTwo.id)
+        const restored = data.docs.find((doc: TrashEnabled) => doc.id === trashEnabledDocTwo.id)
 
         expect(restored).toBeDefined()
         expect(restored.deletedAt).toBeNull()
@@ -834,15 +851,15 @@ describe('soft-delete', () => {
 
     describe('update endpoint', () => {
       it('should update only normal document when trash: false', async () => {
-        const query = `?trash=false&where[id][equals]=${postOne.id}`
+        const query = `?trash=false&where[id][equals]=${trashEnabledDocOne.id}`
 
-        const res = await restClient.PATCH(`/${postsSlug}${query}`, {
+        const res = await restClient.PATCH(`/${trashEnabledSlug}${query}`, {
           body: JSON.stringify({ title: 'Updated Normal via REST' }),
         })
 
         const result = await res.json()
         expect(result.docs).toHaveLength(1)
-        expect(result.docs[0].id).toBe(postOne.id)
+        expect(result.docs[0].id).toBe(trashEnabledDocOne.id)
         expect(result.docs[0].title).toBe('Updated Normal via REST')
         expect(result.docs[0].deletedAt).toBeFalsy()
       })
@@ -850,45 +867,47 @@ describe('soft-delete', () => {
       it('should update all documents including soft-deleted documents when trash: true', async () => {
         const query = `?trash=true&where[title][exists]=true`
 
-        const res = await restClient.PATCH(`/${postsSlug}${query}`, {
+        const res = await restClient.PATCH(`/${trashEnabledSlug}${query}`, {
           body: JSON.stringify({ title: 'Bulk Updated All' }),
         })
 
         const result = await res.json()
         expect(result.docs).toHaveLength(2)
-        expect(result.docs.every((doc: Post) => doc.title === 'Bulk Updated All')).toBe(true)
+        expect(result.docs.every((doc: TrashEnabled) => doc.title === 'Bulk Updated All')).toBe(
+          true,
+        )
       })
 
       it('should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true', async () => {
         const query = `?trash=true&where[deletedAt][exists]=true`
 
-        const postThree = await payload.create({
-          collection: postsSlug,
+        const docThree = await payload.create({
+          collection: trashEnabledSlug,
           data: {
-            title: 'Post three',
+            title: 'Doc three',
             deletedAt: new Date().toISOString(),
           },
         })
 
-        const res = await restClient.PATCH(`/${postsSlug}${query}`, {
-          body: JSON.stringify({ title: 'Updated Soft Deleted Post' }),
+        const res = await restClient.PATCH(`/${trashEnabledSlug}${query}`, {
+          body: JSON.stringify({ title: 'Updated Soft Deleted Doc' }),
         })
 
         const result = await res.json()
         expect(result.docs).toHaveLength(2)
 
         expect(result.docs).toBeDefined()
-        expect(result.docs[0]?.id).toEqual(postThree.id)
-        expect(result.docs[0]?.title).toEqual('Updated Soft Deleted Post')
-        expect(result.docs[0]?.deletedAt).toEqual(postThree.deletedAt)
-        expect(result.docs[1]?.id).toEqual(postTwo.id)
-        expect(result.docs[1]?.title).toEqual('Updated Soft Deleted Post')
-        expect(result.docs[1]?.deletedAt).toEqual(postTwo.deletedAt)
+        expect(result.docs[0]?.id).toEqual(docThree.id)
+        expect(result.docs[0]?.title).toEqual('Updated Soft Deleted Doc')
+        expect(result.docs[0]?.deletedAt).toEqual(docThree.deletedAt)
+        expect(result.docs[1]?.id).toEqual(trashEnabledDocTwo.id)
+        expect(result.docs[1]?.title).toEqual('Updated Soft Deleted Doc')
+        expect(result.docs[1]?.deletedAt).toEqual(trashEnabledDocTwo.deletedAt)
 
         // Clean up
         await payload.delete({
-          collection: postsSlug,
-          id: postThree.id,
+          collection: trashEnabledSlug,
+          id: docThree.id,
           trash: true,
         })
       })
@@ -898,13 +917,13 @@ describe('soft-delete', () => {
       it('should perma delete all docs including soft-deleted documents when trash: true', async () => {
         const query = `?trash=true&where[title][exists]=true`
 
-        const res = await restClient.DELETE(`/${postsSlug}${query}`)
+        const res = await restClient.DELETE(`/${trashEnabledSlug}${query}`)
         expect(res.status).toBe(200)
 
         const result = await res.json()
         expect(result.docs).toHaveLength(2)
 
-        const check = await restClient.GET(`/${postsSlug}?trash=true`)
+        const check = await restClient.GET(`/${trashEnabledSlug}?trash=true`)
         const checkData = await check.json()
         expect(checkData.docs).toHaveLength(0)
       })
@@ -912,32 +931,36 @@ describe('soft-delete', () => {
       it('should only perma delete normal docs when trash: false', async () => {
         const query = `?trash=false&where[title][exists]=true`
 
-        const res = await restClient.DELETE(`/${postsSlug}${query}`)
+        const res = await restClient.DELETE(`/${trashEnabledSlug}${query}`)
         expect(res.status).toBe(200)
 
         const result = await res.json()
         expect(result.docs).toHaveLength(1)
-        expect(result.docs[0]?.id).toBe(postOne.id)
+        expect(result.docs[0]?.id).toBe(trashEnabledDocOne.id)
 
-        const check = await restClient.GET(`/${postsSlug}?trash=true`)
+        const check = await restClient.GET(`/${trashEnabledSlug}?trash=true`)
         const checkData = await check.json()
 
-        // Make sure postTwo (soft-deleted) is still there
-        expect(checkData.docs.some((doc: Post) => doc.id === postTwo.id)).toBe(true)
+        // Make sure trashEnabledDocTwo (soft-deleted) is still there
+        expect(checkData.docs.some((doc: TrashEnabled) => doc.id === trashEnabledDocTwo.id)).toBe(
+          true,
+        )
       })
     })
 
     describe('deleteByID endpoint', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
-        const res = await restClient.DELETE(`/${postsSlug}/${postTwo.id}`)
+        const res = await restClient.DELETE(`/${trashEnabledSlug}/${trashEnabledDocTwo.id}`)
         expect(res.status).toBe(404)
       })
 
       it('should delete a soft-deleted document when trash: true', async () => {
-        const res = await restClient.DELETE(`/${postsSlug}/${postTwo.id}?trash=true`)
+        const res = await restClient.DELETE(
+          `/${trashEnabledSlug}/${trashEnabledDocTwo.id}?trash=true`,
+        )
         expect(res.status).toBe(200)
         const result = await res.json()
-        expect(result.doc.id).toBe(postTwo.id)
+        expect(result.doc.id).toBe(trashEnabledDocTwo.id)
       })
     })
   })
@@ -947,7 +970,7 @@ describe('soft-delete', () => {
       it('should return all docs including soft-deleted docs in find with trash=true', async () => {
         const query = `
           query {
-            Posts(trash: true) {
+            TrashEnableds(trash: true) {
               docs {
                 id
                 title
@@ -961,13 +984,13 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.Posts.docs).toHaveLength(2)
+        expect(res.data.TrashEnableds.docs).toHaveLength(2)
       })
 
       it('should return only soft-deleted docs with trash=true and where[deletedAt][exists]=true', async () => {
         const query = `
           query {
-            Posts(
+            TrashEnableds(
               trash: true
               where: { deletedAt: { exists: true } }
             ) {
@@ -983,14 +1006,14 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.Posts.docs).toHaveLength(1)
-        expect(res.data.Posts.docs[0].id).toEqual(postTwo.id)
+        expect(res.data.TrashEnableds.docs).toHaveLength(1)
+        expect(res.data.TrashEnableds.docs[0].id).toEqual(trashEnabledDocTwo.id)
       })
 
       it('should return only normal docs when trash=false', async () => {
         const query = `
           query {
-            Posts(trash: false) {
+            TrashEnableds(trash: false) {
               docs {
                 id
                 deletedAt
@@ -1003,15 +1026,15 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.Posts.docs).toHaveLength(1)
-        expect(res.data.Posts.docs[0].id).toEqual(postOne.id)
-        expect(res.data.Posts.docs[0].deletedAt).toBeNull()
+        expect(res.data.TrashEnableds.docs).toHaveLength(1)
+        expect(res.data.TrashEnableds.docs[0].id).toEqual(trashEnabledDocOne.id)
+        expect(res.data.TrashEnableds.docs[0].deletedAt).toBeNull()
       })
 
       it('should find restored documents after setting deletedAt to null', async () => {
         const mutation = `
           mutation {
-            updatePost(id: ${idToString(postTwo.id, payload)}, trash: true, data: {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true, data: {
               deletedAt: null
             }) {
               id
@@ -1022,7 +1045,7 @@ describe('soft-delete', () => {
 
         const query = `
           query {
-            Posts(trash: false) {
+            TrashEnableds(trash: false) {
               docs {
                 id
                 deletedAt
@@ -1034,7 +1057,9 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        const restored = res.data.Posts.docs.find((doc: Post) => doc.id === postTwo.id)
+        const restored = res.data.TrashEnableds.docs.find(
+          (doc: TrashEnabled) => doc.id === trashEnabledDocTwo.id,
+        )
         expect(restored).toBeDefined()
         expect(restored.deletedAt).toBeNull()
       })
@@ -1044,7 +1069,7 @@ describe('soft-delete', () => {
       it('should return a soft-deleted doc by ID with trash=true', async () => {
         const query = `
           query {
-            Post(id: ${idToString(postTwo.id, payload)}, trash: true) {
+            TrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true) {
               id
               deletedAt
             }
@@ -1055,14 +1080,14 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.Post.id).toBe(postTwo.id)
-        expect(res.data.Post.deletedAt).toBe(postTwo.deletedAt)
+        expect(res.data.TrashEnabled.id).toBe(trashEnabledDocTwo.id)
+        expect(res.data.TrashEnabled.deletedAt).toBe(trashEnabledDocTwo.deletedAt)
       })
 
       it('should 404 when trying to get a soft-deleted doc without trash=true', async () => {
         const query = `
           query {
-            Post(id: ${idToString(postTwo.id, payload)}) {
+            TrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}) {
               id
             }
           }
@@ -1078,7 +1103,7 @@ describe('soft-delete', () => {
     describe('find versions query', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -1093,7 +1118,7 @@ describe('soft-delete', () => {
       it('should return all versions including soft-deleted docs in findVersions with trash: true', async () => {
         const query = `
           query {
-            versionsPosts(trash: true) {
+            versionsTrashEnableds(trash: true) {
               docs {
                 id
                 version {
@@ -1108,13 +1133,13 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.versionsPosts.docs).toHaveLength(2)
+        expect(res.data.versionsTrashEnableds.docs).toHaveLength(2)
       })
 
       it('should return only soft-deleted docs in findVersions with trash: true', async () => {
         const query = `
           query {
-            versionsPosts(
+            versionsTrashEnableds(
               trash: true,
               where: {
                 version__deletedAt: {
@@ -1137,7 +1162,7 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        const { docs } = res.data.versionsPosts
+        const { docs } = res.data.versionsTrashEnableds
 
         // Should only include soft-deleted versions
         expect(docs).toHaveLength(1)
@@ -1150,7 +1175,7 @@ describe('soft-delete', () => {
       it('should return only non-soft-deleted docs in findVersions with trash: false', async () => {
         const query = `
           query {
-            versionsPosts(trash: false) {
+            versionsTrashEnableds(trash: false) {
               docs {
                 id
                 version {
@@ -1166,7 +1191,7 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        const { docs } = res.data.versionsPosts
+        const { docs } = res.data.versionsTrashEnableds
 
         // All versions returned should NOT have deletedAt set
         for (const doc of docs) {
@@ -1177,7 +1202,7 @@ describe('soft-delete', () => {
       it('should find versions where version.deletedAt is null after restore', async () => {
         const mutation = `
           mutation {
-            updatePost(id: ${idToString(postTwo.id, payload)}, trash: true, data: { deletedAt: null }) {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true, data: { deletedAt: null }) {
               id
               title
               deletedAt
@@ -1188,7 +1213,7 @@ describe('soft-delete', () => {
 
         const query = `
           query {
-            versionsPosts(
+            versionsTrashEnableds(
               trash: true,
               where: {
                 version__deletedAt: {
@@ -1213,8 +1238,8 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        const version = res.data.versionsPosts.docs.find(
-          (v: any) => String(v.parent.id) === String(postTwo.id),
+        const version = res.data.versionsTrashEnableds.docs.find(
+          (v: any) => String(v.parent.id) === String(trashEnabledDocTwo.id),
         )
         expect(version).toBeDefined()
         expect(version.version.deletedAt).toBeNull()
@@ -1224,7 +1249,7 @@ describe('soft-delete', () => {
     describe('findVersionByID endpoint', () => {
       beforeAll(async () => {
         await payload.update({
-          collection: postsSlug,
+          collection: trashEnabledSlug,
           data: {
             title: 'Some updated title',
           },
@@ -1238,10 +1263,10 @@ describe('soft-delete', () => {
       })
 
       it('should return a soft-deleted document when trash: true', async () => {
-        // First, get the version ID of the soft-deleted post
+        // First, get the version ID of the soft-deleted trash enabled doc
         const listQuery = `
           query {
-            versionsPosts(
+            versionsTrashEnableds(
               trash: true,
               where: {
                 version__deletedAt: {
@@ -1262,11 +1287,11 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query: listQuery }) })
           .then((r) => r.json())
 
-        const trashedVersion = listRes.data.versionsPosts.docs[0]
+        const trashedVersion = listRes.data.versionsTrashEnableds.docs[0]
 
         const detailQuery = `
           query {
-            versionPost(id: ${idToString(trashedVersion.id, payload)}, trash: true) {
+            versionTrashEnabled(id: ${idToString(trashedVersion.id, payload)}, trash: true) {
               id
               version {
                 deletedAt
@@ -1278,15 +1303,15 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query: detailQuery }) })
           .then((r) => r.json())
 
-        expect(res.data.versionPost.id).toBe(trashedVersion.id)
-        expect(res.data.versionPost.version.deletedAt).toBe(postTwo.deletedAt)
+        expect(res.data.versionTrashEnabled.id).toBe(trashedVersion.id)
+        expect(res.data.versionTrashEnabled.version.deletedAt).toBe(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to find a soft-deleted version document w/o trash: true', async () => {
-        // First, get the version ID of the soft-deleted post
+        // First, get the version ID of the soft-deleted trash enabled doc
         const listQuery = `
           query {
-            versionsPosts(
+            versionsTrashEnableds(
               trash: true,
               where: {
                 version__deletedAt: {
@@ -1304,11 +1329,11 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query: listQuery }) })
           .then((r) => r.json())
 
-        const trashedVersion = listRes.data.versionsPosts.docs[0]
+        const trashedVersion = listRes.data.versionsTrashEnableds.docs[0]
 
         const detailQuery = `
           query {
-            versionPost(id: ${idToString(trashedVersion.id, payload)}) {
+            versionTrashEnabled(id: ${idToString(trashedVersion.id, payload)}) {
               id
             }
           }
@@ -1325,7 +1350,7 @@ describe('soft-delete', () => {
       it('should update a single soft-deleted doc when trash=true', async () => {
         const query = `
           mutation {
-            updatePost(id: ${idToString(postTwo.id, payload)}, trash: true, data: { title: "Updated Soft Deleted via GQL" }) {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true, data: { title: "Updated Soft Deleted via GQL" }) {
               id
               title
               deletedAt
@@ -1336,15 +1361,15 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.updatePost.id).toBe(postTwo.id)
-        expect(res.data.updatePost.title).toBe('Updated Soft Deleted via GQL')
-        expect(res.data.updatePost.deletedAt).toBe(postTwo.deletedAt)
+        expect(res.data.updateTrashEnabled.id).toBe(trashEnabledDocTwo.id)
+        expect(res.data.updateTrashEnabled.title).toBe('Updated Soft Deleted via GQL')
+        expect(res.data.updateTrashEnabled.deletedAt).toBe(trashEnabledDocTwo.deletedAt)
       })
 
       it('should throw NotFound error when trying to update a soft-deleted document w/o trash: true', async () => {
         const query = `
           mutation {
-            updatePost(id: ${idToString(postTwo.id, payload)}, data: { title: "Should Fail" }) {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, data: { title: "Should Fail" }) {
               id
             }
           }
@@ -1358,7 +1383,7 @@ describe('soft-delete', () => {
       it('should update a single normal document when trash: false', async () => {
         const query = `
           mutation {
-            updatePost(id: ${idToString(postOne.id, payload)}, trash: false, data: { title: "Updated Normal via GQL" }) {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocOne.id, payload)}, trash: false, data: { title: "Updated Normal via GQL" }) {
               id
               title
               deletedAt
@@ -1369,15 +1394,15 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        expect(res.data.updatePost.id).toBe(postOne.id)
-        expect(res.data.updatePost.title).toBe('Updated Normal via GQL')
-        expect(res.data.updatePost.deletedAt).toBeNull()
+        expect(res.data.updateTrashEnabled.id).toBe(trashEnabledDocOne.id)
+        expect(res.data.updateTrashEnabled.title).toBe('Updated Normal via GQL')
+        expect(res.data.updateTrashEnabled.deletedAt).toBeNull()
       })
 
       it('should restore a soft-deleted document by setting deletedAt to null', async () => {
         const mutation = `
           mutation {
-            updatePost(id: ${idToString(postTwo.id, payload)}, trash: true, data: {
+            updateTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true, data: {
               deletedAt: null
             }) {
               id
@@ -1389,11 +1414,11 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query: mutation }) })
           .then((r) => r.json())
 
-        expect(res.data.updatePost.deletedAt).toBeNull()
+        expect(res.data.updateTrashEnabled.deletedAt).toBeNull()
 
         const query = `
           query {
-            Posts(trash: false) {
+            TrashEnableds(trash: false) {
               docs {
                 id
                 deletedAt
@@ -1405,7 +1430,9 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        const match = restored.data.Posts.docs.find((doc: Post) => doc.id === postTwo.id)
+        const match = restored.data.TrashEnableds.docs.find(
+          (doc: TrashEnabled) => doc.id === trashEnabledDocTwo.id,
+        )
         expect(match).toBeDefined()
         expect(match.deletedAt).toBeNull()
       })
@@ -1431,7 +1458,7 @@ describe('soft-delete', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
         const query = `
           mutation {
-            deletePost(id: ${idToString(postTwo.id, payload)}) {
+            deleteTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}) {
                 id
             }
           }
@@ -1447,7 +1474,7 @@ describe('soft-delete', () => {
       it('should delete a soft-deleted document when trash: true', async () => {
         const query = `
           mutation {
-            deletePost(id: ${idToString(postTwo.id, payload)}, trash: true) {
+            deleteTrashEnabled(id: ${idToString(trashEnabledDocTwo.id, payload)}, trash: true) {
                 id
             }
           }
@@ -1455,7 +1482,7 @@ describe('soft-delete', () => {
         const res = await restClient
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
-        expect(res.data.deletePost.id).toBe(postTwo.id)
+        expect(res.data.deleteTrashEnabled.id).toBe(trashEnabledDocTwo.id)
       })
     })
   })
