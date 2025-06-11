@@ -15,8 +15,8 @@ import React from 'react'
 
 import type { CompareOption } from './Default/types.js'
 
-import { getLatestVersion, type GetLatestVersionReturnType } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
+import { fetchLatestVersion, fetchVersion, fetchVersions } from './fetchVersions.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
 import { formatVersionPill } from './VersionPillLabel/formatVersionPill.js'
 
@@ -29,13 +29,15 @@ export async function VersionView(props: DocumentViewServerProps) {
     globalConfig,
     permissions,
     req,
-    req: { payload, payload: { config } = {}, user } = {},
+    req: { payload, payload: { config, config: { localization } } = {}, user } = {},
   } = initPageResult
 
   const versionToID = routeSegments[routeSegments.length - 1]
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
+
+  const draftsEnabled = (collectionConfig ?? globalConfig)?.versions?.drafts
 
   const localeCodesFromParams = searchParams.localeCodes
     ? JSON.parse(searchParams.localeCodes as string)
@@ -45,175 +47,90 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
-  const { localization } = config
+  const docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission = collectionSlug
+    ? permissions.collections[collectionSlug]
+    : permissions.globals[globalSlug]
 
-  let docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
-  let slug: string
-
-  let versionTo: TypeWithVersion<any>
-  let versionFrom: null | TypeWithVersion<any> = null
-  let latestPublishedVersion: GetLatestVersionReturnType = null
-  let latestDraftVersion: GetLatestVersionReturnType = null
-
-  if (collectionSlug) {
-    // /collections/:slug/:id/versions/:versionID
-    slug = collectionSlug
-    docPermissions = permissions.collections[collectionSlug]
-
-    try {
-      versionTo = await payload.findVersionByID({
-        id: versionToID,
-        collection: slug,
-        depth: 1,
-        locale: 'all',
-        overrideAccess: false,
-        req,
-        user,
-      })
-
-      if (versionFromIDFromParams) {
-        versionFrom = await payload.findVersionByID({
-          id: versionFromIDFromParams,
-          collection: collectionSlug,
-          depth: 1,
-          locale: 'all',
-          overrideAccess: false,
-          req,
-        })
-      } else {
-        // By default, we'll compare the previous version. => versionFrom = previous version of versionTo
-        versionFrom = (
-          await payload.findVersions({
-            collection: collectionSlug,
-            depth: 1,
-            draft: true,
-            limit: 1,
-            overrideAccess: false,
-            req,
-            sort: '-updatedAt',
-            where: {
-              and: [
-                {
-                  updatedAt: {
-                    less_than: versionTo?.updatedAt,
-                  },
-                },
-                {
-                  parent: {
-                    equals: id,
-                  },
-                },
-              ],
-            },
-          })
-        ).docs[0]
-      }
-
-      if (collectionConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion({
-          slug,
-          type: 'collection',
-          locale: 'all',
-          overrideAccess: false,
-          parentID: id,
-          payload,
-          req,
-          status: 'draft',
-        })
-        latestPublishedVersion = await getLatestVersion({
-          slug,
-          type: 'collection',
-          locale: 'all',
-          overrideAccess: false,
-          parentID: id,
-          payload,
-          req,
-          status: 'published',
-        })
-      }
-    } catch (_err) {
-      return notFound()
-    }
-  } else if (globalSlug) {
-    // /globals/:slug/versions/:versionID
-    slug = globalSlug
-    docPermissions = permissions.globals[globalSlug]
-
-    try {
-      versionTo = await payload.findGlobalVersionByID({
-        id: versionToID,
-        slug,
-        depth: 1,
-        locale: 'all',
-        overrideAccess: false,
-        req,
-        user,
-      })
-
-      if (versionFromIDFromParams) {
-        versionFrom = await payload.findGlobalVersionByID({
-          id: versionFromIDFromParams,
-          slug: globalSlug,
-          depth: 1,
-          locale: 'all',
-          overrideAccess: false,
-          req,
-        })
-      } else {
-        // By default, we'll compare the previous version. => versionFrom = previous version of versionTo
-        versionFrom = (
-          await payload.findGlobalVersions({
-            slug: globalSlug,
-            depth: 1,
-            limit: 1,
-            overrideAccess: false,
-            req,
-            sort: '-updatedAt',
-            where: {
-              and: [
-                {
-                  updatedAt: {
-                    less_than: versionTo?.updatedAt,
-                  },
-                },
-              ],
-            },
-          })
-        ).docs[0]
-
-        if (!versionFrom) {
-          versionFrom = versionTo
-        }
-      }
-
-      if (globalConfig?.versions?.drafts) {
-        latestDraftVersion = await getLatestVersion({
-          slug,
-          type: 'global',
-          locale: 'all',
-          overrideAccess: false,
-          payload,
-          req,
-          status: 'draft',
-        })
-        latestPublishedVersion = await getLatestVersion({
-          slug,
-          type: 'global',
-          locale: 'all',
-          overrideAccess: false,
-          payload,
-          req,
-          status: 'published',
-        })
-      }
-    } catch (_err) {
-      return notFound()
-    }
-  }
+  const versionTo = await fetchVersion<{
+    _status?: string
+  }>({
+    id: versionToID,
+    collectionSlug,
+    depth: 1,
+    globalSlug,
+    locale: 'all',
+    overrideAccess: false,
+    req,
+    user,
+  })
 
   if (!versionTo) {
     return notFound()
   }
+
+  const previousVersion: null | TypeWithVersion<object> = (
+    await fetchVersions({
+      collectionSlug,
+      depth: 1,
+      draft: true,
+      globalSlug,
+      limit: 1,
+      locale: 'all',
+      overrideAccess: false,
+      parentID: id,
+      req,
+      sort: '-updatedAt',
+      user,
+      where: {
+        and: [
+          {
+            updatedAt: {
+              less_than: versionTo?.updatedAt,
+            },
+          },
+        ],
+      },
+    })
+  )?.[0]
+
+  const versionFrom: null | TypeWithVersion<object> = versionFromIDFromParams
+    ? await fetchVersion({
+        id: versionFromIDFromParams,
+        collectionSlug,
+        depth: 1,
+        globalSlug,
+        locale: 'all',
+        overrideAccess: false,
+        req,
+        user,
+      })
+    : // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
+      previousVersion
+
+  const latestPublishedVersion = await fetchLatestVersion({
+    collectionSlug,
+    depth: 0,
+    globalSlug,
+    locale: 'all',
+    overrideAccess: false,
+    parentID: id,
+    req,
+    status: 'published',
+    user,
+  })
+  const latestDraftVersion = draftsEnabled
+    ? await fetchLatestVersion({
+        collectionSlug,
+        depth: 0,
+        globalSlug,
+        locale: 'all',
+        overrideAccess: false,
+        parentID: id,
+        req,
+        status: 'draft',
+        user,
+      })
+    : null
 
   let selectedLocales: string[] = []
   if (localization) {
@@ -290,51 +207,37 @@ export async function VersionView(props: DocumentViewServerProps) {
   const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
 
   // for SelectComparison: fetch
-  // - current (newest) draft: latestDraftVersion
-  // - currently published; publishedNewerThanDraft ? latestPublishedVersion? : null
-  // - previously published: publishedNewerThanDraft ? null : latestPublishedVersion?
+  // - current (newest) draft (only if no newer published exists): latestDraftVersion
+  // - currently published (always); publishedNewerThanDraft ? latestPublishedVersion? : null
+  // - previously published (if there is a prior published version older than the one you are lookin at): publishedNewerThanDraft ? null : latestPublishedVersion?
+  // - previous version: always, unless doesnt exist. Can be the same as previously published
 
   const currentlyPublishedVersion = publishedNewerThanDraft ? latestPublishedVersion : null
   let previouslyPublishedVersion = publishedNewerThanDraft ? null : latestPublishedVersion
 
   if (currentlyPublishedVersion && publishedNewerThanDraft) {
     // There may be a previously published version we can fetch
-    if (collectionSlug) {
-      previouslyPublishedVersion = await getLatestVersion({
-        slug,
-        type: 'collection',
-        additionalWheres: [
+
+    previouslyPublishedVersion = await fetchLatestVersion({
+      collectionSlug,
+      depth: 0,
+      globalSlug,
+      locale: 'all',
+      overrideAccess: false,
+      parentID: id,
+      req,
+      status: 'published',
+      user,
+      where: {
+        and: [
           {
             updatedAt: {
               less_than: currentlyPublishedVersion.updatedAt,
             },
           },
         ],
-        locale: 'all',
-        overrideAccess: false,
-        parentID: id,
-        payload,
-        req,
-        status: 'published',
-      })
-    } else if (globalSlug) {
-      previouslyPublishedVersion = await getLatestVersion({
-        slug,
-        type: 'global',
-        additionalWheres: [
-          {
-            updatedAt: {
-              less_than: currentlyPublishedVersion.updatedAt,
-            },
-          },
-        ],
-        locale: 'all',
-        overrideAccess: false,
-        payload,
-        req,
-        status: 'published',
-      })
-    }
+      },
+    })
   }
 
   const currentlyPublishedVersionPill = currentlyPublishedVersion
