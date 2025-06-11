@@ -140,6 +140,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  data: Partial<T>
   doc: T
   /**
    * Hook operation being performed
