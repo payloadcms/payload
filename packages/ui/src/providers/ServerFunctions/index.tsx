@@ -8,6 +8,7 @@ import type {
   FormState,
   GetFolderResultsComponentAndDataArgs,
   Locale,
+  Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
   ServerFunctionClient,
@@ -61,6 +62,7 @@ type RenderDocumentBaseArgs = {
   redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
+  searchParams?: Params
   /**
    * Properties specific to the versions view
    */

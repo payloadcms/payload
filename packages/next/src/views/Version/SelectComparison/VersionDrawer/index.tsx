@@ -8,9 +8,11 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
+
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 export const baseClass = 'version-drawer'
 export const formatVersionDrawerSlug = ({
@@ -28,6 +30,8 @@ export const VersionDrawerContent: React.FC<{
 }> = (props) => {
   const { collectionSlug, docID, drawerSlug } = props
   const { closeModal } = useModal()
+  const searchParams = useSearchParams()
+  const prevSearchParams = useRef(searchParams)
 
   const { renderDocument } = useServerFunctions()
 
@@ -51,6 +55,7 @@ export const VersionDrawerContent: React.FC<{
             },
             redirectAfterDelete: false,
             redirectAfterDuplicate: false,
+            searchParams: Object.fromEntries(searchParams.entries()),
             versions: {
               disableGutter: true,
               useVersionDrawerCreatedAtCell: true,
@@ -70,15 +75,16 @@ export const VersionDrawerContent: React.FC<{
 
       void fetchDocumentView()
     },
-    [closeModal, collectionSlug, drawerSlug, renderDocument, t],
+    [closeModal, collectionSlug, drawerSlug, renderDocument, searchParams, t],
   )
 
   useEffect(() => {
-    if (!hasRenderedDocument.current) {
+    if (!hasRenderedDocument.current || prevSearchParams.current !== searchParams) {
+      prevSearchParams.current = searchParams
       getDocumentView(docID)
       hasRenderedDocument.current = true
     }
-  }, [docID, getDocumentView])
+  }, [docID, getDocumentView, searchParams])
 
   if (isLoading) {
     return <LoadingOverlay />

@@ -27,6 +27,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       payload: { config },
       user,
     },
+    searchParams = {},
     versions,
   } = args
 
@@ -147,7 +148,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    searchParams: {},
+    searchParams,
     versions,
     viewType: 'document',
   })
