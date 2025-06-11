@@ -235,6 +235,7 @@ export const getDocumentView = ({
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
     switch (routeSegments.length) {
+      // --> ../:slug
       case 2: {
         View = getCustomViewByKey(views, 'default') || DefaultEditView
         break
