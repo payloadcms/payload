@@ -264,16 +264,16 @@ export async function resolveJoins({
     joinMap[join.joinPath] = { ...join, targetCollection: join.field.collection as string }
   }
 
-  // Process each requested join
-  for (const [joinPath, joinQuery] of Object.entries(joins)) {
+  // Process each requested join concurrently
+  const joinPromises = Object.entries(joins).map(async ([joinPath, joinQuery]) => {
     if (!joinQuery) {
-      continue
+      return { joinPath, result: null }
     }
 
     // Get the join definition from our map
     const joinDef = joinMap[joinPath]
     if (!joinDef) {
-      continue
+      return { joinPath, result: null }
     }
 
     // Check if this is a polymorphic collection join (where field.collection is an array)
@@ -304,10 +304,11 @@ export async function resolveJoins({
       // We need to re-query to properly get the parent relationships
       const grouped: Record<string, Record<string, unknown>[]> = {}
 
-      for (const collectionSlug of collections) {
+      // Process collections concurrently
+      const collectionPromises = collections.map(async (collectionSlug) => {
         const targetConfig = adapter.payload.collections[collectionSlug]?.config
         if (!targetConfig) {
-          continue
+          return null
         }
 
         const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
@@ -319,7 +320,7 @@ export async function resolveJoins({
         }
 
         if (!JoinModel) {
-          continue
+          return null
         }
 
         // Extract all parent document IDs to use in the join query
@@ -336,7 +337,7 @@ export async function resolveJoins({
 
         // Skip this collection if the WHERE clause cannot be satisfied
         if (filteredWhere === null) {
-          continue
+          return null
         }
 
         // Build the base query
@@ -408,7 +409,20 @@ export async function resolveJoins({
           })
         }
 
-        // Group the results by parent ID
+        // Return results with collection info for grouping
+        return { collectionSlug, joinDef, results, useDrafts }
+      })
+
+      const collectionResults = await Promise.all(collectionPromises)
+
+      // Group the results by parent ID
+      for (const collectionResult of collectionResults) {
+        if (!collectionResult) {
+          continue
+        }
+
+        const { collectionSlug, joinDef, results, useDrafts } = collectionResult
+
         for (const result of results) {
           if (useDrafts) {
             result.id = result.parent
@@ -515,55 +529,24 @@ export async function resolveJoins({
       // Adjust the join path with locale suffix if needed
       const localizedJoinPath = `${joinPath}${localeSuffix}`
 
-      // Attach the joined data to each parent document
-      for (const doc of docs) {
-        const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
-        const all = grouped[id] || []
-
-        // Calculate the slice for pagination
-        const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
-
-        // Create the join result object with pagination metadata
-        const value: Record<string, unknown> = {
-          docs: slice,
-          hasNextPage: all.length > (page - 1) * limit + slice.length,
-        }
-
-        // Include total count if requested
-        if (joinQuery.count) {
-          value.totalDocs = all.length
-        }
-
-        // Navigate to the correct nested location in the document and set the join data
-        const segments = localizedJoinPath.split('.')
-        let ref: Record<string, unknown>
-        if (versions) {
-          if (!doc.version) {
-            doc.version = {}
-          }
-          ref = doc.version as Record<string, unknown>
-        } else {
-          ref = doc
-        }
-
-        for (let i = 0; i < segments.length - 1; i++) {
-          const seg = segments[i]!
-          if (!ref[seg]) {
-            ref[seg] = {}
-          }
-          ref = ref[seg] as Record<string, unknown>
-        }
-        // Set the final join data at the target path
-        ref[segments[segments.length - 1]!] = value
+      return {
+        joinPath,
+        result: {
+          effectiveLocale,
+          grouped,
+          joinDef,
+          joinQuery,
+          limit,
+          localizedJoinPath,
+          page,
+        },
       }
-
-      continue
     }
 
     // Handle regular joins (including regular polymorphic joins)
     const targetConfig = adapter.payload.collections[joinDef.field.collection as string]?.config
     if (!targetConfig) {
-      continue
+      return { joinPath, result: null }
     }
 
     // Determine if we should use drafts/versions for the target collection
@@ -578,7 +561,7 @@ export async function resolveJoins({
     }
 
     if (!JoinModel) {
-      continue
+      return { joinPath, result: null }
     }
 
     // Extract all parent document IDs to use in the join query
@@ -770,6 +753,32 @@ export async function resolveJoins({
 
     // Adjust the join path with locale suffix if needed
     const localizedJoinPath = `${joinPath}${localeSuffix}`
+
+    return {
+      joinPath,
+      result: {
+        effectiveLocale,
+        grouped,
+        isPolymorphic: false,
+        joinQuery,
+        limit,
+        localizedJoinPath,
+        page,
+      },
+    }
+  })
+
+  // Wait for all join operations to complete
+  const joinResults = await Promise.all(joinPromises)
+
+  // Process the results and attach them to documents
+  for (const joinResult of joinResults) {
+    if (!joinResult || !joinResult.result) {
+      continue
+    }
+
+    const { result } = joinResult
+    const { grouped, joinQuery, limit, localizedJoinPath, page } = result
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
