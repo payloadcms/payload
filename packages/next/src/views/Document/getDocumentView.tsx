@@ -32,14 +32,14 @@ export type ViewToRender =
  *
  * To match a route to a view, the order of operations is as follows:
  *   1. If the route is a "known" route, e.g. `/api`:
- *     a. If the user has NOT overridden the `path`, render the corresponding view, whether default or custom
- *     b. If the user HAS overriden the `path`, do NOT render the view here, as it now exists at a different route.
- *   2. If 1b is true, look for another view that may be occupying this path.
+ *     a. If the user has NOT overridden the `path`, render its corresponding view, whether default or custom
+ *     b. If the user HAS overriden the `path`, do NOT render its view here, as it now exists at a different route
+ *   2. If 1b is true, traverse the config for another view that may be occupying this path
  *
  * This needs to be as performant as possible, as it is calculated on every request. To do this, we should avoid looping
- * through the entire `views` config and avoid running `path-to-regexp` as much as possible until absolutely necessary.
+ * through the entire `views` config and avoid running `path-to-regexp` unless absolutely necessary.
  * For example, we cannot do something like a "view map" where we generate all possible routes ahead of time, as that would require
- * looping through the entire config once to generate routes, and then a second time to run `path-to-regexp` against every route.
+ * looping through the entire config to generate routes and run all conditions, and then a second time to run `path-to-regexp` against every route.
  */
 export const getDocumentView = ({
   collectionConfig,

@@ -8,7 +8,7 @@ import { defaultDocumentViews } from './defaults.js'
  * Does so by iterating through the all views in the config and checking if the route matches any of the view paths.
  * Use it sparingly, as it can be expensive to iterate through all views and match paths.
  */
-export const getViewByRoute = ({
+export const matchRouteToView = ({
   basePath,
   currentRoute,
   views,

@@ -7,7 +7,7 @@ import type { ViewToRender } from './getDocumentView.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { defaultDocumentViews } from './defaults.js'
-import { getViewByRoute } from './getViewByRoute.js'
+import { matchRouteToView } from './matchRouteToView.js'
 
 /**
  * This function will find a view's component using either a key to the view's config object,
@@ -21,10 +21,10 @@ export const getViewByKeyOrRoute = ({
   globalConfig,
   viewKey,
 }: {
-  basePath: Parameters<typeof getViewByRoute>[0]['basePath']
+  basePath: Parameters<typeof matchRouteToView>[0]['basePath']
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-  currentRoute: Parameters<typeof getViewByRoute>[0]['currentRoute']
+  currentRoute: Parameters<typeof matchRouteToView>[0]['currentRoute']
   globalConfig?: SanitizedGlobalConfig
   /**
    * The key that corresponds to the view in the `views` config.
@@ -40,7 +40,7 @@ export const getViewByKeyOrRoute = ({
     (globalConfig && globalConfig?.admin?.components?.views)
 
   if (!viewKey) {
-    return getViewByRoute({
+    return matchRouteToView({
       basePath,
       currentRoute,
       views,
@@ -53,8 +53,8 @@ export const getViewByKeyOrRoute = ({
 
   if (!hasCustomizedPath) {
     const viewConfig = {
-      ...(defaultDocumentViews[viewKey] || {}),
-      ...(views.edit[viewKey] || {}),
+      ...(defaultDocumentViews?.[viewKey] || {}),
+      ...(views?.edit?.[viewKey] || {}),
     }
 
     /**
@@ -85,7 +85,7 @@ export const getViewByKeyOrRoute = ({
     return { Component: viewConfig.Component, viewKey }
   } else {
     // Check for another view that may be occupying this path
-    return getViewByRoute({
+    return matchRouteToView({
       basePath,
       currentRoute,
       views,

@@ -710,6 +710,7 @@ describe('Document View', () => {
 
       await expect(customEditMenuItem).toBeVisible()
     })
+
     test('should render custom editMenuItems component in live preview tab', async () => {
       await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
