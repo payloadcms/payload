@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedJoins } from 'payload'
+import type { JoinQuery, SanitizedJoins, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,
@@ -19,18 +19,19 @@ import { transform } from './transform.js'
  * @param where - The WHERE clause to search
  * @returns Array of collection slugs if relationTo filter found, null otherwise
  */
-function extractRelationToFilter(where: Record<string, any>): null | string[] {
+function extractRelationToFilter(where: Record<string, unknown>): null | string[] {
   if (!where || typeof where !== 'object') {
     return null
   }
 
   // Check for direct relationTo conditions
-  if (where.relationTo) {
-    if (where.relationTo.in && Array.isArray(where.relationTo.in)) {
-      return where.relationTo.in
+  if (where.relationTo && typeof where.relationTo === 'object') {
+    const relationTo = where.relationTo as Record<string, unknown>
+    if (relationTo.in && Array.isArray(relationTo.in)) {
+      return relationTo.in as string[]
     }
-    if (where.relationTo.equals) {
-      return [where.relationTo.equals]
+    if (relationTo.equals) {
+      return [relationTo.equals as string]
     }
   }
 
@@ -65,10 +66,10 @@ function extractRelationToFilter(where: Record<string, any>): null | string[] {
  * @returns A filtered WHERE clause, or null if the query cannot match this collection
  */
 function filterWhereForCollection(
-  where: Record<string, any>,
-  availableFields: any[],
+  where: Record<string, unknown>,
+  availableFields: Array<{ name: string }>,
   excludeRelationTo: boolean = false,
-): null | Record<string, any> {
+): null | Record<string, unknown> {
   if (!where || typeof where !== 'object') {
     return where
   }
@@ -79,13 +80,13 @@ function filterWhereForCollection(
     fieldNames.add('relationTo')
   }
 
-  const filtered: Record<string, any> = {}
+  const filtered: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(where)) {
     if (key === 'and') {
       // Handle AND operator - all conditions must be satisfiable
       if (Array.isArray(value)) {
-        const filteredConditions: Record<string, any>[] = []
+        const filteredConditions: Record<string, unknown>[] = []
 
         for (const condition of value) {
           const filteredCondition = filterWhereForCollection(
@@ -260,7 +261,7 @@ export async function resolveJoins({
   // Add polymorphic joins
   for (const join of collectionConfig.polymorphicJoins || []) {
     // For polymorphic joins, we use the collections array as the target
-    joinMap[join.joinPath] = { ...join, targetCollection: join.field.collection as any }
+    joinMap[join.joinPath] = { ...join, targetCollection: join.field.collection as string }
   }
 
   // Process each requested join
@@ -282,9 +283,6 @@ export async function resolveJoins({
       // Handle polymorphic collection joins (like documentsAndFolders from folder system)
       // These joins span multiple collections, so we need to query each collection separately
       const allCollections = joinDef.field.collection as string[]
-
-      // Extract all parent document IDs to use in the join query
-      const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
       // Use the provided locale or fall back to the default locale for localized fields
       const localizationConfig = adapter.payload.config.localization
@@ -346,7 +344,7 @@ export async function resolveJoins({
           ? await JoinModel.buildQuery({
               locale,
               payload: adapter.payload,
-              where: combineQueries(appendVersionToQueryKey(filteredWhere), {
+              where: combineQueries(appendVersionToQueryKey(filteredWhere as Where), {
                 latest: {
                   equals: true,
                 },
@@ -357,7 +355,7 @@ export async function resolveJoins({
               collectionSlug,
               fields: targetConfig.flattenedFields,
               locale,
-              where: filteredWhere,
+              where: filteredWhere as Where,
             })
 
         // Add the join condition
@@ -458,23 +456,22 @@ export async function resolveJoins({
             sortDirection = 'desc'
           }
 
-          grouped[parentKey].sort((a, b) => {
-            // Extract the field value from the original document
-            let valueA: any
-            let valueB: any
-
+          grouped[parentKey]!.sort((a, b) => {
             const docA = a._originalDoc as Record<string, unknown>
             const docB = b._originalDoc as Record<string, unknown>
 
-            if (sortField === 'createdAt') {
-              valueA = new Date(docA.createdAt as Date | string)
-              valueB = new Date(docB.createdAt as Date | string)
-            } else {
-              // Access the field directly from the document
-              valueA = getByPath(docA, sortField)
-              valueB = getByPath(docB, sortField)
-            }
+            const valueA =
+              sortField === 'createdAt'
+                ? new Date(docA.createdAt as Date | string)
+                : (getByPath(docA, sortField) as Date | number | string)
+            const valueB =
+              sortField === 'createdAt'
+                ? new Date(docB.createdAt as Date | string)
+                : (getByPath(docB, sortField) as Date | number | string)
 
+            if (valueA == null || valueB == null) {
+              return 0
+            }
             if (valueA < valueB) {
               return sortDirection === 'desc' ? 1 : -1
             }
@@ -485,7 +482,7 @@ export async function resolveJoins({
           })
         } else {
           // Default sort by creation time (newest first)
-          grouped[parentKey].sort((a, b) => {
+          grouped[parentKey]!.sort((a, b) => {
             const docA = a._originalDoc as Record<string, unknown>
             const docB = b._originalDoc as Record<string, unknown>
             const dateA = new Date(docA.createdAt as Date | string)
@@ -495,8 +492,8 @@ export async function resolveJoins({
         }
 
         // Remove the temporary _originalDoc field
-        for (const item of grouped[parentKey]) {
-          delete (item as any)._originalDoc
+        for (const item of grouped[parentKey]!) {
+          delete item._originalDoc
         }
       }
 
