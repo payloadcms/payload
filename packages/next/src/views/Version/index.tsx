@@ -88,7 +88,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           and: [
             {
               updatedAt: {
-                less_than: versionTo?.updatedAt,
+                less_than: versionTo.updatedAt,
               },
             },
           ],
@@ -195,12 +195,12 @@ export async function VersionView(props: DocumentViewServerProps) {
       updatedAt: versionFrom?.updatedAt,
     },
     versionToSiblingData: {
-      ...versionTo?.version,
-      updatedAt: versionTo?.updatedAt,
+      ...versionTo.version,
+      updatedAt: versionTo.updatedAt,
     },
   })
 
-  const versionToCreatedAtFormatted = versionTo?.updatedAt
+  const versionToCreatedAtFormatted = versionTo.updatedAt
     ? formatDate({
         date:
           typeof versionTo.updatedAt === 'string'
@@ -286,12 +286,12 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromCreatedAt={versionFrom?.createdAt}
       versionFromID={versionFrom?.id}
       versionFromOptions={versionFromOptions}
-      versionToCreatedAt={versionTo?.createdAt}
+      versionToCreatedAt={versionTo.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
       versionToID={versionTo.id}
-      versionToStatus={versionTo?.version?._status}
-      versionToUseAsTitle={versionTo?.[collectionConfig.admin?.useAsTitle || 'id']}
+      versionToStatus={versionTo.version?._status}
+      versionToUseAsTitle={versionTo[collectionConfig.admin?.useAsTitle || 'id']}
     />
   )
 }
