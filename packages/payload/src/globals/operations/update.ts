@@ -368,6 +368,7 @@ export const updateOperation = async <
         result =
           (await hook({
             context: req.context,
+            data,
             doc: result,
             global: globalConfig,
             previousDoc: originalDoc,

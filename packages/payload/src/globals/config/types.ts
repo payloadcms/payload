@@ -51,6 +51,7 @@ export type BeforeChangeHook = (args: {
 
 export type AfterChangeHook = (args: {
   context: RequestContext
+  data: any
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig

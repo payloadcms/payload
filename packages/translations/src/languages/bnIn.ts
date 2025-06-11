@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const bnINTranslations = {
+export const bnInTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'অ্যাকাউন্ট',
     accountOfCurrentUser: 'বর্তমান ব্যবহারকারীর অ্যাকাউন্ট',
@@ -554,7 +554,7 @@ export const bnINTranslations = {
   },
 }
 
-export const bnIN: Language = {
+export const bnIn: Language = {
   dateFNSKey: 'bn-IN',
-  translations: bnINTranslations,
+  translations: bnInTranslations,
 }
