@@ -74,7 +74,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
     try {
       const res =
-        deletePermanently || !collectionConfig.softDeletes
+        deletePermanently || !collectionConfig.trash
           ? await requests.delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
               headers: {
                 'Accept-Language': i18n.language,
@@ -96,7 +96,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       if (res.status < 400) {
         toast.success(
           t(
-            deletePermanently || !collectionConfig.softDeletes
+            deletePermanently || !collectionConfig.trash
               ? 'general:titleDeleted'
               : 'general:titleSoftDeleted',
             {
@@ -179,7 +179,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                   title: titleFromProps || title || id,
                 }}
               />
-              {collectionConfig.softDeletes && (
+              {collectionConfig.trash && (
                 <CheckboxInput
                   checked={deletePermanently}
                   id="delete-forever"
