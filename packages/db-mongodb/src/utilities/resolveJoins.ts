@@ -107,6 +107,63 @@ function filterWhereForCollection(
   return filtered
 }
 
+/**
+ * Checks if a wrapped polymorphic result matches the given WHERE clause
+ * @param wrappedResult - The polymorphic result with value and relationTo
+ * @param whereClause - The WHERE clause to match against
+ * @returns true if the result matches the WHERE clause
+ */
+function matchesWhereClause(
+  wrappedResult: Record<string, unknown>,
+  whereClause: Record<string, any>,
+): boolean {
+  // Simple implementation for basic filters
+  for (const [field, condition] of Object.entries(whereClause)) {
+    if (field === 'relationTo') {
+      // Handle relationTo filter
+      const relationTo = wrappedResult.relationTo as string
+      if (condition.equals && condition.equals !== relationTo) {
+        return false
+      }
+      if (condition.in && Array.isArray(condition.in) && !condition.in.includes(relationTo)) {
+        return false
+      }
+    } else if (field === 'and' && Array.isArray(condition)) {
+      // Handle AND conditions
+      for (const subCondition of condition) {
+        if (!matchesWhereClause(wrappedResult, subCondition)) {
+          return false
+        }
+      }
+    } else if (field === 'or' && Array.isArray(condition)) {
+      // Handle OR conditions
+      let foundMatch = false
+      for (const subCondition of condition) {
+        if (matchesWhereClause(wrappedResult, subCondition)) {
+          foundMatch = true
+          break
+        }
+      }
+      if (!foundMatch) {
+        return false
+      }
+    } else {
+      // Handle other field conditions by checking the original document
+      const originalDocument = wrappedResult.originalDocument as Record<string, unknown>
+      const fieldValue = getByPath(originalDocument, field)
+
+      if (condition.equals && condition.equals !== fieldValue) {
+        return false
+      }
+      if (condition.not_equals && condition.not_equals === fieldValue) {
+        return false
+      }
+      // Add more condition types as needed
+    }
+  }
+  return true
+}
+
 type Args = {
   adapter: MongooseAdapter
   collectionSlug: string
@@ -268,6 +325,9 @@ export async function resolveJoins({
       // Extract relationTo filter from the where clause to determine which collections to query
       const relationToFilter = extractRelationToFilter(joinQuery.where || {})
 
+      // Keep the original where clause for post-processing
+      const originalWhere = joinQuery.where || {}
+
       // Determine which collections to query based on relationTo filter
       const collections = relationToFilter
         ? allCollections.filter((col) => relationToFilter.includes(col))
@@ -307,8 +367,11 @@ export async function resolveJoins({
         // For polymorphic collection joins, we should not skip collections just because
         // some AND conditions were filtered out - the relationTo filter is what determines
         // if a collection should participate in the join
-        // Only skip if there are literally no conditions after filtering
-        if (Object.keys(filteredWhere).length === 0) {
+        // Only skip if there are literally no conditions after filtering AND the original where was not empty
+        // AND we didn't extract a relationTo filter (which means this collection was specifically requested)
+        const originalWhere = joinQuery.where || {}
+        const originalHadConditions = Object.keys(originalWhere).length > 0
+        if (Object.keys(filteredWhere).length === 0 && originalHadConditions && !relationToFilter) {
           continue
         }
 
@@ -385,28 +448,117 @@ export async function resolveJoins({
           })
         }
 
-        // Add relationTo field to each result to indicate which collection it came from
+        // For polymorphic collection joins, wrap each result in the expected format
         for (const result of results) {
-          result.relationTo = collectionSlug
-
           // For version documents, we want to return the parent document ID but with the version data
           if (useDrafts) {
             result.id = result.parent // Use parent document ID as the ID for joins
           }
 
-          allResults.push(result)
+          // Wrap the result in the polymorphic format with value and relationTo
+          // For polymorphic collection joins, we return the ID as value
+          // Relationship population will handle depth-based population separately
+          const wrappedResult = {
+            originalDocument: result, // Store original for grouping and sorting
+            relationTo: collectionSlug,
+            value: result.id || result._id,
+          }
+
+          allResults.push(wrappedResult)
         }
       }
 
-      // Group the results by their parent document ID
+      // Sort the combined results to maintain consistent order across collections
+      // The sortCriteria here is the raw sort input, not the processed buildSortParam output
+      // We need to parse it properly like buildSortParam does
+      const rawSortCriteria = joinQuery.sort || joinDef.field.defaultSort
+      if (rawSortCriteria) {
+        // Convert the raw sort criteria to the same format as buildSortParam
+        const parsedSort: Record<string, string> = {}
+
+        if (typeof rawSortCriteria === 'string') {
+          // Handle single string like '-title'
+          const items = [rawSortCriteria]
+          for (const item of items) {
+            if (item.indexOf('-') === 0) {
+              parsedSort[item.substring(1)] = 'desc'
+            } else {
+              parsedSort[item] = 'asc'
+            }
+          }
+        } else if (Array.isArray(rawSortCriteria)) {
+          // Handle array like ['-title', 'createdAt']
+          for (const item of rawSortCriteria) {
+            if (typeof item === 'string') {
+              if (item.indexOf('-') === 0) {
+                parsedSort[item.substring(1)] = 'desc'
+              } else {
+                parsedSort[item] = 'asc'
+              }
+            }
+          }
+        } else if (typeof rawSortCriteria === 'object') {
+          // Handle object like { title: 'desc' }
+          Object.assign(parsedSort, rawSortCriteria)
+        }
+
+        allResults.sort((a, b) => {
+          const docA = a.originalDocument as Record<string, unknown>
+          const docB = b.originalDocument as Record<string, unknown>
+
+          for (const [field, direction] of Object.entries(parsedSort)) {
+            const valueA = getByPath(docA, field)
+            const valueB = getByPath(docB, field)
+
+            if (valueA < valueB) {
+              return direction === 'desc' ? 1 : -1
+            }
+            if (valueA > valueB) {
+              return direction === 'desc' ? -1 : 1
+            }
+          }
+          return 0
+        })
+      } else {
+        // Default sort by createdAt descending if no sort specified
+        allResults.sort((a, b) => {
+          const docA = a.originalDocument as Record<string, unknown>
+          const docB = b.originalDocument as Record<string, unknown>
+          const createdAtA = docA.createdAt as Date | string
+          const createdAtB = docB.createdAt as Date | string
+
+          if (createdAtA < createdAtB) {
+            return 1
+          }
+          if (createdAtA > createdAtB) {
+            return -1
+          }
+          return 0
+        })
+      }
+
+      // Apply post-processing WHERE clause filters to the wrapped results
+      // This handles relationTo filters and other conditions that need to be applied
+      // after the polymorphic wrapping
+      let filteredResults = allResults
+      if (Object.keys(originalWhere).length > 0) {
+        filteredResults = allResults.filter((wrappedResult) => {
+          // Check each condition in the WHERE clause
+          const matches = matchesWhereClause(wrappedResult, originalWhere)
+          return matches
+        })
+      }
+
+      // Group the filtered results by their parent document ID
       const grouped: Record<string, Record<string, unknown>[]> = {}
 
-      for (const res of allResults) {
-        // Get the parent ID from the result using the join field
+      for (const res of filteredResults) {
+        // Get the parent ID from the original document using the join field
         // For version documents, the field is nested under 'version'
+        const actualDocument = res.originalDocument as Record<string, unknown>
         const joinFieldPath =
-          versions && res.version ? `version.${joinDef.field.on}` : joinDef.field.on
-        const parentValue = getByPath(res, joinFieldPath)
+          versions && actualDocument.version ? `version.${joinDef.field.on}` : joinDef.field.on
+        const parentValue = getByPath(actualDocument, joinFieldPath)
         if (!parentValue) {
           continue
         }
@@ -444,9 +596,15 @@ export async function resolveJoins({
         // Calculate the slice for pagination
         const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
 
+        // Clean up internal properties from the slice
+        const cleanedSlice = slice.map((item) => {
+          const { originalDocument, ...cleanItem } = item as any
+          return cleanItem
+        })
+
         // Create the join result object with pagination metadata
         const value: Record<string, unknown> = {
-          docs: slice,
+          docs: cleanedSlice,
           hasNextPage: all.length > (page - 1) * limit + slice.length,
         }
 
