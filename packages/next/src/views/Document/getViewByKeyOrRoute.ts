@@ -63,39 +63,7 @@ export const getViewByKeyOrRoute = ({
   // Note: the path could be '' (empty string)
   const hasCustomizedPath = views?.edit?.[viewKey] && 'path' in views.edit[viewKey]
 
-  if (!hasCustomizedPath) {
-    const viewConfig = {
-      ...(defaultDocumentViews?.[viewKey] || {}),
-      ...(views?.edit?.[viewKey] || {}),
-    }
-
-    /**
-     * Runs conditions that should return the not found view. E.g., conditionally render the API view based on `hideAPIURL`.
-     * Should not run if another view is mounted to this route. E.g., you wouldn't want `hideAPIURL` to apply to `myCustomView` mounted to "/api".
-     * If not explicitly false, will return the `NotFoundView`. You can also throw an `UnauthorizedError` to render the `Unauthorized` view.
-     */
-    if (typeof viewConfig.condition === 'function') {
-      try {
-        const meetsCondition = (viewConfig.condition as DocumentViewCondition)({
-          collectionConfig,
-          config,
-          docPermissions,
-          globalConfig,
-          routeSegments,
-        })
-
-        if (meetsCondition === false) {
-          return { Component: NotFoundView }
-        }
-      } catch (error) {
-        if (error instanceof UnauthorizedError) {
-          return { Component: UnauthorizedViewWithGutter }
-        }
-      }
-    }
-
-    return { Component: viewConfig.Component, viewKey: viewKey as string }
-  } else {
+  if (hasCustomizedPath) {
     // Check for another view that may be occupying this path
     return matchRouteToView({
       basePath,
@@ -103,4 +71,36 @@ export const getViewByKeyOrRoute = ({
       views,
     })
   }
+
+  const viewConfig = {
+    ...(defaultDocumentViews?.[viewKey] || {}),
+    ...(views?.edit?.[viewKey] || {}),
+  }
+
+  /**
+   * Runs conditions that should return the not found view. E.g., conditionally render the API view based on `hideAPIURL`.
+   * Should not run if another view is mounted to this route. E.g., you wouldn't want `hideAPIURL` to apply to `myCustomView` mounted to "/api".
+   * If not explicitly false, will return the `NotFoundView`. You can also throw an `UnauthorizedError` to render the `Unauthorized` view.
+   */
+  if (typeof viewConfig.condition === 'function') {
+    try {
+      const meetsCondition = (viewConfig.condition as DocumentViewCondition)({
+        collectionConfig,
+        config,
+        docPermissions,
+        globalConfig,
+        routeSegments,
+      })
+
+      if (meetsCondition === false) {
+        return { Component: NotFoundView }
+      }
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return { Component: UnauthorizedViewWithGutter }
+      }
+    }
+  }
+
+  return { Component: viewConfig.Component, viewKey: viewKey as string }
 }

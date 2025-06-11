@@ -190,11 +190,10 @@ export const renderDocument = async ({
   }
 
   if (
+    !overrideEntityVisibility &&
     ((collectionSlug &&
       !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) ||
-      (globalSlug &&
-        !visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug))) &&
-    !overrideEntityVisibility
+      (globalSlug && !visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)))
   ) {
     throw new Error('not-found')
   }
@@ -205,7 +204,7 @@ export const renderDocument = async ({
 
   const formattedParams = new URLSearchParams()
 
-  if (collectionConfig.versions?.drafts) {
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
     formattedParams.append('draft', 'true')
   }
 
@@ -225,7 +224,10 @@ export const renderDocument = async ({
     collectionConfig?.admin?.components?.views?.edit?.root &&
     'Component' in collectionConfig.admin.components.views.edit.root
       ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
-      : null
+      : globalConfig?.admin?.components?.views?.edit?.root &&
+          'Component' in globalConfig.admin.components.views.edit.root
+        ? globalConfig?.admin?.components?.views?.edit?.root?.Component
+        : null
 
   if (RootViewOverride) {
     View = RootViewOverride
