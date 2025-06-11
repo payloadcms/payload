@@ -7,6 +7,7 @@ import { initHandler } from './init.js'
 import { loginHandler } from './login.js'
 import { logoutHandler } from './logout.js'
 import { meHandler } from './me.js'
+import { patchMeHandler } from './patchMe.js'
 import { refreshHandler } from './refresh.js'
 import { registerFirstUserHandler } from './registerFirstUser.js'
 import { resetPasswordHandler } from './resetPassword.js'
@@ -45,6 +46,11 @@ export const authCollectionEndpoints: Endpoint[] = wrapInternalEndpoints([
   {
     handler: meHandler,
     method: 'get',
+    path: '/me',
+  },
+  {
+    handler: patchMeHandler,
+    method: 'patch',
     path: '/me',
   },
   {
