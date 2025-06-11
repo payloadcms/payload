@@ -72,7 +72,9 @@ export async function VersionView(props: DocumentViewServerProps) {
     await Promise.all([
       fetchVersions({
         collectionSlug,
-        depth: 1,
+        // If versionFromIDFromParams is provided, the previous version is only used in the version comparison dropdown => depth 0 is enough.
+        // If it's not provided, this is used as `versionFrom` in the comparison, which expects populated data => depth 1 is needed.
+        depth: versionFromIDFromParams ? 0 : 1,
         draft: true,
         globalSlug,
         limit: 1,
