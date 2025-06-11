@@ -62,7 +62,7 @@ export const DocumentTabs: React.FC<{
                   (condition &&
                     Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
 
-                const path = 'path' in viewConfig ? viewConfig.path : ''
+                const path = viewConfig && 'path' in viewConfig ? viewConfig.path : ''
 
                 if (meetsCondition) {
                   if (tabFromConfig?.Component) {
