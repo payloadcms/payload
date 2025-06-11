@@ -4,26 +4,20 @@ import { type DocumentViewServerProps, logError, type PaginatedDocs } from 'payl
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import type { CreatedAtCellProps } from './cells/CreatedAt/index.js'
-
+import { VersionDrawerCreatedAtCell } from '../Version/SelectComparison/VersionDrawer/CreatedAtCell.js'
 import { buildVersionColumns } from './buildColumns.js'
-import { getLatestVersion } from './getLatestVersion.js'
 import './index.scss'
+import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'
 
 export const baseClass = 'versions'
 
-export async function VersionsView(
-  props: {
-    CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
-    // Optional props that are passed if this view is rendered from the Version view SelectComparison drawer
-    /**
-     * @default false
-     */
-    disableGutter?: boolean
-  } & DocumentViewServerProps,
-) {
-  const { CreatedAtCellOverride, disableGutter, initPageResult, searchParams } = props
+export async function VersionsView(props: DocumentViewServerProps) {
+  const {
+    initPageResult,
+    searchParams,
+    versions: { disableGutter = false, useVersionDrawerCreatedAtCell = false } = {},
+  } = props
 
   const {
     collectionConfig,
@@ -194,7 +188,7 @@ export async function VersionsView(
   const columns = buildVersionColumns({
     collectionConfig,
     config,
-    CreatedAtCellOverride,
+    CreatedAtCellOverride: useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined,
     docID: id,
     docs: versionsData?.docs,
     globalConfig,

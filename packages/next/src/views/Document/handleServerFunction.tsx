@@ -27,6 +27,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       payload: { config },
       user,
     },
+    versions,
   } = args
 
   const headers = await getHeaders()
@@ -147,6 +148,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    versions,
     viewType: 'document',
   })
 

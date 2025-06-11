@@ -8,6 +8,7 @@ import type {
   FormState,
   GetFolderResultsComponentAndDataArgs,
   Locale,
+  RenderDocumentVersionsProperties,
   ServerFunction,
   ServerFunctionClient,
 } from 'payload'
@@ -60,6 +61,10 @@ type RenderDocumentBaseArgs = {
   redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
+  /**
+   * Properties specific to the versions view
+   */
+  versions?: RenderDocumentVersionsProperties
 }
 
 export type RenderDocumentServerFunction = ServerFunction<

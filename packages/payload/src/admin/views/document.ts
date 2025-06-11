@@ -9,11 +9,26 @@ export type EditViewProps = {
   readonly collectionSlug?: string
   readonly globalSlug?: string
 }
+/**
+ * Properties specific to the versions view
+ */
+export type RenderDocumentVersionsProperties = {
+  /**
+   * @default false
+   */
+  disableGutter?: boolean
+  /**
+   * Use createdAt cell that appends params to the url on version selection instead of redirecting user
+   * @default false
+   */
+  useVersionDrawerCreatedAtCell?: boolean
+}
 
 export type DocumentViewServerPropsOnly = {
   readonly doc: Data
   readonly initPageResult: InitPageResult
   readonly routeSegments: string[]
+  versions?: RenderDocumentVersionsProperties
 } & ServerProps
 
 export type DocumentViewServerProps = DocumentViewClientProps & DocumentViewServerPropsOnly

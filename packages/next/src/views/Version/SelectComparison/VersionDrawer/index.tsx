@@ -51,6 +51,10 @@ export const VersionDrawerContent: React.FC<{
             },
             redirectAfterDelete: false,
             redirectAfterDuplicate: false,
+            versions: {
+              disableGutter: true,
+              useVersionDrawerCreatedAtCell: true,
+            },
           })
 
           if (result?.Document) {

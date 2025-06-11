@@ -16,10 +16,8 @@ import React from 'react'
 import type { CompareOption } from './Default/types.js'
 
 import { getLatestVersion, type GetLatestVersionReturnType } from '../Versions/getLatestVersion.js'
-import { VersionsView } from '../Versions/index.js'
 import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
-import { CreatedAtCell } from './SelectComparison/VersionDrawer/CreatedAtCell.js'
 import { formatVersionPill } from './VersionPillLabel/formatVersionPill.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
@@ -435,10 +433,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       }
       return option
     }) as CompareOption[]
-
-  const _VersionsView = (
-    <VersionsView {...props} CreatedAtCellOverride={CreatedAtCell} disableGutter={true} />
-  )
 
   return (
     <DefaultVersionView

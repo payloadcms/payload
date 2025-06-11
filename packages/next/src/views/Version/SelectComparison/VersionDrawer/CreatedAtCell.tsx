@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 
 import type { CreatedAtCellProps } from '../../../Versions/cells/CreatedAt/index.js'
 
-export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
+export const VersionDrawerCreatedAtCell: React.FC<CreatedAtCellProps> = ({
   rowData: { id, updatedAt } = {},
 }) => {
   const {
