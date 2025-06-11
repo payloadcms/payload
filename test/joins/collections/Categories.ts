@@ -105,6 +105,7 @@ export const Categories: CollectionConfig = {
           on: 'group.category',
           admin: {
             defaultColumns: ['id', 'createdAt', 'title'],
+            disableRowTypes: false,
           },
         },
         {
