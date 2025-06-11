@@ -6,6 +6,21 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const allDatabaseAdapters = {
+  mongodb: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ensureIndexes: true,
+    // required for connect to detect that we are using a memory server
+    mongoMemoryServer:  global._mongoMemoryServer,
+    url:
+      process.env.MONGODB_MEMORY_SERVER_URI ||
+      process.env.DATABASE_URI ||
+      'mongodb://127.0.0.1/payloadtests',
+    collation: {
+      strength: 1,
+    },
+  })`,
   firestore: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
@@ -22,21 +37,6 @@ export const allDatabaseAdapters = {
       strength: 1,
     },
     compatabilityMode: 'firestore'
-  })`,
-  mongodb: `
-  import { mongooseAdapter } from '@payloadcms/db-mongodb'
-
-  export const databaseAdapter = mongooseAdapter({
-    ensureIndexes: true,
-    // required for connect to detect that we are using a memory server
-    mongoMemoryServer:  global._mongoMemoryServer,
-    url:
-      process.env.MONGODB_MEMORY_SERVER_URI ||
-      process.env.DATABASE_URI ||
-      'mongodb://127.0.0.1/payloadtests',
-    collation: {
-      strength: 1,
-    },
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
