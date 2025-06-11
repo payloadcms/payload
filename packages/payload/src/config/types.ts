@@ -340,29 +340,40 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
+export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
 
-export type EditViewConfig = {
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewConfig` instead.
+ */
+export type EditViewConfig = DocumentViewConfig
+
+type BaseDocumentViewConfig = {
+  actions?: CustomComponent[]
   meta?: MetaConfig
-} & (
-  | {
-      actions?: CustomComponent[]
-    }
-  | {
-      Component: EditViewComponent
-      path?: string
-    }
-  | {
-      path?: string
-      /**
-       * Add a new Edit View to the admin panel
-       * i.e. you can render a custom view that has no tab, if desired
-       * Or override a specific properties of an existing one
-       * i.e. you can customize the `Default` view tab label, if desired
-       */
-      tab?: DocumentTabConfig
-    }
-)
+  tab?: DocumentTabConfig
+}
+
+/*
+  If your view does not originate from a "known" key, e.g. `api`, then it is considered a "custom" view and can accept `path`, etc.
+*/
+export type DocumentViewConfig =
+  | ({
+      Component: DocumentViewComponent
+      path: string
+    } & BaseDocumentViewConfig)
+  | ({
+      Component?: DocumentViewComponent
+      path?: never
+    } & BaseDocumentViewConfig)
+
+/*
+  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept `path`, etc.
+*/
+export type DefaultDocumentViewConfig = {
+  Component?: DocumentViewComponent
+} & BaseDocumentViewConfig
 
 export type Params = { [key: string]: string | string[] | undefined }
 
@@ -1268,13 +1279,14 @@ export type EditConfigWithRoot = {
    * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
    * + `root` - `/admin/collections/:collection/:id/**\/*`
    */
-  root: Partial<EditViewConfig>
+  root: Partial<DefaultDocumentViewConfig>
   version?: never
   versions?: never
 }
 
+type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
+
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig
   /**
    * Replace or modify individual nested routes, or add new ones:
    * + `default` - `/admin/collections/:collection/:id`
@@ -1288,18 +1300,14 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  api?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  default?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  livePreview?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  api?: DefaultDocumentViewConfig
+  default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
   root?: never
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  version?: Partial<EditViewConfig>
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  versions?: Partial<EditViewConfig>
+  version?: DefaultDocumentViewConfig
+  versions?: DefaultDocumentViewConfig
+} & {
+  [K in Exclude<string, KnownEditKeys>]?: DocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent
