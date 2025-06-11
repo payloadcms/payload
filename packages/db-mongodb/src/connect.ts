@@ -67,7 +67,7 @@ export const connect: Connect = async function connect(
 
     const client = this.connection.getClient()
 
-    if (!client.options.replicaSet) {
+    if (!client.options.replicaSet && this.compatabilityMode !== 'firestore') {
       this.transactionOptions = false
       this.beginTransaction = defaultBeginTransaction()
     }
