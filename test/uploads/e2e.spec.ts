@@ -27,6 +27,7 @@ import {
   adminThumbnailWithSearchQueries,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
   focalOnlySlug,
@@ -73,6 +74,7 @@ let hideFileInputOnCreateURL: AdminUrlUtil
 let bestFitURL: AdminUrlUtil
 let withoutEnlargementResizeOptionsURL: AdminUrlUtil
 let threeDimensionalURL: AdminUrlUtil
+let constructorOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -110,6 +112,7 @@ describe('Uploads', () => {
     bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
     withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
+    constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1479,13 +1482,13 @@ describe('Uploads', () => {
   })
 
   test('should respect Sharp constructorOptions', async () => {
-    await page.goto(animatedTypeMediaURL.create)
+    await page.goto(constructorOptionsURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './5mb-gif.gif'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
 
     const filename = page.locator('.file-field__filename')
 
-    await expect(filename).toHaveValue('5mb-gif.gif')
+    await expect(filename).toHaveValue('animated.webp')
     await saveDocAndAssert(page, '#action-save', 'error')
   })
 })

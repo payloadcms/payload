@@ -26,3 +26,4 @@ export const customFileNameMediaSlug = 'custom-file-name-media'
 
 export const listViewPreviewSlug = 'list-view-preview'
 export const threeDimensionalSlug = 'three-dimensional'
+export const constructorOptionsSlug = 'constructor-options'

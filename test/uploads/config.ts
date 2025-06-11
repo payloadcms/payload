@@ -18,6 +18,7 @@ import { Uploads2 } from './collections/Upload2/index.js'
 import {
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -409,9 +410,6 @@ export default buildConfigWithDefaults({
       slug: animatedTypeMedia,
       fields: [],
       upload: {
-        constructorOptions: {
-          limitInputPixels: 1500000, // set lower than the collection upload fileSize limit default to test
-        },
         staticDir: path.resolve(dirname, './media'),
         resizeOptions: {
           position: 'center',
@@ -809,6 +807,16 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         focalPoint: false,
+      },
+    },
+    {
+      slug: constructorOptionsSlug,
+      fields: [],
+      upload: {
+        constructorOptions: {
+          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+        },
+        staticDir: path.resolve(dirname, './media'),
       },
     },
   ],

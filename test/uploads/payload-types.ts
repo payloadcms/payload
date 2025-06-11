@@ -105,6 +105,7 @@ export interface Config {
     'best-fit': BestFit;
     'list-view-preview': ListViewPreview;
     'three-dimensional': ThreeDimensional;
+    'constructor-options': ConstructorOption;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -150,6 +151,7 @@ export interface Config {
     'best-fit': BestFitSelect<false> | BestFitSelect<true>;
     'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
     'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
+    'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1329,6 +1331,24 @@ export interface ThreeDimensional {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options".
+ */
+export interface ConstructorOption {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1502,6 +1522,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'three-dimensional';
         value: string | ThreeDimensional;
+      } | null)
+    | ({
+        relationTo: 'constructor-options';
+        value: string | ConstructorOption;
       } | null)
     | ({
         relationTo: 'users';
@@ -2769,6 +2793,23 @@ export interface ThreeDimensionalSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options_select".
+ */
+export interface ConstructorOptionsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
