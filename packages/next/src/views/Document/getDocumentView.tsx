@@ -13,7 +13,7 @@ import type { ViewToRender } from './index.js'
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
-import { UnauthorizedView } from '../Unauthorized/index.js'
+import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
@@ -70,7 +70,7 @@ export const getDocumentView = ({
             if ('create' in docPermissions && docPermissions.create) {
               View = getCustomViewByKey(views, 'default') || DefaultEditView
             } else {
-              View = UnauthorizedView
+              View = UnauthorizedViewWithGutter
             }
             break
           }
@@ -141,7 +141,7 @@ export const getDocumentView = ({
             if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
-              View = UnauthorizedView
+              View = UnauthorizedViewWithGutter
             }
             break
           }
@@ -188,7 +188,7 @@ export const getDocumentView = ({
           if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
           } else {
-            View = UnauthorizedView
+            View = UnauthorizedViewWithGutter
           }
         } else {
           // --> ../:id/<custom-segment>/<custom-segment>
@@ -264,7 +264,7 @@ export const getDocumentView = ({
             if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
-              View = UnauthorizedView
+              View = UnauthorizedViewWithGutter
             }
             break
           }
@@ -295,7 +295,7 @@ export const getDocumentView = ({
                 View = DefaultEditView
               }
             } else {
-              View = UnauthorizedView
+              View = UnauthorizedViewWithGutter
             }
             break
           }
@@ -311,7 +311,7 @@ export const getDocumentView = ({
           if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
           } else {
-            View = UnauthorizedView
+            View = UnauthorizedViewWithGutter
           }
         } else {
           // --> ../:slug/<custom-segment>/<custom-segment>
