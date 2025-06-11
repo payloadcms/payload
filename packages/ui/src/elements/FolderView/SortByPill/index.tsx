@@ -45,9 +45,12 @@ const orderOnOptions: {
   },
 ]
 export function SortByPill() {
-  const { documents, sortAndUpdateState, sortDirection, sortOn, subfolders } = useFolder()
+  const { refineFolderData, sort } = useFolder()
   const { t } = useTranslation()
-  const [selectedSortOption] = sortOnOptions.filter(({ value }) => value === sortOn)
+  const sortDirection = sort.startsWith('-') ? 'desc' : 'asc'
+  const [selectedSortOption] = sortOnOptions.filter(
+    ({ value }) => value === (sort.startsWith('-') ? sort.slice(1) : sort),
+  )
   const [selectedOrderOption] = orderOnOptions.filter(({ value }) => value === sortDirection)
 
   return (
@@ -73,13 +76,11 @@ export function SortByPill() {
                 active={selectedSortOption.value === value}
                 key={value}
                 onClick={() => {
-                  sortAndUpdateState({
-                    documentsToSort: documents,
-                    sortOn: value as keyof Pick<
-                      FolderOrDocument['value'],
-                      '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
-                    >,
-                    subfoldersToSort: subfolders,
+                  refineFolderData({
+                    query: {
+                      sort: value,
+                    },
+                    updateURL: true,
                   })
                   close()
                 }}
@@ -97,11 +98,14 @@ export function SortByPill() {
                 className={`${baseClass}__order-option`}
                 key={value}
                 onClick={() => {
-                  sortAndUpdateState({
-                    documentsToSort: documents,
-                    sortDirection: value,
-                    subfoldersToSort: subfolders,
-                  })
+                  if (value === 'asc') {
+                    refineFolderData({
+                      query: {
+                        sort: value === 'asc' ? `-${sort}` : sort,
+                      },
+                      updateURL: true,
+                    })
+                  }
                   close()
                 }}
               >
