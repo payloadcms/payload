@@ -211,13 +211,19 @@ export async function VersionView(props: DocumentViewServerProps) {
   // - previously published (if there is a prior published version older than the one you are lookin at): publishedNewerThanDraft ? null : latestPublishedVersion?
   // - previous version: always, unless doesnt exist. Can be the same as previously published
 
-  const formatPill = (doc: TypeWithVersion<any>): React.ReactNode => {
+  const formatPill = ({
+    doc,
+    labelStyle,
+  }: {
+    doc: TypeWithVersion<any>
+    labelStyle?: 'pill' | 'text'
+  }): React.ReactNode => {
     return (
       <VersionPillLabel
         doc={doc}
         key={doc.id}
         labelFirst={true}
-        labelStyle={'text'}
+        labelStyle={labelStyle ?? 'text'}
         latestDraftVersion={latestDraftVersion}
         latestPublishedVersion={latestPublishedVersion}
       />
@@ -230,7 +236,7 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   if (previousVersion?.id) {
     versionFromOptionsWithDate.push({
-      label: formatPill(previousVersion),
+      label: formatPill({ doc: previousVersion }),
       updatedAt: new Date(previousVersion.updatedAt),
       value: previousVersion.id,
     })
@@ -238,7 +244,7 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   if (versionFrom?.id) {
     versionFromOptionsWithDate.push({
-      label: formatPill(versionFrom),
+      label: formatPill({ doc: versionFrom }),
       updatedAt: new Date(versionFrom.updatedAt),
       value: versionFrom.id,
     })
@@ -276,7 +282,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromOptions={versionFromOptions}
       versionToCreatedAt={versionTo?.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
-      VersionToCreatedAtLabel={formatPill(versionTo)}
+      VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
       versionToID={versionTo.id}
       versionToStatus={versionTo?.version?._status}
       versionToUseAsTitle={versionTo?.[collectionConfig.admin?.useAsTitle || 'id']}
