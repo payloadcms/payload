@@ -568,12 +568,13 @@ export async function resolveJoins({
       const all = grouped[id] || []
 
       // Calculate the slice for pagination
-      const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
+      // When limit is 0, it means unlimited - return all results
+      const slice = limit === 0 ? all : all.slice((page - 1) * limit, (page - 1) * limit + limit)
 
       // Create the join result object with pagination metadata
       const value: Record<string, unknown> = {
         docs: slice,
-        hasNextPage: all.length > (page - 1) * limit + slice.length,
+        hasNextPage: limit === 0 ? false : all.length > (page - 1) * limit + slice.length,
       }
 
       // Include total count if requested
