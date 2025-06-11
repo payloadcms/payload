@@ -124,8 +124,15 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     const { viewKey } = getDocumentView({
       collectionConfig,
       config,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
       globalConfig,
-      overrideDocPermissions: true,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 

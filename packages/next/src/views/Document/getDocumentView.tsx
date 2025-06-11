@@ -29,23 +29,14 @@ export const getDocumentView = ({
   config,
   docPermissions,
   globalConfig,
-  overrideDocPermissions,
   routeSegments,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
+  docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-} & (
-  | {
-      docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
-      overrideDocPermissions?: false | undefined
-    }
-  | {
-      docPermissions?: never
-      overrideDocPermissions: true
-    }
-)): {
+}): {
   View: ViewToRender
   viewKey: string
 } | null => {
@@ -61,7 +52,7 @@ export const getDocumentView = ({
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
 
-  if (!overrideDocPermissions && !docPermissions?.read) {
+  if (!docPermissions?.read) {
     throw new Error('not-found')
   }
 
@@ -76,7 +67,7 @@ export const getDocumentView = ({
         switch (segment3) {
           // --> ../create
           case 'create': {
-            if (!overrideDocPermissions && 'create' in docPermissions && docPermissions.create) {
+            if ('create' in docPermissions && docPermissions.create) {
               View = getCustomViewByKey(views, 'default') || DefaultEditView
             } else {
               View = UnauthorizedView
@@ -147,7 +138,7 @@ export const getDocumentView = ({
 
           case 'versions': {
             // --> ../:id/versions
-            if (!overrideDocPermissions && docPermissions?.readVersions) {
+            if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedView
@@ -194,7 +185,7 @@ export const getDocumentView = ({
       default: {
         // --> ../:id/versions/:version
         if (segment4 === 'versions') {
-          if (!overrideDocPermissions && docPermissions?.readVersions) {
+          if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedView
@@ -270,7 +261,7 @@ export const getDocumentView = ({
 
           case 'versions': {
             // --> ../:slug/versions
-            if (!overrideDocPermissions && docPermissions?.readVersions) {
+            if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedView
@@ -280,7 +271,7 @@ export const getDocumentView = ({
 
           // --> ../:slug/<custom-segment>
           default: {
-            if (!overrideDocPermissions && docPermissions?.read) {
+            if (docPermissions?.read) {
               const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
                 .filter(Boolean)
                 .join('/')
@@ -317,7 +308,7 @@ export const getDocumentView = ({
       default: {
         // --> ../:slug/versions/:version
         if (segment3 === 'versions') {
-          if (!overrideDocPermissions && docPermissions?.readVersions) {
+          if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedView
