@@ -410,7 +410,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         constructorOptions: {
-          limitInputPixels: 3000000,
+          limitInputPixels: 1500000, // set lower than the collection upload fileSize limit default to test
         },
         staticDir: path.resolve(dirname, './media'),
         resizeOptions: {
@@ -1002,11 +1002,11 @@ export default buildConfigWithDefaults({
   },
   serverURL: undefined,
   upload: {
-    // debug: true,
-    // abortOnLimit: true,
-    // limits: {
-    //   fileSize: 2_000_000, // 2MB
-    // },
+    debug: true,
+    abortOnLimit: true,
+    limits: {
+      fileSize: 2_000_000, // 2MB
+    },
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
