@@ -12,8 +12,8 @@ type Args = {
   }
   t: TFunction
   version: {
-    _status?: string
     id: number | string
+    version: { _status?: string }
   }
 }
 
@@ -28,7 +28,7 @@ export function getVersionLabel({ latestDraftVersion, latestPublishedVersion, t,
 } {
   const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
 
-  if (version._status === 'draft') {
+  if (version.version._status === 'draft') {
     if (publishedNewerThanDraft) {
       return {
         name: 'draft',

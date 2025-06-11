@@ -16,12 +16,12 @@ type AutosaveCellProps = {
     id: number | string
     updatedAt: string
   }
-  rowData?: {
+  rowData: {
     autosave?: boolean
+    id: number | string
     publishedLocale?: string
     version: {
       _status: string
-      id: number | string
     }
   }
 }
@@ -29,7 +29,7 @@ type AutosaveCellProps = {
 export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   latestDraftVersion,
   latestPublishedVersion,
-  rowData = { autosave: undefined, publishedLocale: undefined, version: undefined },
+  rowData,
 }) => {
   const { t } = useTranslation()
 

@@ -21,11 +21,12 @@ export const VersionPillLabel: React.FC<{
   disableDate?: boolean
   doc: {
     [key: string]: any
+    id: number | string
     publishedLocale?: string
     updatedAt?: string
     version: {
+      [key: string]: any
       _status: string
-      id: number | string
     }
   }
   /**
@@ -65,7 +66,7 @@ export const VersionPillLabel: React.FC<{
     latestDraftVersion,
     latestPublishedVersion,
     t,
-    version: doc?.version,
+    version: doc,
   })
 
   const showDate = !disableDate && doc.updatedAt
