@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentSlots, FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
+import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
@@ -104,10 +104,10 @@ export const UploadActions = ({
 export type UploadProps = {
   readonly collectionSlug: string
   readonly customActions?: React.ReactNode[]
-  readonly documentSlots?: DocumentSlots
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly UploadControls?: React.ReactNode
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
@@ -125,7 +125,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
 }
 
 export type UploadProps_v4 = {
-  readonly documentSlots?: DocumentSlots
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadEdits?: UploadEdits
@@ -135,12 +134,12 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {
     collectionSlug,
     customActions,
-    documentSlots,
     initialState,
     onChange,
     resetUploadEdits,
     updateUploadEdits,
     uploadConfig,
+    UploadControls,
     uploadEdits,
   } = props
 
@@ -436,10 +435,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                     </Fragment>
                   )}
 
-                  {uploadConfig?.admin?.components?.controls &&
-                    documentSlots?.UploadControls !== undefined && (
-                      <Fragment>{documentSlots.UploadControls}</Fragment>
-                    )}
+                  {UploadControls ? UploadControls : null}
                 </div>
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
