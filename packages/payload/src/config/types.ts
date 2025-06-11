@@ -356,9 +356,10 @@ type BaseDocumentViewConfig = {
 }
 
 /*
-  If your view does not originate from a "known" key, e.g. `api`, then it is considered a "custom" view and can accept `path`, etc.
+  If your view does not originate from a "known" key, e.g. `myCustomView`, then it is considered a "custom" view and can accept a `path`, etc.
+  To render just a tab component without an accompanying view, you can omit the `path` and `Component` properties altogether.
 */
-export type DocumentViewConfig =
+export type CustomDocumentViewConfig =
   | ({
       Component: DocumentViewComponent
       path: string
@@ -369,11 +370,13 @@ export type DocumentViewConfig =
     } & BaseDocumentViewConfig)
 
 /*
-  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept `path`, etc.
+  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept a `path`, etc.
 */
 export type DefaultDocumentViewConfig = {
   Component?: DocumentViewComponent
 } & BaseDocumentViewConfig
+
+export type DocumentViewConfig = CustomDocumentViewConfig | DefaultDocumentViewConfig
 
 export type Params = { [key: string]: string | string[] | undefined }
 
@@ -1279,7 +1282,7 @@ export type EditConfigWithRoot = {
    * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
    * + `root` - `/admin/collections/:collection/:id/**\/*`
    */
-  root: Partial<DefaultDocumentViewConfig>
+  root: Partial<DocumentViewConfig>
   version?: never
   versions?: never
 }
@@ -1300,14 +1303,14 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
-  api?: DefaultDocumentViewConfig
-  default?: DefaultDocumentViewConfig
-  livePreview?: DefaultDocumentViewConfig
+  api?: DocumentViewConfig
+  default?: DocumentViewConfig
+  livePreview?: DocumentViewConfig
   root?: never
-  version?: DefaultDocumentViewConfig
-  versions?: DefaultDocumentViewConfig
+  version?: DocumentViewConfig
+  versions?: DocumentViewConfig
 } & {
-  [K in Exclude<string, KnownEditKeys>]?: DocumentViewConfig
+  [K in Exclude<string, KnownEditKeys>]?: CustomDocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent
