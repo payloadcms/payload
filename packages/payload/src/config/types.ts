@@ -340,6 +340,13 @@ export type Endpoint = {
   root?: never
 }
 
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewComponent` instead.
+ */
+export type EditViewComponent = DocumentViewComponent
+
 export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
 
 /**
@@ -1274,43 +1281,46 @@ export type SanitizedConfig = {
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
+/**
+ * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+ * + `root` - `/admin/collections/:collection/:id/**\/*`
+ * @link https://payloadcms.com/docs/custom-components/document-views#document-root
+ */
 export type EditConfigWithRoot = {
   api?: never
   default?: never
   livePreview?: never
-  /**
-   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-   * + `root` - `/admin/collections/:collection/:id/**\/*`
-   */
-  root: Partial<DocumentViewConfig>
+  root: DefaultDocumentViewConfig
   version?: never
   versions?: never
 }
 
 type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
 
+/**
+ * Replace or modify individual nested routes, or add new ones:
+ * + `default` - `/admin/collections/:collection/:id`
+ * + `api` - `/admin/collections/:collection/:id/api`
+ * + `livePreview` - `/admin/collections/:collection/:id/preview`
+ * + `references` - `/admin/collections/:collection/:id/references`
+ * + `relationships` - `/admin/collections/:collection/:id/relationships`
+ * + `versions` - `/admin/collections/:collection/:id/versions`
+ * + `version` - `/admin/collections/:collection/:id/versions/:version`
+ * + `customView` - `/admin/collections/:collection/:id/:path`
+ *
+ * To override the entire Edit View including all nested views, use the `root` key.
+ *
+ * @link https://payloadcms.com/docs/custom-components/document-views
+ */
 export type EditConfigWithoutRoot = {
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   *
-   * To override the entire Edit View including all nested views, use the `root` key.
-   */
-  api?: DocumentViewConfig
-  default?: DocumentViewConfig
-  livePreview?: DocumentViewConfig
-  root?: never
-  version?: DocumentViewConfig
-  versions?: DocumentViewConfig
+  [K in Exclude<string, KnownEditKeys>]: CustomDocumentViewConfig
 } & {
-  [K in Exclude<string, KnownEditKeys>]?: CustomDocumentViewConfig
+  api?: DefaultDocumentViewConfig
+  default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
+  root?: never
+  version?: DefaultDocumentViewConfig
+  versions?: DefaultDocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent
