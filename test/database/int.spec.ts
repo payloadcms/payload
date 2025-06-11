@@ -1,7 +1,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload, PayloadRequest, TypeWithID } from 'payload'
+import type { Payload, PayloadRequest, TypeWithID, ValidationError } from 'payload'
 
 import {
   migrateRelationshipsV2_V3,
@@ -2645,5 +2645,25 @@ describe('database', () => {
     expect(docs[0].id).toBe(post_null.id)
     expect(docs[1].id).toBe(post_3.id)
     expect(docs[2].id).toBe(post_1.id)
+  })
+
+  it('should throw specific unique contraint errors', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'unique-text',
+      },
+    })
+
+    try {
+      await payload.create({
+        collection: 'unique-fields',
+        data: {
+          slugField: 'unique-text',
+        },
+      })
+    } catch (e) {
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+    }
   })
 })

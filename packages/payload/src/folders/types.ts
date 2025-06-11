@@ -113,3 +113,10 @@ export type CollectionFoldersConfiguration = {
    */
   browseByFolder?: boolean
 }
+
+type BaseFolderSortKeys = keyof Pick<
+  FolderOrDocument['value'],
+  '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
+>
+
+export type FolderSortKeys = `-${BaseFolderSortKeys}` | BaseFolderSortKeys

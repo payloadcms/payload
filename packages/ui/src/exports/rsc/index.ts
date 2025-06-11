@@ -4,6 +4,7 @@ export { FolderEditField } from '../../elements/FolderView/Field/index.server.js
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
+export { getFolderResultsComponentAndData } from '../../utilities/getFolderResultsComponentAndData.js'
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'
 export { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 export { upsertPreferences } from '../../utilities/upsertPreferences.js'
