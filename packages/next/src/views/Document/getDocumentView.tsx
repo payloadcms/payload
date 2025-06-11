@@ -1,16 +1,16 @@
-import type React from 'react'
-
-import {
-  type DocumentViewClientProps,
-  type DocumentViewServerProps,
-  type EditViewComponent,
-  type PayloadComponent,
-  type SanitizedCollectionConfig,
-  type SanitizedCollectionPermission,
-  type SanitizedConfig,
-  type SanitizedGlobalConfig,
-  type SanitizedGlobalPermission,
+import type {
+  DocumentViewClientProps,
+  DocumentViewServerProps,
+  EditConfigWithoutRoot,
+  EditViewComponent,
+  PayloadComponent,
+  SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+  SanitizedGlobalPermission,
 } from 'payload'
+import type React from 'react'
 
 import { getViewByKeyOrRoute } from './getViewByKeyOrRoute.js'
 
@@ -80,12 +80,14 @@ export const getDocumentView = ({
       .filter(Boolean)
       .join('/')
 
-    const getView = (key?: string) =>
+    const getView = (key?: keyof EditConfigWithoutRoot) =>
       getViewByKeyOrRoute({
         basePath,
         collectionConfig,
         config,
         currentRoute,
+        docPermissions,
+        routeSegments,
         viewKey: key,
       })
 
@@ -187,7 +189,9 @@ export const getDocumentView = ({
         basePath,
         config,
         currentRoute,
+        docPermissions,
         globalConfig,
+        routeSegments,
         viewKey: key,
       })
 

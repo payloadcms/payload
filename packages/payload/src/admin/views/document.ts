@@ -93,4 +93,4 @@ export type DocumentViewCondition = (args: {
   docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-}) => boolean
+}) => boolean | void

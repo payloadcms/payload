@@ -1,4 +1,12 @@
-import type { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  DocumentViewCondition,
+  EditConfigWithoutRoot,
+  SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+  SanitizedGlobalPermission,
+} from 'payload'
 
 import { UnauthorizedError } from 'payload'
 
@@ -18,19 +26,23 @@ export const getViewByKeyOrRoute = ({
   collectionConfig,
   config,
   currentRoute,
+  docPermissions,
   globalConfig,
+  routeSegments,
   viewKey,
 }: {
   basePath: Parameters<typeof matchRouteToView>[0]['basePath']
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   currentRoute: Parameters<typeof matchRouteToView>[0]['currentRoute']
+  docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
+  routeSegments: string[]
   /**
    * The key that corresponds to the view in the `views` config.
    * If no view key was provided, will attempt to find the view's config by matching the current route against all paths.
    */
-  viewKey?: string
+  viewKey?: keyof EditConfigWithoutRoot
 }): {
   Component: ViewToRender
   viewKey?: string
@@ -58,18 +70,18 @@ export const getViewByKeyOrRoute = ({
     }
 
     /**
-     * Runs conditions returning the found view. For example, to conditionally render the API view based on `hideAPIURL`.
-     * Should not run if another view is mounted to this route. For example, you wouldn't want `hideAPIURL` to apply to `myCustomView`.
+     * Runs conditions that should return the not found view. E.g., conditionally render the API view based on `hideAPIURL`.
+     * Should not run if another view is mounted to this route. E.g., you wouldn't want `hideAPIURL` to apply to `myCustomView` mounted to "/api".
      * If not explicitly false, will return the `NotFoundView`. You can also throw an `UnauthorizedError` to render the `Unauthorized` view.
      */
     if (typeof viewConfig.condition === 'function') {
       try {
-        const meetsCondition = viewConfig.condition({
+        const meetsCondition = (viewConfig.condition as DocumentViewCondition)({
           collectionConfig,
           config,
-          // docPermissions,
+          docPermissions,
           globalConfig,
-          viewKey,
+          routeSegments,
         })
 
         if (meetsCondition === false) {
@@ -82,7 +94,7 @@ export const getViewByKeyOrRoute = ({
       }
     }
 
-    return { Component: viewConfig.Component, viewKey }
+    return { Component: viewConfig.Component, viewKey: viewKey as string }
   } else {
     // Check for another view that may be occupying this path
     return matchRouteToView({

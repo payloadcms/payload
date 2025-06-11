@@ -1,3 +1,5 @@
+import type { DocumentViewCondition } from 'payload'
+
 import { UnauthorizedError } from 'payload'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
@@ -6,7 +8,13 @@ import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 
-export const defaultDocumentViews = {
+export const defaultDocumentViews: {
+  [key: string]: {
+    Component: React.FC<any>
+    condition?: DocumentViewCondition
+    viewKey?: string
+  }
+} = {
   api: {
     Component: DefaultAPIView,
     condition: ({ collectionConfig, globalConfig }) =>
@@ -15,8 +23,12 @@ export const defaultDocumentViews = {
   },
   default: {
     Component: DefaultEditView,
-    condition: ({ docPermissions }) => {
-      if (!('create' in docPermissions) || !docPermissions.create) {
+    condition: ({ docPermissions, routeSegments }) => {
+      if (
+        routeSegments.length === 3 &&
+        routeSegments[2] === 'create' &&
+        (!('create' in docPermissions) || !docPermissions.create)
+      ) {
         throw new UnauthorizedError()
       }
     },
