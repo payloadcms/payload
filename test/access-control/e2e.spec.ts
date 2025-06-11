@@ -747,16 +747,15 @@ describe('Access Control', () => {
           password: 'test',
         },
       })
-      console.log('Created auth doc:', existingDoc.id)
     })
-    test('should show email as readonly when access.update is false', async () => {
+    test('should show email as readonly when user does not have update permission', async () => {
       await page.goto(authFields.edit(existingDoc.id))
       const emailField = page.locator('#field-email')
       await expect(emailField).toBeVisible()
       await expect(emailField).toBeDisabled()
     })
 
-    test('should hide Change Password button when password access.update is false', async () => {
+    test('should hide Change Password button when user does not have update permission', async () => {
       await page.goto(authFields.edit(existingDoc.id))
       const passwordField = page.locator('#field-password')
       await expect(passwordField).toBeHidden()

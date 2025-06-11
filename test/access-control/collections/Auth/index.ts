@@ -16,7 +16,11 @@ export const Auth: CollectionConfig = {
       name: 'email',
       type: 'text',
       access: {
-        update: () => false,
+        update: ({ req: { user }, data }) => {
+          const isUserOrSelf =
+            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+          return isUserOrSelf
+        },
       },
     },
     // {
@@ -31,8 +35,19 @@ export const Auth: CollectionConfig = {
       type: 'text',
       hidden: true,
       access: {
-        update: () => false,
+        update: ({ req: { user }, data }) => {
+          const isUserOrSelf =
+            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+          return isUserOrSelf
+        },
       },
+    },
+    {
+      name: 'roles',
+      type: 'select',
+      defaultValue: ['user'],
+      hasMany: true,
+      options: ['admin', 'user'],
     },
   ],
 }

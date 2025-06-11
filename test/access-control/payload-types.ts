@@ -726,6 +726,7 @@ export interface Hook {
 export interface AuthCollection {
   id: string;
   password?: string | null;
+  roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1259,6 +1260,7 @@ export interface HooksSelect<T extends boolean = true> {
  */
 export interface AuthCollectionSelect<T extends boolean = true> {
   password?: T;
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
