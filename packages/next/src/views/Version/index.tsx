@@ -68,30 +68,31 @@ export async function VersionView(props: DocumentViewServerProps) {
     return notFound()
   }
 
-  const previousVersion: null | TypeWithVersion<object> = (
-    await fetchVersions({
-      collectionSlug,
-      depth: 1,
-      draft: true,
-      globalSlug,
-      limit: 1,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      sort: '-updatedAt',
-      user,
-      where: {
-        and: [
-          {
-            updatedAt: {
-              less_than: versionTo?.updatedAt,
+  const previousVersion: null | TypeWithVersion<object> =
+    (
+      await fetchVersions({
+        collectionSlug,
+        depth: 1,
+        draft: true,
+        globalSlug,
+        limit: 1,
+        locale: 'all',
+        overrideAccess: false,
+        parentID: id,
+        req,
+        sort: '-updatedAt',
+        user,
+        where: {
+          and: [
+            {
+              updatedAt: {
+                less_than: versionTo?.updatedAt,
+              },
             },
-          },
-        ],
-      },
-    })
-  )?.[0]
+          ],
+        },
+      })
+    )?.docs?.[0] ?? null
 
   const versionFrom: null | TypeWithVersion<object> = versionFromIDFromParams
     ? await fetchVersion({
@@ -244,7 +245,6 @@ export async function VersionView(props: DocumentViewServerProps) {
   }
 
   const versionFromOptions: CompareOption[] = versionFromOptionsWithDate
-    .filter(Boolean)
     .reduce((acc: ({ updatedAt: Date } & CompareOption)[], option) => {
       if (option && !acc.some((existingOption) => existingOption.value === option.value)) {
         acc.push(option)
