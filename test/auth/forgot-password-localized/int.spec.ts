@@ -46,9 +46,7 @@ describe('Forgot password operation with localized fields', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload?.db.destroy === 'function') {
-      await payload?.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should successfully process forgotPassword operation with localized fields', async () => {

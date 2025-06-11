@@ -41,6 +41,7 @@ export type RichTextElement =
   | 'h5'
   | 'h6'
   | 'indent'
+  | 'li'
   | 'link'
   | 'ol'
   | 'relationship'

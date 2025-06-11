@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
@@ -83,7 +82,7 @@ export const generateFileData = async <T>({
   const incomingFileData = isDuplicating ? originalDoc : data
 
   if (!file && uploadEdits && incomingFileData) {
-    const { filename, url } = incomingFileData as FileData
+    const { filename, url } = incomingFileData as unknown as FileData
 
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
@@ -97,7 +96,7 @@ export const generateFileData = async <T>({
         overwriteExistingFiles = true
       } else if (filename && url) {
         file = await getExternalFile({
-          data: incomingFileData as FileData,
+          data: incomingFileData as unknown as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
@@ -124,7 +123,7 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    await fs.mkdir(staticPath, { recursive: true })
+    await fs.mkdir(staticPath!, { recursive: true })
   }
 
   let newData = data
@@ -139,7 +138,7 @@ export const generateFileData = async <T>({
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
-    let fileBuffer: { data: Buffer; info: OutputInfo }
+    let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
     const fileHasAdjustments =
@@ -183,10 +182,10 @@ export const generateFileData = async <T>({
       sharpFile = await optionallyAppendMetadata({
         req,
         sharpFile,
-        withMetadata,
+        withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
-      ;({ ext, mime } = await fileTypeFromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
       fileData.filesize = fileBuffer.info.size
@@ -201,7 +200,7 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop().split('?')[0]
+        ext = file.name.split('.').pop()?.split('?')[0]
       } else {
         ext = ''
       }
@@ -221,7 +220,7 @@ export const generateFileData = async <T>({
         collectionSlug: collectionConfig.slug,
         desiredFilename: fsSafeName,
         req,
-        staticPath,
+        staticPath: staticPath!,
       })
     }
 
@@ -231,17 +230,17 @@ export const generateFileData = async <T>({
     if (cropData && sharp) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
-        dimensions,
+        dimensions: dimensions!,
         file,
-        heightInPixels: uploadEdits.heightInPixels,
+        heightInPixels: uploadEdits.heightInPixels!,
         req,
         sharp,
-        widthInPixels: uploadEdits.widthInPixels,
+        widthInPixels: uploadEdits.widthInPixels!,
         withMetadata,
       })
 
       // Apply resize after cropping to ensure it conforms to resizeOptions
-      if (resizeOptions) {
+      if (resizeOptions && !resizeOptions.withoutEnlargement) {
         const resizedAfterCrop = await sharp(croppedImage)
           .resize({
             fit: resizeOptions?.fit || 'cover',
@@ -265,7 +264,7 @@ export const generateFileData = async <T>({
         fileData.width = resizedAfterCrop.info.width
         fileData.height = resizedAfterCrop.info.height
         if (fileIsAnimatedType) {
-          const metadata = await sharpFile.metadata()
+          const metadata = await sharpFile!.metadata()
           fileData.height = metadata.pages
             ? resizedAfterCrop.info.height / metadata.pages
             : resizedAfterCrop.info.height
@@ -287,7 +286,7 @@ export const generateFileData = async <T>({
         fileData.width = info.width
         fileData.height = info.height
         if (fileIsAnimatedType) {
-          const metadata = await sharpFile.metadata()
+          const metadata = await sharpFile!.metadata()
           fileData.height = metadata.pages ? info.height / metadata.pages : info.height
         }
         fileData.filesize = info.size
@@ -324,18 +323,18 @@ export const generateFileData = async <T>({
       const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
         dimensions: !cropData
-          ? dimensions
+          ? dimensions!
           : {
               ...dimensions,
-              height: fileData.height,
-              width: fileData.width,
+              height: fileData.height!,
+              width: fileData.width!,
             },
         file: fileForResize,
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,
         sharp,
-        staticPath,
+        staticPath: staticPath!,
         uploadEdits,
         withMetadata,
       })
@@ -390,13 +389,13 @@ function parseUploadEditsFromReqOrIncomingData(args: {
     // If no change in focal point, return undefined.
     // This prevents a refocal operation triggered from admin, because it always sends the focal point.
     if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
-      return undefined
+      return undefined!
     }
 
     if (isDuplicating) {
       uploadEdits.focalPoint = {
-        x: incomingData?.focalX || origDoc.focalX,
-        y: incomingData?.focalY || origDoc.focalX,
+        x: incomingData?.focalX || origDoc.focalX!,
+        y: incomingData?.focalY || origDoc.focalX!,
       }
     }
   }

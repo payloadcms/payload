@@ -1,8 +1,8 @@
-import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
+import * as AWS from '@aws-sdk/client-s3'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -12,6 +12,11 @@ export type SignedDownloadsConfig =
   | {
       /** @default 7200 */
       expiresIn?: number
+      shouldUseSignedURL?(args: {
+        collection: CollectionConfig
+        filename: string
+        req: PayloadRequest
+      }): boolean | Promise<boolean>
     }
   | boolean
 
@@ -64,24 +69,30 @@ export const getHandler = ({
       const key = path.posix.join(prefix, filename)
 
       if (signedDownloads && !clientUploadContext) {
-        const command = new GetObjectCommand({ Bucket: bucket, Key: key })
-        const signedUrl = await getSignedUrl(
-          // @ts-expect-error mismatch versions
-          getStorageClient(),
-          command,
-          typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
-        )
-        return Response.redirect(signedUrl)
+        let useSignedURL = true
+        if (
+          typeof signedDownloads === 'object' &&
+          typeof signedDownloads.shouldUseSignedURL === 'function'
+        ) {
+          useSignedURL = await signedDownloads.shouldUseSignedURL({ collection, filename, req })
+        }
+
+        if (useSignedURL) {
+          const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+          const signedUrl = await getSignedUrl(
+            // @ts-expect-error mismatch versions
+            getStorageClient(),
+            command,
+            typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
+          )
+          return Response.redirect(signedUrl)
+        }
       }
 
       object = await getStorageClient().getObject({
         Bucket: bucket,
         Key: key,
       })
-
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
@@ -123,6 +134,9 @@ export const getHandler = ({
         status: 200,
       })
     } catch (err) {
+      if (err instanceof AWS.NoSuchKey) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
     } finally {

@@ -36,7 +36,7 @@ export const MyRadioField: Field = {
 | Option                 | Description                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                                                  |
-| **`options`** \*       | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing an `label` string and a `value` string.                                                                                                                                              |
+| **`options`** \*       | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                                                                                                                               |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                                                                                 |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                                            |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.                                                                                                                             |
@@ -82,7 +82,7 @@ export const MyRadioField: Field = {
 }
 ```
 
-The Radio Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
+The Radio Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Property     | Description                                                                                                                  |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |

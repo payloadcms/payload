@@ -19,6 +19,7 @@ import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/ind
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
+import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
@@ -111,6 +112,7 @@ export const LexicalEditor: React.FC<
         <InsertParagraphAtEndPlugin />
         <DecoratorPlugin />
         <TextPlugin features={editorConfig.features} />
+        <SelectAllPlugin />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
           // frequency that the FieldComponent and Payload receive updates.

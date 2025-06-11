@@ -45,6 +45,7 @@ export {
   RenderDefaultCell,
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
+export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -57,6 +58,7 @@ export {
   useBulkUpload,
   useBulkUploadDrawerSlug,
 } from '../../elements/BulkUpload/index.js'
+export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
@@ -73,7 +75,8 @@ export type {
   DocumentTogglerProps,
   UseDocumentDrawer,
 } from '../../elements/DocumentDrawer/types.js'
-
+export { useClickOutside } from '../../hooks/useClickOutside.js'
+export { useClickOutsideContext } from '../../providers/ClickOutside/index.js'
 export { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 export { DocumentFields } from '../../elements/DocumentFields/index.js'
 export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/index.js'
@@ -93,8 +96,8 @@ export type {
   ListTogglerProps,
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
-export { ListSelection } from '../../elements/ListSelection/index.js'
-export { ListHeader } from '../../views/List/ListHeader/index.js'
+export { ListSelection } from '../../views/List/ListSelection/index.js'
+export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
@@ -113,6 +116,10 @@ export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
+
+// folder elements
+export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
+export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
@@ -150,6 +157,10 @@ export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
 export { PreviewButton } from '../../elements/PreviewButton/index.js'
 export { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 export { TimezonePicker } from '../../elements/TimezonePicker/index.js'
+export {
+  MoveDocToFolder,
+  MoveDocToFolderButton,
+} from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
@@ -212,6 +223,7 @@ export {
   useWatchForm,
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
+export type { FieldAction } from '../../forms/Form/types.js'
 export { fieldReducer } from '../../forms/Form/fieldReducer.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
@@ -253,6 +265,11 @@ export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
+export { FolderIcon } from '../../icons/Folder/index.js'
+export { DocumentIcon } from '../../icons/Document/index.js'
+export { MoveFolderIcon } from '../../icons/MoveFolder/index.js'
+export { GridViewIcon } from '../../icons/GridView/index.js'
+export { ListViewIcon } from '../../icons/ListView/index.js'
 export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
 export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
 export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
@@ -279,7 +296,6 @@ export { DocumentEventsProvider, useDocumentEvents } from '../../providers/Docum
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
-
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,
@@ -308,6 +324,7 @@ export type { UploadHandlersContext } from '../../providers/UploadHandlers/index
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+
 export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
 export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition/Select/index.js'
 export { RelationshipFilter as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'
@@ -319,6 +336,8 @@ export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
+export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
+export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
 
 export type {
   /**

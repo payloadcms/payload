@@ -53,7 +53,7 @@ export type ListQuery = {
   search?: string
   sort?: Sort
   where?: Where
-}
+} & Record<string, unknown>
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
@@ -70,4 +70,17 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
+}
+
+export type GetFolderResultsComponentAndDataArgs = {
+  activeCollectionSlugs: CollectionSlug[]
+  browseByFolder: boolean
+  displayAs: 'grid' | 'list'
+  folderID: number | string | undefined
+  req: PayloadRequest
+  sort: string
 }

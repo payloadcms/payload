@@ -82,6 +82,7 @@ export interface Config {
     media: Media;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
+    'without-enlarge': WithoutEnlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
     'custom-file-name-media': CustomFileNameMedia;
@@ -102,6 +103,8 @@ export interface Config {
     'relation-preview': RelationPreview;
     'hide-file-input-on-create': HideFileInputOnCreate;
     'best-fit': BestFit;
+    'list-view-preview': ListViewPreview;
+    'three-dimensional': ThreeDimensional;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -124,6 +127,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
+    'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
     reduce: ReduceSelect<false> | ReduceSelect<true>;
     'media-trim': MediaTrimSelect<false> | MediaTrimSelect<true>;
     'custom-file-name-media': CustomFileNameMediaSelect<false> | CustomFileNameMediaSelect<true>;
@@ -144,6 +148,8 @@ export interface Config {
     'relation-preview': RelationPreviewSelect<false> | RelationPreviewSelect<true>;
     'hide-file-input-on-create': HideFileInputOnCreateSelect<false> | HideFileInputOnCreateSelect<true>;
     'best-fit': BestFitSelect<false> | BestFitSelect<true>;
+    'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
+    'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -848,6 +854,24 @@ export interface Enlarge {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge".
+ */
+export interface WithoutEnlarge {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reduce".
  */
 export interface Reduce {
@@ -1277,6 +1301,34 @@ export interface BestFit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview".
+ */
+export interface ListViewPreview {
+  id: string;
+  title?: string | null;
+  imageUpload?: (string | null) | MediaWithRelationPreview;
+  imageRelationship?: (string | null) | MediaWithRelationPreview;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional".
+ */
+export interface ThreeDimensional {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1360,6 +1412,10 @@ export interface PayloadLockedDocument {
         value: string | Enlarge;
       } | null)
     | ({
+        relationTo: 'without-enlarge';
+        value: string | WithoutEnlarge;
+      } | null)
+    | ({
         relationTo: 'reduce';
         value: string | Reduce;
       } | null)
@@ -1438,6 +1494,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'best-fit';
         value: string | BestFit;
+      } | null)
+    | ({
+        relationTo: 'list-view-preview';
+        value: string | ListViewPreview;
+      } | null)
+    | ({
+        relationTo: 'three-dimensional';
+        value: string | ThreeDimensional;
       } | null)
     | ({
         relationTo: 'users';
@@ -2203,6 +2267,23 @@ export interface EnlargeSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge_select".
+ */
+export interface WithoutEnlargeSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reduce_select".
  */
 export interface ReduceSelect<T extends boolean = true> {
@@ -2662,6 +2743,32 @@ export interface BestFitSelect<T extends boolean = true> {
   original?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview_select".
+ */
+export interface ListViewPreviewSelect<T extends boolean = true> {
+  title?: T;
+  imageUpload?: T;
+  imageRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional_select".
+ */
+export interface ThreeDimensionalSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

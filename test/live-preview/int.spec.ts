@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { FieldSchemaJSON, Payload } from 'payload'
 
 import {
   handleMessage,
@@ -7,21 +7,20 @@ import {
   traverseRichText,
 } from '@payloadcms/live-preview'
 import path from 'path'
-import { getFileByPath } from 'payload'
+import { createClientConfig, getFileByPath, getLocalI18n } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { Pages } from './collections/Pages.js'
 import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
+let schemaJSON: FieldSchemaJSON
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -83,12 +82,27 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
+
+    // get schemaJSON from client config
+    const resolvedConfig = await config
+    const i18n = await getLocalI18n({
+      config: resolvedConfig,
+      language: 'en',
+    })
+    const clientConfig = createClientConfig({
+      config: resolvedConfig,
+      i18n,
+      importMap: {},
+    })
+    const clientFields = clientConfig.collections.find((c) => c.slug === 'pages')?.fields
+    if (!clientFields) {
+      throw new Error("Couldn't find client fields for 'pages' collection")
+    }
+    schemaJSON = fieldSchemaToJSON(clientFields, clientConfig)
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('handles `postMessage`', async () => {
@@ -132,27 +146,6 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(handledMessage.title).toEqual('Test Page (Changed)')
-  })
-
-  it('merges data', async () => {
-    const initialData: Partial<Page> = {
-      id: '123',
-      title: 'Test Page',
-    }
-
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        title: 'Test Page (Merged)',
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-    })
-
-    expect(mergedData.id).toEqual(initialData.id)
-    expect(mergedData._numberOfRequests).toEqual(0)
   })
 
   it('— strings - merges data', async () => {

@@ -1,4 +1,6 @@
-import type { CollectionSlug } from 'payload'
+/* eslint-disable no-restricted-exports */
+
+import type { CollectionSlug, File } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -28,8 +30,10 @@ import {
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
+  withoutEnlargeSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -491,6 +495,19 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: withoutEnlargeSlug,
+      fields: [],
+      upload: {
+        resizeOptions: {
+          width: 1000,
+          height: undefined,
+          fit: 'inside',
+          withoutEnlargement: true,
+        },
+        staticDir: path.resolve(dirname, './media/without-enlarge'),
+      },
+    },
+    {
       slug: reduceSlug,
       fields: [],
       upload: {
@@ -783,6 +800,14 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: threeDimensionalSlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+      },
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -879,39 +904,39 @@ export default buildConfigWithDefaults({
 
     // Create admin thumbnail media
     await payload.create({
-      collection: AdminThumbnailSize.slug,
+      collection: AdminThumbnailSize.slug as CollectionSlug,
       data: {},
       file: {
         ...audioFile,
         name: 'audio-thumbnail.mp3', // Override to avoid conflicts
-      },
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailSize.slug,
+      collection: AdminThumbnailSize.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `thumb-${imageFile.name}`,
-      },
+        name: `thumb-${imageFile?.name}`,
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailFunction.slug,
+      collection: AdminThumbnailFunction.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `function-image-${imageFile.name}`,
-      },
+        name: `function-image-${imageFile?.name}`,
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailWithSearchQueries.slug,
+      collection: AdminThumbnailWithSearchQueries.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `searchQueries-image-${imageFile.name}`,
-      },
+        name: `searchQueries-image-${imageFile?.name}`,
+      } as File,
     })
 
     // Create media with and without relation preview
@@ -926,8 +951,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: {
         ...imageFile,
-        name: `withoutCacheTags-image-${imageFile.name}`,
-      },
+        name: `withoutCacheTags-image-${imageFile?.name}`,
+      } as File,
     })
 
     const { id: uploadedImageWithoutPreview } = await payload.create({

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../forgotPassword.js'
@@ -40,7 +39,7 @@ async function localForgotPassword<T extends CollectionSlug>(
     disableEmail,
     expiration,
     req: await createLocalReq(options, payload),
-  })
+  }) as Promise<Result>
 }
 
 export const forgotPassword = localForgotPassword

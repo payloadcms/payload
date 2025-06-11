@@ -64,6 +64,7 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  readReplicas?: string[]
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
