@@ -10,7 +10,7 @@ import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 
 export const defaultDocumentViews: {
   [key: string]: {
-    Component: React.FC<any>
+    Component: any // TODO: type this
     condition?: DocumentViewCondition
     viewKey?: string
   }
