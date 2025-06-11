@@ -78,6 +78,7 @@
         "./packages/plugin-multi-tenant/src/translations/languages/*.ts"
       ],
       "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payloadcms/storage-azure/client": ["./packages/storage-azure/src/exports/client.ts"],
       "@payloadcms/storage-s3/client": ["./packages/storage-s3/src/exports/client.ts"],
       "@payloadcms/storage-vercel-blob/client": [
         "./packages/storage-vercel-blob/src/exports/client.ts"
