@@ -1,74 +1,101 @@
 import type { CollectionConfig } from '../collections/config/types.js'
+import type { Option } from '../fields/config/types.js'
 
-import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
 type CreateFolderCollectionArgs = {
-  collectionSlugs: string[]
   debug?: boolean
+  folderEnabledCollections: CollectionConfig[]
   folderFieldName: string
   slug: string
 }
 export const createFolderCollection = ({
   slug,
-  collectionSlugs,
   debug,
+  folderEnabledCollections,
   folderFieldName,
-}: CreateFolderCollectionArgs): CollectionConfig => ({
-  slug,
-  admin: {
-    hidden: !debug,
-    useAsTitle: 'name',
-  },
-  endpoints: [populateFolderDataEndpoint],
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      index: true,
-      required: true,
+}: CreateFolderCollectionArgs): CollectionConfig => {
+  const { collectionOptions, collectionSlugs } = folderEnabledCollections.reduce(
+    (acc, collection: CollectionConfig) => {
+      acc.collectionSlugs.push(collection.slug)
+      acc.collectionOptions.push({
+        label: collection.labels?.singular || collection.slug,
+        value: collection.slug,
+      })
+
+      return acc
     },
     {
-      name: folderFieldName,
-      type: 'relationship',
-      admin: {
-        hidden: !debug,
+      collectionOptions: [] as Option[],
+      collectionSlugs: [] as string[],
+    },
+  )
+
+  return {
+    slug,
+    admin: {
+      hidden: !debug,
+      useAsTitle: 'name',
+    },
+    fields: [
+      {
+        name: 'name',
+        type: 'text',
+        index: true,
+        required: true,
       },
-      index: true,
-      relationTo: slug,
-    },
-    {
-      name: 'documentsAndFolders',
-      type: 'join',
-      admin: {
-        hidden: !debug,
+      {
+        name: folderFieldName,
+        type: 'relationship',
+        admin: {
+          hidden: !debug,
+        },
+        index: true,
+        relationTo: slug,
       },
-      collection: [slug, ...collectionSlugs],
-      hasMany: true,
-      on: folderFieldName,
+      {
+        name: 'documentsAndFolders',
+        type: 'join',
+        admin: {
+          hidden: !debug,
+        },
+        collection: [slug, ...collectionSlugs],
+        hasMany: true,
+        on: folderFieldName,
+      },
+      {
+        name: 'assignedCollections',
+        type: 'select',
+        admin: {
+          position: 'sidebar',
+        },
+        hasMany: true,
+        options: [...collectionOptions, { label: 'All', value: 'all' }],
+        required: true,
+      },
+    ],
+    hooks: {
+      afterChange: [
+        reparentChildFolder({
+          folderFieldName,
+        }),
+      ],
+      afterDelete: [
+        dissasociateAfterDelete({
+          collectionSlugs,
+          folderFieldName,
+        }),
+      ],
+      beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
     },
-  ],
-  hooks: {
-    afterChange: [
-      reparentChildFolder({
-        folderFieldName,
-      }),
-    ],
-    afterDelete: [
-      dissasociateAfterDelete({
-        collectionSlugs,
-        folderFieldName,
-      }),
-    ],
-    beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
-  },
-  labels: {
-    plural: 'Folders',
-    singular: 'Folder',
-  },
-  typescript: {
-    interface: 'FolderInterface',
-  },
-})
+    labels: {
+      plural: 'Folders',
+      singular: 'Folder',
+    },
+    typescript: {
+      interface: 'FolderInterface',
+    },
+  }
+}

@@ -3,6 +3,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -17,15 +18,10 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { addFolderCollections } from '../folders/addFolderCollections.js'
+import { addFolderCollection } from '../folders/addFolderCollection.js'
+import { addFolderFieldToCollection } from '../folders/addFolderFieldToCollection.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
-import {
-  baseBlockFields,
-  type CollectionSlug,
-  formatLabels,
-  type GlobalSlug,
-  sanitizeFields,
-} from '../index.js'
+import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -190,14 +186,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
-  await addFolderCollections(config as unknown as Config)
-
   const validRelationships = [
     ...(config.collections?.map((c) => c.slug) ?? []),
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
   ]
+
+  if (config.folders !== false) {
+    validRelationships.push(config.folders!.slug)
+  }
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
@@ -235,6 +233,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
+  const folderEnabledCollections: SanitizedCollectionConfig[] = []
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -256,12 +256,24 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }
     }
 
+    if (config.folders !== false && config.collections![i]!.folders) {
+      addFolderFieldToCollection({
+        collection: config.collections![i]!,
+        folderFieldName: config.folders!.fieldName,
+        folderSlug: config.folders!.slug,
+      })
+    }
+
     config.collections![i] = await sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
     )
+
+    if (config.folders !== false && config.collections![i]!.folders) {
+      folderEnabledCollections.push(config.collections![i]!)
+    }
   }
 
   if (config.globals!.length > 0) {
@@ -371,6 +383,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         validRelationships,
       ),
     )
+  }
+
+  if (config.folders !== false) {
+    await addFolderCollection({
+      config: config as unknown as Config,
+      folderEnabledCollections,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
   }
 
   if (config.serverURL !== '') {

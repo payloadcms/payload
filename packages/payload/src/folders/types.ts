@@ -83,8 +83,8 @@ export type RootFoldersConfiguration = {
   collectionOverrides?: (({
     collection,
   }: {
-    collection: CollectionConfig
-  }) => CollectionConfig | Promise<CollectionConfig>)[]
+    collection: SanitizedCollectionConfig
+  }) => Promise<SanitizedCollectionConfig> | SanitizedCollectionConfig)[]
   /**
    * Ability to view hidden fields and collections related to folders
    *
