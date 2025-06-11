@@ -24,6 +24,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.payload.logger.error(error)
       } finally {
         req.data = data
+        // @ts-expect-error
         req.json = () => Promise.resolve(data)
       }
     } else if (bodyByteSize && contentType?.includes('multipart/')) {

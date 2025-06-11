@@ -20,6 +20,7 @@ export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Resp
 
   if (data) {
     reqWithData.data = data
+    // @ts-expect-error
     reqWithData.json = () => Promise.resolve(data)
   }
 
