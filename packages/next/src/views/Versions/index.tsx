@@ -72,23 +72,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
     where: whereQuery,
   })
 
-  const latestDraftVersion = draftsEnabled
-    ? await fetchLatestVersion({
-        collectionSlug,
-        depth: 0,
-        globalSlug,
-        overrideAccess: false,
-        parentID: id,
-        req,
-        select: {
-          id: true,
-          updatedAt: true,
-        },
-        status: 'draft',
-        user,
-      })
-    : null
-
   // If we pass a latestPublishedVersion to buildVersionColumns,
   // this will be used to display it as the "current published version".
   // However, the latest published version might have been unpublished in the meantime.
@@ -108,6 +91,27 @@ export async function VersionsView(props: DocumentViewServerProps) {
     user,
   })
 
+  const latestDraftVersion = draftsEnabled
+    ? await fetchLatestVersion({
+        collectionSlug,
+        depth: 0,
+        globalSlug,
+        overrideAccess: false,
+        parentID: id,
+        req,
+        select: {
+          id: true,
+          updatedAt: true,
+        },
+        status: 'draft',
+        user,
+      })
+    : null
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+
+  // The latest draft is irrelevant if it's not the current version.
+  const latestDraftVersionIfCurrent = publishedNewerThanDraft ? null : latestDraftVersion
+
   if (!versionsData) {
     return notFound()
   }
@@ -118,8 +122,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
       ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
       : ''
 
-  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
-
   const columns = buildVersionColumns({
     collectionConfig,
     config,
@@ -128,7 +130,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     docs: versionsData?.docs,
     globalConfig,
     i18n,
-    latestDraftVersion: latestDraftVersion?.id,
+    latestDraftVersion: latestDraftVersionIfCurrent?.id,
     latestPublishedVersion: latestPublishedVersion?.id,
   })
 

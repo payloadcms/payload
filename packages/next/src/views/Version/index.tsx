@@ -118,7 +118,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     status: 'published',
     user,
   })
-  const latestDraftVersion = draftsEnabled
+  const _latestDraftVersion = draftsEnabled
     ? await fetchLatestVersion({
         collectionSlug,
         depth: 0,
@@ -131,6 +131,11 @@ export async function VersionView(props: DocumentViewServerProps) {
         user,
       })
     : null
+
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > _latestDraftVersion?.updatedAt
+
+  // The latest draft is irrelevant if it's not the current version.
+  const latestDraftVersionIfCurrent = publishedNewerThanDraft ? null : _latestDraftVersion
 
   let selectedLocales: string[] = []
   if (localization) {
@@ -204,8 +209,6 @@ export async function VersionView(props: DocumentViewServerProps) {
       })
     : ''
 
-  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
-
   // for SelectComparison: fetch
   // - current (newest) draft (only if no newer published exists): latestDraftVersion
   // - currently published (always); publishedNewerThanDraft ? latestPublishedVersion? : null
@@ -246,18 +249,18 @@ export async function VersionView(props: DocumentViewServerProps) {
         hasPublishedDoc: !!latestPublishedVersion,
         labelFirst: true,
         labelStyle: 'text',
-        latestDraftVersionID: latestDraftVersion?.id,
+        latestDraftVersionID: _latestDraftVersion?.id,
         latestPublishedVersionID: latestPublishedVersion?.id,
       })
     : null
 
-  const latestDraftVersionPill = latestDraftVersion
+  const latestDraftVersionPill = latestDraftVersionIfCurrent
     ? formatVersionPill({
-        doc: latestDraftVersion,
+        doc: latestDraftVersionIfCurrent,
         hasPublishedDoc: !!latestPublishedVersion,
         labelFirst: true,
         labelStyle: 'text',
-        latestDraftVersionID: latestDraftVersion?.id,
+        latestDraftVersionID: _latestDraftVersion?.id,
         latestPublishedVersionID: latestPublishedVersion?.id,
       })
     : null
@@ -268,7 +271,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         hasPublishedDoc: !!latestPublishedVersion,
         labelFirst: true,
         labelStyle: 'text',
-        latestDraftVersionID: latestDraftVersion?.id,
+        latestDraftVersionID: _latestDraftVersion?.id,
         latestPublishedVersionID: latestPublishedVersion?.id,
       })
     : null
@@ -279,7 +282,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         hasPublishedDoc: !!latestPublishedVersion,
         labelFirst: true,
         labelStyle: 'text',
-        latestDraftVersionID: latestDraftVersion?.id,
+        latestDraftVersionID: _latestDraftVersion?.id,
 
         latestPublishedVersionID: latestPublishedVersion?.id,
       })
@@ -296,7 +299,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     latestDraftVersionPill
       ? {
           label: latestDraftVersionPill.Label,
-          updatedAt: new Date(latestDraftVersion.updatedAt),
+          updatedAt: new Date(latestDraftVersionIfCurrent.updatedAt),
           value: latestDraftVersionPill.id || '',
         }
       : null,
@@ -353,7 +356,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           doc: versionTo,
           hasPublishedDoc: !!latestPublishedVersion,
           labelFirst: true,
-          latestDraftVersionID: latestDraftVersion?.id,
+          latestDraftVersionID: _latestDraftVersion?.id,
           latestPublishedVersionID: latestPublishedVersion?.id,
         }).Label
       }
