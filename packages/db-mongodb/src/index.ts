@@ -110,6 +110,7 @@ export interface Args {
   collation?: Omit<CollationOptions, 'locale'>
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
+  /** Solves some common issues related to the specified database. Full compatability is not guaranteed. */
   compatabilityMode?: 'firestore'
   /** Extra configuration options */
   connectOptions?: {
@@ -126,6 +127,12 @@ export interface Args {
    * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
+  /**
+   * Set to `true` to disable join aggregations and instead populate join fields via multiple queries.
+   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
+   * @default false
+   */
+  manualJoins?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -142,11 +149,9 @@ export type MongooseAdapter = {
   collections: {
     [slug: string]: CollectionModel
   }
-  compatabilityMode?: 'firestore'
   connection: Connection
   ensureIndexes: boolean
   globals: GlobalModel
-  manualJoins: boolean
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -204,6 +209,7 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
+  manualJoins = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -228,7 +234,7 @@ export function mongooseAdapter({
       ensureIndexes,
       // @ts-expect-error don't have globals model yet
       globals: undefined,
-      manualJoins: compatabilityMode === 'firestore',
+      manualJoins,
       // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},
