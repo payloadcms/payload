@@ -17,7 +17,6 @@ import { IDCell } from './cells/ID/index.js'
 
 export const buildVersionColumns = ({
   collectionConfig,
-  config,
   CreatedAtCellOverride,
   docID,
   docs,
@@ -27,14 +26,19 @@ export const buildVersionColumns = ({
   latestPublishedVersion,
 }: {
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
   docID?: number | string
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
+  latestDraftVersion?: {
+    id: number | string
+    updatedAt: string
+  }
+  latestPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
 

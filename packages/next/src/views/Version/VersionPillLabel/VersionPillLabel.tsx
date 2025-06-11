@@ -2,16 +2,30 @@
 
 import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import { useMemo } from 'react'
 
-import { renderPill } from '../../Versions/cells/AutosaveCell/index.js'
+import { getVersionLabel } from '../../Versions/cells/AutosaveCell/getVersionLabel.js'
 import './index.scss'
 
 const baseClass = 'version-pill-label'
 
+const renderPill = (label: string, pillStyle: Parameters<typeof Pill>[0]['pillStyle']) => {
+  return (
+    <Pill pillStyle={pillStyle} size="small">
+      {label}
+    </Pill>
+  )
+}
+
 export const VersionPillLabel: React.FC<{
-  doc: any
-  hasPublishedDoc: boolean
+  disableDate?: boolean
+  doc: {
+    [key: string]: any
+    publishedLocale?: string
+    version: {
+      _status: string
+      id: number | string
+    }
+  }
   /**
    * By default, the date is displayed first, followed by the version label.
    */
@@ -20,16 +34,22 @@ export const VersionPillLabel: React.FC<{
    * @default 'pill'
    */
   labelStyle?: 'pill' | 'text'
-  latestDraftVersionID?: string
-  latestPublishedVersionID?: string
+  latestDraftVersion?: {
+    id: number | string
+    updatedAt: string
+  }
+  latestPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
 }> = (args) => {
   const {
+    disableDate = false,
     doc,
-    hasPublishedDoc,
     labelFirst,
     labelStyle = 'pill',
-    latestDraftVersionID,
-    latestPublishedVersionID,
+    latestDraftVersion,
+    latestPublishedVersion,
   } = args
 
   const {
@@ -40,31 +60,15 @@ export const VersionPillLabel: React.FC<{
   } = useConfig()
   const { i18n, t } = useTranslation()
 
-  const status = doc.version._status
   let publishedLocalePill = null
   const publishedLocale = doc.publishedLocale || undefined
 
-  const versionInfo = useMemo(() => {
-    return {
-      draft: {
-        currentLabel: t('version:currentDraft'),
-        latestVersion: latestDraftVersionID,
-        pillStyle: undefined,
-        previousLabel: t('version:draft'),
-      },
-      published: {
-        currentLabel: t('version:currentlyPublished'),
-        // The latest published version does not necessarily equal the current published version,
-        // because the latest published version might have been unpublished in the meantime.
-        // Hence, we should only use the latest published version if there is a published document.
-        latestVersion: hasPublishedDoc ? latestPublishedVersionID : undefined,
-        pillStyle: 'success',
-        previousLabel: t('version:previouslyPublished'),
-      },
-    }
-  }, [hasPublishedDoc, latestDraftVersionID, latestPublishedVersionID, t])
-
-  const { currentLabel, latestVersion, pillStyle, previousLabel } = versionInfo[status] || {}
+  const { label, pillStyle } = getVersionLabel({
+    latestDraftVersion,
+    latestPublishedVersion,
+    t,
+    version: doc?.version,
+  })
 
   if (localization && localization?.locales && publishedLocale) {
     const localeCode = Array.isArray(publishedLocale) ? publishedLocale[0] : publishedLocale
@@ -79,18 +83,17 @@ export const VersionPillLabel: React.FC<{
 
   const Label: React.ReactNode =
     labelStyle === 'pill' ? (
-      renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)
+      renderPill(label, pillStyle)
     ) : (
-      <span className={`${baseClass}-text`}>
-        {doc?.id === latestVersion ? currentLabel : previousLabel}
-      </span>
+      <span className={`${baseClass}-text`}>{label}</span>
     )
 
-  const Date = (
-    <span className={`${baseClass}-date`}>
-      {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
-    </span>
-  )
+  const Date =
+    disableDate !== true ? (
+      <span className={`${baseClass}-date`}>
+        {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
+      </span>
+    ) : null
 
   if (labelFirst) {
     return (

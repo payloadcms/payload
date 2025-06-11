@@ -18,7 +18,7 @@ import type { CompareOption } from './Default/types.js'
 import { DefaultVersionView } from './Default/index.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from './fetchVersions.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
-import { formatVersionPill } from './VersionPillLabel/formatVersionPill.js'
+import { VersionPillLabel } from './VersionPillLabel/VersionPillLabel.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
   const { i18n, initPageResult, routeSegments, searchParams } = props
@@ -118,7 +118,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     status: 'published',
     user,
   })
-  const _latestDraftVersion = draftsEnabled
+  const latestDraftVersion = draftsEnabled
     ? await fetchLatestVersion({
         collectionSlug,
         depth: 0,
@@ -131,11 +131,6 @@ export async function VersionView(props: DocumentViewServerProps) {
         user,
       })
     : null
-
-  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > _latestDraftVersion?.updatedAt
-
-  // The latest draft is irrelevant if it's not the current version.
-  const latestDraftVersionIfCurrent = publishedNewerThanDraft ? null : _latestDraftVersion
 
   let selectedLocales: string[] = []
   if (localization) {
@@ -215,110 +210,39 @@ export async function VersionView(props: DocumentViewServerProps) {
   // - previously published (if there is a prior published version older than the one you are lookin at): publishedNewerThanDraft ? null : latestPublishedVersion?
   // - previous version: always, unless doesnt exist. Can be the same as previously published
 
-  const currentlyPublishedVersion = publishedNewerThanDraft ? latestPublishedVersion : null
-  let previouslyPublishedVersion = publishedNewerThanDraft ? null : latestPublishedVersion
+  const formatPill = (doc: TypeWithVersion<any>): React.ReactNode => {
+    return (
+      <VersionPillLabel
+        doc={doc}
+        labelFirst={true}
+        labelStyle={'text'}
+        latestDraftVersion={latestDraftVersion}
+        latestPublishedVersion={latestPublishedVersion}
+      />
+    )
+  }
 
-  if (currentlyPublishedVersion && publishedNewerThanDraft) {
-    // There may be a previously published version we can fetch
+  const versionFromOptionsWithDate: ({
+    updatedAt: Date
+  } & CompareOption)[] = []
 
-    previouslyPublishedVersion = await fetchLatestVersion({
-      collectionSlug,
-      depth: 0,
-      globalSlug,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      status: 'published',
-      user,
-      where: {
-        and: [
-          {
-            updatedAt: {
-              less_than: currentlyPublishedVersion.updatedAt,
-            },
-          },
-        ],
-      },
+  if (previousVersion?.id) {
+    versionFromOptionsWithDate.push({
+      label: formatPill(previousVersion),
+      updatedAt: new Date(previousVersion.updatedAt),
+      value: previousVersion.id,
     })
   }
 
-  const currentlyPublishedVersionPill = currentlyPublishedVersion
-    ? formatVersionPill({
-        doc: currentlyPublishedVersion,
-        hasPublishedDoc: !!latestPublishedVersion,
-        labelFirst: true,
-        labelStyle: 'text',
-        latestDraftVersionID: _latestDraftVersion?.id,
-        latestPublishedVersionID: latestPublishedVersion?.id,
-      })
-    : null
+  if (versionFrom?.id) {
+    versionFromOptionsWithDate.push({
+      label: formatPill(versionFrom),
+      updatedAt: new Date(versionFrom.updatedAt),
+      value: versionFrom.id,
+    })
+  }
 
-  const latestDraftVersionPill = latestDraftVersionIfCurrent
-    ? formatVersionPill({
-        doc: latestDraftVersionIfCurrent,
-        hasPublishedDoc: !!latestPublishedVersion,
-        labelFirst: true,
-        labelStyle: 'text',
-        latestDraftVersionID: _latestDraftVersion?.id,
-        latestPublishedVersionID: latestPublishedVersion?.id,
-      })
-    : null
-
-  const previouslyPublishedVersionPill = previouslyPublishedVersion
-    ? formatVersionPill({
-        doc: previouslyPublishedVersion,
-        hasPublishedDoc: !!latestPublishedVersion,
-        labelFirst: true,
-        labelStyle: 'text',
-        latestDraftVersionID: _latestDraftVersion?.id,
-        latestPublishedVersionID: latestPublishedVersion?.id,
-      })
-    : null
-
-  const versionFromPill = versionFrom
-    ? formatVersionPill({
-        doc: versionFrom,
-        hasPublishedDoc: !!latestPublishedVersion,
-        labelFirst: true,
-        labelStyle: 'text',
-        latestDraftVersionID: _latestDraftVersion?.id,
-
-        latestPublishedVersionID: latestPublishedVersion?.id,
-      })
-    : null
-
-  const versionFromOptions = [
-    currentlyPublishedVersionPill
-      ? {
-          label: currentlyPublishedVersionPill.Label,
-          updatedAt: new Date(currentlyPublishedVersion.updatedAt),
-          value: currentlyPublishedVersionPill.id || '',
-        }
-      : null,
-    latestDraftVersionPill
-      ? {
-          label: latestDraftVersionPill.Label,
-          updatedAt: new Date(latestDraftVersionIfCurrent.updatedAt),
-          value: latestDraftVersionPill.id || '',
-        }
-      : null,
-    previouslyPublishedVersionPill
-      ? {
-          label: previouslyPublishedVersionPill.Label,
-          updatedAt: new Date(previouslyPublishedVersion.updatedAt),
-          value: previouslyPublishedVersionPill.id || '',
-        }
-      : null,
-    versionFromPill
-      ? {
-          label: versionFromPill.Label,
-          updatedAt: new Date(versionFrom.updatedAt),
-          value: versionFromPill.id || '',
-        }
-      : null,
-    // Remove entries with duplicative values, sort by updatedAt, descending, then remove updatedAt from the options
-  ]
+  const versionFromOptions: CompareOption[] = versionFromOptionsWithDate
     .filter(Boolean)
     .reduce((acc: ({ updatedAt: Date } & CompareOption)[], option) => {
       if (option && !acc.some((existingOption) => existingOption.value === option.value)) {
@@ -351,15 +275,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       versionFromOptions={versionFromOptions}
       versionToCreatedAt={versionTo?.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
-      VersionToCreatedAtLabel={
-        formatVersionPill({
-          doc: versionTo,
-          hasPublishedDoc: !!latestPublishedVersion,
-          labelFirst: true,
-          latestDraftVersionID: _latestDraftVersion?.id,
-          latestPublishedVersionID: latestPublishedVersion?.id,
-        }).Label
-      }
+      VersionToCreatedAtLabel={formatPill(versionTo)}
       versionToID={versionTo.id}
       versionToStatus={versionTo?.version?._status}
       versionToUseAsTitle={versionTo?.[collectionConfig.admin?.useAsTitle || 'id']}

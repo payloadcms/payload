@@ -72,6 +72,10 @@ export async function VersionsView(props: DocumentViewServerProps) {
     where: whereQuery,
   })
 
+  if (!versionsData) {
+    return notFound()
+  }
+
   // If we pass a latestPublishedVersion to buildVersionColumns,
   // this will be used to display it as the "current published version".
   // However, the latest published version might have been unpublished in the meantime.
@@ -107,14 +111,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
         user,
       })
     : null
-  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
-
-  // The latest draft is irrelevant if it's not the current version.
-  const latestDraftVersionIfCurrent = publishedNewerThanDraft ? null : latestDraftVersion
-
-  if (!versionsData) {
-    return notFound()
-  }
 
   const fetchURL = collectionSlug
     ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
@@ -124,14 +120,13 @@ export async function VersionsView(props: DocumentViewServerProps) {
 
   const columns = buildVersionColumns({
     collectionConfig,
-    config,
     CreatedAtCellOverride: useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined,
     docID: id,
     docs: versionsData?.docs,
     globalConfig,
     i18n,
-    latestDraftVersion: latestDraftVersionIfCurrent?.id,
-    latestPublishedVersion: latestPublishedVersion?.id,
+    latestDraftVersion,
+    latestPublishedVersion,
   })
 
   const pluralLabel = collectionConfig?.labels?.plural
@@ -141,6 +136,10 @@ export async function VersionsView(props: DocumentViewServerProps) {
     : globalConfig?.label
 
   const GutterComponent = disableGutter ? React.Fragment : Gutter
+
+  // WHAT IS NEEDED:
+  // - Latest Draft Version
+  // - Latest Published Version
 
   return (
     <React.Fragment>
