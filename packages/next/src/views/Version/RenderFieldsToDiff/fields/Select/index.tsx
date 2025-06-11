@@ -67,12 +67,6 @@ export const Select: SelectFieldDiffClientComponent = ({
 }) => {
   const { i18n } = useTranslation()
 
-  let placeholder = ''
-
-  if (valueTo == valueFrom) {
-    placeholder = `[${i18n.t('general:noValue')}]`
-  }
-
   const options = 'options' in field && field.options
 
   const renderedValueFrom =
@@ -85,7 +79,7 @@ export const Select: SelectFieldDiffClientComponent = ({
           ),
           i18n,
         )
-      : placeholder
+      : ''
 
   const renderedValueTo =
     typeof valueTo !== 'undefined'
@@ -97,7 +91,7 @@ export const Select: SelectFieldDiffClientComponent = ({
           ),
           i18n,
         )
-      : placeholder
+      : ''
 
   const { From, To } = getHTMLDiffComponents({
     fromHTML: '<p>' + renderedValueFrom + '</p>',

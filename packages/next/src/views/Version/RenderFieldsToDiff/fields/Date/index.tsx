@@ -19,7 +19,6 @@ const baseClass = 'date-diff'
 
 export const DateDiffComponent: DateFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
-  diffMethod,
   field,
   locale,
   nestingLevel,
@@ -31,12 +30,6 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
       admin: { dateFormat },
     },
   } = useConfig()
-
-  let placeholder = ''
-
-  if (valueTo == valueFrom) {
-    placeholder = `[${i18n.t('general:noValue')}]`
-  }
 
   const formattedFromDate = valueFrom
     ? formatDate({

@@ -30,7 +30,6 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
 }) => {
   const hasMany = 'hasMany' in field && field.hasMany
   const polymorphic = Array.isArray(field.relationTo)
-  const placeholder = `[${i18n.t('general:noValue')}]`
 
   if (hasMany) {
     return (
@@ -40,7 +39,6 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
         locale={locale}
         nestingLevel={nestingLevel}
         parentIsLocalized={parentIsLocalized}
-        placeholder={placeholder}
         polymorphic={polymorphic}
         req={req}
         valueFrom={valueFrom as PopulatedRelationshipValue[] | undefined}
@@ -56,7 +54,6 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
       locale={locale}
       nestingLevel={nestingLevel}
       parentIsLocalized={parentIsLocalized}
-      placeholder={placeholder}
       polymorphic={polymorphic}
       req={req}
       valueFrom={valueFrom as PopulatedRelationshipValue}
@@ -71,7 +68,6 @@ export const SingleRelationshipDiff: React.FC<{
   locale: string
   nestingLevel?: number
   parentIsLocalized: boolean
-  placeholder: string
   polymorphic: boolean
   req: PayloadRequest
   valueFrom: PopulatedRelationshipValue
@@ -83,7 +79,6 @@ export const SingleRelationshipDiff: React.FC<{
     locale,
     nestingLevel,
     parentIsLocalized,
-    placeholder,
     polymorphic,
     req,
     valueFrom,
@@ -127,10 +122,8 @@ export const SingleRelationshipDiff: React.FC<{
     />
   ) : null
 
-  const fromHTML = FromComponent
-    ? ReactDOMServer.renderToString(FromComponent)
-    : `<p>${placeholder}</p>`
-  const toHTML = ToComponent ? ReactDOMServer.renderToString(ToComponent) : `<p>${placeholder}</p>`
+  const fromHTML = FromComponent ? ReactDOMServer.renderToString(FromComponent) : `<p></p>`
+  const toHTML = ToComponent ? ReactDOMServer.renderToString(ToComponent) : `<p></p>`
 
   const diff = getHTMLDiffComponents({
     fromHTML,
@@ -156,7 +149,6 @@ const ManyRelationshipDiff: React.FC<{
   locale: string
   nestingLevel?: number
   parentIsLocalized: boolean
-  placeholder: string
   polymorphic: boolean
   req: PayloadRequest
   valueFrom: PopulatedRelationshipValue[] | undefined
@@ -167,7 +159,6 @@ const ManyRelationshipDiff: React.FC<{
   locale,
   nestingLevel,
   parentIsLocalized,
-  placeholder,
   polymorphic,
   req,
   valueFrom,
@@ -199,10 +190,9 @@ const ManyRelationshipDiff: React.FC<{
     ))
 
   const fromNodes =
-    fromArr.length > 0 ? makeNodes(fromArr) : <p className={`${baseClass}__empty`}>{placeholder}</p>
+    fromArr.length > 0 ? makeNodes(fromArr) : <p className={`${baseClass}__empty`}></p>
 
-  const toNodes =
-    toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}>{placeholder}</p>
+  const toNodes = toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}></p>
 
   const fromHTML = ReactDOMServer.renderToString(fromNodes)
   const toHTML = ReactDOMServer.renderToString(toNodes)

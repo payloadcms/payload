@@ -54,7 +54,7 @@ export const Text: TextFieldDiffClientComponent = ({
   let placeholder = ''
 
   if (valueTo == valueFrom) {
-    placeholder = `<span class="html-diff-no-value">${i18n.t('general:noValue')}<span>`
+    placeholder = `<span class="html-diff-no-value"><span>`
   }
 
   const formattedValueFrom = formatValue(valueFrom)

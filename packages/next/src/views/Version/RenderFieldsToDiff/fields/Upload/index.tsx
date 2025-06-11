@@ -26,8 +26,6 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
     versionValue: valueTo,
   } = args
 
-  const placeholder = `[${i18n.t('general:noValue')}]`
-
   if ('hasMany' in field && field.hasMany && Array.isArray(valueTo)) {
     return (
       <HasManyUploadDiff
@@ -35,7 +33,6 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
         i18n={i18n}
         locale={locale}
         nestingLevel={nestingLevel}
-        placeholder={placeholder}
         req={req}
         valueFrom={valueFrom as any}
         valueTo={valueTo as any}
@@ -49,7 +46,6 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
       i18n={i18n}
       locale={locale}
       nestingLevel={nestingLevel}
-      placeholder={placeholder}
       req={req}
       valueFrom={valueFrom as any}
       valueTo={valueTo as any}
@@ -62,16 +58,15 @@ export const HasManyUploadDiff: React.FC<{
   i18n: I18nClient
   locale: string
   nestingLevel?: number
-  placeholder: string
   req: PayloadRequest
   valueFrom: Array<FileData & TypeWithID>
   valueTo: Array<FileData & TypeWithID>
 }> = async (args) => {
-  const { field, i18n, locale, nestingLevel, placeholder, req, valueFrom, valueTo } = args
+  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  let From: React.ReactNode = placeholder
-  let To: React.ReactNode = placeholder
+  let From: React.ReactNode = ''
+  let To: React.ReactNode = ''
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
@@ -107,7 +102,7 @@ export const HasManyUploadDiff: React.FC<{
         ? FromComponents.map(
             (component) => `<div>${ReactDOMServer.renderToString(component)}</div>`,
           ).join('')
-        : placeholder) +
+        : '') +
       '</div>',
     toHTML:
       `<div class="${baseClass}-hasMany">` +
@@ -115,7 +110,7 @@ export const HasManyUploadDiff: React.FC<{
         ? ToComponents.map(
             (component) => `<div>${ReactDOMServer.renderToString(component)}</div>`,
           ).join('')
-        : placeholder) +
+        : '') +
       '</div>',
     tokenizeByCharacter: false,
   })
@@ -142,17 +137,16 @@ export const SingleUploadDiff: React.FC<{
   i18n: I18nClient
   locale: string
   nestingLevel?: number
-  placeholder: string
   req: PayloadRequest
   valueFrom: FileData & TypeWithID
   valueTo: FileData & TypeWithID
 }> = async (args) => {
-  const { field, i18n, locale, nestingLevel, placeholder, req, valueFrom, valueTo } = args
+  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
 
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  let From: React.ReactNode = placeholder
-  let To: React.ReactNode = placeholder
+  let From: React.ReactNode = ''
+  let To: React.ReactNode = ''
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
@@ -177,10 +171,8 @@ export const SingleUploadDiff: React.FC<{
 
   const fromHtml = FromComponent
     ? ReactDOMServer.renderToString(FromComponent)
-    : '<p>' + placeholder + '</p>'
-  const toHtml = ToComponent
-    ? ReactDOMServer.renderToString(ToComponent)
-    : '<p>' + placeholder + '</p>'
+    : '<p>' + '' + '</p>'
+  const toHtml = ToComponent ? ReactDOMServer.renderToString(ToComponent) : '<p>' + '' + '</p>'
 
   const diffResult = getHTMLDiffComponents({
     fromHTML: fromHtml,
