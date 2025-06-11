@@ -107,63 +107,6 @@ function filterWhereForCollection(
   return filtered
 }
 
-/**
- * Checks if a wrapped polymorphic result matches the given WHERE clause
- * @param wrappedResult - The polymorphic result with value and relationTo
- * @param whereClause - The WHERE clause to match against
- * @returns true if the result matches the WHERE clause
- */
-function matchesWhereClause(
-  wrappedResult: Record<string, unknown>,
-  whereClause: Record<string, any>,
-): boolean {
-  // Simple implementation for basic filters
-  for (const [field, condition] of Object.entries(whereClause)) {
-    if (field === 'relationTo') {
-      // Handle relationTo filter
-      const relationTo = wrappedResult.relationTo as string
-      if (condition.equals && condition.equals !== relationTo) {
-        return false
-      }
-      if (condition.in && Array.isArray(condition.in) && !condition.in.includes(relationTo)) {
-        return false
-      }
-    } else if (field === 'and' && Array.isArray(condition)) {
-      // Handle AND conditions
-      for (const subCondition of condition) {
-        if (!matchesWhereClause(wrappedResult, subCondition)) {
-          return false
-        }
-      }
-    } else if (field === 'or' && Array.isArray(condition)) {
-      // Handle OR conditions
-      let foundMatch = false
-      for (const subCondition of condition) {
-        if (matchesWhereClause(wrappedResult, subCondition)) {
-          foundMatch = true
-          break
-        }
-      }
-      if (!foundMatch) {
-        return false
-      }
-    } else {
-      // Handle other field conditions by checking the original document
-      const originalDocument = wrappedResult.originalDocument as Record<string, unknown>
-      const fieldValue = getByPath(originalDocument, field)
-
-      if (condition.equals && condition.equals !== fieldValue) {
-        return false
-      }
-      if (condition.not_equals && condition.not_equals === fieldValue) {
-        return false
-      }
-      // Add more condition types as needed
-    }
-  }
-  return true
-}
-
 type Args = {
   adapter: MongooseAdapter
   collectionSlug: string
@@ -309,7 +252,6 @@ export async function resolveJoins({
       // Handle polymorphic collection joins (like documentsAndFolders from folder system)
       // These joins span multiple collections, so we need to query each collection separately
       const allCollections = joinDef.field.collection as string[]
-      const allResults: Record<string, unknown>[] = []
 
       // Extract all parent document IDs to use in the join query
       const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
@@ -325,25 +267,22 @@ export async function resolveJoins({
       // Extract relationTo filter from the where clause to determine which collections to query
       const relationToFilter = extractRelationToFilter(joinQuery.where || {})
 
-      // Keep the original where clause for post-processing
-      const originalWhere = joinQuery.where || {}
-
       // Determine which collections to query based on relationTo filter
       const collections = relationToFilter
         ? allCollections.filter((col) => relationToFilter.includes(col))
         : allCollections
 
-      // Query each collection in the polymorphic join
+      // Group the results by their parent document ID
+      // We need to re-query to properly get the parent relationships
+      const grouped: Record<string, Record<string, unknown>[]> = {}
+
       for (const collectionSlug of collections) {
         const targetConfig = adapter.payload.collections[collectionSlug]?.config
         if (!targetConfig) {
           continue
         }
 
-        // Determine if we should use drafts/versions for this collection
         const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
-
-        // Choose the appropriate model based on whether we're querying drafts
         let JoinModel
         if (useDrafts) {
           JoinModel = adapter.versions[targetConfig.slug]
@@ -355,32 +294,19 @@ export async function resolveJoins({
           continue
         }
 
+        // Extract all parent document IDs to use in the join query
+        const parentIDs = docs.map((d) =>
+          versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id),
+        )
+
         // Filter WHERE clause to only include fields that exist in this collection
-        // For polymorphic collection joins, we exclude relationTo from individual collections
-        // since relationTo is metadata added after fetching, not a real field in collections
         const filteredWhere = filterWhereForCollection(
           joinQuery.where || {},
           targetConfig.flattenedFields,
-          true, // exclude relationTo field for individual collections in polymorphic joins
+          true, // exclude relationTo for individual collections
         )
 
-        // For polymorphic collection joins, we should not skip collections just because
-        // some AND conditions were filtered out - the relationTo filter is what determines
-        // if a collection should participate in the join
-        // Only skip if there are literally no conditions after filtering AND the original where was not empty
-        // AND we didn't extract a relationTo filter (which means this collection was specifically requested)
-        const originalWhere = joinQuery.where || {}
-        const originalHadConditions = Object.keys(originalWhere).length > 0
-        if (Object.keys(filteredWhere).length === 0 && originalHadConditions && !relationToFilter) {
-          continue
-        }
-
-        // Determine the fields to use based on whether we're querying drafts
-        const fields = useDrafts
-          ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
-          : targetConfig.flattenedFields
-
-        // Build the base query for this specific collection
+        // Build the base query
         const whereQuery = useDrafts
           ? await JoinModel.buildQuery({
               locale,
@@ -399,7 +325,7 @@ export async function resolveJoins({
               where: filteredWhere,
             })
 
-        // Add the join condition - use appropriate field prefix for versions
+        // Add the join condition
         const joinFieldName = useDrafts ? `version.${joinDef.field.on}` : joinDef.field.on
         whereQuery[joinFieldName] = { $in: parentIDs }
 
@@ -407,7 +333,9 @@ export async function resolveJoins({
         const sort = buildSortParam({
           adapter,
           config: adapter.payload.config,
-          fields,
+          fields: useDrafts
+            ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
+            : targetConfig.flattenedFields,
           locale,
           sort: useDrafts
             ? getQueryDraftsSort({
@@ -427,12 +355,11 @@ export async function resolveJoins({
           {} as Record<string, -1 | 1>,
         )
 
-        // Execute the query to get results from this collection
+        // Execute the query
         const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
 
-        // Transform the results and add relationTo metadata
+        // Transform the results
         if (useDrafts) {
-          // For version documents, manually convert _id to id to preserve nested structure
           for (const result of results) {
             if (result._id) {
               result.id = result._id
@@ -448,126 +375,94 @@ export async function resolveJoins({
           })
         }
 
-        // For polymorphic collection joins, wrap each result in the expected format
+        // Group the results by parent ID
         for (const result of results) {
-          // For version documents, we want to return the parent document ID but with the version data
           if (useDrafts) {
-            result.id = result.parent // Use parent document ID as the ID for joins
+            result.id = result.parent
           }
 
-          // Wrap the result in the polymorphic format with value and relationTo
-          // For polymorphic collection joins, we return the ID as value
-          // Relationship population will handle depth-based population separately
-          const wrappedResult = {
-            originalDocument: result, // Store original for grouping and sorting
+          // Get the parent ID from the join field
+          const joinFieldPath = useDrafts ? `version.${joinDef.field.on}` : joinDef.field.on
+          const parentValue = getByPath(result, joinFieldPath)
+          if (!parentValue) {
+            continue
+          }
+
+          const parentKey = parentValue as string
+          if (!grouped[parentKey]) {
+            grouped[parentKey] = []
+          }
+
+          // Add the wrapped result with original document for sorting
+          grouped[parentKey].push({
+            _originalDoc: result, // Store full document for sorting
             relationTo: collectionSlug,
             value: result.id || result._id,
-          }
-
-          allResults.push(wrappedResult)
+          })
         }
       }
 
-      // Sort the combined results to maintain consistent order across collections
-      // The sortCriteria here is the raw sort input, not the processed buildSortParam output
-      // We need to parse it properly like buildSortParam does
-      const rawSortCriteria = joinQuery.sort || joinDef.field.defaultSort
-      if (rawSortCriteria) {
-        // Convert the raw sort criteria to the same format as buildSortParam
-        const parsedSort: Record<string, string> = {}
+      // Sort the grouped results
+      const sortParam = joinQuery.sort || joinDef.field.defaultSort
+      for (const parentKey in grouped) {
+        if (sortParam) {
+          // Parse the sort parameter
+          let sortField: string
+          let sortDirection: 'asc' | 'desc' = 'asc'
 
-        if (typeof rawSortCriteria === 'string') {
-          // Handle single string like '-title'
-          const items = [rawSortCriteria]
-          for (const item of items) {
-            if (item.indexOf('-') === 0) {
-              parsedSort[item.substring(1)] = 'desc'
+          if (typeof sortParam === 'string') {
+            if (sortParam.startsWith('-')) {
+              sortField = sortParam.substring(1)
+              sortDirection = 'desc'
             } else {
-              parsedSort[item] = 'asc'
+              sortField = sortParam
             }
+          } else {
+            // For non-string sort params, fall back to default
+            sortField = 'createdAt'
+            sortDirection = 'desc'
           }
-        } else if (Array.isArray(rawSortCriteria)) {
-          // Handle array like ['-title', 'createdAt']
-          for (const item of rawSortCriteria) {
-            if (typeof item === 'string') {
-              if (item.indexOf('-') === 0) {
-                parsedSort[item.substring(1)] = 'desc'
-              } else {
-                parsedSort[item] = 'asc'
-              }
+
+          grouped[parentKey].sort((a, b) => {
+            // Extract the field value from the original document
+            let valueA: any
+            let valueB: any
+
+            const docA = a._originalDoc as Record<string, unknown>
+            const docB = b._originalDoc as Record<string, unknown>
+
+            if (sortField === 'createdAt') {
+              valueA = new Date(docA.createdAt as Date | string)
+              valueB = new Date(docB.createdAt as Date | string)
+            } else {
+              // Access the field directly from the document
+              valueA = getByPath(docA, sortField)
+              valueB = getByPath(docB, sortField)
             }
-          }
-        } else if (typeof rawSortCriteria === 'object') {
-          // Handle object like { title: 'desc' }
-          Object.assign(parsedSort, rawSortCriteria)
-        }
-
-        allResults.sort((a, b) => {
-          const docA = a.originalDocument as Record<string, unknown>
-          const docB = b.originalDocument as Record<string, unknown>
-
-          for (const [field, direction] of Object.entries(parsedSort)) {
-            const valueA = getByPath(docA, field)
-            const valueB = getByPath(docB, field)
 
             if (valueA < valueB) {
-              return direction === 'desc' ? 1 : -1
+              return sortDirection === 'desc' ? 1 : -1
             }
             if (valueA > valueB) {
-              return direction === 'desc' ? -1 : 1
+              return sortDirection === 'desc' ? -1 : 1
             }
-          }
-          return 0
-        })
-      } else {
-        // Default sort by createdAt descending if no sort specified
-        allResults.sort((a, b) => {
-          const docA = a.originalDocument as Record<string, unknown>
-          const docB = b.originalDocument as Record<string, unknown>
-          const createdAtA = docA.createdAt as Date | string
-          const createdAtB = docB.createdAt as Date | string
-
-          if (createdAtA < createdAtB) {
-            return 1
-          }
-          if (createdAtA > createdAtB) {
-            return -1
-          }
-          return 0
-        })
-      }
-
-      // Apply post-processing WHERE clause filters to the wrapped results
-      // This handles relationTo filters and other conditions that need to be applied
-      // after the polymorphic wrapping
-      let filteredResults = allResults
-      if (Object.keys(originalWhere).length > 0) {
-        filteredResults = allResults.filter((wrappedResult) => {
-          // Check each condition in the WHERE clause
-          const matches = matchesWhereClause(wrappedResult, originalWhere)
-          return matches
-        })
-      }
-
-      // Group the filtered results by their parent document ID
-      const grouped: Record<string, Record<string, unknown>[]> = {}
-
-      for (const res of filteredResults) {
-        // Get the parent ID from the original document using the join field
-        // For version documents, the field is nested under 'version'
-        const actualDocument = res.originalDocument as Record<string, unknown>
-        const joinFieldPath =
-          versions && actualDocument.version ? `version.${joinDef.field.on}` : joinDef.field.on
-        const parentValue = getByPath(actualDocument, joinFieldPath)
-        if (!parentValue) {
-          continue
+            return 0
+          })
+        } else {
+          // Default sort by creation time (newest first)
+          grouped[parentKey].sort((a, b) => {
+            const docA = a._originalDoc as Record<string, unknown>
+            const docB = b._originalDoc as Record<string, unknown>
+            const dateA = new Date(docA.createdAt as Date | string)
+            const dateB = new Date(docB.createdAt as Date | string)
+            return dateB.getTime() - dateA.getTime()
+          })
         }
 
-        const parentKey = parentValue as string
-        if (!grouped[parentKey]) {
-          grouped[parentKey] = []
+        // Remove the temporary _originalDoc field
+        for (const item of grouped[parentKey]) {
+          delete (item as any)._originalDoc
         }
-        grouped[parentKey].push(res)
       }
 
       // Apply pagination settings
@@ -596,15 +491,9 @@ export async function resolveJoins({
         // Calculate the slice for pagination
         const slice = all.slice((page - 1) * limit, (page - 1) * limit + limit)
 
-        // Clean up internal properties from the slice
-        const cleanedSlice = slice.map((item) => {
-          const { originalDocument, ...cleanItem } = item as any
-          return cleanItem
-        })
-
         // Create the join result object with pagination metadata
         const value: Record<string, unknown> = {
-          docs: cleanedSlice,
+          docs: slice,
           hasNextPage: all.length > (page - 1) * limit + slice.length,
         }
 
