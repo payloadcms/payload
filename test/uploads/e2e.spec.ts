@@ -541,6 +541,7 @@ describe('Uploads', () => {
 
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
 
     const mediaID = page.url().split('/').pop()
     const { doc: mediaDoc } = await client.findByID({
@@ -560,6 +561,8 @@ describe('Uploads', () => {
     await loadFromUrlButton.click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
     const mediaID = page.url().split('/').pop()
     const { doc: mediaDoc } = await client.findByID({
       id: mediaID as string,
