@@ -1,7 +1,7 @@
 /* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
-import type { ClientUser, DocumentSlots, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -27,6 +27,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
@@ -51,6 +52,7 @@ export function DefaultEditView({
   SaveButton,
   SaveDraftButton,
   Upload: CustomUpload,
+  UploadControls,
 }: DocumentViewClientProps) {
   const {
     id,
@@ -108,7 +110,6 @@ export function DefaultEditView({
     getEntityConfig,
   } = useConfig()
 
-  const [documentSlots, setDocumentSlots] = useState<DocumentSlots>({})
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
 
@@ -118,7 +119,7 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getDocumentSlots, getFormState } = useServerFunctions()
+  const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
 
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -435,13 +436,6 @@ export function DefaultEditView({
     }
   }, [])
 
-  useEffect(() => {
-    void (async () => {
-      const slots = await getDocumentSlots({ collectionSlug })
-      setDocumentSlots(slots)
-    })()
-  }, [getDocumentSlots, collectionSlug])
-
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
@@ -589,14 +583,16 @@ export function DefaultEditView({
                   )}
                   {upload && (
                     <React.Fragment>
-                      {CustomUpload || (
-                        <Upload
-                          collectionSlug={collectionConfig.slug}
-                          documentSlots={documentSlots}
-                          initialState={initialState}
-                          uploadConfig={upload}
-                        />
-                      )}
+                      <UploadControlsProvider>
+                        {CustomUpload || (
+                          <Upload
+                            collectionSlug={collectionConfig.slug}
+                            initialState={initialState}
+                            uploadConfig={upload}
+                            UploadControls={UploadControls}
+                          />
+                        )}
+                      </UploadControlsProvider>
                     </React.Fragment>
                   )}
                 </Fragment>
