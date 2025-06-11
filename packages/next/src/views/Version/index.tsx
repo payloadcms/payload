@@ -43,7 +43,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     ? JSON.parse(searchParams.localeCodes as string)
     : null
 
-  const versionFromIDFromParams: string = searchParams.versionFrom as string
+  const versionFromIDFromParams = searchParams.versionFrom as string
 
   const modifiedOnly: boolean = searchParams.modifiedOnly === 'false' ? false : true
 
@@ -94,7 +94,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           ],
         },
       }),
-      versionFromIDFromParams
+      (versionFromIDFromParams
         ? fetchVersion({
             id: versionFromIDFromParams,
             collectionSlug,
@@ -105,7 +105,7 @@ export async function VersionView(props: DocumentViewServerProps) {
             req,
             user,
           })
-        : Promise.resolve(null),
+        : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
       fetchLatestVersion({
         collectionSlug,
         depth: 0,
@@ -134,10 +134,10 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null
 
-  const versionFrom: null | TypeWithVersion<object> = versionFromIDFromParams
-    ? (versionFromResult as null | TypeWithVersion<object>)
-    : // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
-      previousVersion
+  const versionFrom =
+    versionFromResult ||
+    // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
+    previousVersion
 
   let selectedLocales: string[] = []
   if (localization) {
@@ -257,22 +257,25 @@ export async function VersionView(props: DocumentViewServerProps) {
   }
 
   const versionFromOptions: CompareOption[] = versionFromOptionsWithDate
+    // Filter out duplicates
     .reduce((acc: ({ updatedAt: Date } & CompareOption)[], option) => {
       if (option && !acc.some((existingOption) => existingOption.value === option.value)) {
         acc.push(option)
       }
       return acc
     }, [])
+    // Sort by updatedAt, newest first
     .sort((a, b) => {
       if (a && b) {
         return b.updatedAt.getTime() - a.updatedAt.getTime()
       }
       return 0
     })
+    // Remove updatedAt from the options
     .map((option) => {
       if (option) {
-        const { updatedAt, ...rest } = option
-        return rest
+        delete option.updatedAt
+        return option
       }
       return option
     }) as CompareOption[]

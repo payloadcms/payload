@@ -10,7 +10,7 @@ import { buildVersionColumns } from './buildColumns.js'
 import { VersionsViewClient } from './index.client.js'
 import './index.scss'
 
-export const baseClass = 'versions'
+const baseClass = 'versions'
 
 export async function VersionsView(props: DocumentViewServerProps) {
   const {
@@ -54,9 +54,9 @@ export async function VersionsView(props: DocumentViewServerProps) {
     })
   }
 
-  const limitToUse =
-    (isNumber(limit) ? Number(limit) : undefined) ||
-    (collectionSlug ? collectionConfig.admin.pagination.defaultLimit : 10)
+  const defaultLimit = collectionSlug ? collectionConfig?.admin?.pagination?.defaultLimit : 10
+
+  const limitToUse = isNumber(limit) ? Number(limit) : defaultLimit
 
   const versionsData: PaginatedDocs = await fetchVersions({
     collectionSlug,
@@ -111,9 +111,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
 
   const fetchURL = collectionSlug
     ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
-      : ''
+    : `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
 
   const columns = buildVersionColumns({
     collectionConfig,
@@ -126,11 +124,10 @@ export async function VersionsView(props: DocumentViewServerProps) {
     latestPublishedVersion,
   })
 
-  const pluralLabel = collectionConfig?.labels?.plural
-    ? typeof collectionConfig.labels.plural === 'function'
+  const pluralLabel =
+    typeof collectionConfig?.labels?.plural === 'function'
       ? collectionConfig.labels.plural({ i18n, t })
-      : collectionConfig.labels.plural
-    : globalConfig?.label
+      : (collectionConfig?.labels?.plural ?? globalConfig?.label)
 
   const GutterComponent = disableGutter ? React.Fragment : Gutter
 

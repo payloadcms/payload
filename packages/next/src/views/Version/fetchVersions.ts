@@ -24,7 +24,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   depth?: number
   globalSlug?: string
   id: number | string
-  locale?: 'all' | string
+  locale?: 'all' | ({} & string)
   overrideAccess?: boolean
   req: PayloadRequest
   select?: SelectType
@@ -60,7 +60,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   }
 }
 
-export const fetchVersions = async ({
+export const fetchVersions = async <TVersionData extends object = object>({
   collectionSlug,
   depth,
   draft,
@@ -81,7 +81,7 @@ export const fetchVersions = async ({
   draft?: boolean
   globalSlug?: string
   limit?: number
-  locale?: 'all' | string
+  locale?: 'all' | ({} & string)
   overrideAccess?: boolean
   page?: number
   parentID?: number | string
@@ -90,7 +90,7 @@ export const fetchVersions = async ({
   sort?: Sort
   user?: User
   where?: Where
-}): Promise<null | PaginatedDocs<TypeWithVersion<object>>> => {
+}): Promise<null | PaginatedDocs<TypeWithVersion<TVersionData>>> => {
   const where: Where = { and: [...(whereFromArgs ? [whereFromArgs] : [])] }
 
   try {
@@ -102,7 +102,7 @@ export const fetchVersions = async ({
           },
         })
       }
-      return await req.payload.findVersions({
+      return (await req.payload.findVersions({
         collection: collectionSlug,
         depth,
         draft,
@@ -115,9 +115,9 @@ export const fetchVersions = async ({
         sort,
         user,
         where,
-      })
+      })) as PaginatedDocs<TypeWithVersion<TVersionData>>
     } else if (globalSlug) {
-      return await req.payload.findGlobalVersions({
+      return (await req.payload.findGlobalVersions({
         slug: globalSlug,
         depth,
         limit,
@@ -129,7 +129,7 @@ export const fetchVersions = async ({
         sort,
         user,
         where,
-      })
+      })) as PaginatedDocs<TypeWithVersion<TVersionData>>
     }
   } catch (err) {
     logError({ err, payload: req.payload })
@@ -138,7 +138,7 @@ export const fetchVersions = async ({
   }
 }
 
-export const fetchLatestVersion = async ({
+export const fetchLatestVersion = async <TVersionData extends object = object>({
   collectionSlug,
   depth,
   globalSlug,
@@ -154,7 +154,7 @@ export const fetchLatestVersion = async ({
   collectionSlug?: string
   depth?: number
   globalSlug?: string
-  locale?: 'all' | string
+  locale?: 'all' | ({} & string)
   overrideAccess?: boolean
   parentID?: number | string
   req: PayloadRequest
@@ -162,7 +162,7 @@ export const fetchLatestVersion = async ({
   status: 'draft' | 'published'
   user?: User
   where?: Where
-}): Promise<null | TypeWithVersion<object>> => {
+}): Promise<null | TypeWithVersion<TVersionData>> => {
   const and: Where[] = [
     {
       'version._status': {
@@ -188,5 +188,5 @@ export const fetchLatestVersion = async ({
     where: { and },
   })
 
-  return latest?.docs?.length ? latest.docs[0] : null
+  return latest?.docs?.length ? (latest.docs[0] as TypeWithVersion<TVersionData>) : null
 }
