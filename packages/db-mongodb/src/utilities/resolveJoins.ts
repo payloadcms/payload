@@ -61,13 +61,14 @@ function extractRelationToFilter(where: Record<string, any>): null | string[] {
  * This is needed for polymorphic joins where different collections have different fields
  * @param where - The original WHERE clause
  * @param availableFields - The fields available in the target collection
- * @returns A filtered WHERE clause
+ * @param excludeRelationTo - Whether to exclude relationTo field (for individual collections)
+ * @returns A filtered WHERE clause, or null if the query cannot match this collection
  */
 function filterWhereForCollection(
   where: Record<string, any>,
   availableFields: any[],
   excludeRelationTo: boolean = false,
-): Record<string, any> {
+): null | Record<string, any> {
   if (!where || typeof where !== 'object') {
     return where
   }
@@ -81,18 +82,45 @@ function filterWhereForCollection(
   const filtered: Record<string, any> = {}
 
   for (const [key, value] of Object.entries(where)) {
-    if (key === 'and' || key === 'or') {
-      // Handle logical operators by recursively filtering their conditions
+    if (key === 'and') {
+      // Handle AND operator - all conditions must be satisfiable
+      if (Array.isArray(value)) {
+        const filteredConditions: Record<string, any>[] = []
+
+        for (const condition of value) {
+          const filteredCondition = filterWhereForCollection(
+            condition,
+            availableFields,
+            excludeRelationTo,
+          )
+
+          // If any condition in AND cannot be satisfied, the whole AND fails
+          if (filteredCondition === null) {
+            return null
+          }
+
+          if (Object.keys(filteredCondition).length > 0) {
+            filteredConditions.push(filteredCondition)
+          }
+        }
+
+        if (filteredConditions.length > 0) {
+          filtered[key] = filteredConditions
+        }
+      }
+    } else if (key === 'or') {
+      // Handle OR operator - at least one condition must be satisfiable
       if (Array.isArray(value)) {
         const filteredConditions = value
           .map((condition) =>
             filterWhereForCollection(condition, availableFields, excludeRelationTo),
           )
-          .filter((condition) => Object.keys(condition).length > 0) // Remove empty conditions
+          .filter((condition) => condition !== null && Object.keys(condition).length > 0)
 
         if (filteredConditions.length > 0) {
           filtered[key] = filteredConditions
         }
+        // If no OR conditions can be satisfied, we still continue (OR is more permissive)
       }
     } else if (key === 'relationTo' && excludeRelationTo) {
       // Skip relationTo field for non-polymorphic collections
@@ -100,8 +128,10 @@ function filterWhereForCollection(
     } else if (fieldNames.has(key)) {
       // Include the condition if the field exists in this collection
       filtered[key] = value
+    } else {
+      // Field doesn't exist in this collection - this makes the query unsatisfiable
+      return null
     }
-    // Skip conditions for fields that don't exist in this collection
   }
 
   return filtered
@@ -305,6 +335,11 @@ export async function resolveJoins({
           targetConfig.flattenedFields,
           true, // exclude relationTo for individual collections
         )
+
+        // Skip this collection if the WHERE clause cannot be satisfied
+        if (filteredWhere === null) {
+          continue
+        }
 
         // Build the base query
         const whereQuery = useDrafts
