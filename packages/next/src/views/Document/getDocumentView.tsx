@@ -60,12 +60,12 @@ export const getDocumentView = ({
     const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
       routeSegments
 
-    // --> ../:id
-    // --> ../create
+    // --> /collections/:collectionSlug/:id
+    // --> /collections/:collectionSlug/create
     switch (routeSegments.length) {
       case 3: {
         switch (segment3) {
-          // --> ../create
+          // --> /collections/:collectionSlug/create
           case 'create': {
             if ('create' in docPermissions && docPermissions.create) {
               View = getCustomViewByKey(views, 'default') || DefaultEditView
@@ -75,7 +75,7 @@ export const getDocumentView = ({
             break
           }
 
-          // --> ../:id
+          // --> /collections/:collectionSlug/:id
           default: {
             const baseRoute = [
               adminRoute !== '/' && adminRoute,
@@ -111,13 +111,13 @@ export const getDocumentView = ({
         break
       }
 
-      // --> ../:id/api
-      // --> ../:id/preview
-      // --> ../:id/versions
-      // --> ../:id/<custom-segment>
+      // --> /collections/:collectionSlug/:id/api
+      // --> /collections/:collectionSlug/:id/preview
+      // --> /collections/:collectionSlug/:id/versions
+      // --> /collections/:collectionSlug/:id/<custom-segment>
       case 4: {
         switch (segment4) {
-          // --> ../:id/api
+          // --> /collections/:collectionSlug/:id/api
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
               View = getCustomViewByKey(views, 'api') || DefaultAPIView
@@ -126,7 +126,7 @@ export const getDocumentView = ({
           }
 
           case 'preview': {
-            // --> ../:id/preview
+            // --> /collections/:collectionSlug/:id/preview
             if (
               (collectionConfig && collectionConfig?.admin?.livePreview) ||
               config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug)
@@ -137,7 +137,7 @@ export const getDocumentView = ({
           }
 
           case 'versions': {
-            // --> ../:id/versions
+            // --> /collections/:collectionSlug/:id/versions
             if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
@@ -146,7 +146,7 @@ export const getDocumentView = ({
             break
           }
 
-          // --> ../:id/<custom-segment>
+          // --> /collections/:collectionSlug/:id/<custom-segment>
           default: {
             const baseRoute = [
               adminRoute !== '/' && adminRoute,
@@ -180,10 +180,10 @@ export const getDocumentView = ({
         break
       }
 
-      // --> ../:id/versions/:version
-      // --> ../:id/<custom-segment>/<custom-segment>
+      // --> /collections/:collectionSlug/:id/versions/:version
+      // --> /collections/:collectionSlug/:id/<custom-segment>/<custom-segment>
       default: {
-        // --> ../:id/versions/:version
+        // --> /collections/:collectionSlug/:id/versions/:version
         if (segment4 === 'versions') {
           if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
@@ -191,7 +191,7 @@ export const getDocumentView = ({
             View = UnauthorizedViewWithGutter
           }
         } else {
-          // --> ../:id/<custom-segment>/<custom-segment>
+          // --> /collections/:collectionSlug/:id/<custom-segment>/<custom-segment>
           const baseRoute = [
             adminRoute !== '/' && adminRoute,
             collectionEntity,
@@ -226,19 +226,19 @@ export const getDocumentView = ({
     const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
     switch (routeSegments.length) {
-      // --> ../:slug
+      // --> /globals/:globalSlug
       case 2: {
         View = getCustomViewByKey(views, 'default') || DefaultEditView
         break
       }
 
       case 3: {
-        // --> ../:slug/api
-        // --> ../:slug/preview
-        // --> ../:slug/versions
-        // --> ../:slug/<custom-segment>
+        // --> /globals/:globalSlug/api
+        // --> /globals/:globalSlug/preview
+        // --> /globals/:globalSlug/versions
+        // --> /globals/:globalSlug/<custom-segment>
         switch (segment3) {
-          // --> ../:slug/api
+          // --> /globals/:globalSlug/api
           case 'api': {
             if (globalConfig?.admin?.hideAPIURL !== true) {
               View = getCustomViewByKey(views, 'api') || DefaultAPIView
@@ -248,7 +248,7 @@ export const getDocumentView = ({
           }
 
           case 'preview': {
-            // --> ../:slug/preview
+            // --> /globals/:globalSlug/preview
             if (
               (globalConfig && globalConfig?.admin?.livePreview) ||
               config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
@@ -260,7 +260,7 @@ export const getDocumentView = ({
           }
 
           case 'versions': {
-            // --> ../:slug/versions
+            // --> /globals/:globalSlug/versions
             if (docPermissions?.readVersions) {
               View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
             } else {
@@ -269,7 +269,7 @@ export const getDocumentView = ({
             break
           }
 
-          // --> ../:slug/<custom-segment>
+          // --> /globals/:globalSlug/<custom-segment>
           default: {
             if (docPermissions?.read) {
               const baseRoute = [adminRoute, globalEntity, globalSlug, segment3]
@@ -303,10 +303,10 @@ export const getDocumentView = ({
         break
       }
 
-      // --> ../:slug/versions/:version
-      // --> ../:slug/<custom-segment>/<custom-segment>
+      // --> /globals/:globalSlug/versions/:version
+      // --> /globals/:globalSlug/<custom-segment>/<custom-segment>
       default: {
-        // --> ../:slug/versions/:version
+        // --> /globals/:globalSlug/versions/:version
         if (segment3 === 'versions') {
           if (docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
@@ -314,7 +314,7 @@ export const getDocumentView = ({
             View = UnauthorizedViewWithGutter
           }
         } else {
-          // --> ../:slug/<custom-segment>/<custom-segment>
+          // --> /globals/:globalSlug/<custom-segment>/<custom-segment>
           const baseRoute = [adminRoute !== '/' && adminRoute, 'globals', globalSlug]
             .filter(Boolean)
             .join('/')
