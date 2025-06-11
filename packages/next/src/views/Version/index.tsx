@@ -68,9 +68,9 @@ export async function VersionView(props: DocumentViewServerProps) {
     return notFound()
   }
 
-  const previousVersion: null | TypeWithVersion<object> =
-    (
-      await fetchVersions({
+  const [previousVersionResult, versionFromResult, latestPublishedVersion, latestDraftVersion] =
+    await Promise.all([
+      fetchVersions({
         collectionSlug,
         depth: 1,
         draft: true,
@@ -91,36 +91,20 @@ export async function VersionView(props: DocumentViewServerProps) {
             },
           ],
         },
-      })
-    )?.docs?.[0] ?? null
-
-  const versionFrom: null | TypeWithVersion<object> = versionFromIDFromParams
-    ? await fetchVersion({
-        id: versionFromIDFromParams,
-        collectionSlug,
-        depth: 1,
-        globalSlug,
-        locale: 'all',
-        overrideAccess: false,
-        req,
-        user,
-      })
-    : // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
-      previousVersion
-
-  const latestPublishedVersion = await fetchLatestVersion({
-    collectionSlug,
-    depth: 0,
-    globalSlug,
-    locale: 'all',
-    overrideAccess: false,
-    parentID: id,
-    req,
-    status: 'published',
-    user,
-  })
-  const latestDraftVersion = draftsEnabled
-    ? await fetchLatestVersion({
+      }),
+      versionFromIDFromParams
+        ? fetchVersion({
+            id: versionFromIDFromParams,
+            collectionSlug,
+            depth: 1,
+            globalSlug,
+            locale: 'all',
+            overrideAccess: false,
+            req,
+            user,
+          })
+        : Promise.resolve(null),
+      fetchLatestVersion({
         collectionSlug,
         depth: 0,
         globalSlug,
@@ -128,10 +112,30 @@ export async function VersionView(props: DocumentViewServerProps) {
         overrideAccess: false,
         parentID: id,
         req,
-        status: 'draft',
+        status: 'published',
         user,
-      })
-    : null
+      }),
+      draftsEnabled
+        ? fetchLatestVersion({
+            collectionSlug,
+            depth: 0,
+            globalSlug,
+            locale: 'all',
+            overrideAccess: false,
+            parentID: id,
+            req,
+            status: 'draft',
+            user,
+          })
+        : Promise.resolve(null),
+    ])
+
+  const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null
+
+  const versionFrom: null | TypeWithVersion<object> = versionFromIDFromParams
+    ? (versionFromResult as null | TypeWithVersion<object>)
+    : // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
+      previousVersion
 
   let selectedLocales: string[] = []
   if (localization) {

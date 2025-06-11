@@ -76,41 +76,38 @@ export async function VersionsView(props: DocumentViewServerProps) {
     return notFound()
   }
 
-  // If we pass a latestPublishedVersion to buildVersionColumns,
-  // this will be used to display it as the "current published version".
-  // However, the latest published version might have been unpublished in the meantime.
-  // Hence, we should only pass the latest published version if there is a published document.
-  const latestPublishedVersion = await fetchLatestVersion({
-    collectionSlug,
-    depth: 0,
-    globalSlug,
-    overrideAccess: false,
-    parentID: id,
-    req,
-    select: {
-      id: true,
-      updatedAt: true,
-    },
-    status: 'published',
-    user,
-  })
-
-  const latestDraftVersion = draftsEnabled
-    ? await fetchLatestVersion({
-        collectionSlug,
-        depth: 0,
-        globalSlug,
-        overrideAccess: false,
-        parentID: id,
-        req,
-        select: {
-          id: true,
-          updatedAt: true,
-        },
-        status: 'draft',
-        user,
-      })
-    : null
+  const [latestPublishedVersion, latestDraftVersion] = await Promise.all([
+    fetchLatestVersion({
+      collectionSlug,
+      depth: 0,
+      globalSlug,
+      overrideAccess: false,
+      parentID: id,
+      req,
+      select: {
+        id: true,
+        updatedAt: true,
+      },
+      status: 'published',
+      user,
+    }),
+    draftsEnabled
+      ? fetchLatestVersion({
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          overrideAccess: false,
+          parentID: id,
+          req,
+          select: {
+            id: true,
+            updatedAt: true,
+          },
+          status: 'draft',
+          user,
+        })
+      : Promise.resolve(null),
+  ])
 
   const fetchURL = collectionSlug
     ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
@@ -136,10 +133,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
     : globalConfig?.label
 
   const GutterComponent = disableGutter ? React.Fragment : Gutter
-
-  // WHAT IS NEEDED:
-  // - Latest Draft Version
-  // - Latest Published Version
 
   return (
     <React.Fragment>
