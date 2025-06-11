@@ -110,6 +110,11 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
+  it('should return 404 when the file is not found', async () => {
+    const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
+    expect(response.status).toBe(404)
+  })
+
   describe('R2', () => {
     it.todo('can upload')
   })
