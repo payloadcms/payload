@@ -114,7 +114,7 @@ export const sanitizeCollection = async (
         }
       }
 
-      return hasCreatedAt && hasUpdatedAt && (!sanitized.softDeletes || hasDeletedAt)
+      return hasCreatedAt && hasUpdatedAt && (!sanitized.trash || hasDeletedAt)
     })
 
     if (!hasUpdatedAt) {
@@ -144,7 +144,7 @@ export const sanitizeCollection = async (
       })
     }
 
-    if (sanitized.softDeletes && !hasDeletedAt) {
+    if (sanitized.trash && !hasDeletedAt) {
       sanitized.fields.push({
         name: 'deletedAt',
         type: 'date',

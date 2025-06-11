@@ -13,8 +13,8 @@ export type Resolver = (
     locale?: string
     page?: number
     pagination?: boolean
-    softDeletes?: boolean
     sort?: string
+    trash?: boolean
     where: Where
   },
   context: {
@@ -54,8 +54,8 @@ export function findVersionsResolver(collection: Collection): Resolver {
       page: args.page,
       pagination: args.pagination,
       req: isolateObjectProperty(req, 'transactionID'),
-      softDeletes: args.softDeletes,
       sort: args.sort,
+      trash: args.trash,
       where: args.where,
     }
 

@@ -13,7 +13,7 @@ export const Pages: CollectionConfig = {
       return Boolean(user?.roles?.includes('is_admin'))
     },
   },
-  softDeletes: true,
+  trash: true,
   fields: [
     {
       name: 'title',
