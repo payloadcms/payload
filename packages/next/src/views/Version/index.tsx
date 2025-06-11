@@ -214,6 +214,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     return (
       <VersionPillLabel
         doc={doc}
+        key={doc.id}
         labelFirst={true}
         labelStyle={'text'}
         latestDraftVersion={latestDraftVersion}

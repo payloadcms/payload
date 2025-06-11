@@ -2,9 +2,10 @@
 
 import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
+import React from 'react'
 
-import { getVersionLabel } from '../../Versions/cells/AutosaveCell/getVersionLabel.js'
 import './index.scss'
+import { getVersionLabel } from '../../Versions/cells/AutosaveCell/getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
 
@@ -21,6 +22,7 @@ export const VersionPillLabel: React.FC<{
   doc: {
     [key: string]: any
     publishedLocale?: string
+    updatedAt?: string
     version: {
       _status: string
       id: number | string
@@ -28,6 +30,7 @@ export const VersionPillLabel: React.FC<{
   }
   /**
    * By default, the date is displayed first, followed by the version label.
+   * @default false
    */
   labelFirst?: boolean
   /**
@@ -42,16 +45,14 @@ export const VersionPillLabel: React.FC<{
     id: number | string
     updatedAt: string
   }
-}> = (args) => {
-  const {
-    disableDate = false,
-    doc,
-    labelFirst,
-    labelStyle = 'pill',
-    latestDraftVersion,
-    latestPublishedVersion,
-  } = args
-
+}> = ({
+  disableDate = false,
+  doc,
+  labelFirst = false,
+  labelStyle = 'pill',
+  latestDraftVersion,
+  latestPublishedVersion,
+}) => {
   const {
     config: {
       admin: { dateFormat },
@@ -60,9 +61,6 @@ export const VersionPillLabel: React.FC<{
   } = useConfig()
   const { i18n, t } = useTranslation()
 
-  let publishedLocalePill = null
-  const publishedLocale = doc.publishedLocale || undefined
-
   const { label, pillStyle } = getVersionLabel({
     latestDraftVersion,
     latestPublishedVersion,
@@ -70,46 +68,43 @@ export const VersionPillLabel: React.FC<{
     version: doc?.version,
   })
 
-  if (localization && localization?.locales && publishedLocale) {
-    const localeCode = Array.isArray(publishedLocale) ? publishedLocale[0] : publishedLocale
+  const showDate = !disableDate && doc.updatedAt
+  const formattedDate = showDate
+    ? formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })
+    : null
 
-    const locale = localization.locales.find((loc) => loc.code === localeCode)
-    const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
+  const localeCode = Array.isArray(doc.publishedLocale)
+    ? doc.publishedLocale[0]
+    : doc.publishedLocale
 
-    if (formattedLabel) {
-      publishedLocalePill = <Pill>{formattedLabel}</Pill>
-    }
-  }
-
-  const Label: React.ReactNode =
-    labelStyle === 'pill' ? (
-      renderPill(label, pillStyle)
-    ) : (
-      <span className={`${baseClass}-text`}>{label}</span>
-    )
-
-  const Date =
-    disableDate !== true ? (
-      <span className={`${baseClass}-date`}>
-        {formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat })}
-      </span>
-    ) : null
-
-  if (labelFirst) {
-    return (
-      <div className={baseClass}>
-        {Label}
-        {Date}
-        {publishedLocalePill}
-      </div>
-    )
-  }
+  const locale =
+    localization && localization?.locales
+      ? localization.locales.find((loc) => loc.code === localeCode)
+      : null
+  const formattedLabel = locale ? locale?.label?.[i18n?.language] || locale?.label : null
 
   return (
     <div className={baseClass}>
-      {Date}
-      {Label}
-      {publishedLocalePill}
+      {labelFirst ? (
+        <React.Fragment>
+          {labelStyle === 'pill' ? (
+            renderPill(label, pillStyle)
+          ) : (
+            <span className={`${baseClass}-text`}>{label}</span>
+          )}
+          {showDate && <span className={`${baseClass}-date`}>{formattedDate}</span>}
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          {showDate && <span className={`${baseClass}-date`}>{formattedDate}</span>}
+          {labelStyle === 'pill' ? (
+            renderPill(label, pillStyle)
+          ) : (
+            <span className={`${baseClass}-text`}>{label}</span>
+          )}
+        </React.Fragment>
+      )}
+      {formattedLabel && <Pill>{formattedLabel}</Pill>}
     </div>
   )
 }
