@@ -367,6 +367,7 @@ export const createOperation = async <
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data,
             doc: result,
             operation: 'create',
             previousDoc: {},

@@ -1,13 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
-export const postsSlug = 'posts'
+export const trashEnabledSlug = 'trash-enabled'
 
-export const Posts: CollectionConfig = {
-  slug: postsSlug,
+export const TrashEnabled: CollectionConfig = {
+  slug: trashEnabledSlug,
   admin: {
     useAsTitle: 'title',
   },
-  softDeletes: true,
+  trash: true,
   fields: [
     {
       name: 'title',

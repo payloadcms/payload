@@ -46,13 +46,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-  softDeletes?: boolean
   /**
    * Sort the documents, can be a string or an array of strings
    * @example '-createdAt' // Sort DESC by createdAt
    * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  trash?: boolean
   where: Where
 }
 
@@ -104,8 +104,8 @@ export const updateOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
-      softDeletes = false,
       sort: incomingSort,
+      trash = false,
       where,
     } = args
 
@@ -138,27 +138,27 @@ export const updateOperation = async <
 
     let fullWhere = combineQueries(where, accessResult!)
 
-    const isSoftDeleteAttempt =
-      collectionConfig.softDeletes &&
+    const isTrashAttempt =
+      collectionConfig.trash &&
       typeof bulkUpdateData === 'object' &&
       bulkUpdateData !== null &&
       'deletedAt' in bulkUpdateData &&
       bulkUpdateData.deletedAt != null
 
-    // Enforce delete access if performing a soft-delete
-    if (isSoftDeleteAttempt && !overrideAccess) {
+    // Enforce delete access if performing a soft-delete (trash)
+    if (isTrashAttempt && !overrideAccess) {
       const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
-    // If softDeletes is false, restrict to non-softDeleted documents only
-    if (collectionConfig.softDeletes && !softDeletes) {
-      const notSoftDeletedFilter = { deletedAt: { exists: false } }
+    // If trash is false, restrict to non-trashed documents only
+    if (collectionConfig.trash && !trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {
-        fullWhere.and.push(notSoftDeletedFilter)
+        fullWhere.and.push(notTrashedFilter)
       } else {
-        fullWhere = { and: [notSoftDeletedFilter] }
+        fullWhere = { and: [notTrashedFilter] }
       }
     }
 

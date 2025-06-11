@@ -115,11 +115,11 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   showHiddenFields?: boolean
   /**
    * When set to `true`, the operation will update both normal and trashed (soft-deleted) documents.
-   * To update only softDeleted documents, pass `softDeletes: true` and combine with a `where` clause filtering by `deletedAt`.
+   * To update only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
    * By default (`false`), the update will only include normal documents and exclude those with a `deletedAt` field.
    * @default false
    */
-  softDeletes?: boolean
+  trash?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -225,8 +225,8 @@ async function updateLocal<
     publishSpecificLocale,
     select,
     showHiddenFields,
-    softDeletes = false,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -259,8 +259,8 @@ async function updateLocal<
     req,
     select,
     showHiddenFields,
-    softDeletes,
     sort,
+    trash,
     where,
   }
 

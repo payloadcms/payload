@@ -47,7 +47,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
-  softDeletes?: boolean
+  trash?: boolean
 }
 
 export const updateByIDOperation = async <
@@ -103,7 +103,7 @@ export const updateByIDOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
-      softDeletes = false,
+      trash = false,
     } = args
 
     if (!id) {
@@ -129,26 +129,26 @@ export const updateByIDOperation = async <
 
     let fullWhere = combineQueries(where, accessResults)
 
-    const isSoftDeleteAttempt =
-      collectionConfig.softDeletes &&
+    const isTrashAttempt =
+      collectionConfig.trash &&
       typeof data === 'object' &&
       data !== null &&
       'deletedAt' in data &&
       data.deletedAt != null
 
-    if (isSoftDeleteAttempt && !overrideAccess) {
+    if (isTrashAttempt && !overrideAccess) {
       const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
-    // If softDeletes is false, restrict to non-softDeleted documents only
-    if (collectionConfig.softDeletes && !softDeletes) {
-      const notSoftDeletedFilter = { deletedAt: { exists: false } }
+    // If trash is false, restrict to non-trashed documents only
+    if (collectionConfig.trash && !trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
 
       if (fullWhere?.and) {
-        fullWhere.and.push(notSoftDeletedFilter)
+        fullWhere.and.push(notTrashedFilter)
       } else {
-        fullWhere = { and: [notSoftDeletedFilter] }
+        fullWhere = { and: [notTrashedFilter] }
       }
     }
 

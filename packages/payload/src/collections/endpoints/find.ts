@@ -14,31 +14,20 @@ import { findOperation } from '../operations/find.js'
 
 export const findHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const {
-    depth,
-    draft,
-    joins,
-    limit,
-    page,
-    pagination,
-    populate,
-    select,
-    softDeletes,
-    sort,
-    where,
-  } = req.query as {
-    depth?: string
-    draft?: string
-    joins?: JoinParams
-    limit?: string
-    page?: string
-    pagination?: string
-    populate?: Record<string, unknown>
-    select?: Record<string, unknown>
-    softDeletes?: string
-    sort?: string
-    where?: Where
-  }
+  const { depth, draft, joins, limit, page, pagination, populate, select, sort, trash, where } =
+    req.query as {
+      depth?: string
+      draft?: string
+      joins?: JoinParams
+      limit?: string
+      page?: string
+      pagination?: string
+      populate?: Record<string, unknown>
+      select?: Record<string, unknown>
+      sort?: string
+      trash?: string
+      where?: Where
+    }
 
   const result = await findOperation({
     collection,
@@ -51,8 +40,8 @@ export const findHandler: PayloadHandler = async (req) => {
     populate: sanitizePopulateParam(populate),
     req,
     select: sanitizeSelectParam(select),
-    softDeletes: softDeletes === 'true',
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    trash: trash === 'true',
     where,
   })
 

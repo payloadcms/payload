@@ -1,20 +1,18 @@
 import type {
   AdminViewServerProps,
   BuildCollectionFolderViewResult,
+  FolderListViewClientProps,
   FolderListViewServerPropsOnly,
+  FolderSortKeys,
   ListQuery,
-  Where,
 } from 'payload'
 
-import { DefaultCollectionFolderView, FolderProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DefaultCollectionFolderView, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData } from 'payload'
-import { buildFolderWhereConstraints } from 'payload/shared'
 import React from 'react'
-
-import { getPreferences } from '../../utilities/getPreferences.js'
 
 // import { renderFolderViewSlots } from './renderFolderViewSlots.js'
 
@@ -62,24 +60,18 @@ export const buildCollectionFolderView = async (
     visibleEntities,
   } = initPageResult
 
-  if (!permissions?.collections?.[collectionSlug]?.read) {
+  if (!config.folders) {
+    throw new Error('not-found')
+  }
+
+  if (
+    !permissions?.collections?.[collectionSlug]?.read ||
+    !permissions?.collections?.[config.folders.slug].read
+  ) {
     throw new Error('not-found')
   }
 
   if (collectionConfig) {
-    const query = queryFromArgs || queryFromReq
-
-    const collectionFolderPreferences = await getPreferences<{
-      sort?: string
-      viewPreference: string
-    }>(`${collectionSlug}-collection-folder`, payload, user.id, user.collection)
-
-    const sortPreference = collectionFolderPreferences?.value.sort
-
-    const {
-      routes: { admin: adminRoute },
-    } = config
-
     if (
       (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) ||
       !config.folders
@@ -87,41 +79,41 @@ export const buildCollectionFolderView = async (
       throw new Error('not-found')
     }
 
-    let folderWhere: undefined | Where
-    const folderCollectionConfig = payload.collections[config.folders.slug].config
-    const folderCollectionConstraints = await buildFolderWhereConstraints({
-      collectionConfig: folderCollectionConfig,
-      folderID,
-      localeCode: fullLocale?.code,
+    const query = queryFromArgs || queryFromReq
+
+    /**
+     * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
+     * This will ensure that prefs are only updated when explicitly set by the user
+     * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
+     */
+    const collectionFolderPreferences = await upsertPreferences<{
+      sort?: FolderSortKeys
+      viewPreference?: 'grid' | 'list'
+    }>({
+      key: `${collectionSlug}-collection-folder`,
       req: initPageResult.req,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      sort: sortPreference,
+      value: {
+        sort: query?.sort as FolderSortKeys,
+      },
     })
 
-    if (folderCollectionConstraints) {
-      folderWhere = folderCollectionConstraints
-    }
+    const sortPreference: FolderSortKeys =
+      collectionFolderPreferences?.sort || '_folderOrDocumentTitle'
+    const viewPreference = collectionFolderPreferences?.viewPreference || 'grid'
 
-    let documentWhere: undefined | Where
-    const collectionConstraints = await buildFolderWhereConstraints({
-      collectionConfig,
-      folderID,
-      localeCode: fullLocale?.code,
-      req: initPageResult.req,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      sort: sortPreference,
-    })
-    if (collectionConstraints) {
-      documentWhere = collectionConstraints
-    }
+    const {
+      routes: { admin: adminRoute },
+    } = config
 
-    const { breadcrumbs, documents, subfolders } = await getFolderData({
-      collectionSlug,
-      documentWhere,
-      folderID,
-      folderWhere,
-      req: initPageResult.req,
-    })
+    const { breadcrumbs, documents, FolderResultsComponent, subfolders } =
+      await getFolderResultsComponentAndData({
+        activeCollectionSlugs: [config.folders.slug, collectionSlug],
+        browseByFolder: false,
+        displayAs: viewPreference,
+        folderID,
+        req: initPageResult.req,
+        sort: sortPreference,
+      })
 
     const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
 
@@ -138,13 +130,6 @@ export const buildCollectionFolderView = async (
         }),
       )
     }
-
-    const newDocumentURL = formatAdminURL({
-      adminRoute,
-      path: `/collections/${collectionSlug}/create`,
-    })
-
-    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
     const serverProps: FolderListViewServerPropsOnly = {
       collectionConfig,
@@ -178,34 +163,39 @@ export const buildCollectionFolderView = async (
 
     return {
       View: (
-        <FolderProvider
-          breadcrumbs={breadcrumbs}
-          collectionSlug={collectionSlug}
-          documents={documents}
-          folderCollectionSlugs={[collectionSlug]}
-          folderFieldName={config.folders.fieldName}
-          folderID={folderID}
-          search={search}
-          subfolders={subfolders}
-        >
+        <>
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
             clientProps: {
               // ...folderViewSlots,
+              allCollectionFolderSlugs: [config.folders.slug, collectionSlug],
+              allowCreateCollectionSlugs: [
+                permissions?.collections?.[config.folders.slug]?.create
+                  ? config.folders.slug
+                  : null,
+                permissions?.collections?.[collectionSlug]?.create ? collectionSlug : null,
+              ].filter(Boolean),
+              baseFolderPath: `/collections/${collectionSlug}/${config.folders.slug}`,
+              breadcrumbs,
               collectionSlug,
               disableBulkDelete,
               disableBulkEdit,
+              documents,
               enableRowSelections,
-              hasCreatePermission,
-              newDocumentURL,
-              viewPreference: collectionFolderPreferences?.value?.viewPreference,
-            },
-            Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              folderFieldName: config.folders.fieldName,
+              folderID: resolvedFolderID || null,
+              FolderResultsComponent,
+              search,
+              sort: sortPreference,
+              subfolders,
+              viewPreference,
+            } satisfies FolderListViewClientProps,
+            // Component: collectionConfig?.admin?.components?.views?.Folders?.Component,
             Fallback: DefaultCollectionFolderView,
             importMap: payload.importMap,
             serverProps,
           })}
-        </FolderProvider>
+        </>
       ),
     }
   }
