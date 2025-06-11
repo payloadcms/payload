@@ -51,40 +51,14 @@ export const getViewByKeyOrRoute = ({
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
 
-  if (!viewKey) {
-    return matchRouteToView({
-      basePath,
-      currentRoute,
-      views,
-    })
-  }
-
-  // If the user customized the view's path, don't mount the default view as it now exists at a different route
-  // Note: the path could be '' (empty string)
-  const hasCustomizedPath = views?.edit?.[viewKey] && 'path' in views.edit[viewKey]
-
-  if (hasCustomizedPath) {
-    // Check for another view that may be occupying this path
-    return matchRouteToView({
-      basePath,
-      currentRoute,
-      views,
-    })
-  }
-
-  const viewConfig = {
-    ...(defaultDocumentViews?.[viewKey] || {}),
-    ...(views?.edit?.[viewKey] || {}),
-  }
-
   /**
    * Runs conditions that should return the not found view. E.g., conditionally render the API view based on `hideAPIURL`.
    * Should not run if another view is mounted to this route. E.g., you wouldn't want `hideAPIURL` to apply to `myCustomView` mounted to "/api".
    * If not explicitly false, will return the `NotFoundView`. You can also throw an `UnauthorizedError` to render the `Unauthorized` view.
    */
-  if (typeof viewConfig.condition === 'function') {
+  const runCondition = (condition: DocumentViewCondition) => {
     try {
-      const meetsCondition = (viewConfig.condition as DocumentViewCondition)({
+      const meetsCondition = condition({
         collectionConfig,
         config,
         docPermissions,
@@ -99,6 +73,60 @@ export const getViewByKeyOrRoute = ({
       if (error instanceof UnauthorizedError) {
         return { Component: UnauthorizedViewWithGutter }
       }
+    }
+  }
+
+  if (!viewKey) {
+    const matchedView = matchRouteToView({
+      basePath,
+      currentRoute,
+      views,
+    })
+
+    if (typeof matchedView.condition === 'function') {
+      const conditionResult = runCondition(matchedView.condition)
+
+      if (conditionResult) {
+        return conditionResult
+      }
+    }
+
+    return matchedView
+  }
+
+  // If the user customized the view's path, don't mount the default view as it now exists at a different route
+  // Note: the path could be '' (empty string)
+  const hasCustomizedPath = views?.edit?.[viewKey] && 'path' in views.edit[viewKey]
+
+  if (hasCustomizedPath) {
+    // Check for another view that may be occupying this path
+    const matchedView = matchRouteToView({
+      basePath,
+      currentRoute,
+      views,
+    })
+
+    if (typeof matchedView.condition === 'function') {
+      const conditionResult = runCondition(matchedView.condition)
+
+      if (conditionResult) {
+        return conditionResult
+      }
+    }
+
+    return matchedView
+  }
+
+  const viewConfig = {
+    ...(defaultDocumentViews?.[viewKey] || {}),
+    ...(views?.edit?.[viewKey] || {}),
+  }
+
+  if (typeof viewConfig.condition === 'function') {
+    const conditionResult = runCondition(viewConfig.condition)
+
+    if (conditionResult) {
+      return conditionResult
     }
   }
 

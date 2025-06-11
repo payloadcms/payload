@@ -1,4 +1,9 @@
-import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  DocumentViewCondition,
+  EditViewComponent,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 import { defaultDocumentViews } from './defaults.js'
@@ -32,6 +37,7 @@ export const matchRouteToView = ({
     | SanitizedGlobalConfig['admin']['components']['views']
 }): {
   Component: EditViewComponent
+  condition?: DocumentViewCondition
   viewKey?: string
 } => {
   if (typeof views?.edit === 'object') {
@@ -60,12 +66,13 @@ export const matchRouteToView = ({
     if (foundViewConfig && 'Component' in foundViewConfig) {
       return {
         Component: foundViewConfig.Component,
+        // condition: foundViewConfig.condition, // TODO: enable this when supported through config
         viewKey,
       }
     } else {
-      // Need to run conditions here as well?!?!?!
       return {
         Component: defaultDocumentViews[viewKey]?.Component || null,
+        condition: defaultDocumentViews[viewKey]?.condition,
         viewKey,
       }
     }

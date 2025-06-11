@@ -18,8 +18,10 @@ export const defaultDocumentViews: {
   api: {
     Component: DefaultAPIView,
     condition: ({ collectionConfig, globalConfig }) =>
-      (collectionConfig && collectionConfig.admin?.hideAPIURL !== true) ||
-      (globalConfig && globalConfig.admin?.hideAPIURL !== true),
+      Boolean(
+        (collectionConfig && collectionConfig.admin?.hideAPIURL !== true) ||
+          (globalConfig && globalConfig.admin?.hideAPIURL !== true),
+      ),
   },
   default: {
     Component: DefaultEditView,
