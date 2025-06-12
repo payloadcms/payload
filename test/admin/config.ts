@@ -23,6 +23,7 @@ import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
+import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
@@ -174,6 +175,7 @@ export default buildConfigWithDefaults({
     with300Documents,
     ListDrawer,
     Placeholder,
+    UseAsTitleGroupField,
   ],
   globals: [
     GlobalHidden,
