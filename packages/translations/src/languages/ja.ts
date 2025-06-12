@@ -194,7 +194,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       '<1>{{title}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
     moveItemToRootConfirmation:
       'あなたは<1>{{title}}</1>をルートフォルダに移動しようとしています。よろしいですか？',
-    movingFromFolder: '{{title}}を{{folderName}}から移動します',
+    movingFromFolder: '{{title}}を{{fromFolder}}から移動します',
     newFolder: '新しいフォルダ',
     noFolder: 'フォルダーなし',
     renameFolder: 'フォルダの名前を変更する',

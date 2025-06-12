@@ -20,6 +20,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
 
   if (data) {
     reqWithData.data = data
+    // @ts-expect-error
     reqWithData.json = () => Promise.resolve(data)
   }
 

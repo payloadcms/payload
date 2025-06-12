@@ -1,7 +1,7 @@
-import type { Storage } from '@google-cloud/storage'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
+import { ApiError, type Storage } from '@google-cloud/storage'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 
@@ -58,6 +58,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         status: 200,
       })
     } catch (err: unknown) {
+      if (err instanceof ApiError && err.code === 404) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
     }

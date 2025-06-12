@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { safeFetch } from './safeFetch.js'
 
 type Args = {
   data: FileData
@@ -22,7 +23,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
       : { cookie: req.headers.get('cookie')! }
 
-    const res = await fetch(fileURL, {
+    const res = await safeFetch(fileURL, {
       credentials: 'include',
       headers,
       method: 'GET',

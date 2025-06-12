@@ -43,12 +43,12 @@ export const DocumentTabs: React.FC<{
       }
     }),
 
-    ...customViews.map((CustomView) => {
-      if ('tab' in CustomView) {
+    ...customViews.map((customViewConfig) => {
+      if ('tab' in customViewConfig) {
         return {
           type: 'custom',
-          config: CustomView,
-          order: (CustomView.tab.order && CustomView.tab.order) ?? Infinity,
+          config: customViewConfig,
+          order: (customViewConfig.tab.order && customViewConfig.tab.order) ?? Infinity,
         }
       }
       return null
@@ -115,8 +115,10 @@ export const DocumentTabs: React.FC<{
               }
 
               if (tab.type === 'custom') {
-                if ('path' in tab.config && 'tab' in tab.config) {
-                  const { path, tab: tabConfig } = tab.config
+                if ('tab' in tab.config) {
+                  const { tab: tabConfig } = tab.config
+
+                  const path = 'path' in tab.config ? tab.config.path : ''
 
                   if (tabConfig.Component) {
                     return RenderServerComponent({

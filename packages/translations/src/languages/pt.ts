@@ -193,7 +193,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Você está prestes a mover <1>{{title}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
     moveItemToRootConfirmation:
       'Você está prestes a mover <1>{{title}}</1> para a pasta raiz. Tem certeza disso?',
-    movingFromFolder: 'Movendo {{title}} de {{folderName}}',
+    movingFromFolder: 'Movendo {{title}} de {{fromFolder}}',
     newFolder: 'Nova Pasta',
     noFolder: 'Sem Pasta',
     renameFolder: 'Renomear Pasta',

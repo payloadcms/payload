@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type {
@@ -94,7 +93,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       where: whereConstraint,
     })
 
-    let result
+    let result: boolean | null = null
 
     if (user) {
       await resetLoginAttempts({
@@ -112,7 +111,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       await commitTransaction(req)
     }
 
-    return result
+    return result!
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

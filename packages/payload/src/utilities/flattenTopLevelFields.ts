@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -85,6 +84,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
   } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
+    // If a group field has subfields and has a name, otherwise we catch it below along with collapsible and row fields
     if (field.type === 'group' && 'fields' in field) {
       if (moveSubFieldsToTop) {
         const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
@@ -121,13 +121,17 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
           }),
         )
       } else {
-        // Hoisting diabled - keep as top level field
-        acc.push(field as FlattenedField<TField>)
+        if (fieldAffectsData(field)) {
+          // Hoisting diabled - keep as top level field
+          acc.push(field as FlattenedField<TField>)
+        } else {
+          acc.push(...flattenTopLevelFields(field.fields as TField[], options))
+        }
       }
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...acc,
-        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab) => {
           if (tabHasName(tab)) {
             if (moveSubFieldsToTop) {
               const translatedLabel =
