@@ -17,14 +17,15 @@ import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
-  (incomingConfig: Config): Config => {
+  (config: Config): Config => {
     const { collections: allCollectionOptions, enabled } = pluginOptions
-    const config = { ...incomingConfig }
 
     // Return early if disabled. Only webpack config mods are applied.
     if (enabled === false) {
       return config
     }
+
+    const onInit = config.onInit
 
     const initFunctions: Array<() => void> = []
 
@@ -77,11 +78,11 @@ export const cloudStoragePlugin =
               ...(existingCollection.hooks || {}),
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
-                getAfterDeleteHook({ adapter, collection: existingCollection }),
+                getAfterDeleteHook({ adapter, collectionSlug: existingCollection.slug }),
               ],
               beforeChange: [
                 ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ adapter, collection: existingCollection }),
+                getBeforeChangeHook({ adapter, collectionSlug: existingCollection.slug }),
               ],
             },
             upload: {
@@ -100,8 +101,8 @@ export const cloudStoragePlugin =
       }),
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
-        if (config.onInit) {
-          await config.onInit(payload)
+        if (onInit) {
+          await onInit(payload)
         }
       },
     }

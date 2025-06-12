@@ -110,8 +110,12 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 }
 
 export const resaveChildren =
-  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  (pluginConfig: NestedDocsPluginConfig, collectionSlug: string): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!collection) {
+      throw new Error(`Collection ${collectionSlug} not found`)
+    }
     await resave({
       collection,
       doc,

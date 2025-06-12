@@ -80,6 +80,8 @@ export interface Config {
     'data-hooks': DataHook;
     'field-paths': FieldPath;
     'value-hooks': ValueHook;
+    sharedHooks1: SharedHooks1;
+    sharedHooks2: SharedHooks2;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -99,6 +101,8 @@ export interface Config {
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
     'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
+    sharedHooks1: SharedHooks1Select<false> | SharedHooks1Select<true>;
+    sharedHooks2: SharedHooks2Select<false> | SharedHooks2Select<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -627,6 +631,26 @@ export interface ValueHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharedHooks1".
+ */
+export interface SharedHooks1 {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharedHooks2".
+ */
+export interface SharedHooks2 {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -683,6 +707,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'value-hooks';
         value: string | ValueHook;
+      } | null)
+    | ({
+        relationTo: 'sharedHooks1';
+        value: string | SharedHooks1;
+      } | null)
+    | ({
+        relationTo: 'sharedHooks2';
+        value: string | SharedHooks2;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -937,6 +969,24 @@ export interface ValueHooksSelect<T extends boolean = true> {
   slug?: T;
   beforeValidate_value?: T;
   beforeChange_value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharedHooks1_select".
+ */
+export interface SharedHooks1Select<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sharedHooks2_select".
+ */
+export interface SharedHooks2Select<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }

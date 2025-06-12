@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { SanitizedConfig } from 'payload'
+import type { CollectionConfig, SanitizedConfig } from 'payload'
 
 import { APIError } from 'payload'
 
@@ -21,6 +21,17 @@ import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { ValueCollection } from './collections/Value/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
+
+const sharedHooks: CollectionConfig['hooks'] = {
+  afterRead: [
+    ({ doc }) => {
+      return {
+        ...doc,
+        afterRead1: true,
+      }
+    },
+  ],
+}
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   admin: {
@@ -42,6 +53,43 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
     FieldPaths,
     ValueCollection,
+    {
+      slug: 'sharedHooks1',
+      hooks: sharedHooks,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'sharedHooks2',
+      hooks: sharedHooks,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  plugins: [
+    (config) => {
+      const sharedHooks1 = config?.collections?.find((c) => c.slug === 'sharedHooks1')
+
+      if (!sharedHooks1) {
+        return config
+      }
+
+      ;((sharedHooks1.hooks ??= {}).afterRead ??= []).push(({ doc }) => {
+        return {
+          ...doc,
+          afterRead2: true,
+        }
+      })
+      return config
+    },
   ],
   globals: [DataHooksGlobal],
   endpoints: [

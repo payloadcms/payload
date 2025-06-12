@@ -6,12 +6,14 @@ import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 
 interface Args {
   adapter: GeneratedAdapter
-  collection: CollectionConfig
+  collectionSlug: string
 }
 
 export const getBeforeChangeHook =
-  ({ adapter, collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
+  ({ adapter, collectionSlug }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
   async ({ data, originalDoc, req }) => {
+    const collection = req.payload.collections[collectionSlug]?.config as CollectionConfig
+
     try {
       const files = getIncomingFiles({ data, req })
 
