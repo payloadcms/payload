@@ -18,6 +18,7 @@ import type { CompareOption } from './Default/types.js'
 import { DefaultVersionView } from './Default/index.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from './fetchVersions.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
+import { getVersionLabel } from './VersionPillLabel/getVersionLabel.js'
 import { VersionPillLabel } from './VersionPillLabel/VersionPillLabel.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
@@ -255,10 +256,12 @@ export async function VersionView(props: DocumentViewServerProps) {
     doc,
     labelOverride,
     labelStyle,
+    labelSuffix,
   }: {
     doc: TypeWithVersion<any>
     labelOverride?: string
     labelStyle?: 'pill' | 'text'
+    labelSuffix?: React.ReactNode
   }): React.ReactNode => {
     return (
       <VersionPillLabel
@@ -267,6 +270,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         labelFirst={true}
         labelOverride={labelOverride}
         labelStyle={labelStyle ?? 'text'}
+        labelSuffix={labelSuffix}
         latestDraftVersion={latestDraftVersion}
         latestPublishedVersion={latestPublishedVersion}
       />
@@ -281,14 +285,18 @@ export async function VersionView(props: DocumentViewServerProps) {
   // Previously published: if there is a prior published version older than versionTo
   // Specific Version: only if not already present under other label (= versionFrom)
 
-  const versionFromOptionsWithDate: ({
+  let versionFromOptions: {
+    doc: TypeWithVersion<any>
+    labelOverride?: string
     updatedAt: Date
-  } & CompareOption)[] = []
+    value: string
+  }[] = []
 
   // Previous version
   if (previousVersion?.id) {
-    versionFromOptionsWithDate.push({
-      label: formatPill({ doc: previousVersion, labelOverride: i18n.t('version:previousVersion') }),
+    versionFromOptions.push({
+      doc: previousVersion,
+      labelOverride: i18n.t('version:previousVersion'),
       updatedAt: new Date(previousVersion.updatedAt),
       value: previousVersion.id,
     })
@@ -297,10 +305,8 @@ export async function VersionView(props: DocumentViewServerProps) {
   // Latest Draft
   const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
   if (latestDraftVersion && !publishedNewerThanDraft) {
-    versionFromOptionsWithDate.push({
-      label: formatPill({
-        doc: latestDraftVersion,
-      }),
+    versionFromOptions.push({
+      doc: latestDraftVersion,
       updatedAt: new Date(latestDraftVersion.updatedAt),
       value: latestDraftVersion.id,
     })
@@ -308,10 +314,8 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   // Currently Published
   if (latestPublishedVersion) {
-    versionFromOptionsWithDate.push({
-      label: formatPill({
-        doc: latestPublishedVersion,
-      }),
+    versionFromOptions.push({
+      doc: latestPublishedVersion,
       updatedAt: new Date(latestPublishedVersion.updatedAt),
       value: latestPublishedVersion.id,
     })
@@ -319,52 +323,88 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   // Previous Published
   if (previousPublishedVersion) {
-    versionFromOptionsWithDate.push({
-      label: formatPill({
-        doc: previousPublishedVersion,
-        labelOverride: i18n.t('version:previouslyPublished'),
-      }),
+    versionFromOptions.push({
+      doc: previousPublishedVersion,
+      labelOverride: i18n.t('version:previouslyPublished'),
       updatedAt: new Date(previousPublishedVersion.updatedAt),
       value: previousPublishedVersion.id,
     })
   }
 
   // Specific Version
-  if (
-    versionFrom?.id &&
-    !versionFromOptionsWithDate.some((option) => option.value === versionFrom.id)
-  ) {
+  if (versionFrom?.id && !versionFromOptions.some((option) => option.value === versionFrom.id)) {
     // Only add "specific version" if it is not already in the options
-    versionFromOptionsWithDate.push({
-      label: formatPill({ doc: versionFrom, labelOverride: i18n.t('version:specificVersion') }),
+    versionFromOptions.push({
+      doc: versionFrom,
+      labelOverride: i18n.t('version:specificVersion'),
       updatedAt: new Date(versionFrom.updatedAt),
       value: versionFrom.id,
     })
   }
 
-  const versionFromOptions: CompareOption[] = versionFromOptionsWithDate
-    // Filter out all versions where the ID = versionTo.id, unless versionFrom.id === versionTo.id
-    .filter((option) => {
-      if (versionFrom?.id !== versionTo.id) {
-        return option.value !== versionTo.id
-      }
-      return true
-    })
+  versionFromOptions = versionFromOptions.sort((a, b) => {
     // Sort by updatedAt, newest first
-    .sort((a, b) => {
-      if (a && b) {
-        return b.updatedAt.getTime() - a.updatedAt.getTime()
-      }
-      return 0
+    if (a && b) {
+      return b.updatedAt.getTime() - a.updatedAt.getTime()
+    }
+    return 0
+  })
+
+  const versionToIsVersionFrom = versionFrom?.id === versionTo.id
+
+  const versionFromComparisonOptions: CompareOption[] = []
+
+  for (const option of versionFromOptions) {
+    const isVersionTo = option.value === versionTo.id
+
+    if (isVersionTo && !versionToIsVersionFrom) {
+      // Don't offer selecting a versionFrom that is the same as versionTo, unless it's already selected
+      continue
+    }
+
+    const alreadyAdded = versionFromComparisonOptions.some(
+      (existingOption) => existingOption.value === option.value,
+    )
+    if (alreadyAdded) {
+      continue
+    }
+
+    const otherOptionsWithSameID = versionFromOptions.filter(
+      (existingOption) => existingOption.value === option.value && existingOption !== option,
+    )
+
+    // Merge options with same ID to the same option
+    const labelSuffix = (
+      <span key={`${option.value}-suffix`}>
+        {otherOptionsWithSameID.map((optionWithSameID, index) => {
+          const label =
+            optionWithSameID.labelOverride ||
+            getVersionLabel({
+              latestDraftVersion,
+              latestPublishedVersion,
+              t: i18n.t,
+              version: optionWithSameID.doc,
+            }).label
+
+          return (
+            <React.Fragment key={`${optionWithSameID.value}-${index}`}>
+              {', '}
+              {label}
+            </React.Fragment>
+          )
+        })}
+      </span>
+    )
+
+    versionFromComparisonOptions.push({
+      label: formatPill({
+        doc: option.doc,
+        labelOverride: option.labelOverride,
+        labelSuffix,
+      }),
+      value: option.value,
     })
-    // Remove updatedAt from the options
-    .map((option) => {
-      if (option) {
-        delete option.updatedAt
-        return option
-      }
-      return option
-    }) as CompareOption[]
+  }
 
   return (
     <DefaultVersionView
@@ -374,7 +414,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       selectedLocales={selectedLocales}
       versionFromCreatedAt={versionFrom?.createdAt}
       versionFromID={versionFrom?.id}
-      versionFromOptions={versionFromOptions}
+      versionFromOptions={versionFromComparisonOptions}
       versionToCreatedAt={versionTo.createdAt}
       versionToCreatedAtFormatted={versionToCreatedAtFormatted}
       VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}

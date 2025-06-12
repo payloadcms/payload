@@ -9,7 +9,7 @@ import { getVersionLabel } from './getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
 
-const renderPill = (label: string, pillStyle: Parameters<typeof Pill>[0]['pillStyle']) => {
+const renderPill = (label: React.ReactNode, pillStyle: Parameters<typeof Pill>[0]['pillStyle']) => {
   return (
     <Pill pillStyle={pillStyle} size="small">
       {label}
@@ -20,25 +20,27 @@ const renderPill = (label: string, pillStyle: Parameters<typeof Pill>[0]['pillSt
 export const VersionPillLabel: React.FC<{
   disableDate?: boolean
   doc: {
-    [key: string]: any
+    [key: string]: unknown
     id: number | string
     publishedLocale?: string
     updatedAt?: string
     version: {
-      [key: string]: any
+      [key: string]: unknown
       _status: string
     }
   }
+
   /**
    * By default, the date is displayed first, followed by the version label.
    * @default false
    */
   labelFirst?: boolean
-  labelOverride?: string
+  labelOverride?: React.ReactNode
   /**
    * @default 'pill'
    */
   labelStyle?: 'pill' | 'text'
+  labelSuffix?: React.ReactNode
   latestDraftVersion?: {
     id: number | string
     updatedAt: string
@@ -53,6 +55,7 @@ export const VersionPillLabel: React.FC<{
   labelFirst = false,
   labelOverride,
   labelStyle = 'pill',
+  labelSuffix,
   latestDraftVersion,
   latestPublishedVersion,
 }) => {
@@ -70,7 +73,12 @@ export const VersionPillLabel: React.FC<{
     t,
     version: doc,
   })
-  const labelText = labelOverride || label
+  const labelText: React.ReactNode = (
+    <span>
+      {labelOverride || label}
+      {labelSuffix}
+    </span>
+  )
 
   const showDate = !disableDate && doc.updatedAt
   const formattedDate = showDate
