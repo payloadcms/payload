@@ -86,10 +86,11 @@ export const getTabs = ({
 
       if (value?.tab) {
         acc.push({
-          tabConfig: value.tab,
+          tab: value.tab,
           viewPath: 'path' in value ? value.path : '',
         })
       }
+
       return acc
     }, []),
   )
