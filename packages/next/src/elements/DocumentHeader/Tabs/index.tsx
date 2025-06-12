@@ -98,9 +98,11 @@ export const DocumentTabs: React.FC<{
 
                 return null
               })}
-            {customViews?.map((CustomView, index) => {
-              if ('tab' in CustomView) {
-                const { path, tab } = CustomView
+            {customViews?.map((customViewConfig, index) => {
+              if ('tab' in customViewConfig) {
+                const { tab } = customViewConfig
+
+                const path = 'path' in customViewConfig ? customViewConfig.path : ''
 
                 if (tab.Component) {
                   return RenderServerComponent({
