@@ -63,6 +63,9 @@ export function ListCreateNewDocInFolderButton({
           el="div"
           onClick={() => {
             if (enabledCollections[0].slug === folderCollectionConfig.slug) {
+              if (enabledCollections.length === 2) {
+                setCreateCollectionSlug(enabledCollections[1].slug)
+              }
               openFolderDrawer()
             } else {
               setCreateCollectionSlug(enabledCollections[0].slug)
@@ -96,6 +99,9 @@ export function ListCreateNewDocInFolderButton({
                   key={index}
                   onClick={() => {
                     if (collection.slug === folderCollectionConfig.slug) {
+                      if (enabledCollections.length === 2) {
+                        setCreateCollectionSlug(enabledCollections[1].slug)
+                      }
                       openFolderDrawer()
                     } else {
                       setCreateCollectionSlug(collection.slug)
