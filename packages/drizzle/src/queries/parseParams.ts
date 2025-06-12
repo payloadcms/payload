@@ -117,7 +117,8 @@ export function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.blocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {

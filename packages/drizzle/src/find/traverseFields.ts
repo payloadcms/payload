@@ -252,6 +252,20 @@ export const traverseFields = ({
           }
         }
 
+        if (adapter.blocksAsJSON) {
+          if (select || selectAllOnCurrentLevel) {
+            const fieldPath = `${path}${field.name}`
+
+            if ((isFieldLocalized || parentIsLocalized) && _locales) {
+              _locales.columns[fieldPath] = true
+            } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+              currentArgs.columns[fieldPath] = true
+            }
+          }
+
+          break
+        }
+
         ;(field.blockReferences ?? field.blocks).forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
           const blockKey = `_blocks_${block.slug}${!block[InternalBlockTableNameIndex] ? '' : `_${block[InternalBlockTableNameIndex]}`}`

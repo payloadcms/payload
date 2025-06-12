@@ -33,6 +33,10 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   connectionString?: string
   /**
    * Pass `true` to disale auto database creation if it doesn't exist.

@@ -180,6 +180,9 @@ export const getTableColumnFromPath = ({
         })
       }
       case 'blocks': {
+        if (adapter.blocksAsJSON) {
+          break
+        }
         let blockTableColumn: TableColumn
         let newTableName: string
 

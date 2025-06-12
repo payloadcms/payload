@@ -99,6 +99,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
+      blocksAsJSON: args.blocksAsJSON ?? false,
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({

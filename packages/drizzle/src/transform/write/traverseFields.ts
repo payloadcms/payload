@@ -188,7 +188,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       ;(field.blockReferences ?? field.blocks).forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
