@@ -9,7 +9,11 @@ import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export function CustomTabComponentClient({ path }: DocumentTabClientProps) {
+type CustomTabComponentClientProps = {
+  label: string
+} & DocumentTabClientProps
+
+export function CustomTabComponentClient({ label, path }: CustomTabComponentClientProps) {
   const {
     config: {
       routes: { admin: adminRoute },
@@ -20,5 +24,5 @@ export function CustomTabComponentClient({ path }: DocumentTabClientProps) {
 
   const baseRoute = (params.segments?.slice(0, 3) as string[]).join('/')
 
-  return <Link href={`${adminRoute}/${baseRoute}${path}`}>Custom Tab Component</Link>
+  return <Link href={`${adminRoute}/${baseRoute}${path}`}>{label}</Link>
 }

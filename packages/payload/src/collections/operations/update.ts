@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -126,7 +125,7 @@ export const updateOperation = async <
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       where,
     })
@@ -135,7 +134,7 @@ export const updateOperation = async <
     // Retrieve documents
     // /////////////////////////////////////
 
-    const fullWhere = combineQueries(where, accessResult)
+    const fullWhere = combineQueries(where, accessResult!)
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,
@@ -149,7 +148,7 @@ export const updateOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -158,7 +157,7 @@ export const updateOperation = async <
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
         limit,
-        locale,
+        locale: locale!,
         pagination: false,
         req,
         sort: getQueryDraftsSort({ collectionConfig, sort }),
@@ -170,7 +169,7 @@ export const updateOperation = async <
       const query = await payload.db.find({
         collection: collectionConfig.slug,
         limit,
-        locale,
+        locale: locale!,
         pagination: false,
         req,
         sort,
@@ -194,7 +193,7 @@ export const updateOperation = async <
       throwOnMissingFile: false,
     })
 
-    const errors = []
+    const errors: { id: number | string; message: string }[] = []
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
@@ -216,27 +215,27 @@ export const updateOperation = async <
           collectionConfig,
           config,
           data: deepCopyObjectSimple(data),
-          depth,
+          depth: depth!,
           docWithLocales,
           draftArg,
-          fallbackLocale,
+          fallbackLocale: fallbackLocale!,
           filesToUpload,
-          locale,
-          overrideAccess,
-          overrideLock,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
+          overrideLock: overrideLock!,
           payload,
           populate,
           publishSpecificLocale,
           req,
-          select,
-          showHiddenFields,
+          select: select!,
+          showHiddenFields: showHiddenFields!,
         })
 
         return updatedDoc
       } catch (error) {
         errors.push({
           id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null
@@ -263,6 +262,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
 
@@ -270,6 +270,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
     await killTransaction(args.req)

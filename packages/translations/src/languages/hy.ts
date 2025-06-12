@@ -193,7 +193,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստ եք տեղափոխել <1>{{title}}</1> <2>{{toFolder}}</2>։ Վստահ եք:',
     moveItemToRootConfirmation:
       'Դուք պատրաստ եք <1>{{title}}</1> տեղափոխել արմատային պանակի մեջ։ Վստահ եք։',
-    movingFromFolder: '{{title}}-ի տեղափոխում {{folderName}}-ից',
+    movingFromFolder: '{{title}}-ի տեղափոխում {{fromFolder}}-ից',
     newFolder: 'Նոր թղթապանակ',
     noFolder: 'Ոչ մի թղթապանակ',
     renameFolder: 'Վերանվանել թղթապանակը',

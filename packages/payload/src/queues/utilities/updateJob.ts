@@ -91,7 +91,6 @@ export async function updateJobs({
         req: jobReq,
         returning,
         sort,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         where: where as Where,
       }
 

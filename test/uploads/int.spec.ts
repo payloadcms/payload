@@ -37,9 +37,7 @@ describe('Collections - Uploads', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('REST API', () => {

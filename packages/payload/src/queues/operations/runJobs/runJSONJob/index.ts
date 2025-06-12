@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
 import type {
@@ -67,7 +66,7 @@ export const runJSONJob = async ({
     await Promise.all(
       stepsToRun.map(async (step) => {
         if ('task' in step) {
-          await tasks[step.task](step.id, {
+          await tasks[step.task]!(step.id, {
             input: step.input ? step.input({ job: job as RunningJob<any> }) : {}, // TODO: Type better. We should use RunningJob anywhere and make TypedCollection['payload-jobs'] be BaseJob if type not generated
             retries: step.retries,
           })
@@ -79,7 +78,8 @@ export const runJSONJob = async ({
         }
       }),
     )
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as Error
     const errorResult = handleWorkflowError({
       error: err,
       job,
@@ -93,7 +93,7 @@ export const runJSONJob = async ({
 
   // Check if workflow has completed
   let workflowCompleted = false
-  for (const [slug, map] of Object.entries(job.taskStatus)) {
+  for (const [slug, map] of Object.entries(job.taskStatus!)) {
     for (const [id, taskStatus] of Object.entries(map)) {
       if (taskStatus.complete) {
         const step = workflowHandler.find((step) => {
@@ -103,7 +103,7 @@ export const runJSONJob = async ({
             return step.id === id && slug === 'inline'
           }
         })
-        if (step.completesJob) {
+        if (step?.completesJob) {
           workflowCompleted = true
           break
         }

@@ -16,6 +16,7 @@ export const initPage = async ({
   config: configPromise,
   importMap,
   route,
+  routeParams = {},
   searchParams,
   useLayoutReq,
 }: Args): Promise<InitPageResult> => {
@@ -38,6 +39,7 @@ export const initPage = async ({
           depth: 10,
           ignoreQueryPrefix: true,
         }),
+        routeParams,
       },
       urlSuffix: `${route}${searchParams ? queryString : ''}`,
     },

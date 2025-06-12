@@ -25,9 +25,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   let client: AWS.S3Client

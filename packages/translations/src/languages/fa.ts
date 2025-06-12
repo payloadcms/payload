@@ -191,7 +191,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'شما در حال حاضر در صدد هستید <1>{{title}}</1> را به <2>{{toFolder}}</2> منتقل کنید. آیا مطمئن هستید؟',
     moveItemToRootConfirmation:
       'شما در حال حاضر در مورد انتقال <1>{{title}}</1> به پوشه ریشه هستید. آیا مطمئن هستید؟',
-    movingFromFolder: 'انتقال {{title}} از {{folderName}}',
+    movingFromFolder: 'انتقال {{title}} از {{fromFolder}}',
     newFolder: 'پوشه جدید',
     noFolder: 'بدون پوشه',
     renameFolder: 'تغییر نام پوشه',

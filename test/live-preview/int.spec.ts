@@ -102,9 +102,7 @@ describe('Collections - Live Preview', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('handles `postMessage`', async () => {

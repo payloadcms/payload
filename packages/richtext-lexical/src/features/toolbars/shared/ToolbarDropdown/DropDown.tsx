@@ -31,20 +31,16 @@ export function DropDownItem({
   item: ToolbarGroupItem
   tooltip?: string
 }): React.ReactNode {
-  const [className, setClassName] = useState<string>(baseClass)
-
-  useEffect(() => {
-    setClassName(
-      [
-        baseClass,
-        enabled === false ? 'disabled' : '',
-        active ? 'active' : '',
-        item?.key ? `${baseClass}-${item.key}` : '',
-      ]
-        .filter(Boolean)
-        .join(' '),
-    )
-  }, [enabled, active, className, item.key])
+  const className = useMemo(() => {
+    return [
+      baseClass,
+      enabled === false ? 'disabled' : '',
+      active ? 'active' : '',
+      item?.key ? `${baseClass}-${item.key}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  }, [enabled, active, item.key])
 
   const ref = useRef<HTMLButtonElement>(null)
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
@@ -139,6 +140,7 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  data: Partial<T>
   doc: T
   /**
    * Hook operation being performed
@@ -213,6 +215,7 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -220,6 +223,7 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -238,6 +242,7 @@ export type MeHook<T extends TypeWithID = any> = (args: {
   user: T
 }) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -290,6 +295,10 @@ export type CollectionAdminOptions = {
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
@@ -444,7 +453,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Enables folders for this collection
    */
-  folders?: CollectionFoldersConfiguration
+  folders?: boolean | CollectionFoldersConfiguration
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -594,7 +603,7 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -608,6 +617,7 @@ export interface SanitizedCollectionConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
+  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
 
   /**

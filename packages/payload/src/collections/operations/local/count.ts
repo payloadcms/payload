@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, Where } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -70,7 +70,7 @@ export default async function countLocal<TSlug extends CollectionSlug>(
     collection,
     disableErrors,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     where,
   })
 }

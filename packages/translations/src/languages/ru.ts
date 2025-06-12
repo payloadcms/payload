@@ -195,7 +195,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Вы собираетесь переместить <1>{{title}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
     moveItemToRootConfirmation:
       'Вы собираетесь переместить <1>{{title}}</1> в корневую папку. Вы уверены?',
-    movingFromFolder: 'Перемещение {{title}} из {{folderName}}',
+    movingFromFolder: 'Перемещение {{title}} из {{fromFolder}}',
     newFolder: 'Новая папка',
     noFolder: 'Нет папки',
     renameFolder: 'Переименовать папку',

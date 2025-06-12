@@ -134,6 +134,7 @@ export const generateReindexHandler =
           for (const doc of docs) {
             await syncDocAsSearchIndex({
               collection,
+              data: doc,
               doc,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && aggregateErrors++,

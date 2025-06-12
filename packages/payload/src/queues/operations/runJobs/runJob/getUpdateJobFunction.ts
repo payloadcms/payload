@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob } from '../../../config/types/workflowTypes.js'
 
@@ -30,16 +29,16 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
           }
         }
       } else {
-        job[key] = updatedJob[key]
+        ;(job as any)[key] = updatedJob[key as keyof BaseJob]
       }
     }
 
-    if ((updatedJob.error as Record<string, unknown>)?.cancelled) {
+    if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
       const cancelledError = new Error('Job cancelled') as { cancelled: boolean } & Error
       cancelledError.cancelled = true
       throw cancelledError
     }
 
-    return updatedJob
+    return updatedJob!
   }
 }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedGlobalPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
@@ -41,7 +40,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       },
     })
 
-    return sanitizedPermissions?.globals?.[globalConfig.slug]
+    return sanitizedPermissions.globals![globalConfig.slug]!
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

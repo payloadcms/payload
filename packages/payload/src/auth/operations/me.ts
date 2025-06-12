@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
@@ -29,7 +28,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   const { collection, currentToken, req } = args
 
   let result: MeOperationResult = {
-    user: null,
+    user: null!,
   }
 
   if (req.user) {
@@ -52,7 +51,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
     if (req.user.collection !== collection.config.slug) {
       return {
-        user: null,
+        user: null!,
       }
     }
 

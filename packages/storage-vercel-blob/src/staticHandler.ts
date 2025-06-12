@@ -41,7 +41,10 @@ export const getStaticHandler = (
       }
 
       const response = await fetch(`${fileUrl}?${uploadedAtString}`, {
-        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          Pragma: 'no-cache',
+        },
       })
 
       const blob = await response.blob()

@@ -31,7 +31,8 @@ export const LexicalFullyFeatured: CollectionConfig = {
           EXPERIMENTAL_TableFeature(),
           TextStateFeature({
             state: {
-              color: { ...defaultColors.background, ...defaultColors.text },
+              color: { ...defaultColors.text },
+              backgroundColor: { ...defaultColors.background },
             },
           }),
           BlocksFeature({

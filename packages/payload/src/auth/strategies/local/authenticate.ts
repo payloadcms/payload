@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import crypto from 'crypto'
+// @ts-expect-error - no types available
 import scmp from 'scmp'
 
 import type { TypeWithID } from '../../../collections/config/types.js'
@@ -34,7 +35,7 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
     }
 
     return null
-  } catch (err) {
+  } catch (ignore) {
     return null
   }
 }

@@ -305,6 +305,22 @@ The following additional properties are provided in the `ctx` object:
 | `req`         | The current HTTP request object. Contains `payload`, `user`, etc.                                                                                            |
 | `event`       | Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).                       |
 
+#### Localized and Built-in Error Messages
+
+You can return localized error messages by utilizing the translation function provided in the `req` object:
+
+```ts
+import type { Field } from 'payload'
+
+export const MyField: Field = {
+  type: 'text',
+  name: 'myField',
+  validate: (value, {req: { t }}) => Boolean(value) || t('validation:required'), // highlight-line
+}
+```
+
+This way you can use [Custom Translations](https://payloadcms.com/docs/configuration/i18n#custom-translations) as well as Payload's built in error messages (like `validation:required` used in the example above). For a full list of available translation strings, see the [english translation file](https://github.com/payloadcms/payload/blob/main/packages/translations/src/languages/en.ts) of Payload.
+
 #### Reusing Default Field Validations
 
 When using custom validation functions, Payload will use yours in place of the default. However, you might want to simply augment the default validation with your own custom logic.

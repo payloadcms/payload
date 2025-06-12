@@ -184,7 +184,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     moveItemsToRootConfirmation: '您即將移動<1>{{count}} {{label}}</1>至根文件夾。您確定嗎？',
     moveItemToFolderConfirmation: '您即將將<1>{{title}}</1>移至<2>{{toFolder}}</2>。您確定嗎？',
     moveItemToRootConfirmation: '您即將把<1>{{title}}</1>移至根目錄。您確定嗎？',
-    movingFromFolder: '將 {{title}} 從 {{folderName}} 移出',
+    movingFromFolder: '將 {{title}} 從 {{fromFolder}} 移出',
     newFolder: '新資料夾',
     noFolder: '沒有資料夾',
     renameFolder: '重命名資料夾',

@@ -2,9 +2,17 @@ import type { WorkflowConfig } from 'payload'
 
 export const parallelTaskWorkflow: WorkflowConfig<'parallelTask'> = {
   slug: 'parallelTask',
-  inputSchema: [],
+  inputSchema: [
+    {
+      name: 'amount',
+      type: 'number',
+      required: true,
+    },
+  ],
   handler: async ({ job, inlineTask }) => {
-    const taskIDs = Array.from({ length: 500 }, (_, i) => i + 1).map((i) => i.toString())
+    const taskIDs = Array.from({ length: job.input.amount }, (_, i) => i + 1).map((i) =>
+      i.toString(),
+    )
 
     await Promise.all(
       taskIDs.map(async (taskID) => {

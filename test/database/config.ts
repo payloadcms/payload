@@ -746,6 +746,16 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'unique-fields',
+      fields: [
+        {
+          name: 'slugField',
+          type: 'text',
+          unique: true,
+        },
+      ],
+    },
   ],
   globals: [
     {

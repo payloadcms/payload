@@ -1,4 +1,4 @@
-// @ts-strict-ignore
+import type { APIError } from '../../../../errors/APIError.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   BaseJob,
@@ -48,7 +48,8 @@ export const runJob = async ({
       req,
       tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
     })
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as APIError
     const { hasFinalError } = handleWorkflowError({
       error: err,
       job,

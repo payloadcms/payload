@@ -18,7 +18,7 @@ import { Restricted } from './collections/Restricted/index.js'
 import { RelationshipUpdatedExternally } from './collections/UpdatedExternally/index.js'
 import { Versions } from './collections/Versions/index.js'
 import { Video } from './collections/Video/index.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -49,7 +49,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   typescript: {

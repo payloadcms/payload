@@ -305,7 +305,7 @@ export const i18n: Partial<GenericLanguages> = {
       label: '内联块',
       remove: '删除{{label}}',
     },
-    label: '块',
+    label: '区块',
   },
   'zh-TW': {
     inlineBlocks: {

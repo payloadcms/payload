@@ -3,13 +3,19 @@ import type {
   GenericEnum,
   MigrateDownArgs,
   MigrateUpArgs,
-  PostgresDB,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { DrizzleConfig } from 'drizzle-orm'
+import type { DrizzleConfig, ExtractTablesWithRelations } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
+import type {
+  PgDatabase,
+  PgQueryResultHKT,
+  PgSchema,
+  PgTableFn,
+  PgTransactionConfig,
+  PgWithReplicas,
+} from 'drizzle-orm/pg-core'
 import type { Pool, PoolConfig } from 'pg'
 
 type PgDependency = typeof import('pg')
@@ -55,6 +61,7 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  readReplicas?: string[]
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
@@ -74,7 +81,16 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle =
+  | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+  | PgWithReplicas<
+      PgDatabase<
+        PgQueryResultHKT,
+        Record<string, unknown>,
+        ExtractTablesWithRelations<Record<string, unknown>>
+      >
+    >
+
 export type PostgresAdapter = {
   drizzle: Drizzle
   pg: PgDependency

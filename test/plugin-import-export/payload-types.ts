@@ -151,6 +151,8 @@ export interface Page {
   id: string;
   title: string;
   localized?: string | null;
+  custom?: string | null;
+  customRelationship?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -161,6 +163,11 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    custom?: string | null;
+  };
+  tabToCSV?: string | null;
+  namedTab?: {
+    tabToCSV?: string | null;
   };
   array?:
     | {
@@ -465,6 +472,8 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   localized?: T;
+  custom?: T;
+  customRelationship?: T;
   group?:
     | T
     | {
@@ -477,6 +486,13 @@ export interface PagesSelect<T extends boolean = true> {
               field2?: T;
               id?: T;
             };
+        custom?: T;
+      };
+  tabToCSV?: T;
+  namedTab?:
+    | T
+    | {
+        tabToCSV?: T;
       };
   array?:
     | T

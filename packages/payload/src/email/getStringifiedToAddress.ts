@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SendEmailOptions } from './types.js'
 
 export const getStringifiedToAddress = (message: SendEmailOptions): string | undefined => {
@@ -17,7 +16,7 @@ export const getStringifiedToAddress = (message: SendEmailOptions): string | und
         return ''
       })
       .join(', ')
-  } else if (message.to.address) {
+  } else if (message.to?.address) {
     stringifiedTo = message.to.address
   }
   return stringifiedTo

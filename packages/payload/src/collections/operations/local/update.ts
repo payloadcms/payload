@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
@@ -12,6 +11,7 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
   RequiredDataFromCollectionSlug,
@@ -230,8 +230,8 @@ async function updateLocal<
     )
   }
 
-  const req = await createLocalReq(options, payload)
-  req.file = file ?? (await getFileByPath(filePath))
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {
     id,
@@ -256,8 +256,10 @@ async function updateLocal<
   }
 
   if (options.id) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return updateByIDOperation<TSlug, TSelect>(args)
   }
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   return updateOperation<TSlug, TSelect>(args)
 }
 

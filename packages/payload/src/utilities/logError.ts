@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type pino from 'pino'
 
 import type { Payload } from '../types/index.js'
@@ -11,16 +10,17 @@ export const logError = ({ err, payload }: { err: unknown; payload: Payload }): 
     typeof err === 'object' &&
     'name' in err &&
     typeof err.name === 'string' &&
-    typeof payload.config.loggingLevels[err.name] !== 'undefined'
+    typeof payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels] !==
+      'undefined'
   ) {
-    level = payload.config.loggingLevels[err.name]
+    level = payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels]
   }
 
   if (level) {
     const logObject: { err?: unknown; msg?: unknown } = {}
 
     if (level === 'info') {
-      logObject.msg = typeof err === 'object' && 'message' in err ? err.message : 'Error'
+      logObject.msg = typeof err === 'object' && 'message' in err! ? err.message : 'Error'
     } else {
       logObject.err = err
     }

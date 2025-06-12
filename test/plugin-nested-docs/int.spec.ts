@@ -18,9 +18,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('seed', () => {

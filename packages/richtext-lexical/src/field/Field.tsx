@@ -12,7 +12,7 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -24,6 +24,7 @@ import './index.scss'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -116,35 +117,22 @@ const RichTextComponent: React.FC<
 
   const pathWithEditDepth = `${path}.${editDepth}`
 
-  const dispatchFieldUpdateTask = useRef<number>(undefined)
+  const runDeprioritized = useRunDeprioritized() // defaults to 500 ms timeout
 
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      const updateFieldValue = (editorState: EditorState) => {
+      // Capture `editorState` in the closure so we can safely run later.
+      const updateFieldValue = () => {
         const newState = editorState.toJSON()
         prevValueRef.current = newState
         setValue(newState)
       }
 
-      if (typeof window.requestIdleCallback === 'function') {
-        // Cancel earlier scheduled value updates,
-        // so that a CPU-limited event loop isn't flooded with n callbacks for n keystrokes into the rich text field,
-        // but that there's only ever the latest one state update
-        // dispatch task, to be executed with the next idle time,
-        // or the deadline of 500ms.
-        if (typeof window.cancelIdleCallback === 'function' && dispatchFieldUpdateTask.current) {
-          cancelIdleCallback(dispatchFieldUpdateTask.current)
-        }
-        // Schedule the state update to happen the next time the browser has sufficient resources,
-        // or the latest after 500ms.
-        dispatchFieldUpdateTask.current = requestIdleCallback(() => updateFieldValue(editorState), {
-          timeout: 500,
-        })
-      } else {
-        updateFieldValue(editorState)
-      }
+      // Queue the update for the browser’s idle time (or Safari shim)
+      // and let the hook handle debouncing/cancellation.
+      void runDeprioritized(updateFieldValue)
     },
-    [setValue],
+    [setValue, runDeprioritized], // `runDeprioritized` is stable (useCallback inside hook)
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])

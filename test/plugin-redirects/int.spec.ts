@@ -27,9 +27,7 @@ describe('@payloadcms/plugin-redirects', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a redirects collection', async () => {

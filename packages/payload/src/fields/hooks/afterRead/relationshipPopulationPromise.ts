@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
@@ -47,7 +46,8 @@ const populate = async ({
     relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
   }
 
-  const relatedCollection = req.payload.collections[relation]
+  const relatedCollection =
+    req.payload.collections[relation as keyof typeof req.payload.collections]
 
   if (relatedCollection) {
     let id: unknown
@@ -80,15 +80,15 @@ const populate = async ({
           depth,
           docID: id as string,
           draft,
-          fallbackLocale,
-          locale,
+          fallbackLocale: fallbackLocale!,
+          locale: locale!,
           overrideAccess,
           populate: populateArg,
           select:
             populateArg?.[relatedCollection.config.slug] ??
             relatedCollection.config.defaultPopulate,
           showHiddenFields,
-          transactionID: req.transactionID,
+          transactionID: req.transactionID!,
         }),
       )
     }
@@ -110,14 +110,14 @@ const populate = async ({
     } else if (typeof index === 'number' || typeof key === 'string') {
       if (field.type === 'join') {
         if (!Array.isArray(field.collection)) {
-          dataToUpdate[field.name].docs[index ?? key] = relationshipValue
+          dataToUpdate[field.name].docs[index ?? key!] = relationshipValue
         } else {
-          dataToUpdate[field.name].docs[index ?? key].value = relationshipValue
+          dataToUpdate[field.name].docs[index ?? key!].value = relationshipValue
         }
       } else if (Array.isArray(field.relationTo)) {
-        dataToUpdate[field.name][index ?? key].value = relationshipValue
+        dataToUpdate[field.name][index ?? key!].value = relationshipValue
       } else {
-        dataToUpdate[field.name][index ?? key] = relationshipValue
+        dataToUpdate[field.name][index ?? key!] = relationshipValue
       }
     } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
@@ -161,8 +161,8 @@ export const relationshipPopulationPromise = async ({
   siblingDoc,
 }: PromiseArgs): Promise<void> => {
   const resultingDoc = siblingDoc
-  const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth
-  const rowPromises = []
+  const populateDepth = fieldHasMaxDepth(field) && field.maxDepth! < depth ? field.maxDepth : depth
+  const rowPromises: Promise<void>[] = []
 
   if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
@@ -173,13 +173,13 @@ export const relationshipPopulationPromise = async ({
     ) {
       Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
         if (Array.isArray(siblingDoc[field.name][localeKey])) {
-          siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
+          siblingDoc[field.name][localeKey].forEach((_relatedDoc: any, index: number) => {
             const rowPromise = async () => {
               await populate({
                 currentDepth,
                 data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
-                depth: populateDepth,
+                depth: populateDepth!,
                 draft,
                 fallbackLocale,
                 field,
@@ -203,7 +203,7 @@ export const relationshipPopulationPromise = async ({
       ;(Array.isArray(siblingDoc[field.name])
         ? siblingDoc[field.name]
         : siblingDoc[field.name].docs
-      ).forEach((relatedDoc, index) => {
+      ).forEach((relatedDoc: any, index: number) => {
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
@@ -213,7 +213,7 @@ export const relationshipPopulationPromise = async ({
                   ? relatedDoc.id
                   : relatedDoc,
               dataReference: resultingDoc,
-              depth: populateDepth,
+              depth: populateDepth!,
               draft,
               fallbackLocale,
               field,
@@ -242,7 +242,7 @@ export const relationshipPopulationPromise = async ({
           currentDepth,
           data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
-          depth: populateDepth,
+          depth: populateDepth!,
           draft,
           fallbackLocale,
           field,
@@ -263,7 +263,7 @@ export const relationshipPopulationPromise = async ({
       currentDepth,
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
-      depth: populateDepth,
+      depth: populateDepth!,
       draft,
       fallbackLocale,
       field,

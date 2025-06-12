@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { fileTypeFromFile } from 'file-type'
 import fs from 'fs/promises'
 import path from 'path'
@@ -26,7 +25,7 @@ export const getFileByPath = async (filePath: string): Promise<PayloadRequest['f
   return {
     name,
     data,
-    mimetype: type?.mime || mimeTypeEstimate[ext],
+    mimetype: type?.mime || mimeTypeEstimate[ext]!,
     size: stat.size,
   }
 }

@@ -101,15 +101,16 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path                     | Description                                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols). |
-| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                               |
-| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).               |
-| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                        |
-| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                         |
-| `Description`            | A description of the Collection. [More details](#description).                                       |
-| `Upload`                 | A file upload component. [More details](#upload).                                                    |
+| Path                     | Description                                                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols).                         |
+| `editMenuItems`          | Inject custom components within the 3-dot menu dropdown located in the document control bar. [More details](#editmenuitems). |
+| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
+| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
+| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
+| `Description`            | A description of the Collection. [More details](#description).                                                               |
+| `Upload`                 | A file upload component. [More details](#upload).                                                                            |
 
 #### Globals
 
@@ -134,14 +135,15 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Path                     | Description                                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols). |
-| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                               |
-| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).               |
-| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                        |
-| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                         |
-| `Description`            | A description of the Global. [More details](#description).                                           |
+| Path                     | Description                                                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols).                         |
+| `editMenuItems`          | Inject custom components within the 3-dot menu dropdown located in the document control bar. [More details](#editmenuitems). |
+| `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
+| `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
+| `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
+| `Description`            | A description of the Global. [More details](#description).                                                                   |
 
 ### SaveButton
 
@@ -259,6 +261,92 @@ export function MyCustomDocumentControlButton(
   return <div>This is a custom beforeDocumentControl button (Client)</div>
 }
 ```
+
+### editMenuItems
+
+The `editMenuItems` property allows you to inject custom components into the 3-dot menu dropdown located in the document controls bar. This dropdown contains default options including `Create New`, `Duplicate`, `Delete`, and other options when additional features are enabled. Any custom components you add will appear below these default items.
+
+To add `editMenuItems`, use the `components.edit.editMenuItems` property in your [Collection Config](../configuration/collections):
+
+#### Config Example
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        editMenuItems: ['/path/to/CustomEditMenuItem'],
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `editMenuItems` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { PopupList } from '@payloadcms/ui'
+
+import type { EditMenuItemsServerProps } from 'payload'
+
+export const EditMenuItems = async (props: EditMenuItemsServerProps) => {
+  const href = `/custom-action?id=${props.id}`
+
+  return (
+    <PopupList.ButtonGroup>
+      <PopupList.Button href={href}>Custom Edit Menu Item</PopupList.Button>
+      <PopupList.Button href={href}>
+        Another Custom Edit Menu Item - add as many as you need!
+      </PopupList.Button>
+    </PopupList.ButtonGroup>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+
+import React from 'react'
+import { PopupList } from '@payloadcms/ui'
+
+import type { EditViewMenuItemClientProps } from 'payload'
+
+export const EditMenuItems = (props: EditViewMenuItemClientProps) => {
+  const handleClick = () => {
+    console.log('Custom button clicked!')
+  }
+
+  return (
+    <PopupList.ButtonGroup>
+      <PopupList.Button onClick={handleClick}>
+        Custom Edit Menu Item
+      </PopupList.Button>
+      <PopupList.Button onClick={handleClick}>
+        Another Custom Edit Menu Item - add as many as you need!
+      </PopupList.Button>
+    </PopupList.ButtonGroup>
+  )
+}
+```
+
+<Banner type="info">
+  **Styling:** Use Payload's built-in `PopupList.Button` to ensure your menu
+  items automatically match the default dropdown styles. If you want a different
+  look, you can customize the appearance by passing your own `className` to
+  `PopupList.Button`, or use a completely custom button built with a standard
+  HTML `button` element or any other component that fits your design
+  preferences.
+</Banner>
 
 ### SaveDraftButton
 

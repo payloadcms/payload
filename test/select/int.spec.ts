@@ -36,9 +36,7 @@ describe('Select', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API - Base', () => {
@@ -2153,7 +2151,7 @@ describe('Select', () => {
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
       const query = `query {
         Pages {
-          docs { 
+          docs {
             id,
             content {
               ... on Introduction {
@@ -2161,7 +2159,7 @@ describe('Select', () => {
                   doc {
                     id,
                     additional,
-                    slug, 
+                    slug,
                   }
                 },
                 richTextLexical(depth: 1)

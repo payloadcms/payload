@@ -53,6 +53,6 @@ describe('SQL migrations', () => {
     await payload.db.migrateDown()
 
     await payload.db.dropDatabase({ adapter: payload.db as any })
-    await payload.db.destroy?.()
+    await payload.destroy()
   })
 })

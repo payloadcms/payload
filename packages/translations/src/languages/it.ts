@@ -197,7 +197,7 @@ export const itTranslations: DefaultTranslationsObject = {
       'Stai per spostare <1>{{title}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
     moveItemToRootConfirmation:
       'Stai per spostare <1>{{title}}</1> nella cartella principale. Sei sicuro?',
-    movingFromFolder: 'Spostando {{title}} da {{folderName}}',
+    movingFromFolder: 'Spostando {{title}} da {{fromFolder}}',
     newFolder: 'Nuova Cartella',
     noFolder: 'Nessuna cartella',
     renameFolder: 'Rinomina Cartella',

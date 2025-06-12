@@ -194,7 +194,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
     moveItemToRootConfirmation:
       'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
-    movingFromFolder: 'Memindahkan {{title}} dari {{folderName}}',
+    movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
     newFolder: 'Folder Baru',
     noFolder: 'ဖိုလ်ဒါမရှိပါ',
     renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',

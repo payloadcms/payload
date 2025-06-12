@@ -190,7 +190,7 @@ export const arTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'أنت على وشك نقل <1>{{title}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
     moveItemToRootConfirmation: 'أنت على وشك نقل <1>{{title}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
-    movingFromFolder: 'نقل {{title}} من {{folderName}}',
+    movingFromFolder: 'نقل {{title}} من {{fromFolder}}',
     newFolder: 'مجلد جديد',
     noFolder: 'لا يوجد مجلد',
     renameFolder: 'إعادة تسمية المجلد',

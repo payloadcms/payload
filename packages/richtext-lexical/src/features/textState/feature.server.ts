@@ -69,7 +69,7 @@ export const TextStateFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TextStateFeatureClient',
       clientFeatureProps: {
-        state: props.state,
+        state: props?.state,
       },
     }
   },

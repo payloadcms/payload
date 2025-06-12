@@ -13,7 +13,8 @@ import './index.scss'
 
 export const DocumentDrawerHeader: React.FC<{
   drawerSlug: string
-}> = ({ drawerSlug }) => {
+  showDocumentID?: boolean
+}> = ({ drawerSlug, showDocumentID = true }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
@@ -32,12 +33,12 @@ export const DocumentDrawerHeader: React.FC<{
           <XIcon />
         </button>
       </div>
-      <DocumentTitle />
+      {showDocumentID && <DocumentID />}
     </Gutter>
   )
 }
 
-const DocumentTitle: React.FC = () => {
+const DocumentID: React.FC = () => {
   const { id } = useDocumentInfo()
   const { title } = useDocumentTitle()
   return id && id !== title ? <IDLabel id={id.toString()} /> : null

@@ -3,6 +3,7 @@ import type { CollectionAfterChangeHook, Payload } from '../../index.js'
 import { extractID } from '../../utilities/extractID.js'
 
 type Args = {
+  folderCollectionSlug: string
   folderFieldName: string
   folderID: number | string
   parentIDToFind: number | string
@@ -14,6 +15,7 @@ type Args = {
  * recursively checking upwards through the folder hierarchy.
  */
 async function isChildOfFolder({
+  folderCollectionSlug,
   folderFieldName,
   folderID,
   parentIDToFind,
@@ -21,7 +23,7 @@ async function isChildOfFolder({
 }: Args): Promise<boolean> {
   const parentFolder = await payload.findByID({
     id: folderID,
-    collection: payload.config.folders.slug,
+    collection: folderCollectionSlug,
   })
 
   const parentFolderID = parentFolder[folderFieldName]
@@ -39,6 +41,7 @@ async function isChildOfFolder({
   }
 
   return isChildOfFolder({
+    folderCollectionSlug,
     folderFieldName,
     folderID: parentFolderID,
     parentIDToFind,
@@ -71,10 +74,15 @@ export const reparentChildFolder = ({
   folderFieldName: string
 }): CollectionAfterChangeHook => {
   return async ({ doc, previousDoc, req }) => {
-    if (previousDoc[folderFieldName] !== doc[folderFieldName] && doc[folderFieldName]) {
+    if (
+      previousDoc[folderFieldName] !== doc[folderFieldName] &&
+      doc[folderFieldName] &&
+      req.payload.config.folders
+    ) {
       const newParentFolderID = extractID(doc[folderFieldName])
       const isMovingToChild = newParentFolderID
         ? await isChildOfFolder({
+            folderCollectionSlug: req.payload.config.folders.slug,
             folderFieldName,
             folderID: newParentFolderID,
             parentIDToFind: doc.id,

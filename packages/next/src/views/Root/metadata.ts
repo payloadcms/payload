@@ -129,7 +129,7 @@ export const generatePageMetadata = async ({
         // --> /:collectionSlug/verify/:token
         meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
-        if (segmentThree === config.folders.slug) {
+        if (config.folders && segmentThree === config.folders.slug) {
           if (folderCollectionSlugs.includes(collectionConfig.slug)) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/:folderCollectionSlug

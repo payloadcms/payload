@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -19,7 +18,7 @@ import {
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
@@ -251,7 +250,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email: sanitizedEmail,
+      email: sanitizedEmail!,
       user,
     })
 
@@ -303,15 +302,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: user,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

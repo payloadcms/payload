@@ -24,6 +24,12 @@ On the payload config, you can configure the following settings under the `folde
 
 type RootFoldersConfiguration = {
   /**
+   * If true, the browse by folder view will be enabled
+   *
+   * @default true
+   */
+  browseByFolder?: boolean
+  /**
    * An array of functions to be ran when the folder collection is initialized
    * This allows plugins to modify the collection configuration
    */
@@ -82,7 +88,16 @@ To enable folders on a collection, you need to set the `admin.folders` property 
 ```ts
 // Type definition
 
-type CollectionFoldersConfiguration = boolean
+type CollectionFoldersConfiguration =
+  | boolean
+  | {
+      /**
+       * If true, the collection will be included in the browse by folder view
+       *
+       * @default true
+       */
+      browseByFolder?: boolean
+    }
 ```
 
 ```ts

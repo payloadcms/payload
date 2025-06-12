@@ -7,10 +7,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
-const baseClass = 'drawerHeader'
+const baseClass = 'drawer-action-header'
 
 type DrawerActionHeaderArgs = {
   readonly cancelLabel?: string
+  className?: string
   readonly onCancel?: () => void
   readonly onSave?: () => void
   readonly saveLabel?: string
@@ -18,6 +19,7 @@ type DrawerActionHeaderArgs = {
 }
 export const DrawerActionHeader = ({
   cancelLabel,
+  className,
   onCancel,
   onSave,
   saveLabel,
@@ -26,7 +28,7 @@ export const DrawerActionHeader = ({
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__content`}>
         <h1 className={`${baseClass}__title`}>{title}</h1>
 

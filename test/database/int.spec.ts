@@ -1,7 +1,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload, PayloadRequest, TypeWithID } from 'payload'
+import type { Payload, PayloadRequest, TypeWithID, ValidationError } from 'payload'
 
 import {
   migrateRelationshipsV2_V3,
@@ -71,9 +71,7 @@ describe('database', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('id type', () => {
@@ -2618,5 +2616,54 @@ describe('database', () => {
 
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+  })
+
+  it('should support in with null', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-1' },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-2' },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-3' },
+    })
+    const post_null = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: null },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'posts',
+      where: { text: { in: ['text-1', 'text-3', null] } },
+    })
+    expect(docs).toHaveLength(3)
+    expect(docs[0].id).toBe(post_null.id)
+    expect(docs[1].id).toBe(post_3.id)
+    expect(docs[2].id).toBe(post_1.id)
+  })
+
+  it('should throw specific unique contraint errors', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'unique-text',
+      },
+    })
+
+    try {
+      await payload.create({
+        collection: 'unique-fields',
+        data: {
+          slugField: 'unique-text',
+        },
+      })
+    } catch (e) {
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+    }
   })
 })

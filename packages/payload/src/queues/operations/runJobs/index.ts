@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
@@ -108,7 +107,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   }
 
   if (queue) {
-    where.and.push({
+    where.and?.push({
       queue: {
         equals: queue,
       },
@@ -116,7 +115,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   }
 
   if (whereFromProps) {
-    where.and.push(whereFromProps)
+    where.and?.push(whereFromProps)
   }
 
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
@@ -128,7 +127,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   if (id) {
     // Only one job to run
     jobsQuery.docs = [
-      await updateJob({
+      (await updateJob({
         id,
         data: {
           processing: true,
@@ -137,11 +136,11 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         disableTransaction: true,
         req,
         returning: true,
-      }),
+      }))!,
     ]
   } else {
     let defaultProcessingOrder: Sort =
-      req.payload.collections[jobsCollectionSlug].config.defaultSort ?? 'createdAt'
+      req.payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
 
     const processingOrderConfig = req.payload.config.jobs?.processingOrder
     if (typeof processingOrderConfig === 'function') {
@@ -186,7 +185,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
       return acc
     },
-    { existingJobs: [], newJobs: [] },
+    { existingJobs: [] as BaseJob[], newJobs: [] as BaseJob[] },
   )
 
   if (!jobsQuery.docs.length) {
@@ -207,18 +206,18 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     ? []
     : undefined
 
-  const runSingleJob = async (job) => {
+  const runSingleJob = async (job: BaseJob) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
     const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
-      ? req.payload.config.jobs?.workflows.find(({ slug }) => slug === job.workflowSlug)
+      ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)!
       : {
           slug: 'singleTask',
           handler: async ({ job, tasks }) => {
-            await tasks[job.taskSlug as string]('1', {
+            await tasks[job.taskSlug as string]!('1', {
               input: job.input,
             })
           },
@@ -296,12 +295,15 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     for (const job of jobsQuery.docs) {
       const result = await runSingleJob(job)
       if (result !== null) {
-        resultsArray.push(result)
+        resultsArray.push(result!)
       }
     }
   } else {
     const jobPromises = jobsQuery.docs.map(runSingleJob)
-    resultsArray = await Promise.all(jobPromises)
+    resultsArray = (await Promise.all(jobPromises)) as {
+      id: number | string
+      result: RunJobResult
+    }[]
   }
 
   if (jobsToDelete && jobsToDelete.length > 0) {
@@ -327,18 +329,21 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
-    if (cur !== null) {
-      // Check if there's a valid result to include
-      acc[cur.id] = cur.result
-    }
-    return acc
-  }, {})
+  const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce(
+    (acc, cur) => {
+      if (cur !== null) {
+        // Check if there's a valid result to include
+        acc[cur.id] = cur.result
+      }
+      return acc
+    },
+    {} as Record<string, RunJobResult>,
+  )
 
   let remainingJobsFromQueried = 0
   for (const jobID in resultsObject) {
     const jobResult = resultsObject[jobID]
-    if (jobResult.status === 'error') {
+    if (jobResult?.status === 'error') {
       remainingJobsFromQueried++ // Can be retried
     }
   }

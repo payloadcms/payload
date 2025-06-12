@@ -75,3 +75,12 @@ export type BuildTableStateArgs = {
 export type BuildCollectionFolderViewResult = {
   View: React.ReactNode
 }
+
+export type GetFolderResultsComponentAndDataArgs = {
+  activeCollectionSlugs: CollectionSlug[]
+  browseByFolder: boolean
+  displayAs: 'grid' | 'list'
+  folderID: number | string | undefined
+  req: PayloadRequest
+  sort: string
+}

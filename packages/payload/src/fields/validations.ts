@@ -1,9 +1,11 @@
-// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
+
+import type { TFunction } from '@payloadcms/translations'
+import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -29,6 +31,7 @@ import type {
   TextField,
   UploadField,
   Validate,
+  ValueWithRelation,
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
@@ -55,7 +58,7 @@ export const text: TextFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (!required) {
     if (!value) {
@@ -77,7 +80,7 @@ export const text: TextFieldValidation = (
     maxLength = fieldMaxLength
   }
 
-  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value!]
 
   for (const stringValue of stringsToValidate) {
     const length = stringValue?.length || 0
@@ -114,7 +117,7 @@ export const password: PasswordFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -177,7 +180,7 @@ export const email: EmailFieldValidation = (
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -223,12 +226,12 @@ export const username: UsernameFieldValidation = (
     siblingData,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -270,7 +273,7 @@ export const textarea: TextareaFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -310,11 +313,11 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = async (
+export const json: JSONFieldValidation = (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
-  const isNotEmpty = (value) => {
+  const isNotEmpty = (value: null | string | undefined) => {
     if (value === undefined || value === null) {
       return false
     }
@@ -330,11 +333,10 @@ export const json: JSONFieldValidation = async (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
     if (uri && schema) {
       return schema
     }
-    // @ts-expect-error
     return fetch(uri)
       .then((response) => {
         if (!response.ok) {
@@ -342,7 +344,10 @@ export const json: JSONFieldValidation = async (
         }
         return response.json()
       })
-      .then((json) => {
+      .then((_json) => {
+        const json = _json as {
+          id: string
+        }
         const jsonSchemaSanitizations = {
           id: undefined,
           $id: json.id,
@@ -363,16 +368,16 @@ export const json: JSONFieldValidation = async (
 
   if (jsonSchema && isNotEmpty(value)) {
     try {
-      jsonSchema.schema = await fetchSchema(jsonSchema)
+      jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error
+      // @ts-expect-error missing types
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
         return ajv.errorsText()
       }
     } catch (error) {
-      return error.message
+      return error instanceof Error ? error.message : 'Unknown error'
     }
   }
   return true
@@ -399,7 +404,7 @@ export const date: DateFieldValidation = (
   // We need to also check for the timezone data based on this field's config
   // We cannot do this inside the timezone field validation as it's visually hidden
   const hasRequiredTimezone = timezone && required
-  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  const selectedTimezone: string = siblingData?.[`${name}_tz` as keyof typeof siblingData]
   // Always resolve to true if the field is not required, as timezone may be optional too then
   const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
 
@@ -438,17 +443,17 @@ export const richText: RichTextFieldValidation = async (value, options) => {
 }
 
 const validateArrayLength = (
-  value,
+  value: unknown,
   options: {
     maxRows?: number
     minRows?: number
     required?: boolean
-    t: (key: string, options?: { [key: string]: number | string }) => string
+    t: TFunction
   },
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : value || 0
+  const arrayLength = Array.isArray(value) ? value.length : (value as number) || 0
 
   if (!required && arrayLength === 0) {
     return true
@@ -496,7 +501,7 @@ export const number: NumberFieldValidation = (
     }
   }
 
-  const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
+  const numbersToValidate: number[] = Array.isArray(value) ? value : [value!]
 
   for (const number of numbersToValidate) {
     if (!isNumber(number)) {
@@ -539,7 +544,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -555,7 +560,7 @@ const validateFilterOptions: Validate<
         let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
-                id,
+                id: id!,
                 blockData,
                 data,
                 relationTo: collection,
@@ -590,8 +595,9 @@ const validateFilterOptions: Validate<
             and: [{ id: { in: valueIDs } }],
           }
 
+          // @ts-expect-error - I don't understand why optionFilter is inferred as `false | Where | null` instead of `boolean | Where | null`
           if (optionFilter && optionFilter !== true) {
-            findWhere.and.push(optionFilter)
+            findWhere.and?.push(optionFilter)
           }
 
           if (optionFilter === false) {
@@ -645,11 +651,11 @@ const validateFilterOptions: Validate<
         return true
       }
 
-      if (!options[collection]) {
+      if (!options[collection!]) {
         return true
       }
 
-      return options[collection].indexOf(requestedID) === -1
+      return options[collection!]!.indexOf(requestedID!) === -1
     })
 
     if (invalidRelationships.length > 0) {
@@ -733,7 +739,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
       return !isValidID(requestedID, idType)
     })
@@ -815,7 +821,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 
     const invalidRelationships = values.filter((val) => {
       let collectionSlug: string
-      let requestedID
+      let requestedID: number | string | undefined | ValueWithRelation
 
       if (typeof relationTo === 'string') {
         collectionSlug = relationTo
@@ -836,9 +842,9 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      return !isValidID(requestedID, idType)
+      return !isValidID(requestedID as number | string, idType)
     })
 
     if (invalidRelationships.length > 0) {
@@ -931,11 +937,11 @@ export type PointFieldValidation = Validate<
 >
 
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
-  const lng = parseFloat(String(value[0]))
-  const lat = parseFloat(String(value[1]))
+  const lng = parseFloat(String(value![0]))
+  const lat = parseFloat(String(value![1]))
   if (
     required &&
-    ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number') ||
+    ((value![0] && value![1] && typeof lng !== 'number' && typeof lat !== 'number') ||
       Number.isNaN(lng) ||
       Number.isNaN(lat) ||
       (Array.isArray(value) && value.length !== 2))
@@ -943,7 +949,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
+  if ((value![1] && Number.isNaN(lng)) || (value![0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 

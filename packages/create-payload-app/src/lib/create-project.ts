@@ -144,17 +144,14 @@ export async function createProject(
     }
   }
 
-  // Call manageEnvFiles before initializing Git
-  if (dbDetails) {
-    await manageEnvFiles({
-      cliArgs,
-      databaseType: dbDetails.type,
-      databaseUri: dbDetails.dbUri,
-      payloadSecret: generateSecret(),
-      projectDir,
-      template: 'template' in args ? args.template : undefined,
-    })
-  }
+  await manageEnvFiles({
+    cliArgs,
+    databaseType: dbDetails?.type,
+    databaseUri: dbDetails?.dbUri,
+    payloadSecret: generateSecret(),
+    projectDir,
+    template: 'template' in args ? args.template : undefined,
+  })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')

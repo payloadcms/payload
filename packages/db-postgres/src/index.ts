@@ -139,6 +139,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
+      readReplicaOptions: args.readReplicas,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},

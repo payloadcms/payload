@@ -55,9 +55,7 @@ describe('Localization', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Localization with fallback true', () => {

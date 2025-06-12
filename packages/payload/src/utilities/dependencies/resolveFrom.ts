@@ -63,7 +63,7 @@ export const resolveFrom = (fromDirectory: string, moduleId: string, silent?: bo
   if (silent) {
     try {
       return resolveFileName()
-    } catch (error) {
+    } catch (ignore) {
       return
     }
   }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 
 type CorsArgs = {
@@ -6,8 +5,8 @@ type CorsArgs = {
   req: Partial<PayloadRequest>
 }
 export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
-  const cors = req?.payload.config.cors
-  const requestOrigin = req?.headers.get('Origin')
+  const cors = req?.payload?.config.cors
+  const requestOrigin = req?.headers?.get('Origin')
 
   if (cors) {
     const defaultAllowedHeaders = [
@@ -34,14 +33,14 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
     if (cors === '*' || (typeof cors === 'object' && 'origins' in cors && cors.origins === '*')) {
       headers.set('Access-Control-Allow-Origin', '*')
     } else if (
-      (Array.isArray(cors) && cors.indexOf(requestOrigin) > -1) ||
+      (Array.isArray(cors) && cors.indexOf(requestOrigin!) > -1) ||
       (!Array.isArray(cors) &&
         typeof cors === 'object' &&
         'origins' in cors &&
-        cors.origins.indexOf(requestOrigin) > -1)
+        cors.origins.indexOf(requestOrigin!) > -1)
     ) {
       headers.set('Access-Control-Allow-Credentials', 'true')
-      headers.set('Access-Control-Allow-Origin', requestOrigin)
+      headers.set('Access-Control-Allow-Origin', requestOrigin!)
     }
   }
 

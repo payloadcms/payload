@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -16,8 +15,8 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
   if (data) {
     const localeOnReq = req.locale
     const fallbackLocaleOnReq = req.fallbackLocale
-    let localeFromData
-    let fallbackLocaleFromData
+    let localeFromData!: string
+    let fallbackLocaleFromData!: string
 
     if (!localeOnReq && data?.locale && typeof data.locale === 'string') {
       localeFromData = data.locale
@@ -72,7 +71,7 @@ export const sanitizeLocales = ({
       fallbackLocale,
       locale,
       localization,
-    })
+    })!
   }
 
   if (['*', 'all'].includes(locale)) {

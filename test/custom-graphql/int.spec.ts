@@ -19,9 +19,7 @@ describe('Custom GraphQL', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE || '')) {

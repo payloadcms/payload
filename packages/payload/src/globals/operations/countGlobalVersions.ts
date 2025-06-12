@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
@@ -20,18 +19,14 @@ export type Arguments = {
   where?: Where
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {
   try {
-    const {
-      disableErrors,
-      global,
-      overrideAccess,
-      req: { payload },
-      req,
-      where,
-    } = args
+    const { disableErrors, global, overrideAccess, where } = args
+    const req = args.req!
+    const { payload } = req
 
     // /////////////////////////////////////
     // Access
@@ -50,16 +45,16 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
       }
     }
 
-    const fullWhere = combineQueries(where, accessResult)
+    const fullWhere = combineQueries(where!, accessResult!)
 
     const versionFields = buildVersionGlobalFields(payload.config, global, true)
 
     await validateQueryPaths({
       globalConfig: global,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       versionFields,
-      where,
+      where: where!,
     })
 
     const result = await payload.db.countGlobalVersions({
@@ -74,7 +69,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

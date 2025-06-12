@@ -195,7 +195,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ön készül áthelyezni <1>{{title}}</1>-t <2>{{toFolder}}</2>-be. Biztos benne?',
     moveItemToRootConfirmation:
       'Arra készül, hogy a <1>{{title}}</1> elemet a gyökérmappába helyezi. Biztos benne?',
-    movingFromFolder: '{{title}} áthelyezése a(z) {{folderName}} mappából',
+    movingFromFolder: '{{title}} áthelyezése a(z) {{fromFolder}} mappából',
     newFolder: 'Új Mappa',
     noFolder: 'Nincs mappa',
     renameFolder: 'Mappa átnevezése',

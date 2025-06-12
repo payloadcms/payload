@@ -193,7 +193,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Предстои да преместите <1>{{title}}</1> в <2>{{toFolder}}</2>. Сигурни ли сте?',
     moveItemToRootConfirmation:
       'Предстои да преместите <1>{{title}}</1> в основната папка. Сигурни ли сте?',
-    movingFromFolder: 'Преместване на {{title}} от {{folderName}}',
+    movingFromFolder: 'Преместване на {{title}} от {{fromFolder}}',
     newFolder: 'Нова папка',
     noFolder: 'Няма папка',
     renameFolder: 'Преименувай папка',

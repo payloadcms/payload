@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
@@ -16,6 +15,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -171,7 +171,7 @@ export async function findLocal<
     page,
     pagination,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     sort,

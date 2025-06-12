@@ -150,7 +150,7 @@ Follow the docs to configure any one of these storage providers. For local devel
 ## Docker
 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
-variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
+variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
 In your Next.js config, set the `output` property `standalone`.
 

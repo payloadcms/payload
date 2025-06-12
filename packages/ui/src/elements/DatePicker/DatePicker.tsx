@@ -65,6 +65,13 @@ const DatePicker: React.FC<Props> = (props) => {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
     }
+
+    if (newDate instanceof Date && !dateFormat.includes('SSS')) {
+      // Unless the dateFormat includes milliseconds, set milliseconds to 0
+      // This is to ensure that the timestamp is consistent with the displayFormat
+      newDate.setMilliseconds(0)
+    }
+
     if (typeof onChangeFromProps === 'function') {
       onChangeFromProps(newDate)
     }

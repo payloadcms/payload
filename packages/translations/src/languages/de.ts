@@ -198,7 +198,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Sie sind dabei, <1>{{title}}</1> zu <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
     moveItemToRootConfirmation:
       'Sie sind dabei, <1>{{title}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
-    movingFromFolder: 'Verschieben von {{title}} aus {{folderName}}',
+    movingFromFolder: 'Verschieben von {{title}} aus {{fromFolder}}',
     newFolder: 'Neuer Ordner',
     noFolder: 'Kein Ordner',
     renameFolder: 'Ordner umbenennen',

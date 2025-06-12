@@ -25,6 +25,16 @@ const DateFields: CollectionConfig = {
       },
     },
     {
+      name: 'timeOnlyWithMiliseconds',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'timeOnly',
+          displayFormat: 'h:mm.ss.SSS aa',
+        },
+      },
+    },
+    {
       name: 'timeOnlyWithCustomFormat',
       type: 'date',
       admin: {

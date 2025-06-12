@@ -13,14 +13,19 @@ import './index.scss'
 const baseClass = 'collection-type'
 
 export function CollectionTypePill() {
-  const { filterItems, folderCollectionSlug, visibleCollectionSlugs } = useFolder()
+  const {
+    activeCollectionFolderSlugs: visibleCollectionSlugs,
+    allCollectionFolderSlugs: folderCollectionSlugs,
+    folderCollectionSlug,
+    refineFolderData,
+  } = useFolder()
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
 
   const [allCollectionOptions] = React.useState(() => {
     return config.collections.reduce(
       (acc, collection) => {
-        if (collection.folders) {
+        if (collection.folders && folderCollectionSlugs.includes(collection.slug)) {
           acc.push({
             label: getTranslation(collection.labels?.plural, i18n),
             value: collection.slug,
@@ -52,8 +57,8 @@ export function CollectionTypePill() {
         </Button>
       }
       key="relation-to-selection-popup"
-      onChange={({ selectedValues }) => {
-        void filterItems({ relationTo: selectedValues })
+      onChange={({ selectedValues: relationTo }) => {
+        void refineFolderData({ query: { relationTo }, updateURL: true })
       }}
       options={allCollectionOptions}
       selectedValues={visibleCollectionSlugs}
