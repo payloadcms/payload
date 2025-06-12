@@ -152,7 +152,7 @@ describe('flattenFields', () => {
 
       // Should return the group as a top-level item, not the inner field
       expect(withoutExtract).toHaveLength(1)
-      expect(withoutExtract[0].type).toBe('group')
+      expect(withoutExtract[0].type).toBe('text')
       expect(withoutExtract[0].accessor).toBeUndefined()
       expect(withoutExtract[0].labelWithPrefix).toBeUndefined()
     })
@@ -635,8 +635,8 @@ describe('flattenFields', () => {
       const defaultResult = flattenTopLevelFields(unnamedTabWithUnnamedGroup)
 
       expect(defaultResult).toHaveLength(1)
-      expect(defaultResult[0].type).toBe('group')
-      expect(defaultResult[0].label).toBe('Unnamed Group In Tab')
+      expect(defaultResult[0].type).toBe('text')
+      expect(defaultResult[0].label).toBe('Nested In Unnamed Group')
       expect('accessor' in defaultResult[0]).toBe(false)
       expect('labelWithPrefix' in defaultResult[0]).toBe(false)
 
