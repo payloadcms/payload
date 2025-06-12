@@ -92,6 +92,7 @@ export function FileSidebar() {
               <Pill
                 className={`${baseClass}__header__addFile`}
                 onClick={() => openModal(addMoreFilesDrawerSlug)}
+                size="small"
               >
                 {t('upload:addFile')}
               </Pill>

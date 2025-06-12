@@ -205,7 +205,7 @@ export const renderTable = ({
       },
       Heading: i18n.t('version:type'),
       renderedCells: docs.map((doc, i) => (
-        <Pill key={i}>
+        <Pill key={i} size="small">
           {getTranslation(
             collections
               ? payload.collections[doc.relationTo].config.labels.singular

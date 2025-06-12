@@ -92,6 +92,7 @@ export const handleEndpoints = async ({
       config: incomingConfig,
       path,
       request: new Request(url, {
+        // @ts-expect-error // TODO: check if this is required
         cache: request.cache,
         credentials: request.credentials,
         headers: request.headers,

@@ -44,7 +44,7 @@ const transformWhereToNaturalLanguage = (
     }
 
     return (
-      <Pill pillStyle="always-white">
+      <Pill pillStyle="always-white" size="small">
         <b>{toWords(key)}</b> {operator} <b>{toWords(value)}</b>
       </Pill>
     )
