@@ -2,21 +2,6 @@ import type { Endpoint, SanitizedConfig } from '../config/types.js'
 
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
-const configHasJobs = (config: SanitizedConfig): boolean => {
-  if (!config.jobs) {
-    return false
-  }
-
-  if (config.jobs.tasks?.length > 0) {
-    return true
-  }
-  if (config.jobs.workflows?.length > 0) {
-    return true
-  }
-
-  return false
-}
-
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (!configHasJobs(req.payload.config)) {
@@ -41,10 +26,12 @@ export const runJobsEndpoint: Endpoint = {
 
     const { limit, queue } = req.query
 
+    await handleSchedules()
+
     const runJobsArgs: RunJobsArgs = {
       queue: 'default',
       req,
-      // We are checking access above, so we can override it here
+      // Access is validated above, so it's safe to override here
       overrideAccess: true,
     }
 
@@ -52,8 +39,9 @@ export const runJobsEndpoint: Endpoint = {
       runJobsArgs.queue = queue
     }
 
-    if (typeof limit !== 'undefined') {
-      runJobsArgs.limit = Number(limit)
+    const parsedLimit = Number(limit)
+    if (!isNaN(parsedLimit)) {
+      runJobsArgs.limit = parsedLimit
     }
 
     let noJobsRemaining = false
@@ -91,3 +79,16 @@ export const runJobsEndpoint: Endpoint = {
   method: 'get',
   path: '/run',
 }
+
+const configHasJobs = (config: SanitizedConfig): boolean => {
+  return Boolean(config.jobs?.tasks?.length || config.jobs?.workflows?.length)
+}
+
+/**
+ * On vercel, we cannot auto-schedule jobs using a Cron - instead, we'll use this same endpoint that can
+ * also be called from Vercel Cron for auto-running jobs.
+ *
+ * The benefit of doing it like this instead of a separate endpoint is that we can run jobs immediately
+ * after they are scheduled
+ */
+async function handleSchedules() {}

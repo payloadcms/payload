@@ -102,7 +102,7 @@ export default buildConfigWithDefaults({
         // Every second
         cron: '* * * * * *',
         limit: 100,
-        queue: 'autorunSecond', // name of the queue
+        queue: 'autorunSecond',
       },
       // add as many cron jobs as you want
     ],
@@ -123,9 +123,10 @@ export default buildConfigWithDefaults({
     },
     tasks: [
       {
-        schedule: [{ cron: '* * * * * *', queue: 'schedules' }],
+        schedule: [{ cron: '* * * * * *', queue: 'autorunSecond' }],
         slug: 'EverySecond',
         handler: () => {
+          console.log('Running EverySecond task')
           return {
             output: {},
           }
