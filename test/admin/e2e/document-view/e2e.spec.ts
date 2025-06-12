@@ -37,6 +37,7 @@ import {
   group1GlobalSlug,
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
+  placeholderCollectionSlug,
   postsCollectionSlug,
   reorderTabsSlug,
 } from '../../slugs.js'
@@ -68,7 +69,7 @@ describe('Document View', () => {
   let serverURL: string
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
-  let reorderTabsURL: AdminUrlUtil
+  let placeholderURL: AdminUrlUtil
   let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
 
@@ -86,7 +87,7 @@ describe('Document View', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
-    reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
+    placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
 
     const context = await browser.newContext()
@@ -652,27 +653,32 @@ describe('Document View', () => {
 
   describe('reordering tabs', () => {
     beforeEach(async () => {
-      await page.goto(reorderTabsURL.create)
-      await page.locator('#field-title').fill('Reorder Tabs')
+      await page.goto(placeholderURL.create)
       await saveDocAndAssert(page)
     })
 
     test('collection — should show live preview as first tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
-      await expect(firstTab).toContainText('Live Preview')
+      await expect(firstTab).toContainText('API')
+    })
+
+    test('collection — should show custom tab as second tab', async () => {
+      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
+      const secondTab = tabs.nth(1)
+      await expect(secondTab).toContainText('Test')
     })
 
     test('collection — should show edit as third tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
-      const secondTab = tabs.nth(2)
-      await expect(secondTab).toContainText('Edit')
+      const thirdTab = tabs.nth(2)
+      await expect(thirdTab).toContainText('Edit')
     })
   })
 
   describe('custom editMenuItem components', () => {
     test('should render custom editMenuItems component', async () => {
-      await page.goto(editMenuItemsURL.create)
+      await page.goto(placeholderURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
 

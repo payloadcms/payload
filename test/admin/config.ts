@@ -22,7 +22,6 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
-import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
@@ -164,7 +163,6 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
-    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,

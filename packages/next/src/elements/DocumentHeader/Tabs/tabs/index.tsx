@@ -15,16 +15,18 @@ export const documentViewKeys = [
 
 export type DocumentViewKey = (typeof documentViewKeys)[number]
 
-export const tabs = (
+export const getTabs = (args: {
   collectionConfig: CollectionConfig,
   globalConfig: GlobalConfig,
-): Record<
+}): Record<
   DocumentViewKey,
   {
     order?: number
     Pill_Component?: React.FC
   } & DocumentTabConfig
 > => {
+  const { collectionConfig, globalConfig } = args
+
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
@@ -84,7 +86,7 @@ export const tabs = (
         Boolean(
           (collectionConfig?.versions &&
             permissions?.collections?.[collectionConfig?.slug]?.readVersions) ||
-            (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
+          (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
         ),
       href: '/versions',
       label: ({ t }) => t('version:versions'),

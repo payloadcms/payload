@@ -16,7 +16,7 @@ import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
-import { tabs } from './tabs/index.js'
+import { getTabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
 
@@ -32,7 +32,7 @@ export const DocumentTabs: React.FC<{
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
-  const defaultTabs = tabs(collectionConfig, globalConfig)
+  const defaultTabs = getTabs({ collectionConfig, globalConfig })
 
   const combinedTabs = [
     ...Object.entries(defaultTabs).map(([name, tab]) => {
