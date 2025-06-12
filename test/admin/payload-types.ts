@@ -90,6 +90,7 @@ export interface Config {
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
     placeholder: Placeholder;
+    'use-as-title-group-field': UseAsTitleGroupField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -119,6 +120,7 @@ export interface Config {
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
+    'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -525,6 +527,16 @@ export interface Placeholder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field".
+ */
+export interface UseAsTitleGroupField {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -621,6 +633,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'placeholder';
         value: string | Placeholder;
+      } | null)
+    | ({
+        relationTo: 'use-as-title-group-field';
+        value: string | UseAsTitleGroupField;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -984,6 +1000,15 @@ export interface PlaceholderSelect<T extends boolean = true> {
   placeholderSelect?: T;
   defaultRelationship?: T;
   placeholderRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field_select".
+ */
+export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
 }
