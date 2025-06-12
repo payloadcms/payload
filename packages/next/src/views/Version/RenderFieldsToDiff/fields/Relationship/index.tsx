@@ -122,8 +122,8 @@ export const SingleRelationshipDiff: React.FC<{
     />
   ) : null
 
-  const fromHTML = FromComponent ? ReactDOMServer.renderToString(FromComponent) : `<p></p>`
-  const toHTML = ToComponent ? ReactDOMServer.renderToString(ToComponent) : `<p></p>`
+  const fromHTML = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : `<p></p>`
+  const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : `<p></p>`
 
   const diff = getHTMLDiffComponents({
     fromHTML,
@@ -194,8 +194,8 @@ const ManyRelationshipDiff: React.FC<{
 
   const toNodes = toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}></p>
 
-  const fromHTML = ReactDOMServer.renderToString(fromNodes)
-  const toHTML = ReactDOMServer.renderToString(toNodes)
+  const fromHTML = ReactDOMServer.renderToStaticMarkup(fromNodes)
+  const toHTML = ReactDOMServer.renderToStaticMarkup(toNodes)
 
   const diff = getHTMLDiffComponents({
     fromHTML,

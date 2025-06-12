@@ -100,7 +100,7 @@ export const HasManyUploadDiff: React.FC<{
       `<div class="${baseClass}-hasMany">` +
       (FromComponents
         ? FromComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToString(component)}</div>`,
+            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
           ).join('')
         : '') +
       '</div>',
@@ -108,7 +108,7 @@ export const HasManyUploadDiff: React.FC<{
       `<div class="${baseClass}-hasMany">` +
       (ToComponents
         ? ToComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToString(component)}</div>`,
+            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
           ).join('')
         : '') +
       '</div>',
@@ -170,9 +170,11 @@ export const SingleUploadDiff: React.FC<{
   ) : null
 
   const fromHtml = FromComponent
-    ? ReactDOMServer.renderToString(FromComponent)
+    ? ReactDOMServer.renderToStaticMarkup(FromComponent)
     : '<p>' + '' + '</p>'
-  const toHtml = ToComponent ? ReactDOMServer.renderToString(ToComponent) : '<p>' + '' + '</p>'
+  const toHtml = ToComponent
+    ? ReactDOMServer.renderToStaticMarkup(ToComponent)
+    : '<p>' + '' + '</p>'
 
   const diffResult = getHTMLDiffComponents({
     fromHTML: fromHtml,
