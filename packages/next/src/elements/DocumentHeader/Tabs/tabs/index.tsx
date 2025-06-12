@@ -12,7 +12,7 @@ export const getTabs = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
-}): { tabConfig: DocumentTabConfig; viewPath: string }[] => {
+}): { tab: DocumentTabConfig; viewPath: string }[] => {
   const customViews =
     collectionConfig?.admin?.components?.views?.edit ||
     globalConfig?.admin?.components?.views?.edit ||
@@ -20,30 +20,15 @@ export const getTabs = ({
 
   return [
     {
-      tabConfig: {
-        condition: ({ collectionConfig, globalConfig }) =>
-          (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
-          (globalConfig && !globalConfig?.admin?.hideAPIURL),
-        href: '/api',
-        label: 'API',
-        order: 1000,
-        ...(customViews?.['api']?.tab || {}),
-      },
-      viewPath: '/api',
-    },
-    {
-      tabConfig: {
+      tab: {
         href: '',
-        // isActive: ({ href, location }) =>
-        // location.pathname === href || location.pathname === `${href}/create`,
         label: ({ t }) => t('general:edit'),
-        order: 0,
         ...(customViews?.['default']?.tab || {}),
       },
       viewPath: '/',
     },
     {
-      tabConfig: {
+      tab: {
         condition: ({ collectionConfig, config, globalConfig }) => {
           if (collectionConfig) {
             return Boolean(
@@ -63,13 +48,12 @@ export const getTabs = ({
         },
         href: '/preview',
         label: ({ t }) => t('general:livePreview'),
-        order: 100,
         ...(customViews?.['livePreview']?.tab || {}),
       },
       viewPath: '/preview',
     },
     {
-      tabConfig: {
+      tab: {
         condition: ({ collectionConfig, globalConfig, permissions }) =>
           Boolean(
             (collectionConfig?.versions &&
@@ -78,37 +62,35 @@ export const getTabs = ({
           ),
         href: '/versions',
         label: ({ t }) => t('version:versions'),
-        order: 200,
         Pill_Component: VersionsPill,
         ...(customViews?.['versions']?.tab || {}),
       },
       viewPath: '/versions',
     },
-  ]
-    .concat(
-      Object.entries(customViews).reduce((acc, [key, value]) => {
-        if (documentViewKeys.includes(key)) {
-          return acc
-        }
-
-        if (value?.tab) {
-          acc.push({
-            tabConfig: value.tab,
-            viewPath: 'path' in value ? value.path : '',
-          })
-        }
+    {
+      tab: {
+        condition: ({ collectionConfig, globalConfig }) =>
+          (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
+          (globalConfig && !globalConfig?.admin?.hideAPIURL),
+        href: '/api',
+        label: 'API',
+        ...(customViews?.['api']?.tab || {}),
+      },
+      viewPath: '/api',
+    },
+  ].concat(
+    Object.entries(customViews).reduce((acc, [key, value]) => {
+      if (documentViewKeys.includes(key)) {
         return acc
-      }, []),
-    )
-    ?.sort(({ tabConfig: a }, { tabConfig: b }) => {
-      if (a.order === undefined && b.order === undefined) {
-        return 0
-      } else if (a.order === undefined) {
-        return 1
-      } else if (b.order === undefined) {
-        return -1
       }
 
-      return a.order - b.order
-    })
+      if (value?.tab) {
+        acc.push({
+          tabConfig: value.tab,
+          viewPath: 'path' in value ? value.path : '',
+        })
+      }
+      return acc
+    }, []),
+  )
 }

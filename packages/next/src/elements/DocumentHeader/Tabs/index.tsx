@@ -38,8 +38,8 @@ export const DocumentTabs: React.FC<{
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {tabs?.map(({ tabConfig, viewPath }, index) => {
-              const { condition } = tabConfig || {}
+            {tabs?.map(({ tab, viewPath }, index) => {
+              const { condition } = tab || {}
 
               const meetsCondition =
                 !condition || condition({ collectionConfig, config, globalConfig, permissions })
@@ -48,12 +48,12 @@ export const DocumentTabs: React.FC<{
                 return null
               }
 
-              if (tabConfig?.Component) {
+              if (tab?.Component) {
                 return RenderServerComponent({
                   clientProps: {
                     path: viewPath,
                   } satisfies DocumentTabClientProps,
-                  Component: tabConfig.Component,
+                  Component: tab.Component,
                   importMap: payload.importMap,
                   key: `tab-${index}`,
                   serverProps: {
@@ -72,7 +72,7 @@ export const DocumentTabs: React.FC<{
                   path={viewPath}
                   {...{
                     ...props,
-                    ...tabConfig,
+                    ...tab,
                   }}
                 />
               )
