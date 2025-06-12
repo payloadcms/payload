@@ -5,7 +5,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import './index.scss'
-import { getVersionLabel } from '../../Versions/cells/AutosaveCell/getVersionLabel.js'
+import { getVersionLabel } from './getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
 
@@ -34,6 +34,7 @@ export const VersionPillLabel: React.FC<{
    * @default false
    */
   labelFirst?: boolean
+  labelOverride?: string
   /**
    * @default 'pill'
    */
@@ -50,6 +51,7 @@ export const VersionPillLabel: React.FC<{
   disableDate = false,
   doc,
   labelFirst = false,
+  labelOverride,
   labelStyle = 'pill',
   latestDraftVersion,
   latestPublishedVersion,
@@ -68,6 +70,7 @@ export const VersionPillLabel: React.FC<{
     t,
     version: doc,
   })
+  const labelText = labelOverride || label
 
   const showDate = !disableDate && doc.updatedAt
   const formattedDate = showDate
@@ -82,16 +85,16 @@ export const VersionPillLabel: React.FC<{
     localization && localization?.locales
       ? localization.locales.find((loc) => loc.code === localeCode)
       : null
-  const formattedLabel = locale ? locale?.label?.[i18n?.language] || locale?.label : null
+  const localeLabel = locale ? locale?.label?.[i18n?.language] || locale?.label : null
 
   return (
     <div className={baseClass}>
       {labelFirst ? (
         <React.Fragment>
           {labelStyle === 'pill' ? (
-            renderPill(label, pillStyle)
+            renderPill(labelText, pillStyle)
           ) : (
-            <span className={`${baseClass}-text`}>{label}</span>
+            <span className={`${baseClass}-text`}>{labelText}</span>
           )}
           {showDate && <span className={`${baseClass}-date`}>{formattedDate}</span>}
         </React.Fragment>
@@ -99,13 +102,13 @@ export const VersionPillLabel: React.FC<{
         <React.Fragment>
           {showDate && <span className={`${baseClass}-date`}>{formattedDate}</span>}
           {labelStyle === 'pill' ? (
-            renderPill(label, pillStyle)
+            renderPill(labelText, pillStyle)
           ) : (
-            <span className={`${baseClass}-text`}>{label}</span>
+            <span className={`${baseClass}-text`}>{labelText}</span>
           )}
         </React.Fragment>
       )}
-      {formattedLabel && <Pill>{formattedLabel}</Pill>}
+      {localeLabel && <Pill>{localeLabel}</Pill>}
     </div>
   )
 }

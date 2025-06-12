@@ -68,69 +68,106 @@ export async function VersionView(props: DocumentViewServerProps) {
     return notFound()
   }
 
-  const [previousVersionResult, versionFromResult, latestPublishedVersion, latestDraftVersion] =
-    await Promise.all([
-      fetchVersions({
-        collectionSlug,
-        // If versionFromIDFromParams is provided, the previous version is only used in the version comparison dropdown => depth 0 is enough.
-        // If it's not provided, this is used as `versionFrom` in the comparison, which expects populated data => depth 1 is needed.
-        depth: versionFromIDFromParams ? 0 : 1,
-        draft: true,
-        globalSlug,
-        limit: 1,
-        locale: 'all',
-        overrideAccess: false,
-        parentID: id,
-        req,
-        sort: '-updatedAt',
-        user,
-        where: {
-          and: [
-            {
-              updatedAt: {
-                less_than: versionTo.updatedAt,
-              },
+  const [
+    previousVersionResult,
+    versionFromResult,
+    latestPublishedVersion,
+    latestDraftVersion,
+    previousPublishedVersionResult,
+  ] = await Promise.all([
+    // Previous version (the one before the versionTo)
+    fetchVersions({
+      collectionSlug,
+      // If versionFromIDFromParams is provided, the previous version is only used in the version comparison dropdown => depth 0 is enough.
+      // If it's not provided, this is used as `versionFrom` in the comparison, which expects populated data => depth 1 is needed.
+      depth: versionFromIDFromParams ? 0 : 1,
+      draft: true,
+      globalSlug,
+      limit: 1,
+      locale: 'all',
+      overrideAccess: false,
+      parentID: id,
+      req,
+      sort: '-updatedAt',
+      user,
+      where: {
+        and: [
+          {
+            updatedAt: {
+              less_than: versionTo.updatedAt,
             },
-          ],
-        },
-      }),
-      (versionFromIDFromParams
-        ? fetchVersion({
-            id: versionFromIDFromParams,
-            collectionSlug,
-            depth: 1,
-            globalSlug,
-            locale: 'all',
-            overrideAccess: false,
-            req,
-            user,
-          })
-        : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
-      fetchLatestVersion({
-        collectionSlug,
-        depth: 0,
-        globalSlug,
-        locale: 'all',
-        overrideAccess: false,
-        parentID: id,
-        req,
-        status: 'published',
-        user,
-      }),
-      draftsEnabled
-        ? fetchLatestVersion({
-            collectionSlug,
-            depth: 0,
-            globalSlug,
-            locale: 'all',
-            overrideAccess: false,
-            parentID: id,
-            req,
-            status: 'draft',
-            user,
-          })
-        : Promise.resolve(null),
-    ])
+          },
+        ],
+      },
+    }),
+    // Version from ID from params
+    (versionFromIDFromParams
+      ? fetchVersion({
+          id: versionFromIDFromParams,
+          collectionSlug,
+          depth: 1,
+          globalSlug,
+          locale: 'all',
+          overrideAccess: false,
+          req,
+          user,
+        })
+      : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
+    // Latest published version
+    fetchLatestVersion({
+      collectionSlug,
+      depth: 0,
+      globalSlug,
+      locale: 'all',
+      overrideAccess: false,
+      parentID: id,
+      req,
+      status: 'published',
+      user,
+    }),
+    // Latest draft version
+    draftsEnabled
+      ? fetchLatestVersion({
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
+          req,
+          status: 'draft',
+          user,
+        })
+      : Promise.resolve(null),
+    // Previous published version
+    fetchVersions({
+      collectionSlug,
+      depth: 0,
+      draft: true,
+      globalSlug,
+      limit: 1,
+      locale: 'all',
+      overrideAccess: false,
+      parentID: id,
+      req,
+      sort: '-updatedAt',
+      user,
+      where: {
+        and: [
+          {
+            updatedAt: {
+              less_than: versionTo.updatedAt,
+            },
+          },
+          {
+            'version._status': {
+              equals: 'published',
+            },
+          },
+        ],
+      },
+    }),
+  ])
 
   const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null
 
@@ -138,6 +175,9 @@ export async function VersionView(props: DocumentViewServerProps) {
     versionFromResult ||
     // By default, we'll compare the previous version. => versionFrom = version previous to versionTo
     previousVersion
+
+  // Previous published version before the versionTo
+  const previousPublishedVersion = previousPublishedVersionResult?.docs?.[0] ?? null
 
   let selectedLocales: string[] = []
   if (localization) {
@@ -211,17 +251,13 @@ export async function VersionView(props: DocumentViewServerProps) {
       })
     : ''
 
-  // for SelectComparison: fetch
-  // - current (newest) draft (only if no newer published exists): latestDraftVersion
-  // - currently published (always); publishedNewerThanDraft ? latestPublishedVersion? : null
-  // - previously published (if there is a prior published version older than the one you are lookin at): publishedNewerThanDraft ? null : latestPublishedVersion?
-  // - previous version: always, unless doesnt exist. Can be the same as previously published
-
   const formatPill = ({
     doc,
+    labelOverride,
     labelStyle,
   }: {
     doc: TypeWithVersion<any>
+    labelOverride?: string
     labelStyle?: 'pill' | 'text'
   }): React.ReactNode => {
     return (
@@ -229,6 +265,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         doc={doc}
         key={doc.id}
         labelFirst={true}
+        labelOverride={labelOverride}
         labelStyle={labelStyle ?? 'text'}
         latestDraftVersion={latestDraftVersion}
         latestPublishedVersion={latestPublishedVersion}
@@ -236,34 +273,83 @@ export async function VersionView(props: DocumentViewServerProps) {
     )
   }
 
+  // SelectComparison Options:
+  //
+  // Previous version: always, unless doesn't exist. Can be the same as previously published
+  // Latest draft: only if no newer published exists (latestDraftVersion)
+  // Currently published: always, if exists
+  // Previously published: if there is a prior published version older than versionTo
+  // Specific Version: only if not already present under other label (= versionFrom)
+
   const versionFromOptionsWithDate: ({
     updatedAt: Date
   } & CompareOption)[] = []
 
+  // Previous version
   if (previousVersion?.id) {
     versionFromOptionsWithDate.push({
-      label: formatPill({ doc: previousVersion }),
+      label: formatPill({ doc: previousVersion, labelOverride: i18n.t('version:previousVersion') }),
       updatedAt: new Date(previousVersion.updatedAt),
       value: previousVersion.id,
     })
   }
 
-  if (versionFrom?.id) {
+  // Latest Draft
+  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+  if (latestDraftVersion && !publishedNewerThanDraft) {
     versionFromOptionsWithDate.push({
-      label: formatPill({ doc: versionFrom }),
+      label: formatPill({
+        doc: latestDraftVersion,
+      }),
+      updatedAt: new Date(latestDraftVersion.updatedAt),
+      value: latestDraftVersion.id,
+    })
+  }
+
+  // Currently Published
+  if (latestPublishedVersion) {
+    versionFromOptionsWithDate.push({
+      label: formatPill({
+        doc: latestPublishedVersion,
+      }),
+      updatedAt: new Date(latestPublishedVersion.updatedAt),
+      value: latestPublishedVersion.id,
+    })
+  }
+
+  // Previous Published
+  if (previousPublishedVersion) {
+    versionFromOptionsWithDate.push({
+      label: formatPill({
+        doc: previousPublishedVersion,
+        labelOverride: i18n.t('version:previouslyPublished'),
+      }),
+      updatedAt: new Date(previousPublishedVersion.updatedAt),
+      value: previousPublishedVersion.id,
+    })
+  }
+
+  // Specific Version
+  if (
+    versionFrom?.id &&
+    !versionFromOptionsWithDate.some((option) => option.value === versionFrom.id)
+  ) {
+    // Only add "specific version" if it is not already in the options
+    versionFromOptionsWithDate.push({
+      label: formatPill({ doc: versionFrom, labelOverride: i18n.t('version:specificVersion') }),
       updatedAt: new Date(versionFrom.updatedAt),
       value: versionFrom.id,
     })
   }
 
   const versionFromOptions: CompareOption[] = versionFromOptionsWithDate
-    // Filter out duplicates
-    .reduce((acc: ({ updatedAt: Date } & CompareOption)[], option) => {
-      if (option && !acc.some((existingOption) => existingOption.value === option.value)) {
-        acc.push(option)
+    // Filter out all versions where the ID = versionTo.id, unless versionFrom.id === versionTo.id
+    .filter((option) => {
+      if (versionFrom?.id !== versionTo.id) {
+        return option.value !== versionTo.id
       }
-      return acc
-    }, [])
+      return true
+    })
     // Sort by updatedAt, newest first
     .sort((a, b) => {
       if (a && b) {
