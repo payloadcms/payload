@@ -370,6 +370,7 @@ export const heTranslations: DefaultTranslationsObject = {
     timezone: 'אזור זמן',
     titleDeleted: '{{label}} "{{title}}" נמחק בהצלחה.',
     titleTrashed: '{{label}} "{{title}}" הושמד בהצלחה.',
+    trash: 'זבל',
     true: 'True',
     unauthorized: 'אין הרשאה',
     unsavedChanges: 'יש לך שינויים שלא נשמרו. שמור או מחק לפני שתמשיך.',

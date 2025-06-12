@@ -385,6 +385,7 @@ export const deTranslations: DefaultTranslationsObject = {
     timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     titleTrashed: '{{label}} "{{title}}" erfolgreich entfernt.',
+    trash: 'Müll',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
     unsavedChanges:

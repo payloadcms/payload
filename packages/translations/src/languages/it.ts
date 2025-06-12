@@ -382,6 +382,7 @@ export const itTranslations: DefaultTranslationsObject = {
     timezone: 'Fuso orario',
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
     titleTrashed: '{{label}} "{{title}}" eliminato con successo.',
+    trash: 'Cestino',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
     unsavedChanges: 'Hai delle modifiche non salvate. Salva o scarta prima di continuare.',

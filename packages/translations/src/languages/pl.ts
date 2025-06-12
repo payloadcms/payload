@@ -379,6 +379,7 @@ export const plTranslations: DefaultTranslationsObject = {
     timezone: 'Strefa czasowa',
     titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
     titleTrashed: 'Etykieta "{{title}}" została pomyślnie przeniesiona do kosza.',
+    trash: 'Śmieci',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
     unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',

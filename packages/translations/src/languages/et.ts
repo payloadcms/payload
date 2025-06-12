@@ -375,6 +375,7 @@ export const etTranslations: DefaultTranslationsObject = {
     timezone: 'Ajavöönd',
     titleDeleted: '{{label}} "{{title}}" edukalt kustutatud.',
     titleTrashed: '{{label}} "{{title}}" edukalt prügikasti saadetud.',
+    trash: 'Prügi',
     true: 'Tõene',
     unauthorized: 'Volitamata',
     unsavedChanges: 'Teil on salvestamata muudatusi. Salvestage või tühistage enne jätkamist.',

@@ -379,6 +379,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
     titleTrashed: '{{label}} "{{title}}" uspešno je prebačen u otpad.',
+    trash: 'Smeće',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
     unsavedChanges: 'Imate nesačuvane izmene. Sačuvajte ili odbacite pre nego što nastavite.',

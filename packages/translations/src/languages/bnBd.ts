@@ -380,6 +380,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
     titleTrashed: '{{label}} "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
+    trash: 'আবর্জনা',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:

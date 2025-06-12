@@ -383,6 +383,7 @@ export const trTranslations: DefaultTranslationsObject = {
     timezone: 'Saat dilimi',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     titleTrashed: '"{{label}}" "{{title}}" başarıyla çöpe atıldı.',
+    trash: 'Çöp',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',

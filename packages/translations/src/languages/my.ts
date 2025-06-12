@@ -382,6 +382,7 @@ export const myTranslations: DefaultTranslationsObject = {
     timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     titleTrashed: '"{{label}}" "{{title}}" အောင်မြင်စွာ စုဖြတ်ပြီးပါပြီ။',
+    trash: 'ဖျက်သိမ်းခြင်း',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unsavedChanges:

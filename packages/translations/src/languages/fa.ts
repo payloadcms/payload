@@ -377,6 +377,7 @@ export const faTranslations: DefaultTranslationsObject = {
     timezone: 'منطقه زمانی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     titleTrashed: '{{label}} "{{title}}" با موفقیت به سطل زباله انتقال یافت.',
+    trash: 'زباله',
     true: 'درست',
     unauthorized: 'غیرمجاز',
     unsavedChanges: 'تغییرات ذخیره نشده ای دارید. قبل از ادامه ذخیره کنید یا رد کنید.',

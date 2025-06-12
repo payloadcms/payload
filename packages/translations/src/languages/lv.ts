@@ -378,6 +378,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     timezone: 'Laika zona',
     titleDeleted: '{{label}} "{{title}}" veiksmīgi izdzēsts.',
     titleTrashed: '{{label}} "{{title}}" veiksmīgi pārvietots uz miskasti.',
+    trash: 'Atkritumi',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
     unsavedChanges: 'Jums ir nesaglabātas izmaiņas. Saglabājiet vai atceliet pirms turpināšanas.',

@@ -380,6 +380,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     timezone: 'Fuso horário',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     titleTrashed: '{{label}} "{{title}}" excluído com sucesso.',
+    trash: 'Lixo',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
     unsavedChanges: 'Você tem alterações não salvas. Salve ou descarte antes de continuar.',

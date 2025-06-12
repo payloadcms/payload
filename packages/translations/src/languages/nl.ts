@@ -383,6 +383,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     timezone: 'Tijdzone',
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
     titleTrashed: '{{label}} "{{title}}" succesvol naar de prullenbak verplaatst.',
+    trash: 'Prullenbak',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
     unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',

@@ -379,6 +379,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     timezone: 'タイムゾーン',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     titleTrashed: '「{{title}}」の「{{label}}」が正常に削除されました。',
+    trash: 'ゴミ',
     true: '真実',
     unauthorized: '未認証',
     unsavedChanges: '保存されていない変更があります。続行する前に保存または破棄してください。',

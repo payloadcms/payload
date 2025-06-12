@@ -380,6 +380,7 @@ export const enTranslations = {
     timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     titleTrashed: '{{label}} "{{title}}" successfully trashed.',
+    trash: 'Trash',
     true: 'True',
     unauthorized: 'Unauthorized',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',

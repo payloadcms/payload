@@ -378,6 +378,7 @@ export const viTranslations: DefaultTranslationsObject = {
     timezone: 'Múi giờ',
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
     titleTrashed: '{{label}} "{{title}}" đã được chuyển vào thùng rác thành công.',
+    trash: 'Rác',
     true: 'Thật',
     unauthorized: 'Không có quyền truy cập.',
     unsavedChanges: 'Bạn có những thay đổi chưa được lưu. Lưu hoặc hủy trước khi tiếp tục.',

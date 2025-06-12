@@ -378,6 +378,7 @@ export const slTranslations: DefaultTranslationsObject = {
     timezone: 'Časovni pas',
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
     titleTrashed: '{{label}} "{{title}}" uspešno premaknjeno v smetnjak.',
+    trash: 'Smeti',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
     unsavedChanges: 'Neshranjene spremembe',

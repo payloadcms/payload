@@ -378,6 +378,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     timezone: 'Часовий пояс',
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     titleTrashed: '{{label}} "{{title}}" успішно переміщено в кошик.',
+    trash: 'Сміття',
     true: 'Правда',
     unauthorized: 'Немає доступу',
     unsavedChanges: 'У вас є незбережені зміни. Збережіть або скасуйте перед продовженням.',

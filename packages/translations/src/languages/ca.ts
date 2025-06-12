@@ -380,6 +380,7 @@ export const caTranslations: DefaultTranslationsObject = {
     timezone: 'Fus horari',
     titleDeleted: '{{label}} "{{title}}" eliminat correctament.',
     titleTrashed: '{{label}} "{{title}}" s\'ha enviat correctament a la paperera.',
+    trash: 'Brossa',
     true: 'Veritat',
     unauthorized: 'No autoritzat',
     unsavedChanges: 'Tens canvis no desats. Vols continuar sense desar?',

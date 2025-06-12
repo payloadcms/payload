@@ -380,6 +380,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
     titleTrashed: 'Oznaka "{{title}}" uspešno prebačena u otpad.',
+    trash: 'Otpad',
     true: 'Istinito',
     unauthorized: 'Niste autorizovani',
     unsavedChanges: 'Imate nesačuvane promene. Sačuvajte ili odbacite pre nego što nastavite.',

@@ -380,6 +380,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     timezone: 'Ժամային գոտի',
     titleDeleted: '{{label}} "{{title}}" հաջողությամբ ջնջվել է։',
     titleTrashed: '"{{label}} "{{title}}" հաջողությամբ թափվել է։',
+    trash: 'աղբ',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
     unsavedChanges:

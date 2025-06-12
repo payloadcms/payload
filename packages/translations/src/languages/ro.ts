@@ -383,6 +383,7 @@ export const roTranslations: DefaultTranslationsObject = {
     timezone: 'Fus orar',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     titleTrashed: 'Eticheta "{{title}}" a fost aruncată cu succes.',
+    trash: 'Gunoi',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
     unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',

@@ -377,6 +377,7 @@ export const daTranslations: DefaultTranslationsObject = {
     timezone: 'Tidszone',
     titleDeleted: '{{label}} "{{title}}" slettet.',
     titleTrashed: '{{label}} "{{title}}" er succesfuldt slettet.',
+    trash: 'Affald',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
     unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',

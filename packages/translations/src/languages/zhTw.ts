@@ -364,6 +364,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     timezone: '時區',
     titleDeleted: '{{label}} "{{title}}"已被成功刪除。',
     titleTrashed: '"{{label}}" "{{title}}" 已成功移到垃圾桶。',
+    trash: '垃圾',
     true: '真實',
     unauthorized: '未經授權',
     unsavedChanges: '您有未保存的更改。繼續前請保存或放棄。',

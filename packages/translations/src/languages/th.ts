@@ -373,6 +373,7 @@ export const thTranslations: DefaultTranslationsObject = {
     timezone: 'เขตเวลา',
     titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
     titleTrashed: '{{label}} "{{title}}" ถูกย้ายไปในถังขยะแล้วสำเร็จ',
+    trash: 'ถังขยะ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
     unsavedChanges: 'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก บันทึกหรือทิ้งก่อนที่จะดำเนินการต่อ',

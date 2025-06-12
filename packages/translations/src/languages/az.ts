@@ -379,6 +379,7 @@ export const azTranslations: DefaultTranslationsObject = {
     timezone: 'Saat qurşağı',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     titleTrashed: '"{{label}}" "{{title}}" uğurla zibil qutusuna atıldı.',
+    trash: 'Zibil',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
     unsavedChanges:

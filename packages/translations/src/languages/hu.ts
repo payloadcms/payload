@@ -381,6 +381,7 @@ export const huTranslations: DefaultTranslationsObject = {
     timezone: 'Időzóna',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     titleTrashed: '{{label}} "{{title}}" sikeresen a szemétbe került.',
+    trash: 'Szemét',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
     unsavedChanges: 'Vannak mentetlen változtatásai. Mentsen vagy dobja el mielőtt folytatja.',

@@ -380,6 +380,7 @@ export const svTranslations: DefaultTranslationsObject = {
     timezone: 'Tidszon',
     titleDeleted: '{{label}} "{{title}}" togs bort',
     titleTrashed: '{{label}} "{{title}}" framgångsrikt slängt.',
+    trash: 'Skräp',
     true: 'Sann',
     unauthorized: 'Obehörig',
     unsavedChanges: 'Du har osparade ändringar. Spara innan du fortsätter.',

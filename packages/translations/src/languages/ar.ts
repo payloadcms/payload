@@ -374,6 +374,7 @@ export const arTranslations: DefaultTranslationsObject = {
     timezone: 'المنطقة الزمنية',
     titleDeleted: 'تم حذف {{label}} "{{title}}" بنجاح.',
     titleTrashed: '{{label}} "{{title}}" تم إرسالها إلى سلة المحذوفات بنجاح.',
+    trash: 'سلة المهملات',
     true: 'صحيح',
     unauthorized: 'غير مصرح به',
     unsavedChanges: 'لديك تغييرات غير محفوظة. قم بالحفظ أو التجاهل قبل المتابعة.',

@@ -380,6 +380,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     timezone: 'Tidssone',
     titleDeleted: '{{label}} "{{title}}" ble slettet.',
     titleTrashed: '{{label}} "{{title}}" ble vellykket satt i søppelbøtta.',
+    trash: 'Søppel',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
     unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',
