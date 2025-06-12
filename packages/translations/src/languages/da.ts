@@ -539,6 +539,7 @@ export const daTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Vælg en version til sammenligning',
     showingVersionsFor: 'Viser versioner for:',
     showLocales: 'Vis lokaliteter:',
+    specificVersion: 'Specifik Version',
     status: 'Status',
     unpublish: 'Afpublicer',
     unpublishing: 'Afpublicerer...',

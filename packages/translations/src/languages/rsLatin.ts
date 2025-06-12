@@ -539,6 +539,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Odaberite verziju za upoređivanje',
     showingVersionsFor: 'Pokazujem verzije za:',
     showLocales: 'Prikaži jezike:',
+    specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
     unpublishing: 'Poništavanje objave...',

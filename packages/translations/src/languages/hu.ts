@@ -545,6 +545,7 @@ export const huTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Válassza ki az összehasonlítani kívánt verziót',
     showingVersionsFor: 'Verziók megjelenítése a következőkhöz:',
     showLocales: 'Nyelvek megjelenítése:',
+    specificVersion: 'Specifikus verzió',
     status: 'Állapot',
     unpublish: 'Közzététel visszavonása',
     unpublishing: 'Közzététel visszavonása...',

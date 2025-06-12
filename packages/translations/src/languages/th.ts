@@ -530,6 +530,7 @@ export const thTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'เลือกเวอร์ชันที่ต้องการเปรียบเทียบ',
     showingVersionsFor: 'กำลังแสดงเวอร์ชันของ:',
     showLocales: 'แสดงภาษา:',
+    specificVersion: 'เวอร์ชันเฉพาะ',
     status: 'สถานะ',
     unpublish: 'หยุดเผยแพร่',
     unpublishing: 'กำลังหยุดการเผยแพร่...',

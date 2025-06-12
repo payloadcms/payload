@@ -538,6 +538,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Odaberite verziju za usporedbu',
     showingVersionsFor: 'Pokazujem verzije za:',
     showLocales: 'Prikaži jezike:',
+    specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
     unpublishing: 'Poništavanje objave...',

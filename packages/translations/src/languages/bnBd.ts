@@ -542,6 +542,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'তুলনার জন্য একটি সংস্করণ নির্বাচন করুন',
     showingVersionsFor: 'এর জন্য সংস্করণগুলি দেখানো হচ্ছে:',
     showLocales: 'লোকেল দেখান:',
+    specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',

@@ -549,6 +549,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'နှိုင်းယှဉ်ရန် ဗားရှင်းကို ရွေးပါ။',
     showingVersionsFor: 'အတွက် ဗားရှင်းများကို ပြသနေသည်-',
     showLocales: 'ဒေသန္တရများကိုပြပါ။:',
+    specificVersion: 'အထူးဗားရှင်း',
     status: 'အခြေအနေ',
     unpublish: 'ပြန်ဖြုတ်မည်။',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',

@@ -546,6 +546,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Selecteer een versie om te vergelijken',
     showingVersionsFor: 'Versies tonen voor:',
     showLocales: 'Toon talen:',
+    specificVersion: 'Specifieke versie',
     status: 'Status',
     unpublish: 'Publicatie ongedaan maken',
     unpublishing: 'Publicatie ongedaan maken...',

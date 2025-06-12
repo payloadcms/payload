@@ -542,6 +542,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Velg en versjon å sammenligne',
     showingVersionsFor: 'Viser versjoner for:',
     showLocales: 'Vis språk:',
+    specificVersion: 'Spesifikk versjon',
     status: 'Status',
     unpublish: 'Avpubliser',
     unpublishing: 'Avpubliserer...',

@@ -540,6 +540,7 @@ export const skTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Vybrať verziu na porovnanie',
     showingVersionsFor: 'Zobrazujú sa verzie pre:',
     showLocales: 'Zobraziť lokálne verzie:',
+    specificVersion: 'Špecifická verzia',
     status: 'Stav',
     unpublish: 'Zrušiť publikovanie',
     unpublishing: 'Zrušujem publikovanie...',

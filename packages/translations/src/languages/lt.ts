@@ -545,6 +545,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Pasirinkite versiją, kurią norite palyginti',
     showingVersionsFor: 'Rodomos versijos:',
     showLocales: 'Rodyti lokalizacijas:',
+    specificVersion: 'Specifinė versija',
     status: 'Būsena',
     unpublish: 'Nebepublikuoti',
     unpublishing: 'Nebepublikuojama...',

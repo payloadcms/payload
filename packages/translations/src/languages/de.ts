@@ -548,6 +548,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Wähle Version zum Vergleich',
     showingVersionsFor: 'Versionen anzeigen für:',
     showLocales: 'Sprachen anzeigen:',
+    specificVersion: 'Spezifische Version',
     status: 'Status',
     unpublish: 'Veröffentlichung aufheben',
     unpublishing: 'Veröffentlichung aufheben...',

@@ -541,6 +541,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Wybierz wersję do porównania',
     showingVersionsFor: 'Wyświetlanie wersji dla:',
     showLocales: 'Pokaż ustawienia regionalne:',
+    specificVersion: 'Konkretna Wersja',
     status: 'Status',
     unpublish: 'Cofnij publikację',
     unpublishing: 'Cofanie publikacji...',

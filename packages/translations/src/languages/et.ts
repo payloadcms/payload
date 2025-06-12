@@ -534,6 +534,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Vali versioon võrdlemiseks',
     showingVersionsFor: 'Näitan versioone:',
     showLocales: 'Näita keeli:',
+    specificVersion: 'Spetsiifiline versioon',
     status: 'Olek',
     unpublish: 'Tühista avaldamine',
     unpublishing: 'Avaldamise tühistamine...',

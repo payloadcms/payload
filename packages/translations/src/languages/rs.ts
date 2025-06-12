@@ -537,6 +537,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Одаберите верзију за упоређивање',
     showingVersionsFor: 'Показујем верзије за:',
     showLocales: 'Прикажи језике:',
+    specificVersion: 'Specifična verzija',
     status: 'Статус',
     unpublish: 'Поништи објаву',
     unpublishing: 'Поништавање објаве...',

@@ -538,6 +538,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Vyberte verzi pro porovnání',
     showingVersionsFor: 'Zobrazují se verze pro:',
     showLocales: 'Zobrazit místní verze:',
+    specificVersion: 'Specifická verze',
     status: 'Stav',
     unpublish: 'Zrušit publikování',
     unpublishing: 'Zrušuji publikování...',

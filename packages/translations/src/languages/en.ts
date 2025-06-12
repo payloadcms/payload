@@ -542,6 +542,7 @@ export const enTranslations = {
     selectVersionToCompare: 'Select a version to compare',
     showingVersionsFor: 'Showing versions for:',
     showLocales: 'Show locales:',
+    specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
     unpublishing: 'Unpublishing...',

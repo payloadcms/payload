@@ -537,6 +537,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'نگارشی را برای مقایسه انتخاب کنید',
     showingVersionsFor: 'نمایش نگارش‌ها برای:',
     showLocales: 'نمایش زبان‌ها:',
+    specificVersion: 'نسخه مشخص',
     status: 'وضعیت',
     unpublish: 'لغو انتشار',
     unpublishing: 'در حال لغو انتشار...',

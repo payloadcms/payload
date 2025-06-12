@@ -549,6 +549,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Selectați o versiune pentru a compara',
     showingVersionsFor: 'Se afișează versiuni pentru:',
     showLocales: 'Afișați localitățile:',
+    specificVersion: 'Versiunea specifică',
     status: 'Status',
     unpublish: 'Dezpublicare',
     unpublishing: 'Dezpublicare...',

@@ -543,6 +543,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Karşılaştırılacak bir sürüm seçin',
     showingVersionsFor: 'Şunun için sürümler gösteriliyor:',
     showLocales: 'Yerel ayarları göster:',
+    specificVersion: 'Belirli Sürüm',
     status: 'Durum',
     unpublish: 'Yayından Kaldır',
     unpublishing: 'Yayından kaldırılıyor...',

@@ -541,6 +541,7 @@ export const svTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Välj en version att jämföra',
     showingVersionsFor: 'Visar versioner för:',
     showLocales: 'Visa språk:',
+    specificVersion: 'Specifik version',
     status: 'Status',
     unpublish: 'Avpublicera',
     unpublishing: 'Avpublicerar...',

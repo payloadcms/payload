@@ -538,6 +538,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Izberite različico za primerjavo',
     showingVersionsFor: 'Prikaz različic za:',
     showLocales: 'Prikaži jezike:',
+    specificVersion: 'Specifična različica',
     status: 'Status',
     unpublish: 'Razveljavi objavo',
     unpublishing: 'Razveljavljanje objave...',

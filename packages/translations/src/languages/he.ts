@@ -525,6 +525,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'בחר גרסה להשוואה',
     showingVersionsFor: 'מציג גרסאות עבור:',
     showLocales: 'הצג שפות:',
+    specificVersion: 'גרסה מסוימת',
     status: 'סטטוס',
     unpublish: 'בטל פרסום',
     unpublishing: 'מבטל פרסום...',

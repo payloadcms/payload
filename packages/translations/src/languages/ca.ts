@@ -544,6 +544,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Selecciona una versió per comparar',
     showingVersionsFor: 'Mostrant versions per a:',
     showLocales: 'Mostrar idiomes:',
+    specificVersion: 'Versió Específica',
     status: 'Estat',
     unpublish: 'Despublicar',
     unpublishing: 'Despublicant...',

@@ -518,6 +518,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: '選擇要比較的版本',
     showingVersionsFor: '顯示版本為：',
     showLocales: '顯示語言：',
+    specificVersion: '特定版本',
     status: '狀態',
     unpublish: '取消發佈',
     unpublishing: '取消發佈中...',

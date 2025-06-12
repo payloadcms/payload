@@ -533,6 +533,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: '비교할 버전 선택',
     showingVersionsFor: '다음 버전 표시 중:',
     showLocales: 'locale 표시:',
+    specificVersion: '특정 버전',
     status: '상태',
     unpublish: '게시 해제',
     unpublishing: '게시 해제 중...',

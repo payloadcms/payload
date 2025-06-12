@@ -536,6 +536,7 @@ export const viTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Chọn phiên bản để so sánh',
     showingVersionsFor: 'Hiển thị các phiên bản cho:',
     showLocales: 'Hiển thị mã khu vực:',
+    specificVersion: 'Phiên bản cụ thể',
     status: 'Trạng thái',
     unpublish: 'Ẩn tài liệu',
     unpublishing: 'Đang ẩn tài liệu...',

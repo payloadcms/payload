@@ -540,6 +540,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Izvēlēties versiju salīdzināšanai',
     showingVersionsFor: 'Rāda versijas priekš:',
     showLocales: 'Rādīt lokalizācijas:',
+    specificVersion: 'Konkrētā versija',
     status: 'Statuss',
     unpublish: 'Atcelt publicēšanu',
     unpublishing: 'Atceļ publicēšanu...',

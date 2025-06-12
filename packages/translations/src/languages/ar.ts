@@ -531,6 +531,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'حدّد نسخة للمقارنة',
     showingVersionsFor: 'يتمّ عرض النًّسخ ل:',
     showLocales: 'اظهر اللّغات:',
+    specificVersion: 'الإصدار المحدد',
     status: 'الحالة',
     unpublish: 'الغاء النّشر',
     unpublishing: 'يتمّ الغاء النّشر...',

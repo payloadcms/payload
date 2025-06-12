@@ -544,6 +544,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Выбрать версию для сравнения',
     showingVersionsFor: 'Показаны версии для:',
     showLocales: 'Показать локали:',
+    specificVersion: 'Конкретная версия',
     status: 'Статус',
     unpublish: 'Отменить публикацию',
     unpublishing: 'Отмена публикации...',

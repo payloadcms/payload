@@ -518,6 +518,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: '选择要比较的版本',
     showingVersionsFor: '显示版本为：',
     showLocales: '显示语言环境：',
+    specificVersion: '特定版本',
     status: '状态',
     unpublish: '取消发布',
     unpublishing: '取消发布中...',

@@ -539,6 +539,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: '比較するバージョンを選択',
     showingVersionsFor: '次のバージョンを表示します：',
     showLocales: 'ロケールを表示:',
+    specificVersion: '特定のバージョン',
     status: 'ステータス',
     unpublish: '非公開',
     unpublishing: '非公開中...',

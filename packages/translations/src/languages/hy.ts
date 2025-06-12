@@ -548,6 +548,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Ընտրեք տարբերակ՝ համեմատելու համար',
     showingVersionsFor: 'Ցուցադրված են տարբերակները՝',
     showLocales: 'Ցուցադրել լոկալները՝',
+    specificVersion: 'Մասնավոր Տարբերակ',
     status: 'Կարգավիճակ',
     unpublish: 'Բերել չհրապարակված վիճակի։',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',

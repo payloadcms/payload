@@ -453,6 +453,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:selectLocales',
   'version:selectVersionToCompare',
   'version:showLocales',
+  'version:specificVersion',
   'version:status',
   'version:type',
   'version:unpublish',

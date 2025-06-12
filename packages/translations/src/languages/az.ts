@@ -542,6 +542,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Müqayisə üçün bir versiya seçin',
     showingVersionsFor: 'Göstərilən versiyalar üçün:',
     showLocales: 'Lokalları göstər:',
+    specificVersion: 'Xüsusi Versiya',
     status: 'Status',
     unpublish: 'Dərcdən çıxart',
     unpublishing: 'Dərcdən çıxarılır...',

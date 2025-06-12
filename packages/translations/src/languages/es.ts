@@ -546,6 +546,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Seleccionar una versión para comparar',
     showingVersionsFor: 'Mostrando versiones para:',
     showLocales: 'Mostrar idiomas:',
+    specificVersion: 'Versión Específica',
     status: 'Estado',
     unpublish: 'Despublicar',
     unpublishing: 'Despublicando...',

@@ -539,6 +539,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Оберіть версію для порівняння',
     showingVersionsFor: 'Показані версії для:',
     showLocales: 'Показати локалі:',
+    specificVersion: 'Специфічна версія',
     status: 'Статус',
     unpublish: 'Скасувати публікацію',
     unpublishing: 'Скасування публікації...',

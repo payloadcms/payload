@@ -541,6 +541,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectVersionToCompare: 'Избери версия за сравняване',
     showingVersionsFor: 'Показване на версии за:',
     showLocales: 'Покажи преводи:',
+    specificVersion: 'Специфична версия',
     status: 'Статус',
     unpublish: 'Скрий',
     unpublishing: 'Скриване...',
