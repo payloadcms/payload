@@ -10,7 +10,7 @@ import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getViewsFromConfig } from './getDocumentView.js'
+import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
   args: {
@@ -121,11 +121,18 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       isEditing,
     })
   } else {
-    const { viewKey } = getViewsFromConfig({
+    const { viewKey } = getDocumentView({
       collectionConfig,
       config,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
       globalConfig,
-      overrideDocPermissions: true,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 
