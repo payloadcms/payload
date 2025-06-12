@@ -22,6 +22,11 @@ export type RunJobsArgs = {
    * ID of the job to run
    */
   id?: number | string
+  /**
+   * The maximum number of jobs to run in this invocation
+   *
+   * @default 10
+   */
   limit?: number
   overrideAccess?: boolean
   /**
@@ -32,6 +37,11 @@ export type RunJobsArgs = {
    * @default all jobs for all queues will be executed in FIFO order.
    */
   processingOrder?: Sort
+  /**
+   * If you want to run jobs from a specific queue, set this to the queue name.
+   *
+   * @default all jobs from all queues will be executed.
+   */
   queue?: string
   req: PayloadRequest
   /**
