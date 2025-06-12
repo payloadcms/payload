@@ -322,7 +322,7 @@ export async function VersionView(props: DocumentViewServerProps) {
   }
 
   // Previous Published
-  if (previousPublishedVersion) {
+  if (previousPublishedVersion && latestPublishedVersion?.id !== previousPublishedVersion.id) {
     versionFromOptions.push({
       doc: previousPublishedVersion,
       labelOverride: i18n.t('version:previouslyPublished'),
@@ -374,8 +374,9 @@ export async function VersionView(props: DocumentViewServerProps) {
     )
 
     // Merge options with same ID to the same option
-    const labelSuffix = (
+    const labelSuffix = otherOptionsWithSameID?.length ? (
       <span key={`${option.value}-suffix`}>
+        {' ('}
         {otherOptionsWithSameID.map((optionWithSameID, index) => {
           const label =
             optionWithSameID.labelOverride ||
@@ -388,13 +389,14 @@ export async function VersionView(props: DocumentViewServerProps) {
 
           return (
             <React.Fragment key={`${optionWithSameID.value}-${index}`}>
-              {', '}
+              {index > 0 ? ', ' : ''}
               {label}
             </React.Fragment>
           )
         })}
+        {')'}
       </span>
-    )
+    ) : undefined
 
     versionFromComparisonOptions.push({
       label: formatPill({
