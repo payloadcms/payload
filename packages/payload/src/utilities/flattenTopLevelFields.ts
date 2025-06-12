@@ -191,7 +191,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
         ...(field as FlattenedField<TField>),
         ...(moveSubFieldsToTop &&
           isHoistingFromGroup && {
-            accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
+            accessor: pathPrefix && name ? `${pathPrefix}.${name}` : (name ?? ''),
             labelWithPrefix: labelPrefix
               ? `${labelPrefix} > ${translatedLabel ?? name}`
               : (translatedLabel ?? name),
