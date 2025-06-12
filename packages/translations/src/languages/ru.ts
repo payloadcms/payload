@@ -262,7 +262,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     deletedAt: 'Удалено В',
     deletedCountSuccessfully: 'Удалено {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Удален успешно.',
-    deletePermanently: 'Удалить навсегда',
+    deletePermanently: 'Пропустить корзину и удалить навсегда',
     deleting: 'Удаление...',
     depth: 'Глубина',
     descending: 'Уменьшение',
@@ -380,7 +380,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     time: 'Время',
     timezone: 'Часовой пояс',
     titleDeleted: '{{label}} {{title}} успешно удалено.',
-    titleSoftDeleted: '{{label}} "{{title}}" успешно помечено как удаленное.',
+    titleTrashed: '{{label}} "{{title}}" успешно перемещен в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
     unsavedChanges:

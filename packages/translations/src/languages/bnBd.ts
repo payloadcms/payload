@@ -261,7 +261,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
-    deletePermanently: 'স্থায়ীভাবে মুছুন',
+    deletePermanently: 'ট্র্যাশ এড়িয়ে স্থায়ীভাবে মুছুন',
     deleting: 'মুছে ফেলা হচ্ছে...',
     depth: 'গভীরতা',
     descending: 'অবরোহী',
@@ -379,7 +379,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     time: 'সময়',
     timezone: 'টাইমজোন',
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
-    titleSoftDeleted: '"{{title}}" নামের "{{label}}" সফলভাবে ম্যাগ মুছে ফেলা হয়েছে।',
+    titleTrashed: '{{label}} "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:

@@ -22,6 +22,8 @@ import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
 import './index.scss'
 
+const baseClass = 'delete-document'
+
 export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
@@ -98,7 +100,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           t(
             deletePermanently || !collectionConfig.trash
               ? 'general:titleDeleted'
-              : 'general:titleSoftDeleted',
+              : 'general:titleTrashed',
             {
               label: getTranslation(singularLabel, i18n),
               title,
@@ -156,7 +158,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   if (id) {
     return (
-      <React.Fragment>
+      <Fragment>
         <PopupList.Button
           id={buttonId}
           onClick={() => {
@@ -180,22 +182,25 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 }}
               />
               {collectionConfig.trash && (
-                <CheckboxInput
-                  checked={deletePermanently}
-                  id="delete-forever"
-                  label={t('general:deletePermanently')}
-                  name="delete-forever"
-                  onToggle={(e) => setDeletePermanently(e.target.checked)}
-                />
+                <div className={`${baseClass}__checkbox`}>
+                  <CheckboxInput
+                    checked={deletePermanently}
+                    id="delete-forever"
+                    label={t('general:deletePermanently')}
+                    name="delete-forever"
+                    onToggle={(e) => setDeletePermanently(e.target.checked)}
+                  />
+                </div>
               )}
             </Fragment>
           }
+          className={baseClass}
           confirmingLabel={t('general:deleting')}
           heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
           onConfirm={handleDelete}
         />
-      </React.Fragment>
+      </Fragment>
     )
   }
 

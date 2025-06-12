@@ -267,7 +267,7 @@ export const frTranslations: DefaultTranslationsObject = {
     deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
-    deletePermanently: 'Supprimer définitivement',
+    deletePermanently: 'Ignorer la corbeille et supprimer définitivement',
     deleting: 'Suppression en cours...',
     depth: 'Profondeur',
     descending: 'Descendant(e)',
@@ -386,7 +386,7 @@ export const frTranslations: DefaultTranslationsObject = {
     time: 'Temps',
     timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
-    titleSoftDeleted: '{{label}} "{{title}}" supprimé avec succès de manière douce.',
+    titleTrashed: '{{label}} "{{title}}" a été mis à la poubelle avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
     unsavedChanges:

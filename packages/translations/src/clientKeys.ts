@@ -307,7 +307,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:time',
   'general:timezone',
   'general:titleDeleted',
-  'general:titleSoftDeleted',
+  'general:titleTrashed',
   'general:import',
   'general:export',
   'general:allLocales',

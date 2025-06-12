@@ -260,7 +260,7 @@ export const azTranslations: DefaultTranslationsObject = {
     deletedAt: 'Silinib Tarixi',
     deletedCountSuccessfully: '{{count}} {{label}} uğurla silindi.',
     deletedSuccessfully: 'Uğurla silindi.',
-    deletePermanently: 'Daimi silin',
+    deletePermanently: 'Çöplüyü atlayın və daimi olaraq silin',
     deleting: 'Silinir...',
     depth: 'Dərinlik',
     descending: 'Azalan',
@@ -378,7 +378,7 @@ export const azTranslations: DefaultTranslationsObject = {
     time: 'Vaxt',
     timezone: 'Saat qurşağı',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
-    titleSoftDeleted: '"{{label}}" "{{title}}" uğurla yumşaq silindi.',
+    titleTrashed: '"{{label}}" "{{title}}" uğurla zibil qutusuna atıldı.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
     unsavedChanges:

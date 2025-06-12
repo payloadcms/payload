@@ -265,7 +265,7 @@ export const deTranslations: DefaultTranslationsObject = {
     deletedAt: 'Gelöscht am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
-    deletePermanently: 'Dauerhaft löschen',
+    deletePermanently: 'Überspringen Sie den Papierkorb und löschen Sie dauerhaft.',
     deleting: 'Löschen...',
     depth: 'Tiefe',
     descending: 'Absteigend',
@@ -384,7 +384,7 @@ export const deTranslations: DefaultTranslationsObject = {
     time: 'Zeit',
     timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
-    titleSoftDeleted: '{{label}} "{{title}}" erfolgreich weich gelöscht.',
+    titleTrashed: '{{label}} "{{title}}" erfolgreich entfernt.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
     unsavedChanges:
