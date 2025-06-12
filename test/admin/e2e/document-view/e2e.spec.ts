@@ -678,7 +678,7 @@ describe('Document View', () => {
 
   describe('custom editMenuItem components', () => {
     test('should render custom editMenuItems component', async () => {
-      await page.goto(placeholderURL.create)
+      await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
 
