@@ -44,38 +44,38 @@ export const DocumentTabs: React.FC<{
               const meetsCondition =
                 !condition || condition({ collectionConfig, config, globalConfig, permissions })
 
-              if (meetsCondition) {
-                if (tabConfig?.Component) {
-                  return RenderServerComponent({
-                    clientProps: {
-                      path: viewPath,
-                    } satisfies DocumentTabClientProps,
-                    Component: tabConfig.Component,
-                    importMap: payload.importMap,
-                    key: `tab-${index}`,
-                    serverProps: {
-                      collectionConfig,
-                      globalConfig,
-                      i18n,
-                      payload,
-                      permissions,
-                    } satisfies DocumentTabServerPropsOnly,
-                  })
-                }
-
-                return (
-                  <DocumentTab
-                    key={`tab-${index}`}
-                    path={viewPath}
-                    {...{
-                      ...props,
-                      ...tabConfig,
-                    }}
-                  />
-                )
+              if (!meetsCondition) {
+                return null
               }
 
-              return null
+              if (tabConfig?.Component) {
+                return RenderServerComponent({
+                  clientProps: {
+                    path: viewPath,
+                  } satisfies DocumentTabClientProps,
+                  Component: tabConfig.Component,
+                  importMap: payload.importMap,
+                  key: `tab-${index}`,
+                  serverProps: {
+                    collectionConfig,
+                    globalConfig,
+                    i18n,
+                    payload,
+                    permissions,
+                  } satisfies DocumentTabServerPropsOnly,
+                })
+              }
+
+              return (
+                <DocumentTab
+                  key={`tab-${index}`}
+                  path={viewPath}
+                  {...{
+                    ...props,
+                    ...tabConfig,
+                  }}
+                />
+              )
             })}
           </ul>
         </div>
