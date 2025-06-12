@@ -166,10 +166,16 @@ const results = await payload.jobs.runByID({
 
 ### Bin script
 
-Finally, you can process jobs via the bin script that comes with Payload out of the box.
+Finally, you can process jobs via the bin script that comes with Payload out of the box. By default, this script will run all jobs from all queues, with a limit of 10 jobs per invocation:
 
 ```sh
-npx payload jobs:run --queue default --limit 10
+npx payload jobs:run
+```
+
+You can override the default queue and limit by passing the `--queue` and `--limit` flags:
+
+```sh
+npx payload jobs:run --queue myQueue --limit 15
 ```
 
 In addition, the bin script allows you to pass a `--cron` flag to the `jobs:run` command to run the jobs on a scheduled, cron basis:
