@@ -524,6 +524,7 @@ export const itTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nessuna {{etichetta}} selezionata',
     preview: 'Anteprima',
     previouslyPublished: 'Precedentemente Pubblicato',
+    previousVersion: 'Versione Precedente',
     problemRestoringVersion: 'Si è verificato un problema durante il ripristino di questa versione',
     publish: 'Pubblicare',
     publishAllLocales: 'Pubblica tutte le località',

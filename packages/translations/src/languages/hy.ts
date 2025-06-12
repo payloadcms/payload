@@ -527,6 +527,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Ոչ մի {{label}} ընտրված չէ',
     preview: 'Նախադիտում',
     previouslyPublished: 'Նախկինում հրապարակված',
+    previousVersion: 'Նախորդ Տարբերակ',
     problemRestoringVersion: 'Այս տարբերակը վերականգնելու ժամանակ խնդիր է առաջացել',
     publish: 'Հրապարակել',
     publishAllLocales: 'Հրապարակել բոլոր լոկալներում',

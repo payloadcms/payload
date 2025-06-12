@@ -519,6 +519,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nav atlasīts neviens {{label}}',
     preview: 'Priekšskatījums',
     previouslyPublished: 'Iepriekš publicēts',
+    previousVersion: 'Iepriekšējā versija',
     problemRestoringVersion: 'Radās problēma, atjaunojot šo versiju',
     publish: 'Publicēt',
     publishAllLocales: 'Publicēt visas lokalizācijas',

@@ -497,6 +497,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noRowsSelected: '未選擇 {{label}}',
     preview: '預覽',
     previouslyPublished: '先前出版過的',
+    previousVersion: '先前版本',
     problemRestoringVersion: '回復這個版本時發生了問題',
     publish: '發佈',
     publishAllLocales: '發布所有地區設定',

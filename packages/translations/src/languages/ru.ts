@@ -523,6 +523,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Не выбран {{label}}',
     preview: 'Предпросмотр',
     previouslyPublished: 'Ранее опубликовано',
+    previousVersion: 'Предыдущая версия',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',
     publish: 'Публиковать',
     publishAllLocales: 'Опубликовать все локали',

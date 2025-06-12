@@ -516,6 +516,7 @@ export const faTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'هیچ {{label}} ای انتخاب نشده است',
     preview: 'پیش‌نمایش',
     previouslyPublished: 'قبلا منتشر شده',
+    previousVersion: 'نسخه قبلی',
     problemRestoringVersion: 'مشکلی در بازیابی این نگارش وجود دارد',
     publish: 'انتشار',
     publishAllLocales: 'انتشار در تمام مکان‌های محلی',

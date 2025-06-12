@@ -516,6 +516,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nije odabrana {{label}}',
     preview: 'Преглед',
     previouslyPublished: 'Prethodno objavljeno',
+    previousVersion: 'Prethodna verzija',
     problemRestoringVersion: 'Настао је проблем при враћању ове верзије',
     publish: 'Објавити',
     publishAllLocales: 'Objavi sve lokalitete',

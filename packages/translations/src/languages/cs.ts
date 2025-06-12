@@ -517,6 +517,7 @@ export const csTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nebyl vybrán žádný {{label}}',
     preview: 'Náhled',
     previouslyPublished: 'Dříve publikováno',
+    previousVersion: 'Předchozí verze',
     problemRestoringVersion: 'Při obnovování této verze došlo k problému',
     publish: 'Publikovat',
     publishAllLocales: 'Publikujte všechny lokalizace',

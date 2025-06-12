@@ -528,6 +528,7 @@ export const roTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Niciun {{etichetă}} selectat',
     preview: 'Previzualizare',
     previouslyPublished: 'Publicat anterior',
+    previousVersion: 'Versiune Anterioară',
     problemRestoringVersion: 'A existat o problemă la restaurarea acestei versiuni',
     publish: 'Publicați',
     publishAllLocales: 'Publicați toate configurările regionale și lingvistice',

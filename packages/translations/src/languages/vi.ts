@@ -515,6 +515,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Không có {{label}} được chọn',
     preview: 'Bản xem trước',
     previouslyPublished: 'Đã xuất bản trước đây',
+    previousVersion: 'Phiên bản Trước',
     problemRestoringVersion: 'Đã xảy ra vấn đề khi khôi phục phiên bản này',
     publish: 'Công bố',
     publishAllLocales: 'Xuất bản tất cả địa phương',

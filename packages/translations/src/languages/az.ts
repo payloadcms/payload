@@ -521,6 +521,7 @@ export const azTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Heç bir {{label}} seçilməyib',
     preview: 'Öncədən baxış',
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
+    previousVersion: 'Əvvəlki Versiya',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',
     publish: 'Dərc et',
     publishAllLocales: 'Bütün lokalizasiyaları dərc edin',

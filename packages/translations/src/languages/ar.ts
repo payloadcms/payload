@@ -510,6 +510,7 @@ export const arTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'لم يتم اختيار {{label}}',
     preview: 'معاينة',
     previouslyPublished: 'نشر سابقا',
+    previousVersion: 'النسخة السابقة',
     problemRestoringVersion: 'حدث خطأ في استعادة هذه النّسخة',
     publish: 'نشر',
     publishAllLocales: 'نشر جميع المواقع',

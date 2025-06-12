@@ -518,6 +518,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Не вибрано {{label}}',
     preview: 'Попередній перегляд',
     previouslyPublished: 'Раніше опубліковано',
+    previousVersion: 'Попередня версія',
     problemRestoringVersion: 'Виникла проблема з відновленням цієї версії',
     publish: 'Опублікувати',
     publishAllLocales: 'Опублікуйте всі локалі',

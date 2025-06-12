@@ -504,6 +504,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'לא נבחר {{תווית}}',
     preview: 'תצוגה מקדימה',
     previouslyPublished: 'פורסם בעבר',
+    previousVersion: 'גרסה קודמת',
     problemRestoringVersion: 'הייתה בעיה בשחזור הגרסה הזו',
     publish: 'פרסם',
     publishAllLocales: 'פרסם את כל המיקומים',

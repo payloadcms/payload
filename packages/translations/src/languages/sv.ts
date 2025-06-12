@@ -520,6 +520,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Inget {{etikett}} valt',
     preview: 'Förhandsgranska',
     previouslyPublished: 'Tidigare publicerad',
+    previousVersion: 'Föregående version',
     problemRestoringVersion: 'Det uppstod ett problem när den här versionen skulle återställas',
     publish: 'Publicera',
     publishAllLocales: 'Publicera alla språk',

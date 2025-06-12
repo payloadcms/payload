@@ -533,6 +533,7 @@ export const frTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Aucune {{étiquette}} sélectionnée',
     preview: 'Aperçu',
     previouslyPublished: 'Précédemment publié',
+    previousVersion: 'Version Précédente',
     problemRestoringVersion: 'Un problème est survenu lors de la restauration de cette version',
     publish: 'Publier',
     publishAllLocales: 'Publier toutes les localités',

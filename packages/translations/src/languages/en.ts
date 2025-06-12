@@ -521,6 +521,7 @@ export const enTranslations = {
     noRowsSelected: 'No {{label}} selected',
     preview: 'Preview',
     previouslyPublished: 'Previously Published',
+    previousVersion: 'Previous Version',
     problemRestoringVersion: 'There was a problem restoring this version',
     publish: 'Publish',
     publishAllLocales: 'Publish all locales',

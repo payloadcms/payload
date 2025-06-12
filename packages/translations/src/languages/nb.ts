@@ -521,6 +521,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Ingen {{label}} valgt',
     preview: 'Forhåndsvisning',
     previouslyPublished: 'Tidligere Publisert',
+    previousVersion: 'Tidligere versjon',
     problemRestoringVersion: 'Det oppstod et problem med gjenoppretting av denne versjonen',
     publish: 'Publisere',
     publishAllLocales: 'Publiser alle språk',

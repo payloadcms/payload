@@ -519,6 +519,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nie je vybraté žiadne {{označenie}}',
     preview: 'Náhľad',
     previouslyPublished: 'Predtým publikované',
+    previousVersion: 'Predchádzajúca verzia',
     problemRestoringVersion: 'Pri obnovovaní tejto verzie došlo k problému',
     publish: 'Publikovať',
     publishAllLocales: 'Publikujte všetky lokality',

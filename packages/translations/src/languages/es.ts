@@ -525,6 +525,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'No se ha seleccionado ningún {{label}}.',
     preview: 'Vista previa',
     previouslyPublished: 'Publicado anteriormente',
+    previousVersion: 'Versión Anterior',
     problemRestoringVersion: 'Hubo un problema al restaurar esta versión',
     publish: 'Publicar',
     publishAllLocales: 'Publicar en todos los idiomas',

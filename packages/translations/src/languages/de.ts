@@ -527,6 +527,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Kein {{label}} ausgewählt',
     preview: 'Vorschau',
     previouslyPublished: 'Zuvor veröffentlicht',
+    previousVersion: 'Frühere Version',
     problemRestoringVersion: 'Bei der Wiederherstellung der Version ist ein Fehler aufgetreten',
     publish: 'Veröffentlichen',
     publishAllLocales: 'Alle Sprachen veröffentlichen',

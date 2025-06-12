@@ -509,6 +509,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'ไม่มี {{label}} ที่ถูกเลือก',
     preview: 'ตัวอย่าง',
     previouslyPublished: 'เผยแพร่ก่อนหน้านี้',
+    previousVersion: 'เวอร์ชันก่อนหน้านี้',
     problemRestoringVersion: 'เกิดปัญหาระหว่างการกู้คืนเวอร์ชันนี้',
     publish: 'เผยแพร่',
     publishAllLocales: 'เผยแพร่ทุกสถานที่',

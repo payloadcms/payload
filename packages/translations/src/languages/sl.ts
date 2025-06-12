@@ -517,6 +517,7 @@ export const slTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Ni izbranih {{label}}',
     preview: 'Predogled',
     previouslyPublished: 'Predhodno objavljeno',
+    previousVersion: 'Prejšnja različica',
     problemRestoringVersion: 'Pri obnavljanju te različice je prišlo do težave',
     publish: 'Objavi',
     publishAllLocales: 'Objavi vse jezike',

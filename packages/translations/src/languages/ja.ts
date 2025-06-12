@@ -518,6 +518,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noRowsSelected: '選択された{{label}}はありません',
     preview: 'プレビュー',
     previouslyPublished: '以前に公開された',
+    previousVersion: '以前のバージョン',
     problemRestoringVersion: 'このバージョンの復元に問題がありました。',
     publish: '公開する',
     publishAllLocales: 'すべてのロケールを公開する',

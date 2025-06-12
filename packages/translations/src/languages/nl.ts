@@ -525,6 +525,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Geen {{label}} geselecteerd',
     preview: 'Voorbeeld',
     previouslyPublished: 'Eerder gepubliceerd',
+    previousVersion: 'Vorige Versie',
     problemRestoringVersion: 'Er was een probleem bij het herstellen van deze versie',
     publish: 'Publiceren',
     publishAllLocales: 'Publiceer alle taalinstellingen',

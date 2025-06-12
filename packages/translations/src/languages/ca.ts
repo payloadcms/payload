@@ -523,6 +523,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noRowsSelected: "No s'han seleccionat {{label}}",
     preview: 'Vista prèvia',
     previouslyPublished: 'Publicat anteriorment',
+    previousVersion: 'Versió anterior',
     problemRestoringVersion: 'Hi ha hagut un problema en restaurar aquesta versió',
     publish: 'Publicar',
     publishAllLocales: 'Publica totes les configuracions regionals',

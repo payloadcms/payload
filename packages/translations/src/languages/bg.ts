@@ -520,6 +520,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Не е избран {{label}}',
     preview: 'Предварителен преглед',
     previouslyPublished: 'Предишно публикувано',
+    previousVersion: 'Предишна версия',
     problemRestoringVersion: 'Имаше проблем при възстановяването на тази версия',
     publish: 'Публикувай',
     publishAllLocales: 'Публикувайте всички локали',

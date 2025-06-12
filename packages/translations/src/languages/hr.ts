@@ -517,6 +517,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nije odabrana {{oznaka}}',
     preview: 'Pregled',
     previouslyPublished: 'Prethodno objavljeno',
+    previousVersion: 'Prethodna verzija',
     problemRestoringVersion: 'Nastao je problem pri vraćanju ove verzije',
     publish: 'Objaviti',
     publishAllLocales: 'Objavi sve lokalne postavke',

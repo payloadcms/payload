@@ -522,6 +522,7 @@ export const trTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Seçilen {{label}} yok',
     preview: 'Önizleme',
     previouslyPublished: 'Daha Önce Yayınlanmış',
+    previousVersion: 'Önceki Sürüm',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',
     publish: 'Yayınla',
     publishAllLocales: 'Tüm yerel ayarları yayınla',

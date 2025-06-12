@@ -521,6 +521,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'কোনো {{label}} নির্বাচিত হয়নি',
     preview: 'প্রাকদর্শন',
     previouslyPublished: 'পূর্বে প্রকাশিত',
+    previousVersion: 'পূর্ববর্তী সংস্করণ',
     problemRestoringVersion: 'এই সংস্করণ পুনরুদ্ধারে সমস্যা হয়েছে',
     publish: 'প্রকাশ করুন',
     publishAllLocales: 'সমস্ত লোকেল প্রকাশ করুন',

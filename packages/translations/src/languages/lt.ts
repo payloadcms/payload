@@ -524,6 +524,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Pasirinkta ne viena {{label}}',
     preview: 'Peržiūra',
     previouslyPublished: 'Ankstesnė publikacija',
+    previousVersion: 'Ankstesnė versija',
     problemRestoringVersion: 'Buvo problema atkuriant šią versiją',
     publish: 'Paskelbti',
     publishAllLocales: 'Publikuokite visus lokalizacijas',

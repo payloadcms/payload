@@ -521,6 +521,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nenhum {{rótulo}} selecionado',
     preview: 'Pré-visualização',
     previouslyPublished: 'Publicado Anteriormente',
+    previousVersion: 'Versão Anterior',
     problemRestoringVersion: 'Ocorreu um problema ao restaurar essa versão',
     publish: 'Publicar',
     publishAllLocales: 'Publicar todas as localidades',

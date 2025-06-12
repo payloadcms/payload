@@ -528,6 +528,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Tiada {{label}} yang dipilih',
     preview: 'နမူနာပြရန်',
     previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
+    previousVersion: 'Versi Sebelumnya',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',
     publish: 'ထုတ်ဝေသည်။',
     publishAllLocales: 'နိုင်ငံတကာစာလုံးအားလုံးကို ထုတ်ဝေပါ',

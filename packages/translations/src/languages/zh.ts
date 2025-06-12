@@ -497,6 +497,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     noRowsSelected: '未选择{{label}}',
     preview: '预览',
     previouslyPublished: '先前发布过的',
+    previousVersion: '以前的版本',
     problemRestoringVersion: '恢复这个版本时发生了问题',
     publish: '发布',
     publishAllLocales: '发布所有语言环境',

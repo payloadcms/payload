@@ -518,6 +518,7 @@ export const daTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Ingen {{label}} valgt',
     preview: 'Forhåndsvisning',
     previouslyPublished: 'Tidligere offentliggjort',
+    previousVersion: 'Tidligere version',
     problemRestoringVersion: 'Der opstod et problem med at gendanne denne version',
     publish: 'Offentliggør',
     publishAllLocales: 'Udgiv alle lokalindstillinger',

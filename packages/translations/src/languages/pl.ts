@@ -520,6 +520,7 @@ export const plTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nie wybrano {{etykieta}}',
     preview: 'Podgląd',
     previouslyPublished: 'Wcześniej opublikowane',
+    previousVersion: 'Poprzednia Wersja',
     problemRestoringVersion: 'Wystąpił problem podczas przywracania tej wersji',
     publish: 'Publikuj',
     publishAllLocales: 'Opublikuj wszystkie lokalizacje',

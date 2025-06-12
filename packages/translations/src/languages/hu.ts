@@ -524,6 +524,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noRowsSelected: 'Nincs {{címke}} kiválasztva',
     preview: 'Előnézet',
     previouslyPublished: 'Korábban Közzétéve',
+    previousVersion: 'Előző Verzió',
     problemRestoringVersion: 'Hiba történt a verzió visszaállításakor',
     publish: 'Közzététel',
     publishAllLocales: 'Közzétesz az összes helyszínen',

@@ -513,6 +513,7 @@ export const etTranslations: DefaultTranslationsObject = {
     noRowsSelected: '{{label}} pole valitud',
     preview: 'Eelvaade',
     previouslyPublished: 'Varem avaldatud',
+    previousVersion: 'Eelmine versioon',
     problemRestoringVersion: 'Selle versiooni taastamisel tekkis probleem',
     publish: 'Avalda',
     publishAllLocales: 'Avaldage kõik lokaadid',

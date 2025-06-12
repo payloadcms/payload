@@ -512,6 +512,7 @@ export const koTranslations: DefaultTranslationsObject = {
     noRowsSelected: '선택된 {{label}} 없음',
     preview: '미리보기',
     previouslyPublished: '이전에 발표된',
+    previousVersion: '이전 버전',
     problemRestoringVersion: '이 버전을 복원하는 중 문제가 발생했습니다.',
     publish: '게시',
     publishAllLocales: '모든 로케일을 게시하십시오',
