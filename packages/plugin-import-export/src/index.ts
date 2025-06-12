@@ -91,7 +91,7 @@ export const importExportPlugin =
 declare module 'payload' {
   export interface FieldCustom {
     'plugin-import-export'?: {
-      toCSVFunction?: ToCSVFunction
+      toCSV?: ToCSVFunction
     }
   }
 }
