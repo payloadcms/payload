@@ -385,7 +385,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     )
   }
 
-  if (config.folders !== false) {
+  if (config.folders !== false && folderEnabledCollections.length) {
     await addFolderCollection({
       config: config as unknown as Config,
       folderEnabledCollections,

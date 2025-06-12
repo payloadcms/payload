@@ -65,15 +65,16 @@ export const getFolderData = async ({
       parentFolderID,
       req,
     })
-    const [breadcrumbs, documentsAndSubfolders] = await Promise.all([
+    const [breadcrumbs, result] = await Promise.all([
       breadcrumbsPromise,
       documentAndSubfolderPromise,
     ])
 
     return {
       breadcrumbs,
-      documents: documentsAndSubfolders.documents,
-      subfolders: documentsAndSubfolders.subfolders,
+      documents: result.documents,
+      folderAssignedCollections: result.folderAssignedCollections,
+      subfolders: result.subfolders,
     }
   } else {
     // subfolders and documents are queried separately
@@ -96,9 +97,11 @@ export const getFolderData = async ({
       subfoldersPromise,
       documentsPromise,
     ])
+
     return {
       breadcrumbs,
       documents,
+      folderAssignedCollections: collectionSlug ? [collectionSlug] : undefined,
       subfolders,
     }
   }

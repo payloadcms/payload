@@ -56,6 +56,7 @@ export type FolderOrDocument = {
   relationTo: CollectionSlug
   value: {
     _folderOrDocumentTitle: string
+    assignedCollections: CollectionSlug[]
     createdAt?: string
     folderID?: number | string
     id: number | string
@@ -66,6 +67,7 @@ export type FolderOrDocument = {
 export type GetFolderDataResult = {
   breadcrumbs: FolderBreadcrumb[] | null
   documents: FolderOrDocument[]
+  folderAssignedCollections: CollectionSlug[] | undefined
   subfolders: FolderOrDocument[]
 }
 
@@ -83,8 +85,8 @@ export type RootFoldersConfiguration = {
   collectionOverrides?: (({
     collection,
   }: {
-    collection: SanitizedCollectionConfig
-  }) => Promise<SanitizedCollectionConfig> | SanitizedCollectionConfig)[]
+    collection: CollectionConfig
+  }) => CollectionConfig | Promise<CollectionConfig>)[]
   /**
    * Ability to view hidden fields and collections related to folders
    *

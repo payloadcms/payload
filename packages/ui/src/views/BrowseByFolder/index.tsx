@@ -248,6 +248,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={disableBulkEdit}
+                  folderAssignedCollections={visibleCollectionSlugs}
                   key="list-selection"
                 />
               ),

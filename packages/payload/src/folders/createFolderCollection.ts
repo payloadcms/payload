@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Option } from '../fields/config/types.js'
 
+import { buildFolderField } from './buildFolderField.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 import { reparentChildFolder } from './hooks/reparentChildFolder.js'
@@ -46,15 +47,15 @@ export const createFolderCollection = ({
         index: true,
         required: true,
       },
-      {
-        name: folderFieldName,
-        type: 'relationship',
-        admin: {
-          hidden: !debug,
+      buildFolderField({
+        folderFieldName,
+        folderSlug: slug,
+        overrides: {
+          admin: {
+            hidden: !debug,
+          },
         },
-        index: true,
-        relationTo: slug,
-      },
+      }),
       {
         name: 'documentsAndFolders',
         type: 'join',
@@ -72,7 +73,7 @@ export const createFolderCollection = ({
           position: 'sidebar',
         },
         hasMany: true,
-        options: [...collectionOptions, { label: 'All', value: 'all' }],
+        options: collectionOptions,
         required: true,
       },
     ],

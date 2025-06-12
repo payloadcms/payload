@@ -41,6 +41,7 @@ type ActionProps =
     }
 export type MoveToFolderDrawerProps = {
   readonly drawerSlug: string
+  readonly folderAssignedCollections: CollectionSlug[]
   readonly folderCollectionSlug: string
   readonly folderFieldName: string
   readonly fromFolderID?: number | string
@@ -86,9 +87,10 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
     async (folderIDToPopulate: null | number | string) => {
       try {
         const result = await getFolderResultsComponentAndData({
-          activeCollectionSlugs: [props.folderCollectionSlug],
           browseByFolder: false,
+          collectionsToDisplay: [props.folderCollectionSlug],
           displayAs: 'grid',
+          folderAssignedCollections: props.folderAssignedCollections,
           folderID: folderIDToPopulate,
           sort: '_folderOrDocumentTitle',
         })
@@ -107,7 +109,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
 
       hasLoadedRef.current = true
     },
-    [getFolderResultsComponentAndData, props.folderCollectionSlug],
+    [getFolderResultsComponentAndData, props.folderAssignedCollections, props.folderCollectionSlug],
   )
 
   React.useEffect(() => {
