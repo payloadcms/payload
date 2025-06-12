@@ -300,6 +300,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
             pillStyle="light"
+            size="small"
           >
             {t('general:columns')}
           </Pill>
