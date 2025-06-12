@@ -198,10 +198,6 @@ export const renderDocument = async ({
     throw new Error('not-found')
   }
 
-  let View: ViewToRender = null
-
-  let showHeader = true
-
   const formattedParams = new URLSearchParams()
 
   if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
@@ -219,6 +215,10 @@ export const renderDocument = async ({
     : globalSlug
       ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
       : ''
+
+  let View: ViewToRender = null
+
+  let showHeader = true
 
   const RootViewOverride =
     collectionConfig?.admin?.components?.views?.edit?.root &&
