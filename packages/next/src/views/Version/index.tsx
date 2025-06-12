@@ -22,7 +22,7 @@ import { getVersionLabel } from './VersionPillLabel/getVersionLabel.js'
 import { VersionPillLabel } from './VersionPillLabel/VersionPillLabel.js'
 
 export async function VersionView(props: DocumentViewServerProps) {
-  const { i18n, initPageResult, routeSegments, searchParams } = props
+  const { hasPublishedDoc, i18n, initPageResult, routeSegments, searchParams } = props
 
   const {
     collectionConfig,
@@ -72,7 +72,7 @@ export async function VersionView(props: DocumentViewServerProps) {
   const [
     previousVersionResult,
     versionFromResult,
-    latestPublishedVersion,
+    currentlyPublishedVersion,
     latestDraftVersion,
     previousPublishedVersionResult,
   ] = await Promise.all([
@@ -114,18 +114,20 @@ export async function VersionView(props: DocumentViewServerProps) {
           user,
         })
       : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
-    // Latest published version
-    fetchLatestVersion({
-      collectionSlug,
-      depth: 0,
-      globalSlug,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      status: 'published',
-      user,
-    }),
+    // Currently published version - do note: currently published != latest published, as an unpublished version can be the latest published
+    hasPublishedDoc
+      ? fetchLatestVersion({
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
+          req,
+          status: 'published',
+          user,
+        })
+      : Promise.resolve(null),
     // Latest draft version
     draftsEnabled
       ? fetchLatestVersion({
@@ -265,6 +267,7 @@ export async function VersionView(props: DocumentViewServerProps) {
   }): React.ReactNode => {
     return (
       <VersionPillLabel
+        currentlyPublishedVersion={currentlyPublishedVersion}
         doc={doc}
         key={doc.id}
         labelFirst={true}
@@ -272,7 +275,6 @@ export async function VersionView(props: DocumentViewServerProps) {
         labelStyle={labelStyle ?? 'text'}
         labelSuffix={labelSuffix}
         latestDraftVersion={latestDraftVersion}
-        latestPublishedVersion={latestPublishedVersion}
       />
     )
   }
@@ -303,7 +305,8 @@ export async function VersionView(props: DocumentViewServerProps) {
   }
 
   // Latest Draft
-  const publishedNewerThanDraft = latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
+  const publishedNewerThanDraft =
+    currentlyPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
   if (latestDraftVersion && !publishedNewerThanDraft) {
     versionFromOptions.push({
       doc: latestDraftVersion,
@@ -313,16 +316,16 @@ export async function VersionView(props: DocumentViewServerProps) {
   }
 
   // Currently Published
-  if (latestPublishedVersion) {
+  if (currentlyPublishedVersion) {
     versionFromOptions.push({
-      doc: latestPublishedVersion,
-      updatedAt: new Date(latestPublishedVersion.updatedAt),
-      value: latestPublishedVersion.id,
+      doc: currentlyPublishedVersion,
+      updatedAt: new Date(currentlyPublishedVersion.updatedAt),
+      value: currentlyPublishedVersion.id,
     })
   }
 
   // Previous Published
-  if (previousPublishedVersion && latestPublishedVersion?.id !== previousPublishedVersion.id) {
+  if (previousPublishedVersion && currentlyPublishedVersion?.id !== previousPublishedVersion.id) {
     versionFromOptions.push({
       doc: previousPublishedVersion,
       labelOverride: i18n.t('version:previouslyPublished'),
@@ -381,8 +384,8 @@ export async function VersionView(props: DocumentViewServerProps) {
           const label =
             optionWithSameID.labelOverride ||
             getVersionLabel({
+              currentlyPublishedVersion,
               latestDraftVersion,
-              latestPublishedVersion,
               t: i18n.t,
               version: optionWithSameID.doc,
             }).label

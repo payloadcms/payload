@@ -8,11 +8,11 @@ import { VersionPillLabel } from '../../../Version/VersionPillLabel/VersionPillL
 const baseClass = 'autosave-cell'
 
 type AutosaveCellProps = {
-  latestDraftVersion?: {
+  currentlyPublishedVersion?: {
     id: number | string
     updatedAt: string
   }
-  latestPublishedVersion?: {
+  latestDraftVersion?: {
     id: number | string
     updatedAt: string
   }
@@ -27,8 +27,8 @@ type AutosaveCellProps = {
 }
 
 export const AutosaveCell: React.FC<AutosaveCellProps> = ({
+  currentlyPublishedVersion,
   latestDraftVersion,
-  latestPublishedVersion,
   rowData,
 }) => {
   const { t } = useTranslation()
@@ -37,12 +37,12 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
     <div className={`${baseClass}__items`}>
       {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
       <VersionPillLabel
+        currentlyPublishedVersion={currentlyPublishedVersion}
         disableDate={true}
         doc={rowData}
         labelFirst={false}
         labelStyle="pill"
         latestDraftVersion={latestDraftVersion}
-        latestPublishedVersion={latestPublishedVersion}
       />
     </div>
   )

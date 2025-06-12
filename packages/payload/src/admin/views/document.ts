@@ -25,9 +25,10 @@ export type RenderDocumentVersionsProperties = {
 }
 
 export type DocumentViewServerPropsOnly = {
-  readonly doc: Data
-  readonly initPageResult: InitPageResult
-  readonly routeSegments: string[]
+  doc: Data
+  hasPublishedDoc: boolean
+  initPageResult: InitPageResult
+  routeSegments: string[]
   versions?: RenderDocumentVersionsProperties
 } & ServerProps
 

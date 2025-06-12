@@ -14,6 +14,7 @@ const baseClass = 'versions'
 
 export async function VersionsView(props: DocumentViewServerProps) {
   const {
+    hasPublishedDoc,
     initPageResult: {
       collectionConfig,
       docID: id,
@@ -76,21 +77,23 @@ export async function VersionsView(props: DocumentViewServerProps) {
     return notFound()
   }
 
-  const [latestPublishedVersion, latestDraftVersion] = await Promise.all([
-    fetchLatestVersion({
-      collectionSlug,
-      depth: 0,
-      globalSlug,
-      overrideAccess: false,
-      parentID: id,
-      req,
-      select: {
-        id: true,
-        updatedAt: true,
-      },
-      status: 'published',
-      user,
-    }),
+  const [currentlyPublishedVersion, latestDraftVersion] = await Promise.all([
+    hasPublishedDoc
+      ? fetchLatestVersion({
+          collectionSlug,
+          depth: 0,
+          globalSlug,
+          overrideAccess: false,
+          parentID: id,
+          req,
+          select: {
+            id: true,
+            updatedAt: true,
+          },
+          status: 'published',
+          user,
+        })
+      : Promise.resolve(null),
     draftsEnabled
       ? fetchLatestVersion({
           collectionSlug,
@@ -116,12 +119,12 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const columns = buildVersionColumns({
     collectionConfig,
     CreatedAtCellOverride: useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined,
+    currentlyPublishedVersion,
     docID: id,
     docs: versionsData?.docs,
     globalConfig,
     i18n,
     latestDraftVersion,
-    latestPublishedVersion,
   })
 
   const pluralLabel =

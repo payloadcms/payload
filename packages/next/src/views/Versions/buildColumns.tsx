@@ -18,24 +18,24 @@ import { IDCell } from './cells/ID/index.js'
 export const buildVersionColumns = ({
   collectionConfig,
   CreatedAtCellOverride,
+  currentlyPublishedVersion,
   docID,
   docs,
   globalConfig,
   i18n: { t },
   latestDraftVersion,
-  latestPublishedVersion,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
+  currentlyPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
   docID?: number | string
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
   latestDraftVersion?: {
-    id: number | string
-    updatedAt: string
-  }
-  latestPublishedVersion?: {
     id: number | string
     updatedAt: string
   }
@@ -97,9 +97,9 @@ export const buildVersionColumns = ({
       renderedCells: docs.map((doc, i) => {
         return (
           <AutosaveCell
+            currentlyPublishedVersion={currentlyPublishedVersion}
             key={i}
             latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
             rowData={doc}
           />
         )

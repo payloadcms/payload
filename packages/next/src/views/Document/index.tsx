@@ -181,6 +181,7 @@ export const renderDocument = async ({
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
+    hasPublishedDoc,
     i18n,
     initPageResult,
     locale,

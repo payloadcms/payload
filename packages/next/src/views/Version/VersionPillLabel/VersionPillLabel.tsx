@@ -18,7 +18,12 @@ const renderPill = (label: React.ReactNode, pillStyle: Parameters<typeof Pill>[0
 }
 
 export const VersionPillLabel: React.FC<{
+  currentlyPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
   disableDate?: boolean
+
   doc: {
     [key: string]: unknown
     id: number | string
@@ -29,7 +34,6 @@ export const VersionPillLabel: React.FC<{
       _status: string
     }
   }
-
   /**
    * By default, the date is displayed first, followed by the version label.
    * @default false
@@ -45,11 +49,8 @@ export const VersionPillLabel: React.FC<{
     id: number | string
     updatedAt: string
   }
-  latestPublishedVersion?: {
-    id: number | string
-    updatedAt: string
-  }
 }> = ({
+  currentlyPublishedVersion,
   disableDate = false,
   doc,
   labelFirst = false,
@@ -57,7 +58,6 @@ export const VersionPillLabel: React.FC<{
   labelStyle = 'pill',
   labelSuffix,
   latestDraftVersion,
-  latestPublishedVersion,
 }) => {
   const {
     config: {
@@ -68,8 +68,8 @@ export const VersionPillLabel: React.FC<{
   const { i18n, t } = useTranslation()
 
   const { label, pillStyle } = getVersionLabel({
+    currentlyPublishedVersion,
     latestDraftVersion,
-    latestPublishedVersion,
     t,
     version: doc,
   })
