@@ -964,7 +964,7 @@ describe('List View', () => {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -1036,7 +1036,7 @@ describe('List View', () => {
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
 
       // Expect nested group cell
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -1050,7 +1050,7 @@ describe('List View', () => {
           hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
     })
