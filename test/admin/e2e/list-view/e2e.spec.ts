@@ -964,7 +964,7 @@ describe('List View', () => {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -1036,7 +1036,7 @@ describe('List View', () => {
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
 
       // Expect nested group cell
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -1050,7 +1050,7 @@ describe('List View', () => {
           hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
     })
@@ -1422,26 +1422,26 @@ describe('List View', () => {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      const upChevron = page.locator('#heading-namedGroup-someTextField .sort-column__asc')
-      const downChevron = page.locator('#heading-namedGroup-someTextField .sort-column__desc')
+      const upChevron = page.locator('#heading-namedGroup__someTextField .sort-column__asc')
+      const downChevron = page.locator('#heading-namedGroup__someTextField .sort-column__desc')
 
       await upChevron.click()
       await page.waitForURL(/sort=namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
-      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
 
       await downChevron.click()
       await page.waitForURL(/sort=-namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
-      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
     })
@@ -1455,29 +1455,29 @@ describe('List View', () => {
         })
         .click()
       const upChevron = page.locator(
-        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__asc',
+        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__asc',
       )
       const downChevron = page.locator(
-        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__desc',
+        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__desc',
       )
 
       await upChevron.click()
       await page.waitForURL(/sort=namedTab.nestedTextFieldInNamedTab/)
 
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )
-      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
 
       await downChevron.click()
       await page.waitForURL(/sort=-namedTab.nestedTextFieldInNamedTab/)
 
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
-      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )
     })

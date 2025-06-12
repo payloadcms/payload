@@ -14,7 +14,7 @@ import './index.scss'
 
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
-    as: Element = 'label',
+    as: ElementFromProps = 'label',
     hideLocale = false,
     htmlFor: htmlForFromProps,
     label,
@@ -31,6 +31,9 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
 
   const { i18n } = useTranslation()
   const { code, label: localLabel } = useLocale()
+
+  const Element =
+    ElementFromProps === 'label' ? (htmlFor ? 'label' : 'span') : ElementFromProps || 'span'
 
   if (label) {
     return (
