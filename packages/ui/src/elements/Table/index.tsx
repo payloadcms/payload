@@ -31,7 +31,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         <thead>
           <tr>
             {activeColumns.map((col, i) => (
-              <th id={`heading-${col.accessor}`} key={i}>
+              <th id={`heading-${col.accessor.replace(/\./g, '__')}`} key={i}>
                 {col.Heading}
               </th>
             ))}

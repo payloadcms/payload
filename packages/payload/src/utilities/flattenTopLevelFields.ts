@@ -101,7 +101,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
         const nameWithPrefix =
           'name' in field && field.name
             ? pathPrefix
-              ? `${pathPrefix}-${field.name}`
+              ? `${pathPrefix}.${field.name}`
               : field.name
             : pathPrefix
 
@@ -138,7 +138,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
 
               const pathPrefixForTab = tab.name
                 ? pathPrefix
-                  ? `${pathPrefix}-${tab.name}`
+                  ? `${pathPrefix}.${tab.name}`
                   : tab.name
                 : pathPrefix
 
