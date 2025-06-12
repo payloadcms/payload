@@ -7,11 +7,11 @@ export const postsSlug = 'posts'
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'title-name',
   },
   fields: [
     {
-      name: 'title',
+      name: 'title-name',
       type: 'text',
     },
     {
