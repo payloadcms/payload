@@ -33,8 +33,6 @@ export const DocumentTabs: React.FC<{
     globalConfig,
   })
 
-  console.log(tabs)
-
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
