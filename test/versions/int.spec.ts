@@ -1540,6 +1540,30 @@ describe('Versions', () => {
         expect(globalLocalVersionID).toBeDefined()
       })
 
+      it('ensure global can be published after saving draft', async () => {
+        const draftVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: true,
+          data: {
+            title: 'Draft',
+            _status: 'draft',
+          },
+        })
+        expect(draftVersion.title).toStrictEqual('Draft')
+        expect(draftVersion._status).toStrictEqual('draft')
+
+        const publishedVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: false,
+          data: {
+            title: 'Published',
+            _status: 'published',
+          },
+        })
+        expect(publishedVersion.title).toStrictEqual('Published')
+        expect(publishedVersion._status).toStrictEqual('published')
+      })
+
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,

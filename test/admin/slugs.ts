@@ -8,6 +8,8 @@ export const group1Collection1Slug = 'group-one-collection-ones'
 export const group1Collection2Slug = 'group-one-collection-twos'
 export const group2Collection1Slug = 'group-two-collection-ones'
 export const group2Collection2Slug = 'group-two-collection-twos'
+
+export const useAsTitleGroupFieldSlug = 'use-as-title-group-field'
 export const hiddenCollectionSlug = 'hidden-collection'
 export const notInViewCollectionSlug = 'not-in-view-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'

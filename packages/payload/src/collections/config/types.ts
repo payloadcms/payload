@@ -328,10 +328,14 @@ export type CollectionAdminOptions = {
     listMenuItems?: CustomComponent[]
     views?: {
       /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       * Replace, modify, or add new "document" views.
+       * @link https://payloadcms.com/docs/custom-components/document-views
        */
       edit?: EditConfig
+      /**
+       * Replace or modify the "list" view.
+       * @link https://payloadcms.com/docs/custom-components/list-view
+       */
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
