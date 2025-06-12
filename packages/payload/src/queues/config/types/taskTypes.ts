@@ -1,4 +1,5 @@
 import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type { ScheduleConfig } from './index.js'
 import type { BaseJob, RunningJob, RunningJobSimple, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
@@ -233,6 +234,10 @@ export type TaskConfig<
    * @default By default, tasks are not retried and `retries` is `undefined`.
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this task to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

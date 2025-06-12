@@ -1,6 +1,7 @@
 import type { Field } from '../../../fields/config/types.js'
 import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
+import type { ScheduleConfig } from './index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -130,6 +131,10 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    * @default undefined. By default, workflows retries are defined by their tasks
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this workflow to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job.
    */

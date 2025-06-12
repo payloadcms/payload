@@ -127,3 +127,30 @@ export type JobsConfig = {
    */
   workflows?: WorkflowConfig<any>[]
 }
+
+export type ScheduleConfig = {
+  /**
+   * The cron for scheduling the job.
+   *
+   * @example
+   *     ┌───────────── (optional) second (0 - 59)
+   *     │ ┌───────────── minute (0 - 59)
+   *     │ │ ┌───────────── hour (0 - 23)
+   *     │ │ │ ┌───────────── day of the month (1 - 31)
+   *     │ │ │ │ ┌───────────── month (1 - 12)
+   *     │ │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+   *     │ │ │ │ │ │
+   *     │ │ │ │ │ │
+   *  - '* 0 * * * *' every hour at minute 0
+   *  - '* 0 0 * * *' daily at midnight
+   *  - '* 0 0 * * 0' weekly at midnight on Sundays
+   *  - '* 0 0 1 * *' monthly at midnight on the 1st day of the month
+   *  - '* 0/5 * * * *' every 5 minutes
+   *  - '* * * * * *' every second
+   */
+  cron: string
+  /**
+   * Queue to which the scheduled job will be added.
+   */
+  queue: string
+}

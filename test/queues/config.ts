@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import type { TaskConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -121,6 +122,15 @@ export default buildConfigWithDefaults({
       },
     },
     tasks: [
+      {
+        schedule: [{ cron: '* * * * * *', queue: 'schedules' }],
+        slug: 'EverySecond',
+        handler: () => {
+          return {
+            output: {},
+          }
+        },
+      },
       {
         retries: 2,
         slug: 'UpdatePost',
