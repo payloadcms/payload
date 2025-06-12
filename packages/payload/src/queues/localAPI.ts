@@ -99,6 +99,13 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
   run: async (args?: {
     /**
+     * If you want to run jobs from all queues, set this to true.
+     * If you set this to true, the `queue` property will be ignored.
+     *
+     * @default false
+     */
+    allQueues?: boolean
+    /**
      * The maximum number of jobs to run in this invocation
      *
      * @default 10
@@ -114,7 +121,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     /**
      * If you want to run jobs from a specific queue, set this to the queue name.
      *
-     * @default all jobs from all queues will be executed.
+     * @default jobs from the `default` queue will be executed.
      */
     queue?: string
     req?: PayloadRequest
@@ -128,6 +135,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
     return await runJobs({
+      allQueues: args?.allQueues,
       limit: args?.limit,
       overrideAccess: args?.overrideAccess !== false,
       processingOrder: args?.processingOrder,

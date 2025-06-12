@@ -39,7 +39,8 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { limit, queue } = req.query as {
+    const { allQueues, limit, queue } = req.query as {
+      allQueues?: boolean
       limit?: number
       queue?: string
     }
@@ -53,6 +54,10 @@ export const runJobsEndpoint: Endpoint = {
 
     if (typeof limit !== 'undefined') {
       runJobsArgs.limit = Number(limit)
+    }
+
+    if (allQueues && !(typeof allQueues === 'string' && allQueues === 'false')) {
+      runJobsArgs.allQueues = true
     }
 
     let noJobsRemaining = false
