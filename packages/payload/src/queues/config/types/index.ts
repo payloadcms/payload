@@ -42,6 +42,13 @@ export type RunJobAccessArgs = {
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
 
+export type SanitizedJobsConfig = {
+  /**
+   * If set to `true`, the job system is enabled and a payload-jobs collection exists.
+   * This property is automatically set during sanitization.
+   */
+  enabled?: boolean
+} & JobsConfig
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.

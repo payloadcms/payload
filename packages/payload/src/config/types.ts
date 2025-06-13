@@ -51,6 +51,7 @@ import type {
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -1250,7 +1251,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
+  jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
@@ -1275,6 +1276,7 @@ export type SanitizedConfig = {
   | 'endpoint'
   | 'globals'
   | 'i18n'
+  | 'jobs'
   | 'localization'
   | 'upload'
 >
