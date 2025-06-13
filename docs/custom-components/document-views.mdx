@@ -184,7 +184,7 @@ export function MyCustomTabComponent(props: DocumentTabClientProps) {
 
 You can restrict access to specific Document Views by using the `views.edit.[key].condition` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals). This allows you to control which user roles can access specific views.
 
-To restrict access, define a condition function that returns a `boolean`. This function receives both the current `user` and the relevant `doc` as arguments.
+To restrict access, define a condition function that returns a `boolean`. This function receives both the `req` and the relevant `doc` as arguments.
 
 If the condition returns `false`, the corresponding **view and its tab** will not be rendered or accessible to the user.
 
@@ -196,7 +196,7 @@ If the condition returns `false`, the corresponding **view and its tab** will no
     views: {
       edit: {
         api: {
-          condition: ({ doc, user }) => {
+          condition: ({ doc, req: { user } }) => {
             return user?.roles?.includes('admin') ?? false
           },
         },

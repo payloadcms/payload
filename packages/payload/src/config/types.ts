@@ -343,14 +343,7 @@ export type Endpoint = {
 
 export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
-export type ViewCondition = (args: {
-  collectionConfig: SanitizedCollectionConfig
-  config: SanitizedConfig
-  doc: Data
-  globalConfig: SanitizedGlobalConfig
-  permissions: SanitizedPermissions
-  user: TypedUser
-}) => boolean
+export type ViewCondition = (args: { doc: Data; req: PayloadRequest }) => boolean
 
 export type EditViewConfig = {
   condition?: ViewCondition

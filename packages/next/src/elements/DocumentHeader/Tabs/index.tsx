@@ -4,6 +4,7 @@ import type {
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -29,9 +30,9 @@ export const DocumentTabs: React.FC<{
   i18n: I18n
   payload: Payload
   permissions: SanitizedPermissions
-  user: TypedUser
+  req?: PayloadRequest
 }> = (props) => {
-  const { collectionConfig, doc, globalConfig, i18n, payload, permissions, user } = props
+  const { collectionConfig, doc, globalConfig, i18n, payload, permissions, req } = props
   const { config } = payload
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
@@ -73,12 +74,8 @@ export const DocumentTabs: React.FC<{
                   (viewCondition &&
                     Boolean(
                       viewCondition({
-                        collectionConfig,
-                        config,
                         doc,
-                        globalConfig,
-                        permissions,
-                        user,
+                        req,
                       }),
                     ))
 

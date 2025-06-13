@@ -9,8 +9,8 @@ export const ViewConditionsGlobal: GlobalConfig = {
       views: {
         edit: {
           api: {
-            condition: ({ user }) => {
-              const isAdmin = 'roles' in user && user?.roles?.includes('admin')
+            condition: ({ req: { user } }) => {
+              const isAdmin = user && 'roles' in user && user?.roles?.includes('admin')
               if (isAdmin) {
                 return true
               }

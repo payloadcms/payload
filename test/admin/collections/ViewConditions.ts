@@ -9,9 +9,10 @@ export const ViewConditions: CollectionConfig = {
       views: {
         edit: {
           api: {
-            condition: ({ user, doc }) => {
+            condition: (args) => {
+              const { doc, req } = args
               const trueTitle = doc?.title === 't'
-              if (user?.roles?.includes('admin') || trueTitle) {
+              if (req.user?.roles?.includes('admin') || trueTitle) {
                 return true
               } else {
                 return false
