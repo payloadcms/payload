@@ -88,7 +88,7 @@ export const MyCollection: CollectionConfig = {
 
 ### Edit View
 
-The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. the Edit View is keyed under the `default` property in the `views.edit` object.
+The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. The Edit View is keyed under the `default` property in the `views.edit` object.
 
 For more information on customizing the Edit View, see the [Edit View](./edit-view) documentation.
 
@@ -107,8 +107,8 @@ export const MyCollection: CollectionConfig = {
     components: {
       views: {
         edit: {
-          myCustomTab: {
-            Component: '/path/to/MyCustomTab',
+          myCustomView: {
+            Component: '/path/to/MyCustomView',
             path: '/my-custom-tab',
             // highlight-start
             tab: {
@@ -116,7 +116,7 @@ export const MyCollection: CollectionConfig = {
             },
             // highlight-end
           },
-          anotherCustomTab: {
+          anotherCustomView: {
             Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start

@@ -80,6 +80,7 @@ export interface Config {
     'focal-only': FocalOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
+    'allow-list-media': AllowListMedia;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
     'without-enlarge': WithoutEnlarge;
@@ -125,6 +126,7 @@ export interface Config {
     'focal-only': FocalOnlySelect<false> | FocalOnlySelect<true>;
     'focal-no-sizes': FocalNoSizesSelect<false> | FocalNoSizesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
     'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
@@ -719,6 +721,24 @@ export interface FocalOnly {
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media".
+ */
+export interface AllowListMedia {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1402,6 +1422,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'allow-list-media';
+        value: string | AllowListMedia;
       } | null)
     | ({
         relationTo: 'animated-type-media';
@@ -2122,6 +2146,23 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media_select".
+ */
+export interface AllowListMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

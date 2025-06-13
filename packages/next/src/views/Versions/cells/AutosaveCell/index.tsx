@@ -71,13 +71,13 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
     const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
 
     if (formattedLabel) {
-      publishedLocalePill = <Pill>{formattedLabel}</Pill>
+      publishedLocalePill = <Pill size="small">{formattedLabel}</Pill>
     }
   }
 
   return (
     <div className={`${baseClass}__items`}>
-      {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
+      {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
       {status && renderPill(rowData, latestVersion, currentLabel, previousLabel, pillStyle)}
       {publishedLocalePill}
     </div>

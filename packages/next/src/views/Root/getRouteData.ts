@@ -103,6 +103,7 @@ export const getRouteData = ({
     config,
     importMap,
     route: currentRoute,
+    routeParams: {},
     searchParams,
   }
 
@@ -212,6 +213,8 @@ export const getRouteData = ({
         `/${segmentOne}` === config.admin.routes.browseByFolder
       ) {
         // --> /browse-by-folder/:folderID
+        initPageOptions.routeParams.folderID = folderID
+
         ViewToRender = {
           Component: oneSegmentViews.browseByFolder,
         }
@@ -221,6 +224,7 @@ export const getRouteData = ({
         folderID = segmentTwo
       } else if (isCollection && matchedCollection) {
         // --> /collections/:collectionSlug
+        initPageOptions.routeParams.collection = matchedCollection.slug
 
         ViewToRender = {
           Component: ListView,
@@ -234,6 +238,7 @@ export const getRouteData = ({
         )
       } else if (isGlobal && matchedGlobal) {
         // --> /globals/:globalSlug
+        initPageOptions.routeParams.global = matchedGlobal.slug
 
         ViewToRender = {
           Component: DocumentView,
@@ -256,6 +261,8 @@ export const getRouteData = ({
     default:
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
+        initPageOptions.routeParams.collection = segmentOne
+
         ViewToRender = {
           Component: Verify,
         }
@@ -264,10 +271,14 @@ export const getRouteData = ({
         templateType = 'minimal'
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
+        initPageOptions.routeParams.collection = matchedCollection.slug
         if (config.folders && segmentThree === config.folders.slug && matchedCollection.folders) {
           // Collection Folder Views
           // --> /collections/:collectionSlug/:folderCollectionSlug
           // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
+          initPageOptions.routeParams.folderCollection = segmentThree
+          initPageOptions.routeParams.folderID = segmentFour
+
           ViewToRender = {
             Component: CollectionFolderView,
           }
@@ -283,6 +294,9 @@ export const getRouteData = ({
           // --> /collections/:collectionSlug/:id/preview
           // --> /collections/:collectionSlug/:id/versions
           // --> /collections/:collectionSlug/:id/versions/:versionID
+          initPageOptions.routeParams.id = segmentThree
+          initPageOptions.routeParams.versionID = segmentFive
+
           ViewToRender = {
             Component: DocumentView,
           }
@@ -306,6 +320,8 @@ export const getRouteData = ({
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
+        initPageOptions.routeParams.global = matchedGlobal.slug
+        initPageOptions.routeParams.versionID = segmentFour
 
         ViewToRender = {
           Component: DocumentView,

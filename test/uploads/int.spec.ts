@@ -12,6 +12,7 @@ import type { Enlarge, Media } from './payload-types.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  allowListMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -542,6 +543,48 @@ describe('Collections - Uploads', () => {
 
         expect(doc.docs[0].image).toBeFalsy()
       })
+    })
+
+    describe('filters', () => {
+      it.each`
+        url                                  | collection            | errorContains
+        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'unsafe'}
+        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'unsafe'}
+        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'unsafe'}
+        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
+        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
+        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'unsafe'}
+        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'unsafe'}
+        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://[::1]/file.png'}           | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
+      `(
+        'should block or filter uploading from $collection with URL: $url',
+        async ({ url, collection, errorContains }) => {
+          await expect(
+            payload.create({
+              collection,
+              data: {
+                filename: 'test.png',
+                url,
+              },
+            }),
+          ).rejects.toThrow(
+            expect.objectContaining({
+              name: 'FileRetrievalError',
+              message: expect.stringContaining(errorContains),
+            }),
+          )
+        },
+      )
     })
   })
 

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -236,7 +235,7 @@ export const updateOperation = async <
       } catch (error) {
         errors.push({
           id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null
@@ -263,6 +262,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
 
@@ -270,6 +270,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
     await killTransaction(args.req)

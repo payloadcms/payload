@@ -4,6 +4,7 @@ import type {
   DocumentViewClientProps,
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
+  EditViewComponent,
   PayloadComponent,
 } from 'payload'
 
@@ -17,20 +18,25 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
-import type { ViewFromConfig } from './getViewsFromConfig.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getDocumentView } from './getDocumentView.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
+
+export type ViewToRender =
+  | EditViewComponent
+  | PayloadComponent<DocumentViewServerProps>
+  | React.FC
+  | React.FC<DocumentViewClientProps>
 
 /**
  * This function is responsible for rendering
@@ -88,13 +94,6 @@ export const renderDocument = async ({
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
-
-  let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<DocumentViewServerProps>
-  let DefaultView: ViewFromConfig<DocumentViewServerProps>
-  let ErrorView: ViewFromConfig<AdminViewServerProps>
-
-  let apiURL: string
 
   // Fetch the doc required for the view
   let doc =
@@ -190,103 +189,63 @@ export const renderDocument = async ({
     user,
   }
 
-  if (collectionConfig) {
-    if (
-      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug) &&
-      !overrideEntityVisibility
-    ) {
-      throw new Error('not-found')
-    }
-
-    const params = new URLSearchParams()
-
-    if (collectionConfig.versions?.drafts) {
-      params.append('draft', 'true')
-    }
-
-    if (locale?.code) {
-      params.append('locale', locale.code)
-    }
-
-    const apiQueryParams = `?${params.toString()}`
-
-    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
-
-    RootViewOverride =
-      collectionConfig?.admin?.components?.views?.edit?.root &&
-      'Component' in collectionConfig.admin.components.views.edit.root
-        ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
-        : null
-
-    if (!RootViewOverride) {
-      const collectionViews = getViewsFromConfig({
-        collectionConfig,
-        config,
-        doc,
-        docPermissions,
-        req,
-        routeSegments: segments,
-      })
-
-      CustomView = collectionViews?.CustomView
-      DefaultView = collectionViews?.DefaultView
-      ErrorView = collectionViews?.ErrorView
-    }
-
-    if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-      ErrorView = {
-        Component: NotFoundView,
-      }
-    }
+  if (
+    !overrideEntityVisibility &&
+    ((collectionSlug &&
+      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) ||
+      (globalSlug && !visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)))
+  ) {
+    throw new Error('not-found')
   }
 
-  if (globalConfig) {
-    if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
-      throw new Error('not-found')
-    }
+  const formattedParams = new URLSearchParams()
 
-    const params = new URLSearchParams({
-      locale: locale?.code,
-    })
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    formattedParams.append('draft', 'true')
+  }
 
-    if (globalConfig.versions?.drafts) {
-      params.append('draft', 'true')
-    }
+  if (locale?.code) {
+    formattedParams.append('locale', locale.code)
+  }
 
-    if (locale?.code) {
-      params.append('locale', locale.code)
-    }
+  const apiQueryParams = `?${formattedParams.toString()}`
 
-    const apiQueryParams = `?${params.toString()}`
+  const apiURL = collectionSlug
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+    : globalSlug
+      ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
+      : ''
 
-    apiURL = `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
+  let View: ViewToRender = null
 
-    RootViewOverride =
-      globalConfig?.admin?.components?.views?.edit?.root &&
-      'Component' in globalConfig.admin.components.views.edit.root
+  let showHeader = true
+
+  const RootViewOverride =
+    collectionConfig?.admin?.components?.views?.edit?.root &&
+      'Component' in collectionConfig.admin.components.views.edit.root
+      ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
+      : globalConfig?.admin?.components?.views?.edit?.root &&
+        'Component' in globalConfig.admin.components.views.edit.root
         ? globalConfig?.admin?.components?.views?.edit?.root?.Component
         : null
 
-    if (!RootViewOverride) {
-      const globalViews = getViewsFromConfig({
-        config,
-        doc,
-        docPermissions,
-        globalConfig,
-        req,
-        routeSegments: segments,
-      })
+  if (RootViewOverride) {
+    View = RootViewOverride
+    showHeader = false
+  } else {
+    ; ({ View } = getDocumentView({
+      collectionConfig,
+      config,
+      doc,
+      docPermissions,
+      globalConfig,
+      req,
+      routeSegments: segments,
+    }))
+  }
 
-      CustomView = globalViews?.CustomView
-      DefaultView = globalViews?.DefaultView
-      ErrorView = globalViews?.ErrorView
-
-      if (!CustomView && !DefaultView && !RootViewOverride && !ErrorView) {
-        ErrorView = {
-          Component: NotFoundView,
-        }
-      }
-    }
+  if (!View) {
+    View = NotFoundView
   }
 
   /**
@@ -375,7 +334,7 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        {!RootViewOverride && !drawerSlug && (
+        {showHeader && !drawerSlug && (
           <DocumentHeader
             collectionConfig={collectionConfig}
             doc={doc}
@@ -388,23 +347,12 @@ export const renderDocument = async ({
         )}
         <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
-          {ErrorView
-            ? RenderServerComponent({
-                clientProps,
-                Component: ErrorView.ComponentConfig || ErrorView.Component,
-                importMap,
-                serverProps: documentViewServerProps,
-              })
-            : RenderServerComponent({
-                clientProps,
-                Component: RootViewOverride
-                  ? RootViewOverride
-                  : CustomView?.ComponentConfig || CustomView?.Component
-                    ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component,
-                importMap,
-                serverProps: documentViewServerProps,
-              })}
+          {RenderServerComponent({
+            clientProps,
+            Component: View,
+            importMap,
+            serverProps: documentViewServerProps,
+          })}
         </EditDepthProvider>
       </DocumentInfoProvider>
     ),
