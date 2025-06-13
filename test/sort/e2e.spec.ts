@@ -80,7 +80,7 @@ describe('Sort functionality', () => {
     await page.goto(url.list)
 
     await page.getByText('Join A').click()
-    await expect(page.locator('.sort-header button')).toHaveCount(2)
+    await expect(page.locator('.sort-header button')).toHaveCount(3)
 
     await assertRows(0, 'A', 'B', 'C', 'D')
     await moveRow(2, 3, 'success', 0) // move to middle
