@@ -72,6 +72,7 @@ describe('Document View', () => {
   let placeholderURL: AdminUrlUtil
   let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
+  let reorderTabsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -89,6 +90,7 @@ describe('Document View', () => {
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
+    reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -653,26 +655,21 @@ describe('Document View', () => {
 
   describe('reordering tabs', () => {
     beforeEach(async () => {
-      await page.goto(placeholderURL.create)
+      await page.goto(reorderTabsURL.create)
+      await page.locator('#field-title').fill('Reorder Tabs')
       await saveDocAndAssert(page)
     })
 
     test('collection — should show live preview as first tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const firstTab = tabs.first()
-      await expect(firstTab).toContainText('API')
-    })
-
-    test('collection — should show custom tab as second tab', async () => {
-      const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
-      const secondTab = tabs.nth(1)
-      await expect(secondTab).toContainText('Test')
+      await expect(firstTab).toContainText('Live Preview')
     })
 
     test('collection — should show edit as third tab', async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
-      const thirdTab = tabs.nth(2)
-      await expect(thirdTab).toContainText('Edit')
+      const secondTab = tabs.nth(2)
+      await expect(secondTab).toContainText('Edit')
     })
   })
 
