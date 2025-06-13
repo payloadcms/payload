@@ -1,5 +1,12 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
+import type {
+  ArrayField,
+  CollectionSlug,
+  CustomComponent,
+  Field,
+  RelationshipField,
+  User,
+} from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -116,6 +123,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         rowFields?: never
         tenantFieldAccess?: never
       }
+  /**
+   * Override or disable the TenantSelector shown above the nav.
+   *
+   * - supply a `CustomComponent` → your component is rendered
+   * - supply `null`              → no selector is rendered
+   * - leave it `undefined`       → the default selector is rendered
+   *
+   * @default undefined
+   */
+  tenantSelectorComponent?: CustomComponent | null
   /**
    * Customize tenant selector label
    *
