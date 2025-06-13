@@ -30,7 +30,8 @@
       }
     }
     &__label {
-      color: var(--theme-elevation-300);
+      font-weight: 400;
+      color: var(--theme-elevation-600);
     }
 
     &__locale-label {
