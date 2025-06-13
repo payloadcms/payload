@@ -13,6 +13,7 @@ import type {
   SanitizedCollectionConfig,
   ServerComponentProps,
   StaticLabel,
+  ViewTypes,
 } from 'payload'
 
 import {
@@ -49,6 +50,7 @@ export type BuildColumnStateArgs = {
   serverFields: Field[]
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 } & (
   | {
       collectionSlug: CollectionSlug
@@ -82,6 +84,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     serverFields,
     sortColumnProps,
     useAsTitle,
+    viewType,
   } = args
 
   // clientFields contains the fake `id` column
@@ -250,6 +253,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               payload,
               rowIndex,
               serverField,
+              viewType,
             })
           })
         : [],

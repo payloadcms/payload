@@ -17,6 +17,7 @@ import type { initPage } from '../../utilities/initPage/index.js'
 import { Account } from '../Account/index.js'
 import { BrowseByFolder } from '../BrowseByFolder/index.js'
 import { CollectionFolderView } from '../CollectionFolders/index.js'
+import { TrashView } from '../CollectionTrash/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
@@ -272,7 +273,47 @@ export const getRouteData = ({
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
         initPageOptions.routeParams.collection = matchedCollection.slug
-        if (config.folders && segmentThree === config.folders.slug && matchedCollection.folders) {
+
+        const isTrashRoute = segmentThree === 'trash'
+        const isTrashDocRoute = segmentThree === 'trash' && typeof segmentFour === 'string'
+
+        if (isTrashDocRoute) {
+          // --> /collections/:collectionSlug/trash/:id (read-only)
+          initPageOptions.routeParams.id = segmentFour
+
+          ViewToRender = {
+            Component: DocumentView,
+          }
+
+          templateClassName = `collection-default-edit`
+          templateType = 'default'
+          viewType = 'document'
+
+          documentSubViewType = 'default'
+
+          attachViewActions({
+            collectionOrGlobal: matchedCollection,
+            serverProps,
+            viewKeyArg: 'default',
+          })
+        } else if (isTrashRoute) {
+          // --> /collections/:collectionSlug/trash
+          ViewToRender = {
+            Component: TrashView,
+          }
+
+          templateClassName = `${segmentTwo}-trash`
+          templateType = 'default'
+          viewType = 'trash'
+
+          serverProps.viewActions = serverProps.viewActions.concat(
+            matchedCollection.admin.components?.views?.list?.actions ?? [],
+          )
+        } else if (
+          config.folders &&
+          segmentThree === config.folders.slug &&
+          matchedCollection.folders
+        ) {
           // Collection Folder Views
           // --> /collections/:collectionSlug/:folderCollectionSlug
           // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID

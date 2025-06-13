@@ -1,5 +1,5 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -14,9 +14,10 @@ import {
   ListBulkUploadButton,
   ListCreateNewButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
+import { ListTrashViewPill } from '../../../elements/ListTrashViewPill/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { ListSelection } from '../ListSelection/index.js'
 import './index.scss'
+import { ListSelection } from '../ListSelection/index.js'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -30,6 +31,7 @@ export type ListHeaderProps = {
   hasCreatePermission: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
+  isTrashEnabled?: boolean
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
   /** @deprecated This prop will be removed in the next major version.
@@ -43,7 +45,7 @@ export type ListHeaderProps = {
   /** @deprecated This prop will be removed in the next major version. */
   t?: TFunction
   TitleActions?: React.ReactNode[]
-  viewType?: 'folders' | 'list'
+  viewType?: ViewTypes
 }
 
 export const CollectionListHeader: React.FC<ListHeaderProps> = ({
@@ -55,6 +57,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   hasCreatePermission,
   i18n,
   isBulkUploadEnabled,
+  isTrashEnabled,
   newDocumentURL,
   onBulkUploadSuccess,
   openBulkUpload,
@@ -63,6 +66,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
+  const isTrashRoute = viewType === 'trash'
 
   if (isInDrawer) {
     return (
@@ -107,6 +111,13 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
           />
         ),
+        isTrashEnabled && (
+          <ListTrashViewPill
+            collectionConfig={collectionConfig}
+            key="list-header-trash-view-button"
+            viewType={viewType}
+          />
+        ),
         collectionConfig.folders && config.folders && (
           <ListFolderPills
             collectionConfig={collectionConfig}
@@ -120,7 +131,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
       className={className}
       title={getTranslation(collectionConfig?.labels?.plural, i18n)}
       TitleActions={[
-        hasCreatePermission && (
+        hasCreatePermission && !isTrashRoute && (
           <ListCreateNewButton
             collectionConfig={collectionConfig}
             hasCreatePermission={hasCreatePermission}
@@ -128,7 +139,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             newDocumentURL={newDocumentURL}
           />
         ),
-        hasCreatePermission && isBulkUploadEnabled && (
+        hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (
           <ListBulkUploadButton
             collectionSlug={collectionConfig.slug}
             hasCreatePermission={hasCreatePermission}

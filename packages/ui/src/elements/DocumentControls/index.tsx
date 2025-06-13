@@ -55,6 +55,7 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  readonly isTrashed?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
@@ -85,6 +86,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    isTrashed,
     onDelete,
     onDrawerCreateNew,
     onDuplicate,
@@ -171,7 +173,7 @@ export const DocumentControls: React.FC<{
               {showLockedMetaIcon && (
                 <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {showFolderMetaIcon && config.folders && (
+              {showFolderMetaIcon && config.folders && !isTrashed && (
                 <MoveDocToFolder
                   folderCollectionSlug={config.folders.slug}
                   folderFieldName={config.folders.fieldName}
