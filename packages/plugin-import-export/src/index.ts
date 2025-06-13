@@ -1,4 +1,4 @@
-import type { Config, JobsConfig } from 'payload'
+import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
@@ -47,12 +47,6 @@ export const importExportPlugin =
       const components = collection.admin.components || {}
       if (!components.listMenuItems) {
         components.listMenuItems = []
-      }
-      if (!components.edit) {
-        components.edit = {}
-      }
-      if (!components.edit.SaveButton) {
-        components.edit.SaveButton = '@payloadcms/plugin-import-export/rsc#ExportSaveButton'
       }
       components.listMenuItems.push({
         clientProps: {
