@@ -33,8 +33,6 @@ export const DocumentTabs: React.FC<{
     globalConfig,
   })
 
-  const defaultTabs = getTabs({ collectionConfig, globalConfig })
-
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
