@@ -276,6 +276,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         localized={localized}
         path={path}
         readOnly={readOnly}
+        required={required}
       />
       {BeforeInput}
       {(rows?.length > 0 || (!valid && (showRequired || showMinRows))) && (

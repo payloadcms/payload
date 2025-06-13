@@ -14,6 +14,7 @@ type NullifyLocaleFieldProps = {
   readonly localized: boolean
   readonly path: string
   readonly readOnly?: boolean
+  readonly required: boolean
 }
 
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
@@ -21,6 +22,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   localized,
   path,
   readOnly = false,
+  required,
 }) => {
   const { code: currentLocale } = useLocale()
   const {
@@ -30,8 +32,8 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   const { t } = useTranslation()
   const { dispatchFields, setModified } = useForm()
 
-  if (readOnly) {
-    // do not render when field is read-only
+  if (readOnly || !required) {
+    // do not render when field is read-only or not required
     return null
   }
 
