@@ -116,6 +116,7 @@ export default buildConfigWithDefaults({
         },
       }
     },
+    scheduler: 'runEndpoint',
     processingOrder: {
       queues: {
         lifo: '-createdAt',

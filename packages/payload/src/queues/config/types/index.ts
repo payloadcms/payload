@@ -112,6 +112,18 @@ export type JobsConfig = {
    */
   runHooks?: boolean
   /**
+   * Determines how task / workflow schedules should be handled. This
+   * property needs to be set in order for the `schedule` property to work.
+   *
+   * If set to `cron`, the job system will use cron jobs to run scheduled tasks.
+   * If set to `runEndpoint`, the job system will run scheduled tasks when calling the /api/payload-jobs/run endpoint.
+   *
+   * @remark On serverless platforms like Vercel, you should use `runEndpoint` to avoid issues with cron jobs not running as expected.
+   * You can then use Vercel Cron to call the `/api/payload-jobs/run` endpoint at specified intervals - this will handle both schedules
+   * and autorunning jobs.
+   */
+  scheduler?: 'cron' | 'runEndpoint'
+  /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
    * @param payload

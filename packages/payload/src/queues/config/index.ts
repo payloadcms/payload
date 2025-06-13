@@ -8,7 +8,7 @@ import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const jobsCollectionSlug = 'payload-jobs'
 
-export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
+export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (config) => {
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 

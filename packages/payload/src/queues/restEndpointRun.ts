@@ -30,7 +30,9 @@ export const runJobsEndpoint: Endpoint = {
       queue?: string
     }
 
-    await handleSchedules()
+    if (req?.payload?.config?.jobs?.scheduler === 'runEndpoint') {
+      await handleSchedules()
+    }
 
     const runJobsArgs: RunJobsArgs = {
       queue,
