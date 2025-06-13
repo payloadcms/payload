@@ -17,7 +17,6 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -428,6 +427,33 @@ describe('Relationships', () => {
 
         expect(result.totalDocs).toBe(1)
         expect(result.docs[0].id).toBe(id)
+      })
+
+      it('should allow 4x deep querying', async () => {
+        const movie_1 = await payload.create({
+          collection: 'movies',
+          data: { name: 'random_movie_1' },
+        })
+        const director_1 = await payload.create({
+          collection: 'directors',
+          data: { name: 'random_director_1', movie: movie_1.id },
+        })
+        const movie_2 = await payload.create({
+          collection: 'movies',
+          data: { name: 'random_movie_2', director: director_1.id },
+        })
+        const director_2 = await payload.create({
+          collection: 'directors',
+          data: { name: 'random_director_2', movie: movie_2.id },
+        })
+
+        const res = await payload.find({
+          collection: 'directors',
+          where: { 'movie.director.movie.name': { equals: 'random_movie_1' } },
+        })
+
+        expect(res.totalDocs).toBe(1)
+        expect(res.docs[0].id).toBe(director_2.id)
       })
 
       describe('hasMany relationships', () => {
