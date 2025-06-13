@@ -214,7 +214,7 @@ export type TransformDataWithSelect<
     ? Data
     : // START Handle types when they aren't generated
       // For example in any package in this repository outside of tests / plugins
-      // This stil gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
+      // This still gives us autocomplete when using include select mode, i.e select: {title :true} returns type {title: any, id: string | number}
       string extends keyof Omit<Data, 'id'>
       ? Select extends SelectIncludeType
         ? {
@@ -234,7 +234,31 @@ export type TransformDataWithSelect<
               : // select 'id' always
                 K extends 'id'
                 ? K
-                : never]: Data[K]
+                : never]: Extract<Data[K], TypeWithID> extends never // if the select field is not to-one relation
+              ? Extract<Data[K], Array<unknown>> extends never // if the select field is not to-many relation
+                ? Data[K] // do nothing
+                : // drop foreign keys from to-many relations
+                  Extract<Data[K], Array<unknown>> extends Array<infer U>
+                  ? Extract<U, DataFromCollectionSlug<CollectionSlug>> extends never // if the select field is object but not a collection (e.g., a group)
+                    ?
+                        | Array<
+                            Exclude<
+                              // transform nested object that are not collections
+                              K extends keyof Select
+                                ? Select[K] extends object
+                                  ? TransformDataWithSelect<U, Select[K]>
+                                  : U
+                                : U,
+                              Extract<U, TypeWithID>['id']
+                            >
+                          >
+                        | Exclude<Data[K], Array<unknown>>
+                    :
+                        | Array<Exclude<U, Extract<U, TypeWithID>['id']>>
+                        | Exclude<Data[K], Array<unknown>>
+                  : never
+              : // drop foreign keys from to-one relations
+                Exclude<Data[K], Extract<Data[K], TypeWithID>['id']>
           }
         : // Handle exclude mode
           {
