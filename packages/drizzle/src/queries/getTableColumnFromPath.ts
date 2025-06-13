@@ -355,11 +355,7 @@ export const getTableColumnFromPath = ({
           throw new APIError('Not supported')
         }
 
-        let newCollectionPath = pathSegments.slice(1).join('.')
-        // where: { relatedPosts: { equals: 1}} -> { 'relatedPosts.id': { equals: 1}}
-        if (!newCollectionPath) {
-          newCollectionPath = 'id'
-        }
+        const newCollectionPath = pathSegments.slice(1).join('.')
 
         if (field.hasMany) {
           const relationTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
