@@ -20,5 +20,21 @@ export const Users: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      name: 'roles',
+      type: 'select',
+      hasMany: true,
+      options: [
+        {
+          label: 'Admin',
+          value: 'admin',
+        },
+        {
+          label: 'User',
+          value: 'user',
+        },
+      ],
+      defaultValue: 'user',
+    },
   ],
 }

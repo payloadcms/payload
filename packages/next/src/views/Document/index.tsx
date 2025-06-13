@@ -222,10 +222,10 @@ export const renderDocument = async ({
 
   const RootViewOverride =
     collectionConfig?.admin?.components?.views?.edit?.root &&
-    'Component' in collectionConfig.admin.components.views.edit.root
+      'Component' in collectionConfig.admin.components.views.edit.root
       ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
       : globalConfig?.admin?.components?.views?.edit?.root &&
-          'Component' in globalConfig.admin.components.views.edit.root
+        'Component' in globalConfig.admin.components.views.edit.root
         ? globalConfig?.admin?.components?.views?.edit?.root?.Component
         : null
 
@@ -233,11 +233,13 @@ export const renderDocument = async ({
     View = RootViewOverride
     showHeader = false
   } else {
-    ;({ View } = getDocumentView({
+    ; ({ View } = getDocumentView({
       collectionConfig,
       config,
+      doc,
       docPermissions,
       globalConfig,
+      req,
       routeSegments: segments,
     }))
   }
@@ -335,10 +337,12 @@ export const renderDocument = async ({
         {showHeader && !drawerSlug && (
           <DocumentHeader
             collectionConfig={collectionConfig}
+            doc={doc}
             globalConfig={globalConfig}
             i18n={i18n}
             payload={payload}
             permissions={permissions}
+            req={req}
           />
         )}
         <HydrateAuthProvider permissions={permissions} />

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -25,6 +26,7 @@ import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
+import { ViewConditions } from './collections/ViewConditions.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
@@ -35,6 +37,7 @@ import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
+import { ViewConditionsGlobal } from './globals/ViewConditionsGlobal.js'
 import { seed } from './seed.js'
 import {
   customAdminRoutes,
@@ -175,6 +178,7 @@ export default buildConfigWithDefaults({
     with300Documents,
     ListDrawer,
     Placeholder,
+    ViewConditions,
     UseAsTitleGroupField,
   ],
   globals: [
@@ -187,6 +191,7 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
     Settings,
+    ViewConditionsGlobal,
   ],
   i18n: {
     translations: {
@@ -221,6 +226,15 @@ export default buildConfigWithDefaults({
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
     }
+
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'admin@payloadcms.com',
+        password: 'demo',
+        roles: ['admin'],
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

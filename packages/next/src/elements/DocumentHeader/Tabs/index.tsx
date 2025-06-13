@@ -1,31 +1,37 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Data,
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
+  TypedUser,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { getViewConfig } from './getViewConfig.js'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
-import { getTabs } from './tabs/index.js'
 import './index.scss'
+import { getTabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
+  doc: Data
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
   payload: Payload
   permissions: SanitizedPermissions
+  req?: PayloadRequest
 }> = (props) => {
-  const { collectionConfig, globalConfig, i18n, payload, permissions } = props
+  const { collectionConfig, doc, globalConfig, i18n, payload, permissions, req } = props
   const { config } = payload
 
   const tabs = getTabs({
@@ -38,13 +44,25 @@ export const DocumentTabs: React.FC<{
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {tabs?.map(({ tab, viewPath }, index) => {
+            {tabs?.map(({ name, tab, viewPath }, index) => {
               const { condition } = tab || {}
-
               const meetsCondition =
                 !condition || condition({ collectionConfig, config, globalConfig, permissions })
 
-              if (!meetsCondition) {
+              const viewConfig = getViewConfig({
+                name,
+                collectionConfig,
+                globalConfig,
+              })
+
+              const { condition: viewCondition } = viewConfig || {}
+
+              const meetsViewCondition = !viewCondition || viewCondition({
+                doc,
+                req,
+              })
+
+              if (!meetsCondition || !meetsViewCondition) {
                 return null
               }
 
