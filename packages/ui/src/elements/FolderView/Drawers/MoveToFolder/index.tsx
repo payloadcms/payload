@@ -231,7 +231,7 @@ function Content({
   }, [drawerSlug, isModalOpen, clearRouteCache, folderAddedToUnderlyingFolder])
 
   return (
-    <>
+    <div className={baseClass}>
       <DrawerActionHeader
         onCancel={() => {
           closeModal(drawerSlug)
@@ -358,7 +358,7 @@ function Content({
           onConfirm={onConfirmMove}
         />
       )}
-    </>
+    </div>
   )
 }
 

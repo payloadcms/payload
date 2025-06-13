@@ -43,6 +43,7 @@ export type FolderContextValue = {
   readonly allCollectionFolderSlugs?: CollectionSlug[]
   allowCreateCollectionSlugs: CollectionSlug[]
   breadcrumbs?: FolderBreadcrumb[]
+  checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
@@ -82,6 +83,7 @@ const Context = React.createContext<FolderContextValue>({
   allCollectionFolderSlugs: [],
   allowCreateCollectionSlugs: [],
   breadcrumbs: [],
+  checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
   currentFolder: null,
   documents: [],
@@ -202,6 +204,9 @@ export function FolderProvider({
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
 
+  const currentlySelectedIndexes = React.useRef(new Set<number>())
+
+  const [selectedCollectionCounter, setSelectedCollectionCounter] = React.useState({})
   const [FolderResultsComponent, setFolderResultsComponent] = React.useState(
     InitialFolderResultsComponent || (() => null),
   )
@@ -231,6 +236,7 @@ export function FolderProvider({
     setFocusedRowIndex(-1)
     setSelectedItemKeys(new Set())
     setLastSelectedIndex(undefined)
+    currentlySelectedIndexes.current = new Set()
   }, [])
 
   const mergeQuery = React.useCallback(
@@ -335,6 +341,39 @@ export function FolderProvider({
     ],
   )
 
+  const getSelectedItemsData = React.useCallback(
+    (selectedIndexes) => {
+      return [...subfolders, ...documents].reduce(
+        (acc, item, index) => {
+          if (selectedIndexes?.size && selectedIndexes.has(index)) {
+            // add the item key
+            acc.newSelectedItemKeys.add(item.itemKey)
+            // rebuild the selected collection counter
+            if (item.relationTo === folderCollectionSlug) {
+              item.value.assignedCollections?.forEach((collectionSlug) => {
+                if (!acc.newSelectedCollectionCounter[collectionSlug]) {
+                  acc.newSelectedCollectionCounter[collectionSlug] = 0
+                }
+                acc.newSelectedCollectionCounter[collectionSlug] += 1
+              })
+            } else {
+              if (!acc.newSelectedCollectionCounter[item.relationTo]) {
+                acc.newSelectedCollectionCounter[item.relationTo] = 0
+              }
+              acc.newSelectedCollectionCounter[item.relationTo] += 1
+            }
+          }
+          return acc
+        },
+        {
+          newSelectedCollectionCounter: {},
+          newSelectedItemKeys: new Set<FolderDocumentItemKey>(),
+        },
+      )
+    },
+    [subfolders, documents, folderCollectionSlug],
+  )
+
   const onItemKeyPress: FolderContextValue['onItemKeyPress'] = React.useCallback(
     ({ event, index, item }) => {
       const { code, ctrlKey, metaKey, shiftKey } = event
@@ -407,7 +446,7 @@ export function FolderProvider({
           if (allowMultiSelection && isShiftPressed) {
             event.preventDefault()
             newSelectedIndexes = getMetaSelection({
-              currentSelection: newSelectedIndexes,
+              currentSelection: currentlySelectedIndexes.current,
               toggleIndex: index,
             })
             setLastSelectedIndex(index)
@@ -438,14 +477,11 @@ export function FolderProvider({
         return
       }
 
-      setSelectedItemKeys(
-        [...subfolders, ...documents].reduce((acc, item, index) => {
-          if (newSelectedIndexes?.size && newSelectedIndexes.has(index)) {
-            acc.add(item.itemKey)
-          }
-          return acc
-        }, new Set<FolderDocumentItemKey>()),
-      )
+      currentlySelectedIndexes.current = newSelectedIndexes || new Set()
+      const { newSelectedCollectionCounter, newSelectedItemKeys } =
+        getSelectedItemsData(newSelectedIndexes)
+      setSelectedItemKeys(newSelectedItemKeys)
+      setSelectedCollectionCounter(newSelectedCollectionCounter)
 
       if (selectedItemKeys.size === 1 && code === 'Enter') {
         navigateAfterSelection({
@@ -456,12 +492,11 @@ export function FolderProvider({
     },
     [
       allowMultiSelection,
-      documents,
+      totalCount,
+      getSelectedItemsData,
       lastSelectedIndex,
       navigateAfterSelection,
-      subfolders,
-      totalCount,
-      selectedItemKeys,
+      selectedItemKeys.size,
     ],
   )
 
@@ -474,7 +509,7 @@ export function FolderProvider({
 
       if (allowMultiSelection && isCtrlPressed) {
         newSelectedIndexes = getMetaSelection({
-          currentSelection: newSelectedIndexes,
+          currentSelection: currentlySelectedIndexes.current,
           toggleIndex: index,
         })
       } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
@@ -504,14 +539,11 @@ export function FolderProvider({
       }
 
       if (newSelectedIndexes) {
-        setSelectedItemKeys(
-          [...subfolders, ...documents].reduce((acc, item, index) => {
-            if (newSelectedIndexes.size && newSelectedIndexes.has(index)) {
-              acc.add(item.itemKey)
-            }
-            return acc
-          }, new Set<FolderDocumentItemKey>()),
-        )
+        currentlySelectedIndexes.current = newSelectedIndexes || new Set()
+        const { newSelectedCollectionCounter, newSelectedItemKeys } =
+          getSelectedItemsData(newSelectedIndexes)
+        setSelectedItemKeys(newSelectedItemKeys)
+        setSelectedCollectionCounter(newSelectedCollectionCounter)
       }
 
       if (doubleClicked) {
@@ -522,11 +554,10 @@ export function FolderProvider({
       }
     },
     [
-      selectedItemKeys,
       allowMultiSelection,
       lastSelectedIndex,
-      subfolders,
-      documents,
+      selectedItemKeys,
+      getSelectedItemsData,
       navigateAfterSelection,
     ],
   )
@@ -602,6 +633,33 @@ export function FolderProvider({
     [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, serverURL, t],
   )
 
+  const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(
+    (item) => {
+      if (isDragging) {
+        const isSelected = selectedItemKeys.has(item.itemKey)
+        if (isSelected) {
+          return true
+        } else if (item.relationTo === folderCollectionSlug) {
+          // Disable folders if they do not support ALL of the selected collections
+          return Object.entries(selectedCollectionCounter).some(([slug, count]) => {
+            return !count || !item.value.assignedCollections.includes(slug)
+          })
+        } else {
+          return !selectedCollectionCounter?.[item.relationTo]
+        }
+      } else if (parentFolderContext.selectedItemKeys.has(item.itemKey)) {
+        return true
+      }
+    },
+    [
+      selectedCollectionCounter,
+      isDragging,
+      selectedItemKeys,
+      folderCollectionSlug,
+      parentFolderContext.selectedItemKeys,
+    ],
+  )
+
   // If a new component is provided, update the state so children can re-render with the new component
   React.useEffect(() => {
     if (InitialFolderResultsComponent) {
@@ -616,6 +674,7 @@ export function FolderProvider({
         allCollectionFolderSlugs,
         allowCreateCollectionSlugs,
         breadcrumbs,
+        checkIfItemIsDisabled,
         clearSelections,
         currentFolder: breadcrumbs?.[0]?.id
           ? formatFolderOrDocumentItem({

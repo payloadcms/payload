@@ -3,6 +3,7 @@ import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 import type { Document } from '../types/index.js'
 
 export type FolderInterface = {
+  assignedCollections: CollectionSlug[]
   documentsAndFolders?: {
     docs: {
       relationTo: CollectionSlug
@@ -14,6 +15,7 @@ export type FolderInterface = {
 } & TypeWithID
 
 export type FolderBreadcrumb = {
+  assignedCollections?: CollectionSlug[]
   id: null | number | string
   name: string
 }

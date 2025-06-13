@@ -70,6 +70,14 @@ export const createFolderCollection = ({
         name: 'assignedCollections',
         type: 'select',
         admin: {
+          components: {
+            Field: {
+              clientProps: {
+                options: collectionOptions,
+              },
+              path: '@payloadcms/ui#AssignedToSelect',
+            },
+          },
           position: 'sidebar',
         },
         hasMany: true,
