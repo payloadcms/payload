@@ -127,12 +127,6 @@ export interface Args {
    * NOTE: not recommended for production. This can slow down the initialization of Payload.
    */
   ensureIndexes?: boolean
-  /**
-   * Set to `true` to disable join aggregations and instead populate join fields via multiple queries.
-   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
-   * @default false
-   */
-  manualJoins?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -143,6 +137,13 @@ export interface Args {
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
+
+  /**
+   * Set to `false` to disable join aggregations and instead populate join fields via multiple queries.
+   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
+   * @default false
+   */
+  useJoinAggregations?: boolean
 }
 
 export type MongooseAdapter = {
@@ -209,12 +210,12 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
-  manualJoins = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
   transactionOptions = {},
   url,
+  useJoinAggregations = true,
 }: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
@@ -234,7 +235,6 @@ export function mongooseAdapter({
       ensureIndexes,
       // @ts-expect-error don't have globals model yet
       globals: undefined,
-      manualJoins,
       // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},
@@ -281,6 +281,7 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      useJoinAggregations,
     })
   }
 

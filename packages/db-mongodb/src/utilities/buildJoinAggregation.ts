@@ -44,7 +44,7 @@ export const buildJoinAggregation = async ({
   projection,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
-  if (adapter.manualJoins) {
+  if (!adapter.useJoinAggregations) {
     return
   }
   if (

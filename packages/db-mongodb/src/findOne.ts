@@ -68,7 +68,7 @@ export const findOne: FindOne = async function findOne(
     doc = await Model.findOne(query, {}, options)
   }
 
-  if (doc && this.manualJoins) {
+  if (doc && !this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
       collectionSlug,
