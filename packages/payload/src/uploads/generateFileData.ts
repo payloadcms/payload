@@ -67,6 +67,7 @@ export const generateFileData = async <T>({
   })
 
   const {
+    constructorOptions = {},
     disableLocalStorage,
     focalPoint: focalPointEnabled = true,
     formatOptions,
@@ -143,9 +144,11 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
+      Boolean(
+        resizeOptions || formatOptions || trimOptions || constructorOptions || file.tempFilePath,
+      )
 
-    const sharpOptions: SharpOptions = {}
+    const sharpOptions: SharpOptions = { ...constructorOptions }
 
     if (fileIsAnimatedType) {
       sharpOptions.animated = true
