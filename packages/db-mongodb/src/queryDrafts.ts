@@ -159,7 +159,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     result = await Model.paginate(versionQuery, paginationOptions)
   }
 
-  if (this.manualJoins) {
+  if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
       collectionSlug,

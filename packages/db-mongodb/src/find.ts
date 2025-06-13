@@ -156,7 +156,7 @@ export const find: Find = async function find(
     result = await Model.paginate(query, paginationOptions)
   }
 
-  if (this.manualJoins) {
+  if (!this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
       collectionSlug,

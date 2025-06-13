@@ -66,4 +66,4 @@ Limitations with [DocumentDB](https://aws.amazon.com/documentdb/), [Azure Cosmos
   - `disableIndexHints: true` to disable hinting to the DB to use `id` as index which can cause problems with Firestore.
   - `transactionOptions: false` to disable transactions
   - `compatabilityMode: 'firestore'` to enable Firestore compatibility mode. This does not guarantee full compatability, but solves some common issues such as producing valid sort aggregations and support for custom IDs of type number.
-  - `manualJoins: true` to disable join aggregations and instead populate join fields via multiple queries.
+  - `useJoinAggregations: false` to disable join aggregations and instead populate join fields via multiple queries.
