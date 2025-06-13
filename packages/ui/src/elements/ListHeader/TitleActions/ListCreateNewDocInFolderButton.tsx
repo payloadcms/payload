@@ -18,11 +18,13 @@ const baseClass = 'create-new-doc-in-folder'
 export function ListCreateNewDocInFolderButton({
   buttonLabel,
   collectionSlugs,
+  folderAssignedCollections,
   onCreateSuccess,
   slugPrefix,
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
+  folderAssignedCollections: CollectionSlug[]
   onCreateSuccess: (args: {
     collectionSlug: CollectionSlug
     doc: Record<string, unknown>
@@ -48,7 +50,6 @@ export function ListCreateNewDocInFolderButton({
       return acc
     }, []),
   )
-
   if (enabledCollections.length === 0) {
     return null
   }
@@ -63,9 +64,6 @@ export function ListCreateNewDocInFolderButton({
           el="div"
           onClick={() => {
             if (enabledCollections[0].slug === folderCollectionConfig.slug) {
-              if (enabledCollections.length === 2) {
-                setCreateCollectionSlug(enabledCollections[1].slug)
-              }
               openFolderDrawer()
             } else {
               setCreateCollectionSlug(enabledCollections[0].slug)
@@ -99,9 +97,6 @@ export function ListCreateNewDocInFolderButton({
                   key={index}
                   onClick={() => {
                     if (collection.slug === folderCollectionConfig.slug) {
-                      if (enabledCollections.length === 2) {
-                        setCreateCollectionSlug(enabledCollections[1].slug)
-                      }
                       openFolderDrawer()
                     } else {
                       setCreateCollectionSlug(collection.slug)
@@ -138,7 +133,9 @@ export function ListCreateNewDocInFolderButton({
       {collectionSlugs.includes(folderCollectionConfig.slug) && (
         <FolderDocumentDrawer
           initialData={{
-            assignedCollections: createCollectionSlug ? [createCollectionSlug] : undefined,
+            assignedCollections: createCollectionSlug
+              ? [createCollectionSlug]
+              : folderAssignedCollections,
             [folderFieldName]: folderID,
           }}
           onSave={async (result) => {

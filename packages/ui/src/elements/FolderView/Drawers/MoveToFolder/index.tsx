@@ -323,6 +323,7 @@ function Content({
               <ListCreateNewDocInFolderButton
                 buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                 collectionSlugs={[folderCollectionSlug]}
+                folderAssignedCollections={props.folderAssignedCollections}
                 key="create-folder"
                 onCreateSuccess={onCreateSuccess}
                 slugPrefix="create-new-folder-from-drawer--no-results"

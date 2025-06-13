@@ -236,6 +236,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     }
   }, [breadcrumbs, drawerDepth, getFolderRoute, router, setStepNav, startRouteTransition, t])
 
+  const nonFolderCollectionSlugs = allowCreateCollectionSlugs.filter(
+    (slug) => slug !== folderCollectionConfig.slug,
+  )
+
   return (
     <Fragment>
       <DndEventListener onDragEnd={onDragEnd} setIsDragging={setIsDragging} />
@@ -260,6 +264,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListCreateNewDocInFolderButton
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
+                  folderAssignedCollections={[]}
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -316,24 +321,22 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
+                    folderAssignedCollections={[]}
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
                   />
                 ),
-                folderID &&
-                  allowCreateCollectionSlugs.filter((slug) => slug !== folderCollectionConfig.slug)
-                    .length > 0 && (
-                    <ListCreateNewDocInFolderButton
-                      buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
-                      collectionSlugs={allowCreateCollectionSlugs.filter(
-                        (slug) => slug !== folderCollectionConfig.slug,
-                      )}
-                      key="create-document"
-                      onCreateSuccess={clearRouteCache}
-                      slugPrefix="create-document--no-results"
-                    />
-                  ),
+                folderID && nonFolderCollectionSlugs.length > 0 && (
+                  <ListCreateNewDocInFolderButton
+                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    collectionSlugs={nonFolderCollectionSlugs}
+                    folderAssignedCollections={[]}
+                    key="create-document"
+                    onCreateSuccess={clearRouteCache}
+                    slugPrefix="create-document--no-results"
+                  />
+                ),
               ].filter(Boolean)}
               Message={
                 <p>

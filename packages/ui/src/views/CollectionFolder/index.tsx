@@ -285,6 +285,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 <ListCreateNewDocInFolderButton
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
+                  folderAssignedCollections={[collectionSlug]}
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -323,6 +324,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
+                    folderAssignedCollections={[collectionSlug]}
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
@@ -332,6 +334,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                     collectionSlugs={[collectionSlug]}
+                    folderAssignedCollections={[collectionSlug]}
                     key="create-document"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-document--no-results"
