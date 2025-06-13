@@ -3,5 +3,6 @@ packages:
   - 'packages/*'
   - 'tools/*'
   - 'test'
+  - 'templates/blank'
   # exclude packages that are inside test directories
   # - '!**/test/**'

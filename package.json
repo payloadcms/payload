@@ -188,6 +188,9 @@
     "pnpm": "^9.7.0"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ],
     "overrides": {
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
