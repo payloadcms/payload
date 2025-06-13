@@ -398,6 +398,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     username: 'Korisničko ime',
     users: 'Корисници',
     value: 'Вредност',
+    viewing: 'Pregled',
     viewReadOnly: 'Прегледај само за читање',
     welcome: 'Добродошли',
     yes: 'Да',

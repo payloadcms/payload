@@ -400,6 +400,7 @@ export const azTranslations: DefaultTranslationsObject = {
     username: 'İstifadəçi adı',
     users: 'İstifadəçilər',
     value: 'Dəyər',
+    viewing: 'Baxış',
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
     yes: 'Bəli',

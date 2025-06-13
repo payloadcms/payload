@@ -399,6 +399,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     username: 'Nome de usuário',
     users: 'usuários',
     value: 'Valor',
+    viewing: 'Visualização',
     viewReadOnly: 'Visualizar somente leitura',
     welcome: 'Boas vindas',
     yes: 'Sim',

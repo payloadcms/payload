@@ -398,6 +398,7 @@ export const skTranslations: DefaultTranslationsObject = {
     username: 'Používateľské meno',
     users: 'Používatelia',
     value: 'Hodnota',
+    viewing: 'Prezeranie',
     viewReadOnly: 'Zobraziť iba na čítanie',
     welcome: 'Vitajte',
     yes: 'Áno',

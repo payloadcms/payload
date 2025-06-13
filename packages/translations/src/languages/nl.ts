@@ -402,6 +402,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     username: 'Gebruikersnaam',
     users: 'Gebruikers',
     value: 'Waarde',
+    viewing: 'Bekijken',
     viewReadOnly: 'Alleen-lezen weergave',
     welcome: 'Welkom',
     yes: 'Ja',

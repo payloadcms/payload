@@ -397,6 +397,7 @@ export const viTranslations: DefaultTranslationsObject = {
     username: 'Tên đăng nhập',
     users: 'Người dùng',
     value: 'Giá trị',
+    viewing: 'Xem',
     viewReadOnly: 'Xem chỉ đọc',
     welcome: 'Xin chào',
     yes: 'Đúng',

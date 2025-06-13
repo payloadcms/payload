@@ -383,6 +383,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     username: '用户名',
     users: '用户',
     value: '值',
+    viewing: '查看',
     viewReadOnly: '只读查看',
     welcome: '欢迎',
     yes: '是的',

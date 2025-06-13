@@ -408,6 +408,7 @@ export const frTranslations: DefaultTranslationsObject = {
     username: "Nom d'utilisateur",
     users: 'Utilisateurs',
     value: 'Valeur',
+    viewing: 'Visualisation',
     viewReadOnly: 'Afficher en lecture seule',
     welcome: 'Bienvenue',
     yes: 'Oui',

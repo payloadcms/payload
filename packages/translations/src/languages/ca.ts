@@ -399,6 +399,7 @@ export const caTranslations: DefaultTranslationsObject = {
     username: "Nom d'usuari",
     users: 'Usuaris',
     value: 'Valor',
+    viewing: 'Visualització',
     viewReadOnly: 'Veure només de lectura',
     welcome: 'Benvingut',
     yes: 'Sí',

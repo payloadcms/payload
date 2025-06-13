@@ -383,6 +383,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     username: '使用者名稱',
     users: '使用者',
     value: '值',
+    viewing: '查看',
     viewReadOnly: '僅檢視',
     welcome: '歡迎',
     yes: '是的',

@@ -19,7 +19,7 @@ export const generateCollectionTrashMetadata = async (
   const keywords: string = ''
 
   if (collectionConfig) {
-    title = getTranslation(collectionConfig.labels.singular, i18n)
+    title = getTranslation(collectionConfig.labels.plural, i18n)
   }
 
   title = `${title ? `${title} ` : title}${i18n.t('general:trash')}`

@@ -397,6 +397,7 @@ export const slTranslations: DefaultTranslationsObject = {
     username: 'Uporabniško ime',
     users: 'Uporabniki',
     value: 'Vrednost',
+    viewing: 'Ogled',
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
     yes: 'Da',

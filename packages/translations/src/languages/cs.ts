@@ -396,6 +396,7 @@ export const csTranslations: DefaultTranslationsObject = {
     username: 'Uživatelské jméno',
     users: 'Uživatelé',
     value: 'Hodnota',
+    viewing: 'Prohlížení',
     viewReadOnly: 'Zobrazit pouze pro čtení',
     welcome: 'Vítejte',
     yes: 'Ano',

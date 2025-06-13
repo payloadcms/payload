@@ -16,6 +16,7 @@ export type GenerateEditViewMetadata = (
   args: {
     collectionConfig?: null | SanitizedCollectionConfig
     globalConfig?: null | SanitizedGlobalConfig
+    isReadOnly?: boolean
     view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
@@ -41,6 +42,11 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     // `/:collection/:id`
     if (params.segments.length === 3) {
       fn = generateEditViewMetadata
+    }
+
+    // `/collections/:collection/trash/:id`
+    if (segments.length === 4 && segments[2] === 'trash') {
+      fn = (args) => generateEditViewMetadata({ ...args, isReadOnly: true })
     }
 
     // `/:collection/:id/:view`

@@ -396,6 +396,7 @@ export const faTranslations: DefaultTranslationsObject = {
     username: 'نام کاربری',
     users: 'کاربران',
     value: 'مقدار',
+    viewing: 'مشاهده',
     viewReadOnly: 'فقط برای خواندن مشاهده کنید',
     welcome: 'خوش‌آمدید',
     yes: 'بله',

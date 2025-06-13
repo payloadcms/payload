@@ -393,6 +393,7 @@ export const arTranslations: DefaultTranslationsObject = {
     username: 'اسم المستخدم',
     users: 'المستخدمين',
     value: 'القيمة',
+    viewing: 'عرض',
     viewReadOnly: 'عرض للقراءة فقط',
     welcome: 'مرحبًا',
     yes: 'نعم',

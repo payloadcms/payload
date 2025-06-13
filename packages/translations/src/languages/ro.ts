@@ -402,6 +402,7 @@ export const roTranslations: DefaultTranslationsObject = {
     username: 'Nume de utilizator',
     users: 'Utilizatori',
     value: 'Valoare',
+    viewing: 'Vizualizare',
     viewReadOnly: 'Vizualizare doar pentru citire',
     welcome: 'Bine ați venit',
     yes: 'Da',

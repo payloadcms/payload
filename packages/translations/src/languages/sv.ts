@@ -399,6 +399,7 @@ export const svTranslations: DefaultTranslationsObject = {
     username: 'Användarnamn',
     users: 'Användare',
     value: 'Värde',
+    viewing: 'Visning',
     viewReadOnly: 'Visa endast läsning',
     welcome: 'Välkommen',
     yes: 'Ja',

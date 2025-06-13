@@ -328,6 +328,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:updatedSuccessfully',
   'general:updating',
   'general:value',
+  'general:viewing',
   'general:viewReadOnly',
   'general:uploading',
   'general:uploadingBulk',

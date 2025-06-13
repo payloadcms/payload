@@ -394,6 +394,7 @@ export const etTranslations: DefaultTranslationsObject = {
     username: 'Kasutajanimi',
     users: 'Kasutajad',
     value: 'Väärtus',
+    viewing: 'Vaade',
     viewReadOnly: 'Vaata ainult lugemiseks',
     welcome: 'Tere tulemast',
     yes: 'Jah',

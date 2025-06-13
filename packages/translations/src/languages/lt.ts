@@ -400,6 +400,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     username: 'Vartotojo vardas',
     users: 'Vartotojai',
     value: 'Vertė',
+    viewing: 'Peržiūrėti',
     viewReadOnly: 'Peržiūrėti tik skaitymui',
     welcome: 'Sveiki',
     yes: 'Taip',

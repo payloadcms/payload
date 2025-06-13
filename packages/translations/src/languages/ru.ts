@@ -402,6 +402,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     username: 'Имя пользователя',
     users: 'пользователи',
     value: 'Значение',
+    viewing: 'Просмотр',
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
     yes: 'Да',

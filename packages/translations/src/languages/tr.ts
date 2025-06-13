@@ -403,6 +403,7 @@ export const trTranslations: DefaultTranslationsObject = {
     username: 'Kullanıcı Adı',
     users: 'kullanıcı',
     value: 'Değer',
+    viewing: 'Görüntüleme',
     viewReadOnly: 'Salt okunur olarak görüntüle',
     welcome: 'Hoşgeldiniz',
     yes: 'Evet',

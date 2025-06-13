@@ -401,6 +401,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     username: 'ব্যবহারকারীর নাম',
     users: 'ব্যবহারকারীরা',
     value: 'মান',
+    viewing: 'দেখা',
     viewReadOnly: 'শুধুমাত্র পড়ার জন্য দেখুন',
     welcome: 'স্বাগতম',
     yes: 'হ্যাঁ',

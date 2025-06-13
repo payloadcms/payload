@@ -401,6 +401,7 @@ export const itTranslations: DefaultTranslationsObject = {
     username: 'Nome utente',
     users: 'Utenti',
     value: 'Valore',
+    viewing: 'Visualizzazione',
     viewReadOnly: 'Visualizza solo lettura',
     welcome: 'Benvenuto',
     yes: 'Sì',

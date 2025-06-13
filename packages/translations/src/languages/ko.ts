@@ -395,6 +395,7 @@ export const koTranslations: DefaultTranslationsObject = {
     username: '사용자 이름',
     users: '사용자',
     value: '값',
+    viewing: '열람',
     viewReadOnly: '읽기 전용으로 보기',
     welcome: '환영합니다',
     yes: '네',

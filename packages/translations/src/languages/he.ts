@@ -389,6 +389,7 @@ export const heTranslations: DefaultTranslationsObject = {
     username: 'שם משתמש',
     users: 'משתמשים',
     value: 'ערך',
+    viewing: 'צפיה',
     viewReadOnly: 'הצג קריאה בלבד',
     welcome: 'ברוך הבא',
     yes: 'כן',

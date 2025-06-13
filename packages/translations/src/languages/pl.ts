@@ -398,6 +398,7 @@ export const plTranslations: DefaultTranslationsObject = {
     username: 'Nazwa użytkownika',
     users: 'użytkownicy',
     value: 'Wartość',
+    viewing: 'Podgląd',
     viewReadOnly: 'Widok tylko do odczytu',
     welcome: 'Witaj',
     yes: 'Tak',

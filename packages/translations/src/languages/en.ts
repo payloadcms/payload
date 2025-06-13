@@ -399,6 +399,7 @@ export const enTranslations = {
     username: 'Username',
     users: 'Users',
     value: 'Value',
+    viewing: 'Viewing',
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
     yes: 'Yes',

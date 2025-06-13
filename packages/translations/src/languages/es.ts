@@ -403,6 +403,7 @@ export const esTranslations: DefaultTranslationsObject = {
     username: 'Nombre de usuario',
     users: 'Usuarios',
     value: 'Valor',
+    viewing: 'Visualización',
     viewReadOnly: 'Ver solo lectura',
     welcome: 'Bienvenido',
     yes: 'Sí',

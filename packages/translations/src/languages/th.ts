@@ -392,6 +392,7 @@ export const thTranslations: DefaultTranslationsObject = {
     username: 'ชื่อผู้ใช้',
     users: 'ผู้ใช้',
     value: 'ค่า',
+    viewing: 'การดู',
     viewReadOnly: 'ดูในโหมดอ่านอย่างเดียว',
     welcome: 'ยินดีต้อนรับ',
     yes: 'ใช่',

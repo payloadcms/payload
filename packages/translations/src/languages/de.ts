@@ -406,6 +406,7 @@ export const deTranslations: DefaultTranslationsObject = {
     username: 'Benutzername',
     users: 'Benutzer',
     value: 'Wert',
+    viewing: 'Ansehen',
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
     yes: 'Ja',

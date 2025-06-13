@@ -400,6 +400,7 @@ export const huTranslations: DefaultTranslationsObject = {
     username: 'Felhasználónév',
     users: 'Felhasználók',
     value: 'Érték',
+    viewing: 'Megtekintés',
     viewReadOnly: 'Csak olvasható nézet',
     welcome: 'Üdvözöljük',
     yes: 'Igen',

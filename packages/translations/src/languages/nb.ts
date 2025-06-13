@@ -399,6 +399,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     username: 'Brukernavn',
     users: 'Brukere',
     value: 'Verdi',
+    viewing: 'Visning',
     viewReadOnly: 'Vis skrivebeskyttet',
     welcome: 'Velkommen',
     yes: 'Ja',

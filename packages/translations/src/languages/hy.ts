@@ -401,6 +401,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     username: 'Օգտանուն',
     users: 'Օգտատերեր',
     value: 'Արժեք',
+    viewing: 'Դիտում',
     viewReadOnly: '«Միայն կարդալու» ռեժիմ',
     welcome: 'Բարի գալուստ',
     yes: 'Այո',

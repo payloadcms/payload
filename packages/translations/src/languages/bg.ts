@@ -398,6 +398,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     username: 'Потребителско име',
     users: 'Потребители',
     value: 'Стойност',
+    viewing: 'Преглеждане',
     viewReadOnly: 'Преглед само за четене',
     welcome: 'Добре дошъл',
     yes: 'Да',

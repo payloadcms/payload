@@ -398,6 +398,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     username: 'ユーザーネーム',
     users: 'ユーザー',
     value: '値',
+    viewing: '閲覧',
     viewReadOnly: '読み取り専用で表示',
     welcome: 'ようこそ',
     yes: 'はい',

@@ -396,6 +396,7 @@ export const daTranslations: DefaultTranslationsObject = {
     username: 'Brugernavn',
     users: 'Brugere',
     value: 'Værdi',
+    viewing: 'Visning',
     viewReadOnly: 'Vis kun-læsning',
     welcome: 'Velkommen',
     yes: 'Ja',

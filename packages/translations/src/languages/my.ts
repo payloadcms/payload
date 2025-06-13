@@ -403,6 +403,7 @@ export const myTranslations: DefaultTranslationsObject = {
     username: 'Nama pengguna',
     users: 'အသုံးပြုသူများ',
     value: 'တန်ဖိုး',
+    viewing: 'Melihat',
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
     yes: 'ဟုတ်ကဲ့',

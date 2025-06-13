@@ -397,6 +397,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     username: 'Lietotājvārds',
     users: 'Lietotāji',
     value: 'Vērtība',
+    viewing: 'Skatīšanās',
     viewReadOnly: 'Skatīt tikai lasāmu',
     welcome: 'Laipni lūdzam',
     yes: 'Jā',

@@ -397,6 +397,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     username: "Ім'я користувача",
     users: 'Користувачі',
     value: 'Значення',
+    viewing: 'Перегляд',
     viewReadOnly: 'Перегляд тільки для читання',
     welcome: 'Вітаю',
     yes: 'Так',
