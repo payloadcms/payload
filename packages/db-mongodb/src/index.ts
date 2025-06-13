@@ -110,6 +110,8 @@ export interface Args {
   collation?: Omit<CollationOptions, 'locale'>
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
+  /** Solves some common issues related to the specified database. Full compatability is not guaranteed. */
+  compatabilityMode?: 'firestore'
   /** Extra configuration options */
   connectOptions?: {
     /**
@@ -135,6 +137,13 @@ export interface Args {
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
+
+  /**
+   * Set to `false` to disable join aggregations and instead populate join fields via multiple queries.
+   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
+   * @default false
+   */
+  useJoinAggregations?: boolean
 }
 
 export type MongooseAdapter = {
@@ -197,6 +206,7 @@ export function mongooseAdapter({
   allowIDOnCreate = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
+  compatabilityMode,
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
@@ -205,6 +215,7 @@ export function mongooseAdapter({
   prodMigrations,
   transactionOptions = {},
   url,
+  useJoinAggregations = true,
 }: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
@@ -216,6 +227,7 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
+      compatabilityMode,
       // @ts-expect-error initialize without a connection
       connection: undefined,
       connectOptions: connectOptions || {},
@@ -269,6 +281,7 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      useJoinAggregations,
     })
   }
 

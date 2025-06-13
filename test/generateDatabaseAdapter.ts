@@ -21,6 +21,23 @@ export const allDatabaseAdapters = {
       strength: 1,
     },
   })`,
+  firestore: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  if (!process.env.DATABASE_URI) {
+    throw new Error('DATABASE_URI must be set when using firestore')
+  }
+
+  export const databaseAdapter = mongooseAdapter({
+    ensureIndexes: false,
+    disableIndexHints: true,
+    useJoinAggregations: false,
+    url: process.env.DATABASE_URI,
+    collation: {
+      strength: 1,
+    },
+    compatabilityMode: 'firestore'
+  })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
 
