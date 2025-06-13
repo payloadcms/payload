@@ -355,7 +355,11 @@ export const getTableColumnFromPath = ({
           throw new APIError('Not supported')
         }
 
-        const newCollectionPath = pathSegments.slice(1).join('.')
+        let newCollectionPath = pathSegments.slice(1).join('.')
+        // where: { relatedPosts: { equals: 1}} -> { 'relatedPosts.id': { equals: 1}}
+        if (!newCollectionPath) {
+          newCollectionPath = 'id'
+        }
 
         if (field.hasMany) {
           const relationTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
@@ -386,6 +390,18 @@ export const getTableColumnFromPath = ({
             queryPath: field.on,
             table: aliasRelationshipTable,
           })
+
+          if (newCollectionPath === 'id') {
+            return {
+              columnName: 'parent',
+              constraints,
+              field: {
+                name: 'id',
+                type: adapter.idType === 'uuid' ? 'text' : 'number',
+              } as NumberField | TextField,
+              table: aliasRelationshipTable,
+            }
+          }
 
           const relationshipConfig = adapter.payload.collections[field.collection].config
           const relationshipTableName = adapter.tableNameMap.get(
@@ -436,6 +452,18 @@ export const getTableColumnFromPath = ({
           ),
           table: newAliasTable,
         })
+
+        if (newCollectionPath === 'id') {
+          return {
+            columnName: 'id',
+            constraints,
+            field: {
+              name: 'id',
+              type: adapter.idType === 'uuid' ? 'text' : 'number',
+            } as NumberField | TextField,
+            table: newAliasTable,
+          }
+        }
 
         return getTableColumnFromPath({
           adapter,
