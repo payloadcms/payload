@@ -2,8 +2,10 @@ import type { CollectionConfig } from '../collections/config/types.js'
 import type { Option } from '../fields/config/types.js'
 
 import { buildFolderField } from './buildFolderField.js'
+import { foldersSlug } from './constants.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
+import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
 import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
 type CreateFolderCollectionArgs = {
@@ -22,7 +24,7 @@ export const createFolderCollection = ({
     (acc, collection: CollectionConfig) => {
       acc.collectionSlugs.push(collection.slug)
       acc.collectionOptions.push({
-        label: collection.labels?.singular || collection.slug,
+        label: collection.labels?.plural || collection.slug,
         value: collection.slug,
       })
 
@@ -98,6 +100,7 @@ export const createFolderCollection = ({
         }),
       ],
       beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
+      beforeValidate: [ensureSafeCollectionsChange({ foldersSlug })],
     },
     labels: {
       plural: 'Folders',
