@@ -36,6 +36,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
   where: Where
 }
 
@@ -81,6 +82,7 @@ export const deleteOperation = async <
       req,
       select: incomingSelect,
       showHiddenFields,
+      trash = false,
       where,
     } = args
 
@@ -105,7 +107,18 @@ export const deleteOperation = async <
       where,
     })
 
-    const fullWhere = combineQueries(where, accessResult!)
+    let fullWhere = combineQueries(where, accessResult!)
+
+    // If trash is false, restrict to non-trashed documents only
+    if (collectionConfig.trash && !trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
+
+      if (fullWhere?.and) {
+        fullWhere.and.push(notTrashedFilter)
+      } else {
+        fullWhere = { and: [notTrashedFilter] }
+      }
+    }
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,

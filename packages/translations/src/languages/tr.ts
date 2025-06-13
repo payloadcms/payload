@@ -260,6 +260,7 @@ export const trTranslations: DefaultTranslationsObject = {
     dark: 'Karanlık',
     dashboard: 'Anasayfa',
     delete: 'Sil',
+    deletedAt: 'Silindiği Tarih',
     deletedCountSuccessfully: '{{count}} {{label}} başarıyla silindi.',
     deletedSuccessfully: 'Başarıyla silindi.',
     deleting: 'Siliniyor...',

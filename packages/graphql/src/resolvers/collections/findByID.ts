@@ -11,6 +11,7 @@ export type Resolver<TData> = (
     fallbackLocale?: string
     id: string
     locale?: string
+    trash?: boolean
   },
   context: {
     req: PayloadRequest
@@ -50,6 +51,7 @@ export function findByIDResolver<TSlug extends CollectionSlug>(
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
+      trash: args.trash,
     }
 
     const result = await findByIDOperation(options)

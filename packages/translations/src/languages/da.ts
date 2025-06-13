@@ -254,6 +254,7 @@ export const daTranslations: DefaultTranslationsObject = {
     dark: 'Mørk',
     dashboard: 'Dashboard',
     delete: 'Slet',
+    deletedAt: 'Slettet Ved',
     deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
     deletedSuccessfully: 'Slettet.',
     deleting: 'Sletter...',

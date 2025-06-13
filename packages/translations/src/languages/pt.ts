@@ -257,6 +257,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     dark: 'Escuro',
     dashboard: 'Painel de Controle',
     delete: 'Excluir',
+    deletedAt: 'Excluído Em',
     deletedCountSuccessfully: 'Excluído {{count}} {{label}} com sucesso.',
     deletedSuccessfully: 'Apagado com sucesso.',
     deleting: 'Excluindo...',

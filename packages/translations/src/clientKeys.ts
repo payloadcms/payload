@@ -196,6 +196,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:dark',
   'general:dashboard',
   'general:delete',
+  'general:deletedAt',
   'general:deletedSuccessfully',
   'general:deletedCountSuccessfully',
   'general:deleting',
