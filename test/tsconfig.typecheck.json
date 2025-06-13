@@ -61,6 +61,9 @@
       "path": "../packages/plugin-sentry"
     },
     {
+      "path": "../packages/plugin-ecommerce"
+    },
+    {
       "path": "../packages/plugin-seo"
     },
     {
