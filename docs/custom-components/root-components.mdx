@@ -372,13 +372,13 @@ export default function MyCustomLogo() {
 }
 ```
 
-### Header
+### header
 
-The `Header` property allows you to inject Custom Components above the Payload header.
+The `header` property allows you to inject Custom Components above the Payload header.
 
 Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
 
-To add `Header` components, use the `admin.components.header` property in your Payload Config:
+To add `header` components, use the `admin.components.header` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -388,14 +388,14 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      Header: ['/path/to/your/component'],
+      header: ['/path/to/your/component'],
     },
     // highlight-end
   },
 })
 ```
 
-Here is an example of a simple `Header` component:
+Here is an example of a simple `header` component:
 
 ```tsx
 export default function MyCustomHeader() {

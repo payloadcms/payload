@@ -20,11 +20,12 @@ import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
   adminThumbnailWithSearchQueries,
+  adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
   customFileNameMediaSlug,
@@ -55,6 +56,7 @@ let mediaURL: AdminUrlUtil
 let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
+let adminUploadControlURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
@@ -89,6 +91,7 @@ describe('Uploads', () => {
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
+    adminUploadControlURL = new AdminUrlUtil(serverURL, adminUploadControlSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
     adminThumbnailWithSearchQueriesURL = new AdminUrlUtil(
@@ -518,6 +521,57 @@ describe('Uploads', () => {
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
       'File size limit has been reached',
     )
+  })
+
+  test('should render adminUploadControls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const loadFromFileButton = page.locator('#load-from-file-upload-button')
+    const loadFromUrlButton = page.locator('#load-from-url-upload-button')
+    await expect(loadFromFileButton).toBeVisible()
+    await expect(loadFromUrlButton).toBeVisible()
+  })
+
+  test('should load a file using a file reference from custom controls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const loadFromFileButton = page.locator('#load-from-file-upload-button')
+    await loadFromFileButton.click()
+    await wait(1000)
+
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID as string,
+      slug: adminUploadControlSlug,
+      auth: true,
+    })
+    await expect
+      .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
+      .toContain('universal-truth')
+  })
+
+  test('should load a file using a URL reference from custom controls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const loadFromUrlButton = page.locator('#load-from-url-upload-button')
+    await loadFromUrlButton.click()
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    const mediaID = page.url().split('/').pop()
+    const { doc: mediaDoc } = await client.findByID({
+      id: mediaID as string,
+      slug: adminUploadControlSlug,
+      auth: true,
+    })
+    await expect
+      .poll(() => mediaDoc.filename, { timeout: POLL_TOPASS_TIMEOUT })
+      .toContain('universal-truth')
   })
 
   test('should render adminThumbnail when using a function', async () => {

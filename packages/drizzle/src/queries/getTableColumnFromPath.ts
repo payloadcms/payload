@@ -387,6 +387,18 @@ export const getTableColumnFromPath = ({
             table: aliasRelationshipTable,
           })
 
+          if (newCollectionPath === 'id') {
+            return {
+              columnName: 'parent',
+              constraints,
+              field: {
+                name: 'id',
+                type: adapter.idType === 'uuid' ? 'text' : 'number',
+              } as NumberField | TextField,
+              table: aliasRelationshipTable,
+            }
+          }
+
           const relationshipConfig = adapter.payload.collections[field.collection].config
           const relationshipTableName = adapter.tableNameMap.get(
             toSnakeCase(relationshipConfig.slug),
@@ -436,6 +448,18 @@ export const getTableColumnFromPath = ({
           ),
           table: newAliasTable,
         })
+
+        if (newCollectionPath === 'id') {
+          return {
+            columnName: 'id',
+            constraints,
+            field: {
+              name: 'id',
+              type: adapter.idType === 'uuid' ? 'text' : 'number',
+            } as NumberField | TextField,
+            table: newAliasTable,
+          }
+        }
 
         return getTableColumnFromPath({
           adapter,

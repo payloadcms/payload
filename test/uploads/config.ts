@@ -12,6 +12,7 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
+import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
@@ -639,6 +640,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
+    AdminUploadControl,
     {
       slug: 'optional-file',
       fields: [],

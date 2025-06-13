@@ -39,21 +39,25 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { limit, queue } = req.query
+    const { allQueues, limit, queue } = req.query as {
+      allQueues?: boolean
+      limit?: number
+      queue?: string
+    }
 
     const runJobsArgs: RunJobsArgs = {
-      queue: 'default',
+      queue,
       req,
       // We are checking access above, so we can override it here
       overrideAccess: true,
     }
 
-    if (typeof queue === 'string') {
-      runJobsArgs.queue = queue
-    }
-
     if (typeof limit !== 'undefined') {
       runJobsArgs.limit = Number(limit)
+    }
+
+    if (allQueues && !(typeof allQueues === 'string' && allQueues === 'false')) {
+      runJobsArgs.allQueues = true
     }
 
     let noJobsRemaining = false

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -21,6 +22,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
@@ -45,17 +47,18 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { editMenuItemsSlug } from './slugs.js'
+import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: 'http://localhost:3000',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
-    },
-    livePreview: {
-      url: 'http://localhost:3000/',
-      collections: [editMenuItemsSlug],
     },
     components: {
       actions: ['/components/actions/AdminButton/index.js#AdminButton'],
@@ -161,6 +164,7 @@ export default buildConfigWithDefaults({
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
+    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,

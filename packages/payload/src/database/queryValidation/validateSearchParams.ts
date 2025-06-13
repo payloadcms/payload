@@ -104,6 +104,12 @@ export async function validateSearchParam({
         return
       }
 
+      // where: { relatedPosts: { equals: 1}} -> { 'relatedPosts.id': { equals: 1}}
+      if (field.type === 'join' && path === incomingPath) {
+        constraint[`${path}.id` as keyof WhereField] = constraint[path as keyof WhereField]
+        delete constraint[path as keyof WhereField]
+      }
+
       if ('virtual' in field && field.virtual) {
         if (field.virtual === true) {
           errors.push({ path })

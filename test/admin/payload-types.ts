@@ -76,6 +76,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'reorder-tabs': ReorderTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
@@ -90,6 +91,7 @@ export interface Config {
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
     placeholder: Placeholder;
+    'use-as-title-group-field': UseAsTitleGroupField;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -105,6 +107,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
@@ -119,6 +122,7 @@ export interface Config {
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
+    'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -340,6 +344,16 @@ export interface CustomViewsTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs".
+ */
+export interface ReorderTab {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
@@ -525,6 +539,16 @@ export interface Placeholder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field".
+ */
+export interface UseAsTitleGroupField {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -565,6 +589,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-views-two';
         value: string | CustomViewsTwo;
+      } | null)
+    | ({
+        relationTo: 'reorder-tabs';
+        value: string | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
@@ -621,6 +649,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'placeholder';
         value: string | Placeholder;
+      } | null)
+    | ({
+        relationTo: 'use-as-title-group-field';
+        value: string | UseAsTitleGroupField;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -820,6 +852,15 @@ export interface CustomViewsTwoSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs_select".
+ */
+export interface ReorderTabsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-fields_select".
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
@@ -984,6 +1025,15 @@ export interface PlaceholderSelect<T extends boolean = true> {
   placeholderSelect?: T;
   defaultRelationship?: T;
   placeholderRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "use-as-title-group-field_select".
+ */
+export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
 }
