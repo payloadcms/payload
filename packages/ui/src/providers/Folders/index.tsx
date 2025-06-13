@@ -42,6 +42,7 @@ export type FolderContextValue = {
    */
   readonly allCollectionFolderSlugs?: CollectionSlug[]
   allowCreateCollectionSlugs: CollectionSlug[]
+  assignedCollections: CollectionSlug[] | undefined
   breadcrumbs?: FolderBreadcrumb[]
   checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
   clearSelections: () => void
@@ -82,6 +83,7 @@ const Context = React.createContext<FolderContextValue>({
   activeCollectionFolderSlugs: [],
   allCollectionFolderSlugs: [],
   allowCreateCollectionSlugs: [],
+  assignedCollections: undefined,
   breadcrumbs: [],
   checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
@@ -673,6 +675,7 @@ export function FolderProvider({
         activeCollectionFolderSlugs: activeCollectionSlugs || allCollectionFolderSlugs,
         allCollectionFolderSlugs,
         allowCreateCollectionSlugs,
+        assignedCollections: breadcrumbs?.[0]?.assignedCollections,
         breadcrumbs,
         checkIfItemIsDisabled,
         clearSelections,

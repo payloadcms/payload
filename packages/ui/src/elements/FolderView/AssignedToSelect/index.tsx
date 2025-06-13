@@ -36,21 +36,21 @@ export const AssignedToSelect = ({
     validate,
   } = props
 
-  const { currentFolder } = useFolder()
+  const { assignedCollections } = useFolder()
 
   const options = React.useMemo(() => {
-    if (!currentFolder) {
+    if (!assignedCollections) {
       return formatOptions(allSelectOptions)
     }
     return formatOptions(
       allSelectOptions.filter((option) => {
         if (typeof option === 'object' && option.value) {
-          return currentFolder.value.assignedCollections.includes(option.value)
+          return assignedCollections.includes(option.value)
         }
         return true
       }),
     )
-  }, [allSelectOptions, currentFolder])
+  }, [allSelectOptions, assignedCollections])
 
   const memoizedValidate = React.useCallback(
     (value, validationOptions) => {
