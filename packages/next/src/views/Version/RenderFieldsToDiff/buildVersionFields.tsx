@@ -22,6 +22,7 @@ import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from '
 
 import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
+import { getArrayElementIdsInComparisonOrder } from './utilities/getArrayElementIdsInComparisonOrder.js'
 import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
 
 export type BuildVersionFieldsArgs = {
@@ -311,29 +312,66 @@ const buildVersionField = ({
   } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
     if (field.type === 'array' && versionValue) {
-      const arrayValue = Array.isArray(versionValue) ? versionValue : []
+      const versionArray = Array.isArray(versionValue) ? versionValue : []
+      const comparisonArray = Array.isArray(comparisonValue) ? comparisonValue : []
       baseVersionField.rows = []
 
-      for (let i = 0; i < arrayValue.length; i++) {
-        const comparisonRow = comparisonValue?.[i] || {}
-        const versionRow = arrayValue?.[i] || {}
-        baseVersionField.rows[i] = buildVersionFields({
-          clientSchemaMap,
-          comparisonSiblingData: comparisonRow,
-          customDiffComponents,
-          entitySlug,
-          fieldPermissions,
-          fields: field.fields,
-          i18n,
-          modifiedOnly,
-          parentIndexPath: 'name' in field ? '' : indexPath,
-          parentIsLocalized: parentIsLocalized || field.localized,
-          parentPath: path + '.' + i,
-          parentSchemaPath: schemaPath,
-          req,
-          selectedLocales,
-          versionSiblingData: versionRow,
-        }).versionFields
+      // If all values in the version and comparison array have an `id` property,
+      // the diff can compare the matching entries, so that e.g. a removed entry in the middle
+      // doesn't cause the diff view to show all following entries as being entirely changed.
+      // This improves readability of the diff for humans.
+      const doAllArrayValuesHaveId = [...versionArray, ...comparisonArray].every((value) =>
+        Object.keys(value).includes('id'),
+      )
+      if (doAllArrayValuesHaveId) {
+        const arrayElementIdsInComparisonOrder = getArrayElementIdsInComparisonOrder(
+          versionArray,
+          comparisonArray,
+        )
+        for (let i = 0; i < arrayElementIdsInComparisonOrder.length; i++) {
+          const arrayEntryId = arrayElementIdsInComparisonOrder[i]
+          const comparisonRow = comparisonArray.find((entry) => entry.id === arrayEntryId) || {}
+          const versionRow = versionArray.find((entry) => entry.id === arrayEntryId) || {}
+          baseVersionField.rows[i] = buildVersionFields({
+            clientSchemaMap,
+            comparisonSiblingData: comparisonRow,
+            customDiffComponents,
+            entitySlug,
+            fieldPermissions,
+            fields: field.fields,
+            i18n,
+            modifiedOnly,
+            parentIndexPath: 'name' in field ? '' : indexPath,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            parentPath: path + '.' + i,
+            parentSchemaPath: schemaPath,
+            req,
+            selectedLocales,
+            versionSiblingData: versionRow,
+          }).versionFields
+        }
+      } else {
+        for (let i = 0; i < versionArray.length; i++) {
+          const comparisonRow = comparisonValue?.[i] || {}
+          const versionRow = versionArray?.[i] || {}
+          baseVersionField.rows[i] = buildVersionFields({
+            clientSchemaMap,
+            comparisonSiblingData: comparisonRow,
+            customDiffComponents,
+            entitySlug,
+            fieldPermissions,
+            fields: field.fields,
+            i18n,
+            modifiedOnly,
+            parentIndexPath: 'name' in field ? '' : indexPath,
+            parentIsLocalized: parentIsLocalized || field.localized,
+            parentPath: path + '.' + i,
+            parentSchemaPath: schemaPath,
+            req,
+            selectedLocales,
+            versionSiblingData: versionRow,
+          }).versionFields
+        }
       }
     } else {
       baseVersionField.fields = buildVersionFields({
