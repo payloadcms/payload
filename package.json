@@ -141,7 +141,7 @@
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
-    "@types/node": "22.5.4",
+    "@types/node": "22.15.30",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "@types/shelljs": "0.8.15",

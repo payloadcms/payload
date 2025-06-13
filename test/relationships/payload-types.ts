@@ -280,6 +280,7 @@ export interface Director {
   name?: string | null;
   localized?: string | null;
   movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -742,6 +743,7 @@ export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
   localized?: T;
   movies?: T;
+  movie?: T;
   directors?: T;
   updatedAt?: T;
   createdAt?: T;
