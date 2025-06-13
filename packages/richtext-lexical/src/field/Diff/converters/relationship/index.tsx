@@ -4,6 +4,8 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
 import './index.scss'
 
+import { formatAdminURL } from 'payload/shared'
+
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedRelationshipNode } from '../../../../nodeTypes.js'
 
@@ -58,7 +60,11 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
                 <a
                   className={`${baseClass}__link`}
                   data-enable-match="false"
-                  href={`/${relatedCollection.slug}/${data.id}`}
+                  href={formatAdminURL({
+                    adminRoute: req.payload.config.routes.admin,
+                    path: `/collections/${relatedCollection?.slug}/${data.id}`,
+                    serverURL: req.payload.config.serverURL,
+                  })}
                   rel="noopener noreferrer"
                   target="_blank"
                 >
