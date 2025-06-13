@@ -82,6 +82,12 @@ await fetch('/api/payload-jobs/run?limit=100&queue=nightly', {
 
 This endpoint is automatically mounted for you and is helpful in conjunction with serverless platforms like Vercel, where you might want to use Vercel Cron to invoke a serverless function that executes your jobs.
 
+**Query Parameters:**
+
+- `limit`: The maximum number of jobs to run in this invocation (default: 10).
+- `queue`: The name of the queue to run jobs from. If not specified, jobs will be run from the `default` queue.
+- `allQueues`: If set to `true`, all jobs from all queues will be run. This will ignore the `queue` parameter.
+
 **Vercel Cron Example**
 
 If you're deploying on Vercel, you can add a `vercel.json` file in the root of your project that configures Vercel Cron to invoke the `run` endpoint on a cron schedule.
@@ -139,10 +145,14 @@ If you want to process jobs programmatically from your server-side code, you can
 **Run all jobs:**
 
 ```ts
+// Run all jobs from the `default` queue - default limit is 10
 const results = await payload.jobs.run()
 
 // You can customize the queue name and limit by passing them as arguments:
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// Run all jobs from all queues:
+await payload.jobs.run({ allQueues: true })
 
 // You can provide a where clause to filter the jobs that should be run:
 await payload.jobs.run({
@@ -160,10 +170,22 @@ const results = await payload.jobs.runByID({
 
 ### Bin script
 
-Finally, you can process jobs via the bin script that comes with Payload out of the box.
+Finally, you can process jobs via the bin script that comes with Payload out of the box. By default, this script will run jobs from the `default` queue, with a limit of 10 jobs per invocation:
 
 ```sh
-npx payload jobs:run --queue default --limit 10
+npx payload jobs:run
+```
+
+You can override the default queue and limit by passing the `--queue` and `--limit` flags:
+
+```sh
+npx payload jobs:run --queue myQueue --limit 15
+```
+
+If you want to run all jobs from all queues, you can pass the `--all-queues` flag:
+
+```sh
+npx payload jobs:run --all-queues
 ```
 
 In addition, the bin script allows you to pass a `--cron` flag to the `jobs:run` command to run the jobs on a scheduled, cron basis:

@@ -19,9 +19,21 @@ import { runJSONJob } from './runJSONJob/index.js'
 
 export type RunJobsArgs = {
   /**
+   * If you want to run jobs from all queues, set this to true.
+   * If you set this to true, the `queue` property will be ignored.
+   *
+   * @default false
+   */
+  allQueues?: boolean
+  /**
    * ID of the job to run
    */
   id?: number | string
+  /**
+   * The maximum number of jobs to run in this invocation
+   *
+   * @default 10
+   */
   limit?: number
   overrideAccess?: boolean
   /**
@@ -32,6 +44,11 @@ export type RunJobsArgs = {
    * @default all jobs for all queues will be executed in FIFO order.
    */
   processingOrder?: Sort
+  /**
+   * If you want to run jobs from a specific queue, set this to the queue name.
+   *
+   * @default jobs from the `default` queue will be executed.
+   */
   queue?: string
   req: PayloadRequest
   /**
@@ -57,10 +74,11 @@ export type RunJobsResult = {
 export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const {
     id,
+    allQueues = false,
     limit = 10,
     overrideAccess,
     processingOrder,
-    queue,
+    queue = 'default',
     req,
     sequential,
     where: whereFromProps,
@@ -106,10 +124,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     ],
   }
 
-  if (queue) {
+  if (allQueues !== true) {
     where.and?.push({
       queue: {
-        equals: queue,
+        equals: queue ?? 'default',
       },
     })
   }
@@ -146,7 +164,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     if (typeof processingOrderConfig === 'function') {
       defaultProcessingOrder = await processingOrderConfig(args)
     } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
-      if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
+      if (
+        !allQueues &&
+        queue &&
+        processingOrderConfig.queues &&
+        processingOrderConfig.queues[queue]
+      ) {
         defaultProcessingOrder = processingOrderConfig.queues[queue]
       } else if (processingOrderConfig.default) {
         defaultProcessingOrder = processingOrderConfig.default

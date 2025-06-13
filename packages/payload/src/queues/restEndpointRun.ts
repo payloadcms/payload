@@ -24,12 +24,16 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { limit, queue } = req.query
+    const { allQueues, limit, queue } = req.query as {
+      allQueues?: boolean
+      limit?: number
+      queue?: string
+    }
 
     await handleSchedules()
 
     const runJobsArgs: RunJobsArgs = {
-      queue: 'default',
+      queue,
       req,
       // Access is validated above, so it's safe to override here
       overrideAccess: true,
@@ -42,6 +46,10 @@ export const runJobsEndpoint: Endpoint = {
     const parsedLimit = Number(limit)
     if (!isNaN(parsedLimit)) {
       runJobsArgs.limit = parsedLimit
+    }
+
+    if (allQueues && !(typeof allQueues === 'string' && allQueues === 'false')) {
+      runJobsArgs.allQueues = true
     }
 
     let noJobsRemaining = false
