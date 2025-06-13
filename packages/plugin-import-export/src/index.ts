@@ -48,12 +48,6 @@ export const importExportPlugin =
       if (!components.listMenuItems) {
         components.listMenuItems = []
       }
-      if (!components.edit) {
-        components.edit = {}
-      }
-      if (!components.edit.SaveButton) {
-        components.edit.SaveButton = '@payloadcms/plugin-import-export/rsc#ExportSaveButton'
-      }
       components.listMenuItems.push({
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
