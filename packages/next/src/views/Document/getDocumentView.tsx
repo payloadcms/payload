@@ -111,11 +111,17 @@ export const getDocumentView = ({
         break
       }
 
+      // --> /collections/:collectionSlug/trash/:id
       // --> /collections/:collectionSlug/:id/api
       // --> /collections/:collectionSlug/:id/preview
       // --> /collections/:collectionSlug/:id/versions
       // --> /collections/:collectionSlug/:id/<custom-segment>
       case 4: {
+        // --> /collections/:collectionSlug/trash/:id
+        if (segment3 === 'trash' && segment4) {
+          View = getCustomViewByKey(views, 'default') || DefaultEditView
+          break
+        }
         switch (segment4) {
           // --> /collections/:collectionSlug/:id/api
           case 'api': {

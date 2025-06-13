@@ -105,6 +105,7 @@ export const renderDocument = async ({
       locale,
       payload,
       req,
+      segments,
       user,
     }))
 
@@ -305,6 +306,8 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const isTrashedDoc = typeof (doc as Record<string, unknown>)?.deletedAt === 'string'
+
   return {
     data: doc,
     Document: (
@@ -323,6 +326,7 @@ export const renderDocument = async ({
         initialState={formState}
         isEditing={isEditing}
         isLocked={isLocked}
+        isTrashed={isTrashedDoc}
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
@@ -337,6 +341,7 @@ export const renderDocument = async ({
             collectionConfig={collectionConfig}
             globalConfig={globalConfig}
             i18n={i18n}
+            isTrashed={isTrashedDoc}
             payload={payload}
             permissions={permissions}
           />

@@ -5,6 +5,7 @@ import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountViewMetadata } from '../Account/metadata.js'
 import { generateBrowseByFolderMetadata } from '../BrowseByFolder/metadata.js'
 import { generateCollectionFolderMetadata } from '../CollectionFolders/metadata.js'
+import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
 import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
 import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
@@ -121,6 +122,19 @@ export const generatePageMetadata = async ({
           i18n,
           params,
         })
+      }
+      break
+    }
+    case 3: {
+      if (isCollection && segmentThree === 'trash' && collectionConfig) {
+        // --> /collections/:collectionSlug/trash
+        meta = await generateCollectionTrashMetadata({
+          collectionConfig,
+          config,
+          i18n,
+          params,
+        })
+        break
       }
       break
     }

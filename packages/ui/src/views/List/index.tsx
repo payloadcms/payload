@@ -55,6 +55,7 @@ export function DefaultListView(props: ListViewClientProps) {
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
+    viewType,
   } = props
 
   const [Table, setTable] = useState(InitialTable)
@@ -100,6 +101,8 @@ export function DefaultListView(props: ListViewClientProps) {
   const isUploadCollection = Boolean(upload)
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
+
+  const isTrashEnabled = Boolean(collectionConfig.trash)
 
   const { i18n } = useTranslation()
 
@@ -174,10 +177,11 @@ export function DefaultListView(props: ListViewClientProps) {
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                isTrashEnabled={isTrashEnabled}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                viewType="list"
+                viewType={viewType}
               />
               <ListControls
                 beforeActions={
@@ -205,7 +209,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   <p>
                     {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
                   </p>
-                  {hasCreatePermission && newDocumentURL && (
+                  {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
                     <Fragment>
                       {isInDrawer ? (
                         <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
