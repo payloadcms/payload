@@ -1,4 +1,4 @@
-import type { Config, JobsConfig } from 'payload'
+import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
