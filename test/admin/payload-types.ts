@@ -76,6 +76,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'reorder-tabs': ReorderTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
     'group-one-collection-twos': GroupOneCollectionTwo;
@@ -106,6 +107,7 @@ export interface Config {
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
@@ -335,6 +337,16 @@ export interface CustomViewsOne {
  * via the `definition` "custom-views-two".
  */
 export interface CustomViewsTwo {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs".
+ */
+export interface ReorderTab {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -577,6 +589,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-views-two';
         value: string | CustomViewsTwo;
+      } | null)
+    | ({
+        relationTo: 'reorder-tabs';
+        value: string | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
@@ -830,6 +846,15 @@ export interface CustomViewsOneSelect<T extends boolean = true> {
  * via the `definition` "custom-views-two_select".
  */
 export interface CustomViewsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reorder-tabs_select".
+ */
+export interface ReorderTabsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
