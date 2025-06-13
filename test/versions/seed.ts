@@ -11,6 +11,7 @@ import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
   draftCollectionSlug,
+  media2CollectionSlug,
   mediaCollectionSlug,
 } from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
@@ -36,11 +37,23 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
+  const { id: uploadedImageMedia2 } = await _payload.create({
+    collection: media2CollectionSlug,
+    data: {},
+    file: imageFile,
+  })
+
   const imageFilePath2 = path.resolve(dirname, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
     collection: mediaCollectionSlug,
+    data: {},
+    file: imageFile2,
+  })
+
+  const { id: uploadedImage2Media2 } = await _payload.create({
+    collection: media2CollectionSlug,
     data: {},
     file: imageFile2,
   })
@@ -113,6 +126,20 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     draft: false,
   })
 
+  const draft3 = await _payload.create({
+    collection: draftCollectionSlug,
+    data: {
+      _status: 'published',
+      blocksField,
+      description: 'Description2',
+      radio: 'test',
+      title: 'Another Published Title',
+    },
+    depth: 0,
+    overrideAccess: true,
+    draft: false,
+  })
+
   await _payload.create({
     collection: autosaveWithValidateCollectionSlug,
     data: {
@@ -134,10 +161,54 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   })
 
-  const diffDoc = await _payload.create({
+  const diffDocDraft = await _payload.create({
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
+      _status: 'draft',
+      text: 'Draft 1',
+    },
+    depth: 0,
+  })
+
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 2',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 3',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+  await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    data: {
+      _status: 'draft',
+      text: 'Draft 4',
+    },
+    depth: 0,
+    id: diffDocDraft.id,
+  })
+
+  const diffDoc = await _payload.update({
+    collection: diffCollectionSlug,
+    locale: 'en',
+    id: diffDocDraft.id,
+    data: {
+      _status: 'published',
       array: [
         {
           textInArray: 'textInArray',
@@ -168,7 +239,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       checkbox: true,
       code: 'code',
-      date: '2021-01-01T00:00:00.000Z',
+      date: '2021-04-01T00:00:00.000Z',
       email: 'email@email.com',
       group: {
         textInGroup: 'textInGroup',
@@ -178,8 +249,19 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       },
       number: 1,
       point: [1, 2],
+      json: {
+        text: 'json',
+        number: 1,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson',
+          },
+        ],
+      },
       radio: 'option1',
       relationship: manyDraftsID,
+      relationshipHasMany: [manyDraftsID],
       richtext: generateLexicalData({
         mediaID: uploadedImage,
         textID: doc1ID,
@@ -192,16 +274,73 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInCollapsible: 'textInCollapsible',
       textInRow: 'textInRow',
       textInUnnamedTab2: 'textInUnnamedTab2',
+      relationshipPolymorphic: {
+        relationTo: 'text',
+        value: doc1ID,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+      ],
+      relationshipHasManyPolymorphic2: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+        {
+          relationTo: draftCollectionSlug,
+          value: draft2.id,
+        },
+      ],
       upload: uploadedImage,
+      uploadHasMany: [uploadedImage],
     },
     depth: 0,
   })
+
+  await _payload.db.updateOne({
+    collection: diffCollectionSlug,
+    id: diffDoc.id,
+    data: {
+      ...diffDoc,
+      createdAt: new Date(new Date(diffDoc.createdAt).getTime() - 2 * 60 * 10000).toISOString(),
+      updatedAt: new Date(new Date(diffDoc.updatedAt).getTime() - 2 * 60 * 10000).toISOString(),
+    },
+  })
+
+  const versions = await _payload.findVersions({
+    collection: diffCollectionSlug,
+    depth: 0,
+    limit: 50,
+    sort: '-createdAt',
+  })
+
+  let i = 0
+  for (const version of versions.docs) {
+    i += 1
+    await _payload.db.updateVersion({
+      id: version.id,
+      collection: diffCollectionSlug,
+      versionData: {
+        ...version.version,
+        createdAt: new Date(
+          new Date(version.createdAt).getTime() - 2 * 60 * 10000 * i,
+        ).toISOString(),
+        updatedAt: new Date(
+          new Date(version.updatedAt).getTime() - 2 * 60 * 10000 * i,
+        ).toISOString(),
+      },
+    })
+  }
 
   const updatedDiffDoc = await _payload.update({
     id: diffDoc.id,
     collection: diffCollectionSlug,
     locale: 'en',
     data: {
+      _status: 'published',
       array: [
         {
           textInArray: 'textInArray2',
@@ -232,7 +371,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       checkbox: false,
       code: 'code2',
-      date: '2023-01-01T00:00:00.000Z',
+      date: '2023-04-01T00:00:00.000Z',
       email: 'email2@email.com',
       group: {
         textInGroup: 'textInGroup2',
@@ -241,9 +380,44 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textInNamedTab1: 'textInNamedTab12',
       },
       number: 2,
+      json: {
+        text: 'json2',
+        number: 2,
+        boolean: true,
+        array: [
+          {
+            textInArrayInJson: 'textInArrayInJson2',
+          },
+        ],
+      },
       point: [1, 3],
       radio: 'option2',
       relationship: draft2.id,
+      relationshipHasMany: [manyDraftsID, draft2.id],
+      relationshipPolymorphic: {
+        relationTo: draftCollectionSlug,
+        value: draft2.id,
+      },
+      relationshipHasManyPolymorphic: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+        {
+          relationTo: draftCollectionSlug,
+          value: draft2.id,
+        },
+      ],
+      relationshipHasManyPolymorphic2: [
+        {
+          relationTo: 'text',
+          value: doc1ID,
+        },
+        {
+          relationTo: draftCollectionSlug,
+          value: draft3.id,
+        },
+      ],
       richtext: generateLexicalData({
         mediaID: uploadedImage2,
         textID: doc2ID,
@@ -257,6 +431,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       textInRow: 'textInRow2',
       textInUnnamedTab2: 'textInUnnamedTab22',
       upload: uploadedImage2,
+      uploadHasMany: [uploadedImage, uploadedImage2],
     },
     depth: 0,
   })

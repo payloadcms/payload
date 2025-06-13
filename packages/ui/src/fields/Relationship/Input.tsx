@@ -102,7 +102,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const valueRef = useRef(value)
   // the line below seems odd
 
-  // eslint-disable-next-line react-compiler/react-compiler
   valueRef.current = value
 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
@@ -706,7 +705,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           Fallback={<FieldError path={path} showError={showError} />}
         />
         {BeforeInput}
-        {!errorLoading && (
+        {errorLoading ? (
+          <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
+        ) : (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
               backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
@@ -845,7 +846,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             )}
           </div>
         )}
-        {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
         {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}

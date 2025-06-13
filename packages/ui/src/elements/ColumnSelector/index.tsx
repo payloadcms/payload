@@ -5,15 +5,9 @@ import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 import React, { useId, useMemo } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTableColumns } from '../../providers/TableColumns/index.js'
-import { DraggableSortable } from '../DraggableSortable/index.js'
-import { Pill } from '../Pill/index.js'
-import './index.scss'
-
-const baseClass = 'column-selector'
+import { PillSelector, type SelectablePill } from '../PillSelector/index.js'
 
 export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
@@ -35,53 +29,48 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
     [columns],
   )
 
-  if (!columns) {
+  const pills: SelectablePill[] = useMemo(() => {
+    return filteredColumns
+      ? filteredColumns.map((col, i) => {
+          const { accessor, active, field } = col
+
+          const label =
+            'labelWithPrefix' in field && field.labelWithPrefix !== undefined
+              ? field.labelWithPrefix
+              : 'label' in field && field.label !== undefined
+                ? field.label
+                : 'name' in field && field.name !== undefined
+                  ? field.name
+                  : undefined
+
+          return {
+            name: accessor,
+            key: `${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`,
+            Label: <FieldLabel label={label as StaticLabel} unstyled />,
+            selected: active,
+          } as SelectablePill
+        })
+      : null
+  }, [collectionSlug, editDepth, filteredColumns, uuid])
+
+  if (!pills) {
     return null
   }
 
   return (
-    <DraggableSortable
-      className={baseClass}
-      ids={filteredColumns.map((col) => col?.accessor)}
-      onDragEnd={({ moveFromIndex, moveToIndex }) => {
-        void moveColumn({
-          fromIndex: moveFromIndex,
-          toIndex: moveToIndex,
-        })
+    <PillSelector
+      draggable={{
+        onDragEnd: ({ moveFromIndex, moveToIndex }) => {
+          void moveColumn({
+            fromIndex: moveFromIndex,
+            toIndex: moveToIndex,
+          })
+        },
       }}
-    >
-      {filteredColumns.map((col, i) => {
-        const { accessor, active, field } = col
-
-        const label =
-          'labelWithPrefix' in field && field.labelWithPrefix !== undefined
-            ? field.labelWithPrefix
-            : 'label' in field && field.label !== undefined
-              ? field.label
-              : 'name' in field && field.name !== undefined
-                ? field.name
-                : undefined
-
-        return (
-          <Pill
-            alignIcon="left"
-            aria-checked={active}
-            className={[`${baseClass}__column`, active && `${baseClass}__column--active`]
-              .filter(Boolean)
-              .join(' ')}
-            draggable
-            icon={active ? <XIcon /> : <PlusIcon />}
-            id={accessor}
-            key={`${collectionSlug}-${accessor}-${i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
-            onClick={() => {
-              void toggleColumn(accessor)
-            }}
-            size="small"
-          >
-            {col.CustomLabel ?? <FieldLabel label={label as StaticLabel} unstyled />}
-          </Pill>
-        )
-      })}
-    </DraggableSortable>
+      onClick={({ pill }) => {
+        void toggleColumn(pill.name)
+      }}
+      pills={pills}
+    />
   )
 }

@@ -29,6 +29,8 @@ export type VersionField = {
 
 /**
  * Taken from react-diff-viewer-continued
+ *
+ * @deprecated remove in 4.0 - react-diff-viewer-continued is no longer a dependency
  */
 export declare enum DiffMethod {
   CHARS = 'diffChars',
@@ -44,10 +46,13 @@ export declare enum DiffMethod {
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
   /**
-   * Field value from the version being compared
+   * Field value from the version being compared from
    */
-  comparisonValue: unknown
-  diffMethod: DiffMethod
+  comparisonValue: unknown // TODO: change to valueFrom in 4.0
+  /**
+   * @deprecated remove in 4.0. react-diff-viewer-continued is no longer a dependency
+   */
+  diffMethod: any
   field: TClientField
   fieldPermissions:
     | {
@@ -58,11 +63,13 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
    * If this field is localized, this will be the locale of the field
    */
   locale?: string
+  nestingLevel?: number
   parentIsLocalized: boolean
   /**
-   * Field value from the current version
+   * Field value from the version being compared to
+   *
    */
-  versionValue: unknown
+  versionValue: unknown // TODO: change to valueTo in 4.0
 }
 
 export type FieldDiffServerProps<

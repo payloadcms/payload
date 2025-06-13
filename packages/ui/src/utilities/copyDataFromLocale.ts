@@ -6,6 +6,7 @@ import {
   type FlattenedBlock,
   formatErrors,
   type PayloadRequest,
+  type ServerFunction,
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
@@ -200,7 +201,7 @@ function removeIds(data: Data): Data {
   return data
 }
 
-export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) => {
+export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> = async (args) => {
   const { req } = args
 
   try {

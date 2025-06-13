@@ -24,7 +24,6 @@ const handler: PayloadHandler = async (req) => {
   })
 
   try {
-    console.log('Calling seedDB')
     await seedDB({
       _payload: payload,
       collectionSlugs: payload.config.collections.map(({ slug }) => slug),

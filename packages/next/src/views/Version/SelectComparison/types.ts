@@ -3,14 +3,11 @@ import type { PaginatedDocs, SanitizedCollectionConfig } from 'payload'
 import type { CompareOption } from '../Default/types.js'
 
 export type Props = {
-  baseURL: string
-  draftsEnabled?: boolean
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
+  collectionSlug: string
+  docID: number | string
   onChange: (val: CompareOption) => void
-  parentID?: number | string
-  value: CompareOption
-  versionID: string
+  versionFromID?: string
+  versionFromOptions: CompareOption[]
 }
 
 type CLEAR = {

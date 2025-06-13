@@ -625,6 +625,7 @@ export type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewProps,
+  RenderDocumentVersionsProperties,
 } from './views/document.js'
 
 export type {

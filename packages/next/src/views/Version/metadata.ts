@@ -36,7 +36,7 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
 
     metaToUse = {
       ...(config.admin.meta || {}),
-      description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
+      description: t('version:viewingVersion', { documentTitle: titleFromData, entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
       ...(collectionConfig?.admin?.meta || {}),
       ...(collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}),

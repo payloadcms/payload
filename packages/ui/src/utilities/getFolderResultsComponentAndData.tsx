@@ -2,6 +2,7 @@ import type {
   CollectionSlug,
   ErrorResult,
   GetFolderResultsComponentAndDataArgs,
+  ServerFunction,
   Where,
 } from 'payload'
 import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
@@ -31,11 +32,10 @@ type GetFolderResultsComponentAndDataErrorResult = {
   | ErrorResult
 )
 
-export const getFolderResultsComponentAndDataHandler = async (
-  args: GetFolderResultsComponentAndDataArgs,
-): Promise<
-  GetFolderResultsComponentAndDataErrorResult | GetFolderResultsComponentAndDataResult
-> => {
+export const getFolderResultsComponentAndDataHandler: ServerFunction<
+  GetFolderResultsComponentAndDataArgs,
+  Promise<GetFolderResultsComponentAndDataErrorResult | GetFolderResultsComponentAndDataResult>
+> = async (args) => {
   const { req } = args
 
   try {

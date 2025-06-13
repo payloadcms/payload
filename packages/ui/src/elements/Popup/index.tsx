@@ -17,7 +17,7 @@ export type PopupProps = {
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   buttonClassName?: string
-  buttonSize?: 'large' | 'medium' | 'small'
+  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode

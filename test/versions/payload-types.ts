@@ -82,6 +82,7 @@ export interface Config {
     diff: Diff;
     text: Text;
     media: Media;
+    media2: Media2;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -105,6 +106,7 @@ export interface Config {
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    media2: Media2Select<false> | Media2Select<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -384,8 +386,51 @@ export interface Diff {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   radio?: ('option1' | 'option2') | null;
   relationship?: (string | null) | DraftPost;
+  relationshipHasMany?: (string | DraftPost)[] | null;
+  relationshipPolymorphic?:
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'text';
+        value: string | Text;
+      } | null);
+  relationshipHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
+  relationshipHasManyPolymorphic2?:
+    | (
+        | {
+            relationTo: 'draft-posts';
+            value: string | DraftPost;
+          }
+        | {
+            relationTo: 'text';
+            value: string | Text;
+          }
+      )[]
+    | null;
   richtext?: {
     root: {
       type: string;
@@ -425,6 +470,18 @@ export interface Diff {
   text?: string | null;
   textArea?: string | null;
   upload?: (string | null) | Media;
+  uploadHasMany?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text".
+ */
+export interface Text {
+  id: string;
+  text: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -448,13 +505,21 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text".
+ * via the `definition` "media2".
  */
-export interface Text {
+export interface Media2 {
   id: string;
-  text: string;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -631,6 +696,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'media2';
+        value: string | Media2;
       } | null)
     | ({
         relationTo: 'users';
@@ -898,8 +967,13 @@ export interface DiffSelect<T extends boolean = true> {
       };
   number?: T;
   point?: T;
+  json?: T;
   radio?: T;
   relationship?: T;
+  relationshipHasMany?: T;
+  relationshipPolymorphic?: T;
+  relationshipHasManyPolymorphic?: T;
+  relationshipHasManyPolymorphic2?: T;
   richtext?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
@@ -913,8 +987,10 @@ export interface DiffSelect<T extends boolean = true> {
   text?: T;
   textArea?: T;
   upload?: T;
+  uploadHasMany?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -930,6 +1006,23 @@ export interface TextSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media2_select".
+ */
+export interface Media2Select<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;

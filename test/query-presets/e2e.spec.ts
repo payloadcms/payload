@@ -330,7 +330,7 @@ describe('Query Presets', () => {
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
-    const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+    const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('ID'),
     })
 
@@ -338,7 +338,7 @@ describe('Query Presets', () => {
     await clickListMenuItem({ page, menuItemLabel: 'Reset' })
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/column-selector__column--active/)
+    await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
   test('should only enter modified state when changes are made to an active preset', async () => {

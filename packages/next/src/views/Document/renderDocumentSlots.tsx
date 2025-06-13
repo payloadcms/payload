@@ -11,6 +11,7 @@ import type {
   SanitizedGlobalConfig,
   SaveButtonServerPropsOnly,
   SaveDraftButtonServerPropsOnly,
+  ServerFunction,
   ServerProps,
   StaticDescription,
   ViewDescriptionClientProps,
@@ -168,8 +169,8 @@ export const renderDocumentSlots: (args: {
   return components
 }
 
-export const renderDocumentSlotsHandler = async (
-  args: { collectionSlug: string } & DefaultServerFunctionArgs,
+export const renderDocumentSlotsHandler: ServerFunction<{ collectionSlug: string }> = async (
+  args,
 ) => {
   const { collectionSlug, req } = args
 
