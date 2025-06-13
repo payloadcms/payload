@@ -1,10 +1,8 @@
 'use client'
 import type { DateFieldDiffClientComponent } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import {
   FieldDiffContainer,
-  FieldDiffLabel,
   getHTMLDiffComponents,
   useConfig,
   useTranslation,
@@ -48,9 +46,15 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
     : ''
 
   const { From, To } = getHTMLDiffComponents({
-    fromHTML: '<p>' + formattedFromDate + '</p>',
-    toHTML: '<p>' + formattedToDate + '</p>',
-    tokenizeByCharacter: true,
+    fromHTML:
+      `<div class="${baseClass}" data-enable-match="true" data-date="${formattedFromDate}"><p>` +
+      formattedFromDate +
+      '</p></div>',
+    toHTML:
+      `<div class="${baseClass}" data-enable-match="true" data-date="${formattedToDate}"><p>` +
+      formattedToDate +
+      '</p></div>',
+    tokenizeByCharacter: false,
   })
 
   return (
