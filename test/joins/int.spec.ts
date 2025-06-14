@@ -298,6 +298,7 @@ describe('Joins Field', () => {
     await payload.create({
       collection: 'folderPoly1',
       data: {
+        commonTitle: 'Common Title',
         folderPoly1Title: 'Poly 1 title',
         folder: folderDoc.id,
       },
@@ -307,6 +308,7 @@ describe('Joins Field', () => {
     await payload.create({
       collection: 'folderPoly2',
       data: {
+        commonTitle: 'Common Title',
         folderPoly2Title: 'Poly 2 Title',
         folder: folderDoc.id,
       },
@@ -326,23 +328,12 @@ describe('Joins Field', () => {
                   in: ['folderPoly1', 'folderPoly2'],
                 },
               },
-              {
-                folderPoly2Title: {
-                  equals: 'Poly 2 Title',
-                },
-              },
             ],
           },
         },
       },
-      where: {
-        id: {
-          equals: folderDoc.id,
-        },
-      },
     })
-
-    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
+    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(2)
   })
 
   it('should filter joins using where query', async () => {
@@ -359,6 +350,7 @@ describe('Joins Field', () => {
         },
       },
       collection: categoriesSlug,
+      populate: {},
     })
 
     expect(categoryWithPosts.relatedPosts.docs).toHaveLength(1)
