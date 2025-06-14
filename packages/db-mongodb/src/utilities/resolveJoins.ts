@@ -198,22 +198,17 @@ export async function resolveJoins({
         // Execute the query
         const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
 
+        const fields = useDrafts
+          ? buildVersionCollectionFields(adapter.payload.config, targetConfig)
+          : targetConfig.fields
+
         // Transform the results
-        if (useDrafts) {
-          for (const result of results) {
-            if (result._id) {
-              result.id = result._id
-              delete result._id
-            }
-          }
-        } else {
-          transform({
-            adapter,
-            data: results,
-            fields: targetConfig.fields,
-            operation: 'read',
-          })
-        }
+        transform({
+          adapter,
+          data: results,
+          fields,
+          operation: 'read',
+        })
 
         // Return results with collection info for grouping
         return { collectionSlug, joinDef, results, useDrafts }
