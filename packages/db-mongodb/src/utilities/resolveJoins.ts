@@ -198,12 +198,6 @@ export async function resolveJoins({
         // Execute the query
         const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
 
-        const fields = useDrafts
-          ? buildVersionCollectionFields(adapter.payload.config, targetConfig)
-          : targetConfig.fields
-
-        // Do not transform the results - we only need ObjectID references
-
         // Return results with collection info for grouping
         return { collectionSlug, joinDef, results, useDrafts }
       })
@@ -248,7 +242,9 @@ export async function resolveJoins({
       for (const parentKey in grouped) {
         grouped[parentKey]!.sort((a, b) => {
           // Sort by ObjectID string value in descending order (newest first)
-          return b.value.toString().localeCompare(a.value.toString())
+          const aValue = a.value as { toString(): string }
+          const bValue = b.value as { toString(): string }
+          return bValue.toString().localeCompare(aValue.toString())
         })
       }
 
