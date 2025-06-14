@@ -15,209 +15,6 @@ import { buildSortParam } from '../queries/buildSortParam.js'
 import { transform } from './transform.js'
 
 /**
- * Extracts relationTo filter values from a WHERE clause
- * @param where - The WHERE clause to search
- * @returns Array of collection slugs if relationTo filter found, null otherwise
- */
-function extractRelationToFilter(where: Record<string, unknown>): null | string[] {
-  if (!where || typeof where !== 'object') {
-    return null
-  }
-
-  // Check for direct relationTo conditions
-  if (where.relationTo && typeof where.relationTo === 'object') {
-    const relationTo = where.relationTo as Record<string, unknown>
-    if (relationTo.in && Array.isArray(relationTo.in)) {
-      return relationTo.in as string[]
-    }
-    if (relationTo.equals) {
-      return [relationTo.equals as string]
-    }
-  }
-
-  // Check for relationTo in logical operators
-  if (where.and && Array.isArray(where.and)) {
-    for (const condition of where.and) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        return result
-      }
-    }
-  }
-
-  if (where.or && Array.isArray(where.or)) {
-    for (const condition of where.or) {
-      const result = extractRelationToFilter(condition)
-      if (result) {
-        return result
-      }
-    }
-  }
-
-  return null
-}
-
-/**
- * Filters a WHERE clause to only include fields that exist in the target collection
- * This is needed for polymorphic joins where different collections have different fields
- * @param where - The original WHERE clause
- * @param availableFields - The fields available in the target collection
- * @param excludeRelationTo - Whether to exclude relationTo field (for individual collections)
- * @returns A filtered WHERE clause, or null if the query cannot match this collection
- */
-function filterWhereForCollection(
-  where: Record<string, unknown>,
-  availableFields: Array<{ name: string }>,
-  excludeRelationTo: boolean = false,
-): null | Record<string, unknown> {
-  if (!where || typeof where !== 'object') {
-    return where
-  }
-
-  const fieldNames = new Set(availableFields.map((f) => f.name))
-  // Add special fields that are available in polymorphic relationships
-  if (!excludeRelationTo) {
-    fieldNames.add('relationTo')
-  }
-
-  const filtered: Record<string, unknown> = {}
-
-  for (const [key, value] of Object.entries(where)) {
-    if (key === 'and') {
-      // Handle AND operator - all conditions must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions: Record<string, unknown>[] = []
-
-        for (const condition of value) {
-          const filteredCondition = filterWhereForCollection(
-            condition,
-            availableFields,
-            excludeRelationTo,
-          )
-
-          // If any condition in AND cannot be satisfied, the whole AND fails
-          if (filteredCondition === null) {
-            return null
-          }
-
-          if (Object.keys(filteredCondition).length > 0) {
-            filteredConditions.push(filteredCondition)
-          }
-        }
-
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
-      }
-    } else if (key === 'or') {
-      // Handle OR operator - at least one condition must be satisfiable
-      if (Array.isArray(value)) {
-        const filteredConditions = value
-          .map((condition) =>
-            filterWhereForCollection(condition, availableFields, excludeRelationTo),
-          )
-          .filter((condition) => condition !== null && Object.keys(condition).length > 0)
-
-        if (filteredConditions.length > 0) {
-          filtered[key] = filteredConditions
-        }
-        // If no OR conditions can be satisfied, we still continue (OR is more permissive)
-      }
-    } else if (key === 'relationTo' && excludeRelationTo) {
-      // Skip relationTo field for non-polymorphic collections
-      continue
-    } else if (fieldNames.has(key)) {
-      // Include the condition if the field exists in this collection
-      filtered[key] = value
-    } else {
-      // Field doesn't exist in this collection - this makes the query unsatisfiable
-      return null
-    }
-  }
-
-  return filtered
-}
-
-type Args = {
-  adapter: MongooseAdapter
-  collectionSlug: string
-  docs: Record<string, unknown>[]
-  joins?: JoinQuery
-  locale?: string
-  versions?: boolean
-}
-
-type SanitizedJoin = SanitizedJoins[string][number]
-
-/**
- * Utility function to safely traverse nested object properties using dot notation
- * @param doc - The document to traverse
- * @param path - Dot-separated path (e.g., "user.profile.name")
- * @returns The value at the specified path, or undefined if not found
- */
-function getByPath(doc: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((val, segment) => {
-    if (val === undefined || val === null) {
-      return undefined
-    }
-    return (val as Record<string, unknown>)[segment]
-  }, doc)
-}
-
-/**
- * Enhanced utility function to safely traverse nested object properties using dot notation
- * Handles arrays by searching through array elements for matching values
- * @param doc - The document to traverse
- * @param path - Dot-separated path (e.g., "array.category")
- * @returns Array of values found at the specified path (for arrays) or single value
- */
-function getByPathWithArrays(doc: unknown, path: string): unknown[] {
-  const segments = path.split('.')
-  let current = doc
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i]!
-
-    if (current === undefined || current === null) {
-      return []
-    }
-
-    // Get the value at the current segment
-    const value = (current as Record<string, unknown>)[segment]
-
-    if (value === undefined || value === null) {
-      return []
-    }
-
-    // If this is the last segment, return the value(s)
-    if (i === segments.length - 1) {
-      return Array.isArray(value) ? value : [value]
-    }
-
-    // If the value is an array and we have more segments to traverse
-    if (Array.isArray(value)) {
-      const remainingPath = segments.slice(i + 1).join('.')
-      const results: unknown[] = []
-
-      // Search through each array element
-      for (const item of value) {
-        if (item && typeof item === 'object') {
-          const subResults = getByPathWithArrays(item, remainingPath)
-          results.push(...subResults)
-        }
-      }
-
-      return results
-    }
-
-    // Continue traversing
-    current = value
-  }
-
-  return []
-}
-
-/**
  * Resolves join relationships for a collection of documents.
  * This function fetches related documents based on join configurations and
  * attaches them to the original documents with pagination support.
@@ -824,4 +621,207 @@ export async function resolveJoins({
       ref[segments[segments.length - 1]!] = value
     }
   }
+}
+
+/**
+ * Extracts relationTo filter values from a WHERE clause
+ * @param where - The WHERE clause to search
+ * @returns Array of collection slugs if relationTo filter found, null otherwise
+ */
+function extractRelationToFilter(where: Record<string, unknown>): null | string[] {
+  if (!where || typeof where !== 'object') {
+    return null
+  }
+
+  // Check for direct relationTo conditions
+  if (where.relationTo && typeof where.relationTo === 'object') {
+    const relationTo = where.relationTo as Record<string, unknown>
+    if (relationTo.in && Array.isArray(relationTo.in)) {
+      return relationTo.in as string[]
+    }
+    if (relationTo.equals) {
+      return [relationTo.equals as string]
+    }
+  }
+
+  // Check for relationTo in logical operators
+  if (where.and && Array.isArray(where.and)) {
+    for (const condition of where.and) {
+      const result = extractRelationToFilter(condition)
+      if (result) {
+        return result
+      }
+    }
+  }
+
+  if (where.or && Array.isArray(where.or)) {
+    for (const condition of where.or) {
+      const result = extractRelationToFilter(condition)
+      if (result) {
+        return result
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Filters a WHERE clause to only include fields that exist in the target collection
+ * This is needed for polymorphic joins where different collections have different fields
+ * @param where - The original WHERE clause
+ * @param availableFields - The fields available in the target collection
+ * @param excludeRelationTo - Whether to exclude relationTo field (for individual collections)
+ * @returns A filtered WHERE clause, or null if the query cannot match this collection
+ */
+function filterWhereForCollection(
+  where: Record<string, unknown>,
+  availableFields: Array<{ name: string }>,
+  excludeRelationTo: boolean = false,
+): null | Record<string, unknown> {
+  if (!where || typeof where !== 'object') {
+    return where
+  }
+
+  const fieldNames = new Set(availableFields.map((f) => f.name))
+  // Add special fields that are available in polymorphic relationships
+  if (!excludeRelationTo) {
+    fieldNames.add('relationTo')
+  }
+
+  const filtered: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (key === 'and') {
+      // Handle AND operator - all conditions must be satisfiable
+      if (Array.isArray(value)) {
+        const filteredConditions: Record<string, unknown>[] = []
+
+        for (const condition of value) {
+          const filteredCondition = filterWhereForCollection(
+            condition,
+            availableFields,
+            excludeRelationTo,
+          )
+
+          // If any condition in AND cannot be satisfied, the whole AND fails
+          if (filteredCondition === null) {
+            return null
+          }
+
+          if (Object.keys(filteredCondition).length > 0) {
+            filteredConditions.push(filteredCondition)
+          }
+        }
+
+        if (filteredConditions.length > 0) {
+          filtered[key] = filteredConditions
+        }
+      }
+    } else if (key === 'or') {
+      // Handle OR operator - at least one condition must be satisfiable
+      if (Array.isArray(value)) {
+        const filteredConditions = value
+          .map((condition) =>
+            filterWhereForCollection(condition, availableFields, excludeRelationTo),
+          )
+          .filter((condition) => condition !== null && Object.keys(condition).length > 0)
+
+        if (filteredConditions.length > 0) {
+          filtered[key] = filteredConditions
+        }
+        // If no OR conditions can be satisfied, we still continue (OR is more permissive)
+      }
+    } else if (key === 'relationTo' && excludeRelationTo) {
+      // Skip relationTo field for non-polymorphic collections
+      continue
+    } else if (fieldNames.has(key)) {
+      // Include the condition if the field exists in this collection
+      filtered[key] = value
+    } else {
+      // Field doesn't exist in this collection - this makes the query unsatisfiable
+      return null
+    }
+  }
+
+  return filtered
+}
+
+type Args = {
+  adapter: MongooseAdapter
+  collectionSlug: string
+  docs: Record<string, unknown>[]
+  joins?: JoinQuery
+  locale?: string
+  versions?: boolean
+}
+
+type SanitizedJoin = SanitizedJoins[string][number]
+
+/**
+ * Utility function to safely traverse nested object properties using dot notation
+ * @param doc - The document to traverse
+ * @param path - Dot-separated path (e.g., "user.profile.name")
+ * @returns The value at the specified path, or undefined if not found
+ */
+function getByPath(doc: unknown, path: string): unknown {
+  return path.split('.').reduce<unknown>((val, segment) => {
+    if (val === undefined || val === null) {
+      return undefined
+    }
+    return (val as Record<string, unknown>)[segment]
+  }, doc)
+}
+
+/**
+ * Enhanced utility function to safely traverse nested object properties using dot notation
+ * Handles arrays by searching through array elements for matching values
+ * @param doc - The document to traverse
+ * @param path - Dot-separated path (e.g., "array.category")
+ * @returns Array of values found at the specified path (for arrays) or single value
+ */
+function getByPathWithArrays(doc: unknown, path: string): unknown[] {
+  const segments = path.split('.')
+  let current = doc
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]!
+
+    if (current === undefined || current === null) {
+      return []
+    }
+
+    // Get the value at the current segment
+    const value = (current as Record<string, unknown>)[segment]
+
+    if (value === undefined || value === null) {
+      return []
+    }
+
+    // If this is the last segment, return the value(s)
+    if (i === segments.length - 1) {
+      return Array.isArray(value) ? value : [value]
+    }
+
+    // If the value is an array and we have more segments to traverse
+    if (Array.isArray(value)) {
+      const remainingPath = segments.slice(i + 1).join('.')
+      const results: unknown[] = []
+
+      // Search through each array element
+      for (const item of value) {
+        if (item && typeof item === 'object') {
+          const subResults = getByPathWithArrays(item, remainingPath)
+          results.push(...subResults)
+        }
+      }
+
+      return results
+    }
+
+    // Continue traversing
+    current = value
+  }
+
+  return []
 }
