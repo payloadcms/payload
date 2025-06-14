@@ -196,48 +196,43 @@ export async function resolveJoins({
         )
 
         // Execute the query, projecting only necessary fields for ObjectID references
-        // If a sort field is specified (other than _id), include it for sorting across collections
-        const sortProperty = Object.keys(sort)[0]!
-        const projectSort = sortProperty !== '_id' && sortProperty !== 'relationTo'
-        
+        // If sort fields are specified (other than _id), include them for sorting across collections
+        const sortProperties = Object.keys(sort)
+        const sortEntries = Object.entries(sort) as Array<[string, 'asc' | 'desc']>
+
         const projection: Record<string, 1> = {
           _id: 1,
           [joinFieldName]: 1,
         }
-        
+
         if (useDrafts) {
           projection.parent = 1
         }
-        
-        if (projectSort && joinQuery.sort) {
-          projection[sortProperty] = 1
+
+        // Project all sort fields that aren't _id or relationTo
+        if (joinQuery.sort) {
+          for (const sortProp of sortProperties) {
+            if (sortProp !== '_id' && sortProp !== 'relationTo') {
+              projection[sortProp] = 1
+            }
+          }
         }
 
         const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
 
         // Return results with collection info for grouping
-        return { collectionSlug, joinDef, results, sortProperty, useDrafts }
+        return { collectionSlug, joinDef, results, sortEntries, useDrafts }
       })
 
       const collectionResults = await Promise.all(collectionPromises)
 
-      // Determine if we need to sort by a specific field
-      let sortProperty: string | undefined
-      let sortDirection: 1 | -1 = 1
-      
+      // Determine if we need to sort by specific fields
+      let sortEntries: Array<[string, 'asc' | 'desc']> = []
+
       if (joinQuery.sort) {
-        const firstResult = collectionResults.find(r => r)
-        if (firstResult) {
-          sortProperty = firstResult.sortProperty
-          const sort = buildSortParam({
-            adapter,
-            config: adapter.payload.config,
-            fields: [], // Not needed for just getting direction
-            locale,
-            sort: joinQuery.sort,
-            timestamps: true,
-          })
-          sortDirection = sort[sortProperty] === 'desc' ? -1 : 1
+        const firstResult = collectionResults.find((r) => r)
+        if (firstResult && firstResult.sortEntries) {
+          sortEntries = firstResult.sortEntries
         }
       }
 
@@ -271,36 +266,61 @@ export async function resolveJoins({
             relationTo: collectionSlug,
             value: useDrafts ? result.parent : result._id,
           }
-          
-          // Include sort field if present
-          if (sortProperty && sortProperty !== '_id' && sortProperty !== 'relationTo' && result[sortProperty] !== undefined) {
-            joinData[sortProperty] = result[sortProperty]
+
+          // Include sort fields if present
+          for (const [sortProp] of sortEntries) {
+            if (sortProp !== '_id' && sortProp !== 'relationTo' && result[sortProp] !== undefined) {
+              joinData[sortProp] = result[sortProp]
+            }
           }
-          
+
           grouped[parentKey].push(joinData)
         }
       }
 
       // Apply appropriate sorting
-      if (sortProperty && sortProperty !== '_id' && sortProperty !== 'relationTo') {
-        // Sort by the specified field across all collections
+      const hasFieldSort = sortEntries.some(([prop]) => prop !== '_id' && prop !== 'relationTo')
+
+      if (hasFieldSort) {
+        // Sort by the specified fields across all collections
         for (const parentKey in grouped) {
           grouped[parentKey]!.sort((a, b) => {
-            const aVal = a[sortProperty] as string | number | undefined
-            const bVal = b[sortProperty] as string | number | undefined
-            
-            // Handle undefined/null values
-            if (aVal === undefined || aVal === null) return sortDirection
-            if (bVal === undefined || bVal === null) return -sortDirection
-            
-            // Compare values
-            if (typeof aVal === 'string' && typeof bVal === 'string') {
-              return sortDirection * aVal.localeCompare(bVal)
+            // Compare using each sort field in order
+            for (const [sortProp, sortDir] of sortEntries) {
+              if (sortProp === '_id' || sortProp === 'relationTo') {
+                continue
+              }
+
+              const aVal = a[sortProp] as number | string | undefined
+              const bVal = b[sortProp] as number | string | undefined
+              const direction = sortDir === 'desc' ? -1 : 1
+
+              // Handle undefined/null values
+              if (aVal === undefined || aVal === null) {
+                if (bVal === undefined || bVal === null) {continue} // Both null, check next field
+                return direction
+              }
+              if (bVal === undefined || bVal === null) {
+                return -direction
+              }
+
+              // Compare values
+              let comparison = 0
+              if (typeof aVal === 'string' && typeof bVal === 'string') {
+                comparison = aVal.localeCompare(bVal)
+              } else if (aVal < bVal) {
+                comparison = -1
+              } else if (aVal > bVal) {
+                comparison = 1
+              }
+
+              if (comparison !== 0) {
+                return direction * comparison
+              }
+              // If equal, continue to next sort field
             }
-            
-            if (aVal < bVal) return -sortDirection
-            if (aVal > bVal) return sortDirection
-            return 0
+
+            return 0 // All fields are equal
           })
         }
       } else if (!joinQuery.sort) {
