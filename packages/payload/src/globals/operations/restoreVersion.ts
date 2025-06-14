@@ -170,6 +170,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         result =
           (await hook({
             context: req.context,
+            data: result,
             doc: result,
             global: globalConfig,
             previousDoc,

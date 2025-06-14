@@ -143,7 +143,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
               const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
 
               if (formattedLabel) {
-                publishedLocalePill = <Pill>{formattedLabel}</Pill>
+                publishedLocalePill = <Pill size="small">{formattedLabel}</Pill>
               }
             }
 

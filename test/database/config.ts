@@ -73,6 +73,33 @@ export default buildConfigWithDefaults({
           type: 'number',
         },
         {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'nested',
+                  blocks: [
+                    {
+                      slug: 'block',
+                      fields: [
+                        {
+                          type: 'blocks',
+                          name: 'nested',
+                          blocks: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -743,6 +770,16 @@ export default buildConfigWithDefaults({
             },
           ],
           name: 'testBlocks',
+        },
+      ],
+    },
+    {
+      slug: 'unique-fields',
+      fields: [
+        {
+          name: 'slugField',
+          type: 'text',
+          unique: true,
         },
       ],
     },

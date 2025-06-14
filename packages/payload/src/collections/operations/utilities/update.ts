@@ -383,6 +383,7 @@ export const updateDocument = async <
         (await hook({
           collection: collectionConfig,
           context: req.context,
+          data,
           doc: result,
           operation: 'update',
           previousDoc: originalDoc,

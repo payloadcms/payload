@@ -368,6 +368,36 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
 
+    it('should create a csv of all fields when fields is empty', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: [],
+          format: 'csv',
+          where: {
+            title: { contains: 'Title ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains fields even when the specific fields were not given
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toBeDefined()
+      expect(data[0].createdAt).toBeDefined()
+      expect(data[0].createdAt).toBeDefined()
+    })
+
     it('should run custom toCSV function on a field', async () => {
       const fields = [
         'id',

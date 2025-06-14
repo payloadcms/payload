@@ -1,8 +1,8 @@
-import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
+import * as AWS from '@aws-sdk/client-s3'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -85,7 +85,7 @@ export const getHandler = ({
             command,
             typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
           )
-          return Response.redirect(signedUrl)
+          return Response.redirect(signedUrl, 302)
         }
       }
 
@@ -93,10 +93,6 @@ export const getHandler = ({
         Bucket: bucket,
         Key: key,
       })
-
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
@@ -138,6 +134,9 @@ export const getHandler = ({
         status: 200,
       })
     } catch (err) {
+      if (err instanceof AWS.NoSuchKey) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
     } finally {
