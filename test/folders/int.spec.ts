@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { APIError, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -23,7 +23,7 @@ describe('folders', () => {
 
   beforeEach(async () => {
     await payload.delete({
-      collection: 'posts',
+      collection: 'payload-folders',
       depth: 0,
       where: {
         id: {
@@ -48,6 +48,7 @@ describe('folders', () => {
         collection: 'payload-folders',
         data: {
           name: 'Parent Folder',
+          assignedCollections: ['posts'],
         },
       })
       const folderIDFromParams = parentFolder.id
@@ -57,6 +58,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 1',
           folder: folderIDFromParams,
+          assignedCollections: ['posts'],
         },
       })
 
@@ -65,6 +67,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 2',
           folder: folderIDFromParams,
+          assignedCollections: ['posts'],
         },
       })
 
@@ -73,7 +76,7 @@ describe('folders', () => {
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
     })
   })
 
@@ -82,6 +85,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          assignedCollections: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -108,7 +112,7 @@ describe('folders', () => {
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
     })
   })
 
@@ -117,6 +121,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          assignedCollections: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -124,6 +129,7 @@ describe('folders', () => {
       const childFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          assignedCollections: ['posts'],
           name: 'Child Folder',
           folder: parentFolder,
         },
@@ -153,6 +159,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          assignedCollections: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -168,6 +175,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          assignedCollections: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -176,6 +184,7 @@ describe('folders', () => {
         data: {
           name: 'Child Folder',
           folder: parentFolder,
+          assignedCollections: ['posts'],
         },
       })
 
@@ -188,6 +197,85 @@ describe('folders', () => {
           disableErrors: true,
         }),
       ).resolves.toBeNull()
+    })
+
+    describe('ensureSafeCollectionsChane', () => {
+      it('should prevent removing an assigned collection when documents are of that type', async () => {
+        const sharedFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Posts and Drafts Folder',
+            assignedCollections: ['posts', 'drafts'],
+          },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Post 1',
+            folder: sharedFolder.id,
+          },
+        })
+
+        await payload.create({
+          collection: 'drafts',
+          data: {
+            title: 'Post 1',
+            folder: sharedFolder.id,
+          },
+        })
+
+        try {
+          const updatedFolder = await payload.update({
+            collection: 'payload-folders',
+            id: sharedFolder.id,
+            data: {
+              assignedCollections: ['posts'],
+            },
+          })
+
+          expect(updatedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Posts and Drafts Folder" contains documents that still belong to the following collections: Drafts',
+          )
+        }
+      })
+
+      it('should prevent removing an assigned collection when child folders contain those types', async () => {
+        const parentFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            assignedCollections: ['posts', 'drafts'],
+          },
+        })
+
+        await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            assignedCollections: ['posts', 'drafts'],
+            folder: parentFolder.id,
+          },
+        })
+
+        try {
+          const updatedParent = await payload.update({
+            collection: 'payload-folders',
+            id: parentFolder.id,
+            data: {
+              assignedCollections: ['posts'],
+            },
+          })
+
+          expect(updatedParent).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Parent Folder" contains documents that still belong to the following collections: Drafts',
+          )
+        }
+      })
     })
   })
 })

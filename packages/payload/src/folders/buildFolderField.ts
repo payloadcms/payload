@@ -1,7 +1,6 @@
 import type { SingleRelationshipField } from '../fields/config/types.js'
 import type { Document } from '../types/index.js'
 
-import { APIError } from '../errors/APIError.js'
 import { extractID } from '../utilities/extractID.js'
 
 export const buildFolderField = ({
@@ -21,7 +20,7 @@ export const buildFolderField = ({
     index: true,
     label: 'Folder',
     relationTo: folderSlug,
-    validate: async (value, { collectionSlug, data, previousValue, req }) => {
+    validate: async (value, { collectionSlug, data, overrideAccess, previousValue, req }) => {
       if (!value) {
         // no folder, no validation required
         return true
@@ -40,7 +39,8 @@ export const buildFolderField = ({
             id: newID,
             collection: folderSlug,
             depth: 0, // no need to populate nested folders
-            overrideAccess: false,
+            overrideAccess,
+            req,
             select: {
               assignedCollections: true, // only need to check assignedCollections
             },

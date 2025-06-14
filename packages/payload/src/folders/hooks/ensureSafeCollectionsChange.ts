@@ -29,12 +29,22 @@ export const ensureSafeCollectionsChange =
             documentsAndFolders: {
               limit: 100_000_000,
               where: {
-                relationTo: {
-                  in: removedCollections,
-                },
+                or: [
+                  {
+                    relationTo: {
+                      in: removedCollections,
+                    },
+                  },
+                  {
+                    'folder.assignedCollections': {
+                      in: removedCollections,
+                    },
+                  },
+                ],
               },
             },
           },
+          req,
         })
 
         if (result.documentsAndFolders.docs.length > 0) {
