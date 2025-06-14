@@ -95,7 +95,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           name: field.name,
           type: field.type,
           blocks: field.blocks?.reduce((acc, block) => {
-            acc[block.slug] = {
+            ;(acc as any)[block.slug] = {
               fields: fieldSchemaToJSON(
                 [
                   ...block.fields,
@@ -109,7 +109,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
             }
 
             return acc
-          }, {}),
+          }, {} as FieldSchemaJSON),
         })
 
         break

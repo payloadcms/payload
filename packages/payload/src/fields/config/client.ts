@@ -377,7 +377,7 @@ export const createClientField = ({
           ? incomingField.editor.features.find((feature) => feature.key === 'blocks')
           : undefined
       if (blocksFeature) {
-        field.blocks = blocksFeature.serverFeatureProps.blocks.map((block) => {
+        field.blocks = blocksFeature.serverFeatureProps.blocks.map((block: any) => {
           return {
             slug: block.slug,
             fields: createClientFields({
