@@ -202,13 +202,7 @@ export async function resolveJoins({
           ? buildVersionCollectionFields(adapter.payload.config, targetConfig)
           : targetConfig.fields
 
-        // Transform the results
-        transform({
-          adapter,
-          data: results,
-          fields,
-          operation: 'read',
-        })
+        // Do not transform the results - we only need ObjectID references
 
         // Return results with collection info for grouping
         return { collectionSlug, joinDef, results, useDrafts }
@@ -241,75 +235,21 @@ export async function resolveJoins({
             grouped[parentKey] = []
           }
 
-          // Add the wrapped result with original document for sorting
+          // Add the ObjectID reference in polymorphic format
           grouped[parentKey].push({
-            _originalDoc: result, // Store full document for sorting
             relationTo: collectionSlug,
-            value: result.id || result._id,
+            value: useDrafts ? result.parent : result._id,
           })
         }
       }
 
-      // Sort the grouped results
-      const sortParam = joinQuery.sort || joinDef.field.defaultSort
+      // For polymorphic collection joins, sort by ObjectID value (newest first)
+      // ObjectIDs are naturally sorted by creation time, with newer IDs having higher values
       for (const parentKey in grouped) {
-        if (sortParam) {
-          // Parse the sort parameter
-          let sortField: string
-          let sortDirection: 'asc' | 'desc' = 'asc'
-
-          if (typeof sortParam === 'string') {
-            if (sortParam.startsWith('-')) {
-              sortField = sortParam.substring(1)
-              sortDirection = 'desc'
-            } else {
-              sortField = sortParam
-            }
-          } else {
-            // For non-string sort params, fall back to default
-            sortField = 'createdAt'
-            sortDirection = 'desc'
-          }
-
-          grouped[parentKey]!.sort((a, b) => {
-            const docA = a._originalDoc as Record<string, unknown>
-            const docB = b._originalDoc as Record<string, unknown>
-
-            const valueA =
-              sortField === 'createdAt'
-                ? new Date(docA.createdAt as Date | string)
-                : (getByPath(docA, sortField) as Date | number | string)
-            const valueB =
-              sortField === 'createdAt'
-                ? new Date(docB.createdAt as Date | string)
-                : (getByPath(docB, sortField) as Date | number | string)
-
-            if (valueA == null || valueB == null) {
-              return 0
-            }
-            if (valueA < valueB) {
-              return sortDirection === 'desc' ? 1 : -1
-            }
-            if (valueA > valueB) {
-              return sortDirection === 'desc' ? -1 : 1
-            }
-            return 0
-          })
-        } else {
-          // Default sort by creation time (newest first)
-          grouped[parentKey]!.sort((a, b) => {
-            const docA = a._originalDoc as Record<string, unknown>
-            const docB = b._originalDoc as Record<string, unknown>
-            const dateA = new Date(docA.createdAt as Date | string)
-            const dateB = new Date(docB.createdAt as Date | string)
-            return dateB.getTime() - dateA.getTime()
-          })
-        }
-
-        // Remove the temporary _originalDoc field
-        for (const item of grouped[parentKey]!) {
-          delete item._originalDoc
-        }
+        grouped[parentKey]!.sort((a, b) => {
+          // Sort by ObjectID string value in descending order (newest first)
+          return b.value.toString().localeCompare(a.value.toString())
+        })
       }
 
       // Apply pagination settings
