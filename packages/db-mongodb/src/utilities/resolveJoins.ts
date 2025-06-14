@@ -195,14 +195,51 @@ export async function resolveJoins({
           {} as Record<string, -1 | 1>,
         )
 
-        // Execute the query
-        const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
+        // Execute the query, projecting only necessary fields for ObjectID references
+        // If a sort field is specified (other than _id), include it for sorting across collections
+        const sortProperty = Object.keys(sort)[0]!
+        const projectSort = sortProperty !== '_id' && sortProperty !== 'relationTo'
+        
+        const projection: Record<string, 1> = {
+          _id: 1,
+          [joinFieldName]: 1,
+        }
+        
+        if (useDrafts) {
+          projection.parent = 1
+        }
+        
+        if (projectSort && joinQuery.sort) {
+          projection[sortProperty] = 1
+        }
+
+        const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
 
         // Return results with collection info for grouping
-        return { collectionSlug, joinDef, results, useDrafts }
+        return { collectionSlug, joinDef, results, sortProperty, useDrafts }
       })
 
       const collectionResults = await Promise.all(collectionPromises)
+
+      // Determine if we need to sort by a specific field
+      let sortProperty: string | undefined
+      let sortDirection: 1 | -1 = 1
+      
+      if (joinQuery.sort) {
+        const firstResult = collectionResults.find(r => r)
+        if (firstResult) {
+          sortProperty = firstResult.sortProperty
+          const sort = buildSortParam({
+            adapter,
+            config: adapter.payload.config,
+            fields: [], // Not needed for just getting direction
+            locale,
+            sort: joinQuery.sort,
+            timestamps: true,
+          })
+          sortDirection = sort[sortProperty] === 'desc' ? -1 : 1
+        }
+      }
 
       // Group the results by parent ID
       for (const collectionResult of collectionResults) {
@@ -230,22 +267,53 @@ export async function resolveJoins({
           }
 
           // Add the ObjectID reference in polymorphic format
-          grouped[parentKey].push({
+          const joinData: Record<string, unknown> = {
             relationTo: collectionSlug,
             value: useDrafts ? result.parent : result._id,
-          })
+          }
+          
+          // Include sort field if present
+          if (sortProperty && sortProperty !== '_id' && sortProperty !== 'relationTo' && result[sortProperty] !== undefined) {
+            joinData[sortProperty] = result[sortProperty]
+          }
+          
+          grouped[parentKey].push(joinData)
         }
       }
 
-      // For polymorphic collection joins, sort by ObjectID value (newest first)
-      // ObjectIDs are naturally sorted by creation time, with newer IDs having higher values
-      for (const parentKey in grouped) {
-        grouped[parentKey]!.sort((a, b) => {
-          // Sort by ObjectID string value in descending order (newest first)
-          const aValue = a.value as { toString(): string }
-          const bValue = b.value as { toString(): string }
-          return bValue.toString().localeCompare(aValue.toString())
-        })
+      // Apply appropriate sorting
+      if (sortProperty && sortProperty !== '_id' && sortProperty !== 'relationTo') {
+        // Sort by the specified field across all collections
+        for (const parentKey in grouped) {
+          grouped[parentKey]!.sort((a, b) => {
+            const aVal = a[sortProperty] as string | number | undefined
+            const bVal = b[sortProperty] as string | number | undefined
+            
+            // Handle undefined/null values
+            if (aVal === undefined || aVal === null) return sortDirection
+            if (bVal === undefined || bVal === null) return -sortDirection
+            
+            // Compare values
+            if (typeof aVal === 'string' && typeof bVal === 'string') {
+              return sortDirection * aVal.localeCompare(bVal)
+            }
+            
+            if (aVal < bVal) return -sortDirection
+            if (aVal > bVal) return sortDirection
+            return 0
+          })
+        }
+      } else if (!joinQuery.sort) {
+        // For polymorphic collection joins without explicit sort, sort by ObjectID value (newest first)
+        // ObjectIDs are naturally sorted by creation time, with newer IDs having higher values
+        for (const parentKey in grouped) {
+          grouped[parentKey]!.sort((a, b) => {
+            // Sort by ObjectID string value in descending order (newest first)
+            const aValue = a.value as { toString(): string }
+            const bValue = b.value as { toString(): string }
+            return bValue.toString().localeCompare(aValue.toString())
+          })
+        }
       }
 
       // Apply pagination settings
