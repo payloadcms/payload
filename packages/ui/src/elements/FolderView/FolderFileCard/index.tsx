@@ -3,11 +3,14 @@
 import type { FolderOrDocument } from 'payload/shared'
 
 import { useDroppable } from '@dnd-kit/core'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { ThreeDotsIcon } from '../../../icons/ThreeDots/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup } from '../../Popup/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
@@ -17,6 +20,7 @@ import './index.scss'
 const baseClass = 'folder-file-card'
 
 type Props = {
+  readonly assignedCollections?: string[]
   readonly className?: string
   readonly disabled?: boolean
   readonly id: number | string
@@ -35,6 +39,7 @@ type Props = {
 export function FolderFileCard({
   id,
   type,
+  assignedCollections,
   className = '',
   disabled = false,
   isDeleting = false,
@@ -54,6 +59,7 @@ export function FolderFileCard({
     data: {
       id,
       type,
+      assignedCollections,
     },
     disabled: disableDrop,
   })
@@ -112,22 +118,55 @@ export function FolderFileCard({
         <div className={`${baseClass}__icon-wrap`}>
           {type === 'file' ? <DocumentIcon /> : <ColoredFolderIcon />}
         </div>
-        <p className={`${baseClass}__name`} title={title}>
-          <span>{title}</span>
-        </p>
-        {PopupActions ? (
-          <Popup
-            button={<ThreeDotsIcon />}
-            disabled={selectedCount > 1 || (selectedCount === 1 && !isSelected)}
-            horizontalAlign="right"
-            size="large"
-            verticalAlign="bottom"
-          >
-            {PopupActions}
-          </Popup>
-        ) : null}
+        <div>
+          <div>
+            <p className={`${baseClass}__name`} title={title}>
+              <span>{title}</span>
+            </p>
+            {PopupActions ? (
+              <Popup
+                button={<ThreeDotsIcon />}
+                disabled={selectedCount > 1 || (selectedCount === 1 && !isSelected)}
+                horizontalAlign="right"
+                size="large"
+                verticalAlign="bottom"
+              >
+                {PopupActions}
+              </Popup>
+            ) : null}
+          </div>
+          {assignedCollections && assignedCollections.length > 0 ? (
+            <AssignedCollections assignedCollections={assignedCollections} />
+          ) : null}
+        </div>
       </div>
     </div>
+  )
+}
+
+function AssignedCollections({ assignedCollections }: { assignedCollections: string[] }) {
+  const { config } = useConfig()
+  const { i18n } = useTranslation()
+
+  const collectionsDisplayText = React.useMemo(() => {
+    return assignedCollections.reduce((acc, collection) => {
+      const collectionConfig = config.collections?.find((c) => c.slug === collection)
+      if (collectionConfig) {
+        return [...acc, getTranslation(collectionConfig.labels.singular, i18n)]
+      }
+      return acc
+    }, [])
+  }, [assignedCollections, config.collections, i18n])
+
+  return (
+    <p className={`${baseClass}__assigned-collections`}>
+      {collectionsDisplayText.map((label, index) => (
+        <span key={label}>
+          {label}
+          {index < assignedCollections.length - 1 ? ', ' : ''}
+        </span>
+      ))}
+    </p>
   )
 }
 
@@ -138,20 +177,16 @@ type ContextCardProps = {
   readonly type: 'file' | 'folder'
 }
 export function ContextFolderFileCard({ type, className, index, item }: ContextCardProps) {
-  const {
-    focusedRowIndex,
-    isDragging,
-    itemKeysToMove,
-    onItemClick,
-    onItemKeyPress,
-    selectedItemKeys,
-  } = useFolder()
+  const { checkIfItemIsDisabled, focusedRowIndex, onItemClick, onItemKeyPress, selectedItemKeys } =
+    useFolder()
   const isSelected = selectedItemKeys.has(item.itemKey)
+  const isDisabled = checkIfItemIsDisabled(item)
 
   return (
     <FolderFileCard
+      assignedCollections={item.value.assignedCollections || []}
       className={className}
-      disabled={(isDragging && isSelected) || itemKeysToMove.has(item.itemKey)}
+      disabled={isDisabled}
       id={item.value.id}
       isFocused={focusedRowIndex === index}
       isSelected={isSelected}

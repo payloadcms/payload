@@ -58,7 +58,9 @@ export const buildBrowseByFolderView = async (
     throw new Error('not-found')
   }
 
-  const browseByFolderSlugs = browseByFolderSlugsFromArgs.filter(
+  const foldersSlug = config.folders.slug
+
+  const allowReadCollectionSlugs = browseByFolderSlugsFromArgs.filter(
     (collectionSlug) =>
       permissions?.collections?.[collectionSlug]?.read &&
       visibleEntities.collections.includes(collectionSlug),
@@ -66,12 +68,11 @@ export const buildBrowseByFolderView = async (
 
   const query = queryFromArgs || queryFromReq
   const activeCollectionFolderSlugs: string[] =
-    Array.isArray(query?.relationTo) && query.relationTo.length
+    folderID && Array.isArray(query?.relationTo) && query.relationTo.length
       ? query.relationTo.filter(
-          (slug) =>
-            browseByFolderSlugs.includes(slug) || (config.folders && slug === config.folders.slug),
+          (slug) => allowReadCollectionSlugs.includes(slug) || slug === foldersSlug,
         )
-      : [...browseByFolderSlugs, config.folders.slug]
+      : [...allowReadCollectionSlugs, foldersSlug]
 
   const {
     routes: { admin: adminRoute },
@@ -96,11 +97,12 @@ export const buildBrowseByFolderView = async (
   const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || '_folderOrDocumentTitle'
   const viewPreference = browseByFolderPreferences?.viewPreference || 'grid'
 
-  const { breadcrumbs, documents, FolderResultsComponent, subfolders } =
+  const { breadcrumbs, documents, folderAssignedCollections, FolderResultsComponent, subfolders } =
     await getFolderResultsComponentAndData({
-      activeCollectionSlugs: activeCollectionFolderSlugs,
-      browseByFolder: false,
+      browseByFolder: true,
+      collectionsToDisplay: activeCollectionFolderSlugs,
       displayAs: viewPreference,
+      folderAssignedCollections: activeCollectionFolderSlugs.filter((slug) => slug !== foldersSlug),
       folderID,
       req: initPageResult.req,
       sort: sortPreference,
@@ -142,10 +144,32 @@ export const buildBrowseByFolderView = async (
   //   serverProps,
   // })
 
-  // documents cannot be created without a parent folder in this view
-  const allowCreateCollectionSlugs = resolvedFolderID
-    ? [config.folders.slug, ...browseByFolderSlugs]
-    : [config.folders.slug]
+  // Filter down allCollectionFolderSlugs by the ones the current folder is assingned to
+  const allAvailableCollectionSlugs = folderID
+    ? allowReadCollectionSlugs.filter((slug) => folderAssignedCollections.includes(slug))
+    : allowReadCollectionSlugs
+
+  // Filter down activeCollectionFolderSlugs by the ones the current folder is assingned to
+  const availableActiveCollectionFolderSlugs = activeCollectionFolderSlugs.filter((slug) => {
+    if (slug === foldersSlug) {
+      return permissions?.collections?.[foldersSlug]?.read
+    } else {
+      return !folderAssignedCollections || folderAssignedCollections.includes(slug)
+    }
+  })
+
+  // Documents cannot be created without a parent folder in this view
+  const allowCreateCollectionSlugs = (
+    resolvedFolderID ? [foldersSlug, ...allAvailableCollectionSlugs] : [foldersSlug]
+  ).filter((collectionSlug) => {
+    if (collectionSlug === foldersSlug) {
+      return permissions?.collections?.[foldersSlug]?.create
+    }
+    return (
+      permissions?.collections?.[collectionSlug]?.create &&
+      visibleEntities.collections.includes(collectionSlug)
+    )
+  })
 
   return {
     View: (
@@ -154,8 +178,8 @@ export const buildBrowseByFolderView = async (
         {RenderServerComponent({
           clientProps: {
             // ...folderViewSlots,
-            activeCollectionFolderSlugs,
-            allCollectionFolderSlugs: browseByFolderSlugs,
+            activeCollectionFolderSlugs: availableActiveCollectionFolderSlugs,
+            allCollectionFolderSlugs: allAvailableCollectionSlugs,
             allowCreateCollectionSlugs,
             baseFolderPath: `/browse-by-folder`,
             breadcrumbs,

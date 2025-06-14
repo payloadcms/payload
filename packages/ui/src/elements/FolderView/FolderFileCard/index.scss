@@ -10,6 +10,7 @@
     --card-titlebar-icon-color: var(--theme-elevation-300);
     --card-label-color: var(--theme-text);
     --card-preview-icon-color: var(--theme-elevation-400);
+    --assigned-collections-color: var(--theme-elevation-900);
 
     position: relative;
     display: grid;
@@ -61,6 +62,7 @@
       --card-label-color: var(--theme-success-800);
       --card-preview-icon-color: var(--theme-success-800);
       --accessibility-outline: 2px solid var(--theme-success-600);
+      --assigned-collections-color: var(--theme-success-850);
 
       .popup:hover:not(.popup--active) {
         --card-icon-dots-bg-color: var(--theme-success-100);
@@ -195,13 +197,15 @@
     &__titlebar-area {
       position: relative;
       pointer-events: none;
+      display: flex;
+      flex-direction: column;
       grid-area: details;
       border-radius: inherit;
       display: grid;
       grid-template-columns: auto 1fr auto;
       gap: 1rem;
       align-items: center;
-      padding: 1rem;
+      padding: calc(var(--base) / 2);
       background-color: var(--card-bg-color);
 
       .popup {
@@ -217,6 +221,13 @@
       text-overflow: ellipsis;
       line-height: normal;
       color: var(--card-label-color);
+    }
+
+    &__assigned-collections {
+      color: var(--assigned-collections-color);
+      opacity: 0.5;
+      margin-top: 4px;
+      line-height: normal;
     }
 
     &__icon-wrap .icon {
