@@ -14,16 +14,25 @@ import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { transform } from './transform.js'
 
+export type ResolveJoinsArgs = {
+  /** The MongoDB adapter instance */
+  adapter: MongooseAdapter
+  /** The slug of the collection being queried */
+  collectionSlug: string
+  /** Array of documents to resolve joins for */
+  docs: Record<string, unknown>[]
+  /** Join query specifications (which joins to resolve and how) */
+  joins?: JoinQuery
+  /** Optional locale for localized queries */
+  locale?: string
+  /** Whether to resolve versions instead of published documents */
+  versions?: boolean
+}
+
 /**
  * Resolves join relationships for a collection of documents.
  * This function fetches related documents based on join configurations and
  * attaches them to the original documents with pagination support.
- *
- * @param adapter - The MongoDB adapter instance
- * @param collectionSlug - The slug of the collection being queried
- * @param docs - Array of documents to resolve joins for
- * @param joins - Join query specifications (which joins to resolve and how)
- * @param locale - Optional locale for localized queries
  */
 export async function resolveJoins({
   adapter,
@@ -32,7 +41,7 @@ export async function resolveJoins({
   joins,
   locale,
   versions = false,
-}: Args): Promise<void> {
+}: ResolveJoinsArgs): Promise<void> {
   // Early return if no joins are specified or no documents to process
   if (!joins || docs.length === 0) {
     return
@@ -745,15 +754,6 @@ function filterWhereForCollection(
   }
 
   return filtered
-}
-
-type Args = {
-  adapter: MongooseAdapter
-  collectionSlug: string
-  docs: Record<string, unknown>[]
-  joins?: JoinQuery
-  locale?: string
-  versions?: boolean
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]
