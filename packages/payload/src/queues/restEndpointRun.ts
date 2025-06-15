@@ -1,4 +1,5 @@
 import type { Endpoint, SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
@@ -24,14 +25,24 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { allQueues, limit, queue } = req.query as {
+    const {
+      allQueues,
+      handleSchedules: handleSchedulesParam,
+      limit,
+      queue,
+    } = req.query as {
       allQueues?: boolean
+      handleSchedules?: boolean
       limit?: number
       queue?: string
     }
 
-    if (req?.payload?.config?.jobs?.scheduler === 'runEndpoint') {
-      await handleSchedules()
+    const shouldHandleSchedules =
+      handleSchedulesParam &&
+      !(typeof handleSchedulesParam === 'string' && handleSchedulesParam === 'false')
+
+    if (req?.payload?.config?.jobs?.scheduler === 'runEndpoint' || shouldHandleSchedules) {
+      await handleSchedules({ req })
     }
 
     const runJobsArgs: RunJobsArgs = {
@@ -101,4 +112,30 @@ const configHasJobs = (config: SanitizedConfig): boolean => {
  * The benefit of doing it like this instead of a separate endpoint is that we can run jobs immediately
  * after they are scheduled
  */
-async function handleSchedules() {}
+async function handleSchedules({ req }: { req: PayloadRequest }) {
+  const jobsConfig = req.payload.config.jobs
+
+  const tasksWithSchedules = jobsConfig.tasks.filter((task) => {
+    return task.schedule?.length
+  })
+
+  const workflowsWithSchedules = jobsConfig.workflows.filter((workflow) => {
+    return workflow.schedule?.length
+  })
+
+  const allScheduleQueues = [
+    ...tasksWithSchedules.flatMap(
+      (task) => task.schedule && task.schedule.map((schedule) => schedule.queue),
+    ),
+    ...workflowsWithSchedules.flatMap(
+      (workflow) => workflow.schedule && workflow.schedule.map((schedule) => schedule.queue),
+    ),
+  ]
+
+  for (const queue of allScheduleQueues) {
+    const activeTasksForQueue = await req.payload.find({
+      collection: 'payload-jobs',
+      where: {},
+    })
+  }
+}
