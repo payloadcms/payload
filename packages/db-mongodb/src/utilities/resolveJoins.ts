@@ -186,37 +186,11 @@ export async function resolveJoins({
           timestamps: true,
         })
 
-        // Convert sort object to Mongoose-compatible format
-        const mongooseSort = Object.entries(sort).reduce(
-          (acc, [key, value]) => {
-            acc[key] = value === 'desc' ? -1 : 1
-            return acc
-          },
-          {} as Record<string, -1 | 1>,
-        )
-
         // Execute the query, projecting only necessary fields for ObjectID references
         // If sort fields are specified (other than _id), include them for sorting across collections
-        const sortProperties = Object.keys(sort)
         const sortEntries = Object.entries(sort) as Array<[string, 'asc' | 'desc']>
 
-        const projection: Record<string, 1> = {
-          _id: 1,
-          [joinFieldName]: 1,
-        }
-
-        if (useDrafts) {
-          projection.parent = 1
-        }
-
-        // Project all sort fields that aren't _id or relationTo
-        if (joinQuery.sort) {
-          for (const sortProp of sortProperties) {
-            if (sortProp !== '_id' && sortProp !== 'relationTo') {
-              projection[sortProp] = 1
-            }
-          }
-        }
+        const projection = buildJoinProjection(joinFieldName, useDrafts, sort, !!joinQuery.sort)
 
         // For polymorphic collection joins, skip database sorting since we sort in JavaScript anyway
         // Database sorting here is redundant as results are always re-sorted after grouping
@@ -495,24 +469,7 @@ export async function resolveJoins({
 
     // Execute the query to get all related documents
     // Build projection to only fetch necessary fields for better performance
-    const projection: Record<string, 1> = {
-      _id: 1,
-      [dbFieldName]: 1,
-    }
-
-    if (useDrafts) {
-      projection.parent = 1
-    }
-
-    // Project all sort fields that aren't _id or relationTo
-    if (joinQuery.sort) {
-      const sortProperties = Object.keys(sort)
-      for (const sortProp of sortProperties) {
-        if (sortProp !== '_id' && sortProp !== 'relationTo') {
-          projection[sortProp] = 1
-        }
-      }
-    }
+    const projection = buildJoinProjection(dbFieldName, useDrafts, sort, !!joinQuery.sort)
 
     const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
 
@@ -800,6 +757,36 @@ function filterWhereForCollection(
 }
 
 type SanitizedJoin = SanitizedJoins[string][number]
+
+/**
+ * Builds projection for join queries
+ */
+function buildJoinProjection(
+  baseFieldName: string,
+  useDrafts: boolean,
+  sort: Record<string, string>,
+  includeSort: boolean,
+): Record<string, 1> {
+  const projection: Record<string, 1> = {
+    _id: 1,
+    [baseFieldName]: 1,
+  }
+
+  if (useDrafts) {
+    projection.parent = 1
+  }
+
+  if (includeSort) {
+    const sortProperties = Object.keys(sort)
+    for (const sortProp of sortProperties) {
+      if (sortProp !== '_id' && sortProp !== 'relationTo') {
+        projection[sortProp] = 1
+      }
+    }
+  }
+
+  return projection
+}
 
 /**
  * Utility function to safely traverse nested object properties using dot notation
