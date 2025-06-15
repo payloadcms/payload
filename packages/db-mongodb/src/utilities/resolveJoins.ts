@@ -218,7 +218,9 @@ export async function resolveJoins({
           }
         }
 
-        const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
+        // For polymorphic collection joins, skip database sorting since we sort in JavaScript anyway
+        // Database sorting here is redundant as results are always re-sorted after grouping
+        const results = await JoinModel.find(whereQuery, projection).lean()
 
         // Return results with collection info for grouping
         return { collectionSlug, joinDef, results, sortEntries, useDrafts }
@@ -297,7 +299,9 @@ export async function resolveJoins({
 
               // Handle undefined/null values
               if (aVal === undefined || aVal === null) {
-                if (bVal === undefined || bVal === null) {continue} // Both null, check next field
+                if (bVal === undefined || bVal === null) {
+                  continue
+                } // Both null, check next field
                 return direction
               }
               if (bVal === undefined || bVal === null) {
@@ -490,7 +494,27 @@ export async function resolveJoins({
     )
 
     // Execute the query to get all related documents
-    const results = await JoinModel.find(whereQuery, null).sort(mongooseSort).lean()
+    // Build projection to only fetch necessary fields for better performance
+    const projection: Record<string, 1> = {
+      _id: 1,
+      [dbFieldName]: 1,
+    }
+
+    if (useDrafts) {
+      projection.parent = 1
+    }
+
+    // Project all sort fields that aren't _id or relationTo
+    if (joinQuery.sort) {
+      const sortProperties = Object.keys(sort)
+      for (const sortProp of sortProperties) {
+        if (sortProp !== '_id' && sortProp !== 'relationTo') {
+          projection[sortProp] = 1
+        }
+      }
+    }
+
+    const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
 
     // Transform the results to convert _id to id and handle other transformations
     if (useDrafts) {
