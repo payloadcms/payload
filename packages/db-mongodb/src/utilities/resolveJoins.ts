@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedJoins, Where } from 'payload'
+import type { JoinQuery, SanitizedJoins, Sort, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,
@@ -82,8 +82,6 @@ export async function resolveJoins({
       return { joinPath, result: null }
     }
 
-    console.log(joinPath)
-
     // Normalize collections to always be an array for unified processing
     const allCollections = Array.isArray(joinDef.field.collection)
       ? joinDef.field.collection
@@ -104,9 +102,6 @@ export async function resolveJoins({
     const collections = relationToFilter
       ? allCollections.filter((col) => relationToFilter.includes(col))
       : allCollections
-
-    // Group the results by their parent document ID
-    const grouped: Record<string, Record<string, unknown>[]> = {}
 
     // Check if this is a polymorphic collection join (where field.collection is an array)
     const isPolymorphicCollectionJoin = Array.isArray(joinDef.field.collection)
@@ -167,12 +162,8 @@ export async function resolveJoins({
 
       // Handle localized paths and version prefixes
       let dbFieldName = joinDef.field.on
-      if (
-        effectiveLocale &&
-        typeof localizationConfig === 'object' &&
-        localizationConfig &&
-        !isPolymorphicCollectionJoin
-      ) {
+
+      if (effectiveLocale && typeof localizationConfig === 'object' && localizationConfig) {
         const pathSegments = joinDef.field.on.split('.')
         const transformedSegments: string[] = []
         const fields = useDrafts
@@ -198,20 +189,7 @@ export async function resolveJoins({
         dbFieldName = `version.${dbFieldName}`
       }
 
-      // Check if the target field is a polymorphic relationship
-      const isPolymorphic = joinDef.targetField
-        ? Array.isArray(joinDef.targetField.relationTo)
-        : false
-
-      // Add the join condition
-      if (isPolymorphic && !isPolymorphicCollectionJoin) {
-        // For polymorphic relationships, we need to match both relationTo and value
-        whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
-        whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
-      } else {
-        // For regular relationships and polymorphic collection joins
-        whereQuery[dbFieldName] = { $in: parentIDs }
-      }
+      whereQuery[dbFieldName] = { $in: parentIDs }
 
       // Build the sort parameters for the query
       const fields = useDrafts
@@ -232,189 +210,99 @@ export async function resolveJoins({
         timestamps: true,
       })
 
-      // Execute the query, projecting only necessary fields
-      const sortEntries = Object.entries(sort) as Array<[string, 'asc' | 'desc']>
-      const projection = buildJoinProjection(dbFieldName, useDrafts, sort, !!joinQuery.sort)
+      const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
 
-      const results = await JoinModel.find(whereQuery, projection).lean()
+      const results = await JoinModel.find(whereQuery, projection, {
+        limit: joinQuery.limit,
+        skip: joinQuery.page
+          ? (joinQuery.page - 1) * (joinQuery.limit ?? joinDef.field.defaultLimit ?? 10)
+          : 0,
+        sort,
+      }).lean()
+
+      transform({
+        adapter,
+        data: results,
+        fields: targetConfig.fields,
+        operation: 'read',
+      })
 
       // Return results with collection info for grouping
       return {
         collectionSlug,
         dbFieldName,
-        isPolymorphic,
-        joinDef,
         results,
-        sortEntries,
+        sort,
         useDrafts,
       }
     })
 
     const collectionResults = await Promise.all(collectionPromises)
 
-    // Determine if we need to sort by specific fields
-    let sortEntries: Array<[string, 'asc' | 'desc']> = []
-
-    if (joinQuery.sort) {
-      const firstResult = collectionResults.find((r) => r)
-      if (firstResult && firstResult.sortEntries) {
-        sortEntries = firstResult.sortEntries
-      }
-    }
-
     // Group the results by parent ID
+    const grouped: Record<
+      string,
+      {
+        docs: Record<string, unknown>[]
+        sort: Record<string, string>
+      }
+    > = {}
     for (const collectionResult of collectionResults) {
       if (!collectionResult) {
         continue
       }
 
-      const { collectionSlug, dbFieldName, isPolymorphic, joinDef, results, useDrafts } =
-        collectionResult
+      const { collectionSlug, dbFieldName, results, sort, useDrafts } = collectionResult
 
       for (const result of results) {
-        if (isPolymorphicCollectionJoin) {
-          // For polymorphic collection joins, handle differently
-          if (useDrafts) {
-            result.id = result.parent
-          }
+        if (useDrafts) {
+          result.id = result.parent
+        }
 
-          // Get the parent ID from the join field
-          const joinFieldPath = useDrafts ? `version.${joinDef.field.on}` : joinDef.field.on
-          const parentValue = getByPath(result, joinFieldPath)
-          if (!parentValue) {
-            continue
-          }
+        const parentValue = getByPath(result, dbFieldName)
+        if (!parentValue) {
+          continue
+        }
 
-          const parentKey = parentValue as string
-          if (!grouped[parentKey]) {
-            grouped[parentKey] = []
-          }
+        const joinData = {
+          relationTo: collectionSlug,
+          value: result.id,
+        }
 
-          // Add the ObjectID reference in polymorphic format
-          const joinData: Record<string, unknown> = {
-            relationTo: collectionSlug,
-            value: useDrafts ? result.parent : result._id,
-          }
-
-          // Include sort fields if present
-          for (const [sortProp] of sortEntries) {
-            if (sortProp !== '_id' && sortProp !== 'relationTo' && result[sortProp] !== undefined) {
-              joinData[sortProp] = result[sortProp]
-            }
-          }
-
-          grouped[parentKey].push(joinData)
-        } else {
-          // For regular joins (single collection)
-          // Get the parent ID(s) from the result using the join field
-          let parents: unknown[]
-
-          if (isPolymorphic) {
-            // For polymorphic relationships, extract the value from the polymorphic structure
-            const polymorphicField = getByPath(result, dbFieldName) as
-              | { relationTo: string; value: unknown }
-              | { relationTo: string; value: unknown }[]
-
-            if (Array.isArray(polymorphicField)) {
-              // Handle arrays of polymorphic relationships
-              parents = polymorphicField
-                .filter((item) => item && item.relationTo === collectionSlug)
-                .map((item) => item.value)
-            } else if (polymorphicField && polymorphicField.relationTo === collectionSlug) {
-              // Handle single polymorphic relationship
-              parents = [polymorphicField.value]
-            } else {
-              parents = []
-            }
-          } else {
-            // For regular relationships, use the array-aware function to handle cases where the join field is within an array
-            parents = getByPathWithArrays(result, dbFieldName)
-          }
-
-          // For version documents, we need to map the result to the parent document
-          let resultToAdd = result
-          if (useDrafts) {
-            // For version documents, we want to return the parent document ID but with the version data
-            resultToAdd = {
-              ...result,
-              id: result.parent || result._id, // Use parent document ID as the ID for joins, fallback to _id
-            }
-          }
-
-          for (const parent of parents) {
-            if (!parent) {
-              continue
-            }
-            const parentKey = parent as string
-            if (!grouped[parentKey]) {
-              grouped[parentKey] = []
-            }
-            grouped[parentKey].push(resultToAdd)
+        const parentKey = parentValue as string
+        if (!grouped[parentKey]) {
+          grouped[parentKey] = {
+            docs: [],
+            sort,
           }
         }
+
+        // Always store the ObjectID reference in polymorphic format
+        grouped[parentKey].docs.push({
+          ...result,
+          __joinData: joinData,
+        })
       }
     }
 
-    // Apply appropriate sorting (only for polymorphic collection joins)
-    if (isPolymorphicCollectionJoin) {
-      const hasFieldSort = sortEntries.some(([prop]) => prop !== '_id' && prop !== 'relationTo')
-
-      if (hasFieldSort) {
-        // Sort by the specified fields across all collections
-        for (const parentKey in grouped) {
-          grouped[parentKey]!.sort((a, b) => {
-            // Compare using each sort field in order
-            for (const [sortProp, sortDir] of sortEntries) {
-              if (sortProp === '_id' || sortProp === 'relationTo') {
-                continue
-              }
-
-              const aVal = a[sortProp] as number | string | undefined
-              const bVal = b[sortProp] as number | string | undefined
-              const direction = sortDir === 'desc' ? -1 : 1
-
-              // Handle undefined/null values
-              if (aVal === undefined || aVal === null) {
-                if (bVal === undefined || bVal === null) {
-                  continue
-                } // Both null, check next field
-                return direction
-              }
-              if (bVal === undefined || bVal === null) {
-                return -direction
-              }
-
-              // Compare values
-              let comparison = 0
-              if (typeof aVal === 'string' && typeof bVal === 'string') {
-                comparison = aVal.localeCompare(bVal)
-              } else if (aVal < bVal) {
-                comparison = -1
-              } else if (aVal > bVal) {
-                comparison = 1
-              }
-
-              if (comparison !== 0) {
-                return direction * comparison
-              }
-              // If equal, continue to next sort field
-            }
-
-            return 0 // All fields are equal
-          })
+    for (const results of Object.values(grouped)) {
+      results.docs.sort((a, b) => {
+        for (const [fieldName, sortOrder] of Object.entries(results.sort)) {
+          const sort = sortOrder === 'asc' ? 1 : -1
+          const aValue = a[fieldName] as Date | number | string
+          const bValue = b[fieldName] as Date | number | string
+          if (aValue < bValue) {
+            return -1 * sort
+          }
+          if (aValue > bValue) {
+            return 1 * sort
+          }
         }
-      } else if (!joinQuery.sort) {
-        // For polymorphic collection joins without explicit sort, sort by ObjectID value (newest first)
-        // ObjectIDs are naturally sorted by creation time, with newer IDs having higher values
-        for (const parentKey in grouped) {
-          grouped[parentKey]!.sort((a, b) => {
-            // Sort by ObjectID string value in descending order (newest first)
-            const aValue = a.value as { toString(): string }
-            const bValue = b.value as { toString(): string }
-            return bValue.toString().localeCompare(aValue.toString())
-          })
-        }
-      }
+        return 0
+      })
+      results.docs = results.docs.map(
+        (doc) => (isPolymorphicCollectionJoin ? doc.__joinData : doc.id) as Record<string, unknown>,
+      )
     }
 
     // Apply pagination settings
@@ -438,9 +326,7 @@ export async function resolveJoins({
     return {
       joinPath,
       result: {
-        effectiveLocale,
         grouped,
-        joinDef,
         joinQuery,
         limit,
         localizedJoinPath,
@@ -464,7 +350,7 @@ export async function resolveJoins({
     // Attach the joined data to each parent document
     for (const doc of docs) {
       const id = (versions ? (doc.parent ?? doc._id ?? doc.id) : (doc._id ?? doc.id)) as string
-      const all = grouped[id] || []
+      const all = grouped[id]?.docs || []
 
       // Calculate the slice for pagination
       // When limit is 0, it means unlimited - return all results
@@ -640,7 +526,6 @@ function buildJoinProjection(
   baseFieldName: string,
   useDrafts: boolean,
   sort: Record<string, string>,
-  includeSort: boolean,
 ): Record<string, 1> {
   const projection: Record<string, 1> = {
     _id: 1,
@@ -651,13 +536,8 @@ function buildJoinProjection(
     projection.parent = 1
   }
 
-  if (includeSort) {
-    const sortProperties = Object.keys(sort)
-    for (const sortProp of sortProperties) {
-      if (sortProp !== '_id' && sortProp !== 'relationTo') {
-        projection[sortProp] = 1
-      }
-    }
+  for (const fieldName of Object.keys(sort)) {
+    projection[fieldName] = 1
   }
 
   return projection
