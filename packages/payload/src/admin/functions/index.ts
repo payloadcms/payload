@@ -22,9 +22,10 @@ export type ServerFunctionClientArgs = {
 
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
-export type ServerFunction = (
-  args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
-) => Promise<unknown> | unknown
+export type ServerFunction<
+  TArgs extends object = Record<string, unknown>,
+  TReturnType = Promise<unknown> | unknown,
+> = (args: DefaultServerFunctionArgs & TArgs) => TReturnType
 
 export type ServerFunctionConfig = {
   fn: ServerFunction

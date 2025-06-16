@@ -99,6 +99,7 @@
     "get-tsconfig": "4.8.1",
     "http-status": "2.1.0",
     "image-size": "2.0.2",
+    "ipaddr.js": "2.2.0",
     "jose": "5.9.6",
     "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",
@@ -111,6 +112,7 @@
     "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
     "tsx": "4.19.2",
+    "undici": "7.10.0",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },

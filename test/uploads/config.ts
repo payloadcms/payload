@@ -12,10 +12,12 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
+import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
+  allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
   customFileNameMediaSlug,
@@ -406,6 +408,27 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: allowListMediaSlug,
+      fields: [],
+      upload: {
+        pasteURL: {
+          allowList: [
+            { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: 'localhost', port: '', search: '' },
+            { protocol: 'http', hostname: '[::1]', port: '', search: '' },
+            { protocol: 'http', hostname: '10.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '192.168.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '172.16.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '169.254.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '224.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '0.0.0.0', port: '', search: '' },
+            { protocol: 'http', hostname: '255.255.255.255', port: '', search: '' },
+          ],
+        },
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
       slug: animatedTypeMedia,
       fields: [],
       upload: {
@@ -617,6 +640,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
+    AdminUploadControl,
     {
       slug: 'optional-file',
       fields: [],

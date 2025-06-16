@@ -9,11 +9,27 @@ export type EditViewProps = {
   readonly collectionSlug?: string
   readonly globalSlug?: string
 }
+/**
+ * Properties specific to the versions view
+ */
+export type RenderDocumentVersionsProperties = {
+  /**
+   * @default false
+   */
+  disableGutter?: boolean
+  /**
+   * Use createdAt cell that appends params to the url on version selection instead of redirecting user
+   * @default false
+   */
+  useVersionDrawerCreatedAtCell?: boolean
+}
 
 export type DocumentViewServerPropsOnly = {
-  readonly doc: Data
-  readonly initPageResult: InitPageResult
-  readonly routeSegments: string[]
+  doc: Data
+  hasPublishedDoc: boolean
+  initPageResult: InitPageResult
+  routeSegments: string[]
+  versions?: RenderDocumentVersionsProperties
 } & ServerProps
 
 export type DocumentViewServerProps = DocumentViewClientProps & DocumentViewServerPropsOnly
@@ -66,6 +82,11 @@ export type DocumentTabConfig = {
   readonly isActive?: ((args: { href: string }) => boolean) | boolean
   readonly label?: ((args: { t: (key: string) => string }) => string) | string
   readonly newTab?: boolean
+  /**
+   * Sets the order to render the tab in the admin panel
+   * Recommended to use increments of 100 (e.g. 0, 100, 200)
+   */
+  readonly order?: number
   readonly Pill?: PayloadComponent
 }
 

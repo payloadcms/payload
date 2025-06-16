@@ -57,11 +57,10 @@ export function renderCell({
   const accessor: string | undefined =
     ('accessor' in clientField ? (clientField.accessor as string) : undefined) ??
     ('name' in clientField ? clientField.name : undefined)
-  const dotAccessor = accessor?.replace(/-/g, '.')
 
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, dotAccessor) : undefined,
+    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
     link: isLinkedColumn,
     rowData: doc,
   }
