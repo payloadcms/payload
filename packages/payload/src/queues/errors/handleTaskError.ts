@@ -24,7 +24,6 @@ export async function handleTaskError({
     executedAt,
     input,
     job,
-    maxRetries,
     output,
     parent,
     retriesConfig,
@@ -32,6 +31,7 @@ export async function handleTaskError({
     taskID,
     taskSlug,
     taskStatus,
+    workflowConfig,
   } = error.args
 
   if (taskConfig?.onFail) {
@@ -69,6 +69,24 @@ export async function handleTaskError({
     }
   }
 
+  let maxRetries: number = 0
+
+  if (retriesConfig?.attempts === undefined || retriesConfig?.attempts === null) {
+    // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
+    if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
+      maxRetries =
+        typeof workflowConfig.retries === 'object'
+          ? typeof workflowConfig.retries.attempts === 'number'
+            ? workflowConfig.retries.attempts
+            : 0
+          : workflowConfig.retries
+    } else {
+      maxRetries = 0
+    }
+  } else {
+    maxRetries = retriesConfig.attempts
+  }
+
   if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
     /**
      * Task reached max retries => workflow will not retry
@@ -86,7 +104,7 @@ export async function handleTaskError({
     req.payload.logger.error({
       err: error,
       job,
-      msg: `Error running task ${taskID}. Attempt ${job.totalTried + 1} - max retries reached`,
+      msg: `Error running task ${taskID}. Attempt ${job.totalTried} - max retries reached`,
       taskSlug,
     })
     return {
@@ -96,7 +114,7 @@ export async function handleTaskError({
 
   const { hasFinalError, maxWorkflowRetries, waitUntil } = getWorkflowRetryBehavior({
     job,
-    retriesConfig,
+    retriesConfig: workflowConfig.retries,
   })
 
   /**

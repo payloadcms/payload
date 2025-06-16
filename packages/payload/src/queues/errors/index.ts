@@ -6,15 +6,15 @@ export type TaskErrorArgs = {
   executedAt: Date
   input?: object
   job: Job
-  maxRetries: number
   message: string
   output?: object
   parent?: TaskParent
-  retriesConfig: number | RetryConfig
+  retriesConfig: RetryConfig
   taskConfig?: TaskConfig<string>
   taskID: string
   taskSlug: string
   taskStatus: null | SingleTaskStatus<string>
+  workflowConfig: WorkflowConfig
 }
 
 export type WorkflowErrorArgs = {

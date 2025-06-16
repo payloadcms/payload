@@ -104,19 +104,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           return taskStatus.output
         }
       }
-      let maxRetries: number | undefined = finalRetriesConfig?.attempts
-
-      if (maxRetries === undefined || maxRetries === null) {
-        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
-        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
-          maxRetries =
-            typeof workflowConfig.retries === 'object'
-              ? workflowConfig.retries.attempts
-              : workflowConfig.retries
-        } else {
-          maxRetries = 0
-        }
-      }
 
       const runner = isInline
         ? (task as TaskHandler<TaskType>)
@@ -127,7 +114,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           executedAt,
           input,
           job,
-          maxRetries: maxRetries!,
           message: isInline
             ? `Inline task with ID ${taskID} does not have a valid handler.`
             : `Task with slug ${taskSlug} in workflow ${job.workflowSlug} does not have a valid handler.`,
@@ -137,6 +123,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           taskID,
           taskSlug,
           taskStatus,
+          workflowConfig,
         })
       }
 
@@ -162,7 +149,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           executedAt,
           input: input!,
           job,
-          maxRetries: maxRetries!,
           message: err.message || 'Task handler threw an error',
           output,
           parent,
@@ -171,6 +157,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           taskID,
           taskSlug,
           taskStatus,
+          workflowConfig,
         })
       }
 
@@ -179,7 +166,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           executedAt,
           input: input!,
           job,
-          maxRetries: maxRetries!,
           message: taskHandlerResult.errorMessage ?? 'Task handler returned a failed state',
           output,
           parent,
@@ -188,6 +174,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           taskID,
           taskSlug,
           taskStatus,
+          workflowConfig,
         })
       } else {
         output = taskHandlerResult.output
