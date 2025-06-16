@@ -102,7 +102,7 @@ const relationshipSort = ({
       if (!sortAggregation.some((each) => '$lookup' in each && each.$lookup.as === as)) {
         let localField = versions ? `version.${relationshipPath}` : relationshipPath
 
-        if (adapter.compatabilityMode === 'firestore') {
+        if (adapter.usePipelineInSortLookup) {
           const flattenedField = `__${localField.replace(/\./g, '__')}_lookup`
           sortAggregation.push({
             $addFields: {
@@ -118,7 +118,7 @@ const relationshipSort = ({
             foreignField: '_id',
             from: foreignCollection.Model.collection.name,
             localField,
-            ...(adapter.compatabilityMode !== 'firestore' && {
+            ...(!adapter.usePipelineInSortLookup && {
               pipeline: [
                 {
                   $project: {
@@ -130,14 +130,14 @@ const relationshipSort = ({
           },
         })
 
-        if (adapter.compatabilityMode === 'firestore') {
+        if (adapter.usePipelineInSortLookup) {
           sortAggregation.push({
             $unset: localField,
           })
         }
       }
 
-      if (adapter.compatabilityMode !== 'firestore') {
+      if (!adapter.usePipelineInSortLookup) {
         const lookup = sortAggregation.find(
           (each) => '$lookup' in each && each.$lookup.as === as,
         ) as PipelineStage.Lookup

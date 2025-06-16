@@ -36,7 +36,7 @@ export const connect: Connect = async function connect(
 
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
-    if (this.compatabilityMode === 'firestore') {
+    if (this.useAlternativeDropDatabase) {
       if (this.connection.db) {
         // Firestore doesn't support dropDatabase, so we monkey patch
         // dropDatabase to delete all documents from all collections instead

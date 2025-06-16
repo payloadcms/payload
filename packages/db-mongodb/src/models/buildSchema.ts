@@ -145,7 +145,7 @@ export const buildSchema = (args: {
       fields = {
         _id:
           idField.type === 'number'
-            ? payload.db.compatabilityMode === 'firestore'
+            ? payload.db.useBigIntForNumberIDs
               ? mongoose.Schema.Types.BigInt
               : Number
             : String,
@@ -905,7 +905,7 @@ const getRelationshipValueType = (field: RelationshipField | UploadField, payloa
     }
 
     if (customIDType === 'number') {
-      if (payload.db.compatabilityMode === 'firestore') {
+      if (payload.db.useBigIntForNumberIDs) {
         return mongoose.Schema.Types.BigInt
       } else {
         return mongoose.Schema.Types.Number
