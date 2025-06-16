@@ -24,15 +24,14 @@ export const allDatabaseAdapters = {
   firestore: `
   import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
 
-  if (!process.env.DATABASE_URI) {
-    throw new Error('DATABASE_URI must be set when using firestore')
-  }
-
   export const databaseAdapter = mongooseAdapter({
     ...compatabilityOptions.firestore,
-    disableIndexHints: true,
-    useJoinAggregations: false,
-    url: process.env.DATABASE_URI,
+    ensureIndexes: true,
+    disableIndexHints: false,
+    url:
+      process.env.DATABASE_URI ||
+      process.env.MONGODB_MEMORY_SERVER_URI ||
+      'mongodb://127.0.0.1/payloadtests',
     collation: {
       strength: 1,
     },
