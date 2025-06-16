@@ -45,6 +45,7 @@ export type ListViewClientProps = {
   disableQueryPresets?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
+  hasDeletePermission?: boolean
   /**
    * @deprecated
    */
@@ -64,6 +65,7 @@ export type ListViewClientProps = {
 export type ListViewSlotSharedClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   hasCreatePermission: boolean
+  hasDeletePermission?: boolean
   newDocumentURL: string
 }
 

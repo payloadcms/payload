@@ -240,6 +240,7 @@ export const renderListView = async (
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
 
     const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
@@ -260,6 +261,7 @@ export const renderListView = async (
       clientProps: {
         collectionSlug,
         hasCreatePermission,
+        hasDeletePermission,
         newDocumentURL,
       },
       collectionConfig,
@@ -294,6 +296,7 @@ export const renderListView = async (
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
+                hasDeletePermission,
                 listPreferences,
                 newDocumentURL,
                 queryPreset,

@@ -283,6 +283,8 @@ export const myTranslations: DefaultTranslationsObject = {
     editLabel: '{{label}} ပြင်ဆင်မည်။',
     email: 'အီးမေးလ်',
     emailAddress: 'အီးမေးလ် လိပ်စာ',
+    emptyTrash: 'Kosongkan tong sampah',
+    emptyTrashLabel: 'Kosongkan {{label}} sampah',
     enterAValue: 'တန်ဖိုးတစ်ခုထည့်ပါ။',
     error: 'အမှား',
     errors: 'အမှားများ',
@@ -383,6 +385,7 @@ export const myTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     titleTrashed: '"{{label}}" "{{title}}" အောင်မြင်စွာ စုဖြတ်ပြီးပါပြီ။',
     trash: 'ဖျက်သိမ်းခြင်း',
+    trashedCountSuccessfully: 'Berjaya membuang {{count}} {{label}}.',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
     unsavedChanges:

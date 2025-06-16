@@ -281,6 +281,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     editLabel: 'Խմբագրել {{label}}',
     email: 'Էլ. փոստ',
     emailAddress: 'Էլ. փոստի հասցե',
+    emptyTrash: 'Մաքրել աղբաղեցույցը',
+    emptyTrashLabel: 'Դատարկել {{label}} աղբուկը',
     enterAValue: 'Մուտքագրեք արժեք',
     error: 'Սխալ',
     errors: 'Սխալներ',
@@ -381,6 +383,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" հաջողությամբ ջնջվել է։',
     titleTrashed: '"{{label}} "{{title}}" հաջողությամբ թափվել է։',
     trash: 'աղբ',
+    trashedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թափափվել է:',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
     unsavedChanges:

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import React, { Fragment } from 'react'
 
@@ -16,6 +16,7 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  viewType?: ViewTypes
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
@@ -23,6 +24,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  viewType,
 }) => {
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
@@ -30,6 +32,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   if (count === 0) {
     return null
   }
+
+  const isTrashView = collectionConfig?.trash && viewType === 'trash'
 
   return (
     <ListSelection_v4
@@ -47,7 +51,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         ) : null,
       ].filter(Boolean)}
       SelectionActions={[
-        !disableBulkEdit && (
+        !disableBulkEdit && !isTrashView && (
           <Fragment key="bulk-actions">
             <EditMany_v4
               collection={collectionConfig}
@@ -69,7 +73,9 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             />
           </Fragment>
         ),
-        !disableBulkDelete && <DeleteMany collection={collectionConfig} key="bulk-delete" />,
+        !disableBulkDelete && (
+          <DeleteMany collection={collectionConfig} key="bulk-delete" viewType={viewType} />
+        ),
       ].filter(Boolean)}
     />
   )

@@ -283,6 +283,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     editLabel: 'Редактировать {{label}}',
     email: 'Email',
     emailAddress: 'Email',
+    emptyTrash: 'Очистить корзину',
+    emptyTrashLabel: 'Очистить корзину для {{label}}',
     enterAValue: 'Введите значение',
     error: 'Ошибка',
     errors: 'Ошибки',
@@ -382,6 +384,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     titleTrashed: '{{label}} "{{title}}" успешно перемещен в корзину.',
     trash: 'Мусор',
+    trashedCountSuccessfully: 'Успешно удалено {{count}} {{label}}.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
     unsavedChanges:

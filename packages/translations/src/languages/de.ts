@@ -286,6 +286,8 @@ export const deTranslations: DefaultTranslationsObject = {
     editLabel: '{{label}} bearbeiten',
     email: 'E-Mail',
     emailAddress: 'E-Mail-Adresse',
+    emptyTrash: 'Papierkorb leeren',
+    emptyTrashLabel: 'Leeren Sie den {{label}} Papierkorb',
     enterAValue: 'Gib einen Wert ein',
     error: 'Fehler',
     errors: 'Fehler',
@@ -386,6 +388,7 @@ export const deTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     titleTrashed: '{{label}} "{{title}}" erfolgreich entfernt.',
     trash: 'Müll',
+    trashedCountSuccessfully: 'Erfolgreich {{count}} {{label}} in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
     unsavedChanges:

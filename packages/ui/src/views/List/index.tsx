@@ -48,6 +48,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
+    hasDeletePermission,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -194,6 +195,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 hasCreatePermission={hasCreatePermission}
+                hasDeletePermission={hasDeletePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 isTrashEnabled={isTrashEnabled}

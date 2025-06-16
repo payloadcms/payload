@@ -282,6 +282,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     editLabel: '{{label}} সম্পাদনা করুন',
     email: 'ইমেইল',
     emailAddress: 'ইমেইল ঠিকানা',
+    emptyTrash: 'ট্র্যাশ খালি করুন',
+    emptyTrashLabel: '{{label}} ট্র্যাশ খালি করুন',
     enterAValue: 'একটি মান লিখুন',
     error: 'ত্রুটি',
     errors: 'ত্রুটিগুলি',
@@ -381,6 +383,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" সফলভাবে মুছে ফেলা হয়েছে।',
     titleTrashed: '{{label}} "{{title}}" সফলভাবে ট্র্যাশ করা হয়েছে।',
     trash: 'আবর্জনা',
+    trashedCountSuccessfully: 'সফলভাবে {{count}} {{label}} মুছে ফেলা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
     unsavedChanges:

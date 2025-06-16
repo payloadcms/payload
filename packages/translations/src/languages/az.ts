@@ -281,6 +281,8 @@ export const azTranslations: DefaultTranslationsObject = {
     editLabel: '{{label}} redaktə et',
     email: 'Elektron poçt',
     emailAddress: 'Elektron poçt ünvanı',
+    emptyTrash: 'Zibil qutusunu boşaltın',
+    emptyTrashLabel: '{{label}} zibilini boşaltın',
     enterAValue: 'Bir dəyər daxil edin',
     error: 'Xəta',
     errors: 'Xətalar',
@@ -380,6 +382,7 @@ export const azTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     titleTrashed: '"{{label}}" "{{title}}" uğurla zibil qutusuna atıldı.',
     trash: 'Zibil',
+    trashedCountSuccessfully: '{{count}} {{label}} uğurla zibilə yollandı.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
     unsavedChanges:

@@ -13,6 +13,7 @@ import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
   ListCreateNewButton,
+  ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
 import { ListTrashViewPill } from '../../../elements/ListTrashViewPill/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -29,6 +30,7 @@ export type ListHeaderProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   hasCreatePermission: boolean
+  hasDeletePermission?: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
   isTrashEnabled?: boolean
@@ -55,6 +57,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   hasCreatePermission,
+  hasDeletePermission,
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
@@ -109,6 +112,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             disableBulkEdit={disableBulkEdit}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+            viewType={viewType}
           />
         ),
         isTrashEnabled && (
@@ -147,6 +151,13 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             key="list-header-bulk-upload"
             onBulkUploadSuccess={onBulkUploadSuccess}
             openBulkUpload={openBulkUpload}
+          />
+        ),
+        hasDeletePermission && isTrashEnabled && viewType === 'trash' && (
+          <ListEmptyTrashButton
+            collectionConfig={collectionConfig}
+            hasDeletePermission={hasDeletePermission}
+            key="list-header-empty-trash"
           />
         ),
       ].filter(Boolean)}

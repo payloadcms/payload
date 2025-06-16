@@ -288,6 +288,8 @@ export const frTranslations: DefaultTranslationsObject = {
     editLabel: 'Modifier {{label}}',
     email: 'E-mail',
     emailAddress: 'Adresse e-mail',
+    emptyTrash: 'Vider la corbeille',
+    emptyTrashLabel: 'Vider la corbeille {{label}}',
     enterAValue: 'Entrez une valeur',
     error: 'Erreur',
     errors: 'Erreurs',
@@ -388,6 +390,7 @@ export const frTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     titleTrashed: '{{label}} "{{title}}" a été mis à la poubelle avec succès.',
     trash: 'Corbeille',
+    trashedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
     unsavedChanges:
