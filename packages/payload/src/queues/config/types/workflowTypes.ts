@@ -42,7 +42,7 @@ export type JobLog = {
 export type BaseJob<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
 > = {
-  completedAt?: string
+  completedAt?: null | string
   createdAt: string
   error?: unknown
   hasError?: boolean
@@ -55,12 +55,12 @@ export type BaseJob<
   log?: JobLog[]
   processing?: boolean
   queue?: string
-  taskSlug?: TaskType
+  taskSlug?: null | TaskType
   taskStatus: JobTaskStatus
   totalTried: number
   updatedAt: string
-  waitUntil?: string
-  workflowSlug?: WorkflowTypes
+  waitUntil?: null | string
+  workflowSlug?: null | WorkflowTypes
 }
 
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>

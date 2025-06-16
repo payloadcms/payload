@@ -199,10 +199,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         hasError: true,
         processing: false,
         waitUntil: null,
-      } as {
-        completedAt: null
-        waitUntil: null
-      } & Job,
+      },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
       req: newReq,
@@ -228,10 +225,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         hasError: true,
         processing: false,
         waitUntil: null,
-      } as {
-        completedAt: null
-        waitUntil: null
-      } & Job,
+      },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
       req: newReq,
