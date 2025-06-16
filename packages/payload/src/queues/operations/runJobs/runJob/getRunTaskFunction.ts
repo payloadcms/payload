@@ -19,7 +19,7 @@ import type {
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
-import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
+import { TaskError } from '../../../errors/index.js'
 import { importHandlerPath } from './importHandlerPath.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -38,119 +38,6 @@ async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
     return taskConfig.handler
   } else {
     return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
-  }
-}
-
-export async function handleTaskFailed({
-  error,
-  executedAt,
-  input,
-  job,
-  maxRetries,
-  output,
-  parent,
-  req,
-  retriesConfig,
-  state,
-  taskConfig,
-  taskHandlerResult,
-  taskID,
-  taskSlug,
-  taskStatus,
-  updateJob,
-}: {
-  error?: Error
-  executedAt: Date
-  input: object
-  job: Job
-  maxRetries: number
-  output: object
-  parent?: TaskParent
-  req: PayloadRequest
-  retriesConfig: number | RetryConfig
-  state: RunTaskFunctionState
-  taskConfig?: TaskConfig<string>
-  taskHandlerResult?: TaskHandlerResult<string>
-  taskID: string
-  taskSlug: string
-  taskStatus: null | SingleTaskStatus<string>
-  updateJob: UpdateJobFunction
-}): Promise<never> {
-  req.payload.logger.error({ err: error, job, msg: `Error running task ${taskID}`, taskSlug })
-
-  if (taskConfig?.onFail) {
-    await taskConfig.onFail()
-  }
-
-  const errorJSON = error
-    ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      }
-    : {
-        message:
-          taskHandlerResult?.state === 'failed'
-            ? (taskHandlerResult.errorMessage ?? taskHandlerResult.state)
-            : 'failed',
-      }
-
-  const currentDate = new Date()
-
-  ;(job.log ??= []).push({
-    id: new ObjectId().toHexString(),
-    completedAt: currentDate.toISOString(),
-    error: errorJSON,
-    executedAt: executedAt.toISOString(),
-    input,
-    output,
-    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
-    state: 'failed',
-    taskID,
-    taskSlug,
-  })
-
-  if (job.waitUntil) {
-    // Check if waitUntil is in the past
-    const waitUntil = new Date(job.waitUntil)
-    if (waitUntil < currentDate) {
-      // Outdated waitUntil, remove it
-      delete job.waitUntil
-    }
-  }
-
-  if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
-    state.reachedMaxRetries = true
-
-    await updateJob({
-      error,
-      hasError: true,
-      log: job.log,
-      processing: false,
-      waitUntil: job.waitUntil,
-    })
-
-    throw new Error(
-      `Task ${taskSlug} has failed more than the allowed retries in workflow ${job.workflowSlug}${error ? `. Error: ${String(error)}` : ''}`,
-    )
-  } else {
-    // Job will retry. Let's determine when!
-    const waitUntil: Date = calculateBackoffWaitUntil({
-      retriesConfig,
-      totalTried: taskStatus?.totalTried ?? 0,
-    })
-
-    // Update job's waitUntil only if this waitUntil is later than the current one
-    if (!job.waitUntil || waitUntil > new Date(job.waitUntil)) {
-      job.waitUntil = waitUntil.toISOString()
-    }
-
-    await updateJob({
-      log: job.log,
-      processing: false,
-      waitUntil: job.waitUntil,
-    })
-    throw error ?? new Error('Task failed')
   }
 }
 
@@ -234,41 +121,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           return taskStatus.output
         }
       }
-
-      const runner = isInline
-        ? (task as TaskHandler<TaskType>)
-        : await getTaskHandlerFromConfig(taskConfig)
-
-      if (!runner || typeof runner !== 'function') {
-        const errorMessage = isInline
-          ? `Can't find runner for inline task with ID ${taskID}`
-          : `Can't find runner while importing with the path ${typeof workflowConfig.handler === 'string' ? workflowConfig.handler : 'unknown - no string path'} in job type ${job.workflowSlug} for task ${taskSlug}.`
-        req.payload.logger.error(errorMessage)
-
-        await updateJob({
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          log: [
-            ...(job.log || []),
-            {
-              id: new ObjectId().toHexString(),
-              completedAt: new Date().toISOString(),
-              error: errorMessage,
-              executedAt: executedAt.toISOString(),
-              parent: jobConfig.addParentToTaskLog ? parent : undefined,
-              state: 'failed',
-              taskID,
-              taskSlug,
-            },
-          ],
-          processing: false,
-        })
-
-        throw new Error(errorMessage)
-      }
-
       let maxRetries: number | undefined = finalRetriesConfig?.attempts
 
       if (maxRetries === undefined || maxRetries === null) {
@@ -281,6 +133,29 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         } else {
           maxRetries = 0
         }
+      }
+
+      const runner = isInline
+        ? (task as TaskHandler<TaskType>)
+        : await getTaskHandlerFromConfig(taskConfig)
+
+      if (!runner || typeof runner !== 'function') {
+        throw new TaskError({
+          executedAt,
+          input,
+          job,
+          maxRetries: maxRetries!,
+          message: isInline
+            ? `Inline task with ID ${taskID} does not have a valid handler.`
+            : `Task with slug ${taskSlug} in workflow ${job.workflowSlug} does not have a valid handler.`,
+          parent,
+          retriesConfig: finalRetriesConfig,
+          state,
+          taskConfig,
+          taskID,
+          taskSlug,
+          taskStatus,
+        })
       }
 
       let taskHandlerResult: TaskHandlerResult<string>
@@ -300,46 +175,40 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             taskSlug,
           }),
         })
-      } catch (err) {
-        await handleTaskFailed({
-          error: err as Error | undefined,
+      } catch (err: any) {
+        throw new TaskError({
           executedAt,
           input: input!,
           job,
           maxRetries: maxRetries!,
+          message: err.message || 'Task handler threw an error',
           output,
           parent,
-          req,
           retriesConfig: finalRetriesConfig,
           state,
           taskConfig,
           taskID,
           taskSlug,
           taskStatus,
-          updateJob,
         })
-        throw new Error('Task failed')
       }
 
       if (taskHandlerResult.state === 'failed') {
-        await handleTaskFailed({
+        throw new TaskError({
           executedAt,
           input: input!,
           job,
           maxRetries: maxRetries!,
+          message: 'Task handler returned a failed state',
           output,
           parent,
-          req,
           retriesConfig: finalRetriesConfig,
           state,
           taskConfig,
-          taskHandlerResult,
           taskID,
           taskSlug,
           taskStatus,
-          updateJob,
         })
-        throw new Error('Task failed')
       } else {
         output = taskHandlerResult.output
       }

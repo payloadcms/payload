@@ -5,8 +5,9 @@ import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
+import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
+import { WorkflowError } from '../../../errors/index.js'
 import { getRunTaskFunction, type RunTaskFunctionState } from '../runJob/getRunTaskFunction.js'
-import { handleWorkflowError } from '../runJob/handleWorkflowError.js'
 
 type Args = {
   job: Job
@@ -55,8 +56,6 @@ export const runJSONJob = async ({
   const inlineTask = getRunTaskFunction(state, job, workflowConfig, req, true, updateJob)
 
   // Run the job
-  let hasFinalError = false
-  let error: Error | undefined
   try {
     await Promise.all(
       stepsToRun.map(async (step) => {
@@ -73,17 +72,28 @@ export const runJSONJob = async ({
         }
       }),
     )
-  } catch (_err) {
-    const err = _err as Error
-    const errorResult = handleWorkflowError({
-      error: err,
-      job,
+  } catch (error) {
+    const { hasFinalError } = await handleWorkflowError({
+      error:
+        error instanceof WorkflowError
+          ? error
+          : new WorkflowError({
+              job,
+              message:
+                typeof error === 'object' && error && 'message' in error
+                  ? (error.message as string)
+                  : 'An unhandled error occurred',
+              state,
+              workflowConfig,
+            }),
+
       req,
-      state,
-      workflowConfig,
+      updateJob,
     })
-    error = err
-    hasFinalError = errorResult.hasFinalError
+
+    return {
+      status: hasFinalError ? 'error-reached-max-retries' : 'error',
+    }
   }
 
   // Check if workflow has completed
@@ -107,49 +117,23 @@ export const runJSONJob = async ({
   }
 
   if (workflowCompleted) {
-    if (error) {
-      // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
-      // we need to ensure the job is updated to reflect the error
-      await updateJob({
-        completedAt: new Date().toISOString(),
-        error: hasFinalError ? error : undefined,
-        hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
-        processing: false,
-        totalTried: (job.totalTried ?? 0) + 1,
-      })
-    } else {
-      await updateJob({
-        completedAt: new Date().toISOString(),
-        processing: false,
-        totalTried: (job.totalTried ?? 0) + 1,
-      })
-    }
+    await updateJob({
+      completedAt: new Date().toISOString(),
+      processing: false,
+      totalTried: (job.totalTried ?? 0) + 1,
+    })
 
     return {
       status: 'success',
     }
   } else {
-    if (error) {
-      // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
-      // we need to ensure the job is updated to reflect the error
-      await updateJob({
-        error: hasFinalError ? error : undefined,
-        hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
-        processing: false,
-        totalTried: (job.totalTried ?? 0) + 1,
-      })
-      return {
-        status: hasFinalError ? 'error-reached-max-retries' : 'error',
-      }
-    } else {
-      // Retry the job - no need to bump processing or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
-      return await runJSONJob({
-        job,
-        req,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-    }
+    // Retry the job - no need to bump processing or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
+    return await runJSONJob({
+      job,
+      req,
+      updateJob,
+      workflowConfig,
+      workflowHandler,
+    })
   }
 }
