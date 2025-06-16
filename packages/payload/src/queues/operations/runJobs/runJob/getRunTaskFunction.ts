@@ -1,5 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 
+import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,
@@ -12,8 +13,6 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
-  BaseJob,
-  RunningJob,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
@@ -63,7 +62,7 @@ export async function handleTaskFailed({
   error?: Error
   executedAt: Date
   input: object
-  job: BaseJob
+  job: Job
   maxRetries: number
   output: object
   parent?: TaskParent
@@ -163,7 +162,7 @@ export type TaskParent = {
 
 export const getRunTaskFunction = <TIsInline extends boolean>(
   state: RunTaskFunctionState,
-  job: BaseJob,
+  job: Job,
   workflowConfig: WorkflowConfig<string>,
   req: PayloadRequest,
   isInline: TIsInline,
@@ -261,7 +260,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           },
           hasError: true,
           log: [
-            ...job.log,
+            ...(job.log || []),
             {
               id: new ObjectId().toHexString(),
               completedAt: new Date().toISOString(),
@@ -303,7 +302,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             taskSlug,
           }),
           input,
-          job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
+          job: job as unknown as Job<WorkflowTypes>,
           req,
           tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob, {
             taskID,

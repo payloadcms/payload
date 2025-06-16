@@ -258,11 +258,14 @@ type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
  * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
  * If a generated type for the `payload-jobs` collection is not available, falls back to the BaseJob type.
  */
-export type Job = HasPayloadJobsType extends true
+export type Job<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = HasPayloadJobsType extends true
   ? {
-      taskStatus?: BaseJob['taskStatus']
-    } & Omit<TypedCollection['payload-jobs'], 'taskStatus'>
-  : BaseJob
+      input?: BaseJob<TWorkflowSlugOrInput>['input']
+      taskStatus?: BaseJob<TWorkflowSlugOrInput>['taskStatus']
+    } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
+  : BaseJob<TWorkflowSlugOrInput>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

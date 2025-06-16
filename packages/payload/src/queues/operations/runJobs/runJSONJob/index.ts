@@ -1,11 +1,7 @@
+import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
-import type {
-  BaseJob,
-  RunningJob,
-  WorkflowConfig,
-  WorkflowTypes,
-} from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
@@ -13,7 +9,7 @@ import { getRunTaskFunction, type RunTaskFunctionState } from '../runJob/getRunT
 import { handleWorkflowError } from '../runJob/handleWorkflowError.js'
 
 type Args = {
-  job: BaseJob
+  job: Job
   req: PayloadRequest
   updateJob: UpdateJobFunction
   workflowConfig: WorkflowConfig<WorkflowTypes>
@@ -49,8 +45,7 @@ export const runJSONJob = async ({
         continue
       }
     }
-    if (step.condition && !step.condition({ job: job as RunningJob<any> })) {
-      // TODO: Improve RunningJob type see todo below
+    if (step.condition && !step.condition({ job: job as Job<any> })) {
       continue
     }
     stepsToRun.push(step)
@@ -67,7 +62,7 @@ export const runJSONJob = async ({
       stepsToRun.map(async (step) => {
         if ('task' in step) {
           await tasks[step.task]!(step.id, {
-            input: step.input ? step.input({ job: job as RunningJob<any> }) : {}, // TODO: Type better. We should use RunningJob anywhere and make TypedCollection['payload-jobs'] be BaseJob if type not generated
+            input: step.input ? step.input({ job: job as Job<any> }) : {},
             retries: step.retries,
           })
         } else {

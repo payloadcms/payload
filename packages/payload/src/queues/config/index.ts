@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { BaseJob } from './types/workflowTypes.js'
+import type { Job } from '../../index.js'
 
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
@@ -238,7 +238,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: BaseJob }): BaseJob {
+export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: Job }): Job {
   doc.taskStatus = getJobTaskStatus({
     jobLog: doc.log || [],
   })

@@ -1,5 +1,11 @@
 import type { Field } from '../../../fields/config/types.js'
-import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
+import type {
+  Job,
+  PayloadRequest,
+  StringKeyOf,
+  TypedCollection,
+  TypedJobs,
+} from '../../../index.js'
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
 import type {
   RetryConfig,
@@ -33,27 +39,35 @@ export type JobLog = {
 /**
  * @deprecated - will be made private in 4.0. Please use the `Job` type instead.
  */
-export type BaseJob = {
+export type BaseJob<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = {
   completedAt?: string
   createdAt: string
   error?: unknown
   hasError?: boolean
   id: number | string
-  input?: object
+  input?: TWorkflowSlugOrInput extends false
+    ? object
+    : TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
+      ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
+      : TWorkflowSlugOrInput
   log?: JobLog[]
   processing?: boolean
   queue?: string
-  taskSlug?: string
+  taskSlug?: TaskType
   taskStatus?: JobTaskStatus
   totalTried: number
   updatedAt: string
   waitUntil?: string
-  workflowSlug?: string
+  workflowSlug?: WorkflowTypes
 }
 
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
-// TODO: Type job.taskStatus once available - for JSON-defined workflows
+/**
+ * @deprecated - will be removed in 4.0. Use `Job` type instead.
+ */
 export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
   input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
     ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
@@ -61,6 +75,9 @@ export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
   taskStatus: JobTaskStatus
 } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
 
+/**
+ * @deprecated - will be removed in 4.0. Use `Job` type instead.
+ */
 export type RunningJobSimple<TWorkflowInput extends object> = {
   input: TWorkflowInput
 } & TypedCollection['payload-jobs']
@@ -73,7 +90,7 @@ export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
 export type WorkflowHandler<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> =
   (args: {
     inlineTask: RunInlineTaskFunction
-    job: RunningJob<TWorkflowSlugOrInput>
+    job: Job<TWorkflowSlugOrInput>
     req: PayloadRequest
     tasks: RunTaskFunctions
   }) => Promise<void>

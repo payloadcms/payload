@@ -1,4 +1,4 @@
-import type { RunningJob, TaskHandlerResult, TypedJobs } from '../../../index.js'
+import type { Job, TaskHandlerResult, TypedJobs } from '../../../index.js'
 import type { RetryConfig, TaskHandlerArgsNoInput } from './taskTypes.js'
 
 export type WorkflowStep<
@@ -9,7 +9,7 @@ export type WorkflowStep<
    * If this step is completed, the workflow will be marked as completed
    */
   completesJob?: boolean
-  condition?: (args: { job: RunningJob<TWorkflowSlug> }) => boolean
+  condition?: (args: { job: Job<TWorkflowSlug> }) => boolean
   /**
    * Each task needs to have a unique ID to track its status
    */
@@ -27,7 +27,7 @@ export type WorkflowStep<
       ) => Promise<TaskHandlerResult<TTaskSlug>> | TaskHandlerResult<TTaskSlug>
     }
   | {
-      input: (args: { job: RunningJob<TWorkflowSlug> }) => TypedJobs['tasks'][TTaskSlug]['input']
+      input: (args: { job: Job<TWorkflowSlug> }) => TypedJobs['tasks'][TTaskSlug]['input']
       task: TTaskSlug
     }
 )

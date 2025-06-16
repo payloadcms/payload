@@ -1,7 +1,7 @@
+import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
-  BaseJob,
   WorkflowConfig,
   WorkflowHandler,
   WorkflowTypes,
@@ -139,7 +139,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
   const jobsQuery: {
-    docs: BaseJob[]
+    docs: Job[]
   } = { docs: [] }
 
   if (id) {
@@ -208,7 +208,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
       return acc
     },
-    { existingJobs: [] as BaseJob[], newJobs: [] as BaseJob[] },
+    { existingJobs: [] as Job[], newJobs: [] as Job[] },
   )
 
   if (!jobsQuery.docs.length) {
@@ -229,7 +229,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     ? []
     : undefined
 
-  const runSingleJob = async (job: BaseJob) => {
+  const runSingleJob = async (job: Job) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
