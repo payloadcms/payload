@@ -255,29 +255,32 @@ export async function resolveJoins({
           result.id = result.parent
         }
 
-        const parentValue = getByPath(result, dbFieldName)
-        if (!parentValue) {
+        const parentValues = getByPathWithArrays(result, dbFieldName)
+
+        if (parentValues.length === 0 || !parentValues[0]) {
           continue
         }
 
-        const joinData = {
-          relationTo: collectionSlug,
-          value: result.id,
-        }
-
-        const parentKey = parentValue as string
-        if (!grouped[parentKey]) {
-          grouped[parentKey] = {
-            docs: [],
-            sort,
+        for (const parentValue of parentValues) {
+          const joinData = {
+            relationTo: collectionSlug,
+            value: result.id,
           }
-        }
 
-        // Always store the ObjectID reference in polymorphic format
-        grouped[parentKey].docs.push({
-          ...result,
-          __joinData: joinData,
-        })
+          const parentKey = parentValue as string
+          if (!grouped[parentKey]) {
+            grouped[parentKey] = {
+              docs: [],
+              sort,
+            }
+          }
+
+          // Always store the ObjectID reference in polymorphic format
+          grouped[parentKey].docs.push({
+            ...result,
+            __joinData: joinData,
+          })
+        }
       }
     }
 
