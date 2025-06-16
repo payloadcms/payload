@@ -20,7 +20,7 @@ import type {
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { TaskError } from '../../../errors/index.js'
-import { importHandlerPath } from './importHandlerPath.js'
+import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
@@ -28,17 +28,6 @@ const ObjectId = (ObjectIdImport.default ||
 // Helper object type to force being passed by reference
 export type RunTaskFunctionState = {
   reachedMaxRetries: boolean
-}
-
-async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
-  if (!taskConfig) {
-    throw new Error('Task config is required to get the task handler')
-  }
-  if (typeof taskConfig.handler === 'function') {
-    return taskConfig.handler
-  } else {
-    return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
-  }
 }
 
 export type TaskParent = {

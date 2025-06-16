@@ -1,5 +1,7 @@
 import { pathToFileURL } from 'url'
 
+import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
+
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner!: T
   const [runnerPath, runnerImportName] = path.split('#')
@@ -34,4 +36,15 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
   }
 
   return runner
+}
+
+export async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
+  if (!taskConfig) {
+    throw new Error('Task config is required to get the task handler')
+  }
+  if (typeof taskConfig.handler === 'function') {
+    return taskConfig.handler
+  } else {
+    return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
+  }
 }
