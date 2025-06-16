@@ -37,8 +37,8 @@ async function main() {
     allTgzs,
   })
 
-  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
-  execSync('pnpm install --ignore-workspace', execOpts)
+  execSync('pnpm add ./*.tgz', execOpts)
+  execSync('pnpm install', execOpts)
 
   const packageJsonPath = path.join(templatePath, 'package.json')
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
@@ -64,7 +64,7 @@ async function main() {
   packageJsonObj.pnpm = { overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --ignore-workspace --no-frozen-lockfile', execOpts)
+  execSync('pnpm install --no-frozen-lockfile', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
