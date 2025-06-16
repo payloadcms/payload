@@ -357,10 +357,12 @@ export function DeleteMany_v4({
       <ConfirmationModal
         body={
           <React.Fragment>
-            {t('general:aboutToDeleteCount', {
-              count: labelCount,
-              label: labelString,
-            })}
+            <p>
+              {t('general:aboutToDeleteCount', {
+                count: labelCount,
+                label: labelString,
+              })}
+            </p>
             {trash && viewType !== 'trash' && (
               <div className="delete-documents__checkbox">
                 <CheckboxInput
