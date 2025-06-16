@@ -7,7 +7,7 @@ import type { JobRunStatus } from '../runJob/index.js'
 
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
 import { WorkflowError } from '../../../errors/index.js'
-import { getRunTaskFunction, type RunTaskFunctionState } from '../runJob/getRunTaskFunction.js'
+import { getRunTaskFunction } from '../runJob/getRunTaskFunction.js'
 
 type Args = {
   job: Job
@@ -28,12 +28,6 @@ export const runJSONJob = async ({
   workflowConfig,
   workflowHandler,
 }: Args): Promise<RunJSONJobResult> => {
-  // Object so that we can pass contents by reference, not value.
-  // We want any mutations to be reflected in here.
-  const state: RunTaskFunctionState = {
-    reachedMaxRetries: false,
-  }
-
   const stepsToRun: WorkflowStep<string>[] = []
 
   for (const step of workflowHandler) {
@@ -52,8 +46,8 @@ export const runJSONJob = async ({
     stepsToRun.push(step)
   }
 
-  const tasks = getRunTaskFunction(state, job, workflowConfig, req, false, updateJob)
-  const inlineTask = getRunTaskFunction(state, job, workflowConfig, req, true, updateJob)
+  const tasks = getRunTaskFunction(job, workflowConfig, req, false, updateJob)
+  const inlineTask = getRunTaskFunction(job, workflowConfig, req, true, updateJob)
 
   // Run the job
   try {
@@ -83,7 +77,6 @@ export const runJSONJob = async ({
                 typeof error === 'object' && error && 'message' in error
                   ? (error.message as string)
                   : 'An unhandled error occurred',
-              state,
               workflowConfig,
             }),
 

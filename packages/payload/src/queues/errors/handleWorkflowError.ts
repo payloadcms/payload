@@ -23,7 +23,7 @@ export async function handleWorkflowError({
 }): Promise<{
   hasFinalError: boolean
 }> {
-  const { job, state, workflowConfig } = error.args
+  const { job, workflowConfig } = error.args
 
   const errorJSON = {
     name: error.name,
@@ -37,9 +37,7 @@ export async function handleWorkflowError({
     retriesConfig: workflowConfig.retries!,
   })
 
-  if (hasFinalError) {
-    state.reachedMaxRetries = true
-  } else {
+  if (!hasFinalError) {
     if (job.waitUntil) {
       // Check if waitUntil is in the past
       const waitUntil = new Date(job.waitUntil)
@@ -70,6 +68,7 @@ export async function handleWorkflowError({
     log: job.log,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,
+    waitUntil: job.waitUntil,
   })
 
   return {

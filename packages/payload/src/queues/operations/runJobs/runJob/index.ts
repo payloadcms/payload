@@ -1,7 +1,6 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowConfig, WorkflowHandler } from '../../../config/types/workflowTypes.js'
-import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { handleTaskError } from '../../../errors/handleTaskError.js'
@@ -30,19 +29,13 @@ export const runJob = async ({
   workflowConfig,
   workflowHandler,
 }: Args): Promise<RunJobResult> => {
-  // Object so that we can pass contents by reference, not value.
-  // We want any mutations to be reflected in here.
-  const state: RunTaskFunctionState = {
-    reachedMaxRetries: false,
-  }
-
   // Run the job
   try {
     await workflowHandler({
-      inlineTask: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob),
+      inlineTask: getRunTaskFunction(job, workflowConfig, req, true, updateJob),
       job,
       req,
-      tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
+      tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob),
     })
   } catch (error) {
     if (error instanceof TaskError) {
@@ -67,7 +60,6 @@ export const runJob = async ({
                 typeof error === 'object' && error && 'message' in error
                   ? (error.message as string)
                   : 'An unhandled error occurred',
-              state,
               workflowConfig,
             }),
       req,

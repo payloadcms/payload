@@ -1,9 +1,6 @@
 import type { Job, SingleTaskStatus, WorkflowConfig } from '../../index.js'
 import type { RetryConfig, TaskConfig } from '../config/types/taskTypes.js'
-import type {
-  RunTaskFunctionState,
-  TaskParent,
-} from '../operations/runJobs/runJob/getRunTaskFunction.js'
+import type { TaskParent } from '../operations/runJobs/runJob/getRunTaskFunction.js'
 
 export type TaskErrorArgs = {
   executedAt: Date
@@ -14,7 +11,6 @@ export type TaskErrorArgs = {
   output?: object
   parent?: TaskParent
   retriesConfig: number | RetryConfig
-  state: RunTaskFunctionState
   taskConfig?: TaskConfig<string>
   taskID: string
   taskSlug: string
@@ -24,7 +20,6 @@ export type TaskErrorArgs = {
 export type WorkflowErrorArgs = {
   job: Job
   message: string
-  state: RunTaskFunctionState
   workflowConfig: WorkflowConfig
 }
 

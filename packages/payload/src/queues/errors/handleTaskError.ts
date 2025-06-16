@@ -28,7 +28,6 @@ export async function handleTaskError({
     output,
     parent,
     retriesConfig,
-    state,
     taskConfig,
     taskID,
     taskSlug,
@@ -74,7 +73,6 @@ export async function handleTaskError({
     /**
      * Task reached max retries => workflow will not retry
      */
-    state.reachedMaxRetries = true
 
     await updateJob({
       error: errorJSON,

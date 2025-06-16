@@ -25,18 +25,12 @@ import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
-// Helper object type to force being passed by reference
-export type RunTaskFunctionState = {
-  reachedMaxRetries: boolean
-}
-
 export type TaskParent = {
   taskID: string
   taskSlug: string
 }
 
 export const getRunTaskFunction = <TIsInline extends boolean>(
-  state: RunTaskFunctionState,
   job: Job,
   workflowConfig: WorkflowConfig,
   req: PayloadRequest,
@@ -139,7 +133,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             : `Task with slug ${taskSlug} in workflow ${job.workflowSlug} does not have a valid handler.`,
           parent,
           retriesConfig: finalRetriesConfig,
-          state,
           taskConfig,
           taskID,
           taskSlug,
@@ -152,14 +145,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
 
       try {
         taskHandlerResult = await runner({
-          inlineTask: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob, {
+          inlineTask: getRunTaskFunction(job, workflowConfig, req, true, updateJob, {
             taskID,
             taskSlug,
           }),
           input,
           job: job as unknown as Job<WorkflowTypes>,
           req,
-          tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob, {
+          tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob, {
             taskID,
             taskSlug,
           }),
@@ -174,7 +167,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           output,
           parent,
           retriesConfig: finalRetriesConfig,
-          state,
           taskConfig,
           taskID,
           taskSlug,
@@ -192,7 +184,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           output,
           parent,
           retriesConfig: finalRetriesConfig,
-          state,
           taskConfig,
           taskID,
           taskSlug,
