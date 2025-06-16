@@ -66,9 +66,19 @@ export const buildBrowseByFolderView = async (
       visibleEntities.collections.includes(collectionSlug),
   )
 
-  const query = queryFromArgs || queryFromReq
+  const query =
+    queryFromArgs ||
+    ((queryFromReq
+      ? {
+          ...queryFromReq,
+          relationTo:
+            typeof queryFromReq?.relationTo === 'string'
+              ? JSON.parse(queryFromReq.relationTo)
+              : undefined,
+        }
+      : {}) as ListQuery)
   const activeCollectionFolderSlugs: string[] =
-    folderID && Array.isArray(query?.relationTo) && query.relationTo.length
+    folderID && Array.isArray(query?.relationTo)
       ? query.relationTo.filter(
           (slug) => allowReadCollectionSlugs.includes(slug) || slug === foldersSlug,
         )
@@ -94,7 +104,7 @@ export const buildBrowseByFolderView = async (
     },
   })
 
-  const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || '_folderOrDocumentTitle'
+  const sortPreference: FolderSortKeys = browseByFolderPreferences?.sort || 'name'
   const viewPreference = browseByFolderPreferences?.viewPreference || 'grid'
 
   const { breadcrumbs, documents, folderAssignedCollections, FolderResultsComponent, subfolders } =

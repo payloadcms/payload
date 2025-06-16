@@ -213,6 +213,10 @@
       }
     }
 
+    &__titlebar-labels {
+      display: grid;
+    }
+
     &__name {
       overflow: hidden;
       font-weight: bold;

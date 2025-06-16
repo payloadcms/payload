@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
-import { CollectionTypePill } from '../../elements/FolderView/CollectionTypePill/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
 import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelection/index.js'
+import { FilterFolderTypePill } from '../../elements/FolderView/FilterFolderTypePill/index.js'
 import { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 import { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
@@ -275,7 +275,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
           <SearchBar
             Actions={[
               <SortByPill key="sort-by-pill" />,
-              folderID && <CollectionTypePill key="collection-type" />,
+              folderID && <FilterFolderTypePill key="collection-type" />,
               <ToggleViewButtons
                 activeView={activeView}
                 key="toggle-view-buttons"

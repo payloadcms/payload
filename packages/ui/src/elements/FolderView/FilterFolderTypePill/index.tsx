@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'collection-type'
 
-export function CollectionTypePill() {
+export function FilterFolderTypePill() {
   const {
     activeCollectionFolderSlugs: visibleCollectionSlugs,
     allCollectionFolderSlugs: folderCollectionSlugs,
@@ -46,6 +46,7 @@ export function CollectionTypePill() {
     )
   })
 
+  console.log({ visibleCollectionSlugs })
   return (
     <CheckboxPopup
       Button={
@@ -58,6 +59,7 @@ export function CollectionTypePill() {
       }
       key="relation-to-selection-popup"
       onChange={({ selectedValues: relationTo }) => {
+        console.log('Selected relationTo:', relationTo)
         void refineFolderData({ query: { relationTo }, updateURL: true })
       }}
       options={allCollectionOptions}

@@ -71,9 +71,17 @@ export const getFolderResultsComponentAndData = async ({
     throw new APIError('Folders are not enabled in the configuration.')
   }
 
+  const emptyQuery = {
+    id: {
+      exists: false,
+    },
+  }
+
   let collectionSlug: CollectionSlug | undefined = undefined
-  let documentWhere: undefined | Where = undefined
-  let folderWhere: undefined | Where = undefined
+  let documentWhere: undefined | Where =
+    Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
+  let folderWhere: undefined | Where =
+    Array.isArray(activeCollectionSlugs) && !activeCollectionSlugs.length ? emptyQuery : undefined
 
   // todo(perf): - collect promises and resolve them in parallel
   for (const activeCollectionSlug of activeCollectionSlugs) {
@@ -133,6 +141,7 @@ export const getFolderResultsComponentAndData = async ({
     folderID,
     folderWhere,
     req,
+    sort,
   })
 
   let FolderResultsComponent = null

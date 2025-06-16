@@ -145,6 +145,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               fromFolderName={currentFolder?.value?._folderOrDocumentTitle}
               itemsToMove={getSelectedItems()}
               onConfirm={async ({ id, name }) => {
+                console.log('here', id, name)
                 await moveToFolder({
                   itemsToMove: getSelectedItems(),
                   toFolderID: id,
@@ -167,6 +168,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
                   )
                 }
 
+                clearRouteCache()
                 closeModal(moveToFolderDrawerSlug)
               }}
             />

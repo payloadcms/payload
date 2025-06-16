@@ -118,27 +118,25 @@ export function FolderFileCard({
         <div className={`${baseClass}__icon-wrap`}>
           {type === 'file' ? <DocumentIcon /> : <ColoredFolderIcon />}
         </div>
-        <div>
-          <div>
-            <p className={`${baseClass}__name`} title={title}>
-              <span>{title}</span>
-            </p>
-            {PopupActions ? (
-              <Popup
-                button={<ThreeDotsIcon />}
-                disabled={selectedCount > 1 || (selectedCount === 1 && !isSelected)}
-                horizontalAlign="right"
-                size="large"
-                verticalAlign="bottom"
-              >
-                {PopupActions}
-              </Popup>
-            ) : null}
-          </div>
+        <div className={`${baseClass}__titlebar-labels`}>
+          <p className={`${baseClass}__name`} title={title}>
+            <span>{title}</span>
+          </p>
           {assignedCollections && assignedCollections.length > 0 ? (
             <AssignedCollections assignedCollections={assignedCollections} />
           ) : null}
         </div>
+        {PopupActions ? (
+          <Popup
+            button={<ThreeDotsIcon />}
+            disabled={selectedCount > 1 || (selectedCount === 1 && !isSelected)}
+            horizontalAlign="right"
+            size="large"
+            verticalAlign="bottom"
+          >
+            {PopupActions}
+          </Popup>
+        ) : null}
       </div>
     </div>
   )
@@ -192,6 +190,7 @@ export function ContextFolderFileCard({ type, className, index, item }: ContextC
       isSelected={isSelected}
       itemKey={item.itemKey}
       onClick={(event) => {
+        console.log('onItemClick', { isDisabled, isSelected, item: item.itemKey })
         void onItemClick({ event, index, item })
       }}
       onKeyDown={(event) => {

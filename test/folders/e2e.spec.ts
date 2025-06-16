@@ -1,8 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { applyBrowseByFolderTypeFilter } from 'helpers/folders/applyBrowseByFolderTypeFilter.js'
+import { createFolderDoc } from 'helpers/folders/createFolderDoc.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -93,16 +96,15 @@ test.describe('Folders', () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
       await createFolder({ folderName: 'Test Folder', page })
       await clickFolderCard({ folderName: 'Test Folder', page })
-      const renameButton = page.locator('.list-selection__actions button', {
-        hasText: 'Rename',
+      const editFolderDocButton = page.locator('.list-selection__actions button', {
+        hasText: 'Edit',
       })
-      await renameButton.click()
-      const folderNameInput = page.locator('input[id="field-name"]')
-      await folderNameInput.fill('Renamed Folder')
-      const applyChangesButton = page.locator(
-        'dialog#rename-folder--list button[aria-label="Apply Changes"]',
-      )
-      await applyChangesButton.click()
+      await editFolderDocButton.click()
+      await createFolderDoc({
+        page,
+        folderName: 'Renamed Folder',
+        assignedCollections: ['Posts'],
+      })
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       const renamedFolderCard = page
         .locator('.folder-file-card__name', {
@@ -193,7 +195,11 @@ test.describe('Folders', () => {
     // this test currently fails in postgres
     test('should create new document from folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder({ folderName: 'Create New Here', page })
+      await createFolder({
+        folderName: 'Create New Here',
+        page,
+        assignedCollections: ['Posts', 'Drafts'],
+      })
       await clickFolderCard({ folderName: 'Create New Here', page, doubleClick: true })
       const createDocButton = page.locator('.create-new-doc-in-folder__popup-button', {
         hasText: 'Create document',
@@ -231,22 +237,12 @@ test.describe('Folders', () => {
       await expect(createFolderButton).toBeVisible()
       await createFolderButton.click()
 
-      const drawerHeader = page.locator(
-        'dialog#create-folder--no-results-new-folder-drawer h1.drawerHeader__title',
-      )
-      await expect(drawerHeader).toHaveText('New Folder')
+      await createFolderDoc({
+        page,
+        folderName: 'Nested Folder',
+        assignedCollections: ['Posts'],
+      })
 
-      const titleField = page.locator(
-        'dialog#create-folder--no-results-new-folder-drawer input[id="field-name"]',
-      )
-      await titleField.fill('Nested Folder')
-      const createButton = page
-        .locator(
-          'dialog#create-folder--no-results-new-folder-drawer button[aria-label="Apply Changes"]',
-        )
-        .filter({ hasText: 'Create' })
-        .first()
-      await createButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('dialog#create-folder--no-results-new-folder-drawer')).toBeHidden()
     })
@@ -296,12 +292,11 @@ test.describe('Folders', () => {
       await createNewDropdown.click()
       const createFolderButton = page.locator('.popup-button-list__button').first()
       await createFolderButton.click()
-      const folderNameInput = page.locator('input[id="field-name"]')
-      await folderNameInput.fill('Nested Folder')
-      const createButton = page
-        .locator('.drawerHeader button[aria-label="Apply Changes"]')
-        .filter({ hasText: 'Create' })
-      await createButton.click()
+      await createFolderDoc({
+        page,
+        folderName: 'Nested Folder',
+        assignedCollections: ['Posts'],
+      })
       await expect(page.locator('.folder-file-card__name')).toHaveText('Nested Folder')
 
       await createNewDropdown.click()
@@ -314,18 +309,28 @@ test.describe('Folders', () => {
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
-      const typeButton = page.locator('.popup-button', { hasText: 'Type' })
-      await typeButton.click()
-      const folderCheckbox = page.locator('.checkbox-popup__options .checkbox-input__input').first()
-      await folderCheckbox.click()
+      // should filter out folders and only show posts
+      await applyBrowseByFolderTypeFilter({
+        page,
+        type: { label: 'Folders', value: 'payload-folders' },
+        on: false,
+      })
       const folderGroup = page.locator('.item-card-grid__title', { hasText: 'Folders' })
       const postGroup = page.locator('.item-card-grid__title', { hasText: 'Documents' })
       await expect(folderGroup).toBeHidden()
       await expect(postGroup).toBeVisible()
 
-      await folderCheckbox.click()
-      const postCheckbox = page.locator('.checkbox-popup__options .checkbox-input__input').nth(1)
-      await postCheckbox.click()
+      // should filter out posts and only show folders
+      await applyBrowseByFolderTypeFilter({
+        page,
+        type: { label: 'Folders', value: 'payload-folders' },
+        on: true,
+      })
+      await applyBrowseByFolderTypeFilter({
+        page,
+        type: { label: 'Posts', value: 'posts' },
+        on: false,
+      })
 
       await expect(folderGroup).toBeVisible()
       await expect(postGroup).toBeHidden()
@@ -418,14 +423,11 @@ test.describe('Folders', () => {
       await createDropdown.click()
       const createFolderButton = page.locator('.popup-button-list__button', { hasText: 'Folder' })
       await createFolderButton.click()
-      const drawerHeader = page.locator('.drawerHeader__title', { hasText: 'New Folder' })
-      await expect(drawerHeader).toBeVisible()
-      const folderNameInput = page.locator('input[id="field-name"]')
-      await folderNameInput.fill('New Folder From Collection')
-      const createButton = page
-        .locator('.drawerHeader button[aria-label="Apply Changes"]')
-        .filter({ hasText: 'Create' })
-      await createButton.click()
+      await createFolderDoc({
+        page,
+        folderName: 'New Folder From Collection',
+        assignedCollections: ['Posts'],
+      })
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })
   })
@@ -467,6 +469,54 @@ test.describe('Folders', () => {
         hasText: 'Test Folder',
       })
       await expect(updatedFolderPill).toBeVisible()
+    })
+  })
+
+  test.describe('Collection with browse by folders disabled', () => {
+    test('should not show omitted collection documents in browse by folder view', async () => {
+      await page.goto(OmittedFromBrowseBy.byFolder)
+      await page.reload()
+      const folderName = 'Folder without omitted Docs'
+      await page.goto(OmittedFromBrowseBy.byFolder)
+      await createFolder({ folderName, page, fromDropdown: true })
+
+      // create document
+      await page.goto(OmittedFromBrowseBy.create)
+      const titleInput = page.locator('input[name="title"]')
+      await titleInput.fill('Omitted Doc')
+      await saveDocAndAssert(page)
+
+      // assign to folder
+      const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
+      await folderPill.click()
+      await clickFolderCard({ folderName, page })
+      const selectButton = page
+        .locator('button[aria-label="Apply Changes"]')
+        .filter({ hasText: 'Select' })
+      await selectButton.click()
+      await saveDocAndAssert(page)
+
+      // go to browse by folder view
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await clickFolderCard({ folderName, page, doubleClick: true })
+
+      // folder should be empty
+      await expectNoResultsAndCreateFolderButton({ page })
+    })
+
+    test('should not show collection type in browse by folder view', async () => {
+      const folderName = 'omitted collection pill test folder'
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await createFolder({ folderName, page })
+      await clickFolderCard({ folderName, page, doubleClick: true })
+
+      await page.locator('button:has(.collection-type__count)').click()
+
+      await expect(
+        page.locator('.checkbox-input .field-label', {
+          hasText: 'Omitted From Browse By',
+        }),
+      ).toBeHidden()
     })
   })
 
@@ -542,51 +592,6 @@ test.describe('Folders', () => {
       await selectFolderAndConfirmMove({ page })
       await expect(page.locator('.payload-toast-container')).toContainText('moved')
       await expect(firstFolderCard).toBeHidden()
-    })
-  })
-
-  test.describe('Collection with browse by folders disabled', () => {
-    const folderName = 'Folder without omitted Docs'
-    test('should not show omitted collection documents in browse by folder view', async () => {
-      await page.goto(OmittedFromBrowseBy.byFolder)
-      await createFolder({ folderName, page, fromDropdown: true })
-
-      // create document
-      await page.goto(OmittedFromBrowseBy.create)
-      const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Omitted Doc')
-      await saveDocAndAssert(page)
-
-      // assign to folder
-      const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
-      await folderPill.click()
-      await clickFolderCard({ folderName, page })
-      const selectButton = page
-        .locator('button[aria-label="Apply Changes"]')
-        .filter({ hasText: 'Select' })
-      await selectButton.click()
-
-      // go to browse by folder view
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await clickFolderCard({ folderName, page, doubleClick: true })
-
-      // folder should be empty
-      await expectNoResultsAndCreateFolderButton({ page })
-    })
-
-    test('should not show collection type in browse by folder view', async () => {
-      const folderName = 'omitted collection pill test folder'
-      await page.goto(`${serverURL}/admin/browse-by-folder`)
-      await createFolder({ folderName, page })
-      await clickFolderCard({ folderName, page, doubleClick: true })
-
-      await page.locator('button:has(.collection-type__count)').click()
-
-      await expect(
-        page.locator('.checkbox-input .field-label', {
-          hasText: 'Omitted From Browse By',
-        }),
-      ).toBeHidden()
     })
   })
 

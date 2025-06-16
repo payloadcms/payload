@@ -97,8 +97,7 @@ export const buildCollectionFolderView = async (
       },
     })
 
-    const sortPreference: FolderSortKeys =
-      collectionFolderPreferences?.sort || '_folderOrDocumentTitle'
+    const sortPreference: FolderSortKeys = collectionFolderPreferences?.sort || 'name'
     const viewPreference = collectionFolderPreferences?.viewPreference || 'grid'
 
     const {

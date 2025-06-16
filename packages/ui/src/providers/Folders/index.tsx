@@ -109,7 +109,7 @@ const Context = React.createContext<FolderContextValue>({
   setBreadcrumbs: () => {},
   setFocusedRowIndex: () => -1,
   setIsDragging: () => false,
-  sort: '_folderOrDocumentTitle',
+  sort: 'name',
   subfolders: [],
 })
 
@@ -195,7 +195,7 @@ export function FolderProvider({
   FolderResultsComponent: InitialFolderResultsComponent,
   onItemClick: onItemClickFromProps,
   search,
-  sort = '_folderOrDocumentTitle',
+  sort = 'name',
   subfolders,
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
@@ -253,6 +253,7 @@ export function FolderProvider({
         ...currentQuery,
         ...newQuery,
         page,
+        relationTo: 'relationTo' in newQuery ? newQuery.relationTo : currentQuery?.relationTo,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
         sort: 'sort' in newQuery ? newQuery.sort : (currentQuery?.sort ?? undefined),
       }
@@ -266,8 +267,12 @@ export function FolderProvider({
     ({ query, updateURL }) => {
       if (updateURL) {
         const newQuery = mergeQuery(query)
+
+        console.log('new query', { ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) })
         startRouteTransition(() =>
-          router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`),
+          router.replace(
+            `${qs.stringify({ ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) }, { addQueryPrefix: true })}`,
+          ),
         )
 
         setCurrentQuery(newQuery)

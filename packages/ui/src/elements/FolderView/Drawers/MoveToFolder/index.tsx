@@ -92,7 +92,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
           displayAs: 'grid',
           folderAssignedCollections: props.folderAssignedCollections,
           folderID: folderIDToPopulate,
-          sort: '_folderOrDocumentTitle',
+          sort: 'name',
         })
 
         setBreadcrumbs(result.breadcrumbs || [])

@@ -1,6 +1,9 @@
 import { expect, type Page } from '@playwright/test'
 
+import { createFolderDoc } from './createFolderDoc.js'
+
 type Args = {
+  assignedCollections?: string[]
   folderName: string
   fromDropdown?: boolean
   page: Page
@@ -9,6 +12,7 @@ export async function createFolder({
   folderName,
   fromDropdown = false,
   page,
+  assignedCollections = ['Posts'],
 }: Args): Promise<void> {
   if (fromDropdown) {
     const folderDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
@@ -26,16 +30,11 @@ export async function createFolder({
     await createFolderButton.click()
   }
 
-  const folderNameInput = page.locator(
-    'dialog#create-document--header-pill-new-folder-drawer div.drawer-content-container input#field-name',
-  )
-
-  await folderNameInput.fill(folderName)
-
-  const createButton = page.getByRole('button', { name: 'Apply Changes' })
-  await createButton.click()
-
-  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  await createFolderDoc({
+    page,
+    folderName,
+    assignedCollections,
+  })
 
   const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()
   await expect(folderCard).toBeVisible()

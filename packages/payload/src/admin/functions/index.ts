@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference } from '../../index.js'
+import type { CollectionSlug, ColumnPreference, FolderSortKeys } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
@@ -108,5 +108,5 @@ export type GetFolderResultsComponentAndDataArgs = {
   /**
    * The sort order for the results.
    */
-  sort: string
+  sort: FolderSortKeys
 }
