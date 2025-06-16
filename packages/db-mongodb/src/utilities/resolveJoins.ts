@@ -107,8 +107,8 @@ export async function resolveJoins({
     const isPolymorphicCollectionJoin = Array.isArray(joinDef.field.collection)
 
     // Process collections concurrently
-    const collectionPromises = collections.map(async (collectionSlug) => {
-      const targetConfig = adapter.payload.collections[collectionSlug]?.config
+    const collectionPromises = collections.map(async (joinCollectionSlug) => {
+      const targetConfig = adapter.payload.collections[joinCollectionSlug]?.config
       if (!targetConfig) {
         return null
       }
@@ -154,7 +154,7 @@ export async function resolveJoins({
           })
         : await buildQuery({
             adapter,
-            collectionSlug,
+            collectionSlug: joinCollectionSlug,
             fields: targetConfig.flattenedFields,
             locale,
             where: whereQuery as Where,
@@ -189,7 +189,19 @@ export async function resolveJoins({
         dbFieldName = `version.${dbFieldName}`
       }
 
-      whereQuery[dbFieldName] = { $in: parentIDs }
+      // Check if the target field is a polymorphic relationship
+      const isPolymorphic = joinDef.targetField
+        ? Array.isArray(joinDef.targetField.relationTo)
+        : false
+
+      if (isPolymorphic) {
+        // For polymorphic relationships, we need to match both relationTo and value
+        whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
+        whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
+      } else {
+        // For regular relationships and polymorphic collection joins
+        whereQuery[dbFieldName] = { $in: parentIDs }
+      }
 
       // Build the sort parameters for the query
       const fields = useDrafts
@@ -225,7 +237,7 @@ export async function resolveJoins({
 
       // Return results with collection info for grouping
       return {
-        collectionSlug,
+        collectionSlug: joinCollectionSlug,
         dbFieldName,
         results,
         sort,
@@ -255,13 +267,25 @@ export async function resolveJoins({
           result.id = result.parent
         }
 
-        const parentValues = getByPathWithArrays(result, dbFieldName)
+        const parentValues = getByPathWithArrays(result, dbFieldName) as (
+          | { relationTo: string; value: number | string }
+          | number
+          | string
+        )[]
 
-        if (parentValues.length === 0 || !parentValues[0]) {
+        if (parentValues.length === 0) {
           continue
         }
 
-        for (const parentValue of parentValues) {
+        for (let parentValue of parentValues) {
+          if (!parentValue) {
+            continue
+          }
+
+          if (typeof parentValue === 'object') {
+            parentValue = parentValue.value
+          }
+
           const joinData = {
             relationTo: collectionSlug,
             value: result.id,
