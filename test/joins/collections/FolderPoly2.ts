@@ -4,10 +4,6 @@ export const FolderPoly2: CollectionConfig = {
   slug: 'folderPoly2',
   fields: [
     {
-      name: 'commonTitle',
-      type: 'text',
-    },
-    {
       name: 'folderPoly2Title',
       type: 'text',
     },
