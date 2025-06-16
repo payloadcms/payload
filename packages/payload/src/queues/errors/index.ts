@@ -44,3 +44,17 @@ export class WorkflowError extends Error {
     Object.setPrototypeOf(this, WorkflowError.prototype)
   }
 }
+
+export class JobCancelledError extends Error {
+  args: {
+    job: Job
+  }
+
+  constructor(args: { job: Job }) {
+    super(`Job ${args.job.id} was cancelled`)
+    this.args = args
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, JobCancelledError.prototype)
+  }
+}

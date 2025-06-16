@@ -1,6 +1,7 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
+import { JobCancelledError } from '../../../errors/index.js'
 import { updateJob } from '../../../utilities/updateJob.js'
 
 export type UpdateJobFunction = (jobData: Partial<Job>) => Promise<Job>
@@ -31,9 +32,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     }
 
     if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
-      const cancelledError = new Error('Job cancelled') as { cancelled: boolean } & Error
-      cancelledError.cancelled = true
-      throw cancelledError
+      throw new JobCancelledError({ job })
     }
 
     return updatedJob!

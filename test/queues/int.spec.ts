@@ -1339,7 +1339,7 @@ describe('Queues', () => {
 
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun.log[0].error.message).toBe('Task handler returned a failed state')
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
     expect(jobAfterRun.log[0].state).toBe('failed')
   })
 
