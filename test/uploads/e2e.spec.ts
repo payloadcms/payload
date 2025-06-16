@@ -1369,14 +1369,14 @@ describe('Uploads', () => {
 
     // Show all columns with relations
     await page.locator('.list-controls__toggle-columns').click()
-    await expect(page.locator('.column-selector')).toBeVisible()
-    const imageWithoutPreview2Button = page.locator(`.column-selector .column-selector__column`, {
+    await expect(page.locator('.pill-selector')).toBeVisible()
+    const imageWithoutPreview2Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image Without Preview2'),
     })
-    const imageWithPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+    const imageWithPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image With Preview3'),
     })
-    const imageWithoutPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+    const imageWithoutPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image Without Preview3'),
     })
     await imageWithoutPreview2Button.click()

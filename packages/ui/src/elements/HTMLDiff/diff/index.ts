@@ -60,6 +60,11 @@ export interface HtmlDiffOptions {
    * @defaultValue 2
    */
   minMatchedSize?: number
+  /**
+   * Whether to tokenize by character or by word.
+   * @defaultValue false
+   */
+  tokenizeByCharacter?: boolean
 }
 
 // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/optimal-quantifier-concatenation
@@ -94,6 +99,7 @@ export class HtmlDiff {
       greedyBoundary = 1000,
       greedyMatch = true,
       minMatchedSize = 2,
+      tokenizeByCharacter = false,
     }: HtmlDiffOptions = {},
   ) {
     // init config
@@ -127,8 +133,9 @@ export class HtmlDiff {
     }
 
     // step1: split HTML to tokens(atomic tokens)
-    this.oldTokens = this.tokenize(oldHtml)
-    this.newTokens = this.tokenize(newHtml)
+    const tokenizeFn = tokenizeByCharacter ? this.tokenizeByCharacter : this.tokenizeByWord
+    this.oldTokens = tokenizeFn(oldHtml)
+    this.newTokens = tokenizeFn(newHtml)
     // step2: find matched blocks
     this.matchedBlockList = this.getMatchedBlockList()
 
@@ -453,12 +460,51 @@ export class HtmlDiff {
   }
 
   /**
+   * Convert HTML to tokens at character level, preserving HTML tags as complete tokens
+   * @example
+   * tokenize("<a> Hello World </a>")
+   * ["<a>", " ", "H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", " ", "</a>"]
+   */
+  private tokenizeByCharacter(html: string): string[] {
+    // First, identify HTML tags and preserve them as complete tokens
+    const tokens: string[] = []
+    let currentPos = 0
+
+    // Regular expression to match HTML tags (including picture and video tags with content)
+    const tagRegex = /<picture[^>]*>.*?<\/picture>|<video[^>]*>.*?<\/video>|<[^>]+>/gs
+    let match: null | RegExpExecArray
+
+    while ((match = tagRegex.exec(html)) !== null) {
+      // Add characters before the tag
+      const beforeTag = html.substring(currentPos, match.index)
+      if (beforeTag) {
+        // Split non-tag content into individual characters
+        for (const char of beforeTag) {
+          tokens.push(char)
+        }
+      }
+
+      // Add the complete tag as a single token
+      tokens.push(match[0])
+      currentPos = match.index + match[0].length
+    }
+
+    // Add any remaining characters after the last tag
+    const remaining = html.substring(currentPos)
+    for (const char of remaining) {
+      tokens.push(char)
+    }
+
+    return tokens
+  }
+
+  /**
    * convert HTML to tokens
    * @example
    * tokenize("<a> Hello World </a>")
    * ["<a>"," ", "Hello", " ", "World", " ", "</a>"]
    */
-  private tokenize(html: string): string[] {
+  private tokenizeByWord(html: string): string[] {
     // atomic token: html tag、continuous numbers or letters、blank spaces、other symbol
     return (
       html.match(

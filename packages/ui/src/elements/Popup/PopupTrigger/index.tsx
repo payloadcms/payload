@@ -13,7 +13,7 @@ export type PopupTriggerProps = {
   disabled?: boolean
   noBackground?: boolean
   setActive: (active: boolean) => void
-  size?: 'large' | 'medium' | 'small'
+  size?: 'large' | 'medium' | 'small' | 'xsmall'
 }
 
 export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
