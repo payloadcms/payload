@@ -30,6 +30,7 @@ import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workf
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   collections: [
     {
