@@ -206,6 +206,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er i ferd med å slette {{count}} {{label}}',
+    aboutToRestoreCount: 'Du er i ferd med å gjenopprette {{count}} {{label}}',
     addBelow: 'Legg til under',
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',
@@ -239,6 +240,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i {{collections}}-samlingene.',
     confirmReindexDescriptionAll:
       'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i alle samlinger.',
+    confirmRestoration: 'Bekreft gjenoppretting',
     copied: 'Kopiert',
     copy: 'Kopiér',
     copying: 'Kopiering',
@@ -351,6 +353,10 @@ export const nbTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Dette vil tilbakestille alle preferansene dine til standardinnstillingene.',
     resettingPreferences: 'Tilbakestiller preferanser.',
+    restore: 'Gjenopprett',
+    restoredCountSuccessfully: 'Gjenopprettet {{count}} {{label}} vellykket.',
+    restoring:
+      'Respekter betydningen av den opprinnelige teksten innenfor konteksten av Payload. Her er en liste over vanlige Payload-uttrykk som har veldig spesifikke betydninger:\n    - Samling: En samling er en gruppe dokumenter som deler en felles struktur og formål. Samlinger brukes til å organisere og håndtere innhold i Payload.\n    - Felt: Et felt er et bestemt stykke data innenfor et dokument i en samling. Felt definerer strukturen og typen data som kan lagres i et dokument.\n    - Dokument: Et dokument er en individuell post innen',
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',

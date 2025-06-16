@@ -202,6 +202,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'คุณกำลังจะลบ {{count}} {{label}}',
     aboutToDeleteCount_one: 'คุณกำลังจะลบ {{count}} {{label}}',
     aboutToDeleteCount_other: 'คุณกำลังจะลบ {{count}} {{label}}',
+    aboutToRestoreCount: 'คุณกำลังจะกู้คืน {{count}} {{label}}',
     addBelow: 'เพิ่มด้านล่าง',
     addFilter: 'เพิ่มการกรอง',
     adminTheme: 'ธีมผู้ดูแลระบบ',
@@ -234,6 +235,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของคอลเลกชัน {{collections}}.',
     confirmReindexDescriptionAll:
       'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของทุกคอลเลกชัน.',
+    confirmRestoration: 'ยืนยันการคืนค่าให้ครบถ้วน',
     copied: 'คัดลอกแล้ว',
     copy: 'คัดลอก',
     copying: 'การคัดลอก',
@@ -344,6 +346,10 @@ export const thTranslations: DefaultTranslationsObject = {
     resetPreferences: 'รีเซ็ตการตั้งค่า',
     resetPreferencesDescription: 'การกระทำนี้จะรีเซ็ตการตั้งค่าทั้งหมดของคุณเป็นค่าเริ่มต้น',
     resettingPreferences: 'กำลังรีเซ็ตการตั้งค่า',
+    restore: 'กู้คืน',
+    restoredCountSuccessfully: 'ได้ทำการกู้คืน {{count}} {{label}} สำเร็จแล้ว',
+    restoring:
+      'สนับสนุนความหมายของข้อความต้นฉบับในบริบทของ Payload นี่คือรายการของคำที่เกี่ยวข้องกับ Payload ที่มีความหมายเฉพาะเจาะจง:\n    - Collection: Collection เป็นกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหมือน',
     row: 'แถว',
     rows: 'แถว',
     save: 'บันทึก',

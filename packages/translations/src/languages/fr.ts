@@ -213,6 +213,7 @@ export const frTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToDeleteCount_one: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToDeleteCount_other: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
+    aboutToRestoreCount: 'Vous êtes sur le point de restaurer {{count}} {{label}}',
     addBelow: 'Ajoutez ci-dessous',
     addFilter: 'Ajouter un filtre',
     adminTheme: 'Thème d’administration',
@@ -246,6 +247,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Cela supprimera les index existants et réindexera les documents dans les collections {{collections}}.',
     confirmReindexDescriptionAll:
       'Cela supprimera les index existants et réindexera les documents dans toutes les collections.',
+    confirmRestoration: 'Confirmer la restauration',
     copied: 'Copié',
     copy: 'Copie',
     copying: 'Copie',
@@ -358,6 +360,9 @@ export const frTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Cela réinitialisera toutes vos préférences aux paramètres par défaut.',
     resettingPreferences: 'Réinitialisation des préférences.',
+    restore: 'Restaurer',
+    restoredCountSuccessfully: '{{count}} {{label}} restauré avec succès.',
+    restoring: 'Restauration...',
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',

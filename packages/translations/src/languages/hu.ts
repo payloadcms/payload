@@ -208,6 +208,7 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_one: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_other: 'Törölni készül {{count}} {{label}}',
+    aboutToRestoreCount: 'Ön {{count}} {{label}} helyreállítására készül.',
     addBelow: 'Hozzáadás lent',
     addFilter: 'Szűrő hozzáadása',
     adminTheme: 'Admin téma',
@@ -241,6 +242,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat a {{collections}} gyűjteményekben.',
     confirmReindexDescriptionAll:
       'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat az összes gyűjteményben.',
+    confirmRestoration: 'Megerősíti a helyreállítást?',
     copied: 'Másolva',
     copy: 'Másolás',
     copying: 'Másolás',
@@ -352,6 +354,10 @@ export const huTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Ez visszaállítja az összes beállítást az alapértelmezett értékekre.',
     resettingPreferences: 'Beállítások visszaállítása.',
+    restore: 'Visszaállítás',
+    restoredCountSuccessfully: 'Sikeresen visszaállított {{count}} {{label}}.',
+    restoring:
+      'Tartsa tiszteletben az eredeti szöveg jelentését a Payload kontextusában. Íme egy lista a Payloadban gyakran használt kifejezésekről, amelyek rendkívül specifikus jelentéssel bírnak:\n    - Gyűjtemény: A gyűjtemény egy olyan dokumentumcsoport, amelyek közös struktúrával és céllal rendelkeznek. A gyűjteményeket a tartalom szervezésére és kezelésére használjuk a Payloadban.\n    - Mező',
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',

@@ -206,6 +206,7 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_one: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_other: 'Siz {{count}} {{label}} silməyə hazırsınız.',
+    aboutToRestoreCount: 'Siz {{count}} {{label}} bərpası etməyə hazırsınız.',
     addBelow: 'Aşağıya əlavə et',
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',
@@ -239,6 +240,7 @@ export const azTranslations: DefaultTranslationsObject = {
       'Bu, mövcud indeksləri siləcək və {{collections}} kolleksiyalarında sənədləri yenidən indeksləyəcək.',
     confirmReindexDescriptionAll:
       'Bu, mövcud indeksləri siləcək və bütün kolleksiyalardakı sənədləri yenidən indeksləyəcək.',
+    confirmRestoration: 'Bərpa etməni təsdiqləyin',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
     copying: 'Kopyalama',
@@ -350,6 +352,10 @@ export const azTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Təhlükəsizlik parametrlərini sıfırlamaq',
     resetPreferencesDescription: 'Bu, bütün parametrlərinizi standart vəziyyətlərinə sıfırlayacaq.',
     resettingPreferences: 'Təhlükəsizlik parametrləri sıfırlanır.',
+    restore: 'Bərpa et',
+    restoredCountSuccessfully: '{{count}} {{label}} uğurla bərpa edildi.',
+    restoring:
+      'Orijinal mətnin mənasını Payload kontekstində qoruyun. Ən əhəmiyyətli Payload ifadələrinin siyahısı aşağıdakı kimi dir:\n\n    - Collection: "Collection" bir sıra sənədlərin əməkdaş olduğu, ortaq struktur və məqsədi olan bir qrupdur. "Collections", Payload-də məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Field: "Field", kolle',
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',

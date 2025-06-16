@@ -207,6 +207,7 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estas apunt de eliminar {{count}} {{label}}',
+    aboutToRestoreCount: 'Esteu a punt de restaurar {{count}} {{label}}',
     addBelow: 'Afegeix a sota',
     addFilter: 'Afegeix filtre',
     adminTheme: "Tema d'administració",
@@ -239,6 +240,7 @@ export const caTranslations: DefaultTranslationsObject = {
       'Aixo eliminarà els índexs existents i reindexarà els documents de les col·leccions {{collections}}.',
     confirmReindexDescriptionAll:
       'Aixo eliminarà els índexs existents i reindexarà els documents de totes les col·leccions.',
+    confirmRestoration: 'Confirmeu la restauració',
     copied: 'Copiat',
     copy: 'Copiar',
     copying: 'Copiant',
@@ -351,6 +353,9 @@ export const caTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Això restablirà totes les teves preferències a les configuracions per defecte.',
     resettingPreferences: 'Restablint les preferències.',
+    restore: 'Restaura',
+    restoredCountSuccessfully: "S'ha restaurat {{count}} {{label}} correctament.",
+    restoring: 'Restauració...',
     row: 'Fila',
     rows: 'Files',
     save: 'Desa',

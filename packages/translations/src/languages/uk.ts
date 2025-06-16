@@ -207,6 +207,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Ви бажаєте видалити {{count}} {{label}}',
     aboutToDeleteCount_one: 'Ви бажаєте видалити {{count}} {{label}}',
     aboutToDeleteCount_other: 'Ви бажаєте видалити {{count}} {{label}}',
+    aboutToRestoreCount: 'Ви збираєтеся відновити {{count}} {{label}}',
     addBelow: 'Додати нижче',
     addFilter: 'Додати фільтр',
     adminTheme: 'Тема адмін панелі',
@@ -239,6 +240,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Це видалить наявні індекси та перебудує індекси документів у колекціях {{collections}}.',
     confirmReindexDescriptionAll:
       'Це видалить наявні індекси та перебудує індекси документів у всіх колекціях.',
+    confirmRestoration: 'Підтвердіть відновлення',
     copied: 'Скопійовано',
     copy: 'Скопіювати',
     copying: 'Копіювання',
@@ -349,6 +351,10 @@ export const ukTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Скинути налаштування',
     resetPreferencesDescription: 'Це скине всі ваші налаштування до значень за замовчуванням.',
     resettingPreferences: 'Скидання налаштувань.',
+    restore: 'Відновити',
+    restoredCountSuccessfully: 'Відновлено {{count}} {{label}} успішно.',
+    restoring:
+      'Поважайте сенс оригінального тексту в контексті Payload. Ось список поширених термінів Payload, які мають дуже специфічні значення:\n    - Колекція: Колекцією є група документів, які мають спільну структуру та сенс. Колекції використовуються для організації й керування контент',
     row: 'Рядок',
     rows: 'Рядки',
     save: 'Зберегти',

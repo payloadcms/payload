@@ -206,6 +206,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du är på väg att ta bort {{count}} {{label}}',
+    aboutToRestoreCount: 'Du är på väg att återställa {{count}} {{label}}',
     addBelow: 'Lägg till nedanför',
     addFilter: 'Lägg till filter',
     adminTheme: 'Adminutseende',
@@ -239,6 +240,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Detta kommer att ta bort befintliga index och omindexera dokumenten i {{collections}}-samlingarna.',
     confirmReindexDescriptionAll:
       'Detta kommer att ta bort befintliga index och omindexera dokumenten i alla samlingar.',
+    confirmRestoration: 'Bekräfta återställning',
     copied: 'Kopierad',
     copy: 'Kopiera',
     copying: 'Kopierar...',
@@ -351,6 +353,10 @@ export const svTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Detta kommer att återställa alla dina preferenser till standardinställningarna.',
     resettingPreferences: 'Återställer preferenser...',
+    restore: 'Återställ',
+    restoredCountSuccessfully: 'Återställde {{count}} {{label}} framgångsrikt.',
+    restoring:
+      'Respektera innebörden av den ursprungliga texten inom kontexten av Payload. Här är en lista över gemensamma Payload-termer som bär väldigt specifika betydelser:\n    - Samling: En samling är en grupp dokument som delar en gemensam struktur och syfte. Samlingar används för att organisera och hantera innehåll i Payload.\n    - Fält: Ett fält är en specifik data inom ett dokument i en samling. Fält definierar strukturen och typen av data som kan lagras i ett dokument.\n    - Dokument: Ett dokument är en',
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',

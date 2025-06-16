@@ -201,6 +201,7 @@ export const heTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'אתה עומד למחוק {{count}} {{label}}',
     aboutToDeleteCount_one: 'אתה עומד למחוק {{label}} אחד',
     aboutToDeleteCount_other: 'אתה עומד למחוק {{count}} {{label}}',
+    aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
     addBelow: 'הוסף מתחת',
     addFilter: 'הוסף מסנן',
     adminTheme: 'ערכת נושא ממשק הניהול',
@@ -232,6 +233,7 @@ export const heTranslations: DefaultTranslationsObject = {
     confirmReindexDescription:
       'זה יסיר את האינדקסים הקיימים ויחזיר אינדקס למסמכים באוספים {{collections}}.',
     confirmReindexDescriptionAll: 'זה יסיר את האינדקסים הקיימים ויחזיר אינדקס למסמכים בכל האוספים.',
+    confirmRestoration: 'אשר שחזור',
     copied: 'הועתק',
     copy: 'העתק',
     copying: 'העתקה',
@@ -341,6 +343,10 @@ export const heTranslations: DefaultTranslationsObject = {
     resetPreferences: 'איפוס העדפות',
     resetPreferencesDescription: 'זאת תאפס את כל ההעדפות שלך להגדרות ברירת המחדל.',
     resettingPreferences: 'מאפס העדפות.',
+    restore: 'שחזור',
+    restoredCountSuccessfully: 'שוחזרו בהצלחה {{count}} {{label}}.',
+    restoring:
+      'שמעו למשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים נפוצים של Payload שנושאים משמעויות מאוד מסוימות:\n- אוסף: אוסף הוא קבוצה של מסמכים ששותפים למבנה ולמטרה מש',
     row: 'שורה',
     rows: 'שורות',
     save: 'שמירה',

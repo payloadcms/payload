@@ -206,6 +206,7 @@ export const enTranslations = {
     aboutToDeleteCount_many: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_other: 'You are about to delete {{count}} {{label}}',
+    aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',
@@ -239,6 +240,7 @@ export const enTranslations = {
       'This will remove existing indexes and reindex documents in the {{collections}} collections.',
     confirmReindexDescriptionAll:
       'This will remove existing indexes and reindex documents in all collections.',
+    confirmRestoration: 'Confirm restoration',
     copied: 'Copied',
     copy: 'Copy',
     copying: 'Copying',
@@ -351,6 +353,9 @@ export const enTranslations = {
     resetPreferencesDescription:
       'This will reset all of your preferences to their default settings.',
     resettingPreferences: 'Resetting Preferences.',
+    restore: 'Restore',
+    restoredCountSuccessfully: 'Restored {{count}} {{label}} successfully.',
+    restoring: 'Restoring...',
     row: 'Row',
     rows: 'Rows',
     save: 'Save',

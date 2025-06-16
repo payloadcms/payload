@@ -207,6 +207,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisaćete {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisaćete {{count}} {{label}}',
+    aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
     addBelow: 'Dodaj ispod',
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
@@ -239,6 +240,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u kolekcijama {{collections}}.',
     confirmReindexDescriptionAll:
       'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u svim kolekcijama.',
+    confirmRestoration: 'Potvrdite obnovu',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     copying: 'Kopiranje',
@@ -351,6 +353,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Ovo će poništiti sva vaša podešavanja na podrazumevane vrednosti.',
     resettingPreferences: 'Poništavanje podešavanja.',
+    restore: 'Vrati',
+    restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
+    restoring: 'Vraćanje na prethodno stanje...',
     row: 'Red',
     rows: 'Redovi',
     save: 'Sačuvaj',

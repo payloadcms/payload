@@ -206,6 +206,7 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Chystáte se smazat {{count}} {{label}}',
     aboutToDeleteCount_one: 'Chystáte se smazat {{count}} {{label}}',
     aboutToDeleteCount_other: 'Chystáte se smazat {{count}} {{label}}',
+    aboutToRestoreCount: 'Chystáte se obnovit {{count}} {{label}}',
     addBelow: 'Přidat pod',
     addFilter: 'Přidat filtr',
     adminTheme: 'Motiv administračního rozhraní',
@@ -238,6 +239,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Tímto budou odstraněny stávající indexy a dokumenty v kolekcích {{collections}} budou znovu zaindexovány.',
     confirmReindexDescriptionAll:
       'Tímto budou odstraněny stávající indexy a dokumenty ve všech kolekcích budou znovu zaindexovány.',
+    confirmRestoration: 'Potvrdit obnovení',
     copied: 'Zkopírováno',
     copy: 'Kopírovat',
     copying: 'Kopírování',
@@ -348,6 +350,10 @@ export const csTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Obnovit nastavení',
     resetPreferencesDescription: 'Toto obnoví všechna vaše nastavení na výchozí hodnoty.',
     resettingPreferences: 'Obnovování nastavení.',
+    restore: 'Obnovit',
+    restoredCountSuccessfully: 'Úspěšně obnoveno {{count}} {{label}}.',
+    restoring:
+      'Respektujte význam původního textu v kontextu Payload. Zde je seznam běžných termínů Payload, které nesou velmi specifické významy:\n    - Collection: Sbírka je skupina dokumentů, které sdílejí společnou strukturu a účel. Sbírky se používají k organizaci a správě obsahu v Payload.\n    - Field: Field je specifický prvek dat v dokumentu ve sbírce. Field definuje strukturu a typ dat, které mohou',
     row: 'Řádek',
     rows: 'Řádky',
     save: 'Uložit',

@@ -206,6 +206,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'На път си да изтриеш {{count}} {{label}}',
     aboutToDeleteCount_one: 'На път си да изтриеш {{count}} {{label}}',
     aboutToDeleteCount_other: 'На път си да изтриеш {{count}} {{label}}',
+    aboutToRestoreCount: 'Предстои да възстановите {{count}} {{label}}',
     addBelow: 'Добави отдолу',
     addFilter: 'Добави филтър',
     adminTheme: 'Цветова тема',
@@ -238,6 +239,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Това ще премахне съществуващите индекси и ще преиндексира документите в колекциите {{collections}}.',
     confirmReindexDescriptionAll:
       'Това ще премахне съществуващите индекси и ще преиндексира документите във всички колекции.',
+    confirmRestoration: 'Потвърдете възстановяването',
     copied: 'Копирано',
     copy: 'Копирай',
     copying: 'Копиране',
@@ -350,6 +352,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Това ще нулира всички ваши предпочитания до техните настройки по подразбиране.',
     resettingPreferences: 'Нулиране на предпочитанията.',
+    restore: 'Възстановяване',
+    restoredCountSuccessfully: 'Успешно възстановени {{count}} {{label}}.',
+    restoring: 'Възстановяване...',
     row: 'ред',
     rows: 'Редове',
     save: 'Запази',

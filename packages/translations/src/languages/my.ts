@@ -208,6 +208,7 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
+    aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
     addBelow: 'အောက်တွင်ထည့်ပါ။',
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',
@@ -241,6 +242,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'ဤသည်သည် ရှိပြီးသား အညွှန်းများကို ဖျက်ပစ်ပြီး {{collections}} ကော်လက်ရှင်းများတွင် စာရွက်များကို ထပ်လိပ်ပါလိမ့်မည်။',
     confirmReindexDescriptionAll:
       'ဤသည်သည် ရှိပြီးသား အညွှန်းများကို ဖျက်ပစ်ပြီး အားလုံးသော ကော်လက်ရှင်းများတွင် စာရွက်များကို ထပ်လိပ်ပါလိမ့်မည်။',
+    confirmRestoration: 'Sahkan pemulihan',
     copied: 'ကူးယူပြီးပြီ။',
     copy: 'ကူးယူမည်။',
     copying: 'ကူးယူခြင်း',
@@ -353,6 +355,10 @@ export const myTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
     resettingPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်နေပါသည်။',
+    restore: 'Pulihkan',
+    restoredCountSuccessfully: 'Berjaya memulihkan {{count}} {{label}}.',
+    restoring:
+      'Hormati makna teks asal dalam konteks Payload. Berikut adalah senarai istilah Payload yang membawa maksud tertentu :\n    - Koleksi : Koleksi ialah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n    - Medan: Medan adalah sebahagian daripada data dalam dokumen dalam suatu koleksi. Medan menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n    - Dokumen: Dokumen adalah rekod individu dalam suatu koleksi. Ia mengandungi data yang telah',
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',

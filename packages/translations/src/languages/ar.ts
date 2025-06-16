@@ -203,6 +203,7 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_one: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_other: 'أنت على وشك حذف {{count}} {{label}}',
+    aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}}',
     addBelow: 'أضف في الاسفل',
     addFilter: 'أضف فلتر',
     adminTheme: 'شكل واجهة المستخدم',
@@ -235,6 +236,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'سيؤدي هذا إلى إزالة الفهارس الحالية وإعادة فهرسة المستندات في مجموعات {{collections}}.',
     confirmReindexDescriptionAll:
       'سيؤدي هذا إلى إزالة الفهارس الحالية وإعادة فهرسة المستندات في جميع المجموعات.',
+    confirmRestoration: 'تأكيد الاستعادة',
     copied: 'تمّ النّسخ',
     copy: 'نسخ',
     copying: 'نسخ',
@@ -345,6 +347,10 @@ export const arTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'سيؤدي ذلك إلى إعادة تعيين جميع تفضيلاتك إلى الإعدادات الافتراضية.',
     resettingPreferences: 'إعادة تعيين التفضيلات.',
+    restore: 'استعادة',
+    restoredCountSuccessfully: 'تمت استعادة {{count}} {{label}} بنجاح.',
+    restoring:
+      'احترم معنى النص الأصلي في سياق Payload. هنا قائمة بالمصطلحات الشائعة في Payload التي تحمل معانٍ محددة جدًا:\n    - Collection: المجموعة هي مجموعة من الوثائق التي تتشارك في الهيكل والغرض المشترك. تُستخدم المجموعات لتنظيم وإدارة المحتوى في Payload.',
     row: 'سطر',
     rows: 'أسطُر',
     save: 'حفظ',

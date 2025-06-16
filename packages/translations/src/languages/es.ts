@@ -210,6 +210,7 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estás a punto de eliminar {{count}} {{label}}',
+    aboutToRestoreCount: 'Está a punto de restaurar {{count}} {{label}}',
     addBelow: 'Añadir abajo',
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',
@@ -243,6 +244,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Esto eliminará los índices existentes y volverá a indexar los documentos en las colecciones {{collections}}.',
     confirmReindexDescriptionAll:
       'Esto eliminará los índices existentes y volverá a indexar los documentos en todas las colecciones.',
+    confirmRestoration: 'Confirme la restauración',
     copied: 'Copiado',
     copy: 'Copiar',
     copying: 'Copiando',
@@ -355,6 +357,9 @@ export const esTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Esto restablecerá todas tus preferencias a los valores predeterminados.',
     resettingPreferences: 'Restableciendo preferencias...',
+    restore: 'Restaurar',
+    restoredCountSuccessfully: 'Restaurado {{count}} {{label}} con éxito.',
+    restoring: 'Restaurando...',
     row: 'Fila',
     rows: 'Filas',
     save: 'Guardar',

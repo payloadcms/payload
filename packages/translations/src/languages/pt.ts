@@ -206,6 +206,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_one: 'Você está prestes a deletar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Você está prestes a deletar {{count}} {{label}}',
+    aboutToRestoreCount: 'Você está prestes a restaurar {{count}} {{label}}',
     addBelow: 'Adicionar abaixo',
     addFilter: 'Adicionar Filtro',
     adminTheme: 'Tema do Admin',
@@ -239,6 +240,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Isso removerá os índices existentes e reindexará os documentos nas coleções {{collections}}.',
     confirmReindexDescriptionAll:
       'Isso removerá os índices existentes e reindexará os documentos em todas as coleções.',
+    confirmRestoration: 'Confirme a restauração',
     copied: 'Copiado',
     copy: 'Copiar',
     copying: 'Copiando',
@@ -351,6 +353,10 @@ export const ptTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Isso redefinirá todas as suas preferências para as configurações padrão.',
     resettingPreferences: 'Redefinindo preferências.',
+    restore: 'Restaurar',
+    restoredCountSuccessfully: 'Restaurado {{count}} {{label}} com sucesso.',
+    restoring:
+      'Respeite o significado do texto original dentro do contexto do Payload. Aqui está uma lista de termos comuns do Payload que possuem significados muito específicos:\n    - Collection: Uma coleção é um grupo de documentos que compartilham uma estrutura e propósito comuns. As coleções são usadas para organizar e gerenciar conteúdo no Payload.\n    - Field: Um campo é uma peça específica de dados dentro de um documento em uma coleção. Os campos definem a estrutura e o tipo de dados que podem ser armazenados em um documento.\n    - Document: Um documento é um registro individual dentro de uma coleção. Ele contém dados estruturados de acordo',
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',

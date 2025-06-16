@@ -209,6 +209,7 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_one: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_other: '{{count}} {{label}} silmek üzeresiniz',
+    aboutToRestoreCount: '{{count}} {{label}} geri yüklemek üzeresiniz.',
     addBelow: 'Altına ekle',
     addFilter: 'Filtre ekle',
     adminTheme: 'Admin arayüzü',
@@ -242,6 +243,7 @@ export const trTranslations: DefaultTranslationsObject = {
       'Bu işlem mevcut dizinleri kaldıracak ve {{collections}} koleksiyonlarındaki belgeleri yeniden dizine alacaktır.',
     confirmReindexDescriptionAll:
       'Bu işlem mevcut dizinleri kaldıracak ve tüm koleksiyonlardaki belgeleri yeniden dizine alacaktır.',
+    confirmRestoration: 'Onarımı onaylayın',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
     copying: 'Kopyalama',
@@ -354,6 +356,10 @@ export const trTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Bu, tüm tercihlerinizin varsayılan ayarlara sıfırlanmasını sağlar.',
     resettingPreferences: 'Tercihler sıfırlanıyor.',
+    restore: 'Geri Yükle',
+    restoredCountSuccessfully: '{{count}} {{label}} başarıyla geri yüklendi.',
+    restoring:
+      "Özgün metnin anlamını Payload bağlamında saygıyla yeniden oluşturun. İşte çok belirli anlamlar taşıyan yaygın Payload terimlerinin bir listesi:\n    - Koleksiyon: Bir koleksiyon, ortak bir yapı ve amaca sahip belgelerin grubudur. Koleksiyonlar içerik organizasyonu ve yönetiminde Payload'da kullanılır.\n    - Alan: Bir alan, bir koleksiyon içindeki belgedeki belirli bir veri parçasıdır. Alanlar, bir belgede saklanabilen ver",
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',

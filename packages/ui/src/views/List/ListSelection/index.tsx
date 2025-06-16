@@ -7,6 +7,7 @@ import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
+import { RestoreMany } from '../../../elements/RestoreMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { SelectAllStatus, useSelection } from '../../../providers/Selection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -72,6 +73,9 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               selectAll={selectAll === SelectAllStatus.AllAvailable}
             />
           </Fragment>
+        ),
+        isTrashView && (
+          <RestoreMany collection={collectionConfig} key="bulk-restore" viewType={viewType} />
         ),
         !disableBulkDelete && (
           <DeleteMany collection={collectionConfig} key="bulk-delete" viewType={viewType} />

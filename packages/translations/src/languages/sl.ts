@@ -206,6 +206,7 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_one: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisali boste {{count}} {{label}}',
+    aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',
     addBelow: 'Dodaj spodaj',
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',
@@ -239,6 +240,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v zbirkah {{collections}}.',
     confirmReindexDescriptionAll:
       'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v vseh zbirkah.',
+    confirmRestoration: 'Potrdite obnovitev',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     copying: 'Kopiranje',
@@ -349,6 +351,10 @@ export const slTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Ponastavi nastavitve',
     resetPreferencesDescription: 'To bo ponastavilo vse vaše nastavitve na privzete vrednosti.',
     resettingPreferences: 'Ponastavitev nastavitve.',
+    restore: 'Obnovi',
+    restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
+    restoring:
+      'Spoštujte pomen izvirnega besedila znotraj konteksta Payload. Tu je seznam pogostih izrazov Payload, ki imajo zelo specifične pomene:\n    - Zbirka: Zbirka je skupina dokumentov, ki delijo skupno strukturo in namen. Zbirke se uporabljajo za organizacijo in upravljanje vsebine v Payload.\n    - Polje: Polje je določen del podatkov znotraj dokumenta v zbirki. Polja opredeljujejo strukturo in vrsto podatkov, ki jih je mogoče sh',
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',

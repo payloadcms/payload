@@ -211,6 +211,7 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_one: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_other: 'Du bist dabei, {{count}} {{label}} zu löschen',
+    aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} wiederherzustellen.',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Erscheinungsbild',
@@ -244,6 +245,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Dies entfernt bestehende Indizes und indiziert die Dokumente in den {{collections}}-Sammlungen neu.',
     confirmReindexDescriptionAll:
       'Dies entfernt bestehende Indizes und indiziert die Dokumente in allen Sammlungen neu.',
+    confirmRestoration: 'Bestätigen Sie die Wiederherstellung',
     copied: 'Kopiert',
     copy: 'Kopieren',
     copying: 'Kopieren',
@@ -355,6 +357,10 @@ export const deTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Präferenzen zurücksetzen',
     resetPreferencesDescription: 'Alle Präferenzen werden auf die Standardwerte zurückgesetzt.',
     resettingPreferences: 'Präferenzen werden zurückgesetzt.',
+    restore: 'Wiederherstellen',
+    restoredCountSuccessfully: '{{count}} {{label}} erfolgreich wiederhergestellt.',
+    restoring:
+      'Respektieren Sie die Bedeutung des Originaltextes im Kontext von Payload. Hier ist eine Liste häufiger Payload-Begriffe, die sehr spezifische Bedeutungen haben:\n    - Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und einen gemeinsamen Zweck teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n    - Feld: Ein Feld ist ein spezifisches Datenstück innerhalb eines Dokuments in einer Sammlung. Felder definieren die Struktur und den Datentyp, der in einem Dokument gespeichert werden kann.\n    - Dokument:',
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',

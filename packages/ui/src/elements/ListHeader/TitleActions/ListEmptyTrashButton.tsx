@@ -156,6 +156,7 @@ export function ListEmptyTrashButton({
           label: getTranslation(collectionConfig?.labels?.plural, i18n),
         })}
         buttonStyle="pill"
+        disabled={trashCount === 0}
         key="empty-trash-button"
         onClick={() => {
           openModal(confirmEmptyTrashSlug)

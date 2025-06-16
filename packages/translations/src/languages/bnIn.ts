@@ -207,6 +207,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
+    aboutToRestoreCount: 'আপনি প্রস্তুত {{count}} {{label}} পুনরুদ্ধার করতে',
     addBelow: 'নিচে যোগ করুন',
     addFilter: 'ফিল্টার যোগ করুন',
     adminTheme: 'অ্যাডমিন থিম',
@@ -240,6 +241,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'এটি বিদ্যমান সূচিগুলি সরিয়ে দেবে এবং {{collections}} সংগ্রহগুলির ডকুমেন্টগুলি পুনরায় সূচিবদ্ধ করবে।',
     confirmReindexDescriptionAll:
       'এটি বিদ্যমান সূচিগুলি সরিয়ে দেবে এবং সমস্ত সংগ্রহগুলির ডকুমেন্টগুলি পুনরায় সূচিবদ্ধ করবে।',
+    confirmRestoration: 'পুনর্বাসন নিশ্চিত করুন',
     copied: 'কপি করা হয়েছে',
     copy: 'কপি করুন',
     copying: 'কপি করা হচ্ছে',
@@ -351,6 +353,10 @@ export const bnInTranslations: DefaultTranslationsObject = {
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
     resettingPreferences: 'পছন্দগুলি রিসেট করা হচ্ছে।',
+    restore: 'পুনরুদ্ধার করুন',
+    restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
+    restoring:
+      'প্রস্থাপনার অর্থকে সম্মান করুন। এখানে Payload এর সাথে সম্পর্কিত কিছু সাধারণ পদগুলির তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n    - কালেক',
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',

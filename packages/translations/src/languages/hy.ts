@@ -206,6 +206,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_one: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_other: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
+    aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
     addBelow: 'Ավելացնել ներքևում',
     addFilter: 'Ավելացնել ֆիլտր',
     adminTheme: 'Կառավարման թեմա',
@@ -239,6 +240,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Սա կհեռացնի գոյություն ունեցող ինդեքսները և կվերաինդեքսավորի փաստաթղթերը {{collections}} հավաքածուներում։',
     confirmReindexDescriptionAll:
       'Սա կհեռացնի գոյություն ունեցող ինդեքսները և կվերաինդեքսավորի փաստաթղթերը բոլոր հավաքածուներում։',
+    confirmRestoration: 'Հաստատեք վերականգնումը',
     copied: 'Պատճենված',
     copy: 'Պատճենել',
     copying: 'Պատճենվում է',
@@ -351,6 +353,10 @@ export const hyTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Սա կվերակայի Ձեր բոլոր նախընտրությունները դեպի լռելյայն կարգավորումներ։',
     resettingPreferences: 'Նախընտրությունները վերակայվում են',
+    restore: 'Վերականգնել',
+    restoredCountSuccessfully: '{{count}} {{label}} հաջողությամբ վերականգնվեց:',
+    restoring:
+      'Payload-i original teksti mijocov achqers, nran avelacnum e urish Payload nshanakutyunner, oronq kangnvec en specifik texer:\n\n- Zuygh: Zuygh e ayd dokumnerneri jmum, oronq kanen arden mek ban u zoracnum en Payload-i nersum u bavararum.\n- Dasht: Dasht e ayd zuyghi bnutyun dokumneri mej. Dashter pahpanum en bnutyunneri banakanutyuny u texy, ete oronq sa patrastvi dokumentnerum.\n- Dokument: Dokument e mi',
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',

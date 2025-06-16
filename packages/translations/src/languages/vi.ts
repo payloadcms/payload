@@ -206,6 +206,7 @@ export const viTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_one: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_other: 'Bạn sắp xóa {{count}} {{label}}',
+    aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}}',
     addBelow: 'Thêm bên dưới',
     addFilter: 'Thêm bộ lọc',
     adminTheme: 'Giao diện bảng điều khiển',
@@ -238,6 +239,7 @@ export const viTranslations: DefaultTranslationsObject = {
       'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục các tài liệu trong các bộ sưu tập {{collections}}.',
     confirmReindexDescriptionAll:
       'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục các tài liệu trong tất cả các bộ sưu tập.',
+    confirmRestoration: 'Xác nhận khôi phục',
     copied: 'Đâ sao chép',
     copy: 'Sao chép',
     copying: 'Sao chép',
@@ -349,6 +351,10 @@ export const viTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Đặt lại sở thích',
     resetPreferencesDescription: 'Điều này sẽ đặt lại tất cả sở thích của bạn về cài đặt mặc định.',
     resettingPreferences: 'Đang đặt lại sở thích.',
+    restore: 'Khôi phục',
+    restoredCountSuccessfully: 'Đã khôi phục {{count}} {{label}} thành công.',
+    restoring:
+      'Tôn trọng ý nghĩa của văn bản gốc trong bối cảnh của Payload. Dưới đây là danh sách các thuật ngữ Payload thông thường mang ý nghĩa rất cụ thể:\n- Collection: Collection (tạm dịch: Bộ sưu tập) là một nhóm các tài liệu chia sẻ cấu trúc và mục đích chung. Các Collection được sử dụng để tổ chức và quản lý nội dung trong Payload.\n- Field: Field là một phần cụ th',
     row: 'Hàng',
     rows: 'Những hàng',
     save: 'Luu',

@@ -210,6 +210,7 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_one: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_other: 'Stai per eliminare {{count}} {{label}}',
+    aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
     addBelow: 'Aggiungi sotto',
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',
@@ -243,6 +244,7 @@ export const itTranslations: DefaultTranslationsObject = {
       "Questo rimuoverà gli indici esistenti e rifarà l'indice dei documenti nelle collezioni {{collections}}.",
     confirmReindexDescriptionAll:
       "Questo rimuoverà gli indici esistenti e rifarà l'indice dei documenti in tutte le collezioni.",
+    confirmRestoration: 'Conferma il ripristino',
     copied: 'Copiato',
     copy: 'Copia',
     copying: 'Copia',
@@ -353,6 +355,10 @@ export const itTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Questo ripristinerà tutte le tue preferenze alle impostazioni predefinite.',
     resettingPreferences: 'Ripristinando le preferenze.',
+    restore: 'Ripristina',
+    restoredCountSuccessfully: 'Ripristinato {{count}} {{label}} con successo.',
+    restoring:
+      "Rispetta il significato del testo originale nel contesto di Payload. Ecco una lista di termini comuni di Payload che hanno significati molto specifici:\n    - Raccolta: Una raccolta è un gruppo di documenti che condividono una struttura e una finalità comuni. Le raccolte vengono utilizzate per organizzare e gestire i contenuti in Payload.\n    - Campo: Un campo è un pezzo specifico di dati all'interno di un documento in una raccolta. I campi definiscono la struttura e il tipo di dati che possono essere memorizzati in un documento.\n    - Documento: Un documento",
     row: 'Riga',
     rows: 'Righe',
     save: 'Salva',

@@ -204,6 +204,7 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_one: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_other: 'شما در شرف حذف هستید {{count}} {{label}}',
+    aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} هستید.',
     addBelow: 'افزودن به زیر',
     addFilter: 'افزودن علامت',
     adminTheme: 'پوسته پیشخوان',
@@ -237,6 +238,7 @@ export const faTranslations: DefaultTranslationsObject = {
       'این کار ایندکس‌های موجود را حذف کرده و اسناد را در مجموعه‌های {{collections}} بازایندکس می‌کند.',
     confirmReindexDescriptionAll:
       'این کار ایندکس‌های موجود را حذف کرده و اسناد را در همه مجموعه‌ها بازایندکس می‌کند.',
+    confirmRestoration: 'تأیید بازیابی',
     copied: 'رونوشت شده',
     copy: 'رونوشت',
     copying: 'کپی کردن',
@@ -348,6 +350,10 @@ export const faTranslations: DefaultTranslationsObject = {
     resetPreferences: 'بازنشانی تنظیمات',
     resetPreferencesDescription: 'این تمام تنظیمات شما را به تنظیمات پیش‌فرض بازنشانی خواهد کرد.',
     resettingPreferences: 'در حال بازنشانی تنظیمات.',
+    restore: 'بازیابی',
+    restoredCountSuccessfully: '{{count}} {{label}} با موفقیت بازیابی شد.',
+    restoring:
+      'درک معنی متن اصلی در زمینه Payload. در اینجا لیستی از اصطلاحات متداول Payload که معانی خاص خاص خود را دارند:\n- مجموعه: مجموعه گروهی از اسناد است که ساختار و هدف مشترکی را به اشتراک می‌گذارند. مجموعه‌ها برای سازماندهی و مدیر',
     row: 'ردیف',
     rows: 'ردیف‌ها',
     save: 'ذخیره',

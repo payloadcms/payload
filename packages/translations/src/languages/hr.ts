@@ -207,6 +207,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Upravo ćete izbrisati {{count}} {{label}}',
     aboutToDeleteCount_one: 'Upravo ćete izbrisati {{count}} {{label}}',
     aboutToDeleteCount_other: 'Upravo ćete izbrisati {{count}} {{label}}',
+    aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
     addBelow: 'Dodaj ispod',
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
@@ -239,6 +240,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Ovo će ukloniti postojeće indekse i ponovno indeksirati dokumente u {{collections}} kolekcijama.',
     confirmReindexDescriptionAll:
       'Ovo će ukloniti postojeće indekse i ponovno indeksirati dokumente u svim kolekcijama.',
+    confirmRestoration: 'Potvrdite obnovu',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     copying: 'Kopiranje',
@@ -350,6 +352,10 @@ export const hrTranslations: DefaultTranslationsObject = {
     resetPreferences: 'Ponovno postavljanje postavki',
     resetPreferencesDescription: 'Ovo će vratiti sve vaše postavke na zadane vrijednosti.',
     resettingPreferences: 'Ponovno postavljanje postavki.',
+    restore: 'Obnovi',
+    restoredCountSuccessfully: 'Uspješno obnovljeno {{count}} {{label}}.',
+    restoring:
+      'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih pojmova Payloada koji imaju vrlo specifična značenja:\n    - Kolekcija: Kolekcija je skup dokumenata koji dijele zajedničku strukturu i svrhu. Kolekcije se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u kolekciji. Polja definiraju strukturu i vrstu podataka koji',
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',

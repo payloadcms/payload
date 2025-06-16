@@ -205,6 +205,7 @@ export const koTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_one: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_other: '{{label}}를 {{count}}개 삭제하려고 합니다.',
+    aboutToRestoreCount: '당신은 곧 {{count}} {{label}}를 복원하려 하고 있습니다.',
     addBelow: '아래에 추가',
     addFilter: '필터 추가',
     adminTheme: '관리자 테마',
@@ -237,6 +238,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '이 작업은 기존 인덱스를 삭제하고 {{collections}} 컬렉션 내의 문서를 다시 인덱싱합니다.',
     confirmReindexDescriptionAll:
       '이 작업은 기존 인덱스를 삭제하고 모든 컬렉션 내의 문서를 다시 인덱싱합니다.',
+    confirmRestoration: '복구를 확인하십시오',
     copied: '복사됨',
     copy: '복사',
     copying: '복사하기',
@@ -347,6 +349,10 @@ export const koTranslations: DefaultTranslationsObject = {
     resetPreferences: '기본 설정으로 재설정',
     resetPreferencesDescription: '이렇게 하면 모든 기본 설정이 기본값으로 재설정됩니다.',
     resettingPreferences: '기본 설정을 재설정하는 중.',
+    restore: '복원',
+    restoredCountSuccessfully: '성공적으로 {{count}} {{label}}를 복원했습니다.',
+    restoring:
+      '원래 텍스트의 의미를 Payload 문맥 내에서 존중하십시오. 여기에는 매우 특정한 의미를 가진 일반 Payload 용어 목록이 있습니다:\n    - Collection: 컬렉션은 공통 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 Payload에서 컨텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션 내의 문서에 있는 특정 데이터 조각입니다.',
     row: '행',
     rows: '행',
     save: '저장',

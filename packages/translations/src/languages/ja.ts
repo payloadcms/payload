@@ -207,6 +207,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_one: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_other: '{{label}}を{{count}}つ削除しようとしています',
+    aboutToRestoreCount: '{{count}} {{label}}を復元しようとしています',
     addBelow: '下に追加',
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',
@@ -239,6 +240,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       'これにより既存のインデックスが削除され、{{collections}}コレクション内のドキュメントが再インデックスされます。',
     confirmReindexDescriptionAll:
       'これにより既存のインデックスが削除され、すべてのコレクション内のドキュメントが再インデックスされます。',
+    confirmRestoration: '復元を確認してください',
     copied: 'コピーしました',
     copy: 'コピー',
     copying: 'コピーする',
@@ -350,6 +352,10 @@ export const jaTranslations: DefaultTranslationsObject = {
     resetPreferences: '設定をリセット',
     resetPreferencesDescription: 'これにより、すべての設定がデフォルト設定にリセットされます。',
     resettingPreferences: '設定をリセットしています。',
+    restore: '復元',
+    restoredCountSuccessfully: '{{count}} {{label}} の復元に成功しました。',
+    restoring:
+      '以下はPayloadの文脈での原文の意味を尊重してください。以下に、特定の意味を持つ一般的なPayload用語のリストを示します。\n    - コレクション: コレクションは、共通の構造と目的を共有する文書のグループです。コレクションは、Payload内のコンテンツを整理および管理するために使用されます。\n    - フィールド: フィールドは、コレクション内の文',
     row: '列',
     rows: '列',
     save: '保存',

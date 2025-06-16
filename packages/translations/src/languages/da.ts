@@ -204,6 +204,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_many: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_one: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er ved at slette {{count}} {{label}}',
+    aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}}',
     addBelow: 'Tilføj under',
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',
@@ -237,6 +238,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Dette vil fjerne eksisterende indekser og genindeksere dokumenter i {{collections}}-samlingerne.',
     confirmReindexDescriptionAll:
       'Dette vil fjerne eksisterende indekser og genindeksere dokumenter i alle samlinger.',
+    confirmRestoration: 'Bekræft gendannelse',
     copied: 'Kopieret',
     copy: 'Kopier',
     copying: 'Kopiering',
@@ -348,6 +350,10 @@ export const daTranslations: DefaultTranslationsObject = {
     resetPreferencesDescription:
       'Dette vil nulstille alle dine præferencer til standardindstillingerne.',
     resettingPreferences: 'Nulstiller præferencer.',
+    restore: 'Gendan',
+    restoredCountSuccessfully: 'Gendannede {{count}} {{label}} succesfuldt.',
+    restoring:
+      'Respekter betydningen af den originale tekst inden for konteksten Payload. Her er en liste over almindelige Payload-udtryk, der bærer meget specifikke betydninger:\n    - Samling: En samling er en gruppe af dokumenter, der deler en fælles struktur og formål. Samlinger anvendes til at organisere og administrere indhold i Payload.\n    - Felt: Et felt er et specifikt stykke data i et dokument i en samling. Felter definerer struktur og type af data, der kan gemmes i et dokument.\n    - Dokument: Et dokument er en individuel post inden for',
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
