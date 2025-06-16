@@ -33,7 +33,7 @@ export type JobLog = {
   parent?: TaskParent
   state: 'failed' | 'succeeded'
   taskID: string
-  taskSlug: string
+  taskSlug: TaskType
 }
 
 /**
