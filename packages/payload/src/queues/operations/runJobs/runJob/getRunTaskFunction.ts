@@ -98,14 +98,16 @@ export async function handleTaskFailed({
             : 'failed',
       }
 
+  const currentDate = new Date()
+
   job.log.push({
     id: new ObjectId().toHexString(),
-    completedAt: new Date().toISOString(),
+    completedAt: currentDate.toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),
     input,
     output,
-    parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
     state: 'failed',
     taskID,
     taskSlug,
@@ -114,7 +116,7 @@ export async function handleTaskFailed({
   if (job.waitUntil) {
     // Check if waitUntil is in the past
     const waitUntil = new Date(job.waitUntil)
-    if (waitUntil < new Date()) {
+    if (waitUntil < currentDate) {
       // Outdated waitUntil, remove it
       delete job.waitUntil
     }
@@ -266,7 +268,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
               completedAt: new Date().toISOString(),
               error: errorMessage,
               executedAt: executedAt.toISOString(),
-              parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+              parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
               state: 'failed',
               taskID,
               taskSlug,
@@ -366,7 +368,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         executedAt: executedAt.toISOString(),
         input,
         output,
-        parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+        parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
         state: 'succeeded',
         taskID,
         taskSlug,
@@ -383,7 +385,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     return runTask('inline') as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
   } else {
     const tasks: RunTaskFunctions = {}
-    for (const task of req?.payload?.config?.jobs?.tasks ?? []) {
+    for (const task of req.payload.config.jobs.tasks ?? []) {
       tasks[task.slug] = runTask(task.slug) as RunTaskFunction<string>
     }
     return tasks as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
