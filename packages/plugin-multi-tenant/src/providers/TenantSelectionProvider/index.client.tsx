@@ -11,6 +11,7 @@ type ContextType = {
    * Array of options to select from
    */
   options: OptionObject[]
+  preventRefreshOnChange: boolean
   /**
    * The currently selected tenant ID
    */
@@ -28,20 +29,26 @@ type ContextType = {
    * @param args.refresh - Whether to refresh the page after changing the tenant
    */
   setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
+  /**
+   *
+   */
+  updateTenants: (args: { id: number | string; label: string }) => void
 }
 
 const Context = createContext<ContextType>({
   options: [],
+  preventRefreshOnChange: false,
   selectedTenantID: undefined,
   setPreventRefreshOnChange: () => null,
   setTenant: () => null,
+  updateTenants: () => null,
 })
 
 export const TenantSelectionProviderClient = ({
   children,
   initialValue,
   tenantCookie,
-  tenantOptions,
+  tenantOptions: tenantOptionsFromProps,
 }: {
   children: React.ReactNode
   initialValue?: number | string
@@ -54,6 +61,9 @@ export const TenantSelectionProviderClient = ({
   const [preventRefreshOnChange, setPreventRefreshOnChange] = React.useState(false)
   const { user } = useAuth()
   const userID = React.useMemo(() => user?.id, [user?.id])
+  const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
+    () => tenantOptionsFromProps,
+  )
   const selectedTenantLabel = React.useMemo(
     () => tenantOptions.find((option) => option.value === selectedTenantID)?.label,
     [selectedTenantID, tenantOptions],
@@ -67,6 +77,7 @@ export const TenantSelectionProviderClient = ({
   }, [])
 
   const deleteCookie = React.useCallback(() => {
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     document.cookie = 'payload-tenant=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'
   }, [])
 
@@ -91,6 +102,20 @@ export const TenantSelectionProviderClient = ({
     [deleteCookie, preventRefreshOnChange, router, setCookie, setSelectedTenantID, tenantOptions],
   )
 
+  const updateTenants = React.useCallback<ContextType['updateTenants']>(({ id, label }) => {
+    setTenantOptions((prev) => {
+      return prev.map((currentTenant) => {
+        if (id === currentTenant.value) {
+          return {
+            label,
+            value: id,
+          }
+        }
+        return currentTenant
+      })
+    })
+  }, [])
+
   React.useEffect(() => {
     if (selectedTenantID && !tenantOptions.find((option) => option.value === selectedTenantID)) {
       if (tenantOptions?.[0]?.value) {
@@ -105,13 +130,14 @@ export const TenantSelectionProviderClient = ({
     if (userID && !tenantCookie) {
       // User is logged in, but does not have a tenant cookie, set it
       setSelectedTenantID(initialValue)
+      setTenantOptions(tenantOptionsFromProps)
       if (initialValue) {
         setCookie(String(initialValue))
       } else {
         deleteCookie()
       }
     }
-  }, [userID, tenantCookie, initialValue, setCookie, deleteCookie, router])
+  }, [userID, tenantCookie, initialValue, setCookie, deleteCookie, router, tenantOptionsFromProps])
 
   React.useEffect(() => {
     if (!userID && tenantCookie) {
@@ -132,9 +158,11 @@ export const TenantSelectionProviderClient = ({
       <Context
         value={{
           options: tenantOptions,
+          preventRefreshOnChange,
           selectedTenantID,
           setPreventRefreshOnChange,
           setTenant,
+          updateTenants,
         }}
       >
         {children}

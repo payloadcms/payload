@@ -237,10 +237,10 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   return jobsCollection
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: BaseJob }): BaseJob {
   doc.taskStatus = getJobTaskStatus({
     jobLog: doc.log || [],
-    tasksConfig: config.jobs.tasks,
   })
   return doc
 }

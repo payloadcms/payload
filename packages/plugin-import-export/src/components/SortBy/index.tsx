@@ -72,11 +72,12 @@ export const SortBy: SelectFieldClientComponent = (props) => {
 
   return (
     <div className={baseClass} style={{ '--field-width': '33%' } as React.CSSProperties}>
-      <FieldLabel label="Sort By" />
+      <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={baseClass}
         disabled={props.readOnly}
         getOptionValue={(option) => String(option.value)}
+        inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={true}
         isSortable={true}
         // @ts-expect-error react select option

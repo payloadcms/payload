@@ -134,16 +134,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     // If there are blocks, add parent to each, and then
     // store by table name and rows
-    Object.keys(rowToInsert.blocks).forEach((blockName) => {
-      rowToInsert.blocks[blockName].forEach((blockRow) => {
+    Object.keys(rowToInsert.blocks).forEach((tableName) => {
+      rowToInsert.blocks[tableName].forEach((blockRow) => {
         blockRow.row._parentID = insertedRow.id
-        if (!blocksToInsert[blockName]) {
-          blocksToInsert[blockName] = []
+        if (!blocksToInsert[tableName]) {
+          blocksToInsert[tableName] = []
         }
         if (blockRow.row.uuid) {
           delete blockRow.row.uuid
         }
-        blocksToInsert[blockName].push(blockRow)
+        blocksToInsert[tableName].push(blockRow)
       })
     })
 
@@ -211,7 +211,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: textsToInsert,
+        rows: [...textsToInsert, ...rowToInsert.textsToDelete],
         tableName: textsTableName,
       })
     }
@@ -238,7 +238,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
-        rows: numbersToInsert,
+        rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
         tableName: numbersTableName,
       })
     }
@@ -258,12 +258,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
     if (operation === 'update') {
-      for (const blockName of rowToInsert.blocksToDelete) {
-        const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
-        const blockTable = adapter.tables[blockTableName]
+      for (const tableName of rowToInsert.blocksToDelete) {
+        const blockTable = adapter.tables[tableName]
         await adapter.deleteWhere({
           db,
-          tableName: blockTableName,
+          tableName,
           where: eq(blockTable._parentID, insertedRow.id),
         })
       }
@@ -272,15 +271,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // When versions are enabled, this is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
     const arraysBlocksUUIDMap: Record<string, number | string> = {}
 
-    for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
-      const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
-      insertedBlockRows[blockName] = await adapter.insert({
+    for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
+      insertedBlockRows[tableName] = await adapter.insert({
         db,
-        tableName: blockTableName,
+        tableName,
         values: blockRows.map(({ row }) => row),
       })
 
-      insertedBlockRows[blockName].forEach((row, i) => {
+      insertedBlockRows[tableName].forEach((row, i) => {
         blockRows[i].row = row
         if (
           typeof row._uuid === 'string' &&
@@ -310,7 +308,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       if (blockLocaleRowsToInsert.length > 0) {
         await adapter.insert({
           db,
-          tableName: `${blockTableName}${adapter.localesSuffix}`,
+          tableName: `${tableName}${adapter.localesSuffix}`,
           values: blockLocaleRowsToInsert,
         })
       }
@@ -319,7 +317,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
         db,
-        parentRows: insertedBlockRows[blockName],
+        parentRows: insertedBlockRows[tableName],
         uuidMap: arraysBlocksUUIDMap,
       })
     }
@@ -382,11 +380,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // Error Handling
     // //////////////////////////////////
   } catch (error) {
-    if (error.code === '23505') {
+    // Unique constraint violation error
+    // '23505' is the code for PostgreSQL, and 'SQLITE_CONSTRAINT_UNIQUE' is for SQLite
+    if (error.code === '23505' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       let fieldName: null | string = null
       // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
-      if (adapter.fieldConstraints?.[tableName]) {
-        if (adapter.fieldConstraints[tableName]?.[error.constraint]) {
+      if (error.code === '23505') {
+        // For PostgreSQL, we can try to extract the field name from the error constraint
+        if (adapter.fieldConstraints?.[tableName]?.[error.constraint]) {
           fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
         } else {
           const replacement = `${tableName}_`
@@ -399,18 +400,36 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             }
           }
         }
-      }
 
-      if (!fieldName) {
-        // Last case scenario we extract the key and value from the detail on the error
-        const detail = error.detail
-        const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
-        const match = detail.match(regex)
+        if (!fieldName) {
+          // Last case scenario we extract the key and value from the detail on the error
+          const detail = error.detail
+          const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
+          const match: string[] = detail.match(regex)
 
-        if (match) {
-          const key = match[1]
+          if (match && match[1]) {
+            const key = match[1]
 
-          fieldName = key
+            fieldName = key
+          }
+        }
+      } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        /**
+         * For SQLite, we can try to extract the field name from the error message
+         * The message typically looks like:
+         * "UNIQUE constraint failed: table_name.field_name"
+         */
+        const regex = /UNIQUE constraint failed: ([^.]+)\.([^.]+)/
+        const match: string[] = error.message.match(regex)
+
+        if (match && match[2]) {
+          if (adapter.fieldConstraints[tableName]) {
+            fieldName = adapter.fieldConstraints[tableName][`${match[2]}_idx`]
+          }
+
+          if (!fieldName) {
+            fieldName = match[2]
+          }
         }
       }
 

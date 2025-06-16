@@ -15,10 +15,12 @@ export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'
 export const mediaCollectionSlug = 'media'
+export const media2CollectionSlug = 'media2'
 
 export const versionCollectionSlug = 'version-posts'
 
 export const disablePublishSlug = 'disable-publish'
+export const errorOnUnpublishSlug = 'error-on-unpublish'
 
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
@@ -30,6 +32,7 @@ export const collectionSlugs = [
   postCollectionSlug,
   diffCollectionSlug,
   mediaCollectionSlug,
+  media2CollectionSlug,
   versionCollectionSlug,
   textCollectionSlug,
 ]

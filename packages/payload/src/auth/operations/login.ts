@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
   DataFromCollectionSlug,
+  SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
@@ -18,10 +18,10 @@ import {
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
-import isLocked from '../isLocked.js'
+import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
@@ -40,6 +40,32 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
+}
+
+type CheckLoginPermissionArgs = {
+  collection: SanitizedCollectionConfig
+  loggingInWithUsername?: boolean
+  req: PayloadRequest
+  user: any
+}
+
+export const checkLoginPermission = ({
+  collection,
+  loggingInWithUsername,
+  req,
+  user,
+}: CheckLoginPermissionArgs) => {
+  if (!user) {
+    throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
+  }
+
+  if (collection.auth.verify && user._verified === false) {
+    throw new UnverifiedEmail({ t: req.t })
+  }
+
+  if (isUserLocked(new Date(user.lockUntil).getTime())) {
+    throw new LockedAuth(req.t)
+  }
 }
 
 export const loginOperation = async <TSlug extends CollectionSlug>(
@@ -184,20 +210,15 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       where: whereConstraint,
     })
 
-    if (!user) {
-      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
-    }
-
-    if (args.collection.config.auth.verify && user._verified === false) {
-      throw new UnverifiedEmail({ t: req.t })
-    }
+    checkLoginPermission({
+      collection: collectionConfig,
+      loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
+      req,
+      user,
+    })
 
     user.collection = collectionConfig.slug
     user._strategy = 'local-jwt'
-
-    if (isLocked(new Date(user.lockUntil).getTime())) {
-      throw new LockedAuth(req.t)
-    }
 
     const authResult = await authenticateLocalStrategy({ doc: user, password })
 
@@ -229,7 +250,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email: sanitizedEmail,
+      email: sanitizedEmail!,
       user,
     })
 
@@ -281,15 +302,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     user = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: user,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       draft: undefined,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       req,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

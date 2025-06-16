@@ -1,8 +1,14 @@
+import { status as httpStatus } from 'http-status'
+
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 import { traverseFields } from '../../utilities/traverseFields.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 
@@ -37,7 +43,12 @@ export const setupOrderable = (config: SanitizedConfig) => {
         }
         if (field.type === 'join' && field.orderable === true) {
           if (Array.isArray(field.collection)) {
-            throw new Error('Orderable joins must target a single collection')
+            throw new APIError(
+              'Orderable joins must target a single collection',
+              httpStatus.BAD_REQUEST,
+              {},
+              true,
+            )
           }
           const relationshipCollection = config.collections.find((c) => c.slug === field.collection)
           if (!relationshipCollection) {
@@ -83,16 +94,14 @@ export const addOrderableFieldsAndHook = (
         hidden: true,
         readOnly: true,
       },
+      hooks: {
+        beforeDuplicate: [
+          ({ siblingData }) => {
+            delete siblingData[orderableFieldName]
+          },
+        ],
+      },
       index: true,
-      required: true,
-      // override the schema to make order fields optional for payload.create()
-      typescriptSchema: [
-        () => ({
-          type: 'string',
-          required: false,
-        }),
-      ],
-      unique: true,
     }
 
     collection.fields.unshift(orderField)
@@ -163,16 +172,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         status: 400,
       })
     }
-    if (
-      typeof target !== 'object' ||
-      typeof target.id === 'undefined' ||
-      typeof target.key !== 'string'
-    ) {
-      return new Response(JSON.stringify({ error: 'target must be an object with id and key' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
     if (newKeyWillBe !== 'greater' && newKeyWillBe !== 'less') {
       return new Response(JSON.stringify({ error: 'newKeyWillBe must be "greater" or "less"' }), {
         headers: { 'Content-Type': 'application/json' },
@@ -205,6 +204,67 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         },
         collection.access.update,
       )
+    }
+    /**
+     * If there is no target.key, we can assume the user enabled `orderable`
+     * on a collection with existing documents, and that this is the first
+     * time they tried to reorder them. Therefore, we perform a one-time
+     * migration by setting the key value for all documents. We do this
+     * instead of enforcing `required` and `unique` at the database schema
+     * level, so that users don't have to run a migration when they enable
+     * `orderable` on a collection with existing documents.
+     */
+    if (!target.key) {
+      const { docs } = await req.payload.find({
+        collection: collection.slug,
+        depth: 0,
+        limit: 0,
+        req,
+        select: { [orderableFieldName]: true },
+        where: {
+          [orderableFieldName]: {
+            exists: false,
+          },
+        },
+      })
+      await initTransaction(req)
+      // We cannot update all documents in a single operation with `payload.update`,
+      // because they would all end up with the same order key (`a0`).
+      try {
+        for (const doc of docs) {
+          await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: {
+              // no data needed since the order hooks will handle this
+            },
+            depth: 0,
+            req,
+          })
+          await commitTransaction(req)
+        }
+      } catch (e) {
+        await killTransaction(req)
+        if (e instanceof Error) {
+          throw new APIError(e.message, httpStatus.INTERNAL_SERVER_ERROR)
+        }
+      }
+
+      return new Response(JSON.stringify({ message: 'initial migration', success: true }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    if (
+      typeof target !== 'object' ||
+      typeof target.id === 'undefined' ||
+      typeof target.key !== 'string'
+    ) {
+      return new Response(JSON.stringify({ error: 'target must be an object with id' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
     }
 
     const targetId = target.id
@@ -275,5 +335,6 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
   if (!config.endpoints) {
     config.endpoints = []
   }
+
   config.endpoints.push(reorderEndpoint)
 }

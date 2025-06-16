@@ -133,6 +133,14 @@ export const OrderableTable: React.FC<Props> = ({
           'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
         )
       }
+
+      if (response.status === 200 && (await response.json())['message'] === 'initial migration') {
+        throw new Error(
+          'You have enabled "orderable" on a collection with existing documents' +
+            'and this is the first time you have sorted documents. We have run an automatic migration ' +
+            'to add an initial order to the documents. Please refresh the page and try again.',
+        )
+      }
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err)
       // Rollback to previous state if the request fails

@@ -12,8 +12,10 @@ import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
+import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
+import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
@@ -23,6 +25,7 @@ import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
+import { MaxVersions } from './globals/MaxVersions.js'
 import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
@@ -42,12 +45,14 @@ export default buildConfigWithDefaults({
     DraftPosts,
     DraftWithMax,
     DraftsWithValidate,
+    ErrorOnUnpublish,
     LocalizedPosts,
     VersionPosts,
     CustomIDs,
     Diff,
     TextCollection,
     Media,
+    Media2,
   ],
   globals: [
     AutosaveGlobal,
@@ -56,6 +61,7 @@ export default buildConfigWithDefaults({
     DraftWithMaxGlobal,
     DisablePublishGlobal,
     LocalizedGlobal,
+    MaxVersions,
   ],
   indexSortableFields: true,
   localization: {

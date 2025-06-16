@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { Field, Option, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -67,6 +67,10 @@ export type FieldState = {
   lastRenderedPath?: string
   passesCondition?: boolean
   rows?: Row[]
+  /**
+   * The result of running `field.filterOptions` on select fields.
+   */
+  selectFilterOptions?: Option[]
   valid?: boolean
   validate?: Validate
   value?: unknown

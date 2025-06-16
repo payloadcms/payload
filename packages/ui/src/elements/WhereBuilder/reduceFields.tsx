@@ -3,13 +3,13 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
 import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
-import fieldTypes from './field-types.js'
+import fieldTypes, { arrayOperators } from './field-types.js'
 
 type ReduceFieldOptionsArgs = {
   fields: ClientField[]
@@ -108,6 +108,45 @@ export const reduceFields = ({
           : labelPrefix
         : translatedLabel
 
+      if (fieldAffectsData(field)) {
+        // Make sure we handle deeply nested groups
+        const pathWithPrefix = field.name
+          ? pathPrefix
+            ? pathPrefix + '.' + field.name
+            : field.name
+          : pathPrefix
+
+        reduced.push(
+          ...reduceFields({
+            fields: field.fields,
+            i18n,
+            labelPrefix: labelWithPrefix,
+            pathPrefix: pathWithPrefix,
+          }),
+        )
+      } else {
+        reduced.push(
+          ...reduceFields({
+            fields: field.fields,
+            i18n,
+            labelPrefix: labelWithPrefix,
+            pathPrefix,
+          }),
+        )
+      }
+
+      return reduced
+    }
+
+    if (field.type === 'array' && 'fields' in field) {
+      const translatedLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
+
       // Make sure we handle deeply nested groups
       const pathWithPrefix = field.name
         ? pathPrefix
@@ -130,7 +169,10 @@ export const reduceFields = ({
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
 
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+      const fieldOperators =
+        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+
+      const operators = fieldOperators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
           const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
@@ -156,6 +198,7 @@ export const reduceFields = ({
 
       const formattedField: ReducedField = {
         label: formattedLabel,
+        plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
         value: fieldPath,
         ...fieldTypes[field.type],
         field,

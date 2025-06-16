@@ -3,6 +3,8 @@ import type { SupportedLanguages } from '../types.js'
 import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
+import { bnBd } from '../languages/bnBd.js'
+import { bnIn } from '../languages/bnIn.js'
 import { ca } from '../languages/ca.js'
 import { cs } from '../languages/cs.js'
 import { da } from '../languages/da.js'
@@ -20,6 +22,7 @@ import { it } from '../languages/it.js'
 import { ja } from '../languages/ja.js'
 import { ko } from '../languages/ko.js'
 import { lt } from '../languages/lt.js'
+import { lv } from '../languages/lv.js'
 import { my } from '../languages/my.js'
 import { nb } from '../languages/nb.js'
 import { nl } from '../languages/nl.js'
@@ -43,6 +46,8 @@ export const translations = {
   ar,
   az,
   bg,
+  'bn-BD': bnBd,
+  'bn-IN': bnIn,
   ca,
   cs,
   da,
@@ -60,6 +65,7 @@ export const translations = {
   ja,
   ko,
   lt,
+  lv,
   my,
   nb,
   nl,

@@ -52,6 +52,9 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
         <TextField
           field={{
             name: 'username',
+            admin: {
+              autoComplete: 'off',
+            },
             label: t('authentication:username'),
             required: loginWithUsername && loginWithUsername.requireUsername,
           }}

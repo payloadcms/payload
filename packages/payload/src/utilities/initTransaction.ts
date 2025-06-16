@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
@@ -28,7 +27,7 @@ export async function initTransaction(
         req.transactionID = transactionID
       }
 
-      return transactionID
+      return transactionID!
     })
     return !!(await req.transactionID)
   }
