@@ -15,7 +15,6 @@ export const DocumentTab: React.FC<
   const {
     apiURL,
     collectionConfig,
-    condition,
     globalConfig,
     href: tabHref,
     i18n,
@@ -49,48 +48,40 @@ export const DocumentTab: React.FC<
     })
   }
 
-  const meetsCondition =
-    !condition ||
-    (condition && Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
+  const labelToRender =
+    typeof label === 'function'
+      ? label({
+          t: i18n.t,
+        })
+      : label
 
-  if (meetsCondition) {
-    const labelToRender =
-      typeof label === 'function'
-        ? label({
-            t: i18n.t,
-          })
-        : label
-
-    return (
-      <DocumentTabLink
-        adminRoute={routes.admin}
-        ariaLabel={labelToRender}
-        baseClass={baseClass}
-        href={href}
-        isActive={isActive}
-        newTab={newTab}
-      >
-        <span className={`${baseClass}__label`}>
-          {labelToRender}
-          {Pill || Pill_Component ? (
-            <Fragment>
-              &nbsp;
-              {RenderServerComponent({
-                Component: Pill,
-                Fallback: Pill_Component,
-                importMap: payload.importMap,
-                serverProps: {
-                  i18n,
-                  payload,
-                  permissions,
-                } satisfies ServerProps,
-              })}
-            </Fragment>
-          ) : null}
-        </span>
-      </DocumentTabLink>
-    )
-  }
-
-  return null
+  return (
+    <DocumentTabLink
+      adminRoute={routes.admin}
+      ariaLabel={labelToRender}
+      baseClass={baseClass}
+      href={href}
+      isActive={isActive}
+      newTab={newTab}
+    >
+      <span className={`${baseClass}__label`}>
+        {labelToRender}
+        {Pill || Pill_Component ? (
+          <Fragment>
+            &nbsp;
+            {RenderServerComponent({
+              Component: Pill,
+              Fallback: Pill_Component,
+              importMap: payload.importMap,
+              serverProps: {
+                i18n,
+                payload,
+                permissions,
+              } satisfies ServerProps,
+            })}
+          </Fragment>
+        ) : null}
+      </span>
+    </DocumentTabLink>
+  )
 }

@@ -19,18 +19,18 @@ const baseClass = 'iterable-diff'
 
 export const Iterable: React.FC<FieldDiffClientProps> = ({
   baseVersionField,
-  comparisonValue,
+  comparisonValue: valueFrom,
   field,
   locale,
   parentIsLocalized,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
   const { config } = useConfig()
 
-  const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
-  const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
+  const versionRowCount = Array.isArray(valueTo) ? valueTo.length : 0
+  const comparisonRowCount = Array.isArray(valueFrom) ? valueFrom.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
 
   if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
@@ -40,10 +40,9 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparisonValue}
         field={field}
         isIterable
-        label={
+        Label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && (
@@ -55,13 +54,14 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
         }
         locales={selectedLocales}
         parentIsLocalized={parentIsLocalized}
-        version={versionValue}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
       >
         {maxRows > 0 && (
           <div className={`${baseClass}__rows`}>
             {Array.from(Array(maxRows).keys()).map((row, i) => {
-              const versionRow = versionValue?.[i] || {}
-              const comparisonRow = comparisonValue?.[i] || {}
+              const versionRow = valueTo?.[i] || {}
+              const comparisonRow = valueFrom?.[i] || {}
 
               const { fields, versionFields } = getFieldsForRowComparison({
                 baseVersionField,
@@ -78,12 +78,18 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
               return (
                 <div className={`${baseClass}__row`} key={i}>
                   <DiffCollapser
-                    comparison={comparisonRow}
                     fields={fields}
-                    label={rowLabel}
+                    hideGutter={true}
+                    Label={
+                      <div className={`${baseClass}-label-container`}>
+                        <div className={`${baseClass}-label-prefix`}></div>
+                        <span className={`${baseClass}__label`}>{rowLabel}</span>
+                      </div>
+                    }
                     locales={selectedLocales}
                     parentIsLocalized={parentIsLocalized || field.localized}
-                    version={versionRow}
+                    valueFrom={comparisonRow}
+                    valueTo={versionRow}
                   >
                     <RenderVersionFieldsToDiff versionFields={versionFields} />
                   </DiffCollapser>

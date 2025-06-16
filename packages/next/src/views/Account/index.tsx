@@ -148,6 +148,7 @@ export async function Account({ initPageResult, params, searchParams }: AdminVie
             importMap: payload.importMap,
             serverProps: {
               doc: data,
+              hasPublishedDoc,
               i18n,
               initPageResult,
               locale,

@@ -71,6 +71,7 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 import { Cron } from 'croner'
 
 import type { ClientConfig } from './config/client.js'
+import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -246,6 +247,27 @@ export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 // @ts-expect-error
 type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
 export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
+
+type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
+  ? 'payload-jobs' extends keyof TypedCollection
+    ? true
+    : false
+  : false
+
+/**
+ * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
+ * If a generated type for the `payload-jobs` collection is not available, falls back to the BaseJob type.
+ *
+ * `input` and `taksStatus` are always present here, as the job afterRead hook will always populate them.
+ */
+export type Job<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = HasPayloadJobsType extends true
+  ? {
+      input: BaseJob<TWorkflowSlugOrInput>['input']
+      taskStatus: BaseJob<TWorkflowSlugOrInput>['taskStatus']
+    } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
+  : BaseJob<TWorkflowSlugOrInput>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -772,7 +794,7 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.autoRun && !isNextBuild()) {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 

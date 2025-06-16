@@ -221,7 +221,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.type === 'blocks') {
+    if (field.type === 'blocks' && !adapter.blocksAsJSON) {
       const blockFieldPath = `${sanitizedPath}${field.name}`
       const blocksByPath = blocks[blockFieldPath]
 

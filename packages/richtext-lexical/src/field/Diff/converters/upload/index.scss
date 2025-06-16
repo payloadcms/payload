@@ -1,8 +1,7 @@
 @import '~@payloadcms/ui/scss';
-@import '../../colors.scss';
 
 @layer payload-default {
-  .lexical-diff__diff-container {
+  .lexical-diff {
     .lexical-upload-diff {
       @extend %body;
       @include shadow-sm;
