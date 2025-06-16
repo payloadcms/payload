@@ -1,4 +1,4 @@
-import type { JoinQuery, SanitizedJoins, Sort, Where } from 'payload'
+import type { JoinQuery, SanitizedJoins, Where } from 'payload'
 
 import {
   appendVersionToQueryKey,
@@ -566,21 +566,6 @@ function buildJoinProjection(
   }
 
   return projection
-}
-
-/**
- * Utility function to safely traverse nested object properties using dot notation
- * @param doc - The document to traverse
- * @param path - Dot-separated path (e.g., "user.profile.name")
- * @returns The value at the specified path, or undefined if not found
- */
-function getByPath(doc: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((val, segment) => {
-    if (val === undefined || val === null) {
-      return undefined
-    }
-    return (val as Record<string, unknown>)[segment]
-  }, doc)
 }
 
 /**
