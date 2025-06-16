@@ -315,6 +315,7 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
 }) => void
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
+  blocksAsJSON?: boolean
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -323,8 +324,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-  execute: Execute<unknown>
 
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }

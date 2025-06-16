@@ -9,8 +9,8 @@ import type {
 import { Gutter, RenderTitle } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
 import { DocumentTabs } from './Tabs/index.js'
+import './index.scss'
 
 const baseClass = `doc-header`
 
