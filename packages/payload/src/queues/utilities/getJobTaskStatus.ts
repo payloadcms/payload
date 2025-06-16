@@ -1,11 +1,16 @@
-import type { BaseJob, JobTaskStatus } from '../config/types/workflowTypes.js'
+import type { Job } from '../../index.js'
+import type { JobTaskStatus } from '../config/types/workflowTypes.js'
 
 type Args = {
-  jobLog: BaseJob['log']
+  jobLog: Job['log']
 }
 
 export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {
   const taskStatus: JobTaskStatus = {}
+
+  if (!jobLog || !Array.isArray(jobLog)) {
+    return taskStatus
+  }
 
   // First, add (in order) the steps from the config to
   // our status map
