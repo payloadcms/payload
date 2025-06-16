@@ -145,13 +145,15 @@ export interface Args {
   url: false | string
 
   /**
-   * Set to `true` to use an alternative `dropDatabase` method that deletes all documents from all collections instead of sending a raw `dropDatabase` command.
+   * Set to `true` to use an alternative `dropDatabase` method that calls `collection.deleteMany({})`
+   * on every collection instead of sending a raw `dropDatabase` command.
    * Useful for databases (e.g. Firestore) that don't support the `dropDatabase` command.
    * @default false
    */
   useAlternativeDropDatabase?: boolean
   /**
-   * Set to `true` to use `BigInt` for custom ID fields of type `'number'`. Useful for databases (e.g. Firestore) that don't support double or int32 IDs.
+   * Set to `true` to use `BigInt` for custom ID fields of type `'number'`.
+   * Useful for databases (e.g. Firestore) that don't support double or int32 IDs.
    * @default false
    */
   useBigIntForNumberIDs?: boolean
@@ -162,7 +164,8 @@ export interface Args {
    */
   useJoinAggregations?: boolean
   /**
-   * Set to `false` to disable the use of pipeline in the $lookup aggregation in sorting. Useful for databases (e.g. Firestore) that don't support pipeline in $lookup.
+   * Set to `false` to disable the use of pipeline in the $lookup aggregation in sorting.
+   * Useful for databases (e.g. Firestore) that don't support pipeline in $lookup.
    * @default true
    */
   usePipelineInSortLookup?: boolean
