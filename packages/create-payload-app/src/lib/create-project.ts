@@ -258,20 +258,17 @@ async function getLatestPackageVersion({
   packageName?: string
 }): Promise<string> {
   try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}`)
+    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
     const data = await response.json()
 
     // Monster chaining for type safety just checking for data['dist-tags'].latest
     const latestVersion =
       data &&
       typeof data === 'object' &&
-      'dist-tags' in data &&
-      data?.['dist-tags'] &&
-      typeof data?.['dist-tags'] === 'object' &&
-      'latest' in data['dist-tags'] &&
-      data['dist-tags'].latest &&
-      typeof data['dist-tags'].latest === 'string'
-        ? data['dist-tags'].latest
+      'latest' in data &&
+      data.latest &&
+      typeof data.latest === 'string'
+        ? data.latest
         : null
 
     if (!latestVersion) {
