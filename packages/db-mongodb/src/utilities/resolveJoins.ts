@@ -231,7 +231,9 @@ export async function resolveJoins({
       transform({
         adapter,
         data: results,
-        fields: targetConfig.fields,
+        fields: useDrafts
+          ? buildVersionCollectionFields(adapter.payload.config, targetConfig, false)
+          : targetConfig.fields,
         operation: 'read',
       })
 
