@@ -195,7 +195,7 @@ describe('createProject', () => {
           name: 'test-project',
           version: '1.0.0',
           dependencies: {
-            '@payloadcms/core': `^${latestVersion}`,
+            '@payloadcms/core': `${latestVersion}`,
           },
         }
 
