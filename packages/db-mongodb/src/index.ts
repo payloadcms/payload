@@ -110,8 +110,6 @@ export interface Args {
   collation?: Omit<CollationOptions, 'locale'>
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
-  /** Solves some common issues related to the specified database. Full compatability is not guaranteed. */
-  compatabilityMode?: 'firestore'
   /** Extra configuration options */
   connectOptions?: {
     /**
@@ -139,11 +137,27 @@ export interface Args {
   url: false | string
 
   /**
-   * Set to `false` to disable join aggregations and instead populate join fields via multiple queries.
-   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
+   * Set to `true` to use an alternative `dropDatabase` method that deletes all documents from all collections instead of sending a raw `dropDatabase` command.
+   * Useful for databases (e.g. Firestore) that don't support the `dropDatabase` command.
    * @default false
    */
+  useAlternativeDropDatabase?: boolean
+  /**
+   * Set to `true` to use `BigInt` for custom ID fields of type `'number'`. Useful for databases (e.g. Firestore) that don't support double or int32 IDs.
+   * @default false
+   */
+  useBigIntForNumberIDs?: boolean
+  /**
+   * Set to `false` to disable join aggregations and instead populate join fields via multiple queries.
+   * May help with compatability issues with non-standard MongoDB databases (e.g. DocumentDB, Azure Cosmos DB, Firestore, etc)
+   * @default true
+   */
   useJoinAggregations?: boolean
+  /**
+   * Set to `false` to disable the use of pipeline in the $lookup aggregation in sorting. Useful for databases (e.g. Firestore) that don't support pipeline in $lookup.
+   * @default true
+   */
+  usePipelineInSortLookup?: boolean
 }
 
 export type MongooseAdapter = {
@@ -160,6 +174,10 @@ export type MongooseAdapter = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   sessions: Record<number | string, ClientSession>
+  useAlternativeDropDatabase: boolean
+  useBigIntForNumberIDs: boolean
+  useJoinAggregations: boolean
+  usePipelineInSortLookup: boolean
   versions: {
     [slug: string]: CollectionModel
   }
@@ -195,6 +213,10 @@ declare module 'payload' {
     updateVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
+    useAlternativeDropDatabase: boolean
+    useBigIntForNumberIDs: boolean
+    useJoinAggregations: boolean
+    usePipelineInSortLookup: boolean
     versions: {
       [slug: string]: CollectionModel
     }
@@ -206,7 +228,6 @@ export function mongooseAdapter({
   allowIDOnCreate = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
-  compatabilityMode,
   connectOptions,
   disableIndexHints = false,
   ensureIndexes = false,
@@ -215,7 +236,10 @@ export function mongooseAdapter({
   prodMigrations,
   transactionOptions = {},
   url,
+  useAlternativeDropDatabase = false,
+  useBigIntForNumberIDs = false,
   useJoinAggregations = true,
+  usePipelineInSortLookup = true,
 }: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
@@ -227,7 +251,6 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      compatabilityMode,
       // @ts-expect-error initialize without a connection
       connection: undefined,
       connectOptions: connectOptions || {},
@@ -281,7 +304,10 @@ export function mongooseAdapter({
       updateOne,
       updateVersion,
       upsert,
+      useAlternativeDropDatabase,
+      useBigIntForNumberIDs,
       useJoinAggregations,
+      usePipelineInSortLookup,
     })
   }
 
@@ -292,6 +318,8 @@ export function mongooseAdapter({
     init: adapter,
   }
 }
+
+export { compatabilityOptions } from './utilities/compatabilityOptions.js'
 
 /**
  * Attempt to find migrations directory.
