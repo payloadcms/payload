@@ -187,7 +187,9 @@ describe('createProject', () => {
           name: 'test-project',
           version: '1.0.0',
           dependencies: {
-            '@payloadcms/core': 'workspace:*',
+            '@payloadcms/db-mongodb': 'workspace:*',
+            payload: 'workspace:*',
+            '@payloadcms/ui': 'workspace:*',
           },
         }
 
@@ -195,7 +197,9 @@ describe('createProject', () => {
           name: 'test-project',
           version: '1.0.0',
           dependencies: {
-            '@payloadcms/core': `${latestVersion}`,
+            '@payloadcms/db-mongodb': `${latestVersion}`,
+            payload: `${latestVersion}`,
+            '@payloadcms/ui': `${latestVersion}`,
           },
         }
 
