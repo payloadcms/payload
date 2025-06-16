@@ -1,11 +1,7 @@
 import type { APIError } from '../../../../errors/APIError.js'
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
-import type {
-  WorkflowConfig,
-  WorkflowHandler,
-  WorkflowTypes,
-} from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig, WorkflowHandler } from '../../../config/types/workflowTypes.js'
 import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
@@ -16,8 +12,8 @@ type Args = {
   job: Job
   req: PayloadRequest
   updateJob: UpdateJobFunction
-  workflowConfig: WorkflowConfig<WorkflowTypes>
-  workflowHandler: WorkflowHandler<WorkflowTypes>
+  workflowConfig: WorkflowConfig
+  workflowHandler: WorkflowHandler
 }
 
 export type JobRunStatus = 'error' | 'error-reached-max-retries' | 'success'
@@ -43,7 +39,7 @@ export const runJob = async ({
   try {
     await workflowHandler({
       inlineTask: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob),
-      job: job as unknown as Job<WorkflowTypes>, //TODO: Type this better
+      job,
       req,
       tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
     })

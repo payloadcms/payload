@@ -3,7 +3,7 @@ import type { RetryConfig, TaskHandlerArgsNoInput } from './taskTypes.js'
 
 export type WorkflowStep<
   TTaskSlug extends keyof TypedJobs['tasks'],
-  TWorkflowSlug extends keyof TypedJobs['workflows'],
+  TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false,
 > = {
   /**
    * If this step is completed, the workflow will be marked as completed
@@ -23,7 +23,9 @@ export type WorkflowStep<
 } & (
   | {
       inlineTask?: (
-        args: TaskHandlerArgsNoInput<TypedJobs['workflows'][TWorkflowSlug]['input']>,
+        args: TWorkflowSlug extends keyof TypedJobs['workflows']
+          ? TaskHandlerArgsNoInput<TypedJobs['workflows'][TWorkflowSlug]['input']>
+          : TaskHandlerArgsNoInput,
       ) => Promise<TaskHandlerResult<TTaskSlug>> | TaskHandlerResult<TTaskSlug>
     }
   | {
@@ -32,10 +34,9 @@ export type WorkflowStep<
     }
 )
 
-type AllWorkflowSteps<TWorkflowSlug extends keyof TypedJobs['workflows']> = {
+type AllWorkflowSteps<TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false> = {
   [TTaskSlug in keyof TypedJobs['tasks']]: WorkflowStep<TTaskSlug, TWorkflowSlug>
 }[keyof TypedJobs['tasks']]
 
-export type WorkflowJSON<TWorkflowSlug extends keyof TypedJobs['workflows']> = Array<
-  AllWorkflowSteps<TWorkflowSlug>
->
+export type WorkflowJSON<TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false> =
+  Array<AllWorkflowSteps<TWorkflowSlug>>

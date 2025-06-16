@@ -87,13 +87,14 @@ export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input: TypedJobs['tasks'][TTaskSlug]['input']
 } & TypedCollection['payload-jobs']
 
-export type WorkflowHandler<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> =
-  (args: {
-    inlineTask: RunInlineTaskFunction
-    job: Job<TWorkflowSlugOrInput>
-    req: PayloadRequest
-    tasks: RunTaskFunctions
-  }) => Promise<void>
+export type WorkflowHandler<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = (args: {
+  inlineTask: RunInlineTaskFunction
+  job: Job<TWorkflowSlugOrInput>
+  req: PayloadRequest
+  tasks: RunTaskFunctions
+}) => Promise<void>
 
 export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
@@ -113,7 +114,9 @@ export type JobTaskStatus = {
   }
 }
 
-export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
+export type WorkflowConfig<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = {
   /**
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
    *

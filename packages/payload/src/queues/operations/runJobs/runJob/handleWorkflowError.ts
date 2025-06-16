@@ -1,6 +1,6 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
-import type { WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
 import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
@@ -20,7 +20,7 @@ export function handleWorkflowError({
   job: Job
   req: PayloadRequest
   state: RunTaskFunctionState
-  workflowConfig: WorkflowConfig<WorkflowTypes>
+  workflowConfig: WorkflowConfig
 }): {
   hasFinalError: boolean
 } {

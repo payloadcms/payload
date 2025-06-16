@@ -163,7 +163,7 @@ export type TaskParent = {
 export const getRunTaskFunction = <TIsInline extends boolean>(
   state: RunTaskFunctionState,
   job: Job,
-  workflowConfig: WorkflowConfig<string>,
+  workflowConfig: WorkflowConfig,
   req: PayloadRequest,
   isInline: TIsInline,
   updateJob: UpdateJobFunction,
