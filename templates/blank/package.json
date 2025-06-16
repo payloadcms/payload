@@ -13,7 +13,7 @@
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "test": "test:int && test:e2e",
+    "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" playwright test",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
@@ -24,6 +24,7 @@
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "cross-env": "^7.0.3",
+    "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "next": "15.3.2",
     "payload": "workspace:*",
