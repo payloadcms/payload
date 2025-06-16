@@ -51,6 +51,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       type: 'text',
       required: true,
     },
+    /**
+     * @todo make required in 4.0
+     */
     {
       name: 'input',
       type: 'json',
@@ -242,5 +245,7 @@ export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: Jo
   doc.taskStatus = getJobTaskStatus({
     jobLog: doc.log || [],
   })
+  doc.input = doc.input || {}
+  doc.taskStatus = doc.taskStatus || {}
   return doc
 }

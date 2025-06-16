@@ -47,7 +47,7 @@ export type BaseJob<
   error?: unknown
   hasError?: boolean
   id: number | string
-  input?: TWorkflowSlugOrInput extends false
+  input: TWorkflowSlugOrInput extends false
     ? object
     : TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
       ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
@@ -56,7 +56,7 @@ export type BaseJob<
   processing?: boolean
   queue?: string
   taskSlug?: TaskType
-  taskStatus?: JobTaskStatus
+  taskStatus: JobTaskStatus
   totalTried: number
   updatedAt: string
   waitUntil?: string

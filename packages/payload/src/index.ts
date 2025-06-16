@@ -257,13 +257,15 @@ type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
 /**
  * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
  * If a generated type for the `payload-jobs` collection is not available, falls back to the BaseJob type.
+ *
+ * `input` and `taksStatus` are always present here, as the job afterRead hook will always populate them.
  */
 export type Job<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
 > = HasPayloadJobsType extends true
   ? {
-      input?: BaseJob<TWorkflowSlugOrInput>['input']
-      taskStatus?: BaseJob<TWorkflowSlugOrInput>['taskStatus']
+      input: BaseJob<TWorkflowSlugOrInput>['input']
+      taskStatus: BaseJob<TWorkflowSlugOrInput>['taskStatus']
     } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
   : BaseJob<TWorkflowSlugOrInput>
 
