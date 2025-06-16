@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { BaseJob, CollectionSlug, GlobalSlug } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -32,14 +32,13 @@ export interface BaseDatabaseAdapter {
   connect?: Connect
   count: Count
   countGlobalVersions: CountGlobalVersions
-
   countVersions: CountVersions
 
   create: Create
 
   createGlobal: CreateGlobal
-  createGlobalVersion: CreateGlobalVersion
 
+  createGlobalVersion: CreateGlobalVersion
   /**
    * Output a migration file
    */
@@ -373,7 +372,8 @@ export type FindGlobalVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
-  collection: CollectionSlug
+  collection?: CollectionSlug
+  globalSlug?: GlobalSlug
   locale?: string
   req?: Partial<PayloadRequest>
   sort?: {
@@ -566,7 +566,7 @@ export type UpdateJobsArgs = {
     }
 )
 
-export type UpdateJobs = (args: UpdateJobsArgs) => Promise<BaseJob[] | null>
+export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Job[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug

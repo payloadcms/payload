@@ -41,7 +41,7 @@ import {
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
-import { tabHasName } from 'payload/shared'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 
@@ -302,44 +302,64 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     field,
     forceNullable,
     graphqlResult,
+    newlyCreatedBlockType,
     objectTypeConfig,
     parentIsLocalized,
     parentName,
   }) => {
-    const interfaceName =
-      field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
+    if (fieldAffectsData(field)) {
+      const interfaceName =
+        field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
-    if (!graphqlResult.types.groupTypes[interfaceName]) {
-      const objectType = buildObjectType({
-        name: interfaceName,
-        config,
-        fields: field.fields,
-        forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
-        graphqlResult,
-        parentIsLocalized: field.localized || parentIsLocalized,
-        parentName: interfaceName,
-      })
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
+        const objectType = buildObjectType({
+          name: interfaceName,
+          config,
+          fields: field.fields,
+          forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
+          graphqlResult,
+          parentIsLocalized: field.localized || parentIsLocalized,
+          parentName: interfaceName,
+        })
 
-      if (Object.keys(objectType.getFields()).length) {
-        graphqlResult.types.groupTypes[interfaceName] = objectType
+        if (Object.keys(objectType.getFields()).length) {
+          graphqlResult.types.groupTypes[interfaceName] = objectType
+        }
       }
-    }
 
-    if (!graphqlResult.types.groupTypes[interfaceName]) {
-      return objectTypeConfig
-    }
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
+        return objectTypeConfig
+      }
 
-    return {
-      ...objectTypeConfig,
-      [formatName(field.name)]: {
-        type: graphqlResult.types.groupTypes[interfaceName],
-        resolve: (parent, args, context: Context) => {
-          return {
-            ...parent[field.name],
-            _id: parent._id ?? parent.id,
-          }
+      return {
+        ...objectTypeConfig,
+        [formatName(field.name)]: {
+          type: graphqlResult.types.groupTypes[interfaceName],
+          resolve: (parent, args, context: Context) => {
+            return {
+              ...parent[field.name],
+              _id: parent._id ?? parent.id,
+            }
+          },
         },
-      },
+      }
+    } else {
+      return field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
+        const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
+        if (addSubField) {
+          return addSubField({
+            config,
+            field: subField,
+            forceNullable,
+            graphqlResult,
+            newlyCreatedBlockType,
+            objectTypeConfig: objectTypeConfigWithCollapsibleFields,
+            parentIsLocalized,
+            parentName,
+          })
+        }
+        return objectTypeConfigWithCollapsibleFields
+      }, objectTypeConfig)
     }
   },
   join: ({ collectionSlug, field, graphqlResult, objectTypeConfig, parentName }) => {

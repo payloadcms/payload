@@ -1,0 +1,18 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .version-drawer {
+    .table {
+      width: 100%;
+    }
+
+    .created-at-cell {
+      // Button reset, + underline
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+    }
+  }
+}

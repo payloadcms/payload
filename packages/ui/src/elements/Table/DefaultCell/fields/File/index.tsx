@@ -6,11 +6,10 @@ import type {
   UploadFieldClient,
 } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import './index.scss'
-import { getBestFitFromSizes } from '../../../../../utilities/getBestFitFromSizes.js'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'

@@ -1,7 +1,7 @@
 import type { ClientConfig } from '../config/client.js'
-// @ts-strict-ignore
 import type { ClientField } from '../fields/config/client.js'
-import type { FieldTypes } from '../fields/config/types.js'
+
+import { fieldAffectsData, type FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -41,8 +41,8 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           name: field.name,
           type: field.type,
           blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
-            const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
-            acc[block.slug] = {
+            const block = typeof _block === 'string' ? config.blocksMap[_block]! : _block
+            ;(acc as any)[block.slug] = {
               fields: fieldSchemaToJSON(
                 [
                   ...block.fields,
@@ -56,7 +56,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
             }
 
             return acc
-          }, {}),
+          }, {} as FieldSchemaJSON),
         })
 
         break
@@ -67,11 +67,15 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
         break
 
       case 'group':
-        acc.push({
-          name: field.name,
-          type: field.type,
-          fields: fieldSchemaToJSON(field.fields, config),
-        })
+        if (fieldAffectsData(field)) {
+          acc.push({
+            name: field.name,
+            type: field.type,
+            fields: fieldSchemaToJSON(field.fields, config),
+          })
+        } else {
+          result = result.concat(fieldSchemaToJSON(field.fields, config))
+        }
 
         break
 
@@ -81,13 +85,13 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
           name: field.name,
           type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          relationTo: field.relationTo,
+          relationTo: field.relationTo as string,
         })
 
         break
 
       case 'tabs': {
-        let tabFields = []
+        let tabFields: FieldSchemaJSON = []
 
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
@@ -117,5 +121,5 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
     }
 
     return result
-  }, [])
+  }, [] as FieldSchemaJSON)
 }

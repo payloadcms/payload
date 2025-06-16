@@ -54,6 +54,7 @@ export const MySelectField: Field = {
 | **`enumName`**         | Custom enum name for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                                         |
 | **`dbName`**           | Custom table name (if `hasMany` set to `true`) for this field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                           |
 | **`interfaceName`**    | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                                     |
+| **`filterOptions`**    | Dynamically filter which options are available based on the user, data, etc. [More details](#filterOptions)                                                                                                                                                                                             |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
 | **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
@@ -65,6 +66,61 @@ _\* An asterisk denotes that a property is required._
   are allowed. If you determine you need your option values to be non-strings or
   contain special characters, they will be formatted accordingly before being
   used as a GraphQL enum.
+</Banner>
+
+### filterOptions
+
+Used to dynamically filter which options are available based on the current user, document data, or other criteria.
+
+Some examples of this might include:
+
+- Restricting options based on a user's role, e.g. admin-only options
+- Displaying different options based on the value of another field, e.g. a city/state selector
+
+The result of `filterOptions` will determine:
+
+- Which options are displayed in the Admin Panel
+- Which options can be saved to the database
+
+To do this, use the `filterOptions` property in your [Field Config](./overview):
+
+```ts
+import type { Field } from 'payload'
+
+export const MySelectField: Field = {
+  // ...
+  // highlight-start
+  type: 'select',
+  options: [
+    {
+      label: 'One',
+      value: 'one',
+    },
+    {
+      label: 'Two',
+      value: 'two',
+    },
+    {
+      label: 'Three',
+      value: 'three',
+    },
+  ],
+  filterOptions: ({ options, data }) =>
+    data.disallowOption1
+      ? options.filter(
+          (option) =>
+            (typeof option === 'string' ? options : option.value) !== 'one',
+        )
+      : options,
+  // highlight-end
+}
+```
+
+<Banner type="warning">
+  **Note:** This property is similar to `filterOptions` in
+  [Relationship](./relationship) or [Upload](./upload) fields, except that the
+  return value of this function is simply an array of options, not a query
+  constraint.
 </Banner>
 
 ## Admin Options
@@ -83,7 +139,7 @@ export const MySelectField: Field = {
 }
 ```
 
-The Select Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
+The Select Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Property          | Description                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |

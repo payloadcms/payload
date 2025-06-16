@@ -33,11 +33,8 @@ describe('Lexical Fully Featured', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: [
-        path.resolve(dirname, './collections/Upload/uploads'),
-        path.resolve(dirname, './collections/Upload2/uploads2'),
-      ],
+      snapshotKey: 'lexicalTest',
+      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     const lexical = new LexicalHelpers(page)
@@ -64,5 +61,37 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.decorator).toHaveCount(3)
     const paragraph = lexical.editor.locator('> p')
     await expect(paragraph).toHaveText('')
+  })
+
+  test('ControlOrMeta+A inside input should select all the text inside the input', async ({
+    page,
+  }) => {
+    const lexical = new LexicalHelpers(page)
+    await lexical.editor.first().focus()
+    await page.keyboard.type('Hello')
+    await page.keyboard.press('Enter')
+    await lexical.slashCommand('block')
+    await page.locator('#field-someText').first().focus()
+    await page.keyboard.type('World')
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.press('Backspace')
+    const paragraph = lexical.editor.locator('> p').first()
+    await expect(paragraph).toHaveText('Hello')
+    await expect(page.getByText('World')).toHaveCount(0)
+  })
+
+  test('text state feature', async ({ page }) => {
+    await page.keyboard.type('Hello')
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.locator('.toolbar-popup__dropdown-textState').first().click()
+    await page.getByRole('button', { name: 'Red' }).first().click()
+    const colored = page.locator('span').filter({ hasText: 'Hello' })
+    await expect(colored).toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
+    await expect(colored).toHaveAttribute('data-color', 'bg-red')
+    await page.locator('.toolbar-popup__dropdown-textState').first().click()
+    await page.getByRole('button', { name: 'Default style' }).click()
+    await expect(colored).toBeVisible()
+    await expect(colored).not.toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
+    await expect(colored).not.toHaveAttribute('data-color', 'bg-red')
   })
 })

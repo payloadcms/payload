@@ -1,6 +1,6 @@
-// @ts-strict-ignore
+import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
-import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
 import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
@@ -17,20 +17,21 @@ export function handleWorkflowError({
   workflowConfig,
 }: {
   error: Error
-  job: BaseJob
+  job: Job
   req: PayloadRequest
   state: RunTaskFunctionState
-  workflowConfig: WorkflowConfig<WorkflowTypes>
+  workflowConfig: WorkflowConfig
 }): {
   hasFinalError: boolean
 } {
   const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
 
   let hasFinalError = state.reachedMaxRetries || !!('cancelled' in error && error.cancelled) // If any TASK reached max retries, the job has an error
-  const maxWorkflowRetries: number =
-    (typeof workflowConfig.retries === 'object'
+  const maxWorkflowRetries: number = (
+    typeof workflowConfig.retries === 'object'
       ? workflowConfig.retries.attempts
-      : workflowConfig.retries) ?? undefined
+      : workflowConfig.retries
+  )!
 
   if (
     maxWorkflowRetries !== undefined &&
@@ -54,7 +55,7 @@ export function handleWorkflowError({
 
     // Job will retry. Let's determine when!
     const waitUntil: Date = calculateBackoffWaitUntil({
-      retriesConfig: workflowConfig.retries,
+      retriesConfig: workflowConfig.retries!,
       totalTried: job.totalTried ?? 0,
     })
 

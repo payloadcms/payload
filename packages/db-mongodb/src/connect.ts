@@ -40,6 +40,9 @@ export const connect: Connect = async function connect(
     // If we are running a replica set with MongoDB Memory Server,
     // wait until the replica set elects a primary before proceeding
     if (this.mongoMemoryServer) {
+      this.payload.logger.info(
+        'Waiting for MongoDB Memory Server replica set to elect a primary...',
+      )
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
 
@@ -50,7 +53,7 @@ export const connect: Connect = async function connect(
       this.beginTransaction = defaultBeginTransaction()
     }
 
-    if (!this.mongoMemoryServer && !hotReload) {
+    if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
         await mongoose.connection.dropDatabase()

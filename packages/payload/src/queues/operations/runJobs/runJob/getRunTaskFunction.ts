@@ -1,7 +1,7 @@
 import ObjectIdImport from 'bson-objectid'
 
-// @ts-strict-ignore
-import type { PayloadRequest } from '../../../../types/index.js'
+import type { Job } from '../../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -13,8 +13,6 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
-  BaseJob,
-  RunningJob,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
@@ -32,15 +30,15 @@ export type RunTaskFunctionState = {
   reachedMaxRetries: boolean
 }
 
-async function getTaskHandlerFromConfig(taskConfig: TaskConfig<string>) {
-  let handler: TaskHandler<TaskType>
-
-  if (typeof taskConfig.handler === 'function') {
-    handler = taskConfig.handler
-  } else {
-    handler = await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
+async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
+  if (!taskConfig) {
+    throw new Error('Task config is required to get the task handler')
   }
-  return handler
+  if (typeof taskConfig.handler === 'function') {
+    return taskConfig.handler
+  } else {
+    return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
+  }
 }
 
 export async function handleTaskFailed({
@@ -64,7 +62,7 @@ export async function handleTaskFailed({
   error?: Error
   executedAt: Date
   input: object
-  job: BaseJob
+  job: Job
   maxRetries: number
   output: object
   parent?: TaskParent
@@ -84,9 +82,6 @@ export async function handleTaskFailed({
     await taskConfig.onFail()
   }
 
-  if (!job.log) {
-    job.log = []
-  }
   const errorJSON = error
     ? {
         name: error.name,
@@ -95,19 +90,21 @@ export async function handleTaskFailed({
       }
     : {
         message:
-          taskHandlerResult.state === 'failed'
+          taskHandlerResult?.state === 'failed'
             ? (taskHandlerResult.errorMessage ?? taskHandlerResult.state)
             : 'failed',
       }
 
-  job.log.push({
+  const currentDate = new Date()
+
+  ;(job.log ??= []).push({
     id: new ObjectId().toHexString(),
-    completedAt: new Date().toISOString(),
+    completedAt: currentDate.toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),
     input,
     output,
-    parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+    parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
     state: 'failed',
     taskID,
     taskSlug,
@@ -116,7 +113,7 @@ export async function handleTaskFailed({
   if (job.waitUntil) {
     // Check if waitUntil is in the past
     const waitUntil = new Date(job.waitUntil)
-    if (waitUntil < new Date()) {
+    if (waitUntil < currentDate) {
       // Outdated waitUntil, remove it
       delete job.waitUntil
     }
@@ -164,13 +161,15 @@ export type TaskParent = {
 
 export const getRunTaskFunction = <TIsInline extends boolean>(
   state: RunTaskFunctionState,
-  job: BaseJob,
-  workflowConfig: WorkflowConfig<string>,
+  job: Job,
+  workflowConfig: WorkflowConfig,
   req: PayloadRequest,
   isInline: TIsInline,
   updateJob: UpdateJobFunction,
   parent?: TaskParent,
 ): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions => {
+  const jobConfig = req.payload.config.jobs
+
   const runTask: <TTaskSlug extends string>(
     taskSlug: TTaskSlug,
   ) => TTaskSlug extends 'inline' ? RunInlineTaskFunction : RunTaskFunction<TTaskSlug> = (
@@ -181,19 +180,16 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       {
         input,
         retries,
+        // Only available for inline tasks:
         task,
       }: Parameters<RunInlineTaskFunction>[1] & Parameters<RunTaskFunction<string>>[1],
     ) => {
       const executedAt = new Date()
 
-      let inlineRunner: TaskHandler<TaskType> = null
-      if (isInline) {
-        inlineRunner = task
-      }
-
-      let taskConfig: TaskConfig<string>
+      let taskConfig: TaskConfig | undefined
       if (!isInline) {
-        taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
+        taskConfig = (jobConfig.tasks?.length &&
+          jobConfig.tasks.find((t) => t.slug === taskSlug)) as TaskConfig<string>
 
         if (!taskConfig) {
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
@@ -218,7 +214,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
-        ? job.taskStatus[taskSlug][taskID]
+        ? job.taskStatus[taskSlug][taskID]!
         : null
 
       // Handle restoration of task if it succeeded in a previous run
@@ -227,22 +223,21 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         if (finalRetriesConfig?.shouldRestore === false) {
           shouldRestore = false
         } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
-          shouldRestore = await finalRetriesConfig.shouldRestore({ input, job, req, taskStatus })
+          shouldRestore = await finalRetriesConfig.shouldRestore({
+            input: input!,
+            job,
+            req,
+            taskStatus,
+          })
         }
         if (shouldRestore) {
           return taskStatus.output
         }
       }
 
-      let runner: TaskHandler<TaskType>
-      if (isInline) {
-        runner = inlineRunner
-      } else {
-        if (!taskConfig) {
-          throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
-        }
-        runner = await getTaskHandlerFromConfig(taskConfig)
-      }
+      const runner = isInline
+        ? (task as TaskHandler<TaskType>)
+        : await getTaskHandlerFromConfig(taskConfig)
 
       if (!runner || typeof runner !== 'function') {
         const errorMessage = isInline
@@ -256,13 +251,13 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           },
           hasError: true,
           log: [
-            ...job.log,
+            ...(job.log || []),
             {
               id: new ObjectId().toHexString(),
               completedAt: new Date().toISOString(),
               error: errorMessage,
               executedAt: executedAt.toISOString(),
-              parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+              parent: jobConfig.addParentToTaskLog ? parent : undefined,
               state: 'failed',
               taskID,
               taskSlug,
@@ -289,7 +284,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       let taskHandlerResult: TaskHandlerResult<string>
-      let output: object = {}
+      let output: JsonObject | undefined = {}
 
       try {
         taskHandlerResult = await runner({
@@ -298,7 +293,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             taskSlug,
           }),
           input,
-          job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
+          job: job as unknown as Job<WorkflowTypes>,
           req,
           tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob, {
             taskID,
@@ -307,11 +302,11 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
       } catch (err) {
         await handleTaskFailed({
-          error: err,
+          error: err as Error | undefined,
           executedAt,
-          input,
+          input: input!,
           job,
-          maxRetries,
+          maxRetries: maxRetries!,
           output,
           parent,
           req,
@@ -329,9 +324,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       if (taskHandlerResult.state === 'failed') {
         await handleTaskFailed({
           executedAt,
-          input,
+          input: input!,
           job,
-          maxRetries,
+          maxRetries: maxRetries!,
           output,
           parent,
           req,
@@ -353,16 +348,13 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         await taskConfig.onSuccess()
       }
 
-      if (!job.log) {
-        job.log = []
-      }
-      job.log.push({
+      ;(job.log ??= []).push({
         id: new ObjectId().toHexString(),
         completedAt: new Date().toISOString(),
         executedAt: executedAt.toISOString(),
         input,
         output,
-        parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
+        parent: jobConfig.addParentToTaskLog ? parent : undefined,
         state: 'succeeded',
         taskID,
         taskSlug,
@@ -379,8 +371,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     return runTask('inline') as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
   } else {
     const tasks: RunTaskFunctions = {}
-    for (const task of req?.payload?.config?.jobs?.tasks ?? []) {
-      tasks[task.slug] = runTask(task.slug)
+    for (const task of jobConfig.tasks ?? []) {
+      tasks[task.slug] = runTask(task.slug) as RunTaskFunction<string>
     }
     return tasks as TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions
   }

@@ -84,6 +84,7 @@ export interface Config {
   blocks: {};
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
+    'lexical-link-feature': LexicalLinkFeature;
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
@@ -103,6 +104,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
+    'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
@@ -160,6 +162,30 @@ export interface UserAuthOperations {
  * via the `definition` "lexical-fully-featured".
  */
 export interface LexicalFullyFeatured {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-link-feature".
+ */
+export interface LexicalLinkFeature {
   id: string;
   richText?: {
     root: {
@@ -805,6 +831,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalFullyFeatured;
       } | null)
     | ({
+        relationTo: 'lexical-link-feature';
+        value: string | LexicalLinkFeature;
+      } | null)
+    | ({
         relationTo: 'lexical-fields';
         value: string | LexicalField;
       } | null)
@@ -899,6 +929,15 @@ export interface PayloadMigration {
  * via the `definition` "lexical-fully-featured_select".
  */
 export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-link-feature_select".
+ */
+export interface LexicalLinkFeatureSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;

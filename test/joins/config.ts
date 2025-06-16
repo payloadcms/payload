@@ -4,6 +4,8 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
+import { FolderPoly1 } from './collections/FolderPoly1.js'
+import { FolderPoly2 } from './collections/FolderPoly2.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
@@ -337,6 +339,8 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    FolderPoly1,
+    FolderPoly2,
   ],
   localization: {
     locales: [

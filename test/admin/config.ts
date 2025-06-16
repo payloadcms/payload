@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -10,6 +11,7 @@ import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
+import { EditMenuItems } from './collections/editMenuItems.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -21,8 +23,10 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
+import { ReorderTabs } from './collections/ReorderTabs.js'
 import { UploadCollection } from './collections/Upload.js'
 import { UploadTwoCollection } from './collections/UploadTwo.js'
+import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { GlobalCustomDocumentControls } from './globals/CustomDocumentControls.js'
@@ -45,10 +49,16 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: 'http://localhost:3000',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -157,6 +167,7 @@ export default buildConfigWithDefaults({
     CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
+    ReorderTabs,
     CustomFields,
     CollectionGroup1A,
     CollectionGroup1B,
@@ -166,10 +177,12 @@ export default buildConfigWithDefaults({
     Array,
     DisableDuplicate,
     DisableCopyToLocale,
+    EditMenuItems,
     BaseListFilter,
     with300Documents,
     ListDrawer,
     Placeholder,
+    UseAsTitleGroupField,
   ],
   globals: [
     GlobalHidden,

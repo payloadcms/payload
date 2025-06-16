@@ -6,6 +6,7 @@ import {
   type FlattenedBlock,
   formatErrors,
   type PayloadRequest,
+  type ServerFunction,
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
@@ -130,7 +131,11 @@ function iterateFields(
           break
 
         case 'group': {
-          if (field.name in toLocaleData && fromLocaleData?.[field.name] !== undefined) {
+          if (
+            fieldAffectsData(field) &&
+            field.name in toLocaleData &&
+            fromLocaleData?.[field.name] !== undefined
+          ) {
             iterateFields(
               field.fields,
               fromLocaleData[field.name],
@@ -138,6 +143,8 @@ function iterateFields(
               req,
               parentIsLocalized || field.localized,
             )
+          } else {
+            iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
           }
           break
         }
@@ -194,7 +201,7 @@ function removeIds(data: Data): Data {
   return data
 }
 
-export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) => {
+export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> = async (args) => {
   const { req } = args
 
   try {

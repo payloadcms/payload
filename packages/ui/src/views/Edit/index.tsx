@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
@@ -26,6 +27,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
@@ -33,8 +35,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
+import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 
 const baseClass = 'collection-edit'
 
@@ -44,12 +46,14 @@ const baseClass = 'collection-edit'
 export function DefaultEditView({
   BeforeDocumentControls,
   Description,
+  EditMenuItems,
   PreviewButton,
   PublishButton,
   SaveButton,
   SaveDraftButton,
   Status,
   Upload: CustomUpload,
+  UploadControls,
 }: DocumentViewClientProps) {
   const {
     id,
@@ -309,6 +313,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,
@@ -327,7 +332,6 @@ export function DefaultEditView({
       isLockingEnabled,
       setDocumentIsLocked,
       startRouteTransition,
-      redirectAfterCreate,
     ],
   )
 
@@ -444,6 +448,8 @@ export function DefaultEditView({
     !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
+  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+
   return (
     <main className={classes.filter(Boolean).join(' ')}>
       <OperationProvider operation={operation}>
@@ -459,8 +465,10 @@ export function DefaultEditView({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {isInDrawer && <DocumentDrawerHeader drawerSlug={drawerSlug} />}
-          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
+          {isInDrawer && (
+            <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />
+          )}
+          {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
               handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
               isActive={shouldShowDocumentLockedModal}
@@ -522,8 +530,9 @@ export function DefaultEditView({
               Status,
             }}
             data={savedDocumentData}
-            disableActions={disableActions}
+            disableActions={disableActions || isFolderCollection}
             disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
@@ -576,13 +585,16 @@ export function DefaultEditView({
                   )}
                   {upload && (
                     <React.Fragment>
-                      {CustomUpload || (
-                        <Upload
-                          collectionSlug={collectionConfig.slug}
-                          initialState={initialState}
-                          uploadConfig={upload}
-                        />
-                      )}
+                      <UploadControlsProvider>
+                        {CustomUpload || (
+                          <Upload
+                            collectionSlug={collectionConfig.slug}
+                            initialState={initialState}
+                            uploadConfig={upload}
+                            UploadControls={UploadControls}
+                          />
+                        )}
+                      </UploadControlsProvider>
                     </React.Fragment>
                   )}
                 </Fragment>

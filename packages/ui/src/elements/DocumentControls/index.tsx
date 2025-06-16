@@ -1,6 +1,7 @@
 'use client'
 import type {
   ClientUser,
+  Data,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
@@ -22,6 +23,7 @@ import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
+import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -45,9 +47,10 @@ export const DocumentControls: React.FC<{
     readonly SaveDraftButton?: React.ReactNode
     readonly Status?: React.ReactNode
   }
-  readonly data?: any
+  readonly data?: Data
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
+  readonly EditMenuItems?: React.ReactNode
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
   readonly id?: number | string
@@ -80,6 +83,7 @@ export const DocumentControls: React.FC<{
     data,
     disableActions,
     disableCreate,
+    EditMenuItems,
     hasSavePermission,
     isAccountView,
     isEditing,
@@ -157,10 +161,27 @@ export const DocumentControls: React.FC<{
 
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
+  const showFolderMetaIcon = collectionConfig && collectionConfig.folders
+  const showLockedMetaIcon = user && readOnlyForIncomingUser
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
+          {showLockedMetaIcon || showFolderMetaIcon ? (
+            <div className={`${baseClass}__meta-icons`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
+              )}
+              {showFolderMetaIcon && config.folders && (
+                <MoveDocToFolder
+                  folderCollectionSlug={config.folders.slug}
+                  folderFieldName={config.folders.fieldName}
+                />
+              )}
+            </div>
+          ) : null}
+
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -174,9 +195,7 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-            {user && readOnlyForIncomingUser && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
+
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
                 {(globalConfig || (collectionConfig && isEditing)) && (
@@ -330,6 +349,7 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
           )}

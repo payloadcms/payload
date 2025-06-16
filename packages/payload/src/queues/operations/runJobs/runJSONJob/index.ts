@@ -1,12 +1,7 @@
-// @ts-strict-ignore
+import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
-import type {
-  BaseJob,
-  RunningJob,
-  WorkflowConfig,
-  WorkflowTypes,
-} from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
@@ -14,11 +9,11 @@ import { getRunTaskFunction, type RunTaskFunctionState } from '../runJob/getRunT
 import { handleWorkflowError } from '../runJob/handleWorkflowError.js'
 
 type Args = {
-  job: BaseJob
+  job: Job
   req: PayloadRequest
   updateJob: UpdateJobFunction
-  workflowConfig: WorkflowConfig<WorkflowTypes>
-  workflowHandler: WorkflowJSON<WorkflowTypes>
+  workflowConfig: WorkflowConfig
+  workflowHandler: WorkflowJSON
 }
 
 export type RunJSONJobResult = {
@@ -38,7 +33,7 @@ export const runJSONJob = async ({
     reachedMaxRetries: false,
   }
 
-  const stepsToRun: WorkflowStep<string, string>[] = []
+  const stepsToRun: WorkflowStep<string>[] = []
 
   for (const step of workflowHandler) {
     if ('task' in step) {
@@ -50,8 +45,7 @@ export const runJSONJob = async ({
         continue
       }
     }
-    if (step.condition && !step.condition({ job: job as RunningJob<any> })) {
-      // TODO: Improve RunningJob type see todo below
+    if (step.condition && !step.condition({ job })) {
       continue
     }
     stepsToRun.push(step)
@@ -67,8 +61,8 @@ export const runJSONJob = async ({
     await Promise.all(
       stepsToRun.map(async (step) => {
         if ('task' in step) {
-          await tasks[step.task](step.id, {
-            input: step.input ? step.input({ job: job as RunningJob<any> }) : {}, // TODO: Type better. We should use RunningJob anywhere and make TypedCollection['payload-jobs'] be BaseJob if type not generated
+          await tasks[step.task]!(step.id, {
+            input: step.input ? step.input({ job }) : {},
             retries: step.retries,
           })
         } else {
@@ -79,7 +73,8 @@ export const runJSONJob = async ({
         }
       }),
     )
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as Error
     const errorResult = handleWorkflowError({
       error: err,
       job,
@@ -103,7 +98,7 @@ export const runJSONJob = async ({
             return step.id === id && slug === 'inline'
           }
         })
-        if (step.completesJob) {
+        if (step?.completesJob) {
           workflowCompleted = true
           break
         }
