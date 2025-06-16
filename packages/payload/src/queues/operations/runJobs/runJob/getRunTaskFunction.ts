@@ -180,7 +180,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           input: input!,
           job,
           maxRetries: maxRetries!,
-          message: 'Task handler returned a failed state',
+          message: taskHandlerResult.errorMessage ?? 'Task handler returned a failed state',
           output,
           parent,
           retriesConfig: finalRetriesConfig,
