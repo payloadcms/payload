@@ -30,18 +30,23 @@ export type JobLog = {
   taskSlug: string
 }
 
+/**
+ * @deprecated - will be made private in 4.0. Please use the `Job` type instead.
+ */
 export type BaseJob = {
   completedAt?: string
+  createdAt: string
   error?: unknown
   hasError?: boolean
   id: number | string
-  input?: any
-  log: JobLog[]
+  input?: object
+  log?: JobLog[]
   processing?: boolean
-  queue: string
+  queue?: string
   taskSlug?: string
   taskStatus?: JobTaskStatus
   totalTried: number
+  updatedAt: string
   waitUntil?: string
   workflowSlug?: string
 }
