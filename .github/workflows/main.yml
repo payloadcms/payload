@@ -529,6 +529,7 @@ jobs:
         include:
           - template: blank
             database: mongodb
+            templateName: '@payloadcms/template-blank'
           - template: website
             database: mongodb
           - template: with-payload-cloud
@@ -611,6 +612,14 @@ jobs:
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
         env:
           NODE_OPTIONS: --max-old-space-size=8096
+
+      - name: Runs Template Int Tests
+        run: pnpm --filter ${{ matrix.templateName }} run test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          MONGODB_URL: mongodb://localhost:27017/payloadtests
 
   tests-type-generation:
     runs-on: ubuntu-24.04
