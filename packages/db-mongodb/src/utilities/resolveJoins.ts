@@ -82,145 +82,198 @@ export async function resolveJoins({
       return { joinPath, result: null }
     }
 
+    console.log(joinPath)
+
+    // Normalize collections to always be an array for unified processing
+    const allCollections = Array.isArray(joinDef.field.collection)
+      ? joinDef.field.collection
+      : [joinDef.field.collection]
+
+    // Use the provided locale or fall back to the default locale for localized fields
+    const localizationConfig = adapter.payload.config.localization
+    const effectiveLocale =
+      locale ||
+      (typeof localizationConfig === 'object' &&
+        localizationConfig &&
+        localizationConfig.defaultLocale)
+
+    // Extract relationTo filter from the where clause to determine which collections to query
+    const relationToFilter = extractRelationToFilter(joinQuery.where || {})
+
+    // Determine which collections to query based on relationTo filter
+    const collections = relationToFilter
+      ? allCollections.filter((col) => relationToFilter.includes(col))
+      : allCollections
+
+    // Group the results by their parent document ID
+    const grouped: Record<string, Record<string, unknown>[]> = {}
+
     // Check if this is a polymorphic collection join (where field.collection is an array)
     const isPolymorphicCollectionJoin = Array.isArray(joinDef.field.collection)
 
-    if (isPolymorphicCollectionJoin) {
-      // Handle polymorphic collection joins (like documentsAndFolders from folder system)
-      // These joins span multiple collections, so we need to query each collection separately
-      const allCollections = joinDef.field.collection as string[]
-
-      // Use the provided locale or fall back to the default locale for localized fields
-      const localizationConfig = adapter.payload.config.localization
-      const effectiveLocale =
-        locale ||
-        (typeof localizationConfig === 'object' &&
-          localizationConfig &&
-          localizationConfig.defaultLocale)
-
-      // Extract relationTo filter from the where clause to determine which collections to query
-      const relationToFilter = extractRelationToFilter(joinQuery.where || {})
-
-      // Determine which collections to query based on relationTo filter
-      const collections = relationToFilter
-        ? allCollections.filter((col) => relationToFilter.includes(col))
-        : allCollections
-
-      // Group the results by their parent document ID
-      // We need to re-query to properly get the parent relationships
-      const grouped: Record<string, Record<string, unknown>[]> = {}
-
-      // Process collections concurrently
-      const collectionPromises = collections.map(async (collectionSlug) => {
-        const targetConfig = adapter.payload.collections[collectionSlug]?.config
-        if (!targetConfig) {
-          return null
-        }
-
-        const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
-        let JoinModel
-        if (useDrafts) {
-          JoinModel = adapter.versions[targetConfig.slug]
-        } else {
-          JoinModel = adapter.collections[targetConfig.slug]
-        }
-
-        if (!JoinModel) {
-          return null
-        }
-
-        // Extract all parent document IDs to use in the join query
-        const parentIDs = docs.map((d) =>
-          versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id),
-        )
-
-        // Filter WHERE clause to only include fields that exist in this collection
-        const filteredWhere = filterWhereForCollection(
-          joinQuery.where || {},
-          targetConfig.flattenedFields,
-          true, // exclude relationTo for individual collections
-        )
-
-        // Skip this collection if the WHERE clause cannot be satisfied
-        if (filteredWhere === null) {
-          return null
-        }
-
-        // Build the base query
-        const whereQuery = useDrafts
-          ? await JoinModel.buildQuery({
-              locale,
-              payload: adapter.payload,
-              where: combineQueries(appendVersionToQueryKey(filteredWhere as Where), {
-                latest: {
-                  equals: true,
-                },
-              }),
-            })
-          : await buildQuery({
-              adapter,
-              collectionSlug,
-              fields: targetConfig.flattenedFields,
-              locale,
-              where: filteredWhere as Where,
-            })
-
-        // Add the join condition
-        const joinFieldName = useDrafts ? `version.${joinDef.field.on}` : joinDef.field.on
-        whereQuery[joinFieldName] = { $in: parentIDs }
-
-        // Build the sort parameters for the query
-        const sort = buildSortParam({
-          adapter,
-          config: adapter.payload.config,
-          fields: useDrafts
-            ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
-            : targetConfig.flattenedFields,
-          locale,
-          sort: useDrafts
-            ? getQueryDraftsSort({
-                collectionConfig: targetConfig,
-                sort: joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
-              })
-            : joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
-          timestamps: true,
-        })
-
-        // Execute the query, projecting only necessary fields for ObjectID references
-        // If sort fields are specified (other than _id), include them for sorting across collections
-        const sortEntries = Object.entries(sort) as Array<[string, 'asc' | 'desc']>
-
-        const projection = buildJoinProjection(joinFieldName, useDrafts, sort, !!joinQuery.sort)
-
-        // For polymorphic collection joins, skip database sorting since we sort in JavaScript anyway
-        // Database sorting here is redundant as results are always re-sorted after grouping
-        const results = await JoinModel.find(whereQuery, projection).lean()
-
-        // Return results with collection info for grouping
-        return { collectionSlug, joinDef, results, sortEntries, useDrafts }
-      })
-
-      const collectionResults = await Promise.all(collectionPromises)
-
-      // Determine if we need to sort by specific fields
-      let sortEntries: Array<[string, 'asc' | 'desc']> = []
-
-      if (joinQuery.sort) {
-        const firstResult = collectionResults.find((r) => r)
-        if (firstResult && firstResult.sortEntries) {
-          sortEntries = firstResult.sortEntries
-        }
+    // Process collections concurrently
+    const collectionPromises = collections.map(async (collectionSlug) => {
+      const targetConfig = adapter.payload.collections[collectionSlug]?.config
+      if (!targetConfig) {
+        return null
       }
 
-      // Group the results by parent ID
-      for (const collectionResult of collectionResults) {
-        if (!collectionResult) {
-          continue
+      const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
+      let JoinModel
+      if (useDrafts) {
+        JoinModel = adapter.versions[targetConfig.slug]
+      } else {
+        JoinModel = adapter.collections[targetConfig.slug]
+      }
+
+      if (!JoinModel) {
+        return null
+      }
+
+      // Extract all parent document IDs to use in the join query
+      const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
+
+      // Build the base query
+      let whereQuery: null | Record<string, unknown> = null
+      whereQuery = isPolymorphicCollectionJoin
+        ? filterWhereForCollection(
+            joinQuery.where || {},
+            targetConfig.flattenedFields,
+            true, // exclude relationTo for individual collections
+          )
+        : joinQuery.where || {}
+
+      // Skip this collection if the WHERE clause cannot be satisfied for polymorphic collection joins
+      if (whereQuery === null) {
+        return null
+      }
+      whereQuery = useDrafts
+        ? await JoinModel.buildQuery({
+            locale,
+            payload: adapter.payload,
+            where: combineQueries(appendVersionToQueryKey(whereQuery as Where), {
+              latest: {
+                equals: true,
+              },
+            }),
+          })
+        : await buildQuery({
+            adapter,
+            collectionSlug,
+            fields: targetConfig.flattenedFields,
+            locale,
+            where: whereQuery as Where,
+          })
+
+      // Handle localized paths and version prefixes
+      let dbFieldName = joinDef.field.on
+      if (
+        effectiveLocale &&
+        typeof localizationConfig === 'object' &&
+        localizationConfig &&
+        !isPolymorphicCollectionJoin
+      ) {
+        const pathSegments = joinDef.field.on.split('.')
+        const transformedSegments: string[] = []
+        const fields = useDrafts
+          ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
+          : targetConfig.flattenedFields
+
+        for (let i = 0; i < pathSegments.length; i++) {
+          const segment = pathSegments[i]!
+          transformedSegments.push(segment)
+
+          // Check if this segment corresponds to a localized field
+          const fieldAtSegment = fields.find((f) => f.name === segment)
+          if (fieldAtSegment && fieldAtSegment.localized) {
+            transformedSegments.push(effectiveLocale)
+          }
         }
 
-        const { collectionSlug, joinDef, results, useDrafts } = collectionResult
+        dbFieldName = transformedSegments.join('.')
+      }
 
-        for (const result of results) {
+      // Add version prefix for draft queries
+      if (useDrafts) {
+        dbFieldName = `version.${dbFieldName}`
+      }
+
+      // Check if the target field is a polymorphic relationship
+      const isPolymorphic = joinDef.targetField
+        ? Array.isArray(joinDef.targetField.relationTo)
+        : false
+
+      // Add the join condition
+      if (isPolymorphic && !isPolymorphicCollectionJoin) {
+        // For polymorphic relationships, we need to match both relationTo and value
+        whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
+        whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
+      } else {
+        // For regular relationships and polymorphic collection joins
+        whereQuery[dbFieldName] = { $in: parentIDs }
+      }
+
+      // Build the sort parameters for the query
+      const fields = useDrafts
+        ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
+        : targetConfig.flattenedFields
+
+      const sort = buildSortParam({
+        adapter,
+        config: adapter.payload.config,
+        fields,
+        locale,
+        sort: useDrafts
+          ? getQueryDraftsSort({
+              collectionConfig: targetConfig,
+              sort: joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
+            })
+          : joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
+        timestamps: true,
+      })
+
+      // Execute the query, projecting only necessary fields
+      const sortEntries = Object.entries(sort) as Array<[string, 'asc' | 'desc']>
+      const projection = buildJoinProjection(dbFieldName, useDrafts, sort, !!joinQuery.sort)
+
+      const results = await JoinModel.find(whereQuery, projection).lean()
+
+      // Return results with collection info for grouping
+      return {
+        collectionSlug,
+        dbFieldName,
+        isPolymorphic,
+        joinDef,
+        results,
+        sortEntries,
+        useDrafts,
+      }
+    })
+
+    const collectionResults = await Promise.all(collectionPromises)
+
+    // Determine if we need to sort by specific fields
+    let sortEntries: Array<[string, 'asc' | 'desc']> = []
+
+    if (joinQuery.sort) {
+      const firstResult = collectionResults.find((r) => r)
+      if (firstResult && firstResult.sortEntries) {
+        sortEntries = firstResult.sortEntries
+      }
+    }
+
+    // Group the results by parent ID
+    for (const collectionResult of collectionResults) {
+      if (!collectionResult) {
+        continue
+      }
+
+      const { collectionSlug, dbFieldName, isPolymorphic, joinDef, results, useDrafts } =
+        collectionResult
+
+      for (const result of results) {
+        if (isPolymorphicCollectionJoin) {
+          // For polymorphic collection joins, handle differently
           if (useDrafts) {
             result.id = result.parent
           }
@@ -251,10 +304,59 @@ export async function resolveJoins({
           }
 
           grouped[parentKey].push(joinData)
+        } else {
+          // For regular joins (single collection)
+          // Get the parent ID(s) from the result using the join field
+          let parents: unknown[]
+
+          if (isPolymorphic) {
+            // For polymorphic relationships, extract the value from the polymorphic structure
+            const polymorphicField = getByPath(result, dbFieldName) as
+              | { relationTo: string; value: unknown }
+              | { relationTo: string; value: unknown }[]
+
+            if (Array.isArray(polymorphicField)) {
+              // Handle arrays of polymorphic relationships
+              parents = polymorphicField
+                .filter((item) => item && item.relationTo === collectionSlug)
+                .map((item) => item.value)
+            } else if (polymorphicField && polymorphicField.relationTo === collectionSlug) {
+              // Handle single polymorphic relationship
+              parents = [polymorphicField.value]
+            } else {
+              parents = []
+            }
+          } else {
+            // For regular relationships, use the array-aware function to handle cases where the join field is within an array
+            parents = getByPathWithArrays(result, dbFieldName)
+          }
+
+          // For version documents, we need to map the result to the parent document
+          let resultToAdd = result
+          if (useDrafts) {
+            // For version documents, we want to return the parent document ID but with the version data
+            resultToAdd = {
+              ...result,
+              id: result.parent || result._id, // Use parent document ID as the ID for joins, fallback to _id
+            }
+          }
+
+          for (const parent of parents) {
+            if (!parent) {
+              continue
+            }
+            const parentKey = parent as string
+            if (!grouped[parentKey]) {
+              grouped[parentKey] = []
+            }
+            grouped[parentKey].push(resultToAdd)
+          }
         }
       }
+    }
 
-      // Apply appropriate sorting
+    // Apply appropriate sorting (only for polymorphic collection joins)
+    if (isPolymorphicCollectionJoin) {
       const hasFieldSort = sortEntries.some(([prop]) => prop !== '_id' && prop !== 'relationTo')
 
       if (hasFieldSort) {
@@ -313,233 +415,6 @@ export async function resolveJoins({
           })
         }
       }
-
-      // Apply pagination settings
-      const limit = joinQuery.limit ?? joinDef.field.defaultLimit ?? 10
-      const page = joinQuery.page ?? 1
-
-      // Determine if the join field should be localized
-      const localeSuffix =
-        fieldShouldBeLocalized({
-          field: joinDef.field,
-          parentIsLocalized: joinDef.parentIsLocalized,
-        }) &&
-        adapter.payload.config.localization &&
-        effectiveLocale
-          ? `.${effectiveLocale}`
-          : ''
-
-      // Adjust the join path with locale suffix if needed
-      const localizedJoinPath = `${joinPath}${localeSuffix}`
-
-      return {
-        joinPath,
-        result: {
-          effectiveLocale,
-          grouped,
-          joinDef,
-          joinQuery,
-          limit,
-          localizedJoinPath,
-          page,
-        },
-      }
-    }
-
-    // Handle regular joins (including regular polymorphic joins)
-    const targetConfig = adapter.payload.collections[joinDef.field.collection as string]?.config
-    if (!targetConfig) {
-      return { joinPath, result: null }
-    }
-
-    // Determine if we should use drafts/versions for the target collection
-    const useDrafts = versions && Boolean(targetConfig.versions?.drafts)
-
-    // Choose the appropriate model based on whether we're querying drafts
-    let JoinModel
-    if (useDrafts) {
-      JoinModel = adapter.versions[targetConfig.slug]
-    } else {
-      JoinModel = adapter.collections[targetConfig.slug]
-    }
-
-    if (!JoinModel) {
-      return { joinPath, result: null }
-    }
-
-    // Extract all parent document IDs to use in the join query
-    const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
-
-    // Determine the fields to use based on whether we're querying drafts
-    const fields = useDrafts
-      ? buildVersionCollectionFields(adapter.payload.config, targetConfig, true)
-      : targetConfig.flattenedFields
-
-    // Build the base query for the target collection
-    const whereQuery = useDrafts
-      ? await JoinModel.buildQuery({
-          locale,
-          payload: adapter.payload,
-          where: combineQueries(appendVersionToQueryKey(joinQuery.where || {}), {
-            latest: {
-              equals: true,
-            },
-          }),
-        })
-      : await buildQuery({
-          adapter,
-          collectionSlug: joinDef.field.collection as string,
-          fields: targetConfig.flattenedFields,
-          locale,
-          where: joinQuery.where || {},
-        })
-
-    // Use the provided locale or fall back to the default locale for localized fields
-    const localizationConfig = adapter.payload.config.localization
-    const effectiveLocale =
-      locale ||
-      (typeof localizationConfig === 'object' &&
-        localizationConfig &&
-        localizationConfig.defaultLocale)
-
-    // Handle localized paths and version prefixes
-    let dbFieldName = joinDef.field.on
-    if (effectiveLocale && typeof localizationConfig === 'object' && localizationConfig) {
-      const pathSegments = joinDef.field.on.split('.')
-      const transformedSegments: string[] = []
-
-      for (let i = 0; i < pathSegments.length; i++) {
-        const segment = pathSegments[i]!
-        transformedSegments.push(segment)
-
-        // Check if this segment corresponds to a localized field
-        const fieldAtSegment = fields.find((f) => f.name === segment)
-        if (fieldAtSegment && fieldAtSegment.localized) {
-          transformedSegments.push(effectiveLocale)
-        }
-      }
-
-      dbFieldName = transformedSegments.join('.')
-    }
-
-    // Add version prefix for draft queries
-    if (useDrafts) {
-      dbFieldName = `version.${dbFieldName}`
-    }
-
-    // Check if the target field is a polymorphic relationship (for regular joins)
-    const isPolymorphic = joinDef.targetField
-      ? Array.isArray(joinDef.targetField.relationTo)
-      : false
-
-    // Add the join condition: find documents where the join field matches any parent ID
-    if (isPolymorphic) {
-      // For polymorphic relationships, we need to match both relationTo and value
-      whereQuery[`${dbFieldName}.relationTo`] = collectionSlug
-      whereQuery[`${dbFieldName}.value`] = { $in: parentIDs }
-    } else {
-      // For regular relationships
-      whereQuery[dbFieldName] = { $in: parentIDs }
-    }
-
-    // Build the sort parameters for the query
-    const sort = buildSortParam({
-      adapter,
-      config: adapter.payload.config,
-      fields,
-      locale,
-      sort: useDrafts
-        ? getQueryDraftsSort({
-            collectionConfig: targetConfig,
-            sort: joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
-          })
-        : joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
-      timestamps: true,
-    })
-
-    // Convert sort object to Mongoose-compatible format
-    // Mongoose expects -1 for descending and 1 for ascending
-    const mongooseSort = Object.entries(sort).reduce(
-      (acc, [key, value]) => {
-        acc[key] = value === 'desc' ? -1 : 1
-        return acc
-      },
-      {} as Record<string, -1 | 1>,
-    )
-
-    // Execute the query to get all related documents
-    // Build projection to only fetch necessary fields for better performance
-    const projection = buildJoinProjection(dbFieldName, useDrafts, sort, !!joinQuery.sort)
-
-    const results = await JoinModel.find(whereQuery, projection).sort(mongooseSort).lean()
-
-    // Transform the results to convert _id to id and handle other transformations
-    if (useDrafts) {
-      // For version documents, manually convert _id to id to preserve nested structure
-      for (const result of results) {
-        if (result._id) {
-          result.id = result._id
-          delete result._id
-        }
-      }
-    } else {
-      transform({
-        adapter,
-        data: results,
-        fields: targetConfig.fields,
-        operation: 'read',
-      })
-    }
-
-    // Group the results by their parent document ID
-    const grouped: Record<string, Record<string, unknown>[]> = {}
-
-    for (const res of results) {
-      // Get the parent ID(s) from the result using the join field
-      let parents: unknown[]
-
-      if (isPolymorphic) {
-        // For polymorphic relationships, extract the value from the polymorphic structure
-        const polymorphicField = getByPath(res, dbFieldName) as
-          | { relationTo: string; value: unknown }
-          | { relationTo: string; value: unknown }[]
-
-        if (Array.isArray(polymorphicField)) {
-          // Handle arrays of polymorphic relationships
-          parents = polymorphicField
-            .filter((item) => item && item.relationTo === collectionSlug)
-            .map((item) => item.value)
-        } else if (polymorphicField && polymorphicField.relationTo === collectionSlug) {
-          // Handle single polymorphic relationship
-          parents = [polymorphicField.value]
-        } else {
-          parents = []
-        }
-      } else {
-        // For regular relationships, use the array-aware function to handle cases where the join field is within an array
-        parents = getByPathWithArrays(res, dbFieldName)
-      }
-
-      // For version documents, we need to map the result to the parent document
-      let resultToAdd = res
-      if (useDrafts) {
-        // For version documents, we want to return the parent document ID but with the version data
-        resultToAdd = {
-          ...res,
-          id: res.parent || res._id, // Use parent document ID as the ID for joins, fallback to _id
-        }
-      }
-
-      for (const parent of parents) {
-        if (!parent) {
-          continue
-        }
-        const parentKey = parent as string
-        if (!grouped[parentKey]) {
-          grouped[parentKey] = []
-        }
-        grouped[parentKey].push(resultToAdd)
-      }
     }
 
     // Apply pagination settings
@@ -565,7 +440,7 @@ export async function resolveJoins({
       result: {
         effectiveLocale,
         grouped,
-        isPolymorphic: false,
+        joinDef,
         joinQuery,
         limit,
         localizedJoinPath,
