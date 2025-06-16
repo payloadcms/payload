@@ -22,7 +22,10 @@ export const seed = async (_payload: Payload) => {
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
     _payload,
-    collectionSlugs: _payload.config.collections.map((collection) => collection.slug),
+    collectionSlugs: [
+      ..._payload.config.collections.map((collection) => collection.slug),
+      'payload-jobs',
+    ],
     seedFunction: seed,
     snapshotKey: 'fieldsTest',
     uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
