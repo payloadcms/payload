@@ -3,6 +3,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -281,12 +282,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  if (schedulePublishCollections.length > 0 || schedulePublishGlobals.length > 0) {
-    if (!Array.isArray(configWithDefaults.jobs?.tasks)) {
-      configWithDefaults.jobs!.tasks = []
-    }
-
-    configWithDefaults.jobs!.tasks.push(
+  if (schedulePublishCollections.length || schedulePublishGlobals.length) {
+    ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
         adminUserSlug: config.admin!.user,
         collections: schedulePublishCollections,
@@ -295,44 +292,44 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     )
   }
 
-  // Need to add default jobs collection before locked documents collections
-  if (
+  ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-    (Array.isArray(configWithDefaults.jobs?.workflows) &&
-      configWithDefaults.jobs?.workflows?.length)
-  ) {
+      (Array.isArray(configWithDefaults.jobs?.workflows) &&
+        configWithDefaults.jobs?.workflows?.length),
+  )
+
+  // Need to add default jobs collection before locked documents collections
+  if (config.jobs.enabled) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
-    if (defaultJobsCollection) {
-      if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
-        defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
-          defaultJobsCollection,
-        })
+    if (typeof config.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = config.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
 
-        const hooks = defaultJobsCollection?.hooks
-        // @todo - delete this check in 4.0
-        if (hooks && config?.jobs?.runHooks !== true) {
-          for (const hook of Object.keys(hooks)) {
-            const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
-            if (hooks[hook as keyof typeof hooks]!.length > defaultAmount) {
-              // eslint-disable-next-line no-console
-              console.warn(
-                `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
-              )
-              break
-            }
+      const hooks = defaultJobsCollection?.hooks
+      // @todo - delete this check in 4.0
+      if (hooks && config?.jobs?.runHooks !== true) {
+        for (const [hookKey, hook] of Object.entries(hooks)) {
+          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
+          if (hook.length > defaultAmount) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+            )
+            break
           }
         }
       }
-      const sanitizedJobsCollection = await sanitizeCollection(
-        config as unknown as Config,
-        defaultJobsCollection,
-        richTextSanitizationPromises,
-        validRelationships,
-      )
-
-      configWithDefaults.collections!.push(sanitizedJobsCollection)
     }
+    const sanitizedJobsCollection = await sanitizeCollection(
+      config as unknown as Config,
+      defaultJobsCollection,
+      richTextSanitizationPromises,
+      validRelationships,
+    )
+
+    configWithDefaults.collections!.push(sanitizedJobsCollection)
   }
 
   configWithDefaults.collections!.push(

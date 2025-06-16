@@ -772,7 +772,7 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.autoRun && !isNextBuild()) {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 

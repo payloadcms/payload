@@ -20,6 +20,7 @@ import {
   allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -830,6 +831,16 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         focalPoint: false,
+      },
+    },
+    {
+      slug: constructorOptionsSlug,
+      fields: [],
+      upload: {
+        constructorOptions: {
+          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+        },
+        staticDir: path.resolve(dirname, './media'),
       },
     },
   ],

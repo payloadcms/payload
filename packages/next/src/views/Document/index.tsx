@@ -6,6 +6,7 @@ import type {
   DocumentViewServerPropsOnly,
   EditViewComponent,
   PayloadComponent,
+  RenderDocumentVersionsProperties,
 } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
@@ -57,6 +58,7 @@ export const renderDocument = async ({
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
+  versions,
   viewType,
 }: {
   drawerSlug?: string
@@ -64,6 +66,7 @@ export const renderDocument = async ({
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  versions?: RenderDocumentVersionsProperties
 } & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
@@ -178,6 +181,7 @@ export const renderDocument = async ({
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
+    hasPublishedDoc,
     i18n,
     initPageResult,
     locale,
@@ -187,6 +191,7 @@ export const renderDocument = async ({
     routeSegments: segments,
     searchParams,
     user,
+    versions,
   }
 
   if (

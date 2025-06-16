@@ -15,6 +15,7 @@ import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
+import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
@@ -51,6 +52,7 @@ export default buildConfigWithDefaults({
     Diff,
     TextCollection,
     Media,
+    Media2,
   ],
   globals: [
     AutosaveGlobal,
