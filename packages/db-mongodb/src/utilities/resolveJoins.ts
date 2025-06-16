@@ -213,10 +213,6 @@ export async function resolveJoins({
       const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
 
       const results = await JoinModel.find(whereQuery, projection, {
-        limit: joinQuery.limit,
-        skip: joinQuery.page
-          ? (joinQuery.page - 1) * (joinQuery.limit ?? joinDef.field.defaultLimit ?? 10)
-          : 0,
         sort,
       }).lean()
 
