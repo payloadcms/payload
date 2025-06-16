@@ -1,18 +1,18 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
-  .column-selector {
+  .pill-selector {
     display: flex;
     flex-wrap: wrap;
     background: var(--theme-elevation-50);
     padding: var(--base);
     gap: calc(var(--base) / 2);
 
-    &__column {
+    &__pill {
       background-color: transparent;
       box-shadow: 0 0 0 1px var(--theme-elevation-150);
 
-      &.column-selector__column {
+      &.pill-selector__pill {
         cursor: pointer;
 
         &:hover {
@@ -20,7 +20,7 @@
         }
       }
 
-      &.column-selector__column--active {
+      &.pill-selector__pill--selected {
         background-color: var(--theme-elevation-0);
         box-shadow:
           0 0px 1px 1px var(--theme-elevation-150),
@@ -41,7 +41,7 @@
     }
 
     @include small-break {
-      padding: calc(var(--base) / 2) calc(var(--base) / 2) 0;
+      padding: calc(var(--base) / 2);
     }
   }
 }

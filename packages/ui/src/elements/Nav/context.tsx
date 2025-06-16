@@ -96,9 +96,12 @@ export const NavProvider: React.FC<{
     }
     setHydrated(true)
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShouldAnimate(true)
     }, 100)
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks

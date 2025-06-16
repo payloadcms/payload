@@ -76,19 +76,23 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     processingOrder,
     queue = 'default',
     req,
+    req: {
+      payload,
+      payload: {
+        config: { jobs: jobsConfig },
+      },
+    },
     sequential,
     where: whereFromProps,
   } = args
 
-  const jobsConfig = req.payload.config.jobs
-
   if (!overrideAccess) {
-    const hasAccess = await jobsConfig.access.run({ req })
+    const accessFn = jobsConfig?.access?.run ?? (() => true)
+    const hasAccess = await accessFn({ req })
     if (!hasAccess) {
       throw new Forbidden(req.t)
     }
   }
-
   const and: Where[] = [
     {
       completedAt: {
@@ -154,7 +158,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   } else {
     let defaultProcessingOrder: Sort =
-      req.payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
+      payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
 
     const processingOrderConfig = jobsConfig.processingOrder
     if (typeof processingOrderConfig === 'function') {
@@ -214,13 +218,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  if (jobs?.length) {
-    req.payload.logger.info({
-      msg: `Running ${jobs.length} jobs.`,
-      new: newJobs?.length,
-      retrying: existingJobs?.length,
-    })
-  }
+  payload.logger.info({
+    msg: `Running ${jobs.length} jobs.`,
+    new: newJobs?.length,
+    retrying: existingJobs?.length,
+  })
+
   const successfullyCompletedJobs: (number | string)[] = []
 
   const runSingleJob = async (job: Job) => {
@@ -229,16 +232,17 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
-    const workflowConfig: WorkflowConfig = job.workflowSlug
-      ? jobsConfig.workflows.find(({ slug }) => slug === job.workflowSlug)!
-      : {
-          slug: 'singleTask',
-          handler: async ({ job, tasks }) => {
-            await tasks[job.taskSlug as string]!('1', {
-              input: job.input,
-            })
-          },
-        }
+    const workflowConfig: WorkflowConfig =
+      job.workflowSlug && jobsConfig.workflows?.length
+        ? jobsConfig.workflows.find(({ slug }) => slug === job.workflowSlug)!
+        : {
+            slug: 'singleTask',
+            handler: async ({ job, tasks }) => {
+              await tasks[job.taskSlug as string]!('1', {
+                input: job.input,
+              })
+            },
+          }
 
     if (!workflowConfig) {
       return null // Skip jobs with no workflow configuration
@@ -250,7 +254,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     // OR it will be a path, which we will need to import via eval to avoid
     // Next.js compiler dynamic import expression errors
     let workflowHandler: WorkflowHandler | WorkflowJSON
-
     if (
       typeof workflowConfig.handler === 'function' ||
       (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
@@ -262,7 +265,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       if (!workflowHandler) {
         const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
         const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-        req.payload.logger.error(errorMessage)
+        payload.logger.error(errorMessage)
 
         await updateJob({
           error: {
@@ -326,20 +329,20 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {
     try {
       if (jobsConfig.runHooks) {
-        await req.payload.delete({
+        await payload.delete({
           collection: jobsCollectionSlug,
           depth: 0, // can be 0 since we're not returning anything
           disableTransaction: true,
           where: { id: { in: successfullyCompletedJobs } },
         })
       } else {
-        await req.payload.db.deleteMany({
+        await payload.db.deleteMany({
           collection: jobsCollectionSlug,
           where: { id: { in: successfullyCompletedJobs } },
         })
       }
     } catch (err) {
-      req.payload.logger.error({
+      payload.logger.error({
         err,
         msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
       })
