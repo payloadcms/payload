@@ -5,7 +5,6 @@ import { applyBrowseByFolderTypeFilter } from 'helpers/folders/applyBrowseByFold
 import { createFolderDoc } from 'helpers/folders/createFolderDoc.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
