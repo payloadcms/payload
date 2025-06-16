@@ -1,11 +1,7 @@
 import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
-import type {
-  WorkflowConfig,
-  WorkflowHandler,
-  WorkflowTypes,
-} from '../../config/types/workflowTypes.js'
+import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
@@ -235,7 +231,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
-    const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
+    const workflowConfig: WorkflowConfig = job.workflowSlug
       ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)!
       : {
           slug: 'singleTask',
@@ -255,7 +251,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     // the runner will either be passed to the config
     // OR it will be a path, which we will need to import via eval to avoid
     // Next.js compiler dynamic import expression errors
-    let workflowHandler: WorkflowHandler<WorkflowTypes> | WorkflowJSON<WorkflowTypes>
+    let workflowHandler: WorkflowHandler | WorkflowJSON
 
     if (
       typeof workflowConfig.handler === 'function' ||

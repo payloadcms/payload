@@ -1,7 +1,7 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
-import type { WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
+import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
@@ -12,8 +12,8 @@ type Args = {
   job: Job
   req: PayloadRequest
   updateJob: UpdateJobFunction
-  workflowConfig: WorkflowConfig<WorkflowTypes>
-  workflowHandler: WorkflowJSON<WorkflowTypes>
+  workflowConfig: WorkflowConfig
+  workflowHandler: WorkflowJSON
 }
 
 export type RunJSONJobResult = {
@@ -33,7 +33,7 @@ export const runJSONJob = async ({
     reachedMaxRetries: false,
   }
 
-  const stepsToRun: WorkflowStep<string, string>[] = []
+  const stepsToRun: WorkflowStep<string>[] = []
 
   for (const step of workflowHandler) {
     if ('task' in step) {
@@ -45,7 +45,7 @@ export const runJSONJob = async ({
         continue
       }
     }
-    if (step.condition && !step.condition({ job: job as Job<any> })) {
+    if (step.condition && !step.condition({ job })) {
       continue
     }
     stepsToRun.push(step)
@@ -62,7 +62,7 @@ export const runJSONJob = async ({
       stepsToRun.map(async (step) => {
         if ('task' in step) {
           await tasks[step.task]!(step.id, {
-            input: step.input ? step.input({ job: job as Job<any> }) : {},
+            input: step.input ? step.input({ job }) : {},
             retries: step.retries,
           })
         } else {
@@ -88,7 +88,7 @@ export const runJSONJob = async ({
 
   // Check if workflow has completed
   let workflowCompleted = false
-  for (const [slug, map] of Object.entries(job.taskStatus!)) {
+  for (const [slug, map] of Object.entries(job.taskStatus)) {
     for (const [id, taskStatus] of Object.entries(map)) {
       if (taskStatus.complete) {
         const step = workflowHandler.find((step) => {
