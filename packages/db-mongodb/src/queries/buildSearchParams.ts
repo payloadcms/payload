@@ -245,10 +245,13 @@ export async function buildSearchParam({
             value: { $in },
           }
         } else {
-          relationshipQuery = {
-            value: {
-              _id: { $in },
-            },
+          const nextSubPath = pathsToQuery[i + 1]?.path
+          if (nextSubPath) {
+            relationshipQuery = {
+              value: {
+                [nextSubPath]: { $in },
+              },
+            }
           }
         }
       }

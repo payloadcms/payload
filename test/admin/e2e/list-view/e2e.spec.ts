@@ -163,7 +163,7 @@ describe('List View', () => {
       await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('ID'),
         })
         .click()
@@ -358,11 +358,11 @@ describe('List View', () => {
       await page.locator('.list-controls__toggle-columns').click()
 
       // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       // ensure the ID column is active
-      const idButton = page.locator('.column-selector .column-selector__column', {
+      const idButton = page.locator('.pill-selector .pill-selector__pill', {
         hasText: exactText('ID'),
       })
 
@@ -370,7 +370,7 @@ describe('List View', () => {
 
       const buttonClasses = await idButton.getAttribute('class')
 
-      if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
+      if (buttonClasses && !buttonClasses.includes('pill-selector__pill--selected')) {
         await idButton.click()
         await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
       }
@@ -827,10 +827,10 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
 
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
 
       await expect(
-        page.locator(`.column-selector .column-selector__column`, {
+        page.locator(`.pill-selector .pill-selector__pill`, {
           hasText: exactText('Hidden Field'),
         }),
       ).toBeHidden()
@@ -840,10 +840,10 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
 
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
 
       await expect(
-        page.locator(`.column-selector .column-selector__column`, {
+        page.locator(`.pill-selector .pill-selector__pill`, {
           hasText: exactText('Admin Hidden Field'),
         }),
       ).toBeVisible()
@@ -853,11 +853,11 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
 
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
 
       // Check if "Disable List Column Text" is not present in the column options
       await expect(
-        page.locator(`.column-selector .column-selector__column`, {
+        page.locator(`.pill-selector .pill-selector__pill`, {
           hasText: exactText('Disable List Column Text'),
         }),
       ).toBeHidden()
@@ -867,11 +867,11 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
 
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
 
       // Check if "Disable List Filter Text" is present in the column options
       await expect(
-        page.locator(`.column-selector .column-selector__column`, {
+        page.locator(`.pill-selector .pill-selector__pill`, {
           hasText: exactText('Disable List Filter Text'),
         }),
       ).toBeVisible()
@@ -895,7 +895,7 @@ describe('List View', () => {
 
       await openListColumns(page, {})
       const numberOfColumns = await page.locator(tableHeaders).count()
-      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('.pill-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
@@ -960,11 +960,11 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -974,7 +974,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Text Field In Unnamed Group'),
         })
         .click()
@@ -988,7 +988,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await expect(
-        page.locator('.column-selector .column-selector__column', {
+        page.locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Group'),
         }),
       ).toBeHidden()
@@ -1003,7 +1003,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await expect(
-        page.locator('.column-selector .column-selector__column', {
+        page.locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Group With Custom Cell'),
         }),
       ).toBeVisible()
@@ -1020,14 +1020,14 @@ describe('List View', () => {
 
       // Enable top-level column
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Some Text Field'),
         })
         .click()
 
       // Enable group column
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
@@ -1036,7 +1036,7 @@ describe('List View', () => {
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
 
       // Expect nested group cell
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
     })
@@ -1046,11 +1046,11 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
         })
         .click()
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
     })
@@ -1060,7 +1060,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Nested Text Field In Unnamed Tab'),
         })
         .click()
@@ -1076,7 +1076,7 @@ describe('List View', () => {
       await page.reload()
 
       await expect(
-        page.locator('.list-controls .column-selector .column-selector__column').first(),
+        page.locator('.list-controls .pill-selector .pill-selector__pill').first(),
       ).toHaveText('Number')
 
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
@@ -1113,7 +1113,7 @@ describe('List View', () => {
       // ensure that the columns are in the correct order
       await expect(
         page
-          .locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column')
+          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
           .first(),
       ).toHaveText('Number')
     })
@@ -1150,11 +1150,11 @@ describe('List View', () => {
 
       const columnContainer = page.locator('.list-controls__columns').first()
 
-      const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+      const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
         hasText: exactText('ID'),
       })
 
-      await expect(column).not.toHaveClass(/column-selector__column--active/)
+      await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
     })
 
     test('should retain preferences when changing drawer collections', async () => {
@@ -1215,9 +1215,9 @@ describe('List View', () => {
       // ensure that the "id" column is still deselected
       await expect(
         page
-          .locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column')
+          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
           .first(),
-      ).not.toHaveClass('column-selector__column--active')
+      ).not.toHaveClass('pill-selector__pill--selected')
 
       // select the "Post" collection again
       await collectionSelector.click()
@@ -1231,9 +1231,9 @@ describe('List View', () => {
       // ensure that the "number" column is still deselected
       await expect(
         page
-          .locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column')
+          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
           .first(),
-      ).not.toHaveClass('column-selector__column--active')
+      ).not.toHaveClass('pill-selector__pill--selected')
     })
 
     test('should render custom table cell component', async () => {
@@ -1418,30 +1418,30 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Group > Some Text Field'),
         })
         .click()
-      const upChevron = page.locator('#heading-namedGroup-someTextField .sort-column__asc')
-      const downChevron = page.locator('#heading-namedGroup-someTextField .sort-column__desc')
+      const upChevron = page.locator('#heading-namedGroup__someTextField .sort-column__asc')
+      const downChevron = page.locator('#heading-namedGroup__someTextField .sort-column__desc')
 
       await upChevron.click()
       await page.waitForURL(/sort=namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
-      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
 
       await downChevron.click()
       await page.waitForURL(/sort=-namedGroup.someTextField/)
 
-      await expect(page.locator('.row-1 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
-      await expect(page.locator('.row-2 .cell-namedGroup-someTextField')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedGroup__someTextField')).toHaveText(
         '<No Some Text Field>',
       )
     })
@@ -1450,34 +1450,34 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await page
-        .locator('.column-selector .column-selector__column', {
+        .locator('.pill-selector .pill-selector__pill', {
           hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
         })
         .click()
       const upChevron = page.locator(
-        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__asc',
+        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__asc',
       )
       const downChevron = page.locator(
-        '#heading-namedTab-nestedTextFieldInNamedTab .sort-column__desc',
+        '#heading-namedTab__nestedTextFieldInNamedTab .sort-column__desc',
       )
 
       await upChevron.click()
       await page.waitForURL(/sort=namedTab.nestedTextFieldInNamedTab/)
 
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )
-      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
 
       await downChevron.click()
       await page.waitForURL(/sort=-namedTab.nestedTextFieldInNamedTab/)
 
-      await expect(page.locator('.row-1 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
-      await expect(page.locator('.row-2 .cell-namedTab-nestedTextFieldInNamedTab')).toHaveText(
+      await expect(page.locator('.row-2 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         '<No Nested Text Field In Named Tab>',
       )
     })
@@ -1492,13 +1492,13 @@ describe('List View', () => {
       await page.waitForURL(/sort=title/)
 
       const columnAfterSort = page.locator(
-        `.list-controls__columns .column-selector .column-selector__column`,
+        `.list-controls__columns .pill-selector .pill-selector__pill`,
         {
           hasText: exactText('ID'),
         },
       )
 
-      await expect(columnAfterSort).not.toHaveClass('column-selector__column--active')
+      await expect(columnAfterSort).not.toHaveClass('pill-selector__pill--selected')
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
     })
@@ -1522,13 +1522,13 @@ describe('List View', () => {
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
       const columnAfterSort = page.locator(
-        `.list-controls__columns .column-selector .column-selector__column`,
+        `.list-controls__columns .pill-selector .pill-selector__pill`,
         {
           hasText: exactText('Status'),
         },
       )
 
-      await expect(columnAfterSort).toHaveClass(/column-selector__column--active/)
+      await expect(columnAfterSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
@@ -1566,13 +1566,13 @@ describe('List View', () => {
 
       // ensure the column is still visible
       const columnAfterSecondSort = page.locator(
-        `.list-controls__columns .column-selector .column-selector__column`,
+        `.list-controls__columns .pill-selector .pill-selector__pill`,
         {
           hasText: exactText('Status'),
         },
       )
 
-      await expect(columnAfterSecondSort).toHaveClass(/column-selector__column--active/)
+      await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
@@ -1591,7 +1591,7 @@ describe('List View', () => {
       await page.locator('.list-controls__toggle-columns').click()
 
       await expect(
-        page.locator('.column-selector__column', {
+        page.locator('.pill-selector__pill', {
           hasText: exactText('Title'),
         }),
       ).toHaveText('Title')
@@ -1620,7 +1620,7 @@ describe('List View', () => {
       await page.locator('.list-controls__toggle-columns').click()
       // expecting the label to fall back to english as default fallbackLng
       await expect(
-        page.locator('.column-selector__column', {
+        page.locator('.pill-selector__pill', {
           hasText: exactText('Title'),
         }),
       ).toHaveText('Title')

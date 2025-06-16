@@ -398,6 +398,7 @@ export const traverseFields = ({
           if (typeof blocksTableNameMap[blockTableName] === 'undefined') {
             blocksTableNameMap[blockTableName] = 1
           } else if (
+            !adapter.rawTables[blockTableName] ||
             !validateExistingBlockIsIdentical({
               block,
               localized: field.localized,

@@ -84,6 +84,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
   } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
+    // If a group field has subfields and has a name, otherwise we catch it below along with collapsible and row fields
     if (field.type === 'group' && 'fields' in field) {
       if (moveSubFieldsToTop) {
         const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
@@ -101,7 +102,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
         const nameWithPrefix =
           'name' in field && field.name
             ? pathPrefix
-              ? `${pathPrefix}-${field.name}`
+              ? `${pathPrefix}.${field.name}`
               : field.name
             : pathPrefix
 
@@ -120,8 +121,12 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
           }),
         )
       } else {
-        // Hoisting diabled - keep as top level field
-        acc.push(field as FlattenedField<TField>)
+        if (fieldAffectsData(field)) {
+          // Hoisting diabled - keep as top level field
+          acc.push(field as FlattenedField<TField>)
+        } else {
+          acc.push(...flattenTopLevelFields(field.fields as TField[], options))
+        }
       }
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
@@ -138,7 +143,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
 
               const pathPrefixForTab = tab.name
                 ? pathPrefix
-                  ? `${pathPrefix}-${tab.name}`
+                  ? `${pathPrefix}.${tab.name}`
                   : tab.name
                 : pathPrefix
 
@@ -191,7 +196,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
         ...(field as FlattenedField<TField>),
         ...(moveSubFieldsToTop &&
           isHoistingFromGroup && {
-            accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
+            accessor: pathPrefix && name ? `${pathPrefix}.${name}` : (name ?? ''),
             labelWithPrefix: labelPrefix
               ? `${labelPrefix} > ${translatedLabel ?? name}`
               : (translatedLabel ?? name),
