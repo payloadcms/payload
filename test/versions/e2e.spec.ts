@@ -175,6 +175,36 @@ describe('Versions', () => {
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
+    test('autosave relationships - should select doc after creating from relationship field', async () => {
+      await page.goto(postURL.create)
+      const autosaveRelationField = page.locator('#field-relationToAutosaves')
+      await expect(autosaveRelationField).toBeVisible()
+      const addNewButton = autosaveRelationField.locator(
+        '.relationship-add-new__add-button.doc-drawer__toggler',
+      )
+      await addNewButton.click()
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
+      await titleField.fill('test')
+      await descriptionField.fill('test')
+
+      const createdDate = await page.textContent(
+        'li:has(p:has-text("Created:")) .doc-controls__value',
+      )
+
+      // wait for modified date and created date to be different
+      await expect(async () => {
+        const modifiedDateLocator = page.locator(
+          'li:has(p:has-text("Last Modified:")) .doc-controls__value',
+        )
+        await expect(modifiedDateLocator).not.toHaveText(createdDate ?? '')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      const closeDrawer = page.locator('.doc-drawer__header-close')
+      await closeDrawer.click()
+      const fieldValue = autosaveRelationField.locator('.value-container')
+      await expect(fieldValue).toContainText('test')
+    })
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
