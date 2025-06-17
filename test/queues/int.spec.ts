@@ -41,6 +41,7 @@ describe('Queues', () => {
     if (data.token) {
       token = data.token
     }
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('will run access control on jobs runner', async () => {
@@ -182,7 +183,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflow-level retries are respected', async () => {
@@ -218,8 +218,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont limit retries if no retries property is sett', async () => {
@@ -255,8 +253,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont retry if retries set to 0, even if individual tasks have retries > 0 set', async () => {
@@ -292,8 +288,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont retry if neither workflows nor tasks have retries set', async () => {
@@ -329,8 +323,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows retry if workflows have retries set and tasks do not have retries set, due to tasks inheriting workflow retries', async () => {
@@ -366,8 +358,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows do not retry if workflows have retries set and tasks have retries set to 0', async () => {
@@ -403,8 +393,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   /*
@@ -527,8 +515,6 @@ describe('Queues', () => {
     expect(durations[1]).toBeGreaterThan(600)
     expect(durations[2]).toBeGreaterThan(1200)
     expect(durations[3]).toBeGreaterThan(2400)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure jobs run in FIFO order by default', async () => {
@@ -682,12 +668,27 @@ describe('Queues', () => {
     })
 
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(before.id).toBe(id)
+    expect(before?.id).toBe(id)
 
     await payload.jobs.run()
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after).toBeNull()
+  })
+
+  it('should not delete failed jobs if deleteJobOnComplete is true', async () => {
+    const { id } = await payload.jobs.queue({
+      workflow: 'failsImmediately',
+      input: {},
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before?.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after?.id).toBe(id)
   })
 
   it('should respect deleteJobOnComplete false configuration', async () => {
@@ -700,14 +701,12 @@ describe('Queues', () => {
     })
 
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(before.id).toBe(id)
+    expect(before?.id).toBe(id)
 
     await payload.jobs.run()
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(after.id).toBe(id)
-
-    payload.config.jobs.deleteJobOnComplete = true
+    expect(after?.id).toBe(id)
   })
 
   it('can queue single tasks', async () => {
@@ -914,7 +913,6 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(numberOfTasks) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
     expect(allSimples.docs[numberOfTasks - 1].title).toBe('from single task')
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
@@ -1086,7 +1084,6 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
@@ -1131,8 +1128,6 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
@@ -1175,7 +1170,6 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can run sub-tasks', async () => {
@@ -1213,7 +1207,6 @@ describe('Queues', () => {
     expect(jobAfterRun.log[1].parent).toBeUndefined()
 
     expect(jobAfterRun.log[2].taskID).toBe('create two docs')
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure successful sub-tasks are not retried', async () => {
@@ -1253,7 +1246,6 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask2Retried).toBe(3)
     // @ts-expect-error
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
@@ -1288,7 +1280,6 @@ describe('Queues', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
@@ -1327,7 +1318,6 @@ describe('Queues', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can tasks throw error', async () => {
@@ -1349,7 +1339,6 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('failed')
     expect(jobAfterRun.log[0].state).toBe('failed')
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can tasks return error', async () => {
@@ -1371,7 +1360,7 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('Task handler returned a failed state')
     expect(jobAfterRun.log[0].state).toBe('failed')
-    payload.config.jobs.deleteJobOnComplete = true
+    payload
   })
 
   it('can tasks return error with custom error message', async () => {
@@ -1395,7 +1384,6 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('custom error message')
     expect(jobAfterRun.log[0].state).toBe('failed')
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can reliably run workflows with parallel tasks', async () => {
@@ -1439,6 +1427,5 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
-    payload.config.jobs.deleteJobOnComplete = true
   })
 })
