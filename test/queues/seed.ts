@@ -1,13 +1,7 @@
 import type { Payload } from 'payload'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -27,7 +21,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
       'payload-jobs',
     ],
     seedFunction: seed,
-    snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    snapshotKey: 'queuesTest',
   })
 }
