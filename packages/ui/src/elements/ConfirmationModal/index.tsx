@@ -77,7 +77,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{heading}</h1>
-          <p>{body}</p>
+          {typeof body === 'string' ? <p>{body}</p> : body}
         </div>
         <div className={`${baseClass}__controls`}>
           <Button
