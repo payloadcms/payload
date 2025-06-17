@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../../index.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { TaskError } from './index.js'
 
+import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -112,16 +113,27 @@ export async function handleTaskError({
     }
   }
 
-  const { hasFinalError, maxWorkflowRetries, waitUntil } = getWorkflowRetryBehavior({
-    job,
-    retriesConfig: workflowConfig.retries,
-  })
-
   /**
    * Task can retry:
    * - If workflow can retry, allow it to retry
    * - If workflow reached max retries, do not retry and set final error
    */
+
+  // First set task waitUntil - if the workflow waitUntil is later, it will be updated later
+  const taskWaitUntil: Date = calculateBackoffWaitUntil({
+    retriesConfig,
+    totalTried: taskStatus?.totalTried ?? 0,
+  })
+
+  // Update job's waitUntil only if this waitUntil is later than the current one
+  if (!job.waitUntil || taskWaitUntil > new Date(job.waitUntil)) {
+    job.waitUntil = taskWaitUntil.toISOString()
+  }
+
+  const { hasFinalError, maxWorkflowRetries, waitUntil } = getWorkflowRetryBehavior({
+    job,
+    retriesConfig: workflowConfig.retries,
+  })
 
   req.payload.logger.error({
     err: error,
