@@ -117,13 +117,15 @@ const configHasJobs = (config: SanitizedConfig): boolean => {
 async function handleSchedules({ req }: { req: PayloadRequest }) {
   const jobsConfig = req.payload.config.jobs
 
-  const tasksWithSchedules = jobsConfig.tasks.filter((task) => {
-    return task.schedule?.length
-  })
+  const tasksWithSchedules =
+    jobsConfig.tasks?.filter((task) => {
+      return task.schedule?.length
+    }) ?? []
 
-  const workflowsWithSchedules = jobsConfig.workflows.filter((workflow) => {
-    return workflow.schedule?.length
-  })
+  const workflowsWithSchedules =
+    jobsConfig.workflows?.filter((workflow) => {
+      return workflow.schedule?.length
+    }) ?? []
 
   const allScheduleQueues = [
     ...tasksWithSchedules.flatMap(
