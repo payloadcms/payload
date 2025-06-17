@@ -207,6 +207,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToDeleteCount_other: 'Jūs grasāties dzēst {{count}} {{label}}',
     aboutToRestoreCount: 'Jūs gatavojaties atjaunot {{count}} {{label}}',
+    aboutToTrash:
+      'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
+    aboutToTrashCount: 'Jūs gatavojaties pārvietot {{count}} {{label}} uz miskasti',
     addBelow: 'Pievienot zemāk',
     addFilter: 'Pievienot filtru',
     adminTheme: 'Administratora tēma',

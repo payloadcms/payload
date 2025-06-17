@@ -206,6 +206,9 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Olete kustutamas {{count}} {{label}}',
     aboutToDeleteCount_other: 'Olete kustutamas {{count}} {{label}}',
     aboutToRestoreCount: 'Te oled taastamas {{count}} {{label}}',
+    aboutToTrash:
+      'Te olete just prügikasti liigutamas {{label}} <1>{{title}}</1>. Kas olete kindel?',
+    aboutToTrashCount: 'Te oled valmis liigutama {{count}} {{label}} prügikasti.',
     addBelow: 'Lisa alla',
     addFilter: 'Lisa filter',
     adminTheme: 'Administreerimisliidese teema',

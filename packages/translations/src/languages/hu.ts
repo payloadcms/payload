@@ -209,6 +209,9 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Törölni készül {{count}} {{label}}',
     aboutToDeleteCount_other: 'Törölni készül {{count}} {{label}}',
     aboutToRestoreCount: 'Ön {{count}} {{label}} helyreállítására készül.',
+    aboutToTrash:
+      'Ön azon van, hogy a következőt: {{label}} <1>{{title}}</1> áthelyezze a szemetesbe. Biztos benne?',
+    aboutToTrashCount: 'Ön a(z) {{count}} {{label}} elemet készül a kukába helyezni.',
     addBelow: 'Hozzáadás lent',
     addFilter: 'Szűrő hozzáadása',
     adminTheme: 'Admin téma',

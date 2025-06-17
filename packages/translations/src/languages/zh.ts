@@ -198,6 +198,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: '您即将删除 {{count}}个{{label}}',
     aboutToDeleteCount_other: '您即将删除 {{count}}个{{label}}',
     aboutToRestoreCount: '您即将恢复 {{count}} {{label}}',
+    aboutToTrash: '您即将将 {{label}} <1>{{title}}</1> 移至垃圾箱。您确定吗？',
+    aboutToTrashCount: '您即将将{{count}}个{{label}}移至垃圾箱',
     addBelow: '添加到下面',
     addFilter: '添加过滤条件',
     adminTheme: '管理页面主题',

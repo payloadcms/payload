@@ -208,6 +208,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: '{{label}}を{{count}}つ削除しようとしています',
     aboutToDeleteCount_other: '{{label}}を{{count}}つ削除しようとしています',
     aboutToRestoreCount: '{{count}} {{label}}を復元しようとしています',
+    aboutToTrash:
+      'あなたは{{label}} <1>{{title}}</1>をゴミ箱に移動しようとしています。よろしいですか？',
+    aboutToTrashCount: 'あなたはまもなく{{count}} {{label}}をゴミ箱に移動しようとしています。',
     addBelow: '下に追加',
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',

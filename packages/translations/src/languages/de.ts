@@ -212,6 +212,9 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToDeleteCount_other: 'Du bist dabei, {{count}} {{label}} zu löschen',
     aboutToRestoreCount: 'Sie sind dabei, {{count}} {{label}} wiederherzustellen.',
+    aboutToTrash:
+      'Sie sind dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Sind Sie sicher?',
+    aboutToTrashCount: 'Sie sind dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Erscheinungsbild',

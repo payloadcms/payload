@@ -211,6 +211,8 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Stai per eliminare {{count}} {{label}}',
     aboutToDeleteCount_other: 'Stai per eliminare {{count}} {{label}}',
     aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
+    aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',
+    aboutToTrashCount: 'Stai per spostare {{count}} {{label}} nel cestino',
     addBelow: 'Aggiungi sotto',
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',

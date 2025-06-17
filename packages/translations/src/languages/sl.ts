@@ -207,6 +207,8 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Izbrisali boste {{count}} {{label}}',
     aboutToDeleteCount_other: 'Izbrisali boste {{count}} {{label}}',
     aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',
+    aboutToTrash: 'Pravkar boste premaknili {{label}} <1>{{title}}</1> v smeti. Ste prepričani?',
+    aboutToTrashCount: 'Pravkar boste premaknili {{count}} {{label}} v smeti.',
     addBelow: 'Dodaj spodaj',
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',

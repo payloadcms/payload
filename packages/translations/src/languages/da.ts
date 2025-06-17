@@ -205,6 +205,9 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Du er ved at slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er ved at slette {{count}} {{label}}',
     aboutToRestoreCount: 'Du er ved at gendanne {{count}} {{label}}',
+    aboutToTrash:
+      'Du er ved at flytte {{label}} <1>{{title}}</1> til skraldespanden. Er du sikker?',
+    aboutToTrashCount: 'Du er ved at flytte {{count}} {{label}} til skraldespanden',
     addBelow: 'Tilføj under',
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',

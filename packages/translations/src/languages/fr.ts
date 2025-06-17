@@ -214,6 +214,9 @@ export const frTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToDeleteCount_other: 'Vous êtes sur le point de supprimer {{count}} {{label}}',
     aboutToRestoreCount: 'Vous êtes sur le point de restaurer {{count}} {{label}}',
+    aboutToTrash:
+      'Vous êtes sur le point de déplacer le {{label}} <1>{{title}}</1> dans la corbeille. Êtes-vous sûr ?',
+    aboutToTrashCount: 'Vous êtes sur le point de déplacer {{count}} {{label}} à la corbeille',
     addBelow: 'Ajoutez ci-dessous',
     addFilter: 'Ajouter un filtre',
     adminTheme: 'Thème d’administration',

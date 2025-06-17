@@ -210,6 +210,8 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: '{{count}} {{label}} silmek üzeresiniz',
     aboutToDeleteCount_other: '{{count}} {{label}} silmek üzeresiniz',
     aboutToRestoreCount: '{{count}} {{label}} geri yüklemek üzeresiniz.',
+    aboutToTrash: '{{label}} <1>{{title}}</1> çöp kutusuna taşımayı düşünüyorsunuz. Emin misiniz?',
+    aboutToTrashCount: '{{count}} {{label}} çöp kutusuna taşımayı düşünüyorsunuz.',
     addBelow: 'Altına ekle',
     addFilter: 'Filtre ekle',
     adminTheme: 'Admin arayüzü',

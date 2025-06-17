@@ -207,6 +207,9 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToDeleteCount_other: 'Siz {{count}} {{label}} silməyə hazırsınız.',
     aboutToRestoreCount: 'Siz {{count}} {{label}} bərpası etməyə hazırsınız.',
+    aboutToTrash:
+      'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
+    aboutToTrashCount: 'Siz {{count}} {{label}}-i zibilə köçürmək barədəsiz.',
     addBelow: 'Aşağıya əlavə et',
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',

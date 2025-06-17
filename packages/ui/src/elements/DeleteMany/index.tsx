@@ -358,10 +358,15 @@ export function DeleteMany_v4({
         body={
           <React.Fragment>
             <p>
-              {t('general:aboutToDeleteCount', {
-                count: labelCount,
-                label: labelString,
-              })}
+              {t(
+                trash && viewType !== 'trash'
+                  ? 'general:aboutToTrashCount'
+                  : 'general:aboutToDeleteCount',
+                {
+                  count: labelCount,
+                  label: labelString,
+                },
+              )}
             </p>
             {trash && viewType !== 'trash' && (
               <div className="delete-documents__checkbox">

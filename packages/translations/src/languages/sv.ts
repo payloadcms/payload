@@ -207,6 +207,9 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du är på väg att ta bort {{count}} {{label}}',
     aboutToRestoreCount: 'Du är på väg att återställa {{count}} {{label}}',
+    aboutToTrash:
+      'Du håller på att flytta {{label}} <1>{{title}}</1> till papperskorgen. Är du säker?',
+    aboutToTrashCount: 'Du håller på att flytta {{count}} {{label}} till papperskorgen',
     addBelow: 'Lägg till nedanför',
     addFilter: 'Lägg till filter',
     adminTheme: 'Adminutseende',

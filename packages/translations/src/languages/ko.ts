@@ -206,6 +206,8 @@ export const koTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToDeleteCount_other: '{{label}}를 {{count}}개 삭제하려고 합니다.',
     aboutToRestoreCount: '당신은 곧 {{count}} {{label}}를 복원하려 하고 있습니다.',
+    aboutToTrash: '{{label}} <1>{{title}}</1>을 휴지통으로 이동하려고 합니다. 확실합니까?',
+    aboutToTrashCount: '당신은 곧 {{count}} {{label}}을(를) 휴지통으로 이동하려고 합니다.',
     addBelow: '아래에 추가',
     addFilter: '필터 추가',
     adminTheme: '관리자 테마',

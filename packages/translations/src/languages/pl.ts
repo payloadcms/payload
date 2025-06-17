@@ -207,6 +207,8 @@ export const plTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Zamierzasz usunąć {{count}} {{label}}',
     aboutToDeleteCount_other: 'Zamierzasz usunąć {{count}} {{label}}',
     aboutToRestoreCount: 'Zamierzasz przywrócić {{count}} {{label}}',
+    aboutToTrash: 'Zamierzasz przenieść {{label}} <1>{{title}}</1> do kosza. Czy jesteś pewien?',
+    aboutToTrashCount: 'Zamierzasz przenieść {{count}} {{label}} do kosza.',
     addBelow: 'Dodaj poniżej',
     addFilter: 'Dodaj filtr',
     adminTheme: 'Motyw administratora',

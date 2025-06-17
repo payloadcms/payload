@@ -208,6 +208,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Избрисаћете {{count}} {{label}}',
     aboutToDeleteCount_other: 'Избрисаћете {{count}} {{label}}',
     aboutToRestoreCount: 'Uskoro ćete vratiti {{count}} {{label}}',
+    aboutToTrash:
+      'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
+    aboutToTrashCount: 'Upravo ćete premestiti {{count}} {{label}} u smeće',
     addBelow: 'Додај испод',
     addFilter: 'Додај филтер',
     adminTheme: 'Администраторска тема',

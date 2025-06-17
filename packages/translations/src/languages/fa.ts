@@ -205,6 +205,8 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'شما در حال پاک کردن {{count}} تعداد {{label}} هستید',
     aboutToDeleteCount_other: 'شما در شرف حذف هستید {{count}} {{label}}',
     aboutToRestoreCount: 'شما در حال بازگرداندن {{count}} {{label}} هستید.',
+    aboutToTrash: 'شما در حال حاضر در صدد حذف {{label}} <1>{{title}}</1> هستید. آيا مطمئن هستید؟',
+    aboutToTrashCount: 'شما در حال حاضر در مورد انتقال {{count}} {{label}} به سطل زباله هستید',
     addBelow: 'افزودن به زیر',
     addFilter: 'افزودن علامت',
     adminTheme: 'پوسته پیشخوان',

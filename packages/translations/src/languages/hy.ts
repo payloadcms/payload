@@ -207,6 +207,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToDeleteCount_other: 'Դուք պատրաստվում եք ջնջել {{count}} {{label}}',
     aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
+    aboutToTrash: 'Դուք պատրաստ եք տեղափոխել {{label}} <1>{{title}}</1>-ը աղբականջը։ Վստահ եք։',
+    aboutToTrashCount: 'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} աղբամանը',
     addBelow: 'Ավելացնել ներքևում',
     addFilter: 'Ավելացնել ֆիլտր',
     adminTheme: 'Կառավարման թեմա',

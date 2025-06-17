@@ -210,6 +210,10 @@ export const nlTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToDeleteCount_other: 'Je staat op het punt {{count}} {{label}} te verwijderen',
     aboutToRestoreCount: 'U staat op het punt om {{count}} {{label}} te herstellen',
+    aboutToTrash:
+      'U staat op het punt om het {{label}} <1>{{title}}</1> naar de prullenbak te verplaatsen. Weet u het zeker?',
+    aboutToTrashCount:
+      'U staat op het punt om {{count}} {{label}} naar de prullenbak te verplaatsen',
     addBelow: 'Onderaan toevoegen',
     addFilter: 'Filter toevoegen',
     adminTheme: 'Adminthema',

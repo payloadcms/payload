@@ -209,6 +209,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Jūs ketinate ištrinti {{count}} {{label}}',
     aboutToDeleteCount_other: 'Jūs ketinate ištrinti {{count}} {{label}}',
     aboutToRestoreCount: 'Jūs ketinate atkurti {{count}} {{label}}',
+    aboutToTrash:
+      'Jūs ketinate perkelti {{label}} <1>{{title}}</1> į šiukšliadėžę. Ar esate tikras?',
+    aboutToTrashCount: 'Jūs ketinate perkelti {{count}} {{label}} į šiukšlinę',
     addBelow: 'Pridėti žemiau',
     addFilter: 'Pridėti filtrą',
     adminTheme: 'Admin temos',

@@ -207,6 +207,8 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Chystáte se smazat {{count}} {{label}}',
     aboutToDeleteCount_other: 'Chystáte se smazat {{count}} {{label}}',
     aboutToRestoreCount: 'Chystáte se obnovit {{count}} {{label}}',
+    aboutToTrash: 'Chystáte se přesunout {{label}} <1>{{title}}</1> do koše. Jste si jisti?',
+    aboutToTrashCount: 'Chystáte se přesunout {{count}} {{label}} do koše',
     addBelow: 'Přidat pod',
     addFilter: 'Přidat filtr',
     adminTheme: 'Motiv administračního rozhraní',

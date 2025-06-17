@@ -209,6 +209,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Вы собираетесь удалить {{count}} {{label}}',
     aboutToDeleteCount_other: 'Вы собираетесь удалить {{count}} {{label}}',
     aboutToRestoreCount: 'Вы собираетесь восстановить {{count}} {{label}}',
+    aboutToTrash: 'Вы собираетесь переместить {{label}} <1>{{title}}</1> в корзину. Вы уверены?',
+    aboutToTrashCount: 'Вы собираетесь переместить {{count}} {{label}} в корзину',
     addBelow: 'Добавить ниже',
     addFilter: 'Добавить фильтр',
     adminTheme: 'Тема Панели',

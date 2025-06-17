@@ -209,6 +209,9 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToDeleteCount_other: 'သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။',
     aboutToRestoreCount: 'Anda akan memulihkan {{count}} {{label}}',
+    aboutToTrash:
+      'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
+    aboutToTrashCount: 'Anda akan memindah {{count}} {{label}} ke tong sampah',
     addBelow: 'အောက်တွင်ထည့်ပါ။',
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',

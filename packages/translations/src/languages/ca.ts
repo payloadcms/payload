@@ -208,6 +208,9 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estas apunt de eliminar {{count}} {{label}}',
     aboutToRestoreCount: 'Esteu a punt de restaurar {{count}} {{label}}',
+    aboutToTrash:
+      "Estàs a punt de moure l'{{label}} <1>{{title}}</1> a la paperera. N'estàs segur?",
+    aboutToTrashCount: 'Estàs a punt de moure {{count}} {{label}} a la paperera',
     addBelow: 'Afegeix a sota',
     addFilter: 'Afegeix filtre',
     adminTheme: "Tema d'administració",

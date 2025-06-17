@@ -211,6 +211,9 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToDeleteCount_other: 'Estás a punto de eliminar {{count}} {{label}}',
     aboutToRestoreCount: 'Está a punto de restaurar {{count}} {{label}}',
+    aboutToTrash:
+      'Estás a punto de mover la {{label}} <1>{{title}}</1> a la papelera. ¿Estás seguro?',
+    aboutToTrashCount: 'Estás a punto de mover {{count}} {{label}} a la papelera',
     addBelow: 'Añadir abajo',
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',

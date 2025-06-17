@@ -208,6 +208,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToDeleteCount_other: 'আপনি {{count}} {{label}} মুছতে চলেছেন',
     aboutToRestoreCount: 'আপনি প্রস্তুত হচ্ছেন পুনরুদ্ধার করার জন্য {{count}} {{label}}',
+    aboutToTrash:
+      'আপনি প্রথমরা {{label}} <1>{{title}}</1> কে আবর্জনায় স্থানান্তর করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
+    aboutToTrashCount: 'আপনি সম্পর্কে {{count}} {{label}} মুছে ফেলার জন্য সরিয়ে ফেলাতে যাচ্ছেন',
     addBelow: 'নিচে যোগ করুন',
     addFilter: 'ফিল্টার যোগ করুন',
     adminTheme: 'অ্যাডমিন থিম',

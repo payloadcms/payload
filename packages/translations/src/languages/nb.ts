@@ -207,6 +207,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToDeleteCount_other: 'Du er i ferd med å slette {{count}} {{label}}',
     aboutToRestoreCount: 'Du er i ferd med å gjenopprette {{count}} {{label}}',
+    aboutToTrash: 'Du er i ferd med å flytte {{label}} <1>{{title}}</1> til søppel. Er du sikker?',
+    aboutToTrashCount: 'Du er i ferd med å flytte {{count}} {{label}} til søppelkurven',
     addBelow: 'Legg til under',
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',

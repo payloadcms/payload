@@ -207,6 +207,9 @@ export const enTranslations = {
     aboutToDeleteCount_one: 'You are about to delete {{count}} {{label}}',
     aboutToDeleteCount_other: 'You are about to delete {{count}} {{label}}',
     aboutToRestoreCount: 'You are about to restore {{count}} {{label}}',
+    aboutToTrash:
+      'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
+    aboutToTrashCount: 'You are about to move {{count}} {{label}} to the trash',
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',

@@ -211,6 +211,9 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToDeleteCount_other: 'Sunteți pe cale să ștergeți {{count}} {{label}}',
     aboutToRestoreCount: 'Sunteți pe cale să restaurați {{count}} {{label}}',
+    aboutToTrash:
+      'Sunteți pe cale să mutați {{label}} <1>{{title}}</1> în coșul de gunoi. Sunteți sigur?',
+    aboutToTrashCount: 'Sunteți pe cale să mutați {{count}} {{label}} la gunoi.',
     addBelow: 'Adaugă mai jos',
     addFilter: 'Adaugă filtru',
     adminTheme: 'Tema Admin',

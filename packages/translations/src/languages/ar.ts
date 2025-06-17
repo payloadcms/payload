@@ -204,6 +204,8 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToDeleteCount_other: 'أنت على وشك حذف {{count}} {{label}}',
     aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}}',
+    aboutToTrash: 'أنت على وشك نقل {{label}} <1>{{title}}</1> إلى القمامة. هل أنت متأكد؟',
+    aboutToTrashCount: 'أنت على وشك نقل {{count}} {{label}} إلى المهملات',
     addBelow: 'أضف في الاسفل',
     addFilter: 'أضف فلتر',
     adminTheme: 'شكل واجهة المستخدم',

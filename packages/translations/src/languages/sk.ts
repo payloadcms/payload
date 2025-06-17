@@ -210,6 +210,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Chystáte sa zmazať {{count}} {{label}}',
     aboutToDeleteCount_other: 'Chystáte sa zmazať {{count}} {{label}}',
     aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}}',
+    aboutToTrash: 'Chystáte sa presunúť {{label}} <1>{{title}}</1> do koša. Ste si istý?',
+    aboutToTrashCount: 'Chystáte sa presunúť {{count}} {{label}} do koša',
     addBelow: 'Pridať pod',
     addFilter: 'Pridať filter',
     adminTheme: 'Motív administračného rozhrania',

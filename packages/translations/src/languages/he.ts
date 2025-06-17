@@ -202,6 +202,8 @@ export const heTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'אתה עומד למחוק {{label}} אחד',
     aboutToDeleteCount_other: 'אתה עומד למחוק {{count}} {{label}}',
     aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
+    aboutToTrash: 'אתה עומד להעביר את ה{{label}} <1>{{title}}</1> לפח. האם אתה בטוח?',
+    aboutToTrashCount: 'אתה עומד להעביר {{count}} {{label}} לפח אשפה',
     addBelow: 'הוסף מתחת',
     addFilter: 'הוסף מסנן',
     adminTheme: 'ערכת נושא ממשק הניהול',

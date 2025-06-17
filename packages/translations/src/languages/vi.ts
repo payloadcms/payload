@@ -207,6 +207,9 @@ export const viTranslations: DefaultTranslationsObject = {
     aboutToDeleteCount_one: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToDeleteCount_other: 'Bạn sắp xóa {{count}} {{label}}',
     aboutToRestoreCount: 'Bạn sắp khôi phục {{count}} {{label}}',
+    aboutToTrash:
+      'Bạn đang chuẩn bị di chuyển {{label}} <1>{{title}}</1> vào thùng rác. Bạn có chắc không?',
+    aboutToTrashCount: 'Bạn đang chuẩn bị chuyển {{count}} {{label}} vào thùng rác',
     addBelow: 'Thêm bên dưới',
     addFilter: 'Thêm bộ lọc',
     adminTheme: 'Giao diện bảng điều khiển',
