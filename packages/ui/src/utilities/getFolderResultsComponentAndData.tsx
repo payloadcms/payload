@@ -13,8 +13,9 @@ import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/sh
 import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
   FolderFileTable,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+  ItemCardGrid,
 } from '../exports/client/index.js'
-import { ItemCardGrid } from '../elements/FolderView/ItemCardGrid/index.js'
 
 type GetFolderResultsComponentAndDataResult = {
   breadcrumbs?: FolderBreadcrumb[]
