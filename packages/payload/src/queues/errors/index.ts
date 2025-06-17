@@ -28,9 +28,6 @@ export class TaskError extends Error {
   constructor(args: TaskErrorArgs) {
     super(args.message)
     this.args = args
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, TaskError.prototype)
   }
 }
 export class WorkflowError extends Error {
@@ -39,9 +36,6 @@ export class WorkflowError extends Error {
   constructor(args: WorkflowErrorArgs) {
     super(args.message)
     this.args = args
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, WorkflowError.prototype)
   }
 }
 
@@ -53,8 +47,5 @@ export class JobCancelledError extends Error {
   constructor(args: { job: Job }) {
     super(`Job ${args.job.id} was cancelled`)
     this.args = args
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, JobCancelledError.prototype)
   }
 }
