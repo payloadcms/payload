@@ -677,7 +677,7 @@ describe('Queues', () => {
     const { id } = await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       input: {
-        message: 'hello!',
+        message: 'deleteJobOnComplete test',
       },
     })
 
@@ -1086,6 +1086,7 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
@@ -1130,6 +1131,8 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
@@ -1172,6 +1175,7 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can run sub-tasks', async () => {
@@ -1209,6 +1213,7 @@ describe('Queues', () => {
     expect(jobAfterRun.log[1].parent).toBeUndefined()
 
     expect(jobAfterRun.log[2].taskID).toBe('create two docs')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure successful sub-tasks are not retried', async () => {
@@ -1248,6 +1253,7 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask2Retried).toBe(3)
     // @ts-expect-error
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
@@ -1282,6 +1288,7 @@ describe('Queues', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
@@ -1320,6 +1327,7 @@ describe('Queues', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can tasks throw error', async () => {
@@ -1341,6 +1349,7 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('failed')
     expect(jobAfterRun.log[0].state).toBe('failed')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can tasks return error', async () => {
@@ -1362,6 +1371,7 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('Task handler returned a failed state')
     expect(jobAfterRun.log[0].state).toBe('failed')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can tasks return error with custom error message', async () => {
@@ -1385,6 +1395,7 @@ describe('Queues', () => {
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('custom error message')
     expect(jobAfterRun.log[0].state).toBe('failed')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can reliably run workflows with parallel tasks', async () => {
@@ -1428,5 +1439,6 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+    payload.config.jobs.deleteJobOnComplete = true
   })
 })
