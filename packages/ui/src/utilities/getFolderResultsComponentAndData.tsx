@@ -11,10 +11,9 @@ import { APIError, formatErrors, getFolderData } from 'payload'
 import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/shared'
 
 import {
-  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
   FolderFileTable,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
   ItemCardGrid,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
 
 type GetFolderResultsComponentAndDataResult = {
