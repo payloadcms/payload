@@ -3,6 +3,9 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
+/**
+ * /api/payload-jobs/run endpoint
+ */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (!configHasJobs(req.payload.config)) {
