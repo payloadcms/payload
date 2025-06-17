@@ -14,7 +14,9 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const hasAccess = await req.payload.config.jobs.access.run({ req })
+    const accessFn = req.payload.config.jobs?.access?.run ?? (() => true)
+
+    const hasAccess = await accessFn({ req })
 
     if (!hasAccess) {
       return Response.json(

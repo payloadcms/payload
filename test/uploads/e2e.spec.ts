@@ -28,6 +28,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
   focalOnlySlug,
@@ -75,6 +76,7 @@ let hideFileInputOnCreateURL: AdminUrlUtil
 let bestFitURL: AdminUrlUtil
 let withoutEnlargementResizeOptionsURL: AdminUrlUtil
 let threeDimensionalURL: AdminUrlUtil
+let constructorOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
@@ -113,6 +115,7 @@ describe('Uploads', () => {
     bestFitURL = new AdminUrlUtil(serverURL, 'best-fit')
     withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
+    constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1369,14 +1372,14 @@ describe('Uploads', () => {
 
     // Show all columns with relations
     await page.locator('.list-controls__toggle-columns').click()
-    await expect(page.locator('.column-selector')).toBeVisible()
-    const imageWithoutPreview2Button = page.locator(`.column-selector .column-selector__column`, {
+    await expect(page.locator('.pill-selector')).toBeVisible()
+    const imageWithoutPreview2Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image Without Preview2'),
     })
-    const imageWithPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+    const imageWithPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image With Preview3'),
     })
-    const imageWithoutPreview3Button = page.locator(`.column-selector .column-selector__column`, {
+    const imageWithoutPreview3Button = page.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('Image Without Preview3'),
     })
     await imageWithoutPreview2Button.click()
@@ -1530,5 +1533,16 @@ describe('Uploads', () => {
 
     await expect(imageUploadCell).toHaveText('<No Image Upload>')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
+  })
+
+  test('should respect Sharp constructorOptions', async () => {
+    await page.goto(constructorOptionsURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('animated.webp')
+    await saveDocAndAssert(page, '#action-save', 'error')
   })
 })

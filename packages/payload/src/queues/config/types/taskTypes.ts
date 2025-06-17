@@ -1,6 +1,6 @@
-import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
 import type { ScheduleConfig } from './index.js'
-import type { BaseJob, RunningJob, RunningJobSimple, SingleTaskStatus } from './workflowTypes.js'
+import type { SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -35,7 +35,7 @@ export type TaskHandlerArgs<
     : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
       ? TTaskSlugOrInputOutput['input']
       : never
-  job: RunningJob<TWorkflowSlug>
+  job: Job<TWorkflowSlug>
   req: PayloadRequest
   tasks: RunTaskFunctions
 }
@@ -43,8 +43,8 @@ export type TaskHandlerArgs<
 /**
  * Inline tasks in JSON workflows have no input, as they can just get the input from job.taskStatus
  */
-export type TaskHandlerArgsNoInput<TWorkflowInput extends object> = {
-  job: RunningJobSimple<TWorkflowInput>
+export type TaskHandlerArgsNoInput<TWorkflowInput extends false | object = false> = {
+  job: Job<TWorkflowInput>
   req: PayloadRequest
 }
 
@@ -108,7 +108,7 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
     task: (args: {
       inlineTask: RunInlineTaskFunction
       input: TTaskInput
-      job: RunningJob<any>
+      job: Job<any>
       req: PayloadRequest
       tasks: RunTaskFunctions
     }) => MaybePromise<
@@ -129,7 +129,7 @@ export type ShouldRestoreFn = (args: {
    * Input data passed to the task
    */
   input: object
-  job: BaseJob
+  job: Job
   req: PayloadRequest
   taskStatus: SingleTaskStatus<string>
 }) => boolean | Promise<boolean>
