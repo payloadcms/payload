@@ -74,7 +74,7 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
 
   return (
     <Fragment>
-      {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
+      {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
       {status && renderPill(rowData, latestVersion, currentLabel, previousLabel, pillStyle)}
       {publishedLocalePill}
     </Fragment>
