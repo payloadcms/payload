@@ -123,7 +123,7 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { previewWindowType } = useLivePreviewContext()
+  const { isLivePreviewing, previewWindowType } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -173,16 +173,6 @@ export function DefaultEditView({
     isLocked: false,
     user: null,
   })
-
-  const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
-
-  if (globalSlug) {
-    classes.push(`global-edit--${globalSlug}`)
-  }
-
-  if (collectionSlug) {
-    classes.push(`collection-edit--${collectionSlug}`)
-  }
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -453,7 +443,17 @@ export function DefaultEditView({
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
 
   return (
-    <main className={classes.filter(Boolean).join(' ')}>
+    <main
+      className={[
+        baseClass,
+        (id || globalSlug) && `${baseClass}--is-editing`,
+        globalSlug && `global-edit--${globalSlug}`,
+        collectionSlug && `collection-edit--${collectionSlug}`,
+        isLivePreviewing && `${baseClass}--live-preview-enabled`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <OperationProvider operation={operation}>
         <Form
           action={action}
@@ -622,7 +622,9 @@ export function DefaultEditView({
               />
               {AfterDocument}
             </div>
-            <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
+            {isLivePreviewing && (
+              <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
+            )}
           </div>
         </Form>
       </OperationProvider>

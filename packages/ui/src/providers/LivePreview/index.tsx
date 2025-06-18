@@ -176,6 +176,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
+        isLivePreviewing: true, // TODO: wire into prefs
         isPopupOpen,
         measuredDeviceSize,
         openPopupWindow,

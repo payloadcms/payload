@@ -111,7 +111,6 @@ export const getDocumentView = ({
       }
 
       // --> /collections/:collectionSlug/:id/api
-      // --> /collections/:collectionSlug/:id/preview
       // --> /collections/:collectionSlug/:id/versions
       // --> /collections/:collectionSlug/:id/<custom-segment>
       case 4: {
@@ -222,7 +221,6 @@ export const getDocumentView = ({
 
       case 3: {
         // --> /globals/:globalSlug/api
-        // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/<custom-segment>
         switch (segment3) {
