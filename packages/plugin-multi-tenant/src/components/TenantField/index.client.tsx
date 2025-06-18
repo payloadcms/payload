@@ -22,7 +22,7 @@ export const TenantField = (args: Props) => {
   const {
     options,
     selectedTenantID,
-    setEntityType: setView,
+    setEntityType: setEntityType,
     setModified,
     setTenant,
   } = useTenantSelection()
@@ -47,11 +47,11 @@ export const TenantField = (args: Props) => {
   }, [value, selectedTenantID, setTenant, setValue, options, unique])
 
   React.useEffect(() => {
-    setView(unique ? 'global' : 'document')
+    setEntityType(unique ? 'global' : 'document')
     return () => {
-      setView(undefined)
+      setEntityType(undefined)
     }
-  }, [unique, setView])
+  }, [unique, setEntityType])
 
   React.useEffect(() => {
     // sync form modified state with the tenant selection provider context
