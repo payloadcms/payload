@@ -25,6 +25,8 @@ export type ResolveJoinsArgs = {
   joins?: JoinQuery
   /** Optional locale for localized queries */
   locale?: string
+  /** Optional projection for the join query */
+  projection?: Record<string, true>
   /** Whether to resolve versions instead of published documents */
   versions?: boolean
 }
@@ -40,6 +42,7 @@ export async function resolveJoins({
   docs,
   joins,
   locale,
+  projection,
   versions = false,
 }: ResolveJoinsArgs): Promise<void> {
   // Early return if no joins are specified or no documents to process
@@ -59,7 +62,7 @@ export async function resolveJoins({
 
   // Add regular joins
   for (const [target, joinList] of Object.entries(collectionConfig.joins)) {
-    for (const join of joinList || []) {
+    for (const join of joinList) {
       joinMap[join.joinPath] = { ...join, targetCollection: target }
     }
   }
@@ -73,13 +76,18 @@ export async function resolveJoins({
   // Process each requested join concurrently
   const joinPromises = Object.entries(joins).map(async ([joinPath, joinQuery]) => {
     if (!joinQuery) {
-      return { joinPath, result: null }
+      return null
+    }
+
+    // If a projection is provided, and the join path is not in the projection, skip it
+    if (projection && !projection[joinPath]) {
+      return null
     }
 
     // Get the join definition from our map
     const joinDef = joinMap[joinPath]
     if (!joinDef) {
-      return { joinPath, result: null }
+      return null
     }
 
     // Normalize collections to always be an array for unified processing
@@ -104,7 +112,12 @@ export async function resolveJoins({
       : allCollections
 
     // Check if this is a polymorphic collection join (where field.collection is an array)
-    const isPolymorphicCollectionJoin = Array.isArray(joinDef.field.collection)
+    const isPolymorphicJoin = Array.isArray(joinDef.field.collection)
+
+    // Apply pagination settings
+    const limit = joinQuery.limit ?? joinDef.field.defaultLimit ?? 10
+    const page = joinQuery.page ?? 1
+    const skip = (page - 1) * limit
 
     // Process collections concurrently
     const collectionPromises = collections.map(async (joinCollectionSlug) => {
@@ -130,7 +143,7 @@ export async function resolveJoins({
 
       // Build the base query
       let whereQuery: null | Record<string, unknown> = null
-      whereQuery = isPolymorphicCollectionJoin
+      whereQuery = isPolymorphicJoin
         ? filterWhereForCollection(
             joinQuery.where || {},
             targetConfig.flattenedFields,
@@ -224,9 +237,15 @@ export async function resolveJoins({
 
       const projection = buildJoinProjection(dbFieldName, useDrafts, sort)
 
-      const results = await JoinModel.find(whereQuery, projection, {
-        sort,
-      }).lean()
+      const [results, dbCount] = await Promise.all([
+        JoinModel.find(whereQuery, projection, {
+          sort,
+          ...(isPolymorphicJoin ? {} : { limit, skip }),
+        }).lean(),
+        isPolymorphicJoin ? Promise.resolve(0) : JoinModel.countDocuments(whereQuery),
+      ])
+
+      const count = isPolymorphicJoin ? results.length : dbCount
 
       transform({
         adapter,
@@ -240,6 +259,7 @@ export async function resolveJoins({
       // Return results with collection info for grouping
       return {
         collectionSlug: joinCollectionSlug,
+        count,
         dbFieldName,
         results,
         sort,
@@ -257,12 +277,16 @@ export async function resolveJoins({
         sort: Record<string, string>
       }
     > = {}
+
+    let totalCount = 0
     for (const collectionResult of collectionResults) {
       if (!collectionResult) {
         continue
       }
 
-      const { collectionSlug, dbFieldName, results, sort, useDrafts } = collectionResult
+      const { collectionSlug, count, dbFieldName, results, sort, useDrafts } = collectionResult
+
+      totalCount += count
 
       for (const result of results) {
         if (useDrafts) {
@@ -326,13 +350,9 @@ export async function resolveJoins({
         return 0
       })
       results.docs = results.docs.map(
-        (doc) => (isPolymorphicCollectionJoin ? doc.__joinData : doc.id) as Record<string, unknown>,
+        (doc) => (isPolymorphicJoin ? doc.__joinData : doc.id) as Record<string, unknown>,
       )
     }
-
-    // Apply pagination settings
-    const limit = joinQuery.limit ?? joinDef.field.defaultLimit ?? 10
-    const page = joinQuery.page ?? 1
 
     // Determine if the join field should be localized
     const localeSuffix =
@@ -349,14 +369,14 @@ export async function resolveJoins({
     const localizedJoinPath = `${joinPath}${localeSuffix}`
 
     return {
-      joinPath,
-      result: {
-        grouped,
-        joinQuery,
-        limit,
-        localizedJoinPath,
-        page,
-      },
+      grouped,
+      isPolymorphicJoin,
+      joinQuery,
+      limit,
+      localizedJoinPath,
+      page,
+      skip,
+      totalCount,
     }
   })
 
@@ -365,12 +385,12 @@ export async function resolveJoins({
 
   // Process the results and attach them to documents
   for (const joinResult of joinResults) {
-    if (!joinResult || !joinResult.result) {
+    if (!joinResult) {
       continue
     }
 
-    const { result } = joinResult
-    const { grouped, joinQuery, limit, localizedJoinPath, page } = result
+    const { grouped, isPolymorphicJoin, joinQuery, limit, localizedJoinPath, skip, totalCount } =
+      joinResult
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
@@ -379,17 +399,22 @@ export async function resolveJoins({
 
       // Calculate the slice for pagination
       // When limit is 0, it means unlimited - return all results
-      const slice = limit === 0 ? all : all.slice((page - 1) * limit, (page - 1) * limit + limit)
+      const slice = isPolymorphicJoin
+        ? limit === 0
+          ? all
+          : all.slice(skip, skip + limit)
+        : // For non-polymorphic joins, we assume that page and limit were applied at the database level
+          all
 
       // Create the join result object with pagination metadata
       const value: Record<string, unknown> = {
         docs: slice,
-        hasNextPage: limit === 0 ? false : all.length > (page - 1) * limit + slice.length,
+        hasNextPage: limit === 0 ? false : totalCount > skip + slice.length,
       }
 
       // Include total count if requested
       if (joinQuery.count) {
-        value.totalDocs = all.length
+        value.totalDocs = totalCount
       }
 
       // Navigate to the correct nested location in the document and set the join data
