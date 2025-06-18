@@ -123,6 +123,7 @@ export const MyCollection: CollectionConfig = {
             tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
+              order: '100',
             },
             // highlight-end
           },
@@ -143,6 +144,7 @@ The following options are available for tabs:
 | ----------- | ------------------------------------------------------------------------------------------------------------- |
 | `label`     | The label to display in the tab.                                                                              |
 | `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.            |
+| `order`     | The order in which the tab appears in the navigation. Can be set on default and custom tabs.                  |
 | `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
 
 ### Tab Components

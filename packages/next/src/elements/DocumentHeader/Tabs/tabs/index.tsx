@@ -24,6 +24,7 @@ export const getTabs = ({
       tab: {
         href: '',
         label: ({ t }) => t('general:edit'),
+        order: 100,
         ...(customViews?.['default']?.tab || {}),
       },
       viewPath: '/',
@@ -35,14 +36,14 @@ export const getTabs = ({
           if (collectionConfig) {
             return Boolean(
               config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-              collectionConfig?.admin?.livePreview,
+                collectionConfig?.admin?.livePreview,
             )
           }
 
           if (globalConfig) {
             return Boolean(
               config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-              globalConfig?.admin?.livePreview,
+                globalConfig?.admin?.livePreview,
             )
           }
 
@@ -50,6 +51,7 @@ export const getTabs = ({
         },
         href: '/preview',
         label: ({ t }) => t('general:livePreview'),
+        order: 200,
         ...(customViews?.['livePreview']?.tab || {}),
       },
       viewPath: '/preview',
@@ -61,10 +63,11 @@ export const getTabs = ({
           Boolean(
             (collectionConfig?.versions &&
               permissions?.collections?.[collectionConfig?.slug]?.readVersions) ||
-            (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
+              (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
           ),
         href: '/versions',
         label: ({ t }) => t('version:versions'),
+        order: 300,
         Pill_Component: VersionsPill,
         ...(customViews?.['versions']?.tab || {}),
       },
@@ -78,24 +81,37 @@ export const getTabs = ({
           (globalConfig && !globalConfig?.admin?.hideAPIURL),
         href: '/api',
         label: 'API',
+        order: 400,
         ...(customViews?.['api']?.tab || {}),
       },
       viewPath: '/api',
     },
-  ].concat(
-    Object.entries(customViews).reduce((acc, [key, value]) => {
-      if (documentViewKeys.includes(key)) {
+  ]
+    .concat(
+      Object.entries(customViews).reduce((acc, [key, value]) => {
+        if (documentViewKeys.includes(key)) {
+          return acc
+        }
+
+        if (value?.tab) {
+          acc.push({
+            tab: value.tab,
+            viewPath: 'path' in value ? value.path : '',
+          })
+        }
+
         return acc
+      }, []),
+    )
+    ?.sort(({ tab: a }, { tab: b }) => {
+      if (a.order === undefined && b.order === undefined) {
+        return 0
+      } else if (a.order === undefined) {
+        return 1
+      } else if (b.order === undefined) {
+        return -1
       }
 
-      if (value?.tab) {
-        acc.push({
-          tab: value.tab,
-          viewPath: 'path' in value ? value.path : '',
-        })
-      }
-
-      return acc
-    }, []),
-  )
+      return a.order - b.order
+    })
 }

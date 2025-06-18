@@ -50,6 +50,10 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   client: Config
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string

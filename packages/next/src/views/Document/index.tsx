@@ -6,6 +6,7 @@ import type {
   DocumentViewServerPropsOnly,
   EditViewComponent,
   PayloadComponent,
+  RenderDocumentVersionsProperties,
 } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
@@ -57,6 +58,7 @@ export const renderDocument = async ({
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
+  versions,
   viewType,
 }: {
   drawerSlug?: string
@@ -64,6 +66,7 @@ export const renderDocument = async ({
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  versions?: RenderDocumentVersionsProperties
 } & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
@@ -178,6 +181,7 @@ export const renderDocument = async ({
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
+    hasPublishedDoc,
     i18n,
     initPageResult,
     locale,
@@ -187,6 +191,7 @@ export const renderDocument = async ({
     routeSegments: segments,
     searchParams,
     user,
+    versions,
   }
 
   if (
@@ -222,10 +227,10 @@ export const renderDocument = async ({
 
   const RootViewOverride =
     collectionConfig?.admin?.components?.views?.edit?.root &&
-      'Component' in collectionConfig.admin.components.views.edit.root
+    'Component' in collectionConfig.admin.components.views.edit.root
       ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
       : globalConfig?.admin?.components?.views?.edit?.root &&
-        'Component' in globalConfig.admin.components.views.edit.root
+          'Component' in globalConfig.admin.components.views.edit.root
         ? globalConfig?.admin?.components?.views?.edit?.root?.Component
         : null
 
@@ -233,7 +238,7 @@ export const renderDocument = async ({
     View = RootViewOverride
     showHeader = false
   } else {
-    ; ({ View } = getDocumentView({
+    ;({ View } = getDocumentView({
       collectionConfig,
       config,
       doc,

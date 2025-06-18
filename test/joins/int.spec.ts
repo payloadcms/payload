@@ -1619,6 +1619,31 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
+  it('should support where querying by a join field as ID', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { category: category.id, title: 'my-title' },
+    })
+    const found_1 = await payload.find({
+      collection: 'categories',
+      where: { 'relatedPosts.id': { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_1.docs).toHaveLength(1)
+    expect(found_1.docs[0].id).toBe(category.id)
+
+    const found_2 = await payload.find({
+      collection: 'categories',
+      where: { relatedPosts: { equals: post.id } },
+      overrideAccess: true,
+    })
+
+    expect(found_2.docs).toHaveLength(1)
+    expect(found_2.docs[0].id).toBe(category.id)
+  })
+
   it('should support where querying by a join field with hasMany relationship', async () => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({

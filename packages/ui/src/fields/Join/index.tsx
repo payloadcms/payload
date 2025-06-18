@@ -213,6 +213,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
+        fieldPath={path}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}

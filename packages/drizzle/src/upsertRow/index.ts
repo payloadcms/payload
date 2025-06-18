@@ -379,9 +379,15 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
     // Error Handling
     // //////////////////////////////////
-  } catch (error) {
+  } catch (caughtError) {
     // Unique constraint violation error
     // '23505' is the code for PostgreSQL, and 'SQLITE_CONSTRAINT_UNIQUE' is for SQLite
+
+    let error = caughtError
+    if (typeof caughtError === 'object' && 'cause' in caughtError) {
+      error = caughtError.cause
+    }
+
     if (error.code === '23505' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       let fieldName: null | string = null
       // We need to try and find the right constraint for the field but if we can't we fallback to a generic message

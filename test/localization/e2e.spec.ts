@@ -122,11 +122,14 @@ describe('Localization', () => {
       await page.locator('#action-save').click()
 
       await page.locator('text=Versions').click()
-      const firstVersion = findTableRow(page, 'Current Published Version')
+      const firstVersion = findTableRow(page, 'Currently Published')
       await firstVersion.locator('a').click()
 
-      await expect(page.locator('.select-version-locales__label')).toBeVisible()
-      await expect(page.locator('.select-version-locales .react-select')).not.toContainText(
+      await expect(page.locator('.view-version__toggle-locales')).toBeVisible()
+      await page.locator('.view-version__toggle-locales').click()
+
+      await expect(page.locator('.select-version-locales .pill-selector')).toBeVisible()
+      await expect(page.locator('.select-version-locales .pill-selector')).not.toContainText(
         'FILTERED',
       )
     })

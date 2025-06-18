@@ -62,6 +62,8 @@ export { DrawerContentContainer } from '../../elements/DrawerContentContainer/in
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
+export { AnimateHeight } from '../../elements/AnimateHeight/index.js'
+export { PillSelector, type SelectablePill } from '../../elements/PillSelector/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
 export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
@@ -70,6 +72,7 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -277,6 +280,8 @@ export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/War
 
 // providers
 export {
+  type RenderDocumentResult,
+  type RenderDocumentServerFunction,
   ServerFunctionsProvider,
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
@@ -296,6 +301,7 @@ export { DocumentEventsProvider, useDocumentEvents } from '../../providers/Docum
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
+export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,
@@ -392,3 +398,5 @@ export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
+export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
+export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
