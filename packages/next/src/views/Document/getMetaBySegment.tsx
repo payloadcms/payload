@@ -16,6 +16,7 @@ export type GenerateEditViewMetadata = (
   args: {
     collectionConfig?: null | SanitizedCollectionConfig
     globalConfig?: null | SanitizedGlobalConfig
+    isReadOnly?: boolean
     view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
@@ -41,6 +42,11 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     // `/:collection/:id`
     if (params.segments.length === 3) {
       fn = generateEditViewMetadata
+    }
+
+    // `/collections/:collection/trash/:id`
+    if (segments.length === 4 && segments[2] === 'trash') {
+      fn = (args) => generateEditViewMetadata({ ...args, isReadOnly: true })
     }
 
     // `/:collection/:id/:view`
@@ -73,6 +79,28 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         default:
           break
       }
+    }
+
+    // `/collections/:collection/trash/:id/:view`
+    if (segments.length === 5 && segments[2] === 'trash') {
+      switch (segments[4]) {
+        case 'api':
+          fn = generateAPIViewMetadata
+          break
+        case 'preview':
+          fn = (args) => generateLivePreviewViewMetadata({ ...args, isReadOnly: true })
+          break
+        case 'versions':
+          fn = generateVersionsViewMetadata
+          break
+        default:
+          break
+      }
+    }
+
+    // `/collections/:collection/trash/:id/versions/:versionID`
+    if (segments.length === 6 && segments[2] === 'trash' && segments[4] === 'versions') {
+      fn = generateVersionViewMetadata
     }
   }
 

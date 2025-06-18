@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
@@ -15,7 +15,7 @@ const baseClass = 'list-folder-pills'
 type ListFolderPillsProps = {
   readonly collectionConfig: ClientCollectionConfig
   readonly folderCollectionSlug: string
-  readonly viewType: 'folders' | 'list'
+  readonly viewType: ViewTypes
 }
 
 export function ListFolderPills({
@@ -41,7 +41,7 @@ export function ListFolderPills({
           .filter(Boolean)
           .join(' ')}
         disabled={viewType === 'folders'}
-        el={viewType === 'list' ? 'link' : 'div'}
+        el={viewType === 'list' || viewType === 'trash' ? 'link' : 'div'}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}/${folderCollectionSlug}`,
@@ -56,7 +56,7 @@ export function ListFolderPills({
           .filter(Boolean)
           .join(' ')}
         disabled={viewType === 'list'}
-        el={viewType === 'folders' ? 'link' : 'div'}
+        el={viewType === 'folders' || viewType === 'trash' ? 'link' : 'div'}
         to={formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${collectionConfig.slug}`,

@@ -26,6 +26,7 @@ export const getDoc = async <T>(args: {
       depth,
       where,
       draft,
+      trash: true,
     })
 
     if (docs[0]) {

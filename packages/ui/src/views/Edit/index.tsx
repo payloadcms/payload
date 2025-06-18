@@ -77,6 +77,7 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
     redirectAfterDelete,
@@ -455,7 +456,7 @@ export function DefaultEditView({
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
+          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
@@ -508,6 +509,7 @@ export function DefaultEditView({
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
+              isTrashed={isTrashed}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
@@ -528,13 +530,14 @@ export function DefaultEditView({
               SaveDraftButton,
             }}
             data={savedDocumentData}
-            disableActions={disableActions || isFolderCollection}
+            disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            isTrashed={isTrashed}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
@@ -601,7 +604,7 @@ export function DefaultEditView({
             Description={Description}
             docPermissions={docPermissions}
             fields={docConfig.fields}
-            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+            readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
             schemaPathSegments={schemaPathSegments}
           />
           {AfterDocument}
