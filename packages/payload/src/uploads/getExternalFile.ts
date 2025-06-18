@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { safeFetch } from './safeFetch.js'
 
 type Args = {
   data: FileData
@@ -21,9 +21,9 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers?.get('cookie') }
+      : { cookie: req.headers.get('cookie')! }
 
-    const res = await fetch(fileURL, {
+    const res = await safeFetch(fileURL, {
       credentials: 'include',
       headers,
       method: 'GET',
@@ -38,7 +38,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     return {
       name: filename,
       data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined,
+      mimetype: res.headers.get('content-type') || undefined!,
       size: Number(res.headers.get('content-length')) || 0,
     }
   }

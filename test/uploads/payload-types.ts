@@ -80,8 +80,10 @@ export interface Config {
     'focal-only': FocalOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
+    'allow-list-media': AllowListMedia;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
+    'without-enlarge': WithoutEnlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
     'custom-file-name-media': CustomFileNameMedia;
@@ -92,6 +94,7 @@ export interface Config {
     'admin-thumbnail-function': AdminThumbnailFunction;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
+    'admin-upload-control': AdminUploadControl;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
@@ -103,6 +106,8 @@ export interface Config {
     'hide-file-input-on-create': HideFileInputOnCreate;
     'best-fit': BestFit;
     'list-view-preview': ListViewPreview;
+    'three-dimensional': ThreeDimensional;
+    'constructor-options': ConstructorOption;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -123,8 +128,10 @@ export interface Config {
     'focal-only': FocalOnlySelect<false> | FocalOnlySelect<true>;
     'focal-no-sizes': FocalNoSizesSelect<false> | FocalNoSizesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
+    'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
     reduce: ReduceSelect<false> | ReduceSelect<true>;
     'media-trim': MediaTrimSelect<false> | MediaTrimSelect<true>;
     'custom-file-name-media': CustomFileNameMediaSelect<false> | CustomFileNameMediaSelect<true>;
@@ -135,6 +142,7 @@ export interface Config {
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
+    'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
@@ -146,6 +154,8 @@ export interface Config {
     'hide-file-input-on-create': HideFileInputOnCreateSelect<false> | HideFileInputOnCreateSelect<true>;
     'best-fit': BestFitSelect<false> | BestFitSelect<true>;
     'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
+    'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
+    'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -730,6 +740,24 @@ export interface FocalNoSize {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media".
+ */
+export interface AllowListMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "animated-type-media".
  */
 export interface AnimatedTypeMedia {
@@ -847,6 +875,24 @@ export interface Enlarge {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge".
+ */
+export interface WithoutEnlarge {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1139,6 +1185,24 @@ export interface AdminThumbnailWithSearchQuery {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control".
+ */
+export interface AdminUploadControl {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
@@ -1291,6 +1355,40 @@ export interface ListViewPreview {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional".
+ */
+export interface ThreeDimensional {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options".
+ */
+export interface ConstructorOption {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1366,12 +1464,20 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'allow-list-media';
+        value: string | AllowListMedia;
+      } | null)
+    | ({
         relationTo: 'animated-type-media';
         value: string | AnimatedTypeMedia;
       } | null)
     | ({
         relationTo: 'enlarge';
         value: string | Enlarge;
+      } | null)
+    | ({
+        relationTo: 'without-enlarge';
+        value: string | WithoutEnlarge;
       } | null)
     | ({
         relationTo: 'reduce';
@@ -1412,6 +1518,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'admin-thumbnail-size';
         value: string | AdminThumbnailSize;
+      } | null)
+    | ({
+        relationTo: 'admin-upload-control';
+        value: string | AdminUploadControl;
       } | null)
     | ({
         relationTo: 'optional-file';
@@ -1456,6 +1566,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'list-view-preview';
         value: string | ListViewPreview;
+      } | null)
+    | ({
+        relationTo: 'three-dimensional';
+        value: string | ThreeDimensional;
+      } | null)
+    | ({
+        relationTo: 'constructor-options';
+        value: string | ConstructorOption;
       } | null)
     | ({
         relationTo: 'users';
@@ -2079,6 +2197,23 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media_select".
+ */
+export interface AllowListMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "animated-type-media_select".
  */
 export interface AnimatedTypeMediaSelect<T extends boolean = true> {
@@ -2218,6 +2353,23 @@ export interface EnlargeSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge_select".
+ */
+export interface WithoutEnlargeSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2514,6 +2666,23 @@ export interface AdminThumbnailSizeSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control_select".
+ */
+export interface AdminUploadControlSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file_select".
  */
 export interface OptionalFileSelect<T extends boolean = true> {
@@ -2691,6 +2860,38 @@ export interface ListViewPreviewSelect<T extends boolean = true> {
   imageRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional_select".
+ */
+export interface ThreeDimensionalSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options_select".
+ */
+export interface ConstructorOptionsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

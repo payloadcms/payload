@@ -39,9 +39,7 @@ describe('@payloadcms/storage-s3', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
   afterEach(async () => {
     await clearTestBucket()
@@ -96,6 +94,25 @@ describe('@payloadcms/storage-s3', () => {
     expect(new URLSearchParams(url!).get('x-id')).toBe('GetObject')
     const file = await fetch(url!)
     expect(file.headers.get('Content-Type')).toBe('image/png')
+  })
+
+  it('should skip signed download', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/small.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/small.png`, {
+      headers: { 'X-Disable-Signed-URL': 'true' },
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+  })
+
+  it('should return 404 when the file is not found', async () => {
+    const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
+    expect(response.status).toBe(404)
   })
 
   describe('R2', () => {

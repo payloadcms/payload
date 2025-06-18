@@ -73,6 +73,33 @@ export default buildConfigWithDefaults({
           type: 'number',
         },
         {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'nested',
+                  blocks: [
+                    {
+                      slug: 'block',
+                      fields: [
+                        {
+                          type: 'blocks',
+                          name: 'nested',
+                          blocks: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -259,6 +286,11 @@ export default buildConfigWithDefaults({
           name: 'point',
           type: 'point',
           defaultValue: [10, 20],
+        },
+        {
+          name: 'escape',
+          type: 'text',
+          defaultValue: "Thanks, we're excited for you to join us.",
         },
       ],
     },
@@ -738,6 +770,16 @@ export default buildConfigWithDefaults({
             },
           ],
           name: 'testBlocks',
+        },
+      ],
+    },
+    {
+      slug: 'unique-fields',
+      fields: [
+        {
+          name: 'slugField',
+          type: 'text',
+          unique: true,
         },
       ],
     },

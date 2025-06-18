@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
@@ -101,12 +100,12 @@ export const deleteOperation = async <
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
       where,
     })
 
-    const fullWhere = combineQueries(where, accessResult)
+    const fullWhere = combineQueries(where, accessResult!)
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -120,13 +119,13 @@ export const deleteOperation = async <
 
     const { docs } = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       select,
       where: fullWhere,
     })
 
-    const errors = []
+    const errors: { id: number | string; message: string }[] = []
 
     const promises = docs.map(async (doc) => {
       let result
@@ -216,17 +215,18 @@ export const deleteOperation = async <
         result = await afterRead({
           collection: collectionConfig,
           context: req.context,
-          depth,
+          depth: depth!,
           doc: result || doc,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
-          fallbackLocale,
+          fallbackLocale: fallbackLocale!,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         })
 
         // /////////////////////////////////////
@@ -270,7 +270,7 @@ export const deleteOperation = async <
       } catch (error) {
         errors.push({
           id: doc.id,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
       return null

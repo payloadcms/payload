@@ -95,6 +95,16 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       await payload.create({
         collection: 'pages',
         data: {
+          customRelationship: user.id,
+          title: `Custom ${i}`,
+        },
+      })
+    }
+
+    for (let i = 0; i < 5; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
           title: `hasMany Number ${i}`,
           hasManyNumber: [0, 1, 1, 2, 3, 5, 8, 13, 21],
         },

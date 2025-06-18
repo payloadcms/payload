@@ -31,7 +31,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         <thead>
           <tr>
             {activeColumns.map((col, i) => (
-              <th id={`heading-${col.accessor}`} key={i}>
+              <th id={`heading-${col.accessor.replace(/\./g, '__')}`} key={i}>
                 {col.Heading}
               </th>
             ))}
@@ -52,7 +52,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
                   const { accessor } = col
 
                   return (
-                    <td className={`cell-${accessor}`} key={colIndex}>
+                    <td className={`cell-${accessor.replace(/\./g, '__')}`} key={colIndex}>
                       {col.renderedCells[rowIndex]}
                     </td>
                   )

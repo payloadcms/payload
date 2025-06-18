@@ -1,9 +1,9 @@
-import type { Config, JobsConfig } from 'payload'
+import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
-import type { ImportExportPluginConfig } from './types.js'
+import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
 import { getExportCollection } from './getExportCollection.js'
@@ -28,11 +28,7 @@ export const importExportPlugin =
     )
 
     // inject the createExport job into the config
-    config.jobs =
-      config.jobs ||
-      ({
-        tasks: [getCreateCollectionExportTask(config)],
-      } as unknown as JobsConfig) // cannot type jobs config inside of plugins
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
 
     let collectionsToUpdate = config.collections
 
@@ -51,12 +47,6 @@ export const importExportPlugin =
       const components = collection.admin.components || {}
       if (!components.listMenuItems) {
         components.listMenuItems = []
-      }
-      if (!components.edit) {
-        components.edit = {}
-      }
-      if (!components.edit.SaveButton) {
-        components.edit.SaveButton = '@payloadcms/plugin-import-export/rsc#ExportSaveButton'
       }
       components.listMenuItems.push({
         clientProps: {
@@ -91,3 +81,11 @@ export const importExportPlugin =
 
     return config
   }
+
+declare module 'payload' {
+  export interface FieldCustom {
+    'plugin-import-export'?: {
+      toCSV?: ToCSVFunction
+    }
+  }
+}

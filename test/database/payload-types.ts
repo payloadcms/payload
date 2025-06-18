@@ -84,6 +84,7 @@ export interface Config {
     'compound-indexes': CompoundIndex;
     aliases: Alias;
     'blocks-docs': BlocksDoc;
+    'unique-fields': UniqueField;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -108,6 +109,7 @@ export interface Config {
     'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
+    'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -178,6 +180,21 @@ export interface Post {
   localized?: string | null;
   text?: string | null;
   number?: number | null;
+  blocks?:
+    | {
+        nested?:
+          | {
+              nested?: unknown[] | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'block';
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   D1?: {
     D2?: {
       D3?: {
@@ -239,6 +256,7 @@ export interface DefaultValue {
    * @maxItems 2
    */
   point?: [number, number] | null;
+  escape?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -526,6 +544,16 @@ export interface BlocksDoc {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unique-fields".
+ */
+export interface UniqueField {
+  id: string;
+  slugField?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -617,6 +645,10 @@ export interface PayloadLockedDocument {
         value: string | BlocksDoc;
       } | null)
     | ({
+        relationTo: 'unique-fields';
+        value: string | UniqueField;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -681,6 +713,27 @@ export interface PostsSelect<T extends boolean = true> {
   localized?: T;
   text?: T;
   number?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              nested?:
+                | T
+                | {
+                    block?:
+                      | T
+                      | {
+                          nested?: T | {};
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
   D1?:
     | T
     | {
@@ -749,6 +802,7 @@ export interface DefaultValuesSelect<T extends boolean = true> {
       };
   select?: T;
   point?: T;
+  escape?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -992,6 +1046,15 @@ export interface BlocksDocsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unique-fields_select".
+ */
+export interface UniqueFieldsSelect<T extends boolean = true> {
+  slugField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

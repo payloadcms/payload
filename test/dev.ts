@@ -55,9 +55,12 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
-console.log(`Selected test suite: ${testSuiteArg}`)
+// Enable turbopack by default, unless --no-turbo is passed
+const enableTurbo = args.turbo !== false
 
-if (args.turbo === true) {
+console.log(`Selected test suite: ${testSuiteArg}${enableTurbo ? ' [Turbopack]' : ' [Webpack]'}`)
+
+if (enableTurbo) {
   process.env.TURBOPACK = '1'
 }
 
@@ -111,6 +114,8 @@ const app = nextImport({
   hostname: 'localhost',
   port: availablePort,
   dir: rootDir,
+  turbo: enableTurbo,
+  turbopack: enableTurbo,
 })
 
 const handle = app.getRequestHandler()

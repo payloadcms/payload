@@ -1,7 +1,7 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
-import type { Payload, PayloadRequest, TypeWithID } from 'payload'
+import type { Payload, PayloadRequest, TypeWithID, ValidationError } from 'payload'
 
 import {
   migrateRelationshipsV2_V3,
@@ -71,9 +71,7 @@ describe('database', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('id type', () => {
@@ -1671,6 +1669,7 @@ describe('database', () => {
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      expect(result.escape).toStrictEqual("Thanks, we're excited for you to join us.")
     })
   })
 
@@ -2617,5 +2616,126 @@ describe('database', () => {
 
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+  })
+
+  it('should CRUD with blocks as JSON in SQL adapters', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!('drizzle' in payload.db)) {
+      return
+    }
+
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    payload.db.blocksAsJSON = true
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+    expect(payload.db.tables.blocks_docs.testBlocks).toBeDefined()
+    expect(payload.db.tables.blocks_docs_locales.testBlocksLocalized).toBeDefined()
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+    const res_es = await payload.update({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'es',
+      data: {
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
+        testBlocks: [{ blockType: 'cta', text: 'text_updated' }],
+      },
+    })
+    expect(res_es.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
+    const res_all = await payload.findByID({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'all',
+    })
+    expect(res_all.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_all.testBlocksLocalized.es[0]?.text).toBe('text-localized-es')
+    expect(res_all.testBlocksLocalized.en[0]?.text).toBe('text-localized')
+    payload.db.blocksAsJSON = false
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+  })
+
+  it('should support in with null', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const post_1 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-1' },
+    })
+    const post_2 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-2' },
+    })
+    const post_3 = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: 'text-3' },
+    })
+    const post_null = await payload.create({
+      collection: 'posts',
+      data: { title: 'a', text: null },
+    })
+
+    const { docs } = await payload.find({
+      collection: 'posts',
+      where: { text: { in: ['text-1', 'text-3', null] } },
+    })
+    expect(docs).toHaveLength(3)
+    expect(docs[0].id).toBe(post_null.id)
+    expect(docs[1].id).toBe(post_3.id)
+    expect(docs[2].id).toBe(post_1.id)
+  })
+
+  it('should throw specific unique contraint errors', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'unique-text',
+      },
+    })
+
+    try {
+      await payload.create({
+        collection: 'unique-fields',
+        data: {
+          slugField: 'unique-text',
+        },
+      })
+    } catch (e) {
+      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+    }
+  })
+
+  it('should support x3 nesting blocks', async () => {
+    const res = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'title',
+        blocks: [
+          {
+            blockType: 'block',
+            nested: [
+              {
+                blockType: 'block',
+                nested: [],
+              },
+            ],
+          },
+        ],
+      },
+    })
+
+    expect(res.blocks).toHaveLength(1)
+    expect(res.blocks[0]?.nested).toHaveLength(1)
+    expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
   })
 })

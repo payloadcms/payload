@@ -30,8 +30,10 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   collapsibleFieldsSlug,
   groupFieldsSlug,
+  numberFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -51,9 +53,7 @@ describe('Fields', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -399,6 +399,31 @@ describe('Fields', () => {
       expect(resInSecond.docs.find((res) => res.id === docSecond.id)).toBeDefined()
 
       expect(resInSecond.totalDocs).toBe(1)
+    })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'hasMany deletion test',
+          hasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      await payload.update({
+        collection: textFieldsSlug,
+        id: createdDocId,
+        data: {
+          hasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: textFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.hasMany).toHaveLength(0)
     })
   })
 
@@ -1041,6 +1066,30 @@ describe('Fields', () => {
 
       expect(numbersNotExists.docs).toHaveLength(1)
     })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: numberFieldsSlug,
+        data: {
+          localizedHasMany: [1, 2, 3],
+        },
+      })
+
+      await payload.update({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+        data: {
+          localizedHasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.localizedHasMany).toHaveLength(0)
+    })
   })
 
   it('should query hasMany within an array', async () => {
@@ -1346,6 +1395,58 @@ describe('Fields', () => {
       expect(doc.point).toEqual(point)
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
+    })
+  })
+
+  describe('checkbox', () => {
+    beforeEach(async () => {
+      await payload.delete({
+        collection: checkboxFieldsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
+
+    it('should query checkbox fields with exists operator', async () => {
+      const existsTrueDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+          checkboxNotRequired: false,
+        },
+      })
+
+      const existsFalseDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+        },
+      })
+
+      const existsFalse = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: false,
+          },
+        },
+      })
+      expect(existsFalse.totalDocs).toBe(1)
+      expect(existsFalse.docs[0]?.id).toEqual(existsFalseDoc.id)
+
+      const existsTrue = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: true,
+          },
+        },
+      })
+      expect(existsTrue.totalDocs).toBe(1)
+      expect(existsTrue.docs[0]?.id).toEqual(existsTrueDoc.id)
     })
   })
 
