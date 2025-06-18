@@ -19,7 +19,13 @@ export const TenantField = (args: Props) => {
   const { debug, unique } = args
   const { setValue, value } = useField<number | string>()
   const modified = useFormModified()
-  const { options, selectedTenantID, setModified, setTenant, setView } = useTenantSelection()
+  const {
+    options,
+    selectedTenantID,
+    setEntityType: setView,
+    setModified,
+    setTenant,
+  } = useTenantSelection()
 
   const hasSetValueRef = React.useRef(false)
 

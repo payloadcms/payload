@@ -8,6 +8,14 @@ import React, { createContext } from 'react'
 
 type ContextType = {
   /**
+   * What is the context of the selector? It is either 'document' | 'global' | undefined.
+   *
+   * - 'document' means you are viewing a document in the context of a tenant
+   * - 'global' means you are viewing a "global" (globals are collection documents but prevent you from viewing the list view) document in the context of a tenant
+   * - undefined means you are not viewing a document at all
+   */
+  entityType?: 'document' | 'global'
+  /**
    * Hoists the forms modified state
    */
   modified?: boolean
@@ -20,6 +28,10 @@ type ContextType = {
    */
   selectedTenantID: number | string | undefined
   /**
+   * Sets the entityType when a document is loaded and sets it to undefined when the document unmounts.
+   */
+  setEntityType: React.Dispatch<React.SetStateAction<'document' | 'global' | undefined>>
+  /**
    * Sets the modified state
    */
   setModified: React.Dispatch<React.SetStateAction<boolean>>
@@ -31,27 +43,19 @@ type ContextType = {
    */
   setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
   /**
-   * Sets the view when a document is loaded
-   */
-  setView: React.Dispatch<React.SetStateAction<'document' | 'global' | undefined>>
-  /**
    *
    */
   updateTenants: (args: { id: number | string; label: string }) => void
-  /**
-   * The current view type, either 'document' or 'global'
-   */
-  view?: 'document' | 'global' | undefined
 }
 
 const Context = createContext<ContextType>({
+  entityType: undefined,
   options: [],
   selectedTenantID: undefined,
+  setEntityType: () => undefined,
   setModified: () => undefined,
   setTenant: () => null,
-  setView: () => undefined,
   updateTenants: () => null,
-  view: undefined,
 })
 
 export const TenantSelectionProviderClient = ({
@@ -69,7 +73,7 @@ export const TenantSelectionProviderClient = ({
     initialValue,
   )
   const [modified, setModified] = React.useState<boolean>(false)
-  const [view, setView] = React.useState<'document' | 'global' | undefined>(undefined)
+  const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
   const { user } = useAuth()
   const userID = React.useMemo(() => user?.id, [user?.id])
   const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
@@ -116,11 +120,11 @@ export const TenantSelectionProviderClient = ({
         setSelectedTenantID(id)
         setCookie(String(id))
       }
-      if (view !== 'document' && refresh) {
+      if (entityType !== 'document' && refresh) {
         router.refresh()
       }
     },
-    [deleteCookie, view, router, setCookie, tenantOptions],
+    [deleteCookie, entityType, router, setCookie, tenantOptions],
   )
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(({ id, label }) => {
@@ -165,14 +169,14 @@ export const TenantSelectionProviderClient = ({
     >
       <Context
         value={{
+          entityType,
           modified,
           options: tenantOptions,
           selectedTenantID,
+          setEntityType,
           setModified,
           setTenant,
-          setView,
           updateTenants,
-          view,
         }}
       >
         {children}

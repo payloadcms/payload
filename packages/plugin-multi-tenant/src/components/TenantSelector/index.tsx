@@ -24,7 +24,7 @@ const confirmSwitchTenantSlug = 'confirm-switch-tenant'
 const confirmLeaveWithoutSavingSlug = 'confirm-leave-without-saving'
 
 export const TenantSelector = ({ label, viewType }: { label: string; viewType?: ViewTypes }) => {
-  const { modified, options, selectedTenantID, setTenant, view } = useTenantSelection()
+  const { entityType, modified, options, selectedTenantID, setTenant } = useTenantSelection()
   const { closeModal, openModal } = useModal()
   const { i18n, t } = useTranslation<
     PluginMultiTenantTranslations,
@@ -66,13 +66,13 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         return
       }
 
-      if (view !== 'document') {
-        if (view === 'global' && modified) {
-          // If the view is 'global' and there are unsaved changes, prompt for confirmation
+      if (entityType !== 'document') {
+        if (entityType === 'global' && modified) {
+          // If the entityType is 'global' and there are unsaved changes, prompt for confirmation
           setTenantSelection(option)
           openModal(confirmLeaveWithoutSavingSlug)
         } else {
-          // If the view is not 'document', switch tenant without confirmation
+          // If the entityType is not 'document', switch tenant without confirmation
           switchTenant(option)
         }
       } else {
@@ -81,7 +81,7 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         openModal(confirmSwitchTenantSlug)
       }
     },
-    [selectedTenantID, view, modified, switchTenant, openModal],
+    [selectedTenantID, entityType, modified, switchTenant, openModal],
   )
 
   if (options.length <= 1) {
