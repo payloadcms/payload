@@ -10,7 +10,7 @@ import { operations, type QueryPreset } from './types.js'
 
 export const queryPresetsCollectionSlug = 'payload-query-presets'
 
-export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
+export const getQueryPresetsCollection = (config: Config): CollectionConfig => ({
   slug: queryPresetsCollectionSlug,
   access: getAccess(config),
   admin: {

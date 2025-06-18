@@ -37,7 +37,7 @@ describe('reservedFieldNames - collections -', () => {
               },
             ],
           } as Config,
-          collection: {
+          collectionConfig: {
             ...collectionWithUploads,
             fields,
           },
@@ -65,7 +65,7 @@ describe('reservedFieldNames - collections -', () => {
               },
             ],
           } as Config,
-          collection: {
+          collectionConfig: {
             ...collectionWithUploads,
             fields,
           },
@@ -105,7 +105,7 @@ describe('reservedFieldNames - collections -', () => {
               },
             ],
           } as Config,
-          collection: {
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },
@@ -133,7 +133,7 @@ describe('reservedFieldNames - collections -', () => {
               },
             ],
           } as Config,
-          collection: {
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },
@@ -161,7 +161,7 @@ describe('reservedFieldNames - collections -', () => {
               },
             ],
           } as Config,
-          collection: {
+          collectionConfig: {
             ...collectionWithAuth,
             fields,
           },

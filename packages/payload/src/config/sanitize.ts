@@ -32,7 +32,7 @@ import {
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
-import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
+import { getQueryPresetsCollection, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
@@ -92,6 +92,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       supportedTimezones: defaultTimezones,
     }
   }
+
   // Timezones supported by the Intl API
   const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
 
@@ -225,7 +226,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         : sanitizedBlock.labels
 
       sanitizedBlock.fields = await sanitizeFields({
-        config: sanitizedConfig as unknown as Config,
+        config: incomingConfig,
         existingFieldNames: new Set(),
         fields: sanitizedBlock.fields,
         parentIsLocalized: false,
@@ -365,7 +366,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(
       await sanitizeCollection({
-        collectionConfig: getQueryPresetsConfig(incomingConfig),
+        collectionConfig: getQueryPresetsCollection(incomingConfig),
         config: incomingConfig,
         richTextSanitizationPromises,
         validRelationships,
