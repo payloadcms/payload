@@ -6,7 +6,7 @@ import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 export const getCustomViewByRoute = ({
   config,
-  currentRoute,
+  currentRoute: currentRouteWithAdmin,
 }: {
   config: SanitizedConfig
   currentRoute: string
@@ -19,9 +19,13 @@ export const getCustomViewByRoute = ({
     admin: {
       components: { views },
     },
+    routes: { admin: adminRoute },
   } = config
 
   let viewKey: string
+
+  const currentRoute =
+    adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
 
   const foundViewConfig =
     (views &&
