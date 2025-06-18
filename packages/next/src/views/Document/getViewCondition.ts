@@ -5,8 +5,6 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { getViewConfig } from '../../elements/DocumentHeader/Tabs/getViewConfig.js'
-
 export const getViewCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
   doc: Data
@@ -16,7 +14,17 @@ export const getViewCondition = (args: {
 }): boolean => {
   const { name, collectionConfig, doc, globalConfig, req } = args
 
-  const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
+  let viewConfig
+
+  if (collectionConfig) {
+    if (typeof collectionConfig?.admin?.components?.views?.edit === 'object') {
+      viewConfig = collectionConfig.admin.components.views.edit[name]
+    }
+  } else if (globalConfig) {
+    if (typeof globalConfig?.admin?.components?.views?.edit === 'object') {
+      viewConfig = globalConfig.admin.components.views.edit[name]
+    }
+  }
 
   const { condition } = viewConfig || {}
 

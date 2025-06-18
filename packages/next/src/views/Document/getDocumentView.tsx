@@ -60,7 +60,7 @@ export const getDocumentView = ({
     (globalConfig && globalConfig?.admin?.components?.views)
 
   const viewCondition = (viewKey: string): boolean => {
-    const conditionResult = getViewCondition({
+    const passesCondition = getViewCondition({
       name: viewKey,
       collectionConfig,
       doc,
@@ -68,7 +68,7 @@ export const getDocumentView = ({
       req,
     })
 
-    if (conditionResult) {
+    if (passesCondition === true) {
       return true
     }
     return false
@@ -211,7 +211,6 @@ export const getDocumentView = ({
       default: {
         // --> /collections/:collectionSlug/:id/versions/:version
         if (segment4 === 'versions') {
-
           const passesCondition = viewCondition('versions')
           if (passesCondition && docPermissions?.readVersions) {
             View = getCustomViewByKey(views, 'version') || DefaultVersionView
@@ -280,8 +279,8 @@ export const getDocumentView = ({
             // --> /globals/:globalSlug/preview
             const passesCondition = viewCondition('preview')
             if (
-              (passesCondition && (globalConfig && globalConfig?.admin?.livePreview) ||
-                config?.admin?.livePreview?.globals?.includes(globalConfig?.slug))
+              (passesCondition && globalConfig && globalConfig?.admin?.livePreview) ||
+              config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
             ) {
               View = getCustomViewByKey(views, 'livePreview') || DefaultLivePreviewView
             }

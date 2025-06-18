@@ -8,13 +8,11 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
-  TypedUser,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { getViewConfig } from './getViewConfig.js'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DocumentTab } from './Tab/index.js'
 import './index.scss'
@@ -49,18 +47,26 @@ export const DocumentTabs: React.FC<{
               const meetsCondition =
                 !condition || condition({ collectionConfig, config, globalConfig, permissions })
 
-              const viewConfig = getViewConfig({
-                name,
-                collectionConfig,
-                globalConfig,
-              })
+              let viewConfig
+
+              if (collectionConfig) {
+                if (typeof collectionConfig?.admin?.components?.views?.edit === 'object') {
+                  viewConfig = collectionConfig.admin.components.views.edit[name]
+                }
+              } else if (globalConfig) {
+                if (typeof globalConfig?.admin?.components?.views?.edit === 'object') {
+                  viewConfig = globalConfig.admin.components.views.edit[name]
+                }
+              }
 
               const { condition: viewCondition } = viewConfig || {}
 
-              const meetsViewCondition = !viewCondition || viewCondition({
-                doc,
-                req,
-              })
+              const meetsViewCondition =
+                !viewCondition ||
+                viewCondition({
+                  doc,
+                  req,
+                })
 
               if (!meetsCondition || !meetsViewCondition) {
                 return null

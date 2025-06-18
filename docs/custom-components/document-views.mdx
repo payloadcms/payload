@@ -193,19 +193,26 @@ If the condition returns `false`, the corresponding **view and its tab** will no
 #### Example
 
 ```ts
- admin: {
-  components: {
-    views: {
-      edit: {
-        api: {
-          condition: ({ doc, req: { user } }) => {
-            return user?.roles?.includes('admin') ?? false
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  slug: 'my-collection',
+  // ...
+  admin: {
+    // ...
+    components: {
+      views: {
+        edit: {
+          api: {
+            condition: ({ doc, req: { user } }) => {
+              return user?.roles?.includes('admin') ?? false
+            },
           },
         },
       },
     },
   },
-},
+}
 ```
 
 In this example, only users with the `admin` role can access the API View and its associated tab. This setup works for both Collection and Global Document Views.
