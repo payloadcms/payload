@@ -34,15 +34,8 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
   const { t } = useTranslation()
 
   return (
-<<<<<<< fix/philip
-    <Fragment>
-      {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
-      {status && renderPill(rowData, latestVersion, currentLabel, previousLabel, pillStyle)}
-      {publishedLocalePill}
-    </Fragment>
-=======
     <div className={`${baseClass}__items`}>
-      {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
+      {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
       <VersionPillLabel
         currentlyPublishedVersion={currentlyPublishedVersion}
         disableDate={true}
@@ -52,6 +45,5 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
         latestDraftVersion={latestDraftVersion}
       />
     </div>
->>>>>>> main
   )
 }
