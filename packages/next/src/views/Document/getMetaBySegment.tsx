@@ -6,7 +6,6 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAPIViewMetadata } from '../API/metadata.js'
 import { generateEditViewMetadata } from '../Edit/metadata.js'
-import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
@@ -50,10 +49,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           // `/:collection/:id/api`
           fn = generateAPIViewMetadata
           break
-        case 'preview':
-          // `/:collection/:id/preview`
-          fn = generateLivePreviewViewMetadata
-          break
         case 'versions':
           // `/:collection/:id/versions`
           fn = generateVersionsViewMetadata
@@ -88,10 +83,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         case 'api':
           // `/:global/api`
           fn = generateAPIViewMetadata
-          break
-        case 'preview':
-          // `/:global/preview`
-          fn = generateLivePreviewViewMetadata
           break
         case 'versions':
           // `/:global/versions`

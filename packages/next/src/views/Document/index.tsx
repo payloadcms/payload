@@ -5,11 +5,17 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
+  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  LivePreviewProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
@@ -84,6 +90,7 @@ export const renderDocument = async ({
       payload: {
         config,
         config: {
+          admin: { livePreview: livePreviewConfig },
           routes: { admin: adminRoute, api: apiRoute },
           serverURL,
         },
@@ -310,6 +317,32 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const livePreviewURL =
+    typeof livePreviewConfig?.url === 'function'
+      ? await livePreviewConfig.url({
+          collectionConfig,
+          data: doc,
+          globalConfig,
+          locale,
+          req,
+          /**
+           * @deprecated
+           * Use `req.payload` instead. This will be removed in the next major version.
+           */
+          payload: initPageResult.req.payload,
+        })
+      : livePreviewConfig?.url
+
+  const breakpoints: LivePreviewConfig['breakpoints'] = [
+    ...(livePreviewConfig?.breakpoints || []),
+    {
+      name: 'responsive',
+      height: '100%',
+      label: 'Responsive',
+      width: '100%',
+    },
+  ]
+
   return {
     data: doc,
     Document: (
@@ -337,24 +370,32 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        {showHeader && !drawerSlug && (
-          <DocumentHeader
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-            i18n={i18n}
-            payload={payload}
-            permissions={permissions}
-          />
-        )}
-        <HydrateAuthProvider permissions={permissions} />
-        <EditDepthProvider>
-          {RenderServerComponent({
-            clientProps,
-            Component: View,
-            importMap,
-            serverProps: documentViewServerProps,
-          })}
-        </EditDepthProvider>
+        <LivePreviewProvider
+          breakpoints={breakpoints}
+          // isPopupOpen={isPopupOpen}
+          // openPopupWindow={openPopupWindow}
+          // popupRef={popupRef}
+          url={livePreviewURL}
+        >
+          {showHeader && !drawerSlug && (
+            <DocumentHeader
+              collectionConfig={collectionConfig}
+              globalConfig={globalConfig}
+              i18n={i18n}
+              payload={payload}
+              permissions={permissions}
+            />
+          )}
+          <HydrateAuthProvider permissions={permissions} />
+          <EditDepthProvider>
+            {RenderServerComponent({
+              clientProps,
+              Component: View,
+              importMap,
+              serverProps: documentViewServerProps,
+            })}
+          </EditDepthProvider>
+        </LivePreviewProvider>
       </DocumentInfoProvider>
     ),
   }

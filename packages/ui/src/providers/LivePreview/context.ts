@@ -6,7 +6,7 @@ import type React from 'react'
 
 import { createContext, use } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.js'
+import type { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import type { SizeReducerAction } from './sizeReducer.js'
 
 export interface LivePreviewContextType {

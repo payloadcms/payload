@@ -291,6 +291,8 @@ export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
+export { LivePreviewProvider } from '../../providers/LivePreview/index.js'
+
 export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {
   RouteTransitionProvider,

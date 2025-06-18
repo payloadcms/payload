@@ -1,13 +1,14 @@
 'use client'
-import type { ClientField, LivePreviewConfig } from 'payload'
+import type { LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import { useConfig } from '@payloadcms/ui'
 import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.js'
+import type { usePopupWindow } from '../../hooks/usePopupWindow.js'
 
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -20,7 +21,6 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
-  fieldSchema: ClientField[]
   isPopupOpen?: boolean
   openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.RefObject<Window>
@@ -30,7 +30,6 @@ export type LivePreviewProviderProps = {
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints,
   children,
-  fieldSchema,
   isPopupOpen,
   openPopupWindow,
   popupRef,
@@ -40,11 +39,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [listeningForMessages, setListeningForMessages] = useState(false)
+  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
   const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const [zoom, setZoom] = useState(1)
 
@@ -57,11 +57,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     width: 0,
   })
 
+  const entityConfig = getEntityConfig({ collectionSlug, globalSlug })
+
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
   const [fieldSchemaJSON] = useState(() => {
-    return fieldSchemaToJSON(fieldSchema, config)
+    return fieldSchemaToJSON(entityConfig.fields, config)
   })
 
   // The toolbar needs to freely drag and drop around the page

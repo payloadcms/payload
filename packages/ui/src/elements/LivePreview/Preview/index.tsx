@@ -2,11 +2,14 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ShimmerEffect, useAllFormFields, useDocumentEvents, useLocale } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { useEffect } from 'react'
 
-import { useLivePreviewContext } from '../Context/context.js'
+import { useAllFormFields } from '../../../forms/Form/context.js'
+import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
+import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
@@ -17,6 +20,8 @@ const baseClass = 'live-preview-window'
 export const LivePreview: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
+    breakpoint,
+    fieldSchemaJSON,
     iframeHasLoaded,
     iframeRef,
     popupRef,
@@ -28,8 +33,6 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
   const locale = useLocale()
 
   const { mostRecentUpdate } = useDocumentEvents()
-
-  const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
