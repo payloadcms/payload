@@ -108,7 +108,7 @@ export const getRouteData = ({
     searchParams,
   }
 
-  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive] = segments
+  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
 
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
@@ -279,7 +279,12 @@ export const getRouteData = ({
 
         if (isTrashDocRoute) {
           // --> /collections/:collectionSlug/trash/:id (read-only)
+          // --> /collections/:collectionSlug/trash/:id/api
+          // --> /collections/:collectionSlug/trash/:id/preview
+          // --> /collections/:collectionSlug/trash/:id/versions
+          // --> /collections/:collectionSlug/trash/:id/versions/:versionID
           initPageOptions.routeParams.id = segmentFour
+          initPageOptions.routeParams.versionID = segmentSix
 
           ViewToRender = {
             Component: DocumentView,
@@ -287,14 +292,15 @@ export const getRouteData = ({
 
           templateClassName = `collection-default-edit`
           templateType = 'default'
-          viewType = 'document'
 
-          documentSubViewType = 'default'
+          const viewInfo = getDocumentViewInfo([segmentFive, segmentSix])
+          viewType = viewInfo.viewType
+          documentSubViewType = viewInfo.documentSubViewType
 
           attachViewActions({
             collectionOrGlobal: matchedCollection,
             serverProps,
-            viewKeyArg: 'default',
+            viewKeyArg: documentSubViewType,
           })
         } else if (isTrashRoute) {
           // --> /collections/:collectionSlug/trash

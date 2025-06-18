@@ -116,6 +116,8 @@ export const renderDocument = async ({
     throw new Error('not-found')
   }
 
+  const isTrashedDoc = typeof (doc as Record<string, unknown>)?.deletedAt === 'string'
+
   const [
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
@@ -173,6 +175,7 @@ export const renderDocument = async ({
       globalSlug,
       locale: locale?.code,
       operation: (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create',
+      readOnly: isTrashedDoc,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -311,8 +314,6 @@ export const renderDocument = async ({
     viewType,
   }
 
-  const isTrashedDoc = typeof (doc as Record<string, unknown>)?.deletedAt === 'string'
-
   return {
     data: doc,
     Document: (
@@ -346,7 +347,6 @@ export const renderDocument = async ({
             collectionConfig={collectionConfig}
             globalConfig={globalConfig}
             i18n={i18n}
-            isTrashed={isTrashedDoc}
             payload={payload}
             permissions={permissions}
           />

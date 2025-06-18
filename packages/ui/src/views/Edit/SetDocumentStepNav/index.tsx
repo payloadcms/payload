@@ -80,7 +80,9 @@ export const SetDocumentStepNav: React.FC<{
             url: isVisible
               ? formatAdminURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}/${id}`,
+                  path: isTrashed
+                    ? `/collections/${collectionSlug}/trash/${id}`
+                    : `/collections/${collectionSlug}/${id}`,
                 })
               : undefined,
           })
@@ -102,7 +104,7 @@ export const SetDocumentStepNav: React.FC<{
       }
 
       // Fallback view (used for versions, previews, etc.)
-      if (view && !isTrashed) {
+      if (view) {
         nav.push({
           label: view,
         })

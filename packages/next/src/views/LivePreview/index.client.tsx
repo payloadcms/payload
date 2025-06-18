@@ -107,6 +107,7 @@ const PreviewView: React.FC<Props> = ({
     initialState,
     isEditing,
     isInitializing,
+    isTrashed,
     lastUpdateTime,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -427,7 +428,6 @@ const PreviewView: React.FC<Props> = ({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    // eslint-disable-next-line react-compiler/react-compiler
     !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
@@ -436,7 +436,7 @@ const PreviewView: React.FC<Props> = ({
       <Form
         action={action}
         className={`${baseClass}__form`}
-        disabled={isReadOnlyForIncomingUser || !hasSavePermission}
+        disabled={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
         initialState={initialState}
         isInitializing={isInitializing}
         method={id ? 'PATCH' : 'POST'}
@@ -484,6 +484,7 @@ const PreviewView: React.FC<Props> = ({
           globalLabel={globalConfig?.label}
           globalSlug={globalSlug}
           id={id}
+          isTrashed={isTrashed}
           pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
           useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
           view={t('general:livePreview')}
@@ -504,12 +505,13 @@ const PreviewView: React.FC<Props> = ({
             SaveDraftButton,
           }}
           data={initialData}
-          disableActions={disableActions}
+          disableActions={disableActions || isTrashed}
           EditMenuItems={EditMenuItems}
           hasPublishPermission={hasPublishPermission}
           hasSavePermission={hasSavePermission}
           id={id}
           isEditing={isEditing}
+          isTrashed={isTrashed}
           onTakeOver={() =>
             handleTakeOver(
               id,
@@ -549,7 +551,7 @@ const PreviewView: React.FC<Props> = ({
               docPermissions={docPermissions}
               fields={fields}
               forceSidebarWrap
-              readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+              readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
               schemaPathSegments={[collectionSlug || globalSlug]}
             />
             {AfterDocument}

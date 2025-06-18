@@ -10,6 +10,7 @@ export const generateLivePreviewViewMetadata: GenerateEditViewMetadata = async (
   globalConfig,
   i18n,
   isEditing,
+  isReadOnly = false,
 }): Promise<Metadata> =>
   generateEditViewMetadata({
     collectionConfig,
@@ -17,5 +18,6 @@ export const generateLivePreviewViewMetadata: GenerateEditViewMetadata = async (
     globalConfig,
     i18n,
     isEditing,
+    isReadOnly,
     view: 'livePreview',
   })

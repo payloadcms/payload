@@ -19,16 +19,15 @@ export const DocumentHeader: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   i18n: I18n
-  isTrashed?: boolean
   payload: Payload
   permissions: SanitizedPermissions
 }> = (props) => {
-  const { collectionConfig, globalConfig, hideTabs, i18n, isTrashed, payload, permissions } = props
+  const { collectionConfig, globalConfig, hideTabs, i18n, payload, permissions } = props
 
   return (
     <Gutter className={baseClass}>
       <RenderTitle className={`${baseClass}__title`} />
-      {!hideTabs && !isTrashed && (
+      {!hideTabs && (
         <DocumentTabs
           collectionConfig={collectionConfig}
           globalConfig={globalConfig}

@@ -80,6 +80,28 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           break
       }
     }
+
+    // `/collections/:collection/trash/:id/:view`
+    if (segments.length === 5 && segments[2] === 'trash') {
+      switch (segments[4]) {
+        case 'api':
+          fn = generateAPIViewMetadata
+          break
+        case 'preview':
+          fn = (args) => generateLivePreviewViewMetadata({ ...args, isReadOnly: true })
+          break
+        case 'versions':
+          fn = generateVersionsViewMetadata
+          break
+        default:
+          break
+      }
+    }
+
+    // `/collections/:collection/trash/:id/versions/:versionID`
+    if (segments.length === 6 && segments[2] === 'trash' && segments[4] === 'versions') {
+      fn = generateVersionViewMetadata
+    }
   }
 
   if (isGlobal) {
