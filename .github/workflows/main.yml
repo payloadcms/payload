@@ -342,6 +342,7 @@ jobs:
         if: ${{ matrix.suite == 'plugin-cloud-storage' }}
 
       - name: Store Playwright's Version
+        id: playwright_version
         run: |
           # Extract the version number using a more targeted regex pattern with awk
           PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
@@ -353,7 +354,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}-${{ github.run_id }}
+          key: playwright-browsers-${{ steps.playwright_version.outputs.version }}-${{ github.run_id }}
 
       - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
