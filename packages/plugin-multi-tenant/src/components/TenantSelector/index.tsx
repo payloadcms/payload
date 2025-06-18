@@ -118,17 +118,9 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
             }}
           />
         }
-        heading={
-          <Translation
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            i18nKey="plugin-multi-tenant:confirm-tenant-switch--heading"
-            t={t}
-            variables={{
-              tenantLabel: getTranslation(label, i18n),
-            }}
-          />
-        }
+        heading={t('plugin-multi-tenant:confirm-tenant-switch--heading', {
+          tenantLabel: getTranslation(label, i18n),
+        })}
         modalSlug={confirmSwitchTenantSlug}
         onConfirm={() => {
           switchTenant(tenantSelection)
