@@ -3,20 +3,12 @@ import type { Endpoint, SanitizedConfig } from '../config/types.js'
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
 const configHasJobs = (config: SanitizedConfig): boolean => {
-  if (!config.jobs) {
-    return false
-  }
-
-  if (config.jobs.tasks?.length > 0) {
-    return true
-  }
-  if (config.jobs.workflows?.length > 0) {
-    return true
-  }
-
-  return false
+  return Boolean(config.jobs?.tasks?.length || config.jobs?.workflows?.length)
 }
 
+/**
+ * /api/payload-jobs/run endpoint
+ */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (!configHasJobs(req.payload.config)) {
@@ -28,7 +20,9 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const hasAccess = await req.payload.config.jobs.access.run({ req })
+    const accessFn = req.payload.config.jobs?.access?.run ?? (() => true)
+
+    const hasAccess = await accessFn({ req })
 
     if (!hasAccess) {
       return Response.json(
