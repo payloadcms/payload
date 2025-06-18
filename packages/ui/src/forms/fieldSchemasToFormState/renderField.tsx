@@ -42,6 +42,7 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  readOnly,
   renderAllFields,
   req,
   schemaPath,
@@ -66,7 +67,8 @@ export const renderField: RenderFieldMethod = ({
     field: clientField,
     path,
     permissions,
-    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
+    readOnly:
+      readOnly ?? (typeof permissions === 'boolean' ? !permissions : !permissions?.[operation]),
     schemaPath,
   }
 
