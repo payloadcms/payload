@@ -1,15 +1,12 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { goToListDoc } from 'helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
   selectInput,
 } from 'helpers/e2e/selectInput.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -17,7 +14,10 @@ import type { Config } from './payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, login } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
+import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import { menuItemsSlug, menuSlug } from './shared.js'
