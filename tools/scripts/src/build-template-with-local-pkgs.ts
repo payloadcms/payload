@@ -37,10 +37,24 @@ async function main() {
     allTgzs,
   })
 
-  execSync('pnpm add ./*.tgz', execOpts)
-  execSync('pnpm install', execOpts)
-
+  // remove node_modules
+  await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
+  // replace workspace:* from package.json
   const packageJsonPath = path.join(templatePath, 'package.json')
+  // const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
+  // const packageJsonObj = JSON.parse(packageJson)
+  // packageJsonObj.dependencies = Object.fromEntries(
+  //   Object.entries(packageJsonObj.dependencies).map(([key, value]) => {
+  //     if (value.startsWith('workspace:')) {
+  //       return [key, `^${process.env.PAYLOAD_VERSION || '1.0.0'}`]
+  //     }
+  //     return [key, value]
+  //   }),
+  // )
+
+  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
+  execSync('pnpm install --ignore-workspace', execOpts)
+
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
   const packageJsonObj = JSON.parse(packageJson) as {
     dependencies: Record<string, string>
@@ -64,7 +78,7 @@ async function main() {
   packageJsonObj.pnpm = { overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --no-frozen-lockfile', execOpts)
+  execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
