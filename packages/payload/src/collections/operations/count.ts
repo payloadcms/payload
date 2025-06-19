@@ -7,6 +7,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -71,6 +72,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     let result: { totalDocs: number }
 
     const fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     await validateQueryPaths({
       collectionConfig,

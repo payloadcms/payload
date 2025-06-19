@@ -22,6 +22,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
@@ -106,6 +107,8 @@ export const deleteOperation = async <
     })
 
     const fullWhere = combineQueries(where, accessResult!)
+
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
