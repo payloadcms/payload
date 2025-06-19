@@ -142,7 +142,11 @@ export default buildConfigWithDefaults({
                 await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
                 args.req.payload.logger.info(
                   'EverySecond task scheduled: ' +
-                    (args.status === 'success' ? String(args.job.id) : 'failed to schedule'),
+                    (args.status === 'success'
+                      ? String(args.job.id)
+                      : args.status === 'skipped'
+                        ? 'skipped'
+                        : 'error'),
                 )
               },
             },

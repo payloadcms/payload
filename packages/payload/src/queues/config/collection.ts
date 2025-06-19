@@ -199,6 +199,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
       {
         name: 'waitUntil',
         type: 'date',
+        admin: {
+          date: { pickerAppearance: 'dayAndTime' },
+        },
         index: true,
       },
       {
