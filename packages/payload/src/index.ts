@@ -811,8 +811,7 @@ export class BasePayload {
 
               if (!shouldAutoRun) {
                 job.stop()
-
-                return false
+                return
               }
             }
 
