@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -62,7 +61,7 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
+export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromGlobalSlug<TSlug>> {
