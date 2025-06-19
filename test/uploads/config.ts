@@ -1,4 +1,4 @@
- 
+/* eslint-disable no-restricted-exports */
 
 import type { CollectionSlug, File } from 'payload'
 
