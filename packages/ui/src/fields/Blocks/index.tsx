@@ -254,7 +254,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         />
       </header>
       {BeforeInput}
-      <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      <NullifyLocaleField
+        fieldValue={value}
+        localized={localized}
+        path={path}
+        readOnly={readOnly}
+        required={required}
+      />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__rows`}
