@@ -41,16 +41,12 @@ async function main() {
   await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
   // replace workspace:* from package.json
   const packageJsonPath = path.join(templatePath, 'package.json')
-  // const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
-  // const packageJsonObj = JSON.parse(packageJson)
-  // packageJsonObj.dependencies = Object.fromEntries(
-  //   Object.entries(packageJsonObj.dependencies).map(([key, value]) => {
-  //     if (value.startsWith('workspace:')) {
-  //       return [key, `^${process.env.PAYLOAD_VERSION || '1.0.0'}`]
-  //     }
-  //     return [key, value]
-  //   }),
-  // )
+  const initialPackageJson = await fs.readFile(packageJsonPath, 'utf-8')
+  const initialPackageJsonObj = JSON.parse(initialPackageJson)
+
+  updatePackageJSONDependencies({ latestVersion: '3.42.0', packageJson: initialPackageJsonObj })
+
+  await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
 
   execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
   execSync('pnpm install --ignore-workspace', execOpts)
@@ -94,4 +90,29 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
 
 function header(message: string, opts?: { enable?: boolean }) {
   console.log(chalk.bold.green(`${message}\n`))
+}
+
+/**
+ * Recursively updates a JSON object to replace all instances of `workspace:` with the latest version pinned.
+ *
+ * Does not return and instead modifies the `packageJson` object in place.
+ */
+export function updatePackageJSONDependencies(args: {
+  latestVersion: string
+  packageJson: Record<string, unknown>
+}): void {
+  const { latestVersion, packageJson } = args
+
+  const updatedDependencies = Object.entries(packageJson.dependencies || {}).reduce(
+    (acc, [key, value]) => {
+      if (typeof value === 'string' && value.startsWith('workspace:')) {
+        acc[key] = `${latestVersion}`
+      } else {
+        acc[key] = value
+      }
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+  packageJson.dependencies = updatedDependencies
 }
