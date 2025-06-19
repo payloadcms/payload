@@ -79,7 +79,9 @@ export async function handleSchedules({ req }: { req: PayloadRequest }) {
         ? queueScheduleStats?.tasks?.[schedulable.taskConfig.slug]?.lastScheduledRun
         : queueScheduleStats?.workflows?.[schedulable.workflowConfig?.slug ?? '']?.lastScheduledRun
 
-      const nextRun = new Cron(schedulable.scheduleConfig.cron).nextRun(lastScheduledRun ?? null)
+      const nextRun = new Cron(schedulable.scheduleConfig.cron).nextRun(
+        lastScheduledRun ?? undefined,
+      )
 
       if (!nextRun) {
         continue

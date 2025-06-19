@@ -88,14 +88,19 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
   };
   jobs: {
     tasks: {
+      EverySecond: TaskEverySecond;
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
@@ -260,6 +265,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug:
           | 'inline'
+          | 'EverySecond'
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
@@ -328,6 +334,7 @@ export interface PayloadJob {
   taskSlug?:
     | (
         | 'inline'
+        | 'EverySecond'
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
@@ -510,6 +517,44 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskEverySecond".
+ */
+export interface TaskEverySecond {
+  input: {
+    message: string;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

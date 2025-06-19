@@ -141,8 +141,8 @@ export default buildConfigWithDefaults({
               afterSchedule: async (args) => {
                 await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
                 args.req.payload.logger.info(
-                  'EverySecond task scheduled:',
-                  args.status === 'success' ? args.job.id : 'failed to schedule',
+                  'EverySecond task scheduled: ' +
+                    (args.status === 'success' ? String(args.job.id) : 'failed to schedule'),
                 )
               },
             },

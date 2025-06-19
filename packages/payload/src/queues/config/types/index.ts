@@ -182,9 +182,9 @@ export type AfterScheduleFn = (
   args: {
     defaultAfterSchedule: AfterScheduleFn
     /**
-     * payload-job-stats global data
+     * payload-job-stats global data. If the global does not exist, it will be null.
      */
-    jobStats: JobStats
+    jobStats: JobStats | null
     queueable: Queueable
     req: PayloadRequest
   } & (
