@@ -879,6 +879,12 @@ export {
   type BlockFields,
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
+export { 
+  $createServerInlineBlockNode, 
+  $isServerInlineBlockNode, 
+  type InlineBlockFields,
+  ServerInlineBlockNode,
+} from './features/blocks/server/nodes/InlineBlocksNode.js'
 
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
