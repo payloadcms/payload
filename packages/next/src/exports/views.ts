@@ -1,3 +1,5 @@
+export { EditView } from '../views/Edit/index.js'
+export { LivePreviewView } from '../views/LivePreview/index.js'
 export { NotFoundPage } from '../views/NotFound/index.js'
 export { type GenerateViewMetadata, RootPage } from '../views/Root/index.js'
 export { generatePageMetadata } from '../views/Root/metadata.js'
