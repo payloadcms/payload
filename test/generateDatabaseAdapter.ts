@@ -21,6 +21,21 @@ export const allDatabaseAdapters = {
       strength: 1,
     },
   })`,
+  firestore: `
+  import { mongooseAdapter, compatabilityOptions } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ...compatabilityOptions.firestore,
+    ensureIndexes: true,
+    disableIndexHints: false,
+    url:
+      process.env.DATABASE_URI ||
+      process.env.MONGODB_MEMORY_SERVER_URI ||
+      'mongodb://127.0.0.1/payloadtests',
+    collation: {
+      strength: 1,
+    },
+  })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
 

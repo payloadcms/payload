@@ -76,7 +76,11 @@ export const aggregatePaginate = async ({
       countPromise = Model.estimatedDocumentCount(query)
     } else {
       const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
-      countPromise = Model.countDocuments(query, { collation, hint, session })
+      countPromise = Model.countDocuments(query, {
+        collation,
+        session,
+        ...(hint ? { hint } : {}),
+      })
     }
   }
 
