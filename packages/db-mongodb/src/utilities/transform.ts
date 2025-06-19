@@ -374,6 +374,10 @@ export const transform = ({
   parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
+  if (!data) {
+    return null
+  }
+
   if (Array.isArray(data)) {
     for (const item of data) {
       transform({ adapter, data: item, fields, globalSlug, operation, validateRelationships })
