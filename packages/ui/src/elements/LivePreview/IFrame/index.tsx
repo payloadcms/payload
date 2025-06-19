@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { useLivePreviewContext } from '../Context/context.js'
+import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import './index.scss'
 
 const baseClass = 'live-preview-iframe'

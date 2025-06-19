@@ -2,10 +2,14 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ChevronIcon, LinkIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React from 'react'
 
-import { useLivePreviewContext } from '../../Context/context.js'
+import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { LinkIcon } from '../../../../icons/Link/index.js'
+import { XIcon } from '../../../../icons/X/index.js'
+import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Popup, PopupList } from '../../../Popup/index.js'
 import { PreviewFrameSizeInput } from '../SizeInput/index.js'
 import './index.scss'
 

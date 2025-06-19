@@ -112,7 +112,7 @@
       }
     }
 
-    @include mid-break {
+    @container (max-width: 900px) {
       display: block;
 
       &--has-sidebar {
@@ -180,7 +180,7 @@
       }
     }
 
-    @include small-break {
+    @container (max-width: 600px) {
       &__sidebar-wrap {
         min-width: initial;
         width: 100%;

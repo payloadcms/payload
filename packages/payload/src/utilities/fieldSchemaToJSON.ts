@@ -1,7 +1,8 @@
 import type { ClientConfig } from '../config/client.js'
 import type { ClientField } from '../fields/config/client.js'
+import type { Field, FieldTypes } from '../fields/config/types.js'
 
-import { fieldAffectsData, type FieldTypes } from '../fields/config/types.js'
+import { fieldAffectsData } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -13,7 +14,10 @@ export type FieldSchemaJSON = {
   type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (
+  fields: (ClientField | Field)[],
+  config: ClientConfig,
+): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 

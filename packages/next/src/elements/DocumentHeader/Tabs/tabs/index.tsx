@@ -52,7 +52,7 @@ export const getTabs = ({
         order: 200,
         ...(customViews?.['livePreview']?.tab || {}),
       },
-      viewPath: '/preview',
+      viewPath: '/',
     },
     {
       tab: {

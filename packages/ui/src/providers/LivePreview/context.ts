@@ -6,7 +6,7 @@ import type React from 'react'
 
 import { createContext, use } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.js'
+import type { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import type { SizeReducerAction } from './sizeReducer.js'
 
 export interface LivePreviewContextType {
@@ -16,6 +16,7 @@ export interface LivePreviewContextType {
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
+  isLivePreviewing: boolean
   isPopupOpen: boolean
   measuredDeviceSize: {
     height: number
@@ -53,6 +54,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   fieldSchemaJSON: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
+  isLivePreviewing: false,
   isPopupOpen: false,
   measuredDeviceSize: {
     height: 0,

@@ -144,7 +144,6 @@ export const generatePageMetadata = async ({
         } else {
           // Collection Document Views
           // --> /collections/:collectionSlug/:id
-          // --> /collections/:collectionSlug/:id/preview
           // --> /collections/:collectionSlug/:id/versions
           // --> /collections/:collectionSlug/:id/versions/:version
           // --> /collections/:collectionSlug/:id/api
@@ -154,7 +153,6 @@ export const generatePageMetadata = async ({
         // Global Document Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:version
-        // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/api
         meta = await generateDocumentViewMetadata({
           config,

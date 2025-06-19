@@ -291,7 +291,6 @@ export const getRouteData = ({
           // Collection Edit Views
           // --> /collections/:collectionSlug/:id
           // --> /collections/:collectionSlug/:id/api
-          // --> /collections/:collectionSlug/:id/preview
           // --> /collections/:collectionSlug/:id/versions
           // --> /collections/:collectionSlug/:id/versions/:versionID
           initPageOptions.routeParams.id = segmentThree
@@ -317,7 +316,6 @@ export const getRouteData = ({
       } else if (isGlobal && matchedGlobal) {
         // Global Edit Views
         // --> /globals/:globalSlug/versions
-        // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
         initPageOptions.routeParams.global = matchedGlobal.slug
