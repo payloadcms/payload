@@ -12,7 +12,7 @@ export const getTabs = ({
 }: {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
-}): { tab: DocumentTabConfig; viewPath: string }[] => {
+}): { name: string; tab: DocumentTabConfig; viewPath: string }[] => {
   const customViews =
     collectionConfig?.admin?.components?.views?.edit ||
     globalConfig?.admin?.components?.views?.edit ||
@@ -20,6 +20,7 @@ export const getTabs = ({
 
   return [
     {
+      name: 'default',
       tab: {
         href: '',
         label: ({ t }) => t('general:edit'),
@@ -29,6 +30,7 @@ export const getTabs = ({
       viewPath: '/',
     },
     {
+      name: 'livePreview',
       tab: {
         condition: ({ collectionConfig, config, globalConfig }) => {
           if (collectionConfig) {
@@ -55,6 +57,7 @@ export const getTabs = ({
       viewPath: '/preview',
     },
     {
+      name: 'versions',
       tab: {
         condition: ({ collectionConfig, globalConfig, permissions }) =>
           Boolean(
@@ -71,6 +74,7 @@ export const getTabs = ({
       viewPath: '/versions',
     },
     {
+      name: 'api',
       tab: {
         condition: ({ collectionConfig, globalConfig }) =>
           (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
