@@ -65,6 +65,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'auth-collection': AuthCollectionAuthOperations;
   };
   blocks: {};
   collections: {
@@ -91,6 +92,7 @@ export interface Config {
     regression1: Regression1;
     regression2: Regression2;
     hooks: Hook;
+    'auth-collection': AuthCollection;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -120,6 +122,7 @@ export interface Config {
     regression1: Regression1Select<false> | Regression1Select<true>;
     regression2: Regression2Select<false> | Regression2Select<true>;
     hooks: HooksSelect<false> | HooksSelect<true>;
+    'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -148,6 +151,9 @@ export interface Config {
       })
     | (PublicUser & {
         collection: 'public-users';
+      })
+    | (AuthCollection & {
+        collection: 'auth-collection';
       });
   jobs: {
     tasks: unknown;
@@ -173,6 +179,24 @@ export interface UserAuthOperations {
   };
 }
 export interface PublicUserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface AuthCollectionAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -697,6 +721,26 @@ export interface Hook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth-collection".
+ */
+export interface AuthCollection {
+  id: string;
+  password?: string | null;
+  roles?: ('admin' | 'user')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -793,6 +837,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hooks';
         value: string | Hook;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
       } | null);
   globalSlug?: string | null;
   user:
@@ -803,6 +851,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
       };
   updatedAt: string;
   createdAt: string;
@@ -821,6 +873,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
       };
   key?: string | null;
   value?:
@@ -1197,6 +1253,25 @@ export interface HooksSelect<T extends boolean = true> {
   canMutate?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth-collection_select".
+ */
+export interface AuthCollectionSelect<T extends boolean = true> {
+  password?: T;
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
