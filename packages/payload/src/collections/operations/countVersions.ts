@@ -7,6 +7,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -76,6 +77,8 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     const fullWhere = combineQueries(where!, accessResult!)
 
     const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
+
+    sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
     await validateQueryPaths({
       collectionConfig,

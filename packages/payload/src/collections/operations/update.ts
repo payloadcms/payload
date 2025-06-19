@@ -23,6 +23,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
@@ -139,6 +140,8 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const fullWhere = combineQueries(where, accessResult!)
+
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

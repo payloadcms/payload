@@ -113,9 +113,6 @@ export async function validateSearchParam({
       if ('virtual' in field && field.virtual) {
         if (field.virtual === true) {
           errors.push({ path })
-        } else {
-          constraint[`${field.virtual}` as keyof WhereField] = constraint[path as keyof WhereField]
-          delete constraint[path as keyof WhereField]
         }
       }
 

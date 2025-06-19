@@ -23,6 +23,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -144,6 +145,7 @@ export const findOperation = async <
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
     let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

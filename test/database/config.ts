@@ -38,6 +38,7 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'categories',
+      versions: { drafts: true },
       fields: [
         {
           type: 'text',

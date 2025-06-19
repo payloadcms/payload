@@ -11,6 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
@@ -71,9 +72,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     })
 
     const fullWhere = combineQueries(where!, accessResults)
+    sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
     const select = sanitizeSelect({
-      fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
+      fields: versionFields,
       forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
       select: incomingSelect,
       versions: true,

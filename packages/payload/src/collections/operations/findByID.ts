@@ -24,6 +24,7 @@ import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -109,6 +110,12 @@ export const findByIDOperation = async <
     const where = { id: { equals: id } }
 
     const fullWhere = combineQueries(where, accessResult)
+
+    sanitizeWhereQuery({
+      fields: collectionConfig.flattenedFields,
+      payload: args.req.payload,
+      where: fullWhere,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
