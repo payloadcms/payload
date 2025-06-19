@@ -7,6 +7,7 @@ import type {
   TypedJobs,
 } from '../../../index.js'
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
+import type { ScheduleConfig } from './index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -63,6 +64,9 @@ export type BaseJob<
   workflowSlug?: null | WorkflowTypes
 }
 
+/**
+ * @todo rename to WorkflowSlug in 4.0, similar to CollectionSlug
+ */
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
 /**
@@ -155,6 +159,10 @@ export type WorkflowConfig<
    * @default undefined. By default, workflows retries are defined by their tasks
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this workflow to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job.
    */

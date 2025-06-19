@@ -6,7 +6,7 @@ import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
-import { jobsCollectionSlug } from '../../config/index.js'
+import { jobsCollectionSlug } from '../../config/collection.js'
 import { JobCancelledError } from '../../errors/index.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'

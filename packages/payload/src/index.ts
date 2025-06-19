@@ -805,14 +805,13 @@ export class BasePayload {
 
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
             if (typeof this.config.jobs.shouldAutoRun === 'function') {
               const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
               if (!shouldAutoRun) {
-                job.stop()
-
-                return false
+                jobAutorunCron.stop()
+                return
               }
             }
 
@@ -822,7 +821,7 @@ export class BasePayload {
             })
           })
 
-          this.crons.push(job)
+          this.crons.push(jobAutorunCron)
         }),
       )
     }
@@ -872,8 +871,10 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  await payload.destroy()
-
+  if (typeof payload.db.destroy === 'function') {
+    // Only destroy db, as we then later only call payload.db.init and not payload.init
+    await payload.db.destroy()
+  }
   payload.config = config
 
   payload.collections = config.collections.reduce(
@@ -1459,7 +1460,7 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
-export { jobAfterRead } from './queues/config/index.js'
+export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 
 export type {

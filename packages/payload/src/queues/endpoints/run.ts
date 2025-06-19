@@ -1,17 +1,17 @@
-import type { Endpoint, SanitizedConfig } from '../config/types.js'
+import type { Endpoint } from '../../config/types.js'
+import type { SanitizedJobsConfig } from '../config/types/index.js'
 
-import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
-
-const configHasJobs = (config: SanitizedConfig): boolean => {
-  return Boolean(config.jobs?.tasks?.length || config.jobs?.workflows?.length)
-}
+import { handleSchedules } from '../operations/handleSchedules/index.js'
+import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
  * /api/payload-jobs/run endpoint
  */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
-    if (!configHasJobs(req.payload.config)) {
+    const jobsConfig = req.payload.config.jobs
+
+    if (!configHasJobs(jobsConfig)) {
       return Response.json(
         {
           message: 'No jobs to run.',
@@ -20,7 +20,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const accessFn = req.payload.config.jobs?.access?.run ?? (() => true)
+    const accessFn = jobsConfig.access?.run ?? (() => true)
 
     const hasAccess = await accessFn({ req })
 
@@ -33,21 +33,45 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const { allQueues, limit, queue } = req.query as {
+    const {
+      allQueues,
+      handleSchedules: handleSchedulesParam,
+      limit,
+      queue,
+    } = req.query as {
       allQueues?: boolean
+      handleSchedules?: boolean
       limit?: number
       queue?: string
+    }
+
+    const shouldHandleSchedules =
+      handleSchedulesParam &&
+      !(typeof handleSchedulesParam === 'string' && handleSchedulesParam === 'false')
+
+    if (shouldHandleSchedules) {
+      if (!jobsConfig.enabledStats) {
+        throw new Error(
+          'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
+        )
+      }
+      await handleSchedules({ req })
     }
 
     const runJobsArgs: RunJobsArgs = {
       queue,
       req,
-      // We are checking access above, so we can override it here
+      // Access is validated above, so it's safe to override here
       overrideAccess: true,
     }
 
-    if (typeof limit !== 'undefined') {
-      runJobsArgs.limit = Number(limit)
+    if (typeof queue === 'string') {
+      runJobsArgs.queue = queue
+    }
+
+    const parsedLimit = Number(limit)
+    if (!isNaN(parsedLimit)) {
+      runJobsArgs.limit = parsedLimit
     }
 
     if (allQueues && !(typeof allQueues === 'string' && allQueues === 'false')) {
@@ -88,4 +112,8 @@ export const runJobsEndpoint: Endpoint = {
   },
   method: 'get',
   path: '/run',
+}
+
+export const configHasJobs = (jobsConfig: SanitizedJobsConfig): boolean => {
+  return Boolean(jobsConfig.tasks?.length || jobsConfig.workflows?.length)
 }

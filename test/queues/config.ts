@@ -31,7 +31,6 @@ import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workf
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -103,7 +102,7 @@ export default buildConfigWithDefaults({
         // Every second
         cron: '* * * * * *',
         limit: 100,
-        queue: 'autorunSecond', // name of the queue
+        queue: 'autorunSecond',
       },
       // add as many cron jobs as you want
     ],
@@ -117,12 +116,57 @@ export default buildConfigWithDefaults({
         },
       }
     },
+    scheduler: 'manual',
     processingOrder: {
       queues: {
         lifo: '-createdAt',
       },
     },
     tasks: [
+      {
+        schedule: [
+          {
+            cron: '* * * * * *',
+            queue: 'autorunSecond',
+            hooks: {
+              beforeSchedule: async (args) => {
+                const result = await args.defaultBeforeSchedule(args) // Handles verifying that there are no jobs already scheduled or processing
+                return {
+                  ...result,
+                  input: {
+                    message: 'This task runs every second',
+                  },
+                }
+              },
+              afterSchedule: async (args) => {
+                await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
+                args.req.payload.logger.info(
+                  'EverySecond task scheduled: ' +
+                    (args.status === 'success'
+                      ? String(args.job.id)
+                      : args.status === 'skipped'
+                        ? 'skipped'
+                        : 'error'),
+                )
+              },
+            },
+          },
+        ],
+        slug: 'EverySecond',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: ({ input, req }) => {
+          req.payload.logger.info(input.message)
+          return {
+            output: {},
+          }
+        },
+      },
       {
         retries: 2,
         slug: 'UpdatePost',

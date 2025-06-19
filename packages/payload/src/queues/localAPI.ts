@@ -9,11 +9,19 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
-import { jobAfterRead, jobsCollectionSlug } from './config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
+import { handleSchedules, type HandleSchedulesResult } from './operations/handleSchedules/index.js'
 import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
+  handleSchedules: async (args?: { req?: PayloadRequest }): Promise<HandleSchedulesResult> => {
+    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+
+    return await handleSchedules({
+      req: newReq,
+    })
+  },
   queue: async <
     // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
     TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] | keyof TypedJobs['workflows'],
