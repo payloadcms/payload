@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import type { TaskConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -32,7 +31,6 @@ import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workf
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -118,7 +116,7 @@ export default buildConfigWithDefaults({
         },
       }
     },
-    scheduler: 'runEndpoint',
+    scheduler: 'manual',
     processingOrder: {
       queues: {
         lifo: '-createdAt',
@@ -126,10 +124,40 @@ export default buildConfigWithDefaults({
     },
     tasks: [
       {
-        schedule: [{ cron: '* * * * * *', queue: 'autorunSecond' }],
+        schedule: [
+          {
+            cron: '* * * * * *',
+            queue: 'autorunSecond',
+            hooks: {
+              beforeSchedule: async (args) => {
+                const result = await args.defaultBeforeSchedule(args) // Handles verifying that there are no jobs already scheduled or processing
+                return {
+                  ...result,
+                  input: {
+                    message: 'This task runs every second',
+                  },
+                }
+              },
+              afterSchedule: async (args) => {
+                await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
+                args.req.payload.logger.info(
+                  'EverySecond task scheduled:',
+                  args.status === 'success' ? args.job.id : 'failed to schedule',
+                )
+              },
+            },
+          },
+        ],
         slug: 'EverySecond',
-        handler: () => {
-          console.log('Running EverySecond task')
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: ({ input, req }) => {
+          req.payload.logger.info(input.message)
           return {
             output: {},
           }
