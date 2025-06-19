@@ -82,21 +82,25 @@ export const usePreventLeave = ({
   // check when page is about to be changed
   useEffect(() => {
     function isAnchorOfCurrentUrl(currentUrl: string, newUrl: string) {
-      const currentUrlObj = new URL(currentUrl)
-      const newUrlObj = new URL(newUrl)
-      // Compare hostname, pathname, and search parameters
-      if (
-        currentUrlObj.hostname === newUrlObj.hostname &&
-        currentUrlObj.pathname === newUrlObj.pathname &&
-        currentUrlObj.search === newUrlObj.search
-      ) {
-        // Check if the new URL is just an anchor of the current URL page
-        const currentHash = currentUrlObj.hash
-        const newHash = newUrlObj.hash
-        return (
-          currentHash !== newHash &&
-          currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
-        )
+      try {
+        const currentUrlObj = new URL(currentUrl)
+        const newUrlObj = new URL(newUrl)
+        // Compare hostname, pathname, and search parameters
+        if (
+          currentUrlObj.hostname === newUrlObj.hostname &&
+          currentUrlObj.pathname === newUrlObj.pathname &&
+          currentUrlObj.search === newUrlObj.search
+        ) {
+          // Check if the new URL is just an anchor of the current URL page
+          const currentHash = currentUrlObj.hash
+          const newHash = newUrlObj.hash
+          return (
+            currentHash !== newHash &&
+            currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
+          )
+        }
+      } catch (err) {
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:isAnchorOfCurrentUrl', err)
       }
       return false
     }
@@ -135,7 +139,7 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
-        alert(err)
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:usePreventLeave', err)
       }
     }
 
