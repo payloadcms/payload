@@ -257,6 +257,7 @@ export const plTranslations: DefaultTranslationsObject = {
     dark: 'Ciemny',
     dashboard: 'Panel',
     delete: 'Usuń',
+    deletedAt: 'Usunięto o',
     deletedCountSuccessfully: 'Pomyślnie usunięto {{count}} {{label}}.',
     deletedSuccessfully: 'Pomyślnie usunięto.',
     deleting: 'Usuwanie...',

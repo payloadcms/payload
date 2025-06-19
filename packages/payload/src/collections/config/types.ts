@@ -67,7 +67,7 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -552,11 +552,21 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
-   * Add `createdAt` and `updatedAt` fields
+   * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
    */
   timestamps?: boolean
+  /**
+   * Enables trash support for this collection.
+   *
+   * When enabled, documents will include a `deletedAt` timestamp field.
+   * This allows documents to be marked as deleted without being permanently removed.
+   * The `deletedAt` field will be set to the current date and time when a document is trashed.
+   *
+   * @default false
+   */
+  trash?: boolean
   /**
    * Options used in typescript generation
    */
@@ -675,6 +685,7 @@ export type TypeWithID = {
 export type TypeWithTimestamps = {
   [key: string]: unknown
   createdAt: string
+  deletedAt?: string
   id: number | string
   updatedAt: string
 }

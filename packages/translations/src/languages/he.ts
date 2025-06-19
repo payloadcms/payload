@@ -250,6 +250,7 @@ export const heTranslations: DefaultTranslationsObject = {
     dark: 'כהה',
     dashboard: 'לוח מחוונים',
     delete: 'מחיקה',
+    deletedAt: 'נמחק ב',
     deletedCountSuccessfully: 'נמחקו {{count}} {{label}} בהצלחה.',
     deletedSuccessfully: 'נמחק בהצלחה.',
     deleting: 'מוחק...',

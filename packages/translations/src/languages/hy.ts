@@ -257,6 +257,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     dark: 'Մուգ',
     dashboard: 'Վահանակ',
     delete: 'Ջնջել',
+    deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
     deleting: 'Ջնջվում է...',

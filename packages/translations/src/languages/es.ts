@@ -261,6 +261,7 @@ export const esTranslations: DefaultTranslationsObject = {
     dark: 'Oscuro',
     dashboard: 'Panel de Control',
     delete: 'Eliminar',
+    deletedAt: 'Eliminado En',
     deletedCountSuccessfully: 'Se eliminaron {{count}} {{label}} correctamente.',
     deletedSuccessfully: 'Eliminado correctamente.',
     deleting: 'Eliminando...',

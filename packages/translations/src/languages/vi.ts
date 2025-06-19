@@ -256,6 +256,7 @@ export const viTranslations: DefaultTranslationsObject = {
     dark: 'Nền tối',
     dashboard: 'Bảng điều khiển',
     delete: 'Xóa',
+    deletedAt: 'Đã Xóa Lúc',
     deletedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
     deletedSuccessfully: 'Đã xoá thành công.',
     deleting: 'Đang xóa...',

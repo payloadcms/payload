@@ -34,6 +34,7 @@ export type Arguments = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
@@ -77,6 +78,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       req,
       select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -107,11 +109,24 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // Retrieve document
     // /////////////////////////////////////
 
+    let where = combineQueries({ id: { equals: id } }, accessResults)
+
+    // If trash is false, restrict to non-trashed documents only
+    if (collectionConfig.trash && !trash) {
+      const notTrashedFilter = { deletedAt: { exists: false } }
+
+      if (where?.and) {
+        where.and.push(notTrashedFilter)
+      } else {
+        where = { and: [notTrashedFilter] }
+      }
+    }
+
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
       locale: req.locale!,
       req,
-      where: combineQueries({ id: { equals: id } }, accessResults),
+      where,
     })
 
     if (!docToDelete && !hasWhereAccess) {

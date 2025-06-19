@@ -257,6 +257,7 @@ export const enTranslations = {
     dark: 'Dark',
     dashboard: 'Dashboard',
     delete: 'Delete',
+    deletedAt: 'Deleted At',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
     deleting: 'Deleting...',
