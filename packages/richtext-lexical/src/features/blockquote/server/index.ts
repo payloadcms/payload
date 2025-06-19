@@ -53,7 +53,7 @@ export const BlockquoteFeature = createServerFeature({
               })
               const style = [
                 node.format ? `text-align: ${node.format};` : '',
-                node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
+                node.indent > 0 ? `padding-inline-start: ${Number(node.indent) * 2}rem;` : '',
               ]
                 .filter(Boolean)
                 .join(' ')

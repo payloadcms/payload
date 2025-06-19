@@ -93,6 +93,7 @@ export interface Config {
     placeholder: Placeholder;
     'view-conditions': ViewCondition;
     'use-as-title-group-field': UseAsTitleGroupField;
+    'disable-bulk-edit': DisableBulkEdit;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -125,6 +126,7 @@ export interface Config {
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
     'view-conditions': ViewConditionsSelect<false> | ViewConditionsSelect<true>;
     'use-as-title-group-field': UseAsTitleGroupFieldSelect<false> | UseAsTitleGroupFieldSelect<true>;
+    'disable-bulk-edit': DisableBulkEditSelect<false> | DisableBulkEditSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -564,6 +566,15 @@ export interface UseAsTitleGroupField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-bulk-edit".
+ */
+export interface DisableBulkEdit {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -672,6 +683,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'use-as-title-group-field';
         value: string | UseAsTitleGroupField;
+      } | null)
+    | ({
+        relationTo: 'disable-bulk-edit';
+        value: string | DisableBulkEdit;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1063,6 +1078,14 @@ export interface ViewConditionsSelect<T extends boolean = true> {
  */
 export interface UseAsTitleGroupFieldSelect<T extends boolean = true> {
   name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-bulk-edit_select".
+ */
+export interface DisableBulkEditSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

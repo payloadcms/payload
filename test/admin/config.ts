@@ -1,4 +1,3 @@
- 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -8,6 +7,7 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
@@ -183,6 +183,7 @@ export default buildConfigWithDefaults({
     Placeholder,
     ViewConditions,
     UseAsTitleGroupField,
+    DisableBulkEdit,
   ],
   globals: [
     GlobalHidden,

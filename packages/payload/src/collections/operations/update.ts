@@ -15,7 +15,7 @@ import type {
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import { APIError } from '../../errors/index.js'
+import { APIError, Forbidden } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
@@ -62,6 +62,10 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
+    throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
