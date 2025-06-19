@@ -1,6 +1,6 @@
 import type { Config } from 'payload'
 
-import { devUser } from '../../credentials.js'
+import { credentials } from '../credentials.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
 export const seed: Config['onInit'] = async (payload) => {
@@ -17,6 +17,13 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       name: 'Steel Cat',
       domain: 'steelcat.com',
+    },
+  })
+  const anchorBarTenant = await payload.create({
+    collection: tenantsSlug,
+    data: {
+      name: 'Anchor Bar',
+      domain: 'anchorbar.com',
     },
   })
 
@@ -70,8 +77,7 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: usersSlug,
     data: {
-      email: devUser.email,
-      password: devUser.password,
+      ...credentials.admin,
       roles: ['admin'],
     },
   })
@@ -79,10 +85,25 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: usersSlug,
     data: {
-      email: 'jane@blue-dog.com',
-      password: 'test',
+      ...credentials.blueDog,
       roles: ['user'],
       tenants: [
+        {
+          tenant: blueDogTenant.id,
+        },
+      ],
+    },
+  })
+
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      ...credentials.owner,
+      roles: ['user'],
+      tenants: [
+        {
+          tenant: anchorBarTenant.id,
+        },
         {
           tenant: blueDogTenant.id,
         },
