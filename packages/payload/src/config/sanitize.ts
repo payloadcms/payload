@@ -301,37 +301,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {
-    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
-
-    if (typeof config.jobs.jobsCollectionOverrides === 'function') {
-      defaultJobsCollection = config.jobs.jobsCollectionOverrides({
-        defaultJobsCollection,
-      })
-
-      const hooks = defaultJobsCollection?.hooks
-      // @todo - delete this check in 4.0
-      if (hooks && config?.jobs?.runHooks !== true) {
-        for (const [hookKey, hook] of Object.entries(hooks)) {
-          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
-          if (hook.length > defaultAmount) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
-            )
-            break
-          }
-        }
-      }
-    }
-    const sanitizedJobsCollection = await sanitizeCollection(
-      config as unknown as Config,
-      defaultJobsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    )
-
-    ;(config.collections ??= []).push(sanitizedJobsCollection)
-
     // Check for schedule property in both tasks and workflows
     let hasScheduleProperty =
       config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)
@@ -362,6 +331,37 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
       config.jobs.enabledStats = true
     }
+
+    let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
+
+    if (typeof config.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = config.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+
+      const hooks = defaultJobsCollection?.hooks
+      // @todo - delete this check in 4.0
+      if (hooks && config?.jobs?.runHooks !== true) {
+        for (const [hookKey, hook] of Object.entries(hooks)) {
+          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
+          if (hook.length > defaultAmount) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+            )
+            break
+          }
+        }
+      }
+    }
+    const sanitizedJobsCollection = await sanitizeCollection(
+      config as unknown as Config,
+      defaultJobsCollection,
+      richTextSanitizationPromises,
+      validRelationships,
+    )
+
+    ;(config.collections ??= []).push(sanitizedJobsCollection)
   }
 
   configWithDefaults.collections!.push(
