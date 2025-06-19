@@ -5,7 +5,7 @@ import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflo
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/index.js'
 import { JobCancelledError } from '../../errors/index.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'

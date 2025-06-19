@@ -1,7 +1,7 @@
 import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
 import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 
 /**

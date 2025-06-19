@@ -15,7 +15,7 @@ import type {
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'

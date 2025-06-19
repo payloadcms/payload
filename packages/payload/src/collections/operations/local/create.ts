@@ -115,8 +115,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function createLocal<
+export async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(

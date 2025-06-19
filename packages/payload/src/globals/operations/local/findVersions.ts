@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
@@ -92,7 +91,7 @@ export type Options<TSlug extends GlobalSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {

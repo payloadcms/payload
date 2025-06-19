@@ -13,11 +13,6 @@ import WebSocket from 'ws'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
-import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js'
-import type { Options as LoginOptions } from './auth/operations/local/login.js'
-import type { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword.js'
-import type { Options as UnlockOptions } from './auth/operations/local/unlock.js'
-import type { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail.js'
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
@@ -28,35 +23,26 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
+
+import {
+  forgotPasswordLocal,
+  type Options as ForgotPasswordOptions,
+} from './auth/operations/local/forgotPassword.js'
+import { loginLocal, type Options as LoginOptions } from './auth/operations/local/login.js'
+import {
+  resetPasswordLocal,
+  type Options as ResetPasswordOptions,
+} from './auth/operations/local/resetPassword.js'
+import { unlockLocal, type Options as UnlockOptions } from './auth/operations/local/unlock.js'
+import {
+  verifyEmailLocal,
+  type Options as VerifyEmailOptions,
+} from './auth/operations/local/verifyEmail.js'
 export type { FieldState } from './admin/forms/Form.js'
-import type { Options as CountOptions } from './collections/operations/local/count.js'
-import type { Options as CreateOptions } from './collections/operations/local/create.js'
-import type {
-  ByIDOptions as DeleteByIDOptions,
-  ManyOptions as DeleteManyOptions,
-  Options as DeleteOptions,
-} from './collections/operations/local/delete.js'
-import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
-import type { Options as FindOptions } from './collections/operations/local/find.js'
-import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
-import type { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js'
-import type { Options as FindVersionsOptions } from './collections/operations/local/findVersions.js'
-import type { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion.js'
-import type {
-  ByIDOptions as UpdateByIDOptions,
-  ManyOptions as UpdateManyOptions,
-  Options as UpdateOptions,
-} from './collections/operations/local/update.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
-import type { CountGlobalVersionsOptions } from './globals/operations/local/countGlobalVersions.js'
-import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
-import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
-import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
-import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
-import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -65,6 +51,69 @@ import type {
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+
+import { countLocal, type Options as CountOptions } from './collections/operations/local/count.js'
+import {
+  createLocal,
+  type Options as CreateOptions,
+} from './collections/operations/local/create.js'
+import {
+  type ByIDOptions as DeleteByIDOptions,
+  deleteLocal,
+  type ManyOptions as DeleteManyOptions,
+  type Options as DeleteOptions,
+} from './collections/operations/local/delete.js'
+import {
+  duplicateLocal,
+  type Options as DuplicateOptions,
+} from './collections/operations/local/duplicate.js'
+import { findLocal, type Options as FindOptions } from './collections/operations/local/find.js'
+import {
+  findByIDLocal,
+  type Options as FindByIDOptions,
+} from './collections/operations/local/findByID.js'
+import {
+  findVersionByIDLocal,
+  type Options as FindVersionByIDOptions,
+} from './collections/operations/local/findVersionByID.js'
+import {
+  findVersionsLocal,
+  type Options as FindVersionsOptions,
+} from './collections/operations/local/findVersions.js'
+import {
+  restoreVersionLocal,
+  type Options as RestoreVersionOptions,
+} from './collections/operations/local/restoreVersion.js'
+import {
+  type ByIDOptions as UpdateByIDOptions,
+  updateLocal,
+  type ManyOptions as UpdateManyOptions,
+  type Options as UpdateOptions,
+} from './collections/operations/local/update.js'
+import {
+  countGlobalVersionsLocal,
+  type CountGlobalVersionsOptions,
+} from './globals/operations/local/countVersions.js'
+import {
+  type Options as FindGlobalOptions,
+  findOneGlobalLocal,
+} from './globals/operations/local/findOne.js'
+import {
+  findGlobalVersionByIDLocal,
+  type Options as FindGlobalVersionByIDOptions,
+} from './globals/operations/local/findVersionByID.js'
+import {
+  findGlobalVersionsLocal,
+  type Options as FindGlobalVersionsOptions,
+} from './globals/operations/local/findVersions.js'
+import {
+  restoreGlobalVersionLocal,
+  type Options as RestoreGlobalVersionOptions,
+} from './globals/operations/local/restoreVersion.js'
+import {
+  updateGlobalLocal,
+  type Options as UpdateGlobalOptions,
+} from './globals/operations/local/update.js'
 export type * from './admin/types.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
@@ -75,21 +124,21 @@ import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
+import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import localOperations from './collections/operations/local/index.js'
+import { countVersionsLocal } from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
-import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-export { default as executeAccess } from './auth/executeAccess.js'
+export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
@@ -284,8 +333,7 @@ export class BasePayload {
    * @returns user: User
    */
   auth = async (options: AuthArgs) => {
-    const { auth } = localOperations.auth
-    return auth(this, options)
+    return authLocal(this, options)
   }
 
   authStrategies!: AuthStrategy[]
@@ -303,8 +351,7 @@ export class BasePayload {
   count = async <T extends CollectionSlug>(
     options: CountOptions<T>,
   ): Promise<{ totalDocs: number }> => {
-    const { count } = localOperations
-    return count(this, options)
+    return countLocal(this, options)
   }
 
   /**
@@ -315,8 +362,7 @@ export class BasePayload {
   countGlobalVersions = async <T extends GlobalSlug>(
     options: CountGlobalVersionsOptions<T>,
   ): Promise<{ totalDocs: number }> => {
-    const { countGlobalVersions } = localGlobalOperations
-    return countGlobalVersions(this, options)
+    return countGlobalVersionsLocal(this, options)
   }
 
   /**
@@ -327,8 +373,7 @@ export class BasePayload {
   countVersions = async <T extends CollectionSlug>(
     options: CountOptions<T>,
   ): Promise<{ totalDocs: number }> => {
-    const { countVersions } = localOperations
-    return countVersions(this, options)
+    return countVersionsLocal(this, options)
   }
 
   /**
@@ -339,8 +384,7 @@ export class BasePayload {
   create = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: CreateOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-    const { create } = localOperations
-    return create<TSlug, TSelect>(this, options)
+    return createLocal<TSlug, TSelect>(this, options)
   }
 
   crons: Cron[] = []
@@ -363,8 +407,7 @@ export class BasePayload {
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DuplicateOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-    const { duplicate } = localOperations
-    return duplicate<TSlug, TSelect>(this, options)
+    return duplicateLocal<TSlug, TSelect>(this, options)
   }
 
   email!: InitializedEmailAdapter
@@ -388,8 +431,7 @@ export class BasePayload {
   find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: FindOptions<TSlug, TSelect>,
   ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    const { find } = localOperations
-    return find<TSlug, TSelect>(this, options)
+    return findLocal<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -404,15 +446,13 @@ export class BasePayload {
   >(
     options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
   ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
-    const { findByID } = localOperations
-    return findByID<TSlug, TDisableErrors, TSelect>(this, options)
+    return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
   }
 
   findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
     options: FindGlobalOptions<TSlug, TSelect>,
   ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    const { findOne } = localGlobalOperations
-    return findOne<TSlug, TSelect>(this, options)
+    return findOneGlobalLocal<TSlug, TSelect>(this, options)
   }
 
   /**
@@ -423,8 +463,7 @@ export class BasePayload {
   findGlobalVersionByID = async <TSlug extends GlobalSlug>(
     options: FindGlobalVersionByIDOptions<TSlug>,
   ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> => {
-    const { findVersionByID } = localGlobalOperations
-    return findVersionByID<TSlug>(this, options)
+    return findGlobalVersionByIDLocal<TSlug>(this, options)
   }
 
   /**
@@ -435,8 +474,7 @@ export class BasePayload {
   findGlobalVersions = async <TSlug extends GlobalSlug>(
     options: FindGlobalVersionsOptions<TSlug>,
   ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> => {
-    const { findVersions } = localGlobalOperations
-    return findVersions<TSlug>(this, options)
+    return findGlobalVersionsLocal<TSlug>(this, options)
   }
 
   /**
@@ -447,8 +485,7 @@ export class BasePayload {
   findVersionByID = async <TSlug extends CollectionSlug>(
     options: FindVersionByIDOptions<TSlug>,
   ): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> => {
-    const { findVersionByID } = localOperations
-    return findVersionByID<TSlug>(this, options)
+    return findVersionByIDLocal<TSlug>(this, options)
   }
 
   /**
@@ -459,15 +496,13 @@ export class BasePayload {
   findVersions = async <TSlug extends CollectionSlug>(
     options: FindVersionsOptions<TSlug>,
   ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> => {
-    const { findVersions } = localOperations
-    return findVersions<TSlug>(this, options)
+    return findVersionsLocal<TSlug>(this, options)
   }
 
   forgotPassword = async <TSlug extends CollectionSlug>(
     options: ForgotPasswordOptions<TSlug>,
   ): Promise<ForgotPasswordResult> => {
-    const { forgotPassword } = localOperations.auth
-    return forgotPassword<TSlug>(this, options)
+    return forgotPasswordLocal<TSlug>(this, options)
   }
 
   getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
@@ -485,15 +520,13 @@ export class BasePayload {
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
   ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
-    const { login } = localOperations.auth
-    return login<TSlug>(this, options)
+    return loginLocal<TSlug>(this, options)
   }
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
   ): Promise<ResetPasswordResult> => {
-    const { resetPassword } = localOperations.auth
-    return resetPassword<TSlug>(this, options)
+    return resetPasswordLocal<TSlug>(this, options)
   }
 
   /**
@@ -504,8 +537,7 @@ export class BasePayload {
   restoreGlobalVersion = async <TSlug extends GlobalSlug>(
     options: RestoreGlobalVersionOptions<TSlug>,
   ): Promise<DataFromGlobalSlug<TSlug>> => {
-    const { restoreVersion } = localGlobalOperations
-    return restoreVersion<TSlug>(this, options)
+    return restoreGlobalVersionLocal<TSlug>(this, options)
   }
 
   /**
@@ -516,8 +548,7 @@ export class BasePayload {
   restoreVersion = async <TSlug extends CollectionSlug>(
     options: RestoreVersionOptions<TSlug>,
   ): Promise<DataFromCollectionSlug<TSlug>> => {
-    const { restoreVersion } = localOperations
-    return restoreVersion<TSlug>(this, options)
+    return restoreVersionLocal<TSlug>(this, options)
   }
 
   schema!: GraphQLSchema
@@ -539,15 +570,13 @@ export class BasePayload {
   unlock = async <TSlug extends CollectionSlug>(
     options: UnlockOptions<TSlug>,
   ): Promise<boolean> => {
-    const { unlock } = localOperations.auth
-    return unlock<TSlug>(this, options)
+    return unlockLocal<TSlug>(this, options)
   }
 
   updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
     options: UpdateGlobalOptions<TSlug, TSelect>,
   ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    const { update } = localGlobalOperations
-    return update<TSlug, TSelect>(this, options)
+    return updateGlobalLocal<TSlug, TSelect>(this, options)
   }
 
   validationRules!: (args: OperationArgs<any>) => ValidationRule[]
@@ -555,8 +584,7 @@ export class BasePayload {
   verifyEmail = async <TSlug extends CollectionSlug>(
     options: VerifyEmailOptions<TSlug>,
   ): Promise<boolean> => {
-    const { verifyEmail } = localOperations.auth
-    return verifyEmail(this, options)
+    return verifyEmailLocal(this, options)
   }
 
   versions: {
@@ -604,7 +632,6 @@ export class BasePayload {
   delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DeleteOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
-    const { deleteLocal } = localOperations
     return deleteLocal<TSlug, TSelect>(this, options)
   }
 
@@ -846,8 +873,7 @@ export class BasePayload {
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
-    const { update } = localOperations
-    return update<TSlug, TSelect>(this, options)
+    return updateLocal<TSlug, TSelect>(this, options)
   }
 }
 
@@ -1540,7 +1566,7 @@ export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
-export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
+export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'

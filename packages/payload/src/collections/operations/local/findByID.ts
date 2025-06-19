@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-exports */
 import type {
   CollectionSlug,
   JoinQuery,
@@ -106,7 +105,7 @@ export type Options<
   user?: Document
 }
 
-export default async function findByIDLocal<
+export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,

@@ -3,7 +3,7 @@ import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../.
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'

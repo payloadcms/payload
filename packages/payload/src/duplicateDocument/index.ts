@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { Forbidden } from '../errors/Forbidden.js'

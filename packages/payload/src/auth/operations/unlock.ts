@@ -12,7 +12,7 @@ import { Forbidden } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import executeAccess from '../executeAccess.js'
+import { executeAccess } from '../executeAccess.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 

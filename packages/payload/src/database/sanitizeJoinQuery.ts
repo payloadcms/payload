@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'

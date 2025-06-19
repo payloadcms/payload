@@ -61,5 +61,3 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
     throw error
   }
 }
-
-export default verifyEmailOperation

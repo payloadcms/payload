@@ -69,7 +69,7 @@ export type Options<TSlug extends CollectionSlug> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
+export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromCollectionSlug<TSlug>> {

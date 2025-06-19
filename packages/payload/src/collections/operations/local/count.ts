@@ -51,8 +51,7 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function countLocal<TSlug extends CollectionSlug>(
+export async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
