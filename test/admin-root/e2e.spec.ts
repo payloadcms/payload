@@ -134,4 +134,9 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('#field-theme')).toBeHidden()
     await expect(page.locator('#field-theme-auto')).toBeHidden()
   })
+
+  test('should mount custom root views', async () => {
+    await page.goto(`${url.admin}/custom-view`)
+    await expect(page.locator('#custom-view')).toBeVisible()
+  })
 })
