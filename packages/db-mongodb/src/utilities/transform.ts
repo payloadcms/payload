@@ -277,7 +277,9 @@ const stripFields = ({
               continue
             }
 
-            for (const data of localeData) {
+            let hasNull = false
+            for (let i = 0; i < localeData.length; i++) {
+              const data = localeData[i]
               let fields: FlattenedField[] | null = null
 
               if (field.type === 'array') {
@@ -300,6 +302,9 @@ const stripFields = ({
 
                 if (maybeBlock) {
                   fields = maybeBlock.flattenedFields
+                } else {
+                  localeData[i] = null
+                  hasNull = true
                 }
               }
 
@@ -308,6 +313,10 @@ const stripFields = ({
               }
 
               stripFields({ config, data, fields, reservedKeys })
+            }
+
+            if (hasNull) {
+              fieldData[localeKey] = localeData.filter(Boolean)
             }
 
             continue
@@ -323,7 +332,10 @@ const stripFields = ({
           continue
         }
 
-        for (const data of fieldData) {
+        let hasNull = false
+
+        for (let i = 0; i < fieldData.length; i++) {
+          const data = fieldData[i]
           let fields: FlattenedField[] | null = null
 
           if (field.type === 'array') {
@@ -347,6 +359,9 @@ const stripFields = ({
 
             if (maybeBlock) {
               fields = maybeBlock.flattenedFields
+            } else {
+              fieldData[i] = null
+              hasNull = true
             }
           }
 
@@ -355,6 +370,10 @@ const stripFields = ({
           }
 
           stripFields({ config, data, fields, reservedKeys })
+        }
+
+        if (hasNull) {
+          data[field.name] = fieldData.filter(Boolean)
         }
 
         continue
