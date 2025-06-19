@@ -529,6 +529,7 @@ jobs:
         include:
           - template: blank
             database: mongodb
+            templateName: '@payloadcms/template-blank'
           - template: website
             database: mongodb
           - template: with-payload-cloud
@@ -613,7 +614,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8096
 
       - name: Runs Template Int Tests
-        run: pnpm --filter ${{ matrix.template }} run test:int
+        run: pnpm --filter ${{ matrix.templateName }} run test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
