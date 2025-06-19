@@ -39,7 +39,9 @@ async function main() {
 
   // remove node_modules
   await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
-  // replace workspace:* from package.json
+  // replace workspace:* from package.json with a real version so that it can be installed with pnpm
+  // without this step, even though the packages are built locally as tars
+  // it will error as it cannot contain workspace dependencies when installing with --ignore-workspace
   const packageJsonPath = path.join(templatePath, 'package.json')
   const initialPackageJson = await fs.readFile(packageJsonPath, 'utf-8')
   const initialPackageJsonObj = JSON.parse(initialPackageJson)
