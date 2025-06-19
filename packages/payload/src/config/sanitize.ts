@@ -33,7 +33,8 @@ import {
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
-import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
+import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -335,7 +336,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     let hasScheduleProperty =
       config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)
 
-    configWithDefaults.collections!.push(sanitizedJobsCollection)
     if (
       !hasScheduleProperty &&
       config?.jobs?.workflows?.length &&
@@ -344,10 +344,23 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       hasScheduleProperty = true
     }
 
-    if (!config.jobs?.scheduler && hasScheduleProperty) {
-      throw new InvalidConfiguration(
-        'The jobs.scheduler property must be set when using scheduled tasks or workflows. Otherwise, the schedule property has no effect.',
+    if (hasScheduleProperty) {
+      if (!config.jobs?.scheduler) {
+        throw new InvalidConfiguration(
+          'The jobs.scheduler property must be set when using scheduled tasks or workflows. Otherwise, the schedule property has no effect.',
+        )
+      }
+      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
+      ;(config.globals ??= []).push(
+        await sanitizeGlobal(
+          config as unknown as Config,
+          getJobStatsGlobal(config as unknown as Config),
+          richTextSanitizationPromises,
+          validRelationships,
+        ),
       )
+
+      config.jobs.enabledStats = true
     }
   }
 

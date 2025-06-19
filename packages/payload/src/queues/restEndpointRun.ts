@@ -1,6 +1,9 @@
 import type { Endpoint, SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { SanitizedJobsConfig } from './config/types/index.js'
 
+import { type JobStats, jobStatsGlobalSlug } from './config/global.js'
+import { handleSchedules } from './operations/handleSchedules/index.js'
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
 /**
@@ -8,7 +11,9 @@ import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
  */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
-    if (!configHasJobs(req.payload.config)) {
+    const jobsConfig = req.payload.config.jobs
+
+    if (!configHasJobs(jobsConfig)) {
       return Response.json(
         {
           message: 'No jobs to run.',
@@ -17,7 +22,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const accessFn = req.payload.config.jobs?.access?.run ?? (() => true)
+    const accessFn = jobsConfig.access?.run ?? (() => true)
 
     const hasAccess = await accessFn({ req })
 
@@ -46,7 +51,12 @@ export const runJobsEndpoint: Endpoint = {
       handleSchedulesParam &&
       !(typeof handleSchedulesParam === 'string' && handleSchedulesParam === 'false')
 
-    if (req?.payload?.config?.jobs?.scheduler === 'runEndpoint' || shouldHandleSchedules) {
+    if (shouldHandleSchedules) {
+      if (!jobsConfig.enabledStats) {
+        throw new Error(
+          'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
+        )
+      }
       await handleSchedules({ req })
     }
 
@@ -106,43 +116,6 @@ export const runJobsEndpoint: Endpoint = {
   path: '/run',
 }
 
-const configHasJobs = (config: SanitizedConfig): boolean => {
-  return Boolean(config.jobs?.tasks?.length || config.jobs?.workflows?.length)
-}
-
-/**
- * On vercel, we cannot auto-schedule jobs using a Cron - instead, we'll use this same endpoint that can
- * also be called from Vercel Cron for auto-running jobs.
- *
- * The benefit of doing it like this instead of a separate endpoint is that we can run jobs immediately
- * after they are scheduled
- */
-async function handleSchedules({ req }: { req: PayloadRequest }) {
-  const jobsConfig = req.payload.config.jobs
-
-  const tasksWithSchedules =
-    jobsConfig.tasks?.filter((task) => {
-      return task.schedule?.length
-    }) ?? []
-
-  const workflowsWithSchedules =
-    jobsConfig.workflows?.filter((workflow) => {
-      return workflow.schedule?.length
-    }) ?? []
-
-  const allScheduleQueues = [
-    ...tasksWithSchedules.flatMap(
-      (task) => task.schedule && task.schedule.map((schedule) => schedule.queue),
-    ),
-    ...workflowsWithSchedules.flatMap(
-      (workflow) => workflow.schedule && workflow.schedule.map((schedule) => schedule.queue),
-    ),
-  ]
-
-  for (const queue of allScheduleQueues) {
-    const activeTasksForQueue = await req.payload.find({
-      collection: 'payload-jobs',
-      where: {},
-    })
-  }
+const configHasJobs = (jobsConfig: SanitizedJobsConfig): boolean => {
+  return Boolean(jobsConfig.tasks?.length || jobsConfig.workflows?.length)
 }

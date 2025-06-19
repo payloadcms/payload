@@ -1,6 +1,7 @@
-import type { CollectionConfig } from '../../../index.js'
+import type { CollectionConfig, Job } from '../../../index.js'
 import type { Payload, PayloadRequest, Sort } from '../../../types/index.js'
 import type { RunJobsArgs } from '../../operations/runJobs/index.js'
+import type { JobStats } from '../global.js'
 import type { TaskConfig } from './taskTypes.js'
 import type { WorkflowConfig } from './workflowTypes.js'
 
@@ -48,6 +49,11 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   enabled?: boolean
+  /**
+   * If set to `true`, a payload-job-stats global exists.
+   * This property is automatically set during sanitization.
+   */
+  enabledStats?: boolean
 } & JobsConfig
 export type JobsConfig = {
   /**
@@ -123,13 +129,14 @@ export type JobsConfig = {
    * property needs to be set in order for the `schedule` property to work.
    *
    * If set to `cron`, the job system will use cron jobs to run scheduled tasks.
-   * If set to `runEndpoint`, the job system will run scheduled tasks when calling the /api/payload-jobs/run endpoint.
+   * If set to `manual`, you are responsible for handling schedules yourself, for example by calling the `/api/payload-jobs/handleSchedules` endpoints
    *
-   * @remark On serverless platforms like Vercel, you should use `runEndpoint` to avoid issues with cron jobs not running as expected.
-   * You can then use Vercel Cron to call the `/api/payload-jobs/run` endpoint at specified intervals - this will handle both schedules
-   * and autorunning jobs.
+   * @remark On serverless platforms like Vercel, you should use `manual` to avoid issues with cron jobs not running as expected.
+   * You can then use Vercel Cron to call the `/api/payload-jobs/handleSchedules` endpoint at specified intervals
+   *
+   * @default 'manual'
    */
-  scheduler?: 'cron' | 'runEndpoint'
+  scheduler?: 'cron' | 'manual'
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
@@ -146,6 +153,61 @@ export type JobsConfig = {
    */
   workflows?: WorkflowConfig<any>[]
 }
+
+export type Queueable = {
+  scheduleConfig: ScheduleConfig
+  taskConfig?: TaskConfig
+  // If not set, queue it immediately
+  waitUntil?: Date
+  workflowConfig?: WorkflowConfig
+}
+
+type OptionalPromise<T> = Promise<T> | T
+
+export type BeforeScheduleFn = (args: {
+  defaultBeforeSchedule: BeforeScheduleFn
+  /**
+   * payload-job-stats global data
+   */
+  jobStats: JobStats
+  queueable: Queueable
+  req: PayloadRequest
+}) => OptionalPromise<{
+  input?: object
+  shouldSchedule: boolean
+  waitUntil?: Date
+}>
+
+export type AfterScheduleFn = (
+  args: {
+    defaultAfterSchedule: AfterScheduleFn
+    /**
+     * payload-job-stats global data
+     */
+    jobStats: JobStats
+    queueable: Queueable
+    req: PayloadRequest
+  } & (
+    | {
+        error: Error
+        job?: never
+        status: 'error'
+      }
+    | {
+        error?: never
+        job: Job
+        status: 'success'
+      }
+    | {
+        error?: never
+        job?: never
+        /**
+         * If the beforeSchedule hook returned `shouldSchedule: false`, this will be called with status `skipped`.
+         */
+        status: 'skipped'
+      }
+  ),
+) => OptionalPromise<void>
 
 export type ScheduleConfig = {
   /**
@@ -168,6 +230,25 @@ export type ScheduleConfig = {
    *  - '* * * * * *' every second
    */
   cron: string
+  hooks?: {
+    /**
+     * Functions that will be executed after the job has been successfully scheduled.
+     *
+     * @default By default, global update?? Unless global update should happen before
+     */
+    afterSchedule?: AfterScheduleFn
+    /**
+     * Functions that will be executed before the job is scheduled.
+     * You can use this to control whether or not the job should be scheduled, or what input
+     * data should be passed to the job.
+     *
+     * @default By default, this has one function that returns { shouldSchedule: true } if the following conditions are met:
+     * - There currently is no job of the same type in the specified queue that is currently running
+     * - There currently is no job of the same type in the specified queue that is scheduled to run in the future
+     * - There currently is no job of the same type in the specified queue that failed previously but can be retried
+     */
+    beforeSchedule?: BeforeScheduleFn
+  }
   /**
    * Queue to which the scheduled job will be added.
    */

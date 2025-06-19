@@ -64,6 +64,9 @@ export type BaseJob<
   workflowSlug?: null | WorkflowTypes
 }
 
+/**
+ * @todo rename to WorkflowSlug in 4.0, similar to CollectionSlug
+ */
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
 /**

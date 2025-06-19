@@ -55,6 +55,9 @@ export type TaskHandler<
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
 ) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
 
+/**
+ * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
+ */
 export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task

@@ -9,7 +9,7 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
-import { jobAfterRead, jobsCollectionSlug } from './config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
 import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
