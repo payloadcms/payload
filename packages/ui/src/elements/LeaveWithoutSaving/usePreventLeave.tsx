@@ -4,7 +4,7 @@
 // Credit: `react-use` maintainers
 //    -  Source: https://github.com/streamich/react-use/blob/ade8d3905f544305515d010737b4ae604cc51024/src/useBeforeUnload.ts#L2
 import { useRouter } from 'next/navigation.js'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 
@@ -79,6 +79,11 @@ export const usePreventLeave = ({
   const router = useRouter()
   const cancelledURL = useRef<string>('')
 
+  // This state is added to accomodate the workaround for useOnBrowserHistoryChange.
+  // This is to prevent useOnBrowserHistoryChange fires the prevent modal too
+  // when there's an in app navigation.
+  const [preventTriggered, setPreventTriggered] = useState(false)
+
   // check when page is about to be changed
   useEffect(() => {
     function isAnchorOfCurrentUrl(currentUrl: string, newUrl: string) {
@@ -130,6 +135,7 @@ export const usePreventLeave = ({
             event.stopPropagation()
 
             if (typeof onPrevent === 'function') {
+              setPreventTriggered(true)
               onPrevent()
             }
           }
@@ -157,4 +163,8 @@ export const usePreventLeave = ({
       startRouteTransition(() => router.push(cancelledURL.current))
     }
   }, [hasAccepted, onAccept, router, startRouteTransition])
+
+  return {
+    preventTriggered,
+  }
 }
