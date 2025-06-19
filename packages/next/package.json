@@ -22,6 +22,10 @@
   ],
   "type": "module",
   "exports": {
+    "./css": {
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.js",
