@@ -10,15 +10,15 @@ import {
   type Where,
 } from '../index.js'
 import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
-import { handleSchedules } from './operations/handleSchedules/index.js'
+import { handleSchedules, type HandleSchedulesResult } from './operations/handleSchedules/index.js'
 import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
-  handleSchedules: async (args?: { req?: PayloadRequest }): Promise<void> => {
+  handleSchedules: async (args?: { req?: PayloadRequest }): Promise<HandleSchedulesResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
-    await handleSchedules({
+    return await handleSchedules({
       req: newReq,
     })
   },

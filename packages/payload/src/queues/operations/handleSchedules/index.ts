@@ -10,6 +10,12 @@ import { type JobStats, jobStatsGlobalSlug } from '../../config/global.js'
 import { defaultAfterSchedule } from './defaultAfterSchedule.js'
 import { defaultBeforeSchedule } from './defaultBeforeSchedule.js'
 
+export type HandleSchedulesResult = {
+  errored: Queueable[]
+  queued: Queueable[]
+  skipped: Queueable[]
+}
+
 /**
  * On vercel, we cannot auto-schedule jobs using a Cron - instead, we'll use this same endpoint that can
  * also be called from Vercel Cron for auto-running jobs.
@@ -17,7 +23,11 @@ import { defaultBeforeSchedule } from './defaultBeforeSchedule.js'
  * The benefit of doing it like this instead of a separate endpoint is that we can run jobs immediately
  * after they are scheduled
  */
-export async function handleSchedules({ req }: { req: PayloadRequest }) {
+export async function handleSchedules({
+  req,
+}: {
+  req: PayloadRequest
+}): Promise<HandleSchedulesResult> {
   const jobsConfig = req.payload.config.jobs
 
   const tasksWithSchedules =
@@ -103,6 +113,10 @@ export async function handleSchedules({ req }: { req: PayloadRequest }) {
     }
   }
 
+  const queued: Queueable[] = []
+  const skipped: Queueable[] = []
+  const errored: Queueable[] = []
+
   /**
    * Now queue, but check for constraints (= beforeSchedule) first.
    * Default constraint (= defaultBeforeSchedule): max. 1 running / scheduled task or workflow per queue
@@ -135,6 +149,7 @@ export async function handleSchedules({ req }: { req: PayloadRequest }) {
           req,
           status: 'skipped',
         })
+        skipped.push(queueable)
         continue
       }
 
@@ -156,6 +171,7 @@ export async function handleSchedules({ req }: { req: PayloadRequest }) {
         req,
         status: 'success',
       })
+      queued.push(queueable)
     } catch (error) {
       await (afterScheduleFN ?? defaultAfterSchedule)({
         // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
@@ -166,6 +182,12 @@ export async function handleSchedules({ req }: { req: PayloadRequest }) {
         req,
         status: 'error',
       })
+      errored.push(queueable)
     }
+  }
+  return {
+    errored,
+    queued,
+    skipped,
   }
 }

@@ -42,11 +42,14 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    await handleSchedules({ req })
+    const { errored, queued, skipped } = await handleSchedules({ req })
 
     return Response.json(
       {
+        errored,
         message: req.i18n.t('general:success'),
+        queued,
+        skipped,
       },
       { status: 200 },
     )
