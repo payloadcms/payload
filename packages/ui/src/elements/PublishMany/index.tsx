@@ -15,13 +15,14 @@ export type PublishManyProps = {
 }
 
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { count, selectAll, selected } = useSelection()
+  const { count, selectAll, selected, toggleAll } = useSelection()
 
   return (
     <PublishMany_v4
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
+      onSuccess={() => toggleAll(false)}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -30,10 +31,18 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 type PublishMany_v4Props = {
   count: number
   ids: (number | string)[]
+  onSuccess?: () => void
   selectAll: boolean
 } & PublishManyProps
 export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
-  const { collection, collection: { slug, versions } = {}, count, ids, selectAll } = props
+  const {
+    collection,
+    collection: { slug, versions } = {},
+    count,
+    ids,
+    onSuccess,
+    selectAll,
+  } = props
 
   const { permissions } = useAuth()
   const { t } = useTranslation()
@@ -63,6 +72,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
         collection={collection}
         drawerSlug={drawerSlug}
         ids={ids}
+        onSuccess={onSuccess}
         selectAll={selectAll}
       />
     </React.Fragment>
