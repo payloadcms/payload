@@ -1,10 +1,8 @@
-import type { Endpoint, SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
-import type { SanitizedJobsConfig } from './config/types/index.js'
+import type { Endpoint } from '../../config/types.js'
+import type { SanitizedJobsConfig } from '../config/types/index.js'
 
-import { type JobStats, jobStatsGlobalSlug } from './config/global.js'
-import { handleSchedules } from './operations/handleSchedules/index.js'
-import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
+import { handleSchedules } from '../operations/handleSchedules/index.js'
+import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
  * /api/payload-jobs/run endpoint
@@ -116,6 +114,6 @@ export const runJobsEndpoint: Endpoint = {
   path: '/run',
 }
 
-const configHasJobs = (jobsConfig: SanitizedJobsConfig): boolean => {
+export const configHasJobs = (jobsConfig: SanitizedJobsConfig): boolean => {
   return Boolean(jobsConfig.tasks?.length || jobsConfig.workflows?.length)
 }

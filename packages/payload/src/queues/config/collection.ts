@@ -3,7 +3,8 @@ import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { Job } from '../../index.js'
 
-import { runJobsEndpoint } from '../restEndpointRun.js'
+import { handleSchedulesJobsEndpoint } from '../endpoints/handleSchedules.js'
+import { runJobsEndpoint } from '../endpoints/run.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const jobsCollectionSlug = 'payload-jobs'
@@ -102,7 +103,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (c
       group: 'System',
       hidden: true,
     },
-    endpoints: [runJobsEndpoint],
+    endpoints: [runJobsEndpoint, handleSchedulesJobsEndpoint],
     fields: [
       {
         name: 'input',
