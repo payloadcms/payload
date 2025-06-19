@@ -146,10 +146,21 @@ export const TenantSelectionProviderClient = ({
       if (tenantOptionsFromProps.length === 1) {
         // Users with no cookie set and only 1 tenant should set that tenant automatically
         setTenant({ id: tenantOptionsFromProps[0]?.value, refresh: true })
+        setTenantOptions(tenantOptionsFromProps)
+      } else if (!tenantOptions && tenantOptionsFromProps) {
+        // If there are no tenant options, set them from the props
+        setTenantOptions(tenantOptionsFromProps)
       }
-      setTenantOptions(tenantOptionsFromProps)
     }
-  }, [initialValue, selectedTenantID, tenantCookie, userID, setTenant, tenantOptionsFromProps])
+  }, [
+    initialValue,
+    selectedTenantID,
+    tenantCookie,
+    userID,
+    setTenant,
+    tenantOptionsFromProps,
+    tenantOptions,
+  ])
 
   React.useEffect(() => {
     if (!userID && tenantCookie) {
@@ -161,7 +172,7 @@ export const TenantSelectionProviderClient = ({
       router.refresh()
     }
   }, [userID, tenantCookie, deleteCookie, router])
-
+  console.log({ tenantOptions })
   return (
     <span
       data-selected-tenant-id={selectedTenantID}

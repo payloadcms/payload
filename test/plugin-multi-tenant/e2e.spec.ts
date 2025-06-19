@@ -6,7 +6,12 @@ import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, login } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  login,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
 import {
@@ -20,7 +25,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { menuItemsSlug, menuSlug } from './shared.js'
+import { menuItemsSlug, menuSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,6 +35,7 @@ test.describe('Multi Tenant', () => {
   let serverURL: string
   let globalMenuURL: AdminUrlUtil
   let menuItemsURL: AdminUrlUtil
+  let tenantsURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -38,6 +44,7 @@ test.describe('Multi Tenant', () => {
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
+    tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -87,8 +94,6 @@ test.describe('Multi Tenant', () => {
         serverURL,
         data: credentials.owner,
       })
-
-      await openNav(page)
 
       await expect
         .poll(async () => {
@@ -260,6 +265,45 @@ test.describe('Multi Tenant', () => {
         confirmationModal.getByText('You are about to change ownership from Blue Dog to Steel Cat'),
       ).toBeVisible()
     })
+  })
+
+  test.describe('tenants', () => {
+    test('should update the tenant name in the selector when editing a tenant', async () => {
+      await login({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Blue Dog',
+        urlUtil: tenantsURL,
+      })
+
+      await page.locator('#field-name').fill('Red Dog')
+      await saveDocAndAssert(page)
+
+      // Check the tenant selector
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Red Dog', 'Steel Cat', 'Anchor Bar'].sort())
+
+      // Change the tenant back to the original name
+      await page.locator('#field-name').fill('Blue Dog')
+      await saveDocAndAssert(page)
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
+    })
+
+    // test('should add tenant to the selector when creating a new tenant', async () => {
+    // })
   })
 })
 
