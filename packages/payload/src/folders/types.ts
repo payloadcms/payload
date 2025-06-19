@@ -3,6 +3,7 @@ import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 import type { Document } from '../types/index.js'
 
 export type FolderInterface = {
+  assignedCollections: CollectionSlug[]
   documentsAndFolders?: {
     docs: {
       relationTo: CollectionSlug
@@ -14,6 +15,7 @@ export type FolderInterface = {
 } & TypeWithID
 
 export type FolderBreadcrumb = {
+  assignedCollections?: CollectionSlug[]
   id: null | number | string
   name: string
 }
@@ -56,6 +58,7 @@ export type FolderOrDocument = {
   relationTo: CollectionSlug
   value: {
     _folderOrDocumentTitle: string
+    assignedCollections: CollectionSlug[]
     createdAt?: string
     folderID?: number | string
     id: number | string
@@ -66,6 +69,7 @@ export type FolderOrDocument = {
 export type GetFolderDataResult = {
   breadcrumbs: FolderBreadcrumb[] | null
   documents: FolderOrDocument[]
+  folderAssignedCollections: CollectionSlug[] | undefined
   subfolders: FolderOrDocument[]
 }
 
@@ -114,9 +118,6 @@ export type CollectionFoldersConfiguration = {
   browseByFolder?: boolean
 }
 
-type BaseFolderSortKeys = keyof Pick<
-  FolderOrDocument['value'],
-  '_folderOrDocumentTitle' | 'createdAt' | 'updatedAt'
->
+type BaseFolderSortKeys = 'createdAt' | 'name' | 'updatedAt'
 
 export type FolderSortKeys = `-${BaseFolderSortKeys}` | BaseFolderSortKeys

@@ -18,11 +18,13 @@ const baseClass = 'create-new-doc-in-folder'
 export function ListCreateNewDocInFolderButton({
   buttonLabel,
   collectionSlugs,
+  folderAssignedCollections,
   onCreateSuccess,
   slugPrefix,
 }: {
   buttonLabel: string
   collectionSlugs: CollectionSlug[]
+  folderAssignedCollections: CollectionSlug[]
   onCreateSuccess: (args: {
     collectionSlug: CollectionSlug
     doc: Record<string, unknown>
@@ -48,7 +50,6 @@ export function ListCreateNewDocInFolderButton({
       return acc
     }, []),
   )
-
   if (enabledCollections.length === 0) {
     return null
   }
@@ -132,6 +133,9 @@ export function ListCreateNewDocInFolderButton({
       {collectionSlugs.includes(folderCollectionConfig.slug) && (
         <FolderDocumentDrawer
           initialData={{
+            assignedCollections: createCollectionSlug
+              ? [createCollectionSlug]
+              : folderAssignedCollections,
             [folderFieldName]: folderID,
           }}
           onSave={async (result) => {

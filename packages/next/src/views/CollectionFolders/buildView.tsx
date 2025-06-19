@@ -97,8 +97,7 @@ export const buildCollectionFolderView = async (
       },
     })
 
-    const sortPreference: FolderSortKeys =
-      collectionFolderPreferences?.sort || '_folderOrDocumentTitle'
+    const sortPreference: FolderSortKeys = collectionFolderPreferences?.sort || 'name'
     const viewPreference = collectionFolderPreferences?.viewPreference || 'grid'
 
     const {
@@ -107,9 +106,10 @@ export const buildCollectionFolderView = async (
 
     const { breadcrumbs, documents, FolderResultsComponent, subfolders } =
       await getFolderResultsComponentAndData({
-        activeCollectionSlugs: [config.folders.slug, collectionSlug],
         browseByFolder: false,
+        collectionsToDisplay: [config.folders.slug, collectionSlug],
         displayAs: viewPreference,
+        folderAssignedCollections: [collectionSlug],
         folderID,
         req: initPageResult.req,
         sort: sortPreference,
