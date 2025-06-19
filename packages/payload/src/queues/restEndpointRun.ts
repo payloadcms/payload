@@ -6,6 +6,9 @@ const configHasJobs = (config: SanitizedConfig): boolean => {
   return Boolean(config.jobs?.tasks?.length || config.jobs?.workflows?.length)
 }
 
+/**
+ * /api/payload-jobs/run endpoint
+ */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
     if (!configHasJobs(req.payload.config)) {

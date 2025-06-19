@@ -13,7 +13,7 @@ on:
 
 env:
   NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
+  PNPM_VERSION: 10.12.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 

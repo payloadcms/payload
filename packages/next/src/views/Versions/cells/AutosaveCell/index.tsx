@@ -35,7 +35,7 @@ export const AutosaveCell: React.FC<AutosaveCellProps> = ({
 
   return (
     <div className={`${baseClass}__items`}>
-      {rowData?.autosave && <Pill>{t('version:autosave')}</Pill>}
+      {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
       <VersionPillLabel
         currentlyPublishedVersion={currentlyPublishedVersion}
         disableDate={true}
