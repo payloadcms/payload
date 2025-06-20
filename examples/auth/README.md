@@ -10,13 +10,16 @@ To spin up this example locally, follow the steps below:
 
 - `npx create-payload-app --example auth`
 
-2. Start the server:
+2. Copy the environment variables:
+   - Run `cp .env.example .env` to copy the example environment variables
+
+3. Start the server:
    - Depending on your package manager, run `pnpm dev`, `yarn dev` or `npm run dev`
    - When prompted, type `y` then `enter` to seed the database with sample data
-3. Access the application:
+4. Access the application:
    - Open your browser and navigate to `http://localhost:3000` to access the homepage.
    - Open `http://localhost:3000/admin` to access the admin panel.
-4. Login:
+5. Login:
 
 - Use the following credentials to log into the admin panel:
   > `Email: demo@payloadcms.com` > `Password: demo`
