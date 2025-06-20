@@ -335,7 +335,7 @@ export function DefaultEditView({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
+    async ({ formState: prevFormState, skipValidationOnLastSubmit, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -357,7 +357,10 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
+        // Only run validation on change once the form has been submitted,
+        // but only if the submit action didn't skip validation
+        // (saving drafts skips validation, publish changes does not).
+        skipValidation: submitted ? skipValidationOnLastSubmit : true,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
         // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,

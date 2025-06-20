@@ -50,7 +50,11 @@ export type FormProps = {
   isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
+  onChange?: ((args: {
+    formState: FormState
+    skipValidationOnLastSubmit?: boolean
+    submitted?: boolean
+  }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => Promise<FormState | void> | void
   redirect?: string
