@@ -81,7 +81,6 @@ export async function login({ collection, config, email, password, username }: L
 
     return result
   } catch (e) {
-    console.error('Login error:', e)
     throw new Error(`${e}`)
   }
 }
