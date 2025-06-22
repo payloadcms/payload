@@ -23,6 +23,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
+import { useDocumentDrawerContext } from '../DocumentDrawer/Provider.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.scss'
 
@@ -55,6 +56,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
     updateSavedDocumentData,
   } = useDocumentInfo()
+
+  const { onSave: onSaveFromDocumentDrawer } = useDocumentDrawerContext()
 
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
@@ -183,6 +186,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                 // We need to log the time in order to figure out if we need to trigger the state off later
                 endTimestamp = newDate.getTime()
 
+                const json = await res.json()
+
                 if (res.status === 200) {
                   setLastUpdateTime(newDate.getTime())
 
@@ -192,13 +197,20 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                     updatedAt: newDate.toISOString(),
                   })
 
+                  // if onSaveFromDocumentDrawer is defined, call it
+                  if (typeof onSaveFromDocumentDrawer === 'function') {
+                    void onSaveFromDocumentDrawer({
+                      ...json,
+                      operation: 'update',
+                    })
+                  }
+
                   if (!mostRecentVersionIsAutosaved) {
                     incrementVersionCount()
                     setMostRecentVersionIsAutosaved(true)
                     setUnpublishedVersionCount((prev) => prev + 1)
                   }
                 }
-                const json = await res.json()
 
                 if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
                   if (Array.isArray(json.errors)) {
