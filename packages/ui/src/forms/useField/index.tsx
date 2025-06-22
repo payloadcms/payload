@@ -76,8 +76,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // Method to return from `useField`, used to
   // update field values from field component(s)
   const setValue = useCallback(
-    (e, disableModifyingForm = false) => {
-      const val = e && e.target ? e.target.value : e
+    (val, disableModifyingForm = false) => {
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
