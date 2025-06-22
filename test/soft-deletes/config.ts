@@ -4,16 +4,16 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../credentials.js'
-import { TrashEnabled } from './collections/TrashEnabled/index.js'
-import { TrashEnabledWithAccessControl } from './collections/TrashEnabledWithAccessControl/index.js'
+import { Pages } from './collections/Pages/index.js'
+import { Posts } from './collections/Posts/index.js'
+import { RestrictedCollection } from './collections/RestrictedCollection/index.js'
 import { Users } from './collections/Users/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
-  collections: [TrashEnabled, TrashEnabledWithAccessControl, Users],
+  collections: [Pages, Posts, RestrictedCollection, Users],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

@@ -292,7 +292,7 @@ export const renderListView = async (
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
-                disableBulkEdit,
+                disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,

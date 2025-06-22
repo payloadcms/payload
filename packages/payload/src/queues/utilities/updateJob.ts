@@ -40,6 +40,11 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
   }
 }
 
+/**
+ * Helper for updating jobs in the most performant way possible.
+ * Handles deciding whether it can used direct db methods or not, and if so,
+ * manually runs the afterRead hook that populates the `taskStatus` property.
+ */
 export async function updateJobs({
   id,
   data,

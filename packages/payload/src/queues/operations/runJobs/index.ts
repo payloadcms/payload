@@ -7,6 +7,7 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/index.js'
+import { JobCancelledError } from '../../errors/index.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -226,7 +227,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   const successfullyCompletedJobs: (number | string)[] = []
 
-  const runSingleJob = async (job: Job) => {
+  const runSingleJob = async (
+    job: Job,
+  ): Promise<{
+    id: number | string
+    result: RunJobResult
+  }> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -245,68 +251,90 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           }
 
     if (!workflowConfig) {
-      return null // Skip jobs with no workflow configuration
+      return {
+        id: job.id,
+        result: {
+          status: 'error',
+        },
+      } // Skip jobs with no workflow configuration
     }
 
-    const updateJob = getUpdateJobFunction(job, jobReq)
+    try {
+      const updateJob = getUpdateJobFunction(job, jobReq)
 
-    // the runner will either be passed to the config
-    // OR it will be a path, which we will need to import via eval to avoid
-    // Next.js compiler dynamic import expression errors
-    let workflowHandler: WorkflowHandler | WorkflowJSON
-    if (
-      typeof workflowConfig.handler === 'function' ||
-      (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
-    ) {
-      workflowHandler = workflowConfig.handler
-    } else {
-      workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
+      // the runner will either be passed to the config
+      // OR it will be a path, which we will need to import via eval to avoid
+      // Next.js compiler dynamic import expression errors
+      let workflowHandler: WorkflowHandler | WorkflowJSON
+      if (
+        typeof workflowConfig.handler === 'function' ||
+        (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
+      ) {
+        workflowHandler = workflowConfig.handler
+      } else {
+        workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
 
-      if (!workflowHandler) {
-        const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
-        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-        payload.logger.error(errorMessage)
+        if (!workflowHandler) {
+          const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+          const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
+          payload.logger.error(errorMessage)
 
-        await updateJob({
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          processing: false,
+          await updateJob({
+            error: {
+              error: errorMessage,
+            },
+            hasError: true,
+            processing: false,
+          })
+
+          return {
+            id: job.id,
+            result: {
+              status: 'error-reached-max-retries',
+            },
+          }
+        }
+      }
+
+      if (typeof workflowHandler === 'function') {
+        const result = await runJob({
+          job,
+          req: jobReq,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
         })
 
-        return
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
+      } else {
+        const result = await runJSONJob({
+          job,
+          req: jobReq,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
+        })
+
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
       }
-    }
-
-    if (typeof workflowHandler === 'function') {
-      const result = await runJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error') {
-        successfullyCompletedJobs.push(job.id)
+    } catch (error) {
+      if (error instanceof JobCancelledError) {
+        return {
+          id: job.id,
+          result: {
+            status: 'error-reached-max-retries',
+          },
+        }
       }
-
-      return { id: job.id, result }
-    } else {
-      const result = await runJSONJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error') {
-        successfullyCompletedJobs.push(job.id)
-      }
-
-      return { id: job.id, result }
+      throw error
     }
   }
 
