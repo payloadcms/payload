@@ -158,7 +158,7 @@ export const buildSortParam = ({
     fallbackSort = '-createdAt'
   }
 
-  if (!(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', '')))) {
+  if (!sort?.length  && (!(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', ''))))) {
     sort.push(fallbackSort)
   }
 
