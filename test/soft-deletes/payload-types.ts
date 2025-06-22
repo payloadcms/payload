@@ -67,8 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    'trash-enabled': TrashEnabled;
-    'trash-enabled-with-access-control': TrashEnabledWithAccessControl;
+    pages: Page;
+    posts: Post;
+    'restricted-collection': RestrictedCollection;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +77,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    'trash-enabled': TrashEnabledSelect<false> | TrashEnabledSelect<true>;
-    'trash-enabled-with-access-control': TrashEnabledWithAccessControlSelect<false> | TrashEnabledWithAccessControlSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'restricted-collection': RestrictedCollectionSelect<false> | RestrictedCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -117,9 +119,20 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trash-enabled".
+ * via the `definition` "pages".
  */
-export interface TrashEnabled {
+export interface Page {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -129,9 +142,9 @@ export interface TrashEnabled {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trash-enabled-with-access-control".
+ * via the `definition` "restricted-collection".
  */
-export interface TrashEnabledWithAccessControl {
+export interface RestrictedCollection {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -166,12 +179,16 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'trash-enabled';
-        value: string | TrashEnabled;
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
-        relationTo: 'trash-enabled-with-access-control';
-        value: string | TrashEnabledWithAccessControl;
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'restricted-collection';
+        value: string | RestrictedCollection;
       } | null)
     | ({
         relationTo: 'users';
@@ -221,9 +238,19 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trash-enabled_select".
+ * via the `definition` "pages_select".
  */
-export interface TrashEnabledSelect<T extends boolean = true> {
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -232,9 +259,9 @@ export interface TrashEnabledSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trash-enabled-with-access-control_select".
+ * via the `definition` "restricted-collection_select".
  */
-export interface TrashEnabledWithAccessControlSelect<T extends boolean = true> {
+export interface RestrictedCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

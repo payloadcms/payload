@@ -1,13 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
-export const trashEnabledSlug = 'trash-enabled'
+export const pagesSlug = 'pages'
 
-export const TrashEnabled: CollectionConfig = {
-  slug: trashEnabledSlug,
+export const Pages: CollectionConfig = {
+  slug: pagesSlug,
   admin: {
     useAsTitle: 'title',
   },
-  trash: true,
+  trash: false, // Soft deletes are not enabled for this collection
   fields: [
     {
       name: 'title',

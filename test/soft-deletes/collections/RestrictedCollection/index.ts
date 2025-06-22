@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-export const trashEnabledWithAccessControlSlug = 'trash-enabled-with-access-control'
+export const restrictedCollectionSlug = 'restricted-collection'
 
-export const TrashEnabledWithAccessControl: CollectionConfig = {
-  slug: trashEnabledWithAccessControlSlug,
+export const RestrictedCollection: CollectionConfig = {
+  slug: restrictedCollectionSlug,
   admin: {
     useAsTitle: 'title',
   },
