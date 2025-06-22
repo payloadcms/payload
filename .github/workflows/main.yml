@@ -314,6 +314,7 @@ jobs:
           - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
+          - soft-deletes
           - sort
           - versions
           - uploads
@@ -450,6 +451,7 @@ jobs:
           - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
+          - soft-deletes
           - sort
           - versions
           - uploads

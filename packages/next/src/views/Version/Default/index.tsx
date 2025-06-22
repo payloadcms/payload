@@ -251,7 +251,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             </div>
             <div className={`${baseClass}__version-to-version`}>
               {VersionToCreatedAtLabel}
-              {canUpdate && (
+              {canUpdate && !isTrashed && (
                 <Restore
                   className={`${baseClass}__restore`}
                   collectionConfig={collectionConfig}
