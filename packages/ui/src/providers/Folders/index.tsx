@@ -42,7 +42,6 @@ export type FolderContextValue = {
    */
   readonly allCollectionFolderSlugs?: CollectionSlug[]
   allowCreateCollectionSlugs: CollectionSlug[]
-  assignedCollections: CollectionSlug[] | undefined
   breadcrumbs?: FolderBreadcrumb[]
   checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
   clearSelections: () => void
@@ -54,6 +53,7 @@ export type FolderContextValue = {
   folderFieldName: string
   folderID?: number | string
   FolderResultsComponent: React.ReactNode
+  folderType: CollectionSlug[] | undefined
   getFolderRoute: (toFolderID?: number | string) => string
   getSelectedItems?: () => FolderOrDocument[]
   isDragging: boolean
@@ -83,7 +83,6 @@ const Context = React.createContext<FolderContextValue>({
   activeCollectionFolderSlugs: [],
   allCollectionFolderSlugs: [],
   allowCreateCollectionSlugs: [],
-  assignedCollections: undefined,
   breadcrumbs: [],
   checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
@@ -95,6 +94,7 @@ const Context = React.createContext<FolderContextValue>({
   folderFieldName: 'folder',
   folderID: undefined,
   FolderResultsComponent: null,
+  folderType: undefined,
   getFolderRoute: () => '',
   getSelectedItems: () => [],
   isDragging: false,
@@ -357,7 +357,7 @@ export function FolderProvider({
             acc.newSelectedItemKeys.add(item.itemKey)
             // rebuild the selected collection counter
             if (item.relationTo === folderCollectionSlug) {
-              item.value.assignedCollections?.forEach((collectionSlug) => {
+              item.value.folderType?.forEach((collectionSlug) => {
                 if (!acc.newSelectedCollectionCounter[collectionSlug]) {
                   acc.newSelectedCollectionCounter[collectionSlug] = 0
                 }
@@ -649,7 +649,7 @@ export function FolderProvider({
         } else if (item.relationTo === folderCollectionSlug) {
           // Disable folders if they do not support ALL of the selected collections
           return Object.entries(selectedCollectionCounter).some(([slug, count]) => {
-            return !count || !item.value.assignedCollections.includes(slug)
+            return !count || !item.value.folderType.includes(slug)
           })
         } else {
           return !selectedCollectionCounter?.[item.relationTo]
@@ -680,7 +680,6 @@ export function FolderProvider({
         activeCollectionFolderSlugs: activeCollectionSlugs || allCollectionFolderSlugs,
         allCollectionFolderSlugs,
         allowCreateCollectionSlugs,
-        assignedCollections: breadcrumbs?.[0]?.assignedCollections,
         breadcrumbs,
         checkIfItemIsDisabled,
         clearSelections,
@@ -700,6 +699,7 @@ export function FolderProvider({
         folderFieldName,
         folderID,
         FolderResultsComponent,
+        folderType: breadcrumbs?.[0]?.folderType,
         getFolderRoute,
         getSelectedItems,
         isDragging,

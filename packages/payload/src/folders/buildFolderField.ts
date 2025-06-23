@@ -42,7 +42,7 @@ export const buildFolderField = ({
             overrideAccess,
             req,
             select: {
-              assignedCollections: true, // only need to check assignedCollections
+              folderType: true, // only need to check folderType
             },
             user: req.user,
           })
@@ -50,13 +50,13 @@ export const buildFolderField = ({
 
         if (parentFolder && collectionSlug) {
           const parentAssignedCollectionSlugs: string[] =
-            (parentFolder.assignedCollections as string[]) || []
+            (parentFolder.folderType as string[]) || []
 
           // validation for a folder document
           if (collectionSlug === folderSlug) {
             // ensure the parent accepts ALL assigned collections
             const folderAssignedCollections: string[] =
-              'assignedCollections' in data ? (data.assignedCollections as string[]) : []
+              'folderType' in data ? (data.folderType as string[]) : []
             const invalidSlugs = folderAssignedCollections.filter((assignedCollection: string) => {
               return !parentAssignedCollectionSlugs.includes(assignedCollection)
             })

@@ -3,7 +3,6 @@ import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 import type { Document } from '../types/index.js'
 
 export type FolderInterface = {
-  assignedCollections: CollectionSlug[]
   documentsAndFolders?: {
     docs: {
       relationTo: CollectionSlug
@@ -11,11 +10,12 @@ export type FolderInterface = {
     }[]
   }
   folder?: FolderInterface | (number | string | undefined)
+  folderType: CollectionSlug[]
   name: string
 } & TypeWithID
 
 export type FolderBreadcrumb = {
-  assignedCollections?: CollectionSlug[]
+  folderType?: CollectionSlug[]
   id: null | number | string
   name: string
 }
@@ -58,9 +58,9 @@ export type FolderOrDocument = {
   relationTo: CollectionSlug
   value: {
     _folderOrDocumentTitle: string
-    assignedCollections: CollectionSlug[]
     createdAt?: string
     folderID?: number | string
+    folderType: CollectionSlug[]
     id: number | string
     updatedAt?: string
   } & DocumentMediaData

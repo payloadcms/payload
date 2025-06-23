@@ -37,21 +37,21 @@ export const AssignedToSelect = ({
   } = props
   const { t } = useTranslation()
 
-  const { assignedCollections } = useFolder()
+  const { folderType } = useFolder()
 
   const options = React.useMemo(() => {
-    if (!assignedCollections) {
+    if (!folderType) {
       return formatOptions(allSelectOptions)
     }
     return formatOptions(
       allSelectOptions.filter((option) => {
         if (typeof option === 'object' && option.value) {
-          return assignedCollections.includes(option.value)
+          return folderType.includes(option.value)
         }
         return true
       }),
     )
-  }, [allSelectOptions, assignedCollections])
+  }, [allSelectOptions, folderType])
 
   const memoizedValidate = React.useCallback(
     (value, validationOptions) => {

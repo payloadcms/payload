@@ -26,8 +26,8 @@ export const getFolderBreadcrumbs = async ({
       req,
       select: {
         name: true,
-        assignedCollections: true,
         [folderFieldName]: true,
+        folderType: true,
       },
       user,
       where: {
@@ -43,7 +43,7 @@ export const getFolderBreadcrumbs = async ({
       breadcrumbs.push({
         id: folder.id,
         name: folder.name,
-        assignedCollections: folder.assignedCollections,
+        folderType: folder.folderType,
       })
       if (folder[folderFieldName]) {
         return getFolderBreadcrumbs({

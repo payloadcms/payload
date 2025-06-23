@@ -4,10 +4,10 @@ import { selectReactSelectOptions } from '../../helpers/e2e/selectReactSelectOpt
 export const createFolderDoc = async ({
   folderName,
   page,
-  assignedCollections,
+  folderType,
 }: {
-  assignedCollections: string[]
   folderName: string
+  folderType: string[]
   page: Page
 }) => {
   const folderNameInput = page.locator(
@@ -18,8 +18,8 @@ export const createFolderDoc = async ({
 
   await selectReactSelectOptions({
     page,
-    selector: '#field-assignedCollections',
-    options: assignedCollections,
+    selector: '#field-folderType',
+    options: folderType,
   })
 
   const createButton = page

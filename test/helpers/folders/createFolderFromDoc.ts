@@ -4,15 +4,15 @@ import { createFolder } from './createFolder.js'
 import { createFolderDoc } from './createFolderDoc.js'
 
 type Args = {
-  assignedCollections?: string[]
   folderName: string
+  folderType?: string[]
   page: Page
 }
 
 export async function createFolderFromDoc({
   folderName,
   page,
-  assignedCollections = ['Posts'],
+  folderType = ['Posts'],
 }: Args): Promise<void> {
   const addFolderButton = page.locator('.create-new-doc-in-folder__button', {
     hasText: 'Create folder',
@@ -22,7 +22,7 @@ export async function createFolderFromDoc({
   await createFolderDoc({
     page,
     folderName,
-    assignedCollections,
+    folderType,
   })
 
   const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()

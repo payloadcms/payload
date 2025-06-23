@@ -4,21 +4,21 @@ import { getTranslatedLabel } from '../../utilities/getTranslatedLabel.js'
 export const ensureSafeCollectionsChange =
   ({ foldersSlug }: { foldersSlug: CollectionSlug }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
-    if (data?.assignedCollections) {
-      const assignedCollections = data.assignedCollections as string[]
-      const originalAssignedCollections = originalDoc?.assignedCollections as string[] | undefined
+    if (data?.folderType) {
+      const folderType = data.folderType as string[]
+      const originalAssignedCollections = originalDoc?.folderType as string[] | undefined
       /**
        * Check if the assigned collections have changed.
        * example:
        * - originalAssignedCollections: ['posts', 'pages']
-       * - assignedCollections: ['posts']
+       * - folderType: ['posts']
        *
        * The user is narrowing the types of documents that can be associated with this folder.
        * If the user is only expanding the types of documents that can be associated with this folder,
        * we do not need to do anything.
        */
       const removedCollections = originalAssignedCollections
-        ? originalAssignedCollections.filter((c) => !assignedCollections.includes(c))
+        ? originalAssignedCollections.filter((c) => !folderType.includes(c))
         : undefined
       if (removedCollections && removedCollections.length > 0) {
         const result = await req.payload.findByID({
@@ -36,7 +36,7 @@ export const ensureSafeCollectionsChange =
                     },
                   },
                   {
-                    'folder.assignedCollections': {
+                    'folder.folderType': {
                       in: removedCollections,
                     },
                   },

@@ -102,7 +102,7 @@ test.describe('Folders', () => {
       await createFolderDoc({
         page,
         folderName: 'Renamed Folder',
-        assignedCollections: ['Posts'],
+        folderType: ['Posts'],
       })
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       const renamedFolderCard = page
@@ -197,7 +197,7 @@ test.describe('Folders', () => {
       await createFolder({
         folderName: 'Create New Here',
         page,
-        assignedCollections: ['Posts', 'Drafts'],
+        folderType: ['Posts', 'Drafts'],
       })
       await clickFolderCard({ folderName: 'Create New Here', page, doubleClick: true })
       const createDocButton = page.locator('.create-new-doc-in-folder__popup-button', {
@@ -239,7 +239,7 @@ test.describe('Folders', () => {
       await createFolderDoc({
         page,
         folderName: 'Nested Folder',
-        assignedCollections: ['Posts'],
+        folderType: ['Posts'],
       })
 
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -294,7 +294,7 @@ test.describe('Folders', () => {
       await createFolderDoc({
         page,
         folderName: 'Nested Folder',
-        assignedCollections: ['Posts'],
+        folderType: ['Posts'],
       })
       await expect(page.locator('.folder-file-card__name')).toHaveText('Nested Folder')
 
@@ -425,7 +425,7 @@ test.describe('Folders', () => {
       await createFolderDoc({
         page,
         folderName: 'New Folder From Collection',
-        assignedCollections: ['Posts'],
+        folderType: ['Posts'],
       })
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })

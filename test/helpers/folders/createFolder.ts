@@ -3,8 +3,8 @@ import { expect, type Page } from '@playwright/test'
 import { createFolderDoc } from './createFolderDoc.js'
 
 type Args = {
-  assignedCollections?: string[]
   folderName: string
+  folderType?: string[]
   fromDropdown?: boolean
   page: Page
 }
@@ -12,7 +12,7 @@ export async function createFolder({
   folderName,
   fromDropdown = false,
   page,
-  assignedCollections = ['Posts'],
+  folderType = ['Posts'],
 }: Args): Promise<void> {
   if (fromDropdown) {
     const folderDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
@@ -33,7 +33,7 @@ export async function createFolder({
   await createFolderDoc({
     page,
     folderName,
-    assignedCollections,
+    folderType,
   })
 
   const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()

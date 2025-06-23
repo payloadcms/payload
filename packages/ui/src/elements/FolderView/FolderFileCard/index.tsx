@@ -20,9 +20,9 @@ import './index.scss'
 const baseClass = 'folder-file-card'
 
 type Props = {
-  readonly assignedCollections?: string[]
   readonly className?: string
   readonly disabled?: boolean
+  readonly folderType?: string[]
   readonly id: number | string
   readonly isDeleting?: boolean
   readonly isFocused?: boolean
@@ -39,9 +39,9 @@ type Props = {
 export function FolderFileCard({
   id,
   type,
-  assignedCollections,
   className = '',
   disabled = false,
+  folderType,
   isDeleting = false,
   isFocused = false,
   isSelected = false,
@@ -59,7 +59,7 @@ export function FolderFileCard({
     data: {
       id,
       type,
-      assignedCollections,
+      folderType,
     },
     disabled: disableDrop,
   })
@@ -122,8 +122,8 @@ export function FolderFileCard({
           <p className={`${baseClass}__name`} title={title}>
             <span>{title}</span>
           </p>
-          {assignedCollections && assignedCollections.length > 0 ? (
-            <AssignedCollections assignedCollections={assignedCollections} />
+          {folderType && folderType.length > 0 ? (
+            <AssignedCollections folderType={folderType} />
           ) : null}
         </div>
         {PopupActions ? (
@@ -142,26 +142,26 @@ export function FolderFileCard({
   )
 }
 
-function AssignedCollections({ assignedCollections }: { assignedCollections: string[] }) {
+function AssignedCollections({ folderType }: { folderType: string[] }) {
   const { config } = useConfig()
   const { i18n } = useTranslation()
 
   const collectionsDisplayText = React.useMemo(() => {
-    return assignedCollections.reduce((acc, collection) => {
+    return folderType.reduce((acc, collection) => {
       const collectionConfig = config.collections?.find((c) => c.slug === collection)
       if (collectionConfig) {
         return [...acc, getTranslation(collectionConfig.labels.singular, i18n)]
       }
       return acc
     }, [])
-  }, [assignedCollections, config.collections, i18n])
+  }, [folderType, config.collections, i18n])
 
   return (
     <p className={`${baseClass}__assigned-collections`}>
       {collectionsDisplayText.map((label, index) => (
         <span key={label}>
           {label}
-          {index < assignedCollections.length - 1 ? ', ' : ''}
+          {index < folderType.length - 1 ? ', ' : ''}
         </span>
       ))}
     </p>
@@ -182,9 +182,9 @@ export function ContextFolderFileCard({ type, className, index, item }: ContextC
 
   return (
     <FolderFileCard
-      assignedCollections={item.value.assignedCollections || []}
       className={className}
       disabled={isDisabled}
+      folderType={item.value.folderType || []}
       id={item.value.id}
       isFocused={focusedRowIndex === index}
       isSelected={isSelected}

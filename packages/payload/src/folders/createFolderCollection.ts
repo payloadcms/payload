@@ -77,7 +77,7 @@ export const createFolderCollection = ({
         on: folderFieldName,
       },
       {
-        name: 'assignedCollections',
+        name: 'folderType',
         type: 'select',
         admin: {
           components: {

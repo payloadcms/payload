@@ -133,10 +133,8 @@ export function ListCreateNewDocInFolderButton({
       {collectionSlugs.includes(folderCollectionConfig.slug) && (
         <FolderDocumentDrawer
           initialData={{
-            assignedCollections: createCollectionSlug
-              ? [createCollectionSlug]
-              : folderAssignedCollections,
             [folderFieldName]: folderID,
+            folderType: createCollectionSlug ? [createCollectionSlug] : folderAssignedCollections,
           }}
           onSave={async (result) => {
             await onCreateSuccess({

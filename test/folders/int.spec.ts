@@ -48,7 +48,7 @@ describe('folders', () => {
         collection: 'payload-folders',
         data: {
           name: 'Parent Folder',
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
         },
       })
       const folderIDFromParams = parentFolder.id
@@ -58,7 +58,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 1',
           folder: folderIDFromParams,
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
         },
       })
 
@@ -67,7 +67,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 2',
           folder: folderIDFromParams,
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
         },
       })
 
@@ -85,7 +85,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -121,7 +121,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -129,7 +129,7 @@ describe('folders', () => {
       const childFolder = await payload.create({
         collection: 'payload-folders',
         data: {
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
           name: 'Child Folder',
           folder: parentFolder,
         },
@@ -159,7 +159,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -175,7 +175,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -184,7 +184,7 @@ describe('folders', () => {
         data: {
           name: 'Child Folder',
           folder: parentFolder,
-          assignedCollections: ['posts'],
+          folderType: ['posts'],
         },
       })
 
@@ -205,7 +205,7 @@ describe('folders', () => {
           collection: 'payload-folders',
           data: {
             name: 'Posts and Drafts Folder',
-            assignedCollections: ['posts', 'drafts'],
+            folderType: ['posts', 'drafts'],
           },
         })
 
@@ -230,7 +230,7 @@ describe('folders', () => {
             collection: 'payload-folders',
             id: sharedFolder.id,
             data: {
-              assignedCollections: ['posts'],
+              folderType: ['posts'],
             },
           })
 
@@ -247,7 +247,7 @@ describe('folders', () => {
           collection: 'payload-folders',
           data: {
             name: 'Parent Folder',
-            assignedCollections: ['posts', 'drafts'],
+            folderType: ['posts', 'drafts'],
           },
         })
 
@@ -255,7 +255,7 @@ describe('folders', () => {
           collection: 'payload-folders',
           data: {
             name: 'Parent Folder',
-            assignedCollections: ['posts', 'drafts'],
+            folderType: ['posts', 'drafts'],
             folder: parentFolder.id,
           },
         })
@@ -265,7 +265,7 @@ describe('folders', () => {
             collection: 'payload-folders',
             id: parentFolder.id,
             data: {
-              assignedCollections: ['posts'],
+              folderType: ['posts'],
             },
           })
 

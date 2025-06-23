@@ -89,7 +89,7 @@ export async function queryDocumentsAndFoldersFromJoin({
 
   return {
     documents: results.documents,
-    folderAssignedCollections: subfolderDoc?.docs[0]?.assignedCollections || [],
+    folderAssignedCollections: subfolderDoc?.docs[0]?.folderType || [],
     subfolders: results.subfolders,
   }
 }

@@ -106,7 +106,7 @@ export const getFolderResultsComponentAndData = async ({
         folderWhere,
         folderAssignedCollections.length
           ? {
-              assignedCollections: {
+              folderType: {
                 in: folderAssignedCollections,
               },
             }

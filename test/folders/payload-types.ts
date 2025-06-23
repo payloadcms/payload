@@ -201,7 +201,7 @@ export interface FolderInterface {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  assignedCollections: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by')[];
+  folderType: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by')[];
   folderSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -448,7 +448,7 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
   name?: T;
   folder?: T;
   documentsAndFolders?: T;
-  assignedCollections?: T;
+  folderType?: T;
   folderSlug?: T;
   updatedAt?: T;
   createdAt?: T;
