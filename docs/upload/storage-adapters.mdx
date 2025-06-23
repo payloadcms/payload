@@ -250,6 +250,8 @@ pnpm add @payloadcms/storage-uploadthing
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
 
 ```ts
+import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
+
 export default buildConfig({
   collections: [Media],
   plugins: [
