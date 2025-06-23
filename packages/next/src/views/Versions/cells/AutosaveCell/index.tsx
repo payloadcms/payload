@@ -1,85 +1,49 @@
 'use client'
-import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
+import { Pill, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
+import { VersionPillLabel } from '../../../Version/VersionPillLabel/VersionPillLabel.js'
 
 const baseClass = 'autosave-cell'
 
 type AutosaveCellProps = {
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
-  rowData?: {
+  currentlyPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
+  latestDraftVersion?: {
+    id: number | string
+    updatedAt: string
+  }
+  rowData: {
     autosave?: boolean
+    id: number | string
     publishedLocale?: string
     version: {
-      _status?: string
+      _status: string
     }
   }
-}
-
-export const renderPill = (data, latestVersion, currentLabel, previousLabel, pillStyle) => {
-  return (
-    <React.Fragment>
-      {data?.id === latestVersion ? (
-        <Pill pillStyle={pillStyle} size="small">
-          {currentLabel}
-        </Pill>
-      ) : (
-        <Pill size="small">{previousLabel}</Pill>
-      )}
-    </React.Fragment>
-  )
 }
 
 export const AutosaveCell: React.FC<AutosaveCellProps> = ({
+  currentlyPublishedVersion,
   latestDraftVersion,
-  latestPublishedVersion,
-  rowData = { autosave: undefined, publishedLocale: undefined, version: undefined },
+  rowData,
 }) => {
-  const { i18n, t } = useTranslation()
-
-  const {
-    config: { localization },
-  } = useConfig()
-
-  const publishedLocale = rowData?.publishedLocale || undefined
-  const status = rowData?.version._status
-  let publishedLocalePill = null
-
-  const versionInfo = {
-    draft: {
-      currentLabel: t('version:currentDraft'),
-      latestVersion: latestDraftVersion,
-      pillStyle: undefined,
-      previousLabel: t('version:draft'),
-    },
-    published: {
-      currentLabel: t('version:currentPublishedVersion'),
-      latestVersion: latestPublishedVersion,
-      pillStyle: 'success',
-      previousLabel: t('version:previouslyPublished'),
-    },
-  }
-
-  const { currentLabel, latestVersion, pillStyle, previousLabel } = versionInfo[status] || {}
-
-  if (localization && localization?.locales && publishedLocale) {
-    const localeCode = Array.isArray(publishedLocale) ? publishedLocale[0] : publishedLocale
-
-    const locale = localization.locales.find((loc) => loc.code === localeCode)
-    const formattedLabel = locale?.label?.[i18n?.language] || locale?.label
-
-    if (formattedLabel) {
-      publishedLocalePill = <Pill size="small">{formattedLabel}</Pill>
-    }
-  }
+  const { t } = useTranslation()
 
   return (
     <div className={`${baseClass}__items`}>
       {rowData?.autosave && <Pill size="small">{t('version:autosave')}</Pill>}
-      {status && renderPill(rowData, latestVersion, currentLabel, previousLabel, pillStyle)}
-      {publishedLocalePill}
+      <VersionPillLabel
+        currentlyPublishedVersion={currentlyPublishedVersion}
+        disableDate={true}
+        doc={rowData}
+        labelFirst={false}
+        labelStyle="pill"
+        latestDraftVersion={latestDraftVersion}
+      />
     </div>
   )
 }

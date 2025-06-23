@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.42.0",
+  "version": "3.43.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -64,7 +64,7 @@
     "clean:build": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:build:allowtgz": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/meta_*.json'",
     "clean:cache": "node ./scripts/delete-recursively.js node_modules/.cache! packages/payload/node_modules/.cache! .next/*",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts",
+    "dev": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=16384\" tsx ./test/dev.ts",
     "dev:generate-db-schema": "pnpm runts ./test/generateDatabaseSchema.ts",
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
@@ -111,7 +111,7 @@
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
-    "translateNewKeys": "pnpm --filter translations run translateNewKeys"
+    "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -151,7 +151,10 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.28.0",
+    "drizzle-kit": "0.31.0",
+    "drizzle-orm": "0.43.1",
+    "escape-html": "^1.0.3",
+    "eslint": "9.22.0",
     "execa": "5.1.1",
     "form-data": "3.0.1",
     "fs-extra": "10.1.0",
@@ -182,10 +185,10 @@
     "turbo": "^2.3.3",
     "typescript": "5.7.3"
   },
-  "packageManager": "pnpm@9.7.1",
+  "packageManager": "pnpm@10.12.1",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9.7.0"
+    "pnpm": "^10.12.1"
   },
   "pnpm": {
     "overrides": {

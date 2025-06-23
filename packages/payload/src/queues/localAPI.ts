@@ -1,10 +1,10 @@
-import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
+  type Job,
   type Payload,
   type PayloadRequest,
-  type RunningJob,
   type Sort,
   type TypedJobs,
   type Where,
@@ -40,7 +40,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         },
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
-      ? RunningJob<TTaskOrWorkflowSlug>
+      ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug>
   > => {
     let queue: string | undefined = undefined
@@ -57,7 +57,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       }
     }
 
-    const data: Partial<BaseJob> = {
+    const data: Partial<Job> = {
       input: args.input,
     }
 
@@ -75,7 +75,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     }
 
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
-      ? RunningJob<TTaskOrWorkflowSlug>
+      ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
     if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
@@ -199,10 +199,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         hasError: true,
         processing: false,
         waitUntil: null,
-      } as {
-        completedAt: null
-        waitUntil: null
-      } & BaseJob,
+      },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
       req: newReq,
@@ -228,10 +225,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         hasError: true,
         processing: false,
         waitUntil: null,
-      } as {
-        completedAt: null
-        waitUntil: null
-      } & BaseJob,
+      },
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
       req: newReq,

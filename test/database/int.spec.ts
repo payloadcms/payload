@@ -2618,6 +2618,54 @@ describe('database', () => {
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 
+  it('should CRUD with blocks as JSON in SQL adapters', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!('drizzle' in payload.db)) {
+      return
+    }
+
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    payload.db.blocksAsJSON = true
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+    expect(payload.db.tables.blocks_docs.testBlocks).toBeDefined()
+    expect(payload.db.tables.blocks_docs_locales.testBlocksLocalized).toBeDefined()
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+    const res_es = await payload.update({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'es',
+      data: {
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
+        testBlocks: [{ blockType: 'cta', text: 'text_updated' }],
+      },
+    })
+    expect(res_es.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
+    const res_all = await payload.findByID({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'all',
+    })
+    expect(res_all.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_all.testBlocksLocalized.es[0]?.text).toBe('text-localized-es')
+    expect(res_all.testBlocksLocalized.en[0]?.text).toBe('text-localized')
+    payload.db.blocksAsJSON = false
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+  })
+
   it('should support in with null', async () => {
     await payload.delete({ collection: 'posts', where: {} })
     const post_1 = await payload.create({
