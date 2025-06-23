@@ -654,7 +654,6 @@ jobs:
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
           MONGODB_URL: mongodb://localhost:27017/payloadtests
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.templateName }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
   tests-type-generation:
