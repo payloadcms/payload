@@ -20,6 +20,7 @@ export const ensureSafeCollectionsChange =
       const removedCollections = originalAssignedCollections
         ? originalAssignedCollections.filter((c) => !folderType.includes(c))
         : undefined
+
       if (removedCollections && removedCollections.length > 0) {
         const result = await req.payload.findByID({
           id: originalDoc.id,
@@ -30,15 +31,26 @@ export const ensureSafeCollectionsChange =
               limit: 100_000_000,
               where: {
                 or: [
+                  // matches documents that are directly related to the removed collections
                   {
                     relationTo: {
                       in: removedCollections,
                     },
                   },
+                  // matches folders that are directly related to the removed collections
                   {
-                    'folder.folderType': {
-                      in: removedCollections,
-                    },
+                    and: [
+                      {
+                        relationTo: {
+                          equals: foldersSlug,
+                        },
+                      },
+                      {
+                        'folder.folderType': {
+                          in: removedCollections,
+                        },
+                      },
+                    ],
                   },
                 ],
               },
