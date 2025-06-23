@@ -36,7 +36,6 @@ export async function refresh({ collection, config }: { collection: CollectionSl
 
     return { message: 'Token refreshed successfully', success: true }
   } catch (e) {
-    console.error('Refresh error:', e)
     throw new Error(`${e}`)
   }
 }

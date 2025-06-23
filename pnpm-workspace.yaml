@@ -5,3 +5,6 @@ packages:
   - 'test'
   # exclude packages that are inside test directories
   # - '!**/test/**'
+
+# Allow all build scripts
+neverBuiltDependencies: []

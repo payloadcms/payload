@@ -66,6 +66,7 @@ describe('List View', () => {
   let with300DocumentsUrl: AdminUrlUtil
   let withListViewUrl: AdminUrlUtil
   let placeholderUrl: AdminUrlUtil
+  let disableBulkEditUrl: AdminUrlUtil
   let user: any
 
   let serverURL: string
@@ -90,6 +91,7 @@ describe('List View', () => {
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
+    disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -1301,6 +1303,16 @@ describe('List View', () => {
       await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
+    })
+
+    test('should hide edit many from collection with disableBulkEdit: true', async () => {
+      await payload.create({ collection: 'disable-bulk-edit', data: {} })
+      await page.goto(disableBulkEditUrl.list)
+
+      // select one row
+      await page.locator('.row-1 .cell-_select input').check()
+      // ensure the edit many button is hidden
+      await expect(page.locator('.edit-many button')).toBeHidden()
     })
   })
 

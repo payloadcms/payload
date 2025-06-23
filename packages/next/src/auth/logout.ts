@@ -23,7 +23,6 @@ export async function logout({ config }: { config: any }) {
       return { message: 'User logged out successfully', success: true }
     }
   } catch (e) {
-    console.error('Logout error:', e)
     throw new Error(`${e}`)
   }
 }
