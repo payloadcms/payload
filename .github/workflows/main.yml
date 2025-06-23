@@ -163,6 +163,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -258,6 +259,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
