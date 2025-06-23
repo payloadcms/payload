@@ -130,6 +130,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'folder:browseByFolder',
   'folder:deleteFolder',
   'folder:folders',
+  'folder:folderTypeDescription',
   'folder:folderName',
   'folder:itemsMovedToFolder',
   'folder:itemsMovedToRoot',
