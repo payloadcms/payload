@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Option } from '../fields/config/types.js'
+import type { Field, Option, SelectField } from '../fields/config/types.js'
 
 import defaultAccess from '../auth/defaultAccess.js'
 import { buildFolderField } from './buildFolderField.js'
@@ -11,6 +11,7 @@ import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
 type CreateFolderCollectionArgs = {
   debug?: boolean
+  enableCollectionScoping: boolean
   folderEnabledCollections: CollectionConfig[]
   folderFieldName: string
   slug: string
@@ -18,6 +19,7 @@ type CreateFolderCollectionArgs = {
 export const createFolderCollection = ({
   slug,
   debug,
+  enableCollectionScoping,
   folderEnabledCollections,
   folderFieldName,
 }: CreateFolderCollectionArgs): CollectionConfig => {
@@ -58,6 +60,7 @@ export const createFolderCollection = ({
         required: true,
       },
       buildFolderField({
+        enableCollectionScoping,
         folderFieldName,
         folderSlug: slug,
         overrides: {
@@ -76,23 +79,27 @@ export const createFolderCollection = ({
         hasMany: true,
         on: folderFieldName,
       },
-      {
-        name: 'folderType',
-        type: 'select',
-        admin: {
-          components: {
-            Field: {
-              clientProps: {
-                options: collectionOptions,
+      ...(enableCollectionScoping
+        ? [
+            {
+              name: 'folderType',
+              type: 'select',
+              admin: {
+                components: {
+                  Field: {
+                    clientProps: {
+                      options: collectionOptions,
+                    },
+                    path: '@payloadcms/ui#AssignedToSelect',
+                  },
+                },
+                position: 'sidebar',
               },
-              path: '@payloadcms/ui#AssignedToSelect',
-            },
-          },
-          position: 'sidebar',
-        },
-        hasMany: true,
-        options: collectionOptions,
-      },
+              hasMany: true,
+              options: collectionOptions,
+            } satisfies SelectField,
+          ]
+        : ([] as Field[])),
     ],
     hooks: {
       afterChange: [
@@ -107,7 +114,9 @@ export const createFolderCollection = ({
         }),
       ],
       beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
-      beforeValidate: [ensureSafeCollectionsChange({ foldersSlug })],
+      beforeValidate: [
+        ...(enableCollectionScoping ? [ensureSafeCollectionsChange({ foldersSlug })] : []),
+      ],
     },
     labels: {
       plural: 'Folders',

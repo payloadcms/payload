@@ -260,6 +260,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     if (config.folders !== false && config.collections![i]!.folders) {
       addFolderFieldToCollection({
         collection: config.collections![i]!,
+        enableCollectionScoping: config.folders!.enableCollectionScoping,
         folderFieldName: config.folders!.fieldName,
         folderSlug: config.folders!.slug,
       })
@@ -385,6 +386,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (config.folders !== false && folderEnabledCollections.length) {
     await addFolderCollection({
       config: config as unknown as Config,
+      enableCollectionScoping: config.folders!.enableCollectionScoping,
       folderEnabledCollections,
       richTextSanitizationPromises,
       validRelationships,

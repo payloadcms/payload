@@ -104,7 +104,7 @@ export const getFolderResultsComponentAndData = async ({
 
       folderWhere = combineWhereConstraints([
         folderWhere,
-        folderAssignedCollections.length
+        folderAssignedCollections.length && payload.config.folders.enableCollectionScoping
           ? {
               folderType: {
                 in: folderAssignedCollections,

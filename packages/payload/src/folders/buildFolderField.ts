@@ -4,10 +4,12 @@ import type { Document } from '../types/index.js'
 import { extractID } from '../utilities/extractID.js'
 
 export const buildFolderField = ({
+  enableCollectionScoping,
   folderFieldName,
   folderSlug,
   overrides = {},
 }: {
+  enableCollectionScoping: boolean
   folderFieldName: string
   folderSlug: string
   overrides?: Partial<SingleRelationshipField>
@@ -21,6 +23,11 @@ export const buildFolderField = ({
     label: 'Folder',
     relationTo: folderSlug,
     validate: async (value, { collectionSlug, data, overrideAccess, previousValue, req }) => {
+      if (!enableCollectionScoping) {
+        // if collection scoping is not enabled, no validation required since folders can contain any type of document
+        return true
+      }
+
       if (!value) {
         // no folder, no validation required
         return true

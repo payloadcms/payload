@@ -96,6 +96,12 @@ export type RootFoldersConfiguration = {
    */
   debug?: boolean
   /**
+   * If true, you can scope folders to specific collections.
+   *
+   * @default true
+   */
+  enableCollectionScoping?: boolean
+  /**
    * The Folder field name
    *
    * @default "folder"
