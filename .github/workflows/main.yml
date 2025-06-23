@@ -525,6 +525,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     strategy:
+      fail-fast: false
       matrix:
         include:
           - template: blank
@@ -613,6 +614,28 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.templateName }} run test:int
         env:
@@ -620,6 +643,12 @@ jobs:
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
           MONGODB_URL: mongodb://localhost:27017/payloadtests
+
+      - name: Runs Template E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.templateName }}.json pnpm --filter ${{ matrix.templateName }} test:e2e
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.templateName }}.json
+          NEXT_TELEMETRY_DISABLED: 1
 
   tests-type-generation:
     runs-on: ubuntu-24.04
