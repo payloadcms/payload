@@ -9,6 +9,7 @@ import { formatOptions } from '../../../fields/Select/index.js'
 import { SelectInput } from '../../../fields/Select/Input.js'
 import { useField } from '../../../forms/useField/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 export const AssignedToSelect = ({
   options: allSelectOptions,
@@ -20,7 +21,6 @@ export const AssignedToSelect = ({
       name,
       admin: {
         className,
-        description,
         isClearable = true,
         isSortable = true,
         placeholder,
@@ -35,6 +35,7 @@ export const AssignedToSelect = ({
     readOnly,
     validate,
   } = props
+  const { t } = useTranslation()
 
   const { assignedCollections } = useFolder()
 
@@ -107,7 +108,7 @@ export const AssignedToSelect = ({
         BeforeInput={BeforeInput}
         className={className}
         Description={Description}
-        description={description}
+        description={t('folder:folderTypeDescription')}
         Error={Error}
         filterOption={
           selectFilterOptions

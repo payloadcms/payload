@@ -179,6 +179,7 @@ export const etTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Kustuta kaust',
     folderName: 'Kausta nimi',
     folders: 'Kaustad',
+    folderTypeDescription: 'Valige, millist tüüpi kogumiku dokumente peaks selles kaustas lubama.',
     itemHasBeenMoved: '{{title}} on teisaldatud kausta {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} on teisaldatud juurkausta',
     itemsMovedToFolder: '{{title}} viidi üle kausta {{folderName}}',
