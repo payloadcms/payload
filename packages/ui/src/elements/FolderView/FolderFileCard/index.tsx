@@ -150,7 +150,7 @@ function AssignedCollections({ folderType }: { folderType: string[] }) {
     return folderType.reduce((acc, collection) => {
       const collectionConfig = config.collections?.find((c) => c.slug === collection)
       if (collectionConfig) {
-        return [...acc, getTranslation(collectionConfig.labels.singular, i18n)]
+        return [...acc, getTranslation(collectionConfig.labels.plural, i18n)]
       }
       return acc
     }, [])
