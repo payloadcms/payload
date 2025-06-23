@@ -530,7 +530,6 @@ jobs:
         include:
           - template: blank
             database: mongodb
-            templateName: '@payloadcms/template-blank'
             hasTests: true
           - template: website
             database: mongodb
@@ -645,7 +644,7 @@ jobs:
 
       - name: Runs Template Int Tests
         if: matrix.hasTests == true
-        run: pnpm --filter ${{ matrix.templateName }} run test:int
+        run: pnpm --filter ${{ matrix.template }} run test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
@@ -654,11 +653,11 @@ jobs:
 
       - name: Start Template For E2Es
         if: matrix.hasTests == true
-        run: pnpm --filter ${{ matrix.templateName }} start &
+        run: pnpm --filter ${{ matrix.template }} start &
 
       - name: Runs Template E2E Tests
         if: matrix.hasTests == true
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.templateName }}.json pnpm --filter ${{ matrix.templateName }} test:e2e
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
