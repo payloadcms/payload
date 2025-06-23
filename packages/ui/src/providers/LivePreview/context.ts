@@ -16,6 +16,7 @@ export interface LivePreviewContextType {
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
+  isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
   isPopupOpen: boolean
   measuredDeviceSize: {
@@ -29,6 +30,7 @@ export interface LivePreviewContextType {
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
+  setIsLivePreviewing: (isLivePreviewing: boolean) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
@@ -54,6 +56,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   fieldSchemaJSON: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
+  isLivePreviewEnabled: undefined,
   isLivePreviewing: false,
   isPopupOpen: false,
   measuredDeviceSize: {
@@ -67,6 +70,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setBreakpoint: () => {},
   setHeight: () => {},
   setIframeHasLoaded: () => {},
+  setIsLivePreviewing: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewWindowType: () => {},
   setSize: () => {},

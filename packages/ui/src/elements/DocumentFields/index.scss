@@ -180,7 +180,7 @@
       }
     }
 
-    @container (max-width: 600px) {
+    @include small-break {
       &__sidebar-wrap {
         min-width: initial;
         width: 100%;

@@ -5,7 +5,7 @@ import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug } from '../index.js'
 import type {
-  LivePreviewConfig,
+  RootLivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
 } from './types.js'
@@ -44,7 +44,7 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type UnsanitizedClientConfig = {
   admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
   collections: ClientCollectionConfig[]
@@ -54,7 +54,7 @@ export type UnsanitizedClientConfig = {
 
 export type ClientConfig = {
   admin: {
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
@@ -122,6 +122,12 @@ export const createClientConfig = ({
 
           if (config.admin.livePreview.breakpoints) {
             clientConfig.admin.livePreview.breakpoints = config.admin.livePreview.breakpoints
+          }
+          if (config.admin.livePreview.collections) {
+            clientConfig.admin.livePreview.collections = config.admin.livePreview.collections
+          }
+          if (config.admin.livePreview.globals) {
+            clientConfig.admin.livePreview.globals = config.admin.livePreview.globals
           }
         }
         break

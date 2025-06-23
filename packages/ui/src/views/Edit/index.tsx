@@ -538,6 +538,7 @@ export function DefaultEditView({
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            isInDrawer={isInDrawer}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
@@ -622,7 +623,7 @@ export function DefaultEditView({
               />
               {AfterDocument}
             </div>
-            {isLivePreviewing && (
+            {isLivePreviewing && !isInDrawer && (
               <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
             )}
           </div>

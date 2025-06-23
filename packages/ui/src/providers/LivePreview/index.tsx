@@ -36,6 +36,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   url,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
+  const [isLivePreviewing, setIsLivePreviewing] = useState(true) // TODO: wire into prefs
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [listeningForMessages, setListeningForMessages] = useState(false)
@@ -176,7 +177,11 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
-        isLivePreviewing: true, // TODO: wire into prefs
+        isLivePreviewEnabled: Boolean(
+          config?.admin?.livePreview?.collections?.includes(entityConfig.slug) ||
+            entityConfig?.admin?.livePreview,
+        ),
+        isLivePreviewing,
         isPopupOpen,
         measuredDeviceSize,
         openPopupWindow,
@@ -186,6 +191,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,
+        setIsLivePreviewing,
         setMeasuredDeviceSize,
         setPreviewWindowType: handleWindowChange,
         setSize,

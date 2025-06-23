@@ -14,8 +14,10 @@ import React, { Fragment, useEffect } from 'react'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { EyeIcon } from '../../icons/Eye/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
@@ -31,9 +33,9 @@ import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { SaveButton } from '../SaveButton/index.js'
+import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
-import './index.scss'
 
 const baseClass = 'doc-controls'
 
@@ -55,6 +57,7 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  readonly isInDrawer?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
@@ -85,6 +88,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    isInDrawer,
     onDelete,
     onDrawerCreateNew,
     onDuplicate,
@@ -105,6 +109,8 @@ export const DocumentControls: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
   const globalConfig = getEntityConfig({ globalSlug: slug })
+
+  const { isLivePreviewEnabled, isLivePreviewing, setIsLivePreviewing } = useLivePreviewContext()
 
   const {
     admin: { dateFormat },
@@ -244,6 +250,15 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {BeforeDocumentControls}
+            {isLivePreviewEnabled && !isInDrawer && (
+              <button
+                className={`${baseClass}__live-preview-button`}
+                onClick={() => setIsLivePreviewing(!isLivePreviewing)}
+                type="button"
+              >
+                <EyeIcon />
+              </button>
+            )}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
