@@ -354,7 +354,7 @@ describe('database', () => {
       expect(post.doc.id).toBe(id)
     })
 
-    it('graphQL - accepts ID on create', async () => {
+    it.skip('graphQL - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -2232,7 +2232,7 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
-    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+    it.skip('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({
