@@ -18,7 +18,7 @@ concurrency:
 
 env:
   NODE_VERSION: 23.11.0
-  PNPM_VERSION: 10.12.1
+  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -163,6 +163,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -258,6 +259,7 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
