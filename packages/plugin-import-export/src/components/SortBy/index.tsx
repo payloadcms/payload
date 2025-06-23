@@ -33,7 +33,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   } | null>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
-  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
+  const fieldOptions = reduceFields({ excludeUnsortable: true, fields: collectionConfig?.fields })
 
   // Sync displayedValue with value from useField
   useEffect(() => {

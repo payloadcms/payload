@@ -51,7 +51,7 @@ export const Preview = () => {
             depth: 0,
             draft,
             limit: limit > 10 ? 10 : limit,
-            sort,
+            sort: sort ? sort : undefined,
             where,
           },
           {
