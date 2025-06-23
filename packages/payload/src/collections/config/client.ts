@@ -147,13 +147,15 @@ export const createClientCollectionConfig = ({
                 }
               }
               break
+
             case 'livePreview':
-              clientCollection.admin.livePreview = {} as LivePreviewConfig
+              clientCollection.admin.livePreview = {}
 
               if (collection.admin.livePreview?.breakpoints) {
                 clientCollection.admin.livePreview.breakpoints =
                   collection.admin.livePreview.breakpoints
               }
+
               break
 
             case 'preview':
@@ -220,6 +222,7 @@ export const createClientCollectionConfig = ({
         if (collection.auth.verify) {
           clientCollection.auth.verify = true
         }
+
         break
 
       case 'fields':
