@@ -88,9 +88,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
-export const serverOnlyLivePreviewProperties: readonly Partial<ServerOnlyLivePreviewProperties>[] =
-  ['url']
-
 export const createClientConfig = ({
   config,
   i18n,
