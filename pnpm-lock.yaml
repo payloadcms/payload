@@ -1715,6 +1715,9 @@ importers:
         specifier: 0.32.6
         version: 0.32.6
     devDependencies:
+      '@playwright/test':
+        specifier: 1.50.0
+        version: 1.50.0
       '@testing-library/react':
         specifier: 16.3.0
         version: 16.3.0(@testing-library/dom@10.4.0)(@types/react-dom@19.1.2(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
