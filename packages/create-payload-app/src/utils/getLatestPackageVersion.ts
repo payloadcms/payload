@@ -19,7 +19,7 @@ export async function getLatestPackageVersion({
 }) {
   try {
     const response = await fetch(`https://registry.npmjs.org/${packageName}`)
-    const data = await response.json()
+    const data = (await response.json()) as { 'dist-tags': { latest: string } }
     const latestVersion = data['dist-tags'].latest
 
     if (debug) {

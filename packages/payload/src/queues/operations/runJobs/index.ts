@@ -1,16 +1,13 @@
+import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
-import type {
-  BaseJob,
-  WorkflowConfig,
-  WorkflowHandler,
-  WorkflowTypes,
-} from '../../config/types/workflowTypes.js'
+import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/index.js'
+import { JobCancelledError } from '../../errors/index.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -19,9 +16,21 @@ import { runJSONJob } from './runJSONJob/index.js'
 
 export type RunJobsArgs = {
   /**
+   * If you want to run jobs from all queues, set this to true.
+   * If you set this to true, the `queue` property will be ignored.
+   *
+   * @default false
+   */
+  allQueues?: boolean
+  /**
    * ID of the job to run
    */
   id?: number | string
+  /**
+   * The maximum number of jobs to run in this invocation
+   *
+   * @default 10
+   */
   limit?: number
   overrideAccess?: boolean
   /**
@@ -32,6 +41,11 @@ export type RunJobsArgs = {
    * @default all jobs for all queues will be executed in FIFO order.
    */
   processingOrder?: Sort
+  /**
+   * If you want to run jobs from a specific queue, set this to the queue name.
+   *
+   * @default jobs from the `default` queue will be executed.
+   */
   queue?: string
   req: PayloadRequest
   /**
@@ -57,96 +71,106 @@ export type RunJobsResult = {
 export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const {
     id,
+    allQueues = false,
     limit = 10,
     overrideAccess,
     processingOrder,
-    queue,
+    queue = 'default',
     req,
+    req: {
+      payload,
+      payload: {
+        config: { jobs: jobsConfig },
+      },
+    },
     sequential,
     where: whereFromProps,
   } = args
 
   if (!overrideAccess) {
-    const hasAccess = await req.payload.config.jobs.access.run({ req })
+    const accessFn = jobsConfig?.access?.run ?? (() => true)
+    const hasAccess = await accessFn({ req })
     if (!hasAccess) {
       throw new Forbidden(req.t)
     }
   }
-  const where: Where = {
-    and: [
-      {
-        completedAt: {
-          exists: false,
-        },
+  const and: Where[] = [
+    {
+      completedAt: {
+        exists: false,
       },
-      {
-        hasError: {
-          not_equals: true,
-        },
+    },
+    {
+      hasError: {
+        not_equals: true,
       },
-      {
-        processing: {
-          equals: false,
-        },
+    },
+    {
+      processing: {
+        equals: false,
       },
-      {
-        or: [
-          {
-            waitUntil: {
-              exists: false,
-            },
+    },
+    {
+      or: [
+        {
+          waitUntil: {
+            exists: false,
           },
-          {
-            waitUntil: {
-              less_than: new Date().toISOString(),
-            },
+        },
+        {
+          waitUntil: {
+            less_than: new Date().toISOString(),
           },
-        ],
-      },
-    ],
-  }
+        },
+      ],
+    },
+  ]
 
-  if (queue) {
-    where.and?.push({
+  if (allQueues !== true) {
+    and.push({
       queue: {
-        equals: queue,
+        equals: queue ?? 'default',
       },
     })
   }
 
   if (whereFromProps) {
-    where.and?.push(whereFromProps)
+    and.push(whereFromProps)
   }
 
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
-  const jobsQuery: {
-    docs: BaseJob[]
-  } = { docs: [] }
+  let jobs: Job[] = []
 
   if (id) {
     // Only one job to run
-    jobsQuery.docs = [
-      (await updateJob({
-        id,
-        data: {
-          processing: true,
-        },
-        depth: req.payload.config.jobs.depth,
-        disableTransaction: true,
-        req,
-        returning: true,
-      }))!,
-    ]
+    const job = await updateJob({
+      id,
+      data: {
+        processing: true,
+      },
+      depth: jobsConfig.depth,
+      disableTransaction: true,
+      req,
+      returning: true,
+    })
+    if (job) {
+      jobs = [job]
+    }
   } else {
     let defaultProcessingOrder: Sort =
-      req.payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
+      payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
 
-    const processingOrderConfig = req.payload.config.jobs?.processingOrder
+    const processingOrderConfig = jobsConfig.processingOrder
     if (typeof processingOrderConfig === 'function') {
       defaultProcessingOrder = await processingOrderConfig(args)
     } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
-      if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
+      if (
+        !allQueues &&
+        queue &&
+        processingOrderConfig.queues &&
+        processingOrderConfig.queues[queue]
+      ) {
         defaultProcessingOrder = processingOrderConfig.queues[queue]
       } else if (processingOrderConfig.default) {
         defaultProcessingOrder = processingOrderConfig.default
@@ -158,17 +182,17 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
-      depth: req.payload.config.jobs.depth,
+      depth: jobsConfig.depth,
       disableTransaction: true,
       limit,
       req,
       returning: true,
       sort: processingOrder ?? defaultProcessingOrder,
-      where,
+      where: { and },
     })
 
     if (updatedDocs) {
-      jobsQuery.docs = updatedDocs
+      jobs = updatedDocs
     }
   }
 
@@ -176,7 +200,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
    * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
    */
-  const { existingJobs, newJobs } = jobsQuery.docs.reduce(
+  const { existingJobs, newJobs } = jobs.reduce(
     (acc, job) => {
       if (job.totalTried > 0) {
         acc.existingJobs.push(job)
@@ -185,146 +209,170 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
       return acc
     },
-    { existingJobs: [] as BaseJob[], newJobs: [] as BaseJob[] },
+    { existingJobs: [] as Job[], newJobs: [] as Job[] },
   )
 
-  if (!jobsQuery.docs.length) {
+  if (!jobs.length) {
     return {
       noJobsRemaining: true,
       remainingJobsFromQueried: 0,
     }
   }
 
-  if (jobsQuery?.docs?.length) {
-    req.payload.logger.info({
-      msg: `Running ${jobsQuery.docs.length} jobs.`,
-      new: newJobs?.length,
-      retrying: existingJobs?.length,
-    })
-  }
-  const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
-    ? []
-    : undefined
+  payload.logger.info({
+    msg: `Running ${jobs.length} jobs.`,
+    new: newJobs?.length,
+    retrying: existingJobs?.length,
+  })
 
-  const runSingleJob = async (job: BaseJob) => {
+  const successfullyCompletedJobs: (number | string)[] = []
+
+  const runSingleJob = async (
+    job: Job,
+  ): Promise<{
+    id: number | string
+    result: RunJobResult
+  }> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
-    const workflowConfig: WorkflowConfig<WorkflowTypes> = job.workflowSlug
-      ? req.payload.config.jobs.workflows.find(({ slug }) => slug === job.workflowSlug)!
-      : {
-          slug: 'singleTask',
-          handler: async ({ job, tasks }) => {
-            await tasks[job.taskSlug as string]!('1', {
-              input: job.input,
-            })
-          },
-        }
+    const workflowConfig: WorkflowConfig =
+      job.workflowSlug && jobsConfig.workflows?.length
+        ? jobsConfig.workflows.find(({ slug }) => slug === job.workflowSlug)!
+        : {
+            slug: 'singleTask',
+            handler: async ({ job, tasks }) => {
+              await tasks[job.taskSlug as string]!('1', {
+                input: job.input,
+              })
+            },
+          }
 
     if (!workflowConfig) {
-      return null // Skip jobs with no workflow configuration
+      return {
+        id: job.id,
+        result: {
+          status: 'error',
+        },
+      } // Skip jobs with no workflow configuration
     }
 
-    const updateJob = getUpdateJobFunction(job, jobReq)
+    try {
+      const updateJob = getUpdateJobFunction(job, jobReq)
 
-    // the runner will either be passed to the config
-    // OR it will be a path, which we will need to import via eval to avoid
-    // Next.js compiler dynamic import expression errors
-    let workflowHandler: WorkflowHandler<WorkflowTypes> | WorkflowJSON<WorkflowTypes>
+      // the runner will either be passed to the config
+      // OR it will be a path, which we will need to import via eval to avoid
+      // Next.js compiler dynamic import expression errors
+      let workflowHandler: WorkflowHandler | WorkflowJSON
+      if (
+        typeof workflowConfig.handler === 'function' ||
+        (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
+      ) {
+        workflowHandler = workflowConfig.handler
+      } else {
+        workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
 
-    if (
-      typeof workflowConfig.handler === 'function' ||
-      (typeof workflowConfig.handler === 'object' && Array.isArray(workflowConfig.handler))
-    ) {
-      workflowHandler = workflowConfig.handler
-    } else {
-      workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
+        if (!workflowHandler) {
+          const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+          const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
+          payload.logger.error(errorMessage)
 
-      if (!workflowHandler) {
-        const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
-        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-        req.payload.logger.error(errorMessage)
+          await updateJob({
+            error: {
+              error: errorMessage,
+            },
+            hasError: true,
+            processing: false,
+          })
 
-        await updateJob({
-          error: {
-            error: errorMessage,
-          },
-          hasError: true,
-          processing: false,
+          return {
+            id: job.id,
+            result: {
+              status: 'error-reached-max-retries',
+            },
+          }
+        }
+      }
+
+      if (typeof workflowHandler === 'function') {
+        const result = await runJob({
+          job,
+          req: jobReq,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
         })
 
-        return
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
+      } else {
+        const result = await runJSONJob({
+          job,
+          req: jobReq,
+          updateJob,
+          workflowConfig,
+          workflowHandler,
+        })
+
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
+        }
+
+        return { id: job.id, result }
       }
-    }
-
-    if (typeof workflowHandler === 'function') {
-      const result = await runJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error' && jobsToDelete) {
-        jobsToDelete.push(job.id)
+    } catch (error) {
+      if (error instanceof JobCancelledError) {
+        return {
+          id: job.id,
+          result: {
+            status: 'error-reached-max-retries',
+          },
+        }
       }
-
-      return { id: job.id, result }
-    } else {
-      const result = await runJSONJob({
-        job,
-        req: jobReq,
-        updateJob,
-        workflowConfig,
-        workflowHandler,
-      })
-
-      if (result.status !== 'error' && jobsToDelete) {
-        jobsToDelete.push(job.id)
-      }
-
-      return { id: job.id, result }
+      throw error
     }
   }
 
   let resultsArray: { id: number | string; result: RunJobResult }[] = []
   if (sequential) {
-    for (const job of jobsQuery.docs) {
+    for (const job of jobs) {
       const result = await runSingleJob(job)
-      if (result !== null) {
-        resultsArray.push(result!)
+      if (result) {
+        resultsArray.push(result)
       }
     }
   } else {
-    const jobPromises = jobsQuery.docs.map(runSingleJob)
+    const jobPromises = jobs.map(runSingleJob)
     resultsArray = (await Promise.all(jobPromises)) as {
       id: number | string
       result: RunJobResult
     }[]
   }
 
-  if (jobsToDelete && jobsToDelete.length > 0) {
+  if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {
     try {
-      if (req.payload.config.jobs.runHooks) {
-        await req.payload.delete({
+      if (jobsConfig.runHooks) {
+        await payload.delete({
           collection: jobsCollectionSlug,
           depth: 0, // can be 0 since we're not returning anything
           disableTransaction: true,
-          where: { id: { in: jobsToDelete } },
+          where: { id: { in: successfullyCompletedJobs } },
         })
       } else {
-        await req.payload.db.deleteMany({
+        await payload.db.deleteMany({
           collection: jobsCollectionSlug,
-          where: { id: { in: jobsToDelete } },
+          where: { id: { in: successfullyCompletedJobs } },
         })
       }
     } catch (err) {
-      req.payload.logger.error({
+      payload.logger.error({
         err,
-        msg: `failed to delete jobs ${jobsToDelete.join(', ')} on complete`,
+        msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
       })
     }
   }

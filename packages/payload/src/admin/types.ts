@@ -566,12 +566,14 @@ export type DocumentSlots = {
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Upload?: React.ReactNode
+  UploadControls?: React.ReactNode
 }
 
 export type {
   BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
+  GetFolderResultsComponentAndDataArgs,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
@@ -623,6 +625,7 @@ export type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewProps,
+  RenderDocumentVersionsProperties,
 } from './views/document.js'
 
 export type {

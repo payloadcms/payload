@@ -83,7 +83,7 @@ export function findConverterForNode<
 
   if (!disableIndent && (!Array.isArray(disableIndent) || !disableIndent?.includes(node.type))) {
     if ('indent' in node && node.indent && node.type !== 'listitem') {
-      style['padding-inline-start'] = `${Number(node.indent) * 2}em`
+      style['padding-inline-start'] = `${Number(node.indent) * 2}rem`
     }
   }
 

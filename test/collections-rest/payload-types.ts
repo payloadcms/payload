@@ -75,6 +75,7 @@ export interface Config {
     'custom-id-number': CustomIdNumber;
     'error-on-hooks': ErrorOnHook;
     endpoints: Endpoint;
+    'disabled-bulk-edit-docs': DisabledBulkEditDoc;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     'custom-id-number': CustomIdNumberSelect<false> | CustomIdNumberSelect<true>;
     'error-on-hooks': ErrorOnHooksSelect<false> | ErrorOnHooksSelect<true>;
     endpoints: EndpointsSelect<false> | EndpointsSelect<true>;
+    'disabled-bulk-edit-docs': DisabledBulkEditDocsSelect<false> | DisabledBulkEditDocsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -249,6 +251,16 @@ export interface Endpoint {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-edit-docs".
+ */
+export interface DisabledBulkEditDoc {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -302,6 +314,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'endpoints';
         value: string | Endpoint;
+      } | null)
+    | ({
+        relationTo: 'disabled-bulk-edit-docs';
+        value: string | DisabledBulkEditDoc;
       } | null)
     | ({
         relationTo: 'users';
@@ -443,6 +459,15 @@ export interface ErrorOnHooksSelect<T extends boolean = true> {
  * via the `definition` "endpoints_select".
  */
 export interface EndpointsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-edit-docs_select".
+ */
+export interface DisabledBulkEditDocsSelect<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }

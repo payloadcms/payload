@@ -27,6 +27,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
@@ -34,8 +35,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
+import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 
 const baseClass = 'collection-edit'
 
@@ -51,6 +52,7 @@ export function DefaultEditView({
   SaveButton,
   SaveDraftButton,
   Upload: CustomUpload,
+  UploadControls,
 }: DocumentViewClientProps) {
   const {
     id,
@@ -581,13 +583,16 @@ export function DefaultEditView({
                   )}
                   {upload && (
                     <React.Fragment>
-                      {CustomUpload || (
-                        <Upload
-                          collectionSlug={collectionConfig.slug}
-                          initialState={initialState}
-                          uploadConfig={upload}
-                        />
-                      )}
+                      <UploadControlsProvider>
+                        {CustomUpload || (
+                          <Upload
+                            collectionSlug={collectionConfig.slug}
+                            initialState={initialState}
+                            uploadConfig={upload}
+                            UploadControls={UploadControls}
+                          />
+                        )}
+                      </UploadControlsProvider>
                     </React.Fragment>
                   )}
                 </Fragment>

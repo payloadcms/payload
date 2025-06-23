@@ -628,6 +628,69 @@ describe('Sort', () => {
           parseInt(docDuplicatedAfterReorder._order!, 16),
         )
       })
+
+      it('should not break with existing base 62 digits', async () => {
+        const collection = orderableSlug
+        // create seed docs with aa, aA, AA
+        const aa = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aa',
+            _order: 'aa',
+          },
+        })
+        const aA = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 aA',
+            _order: 'aA',
+          },
+        })
+        const AA = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 AA',
+            _order: 'AA',
+          },
+        })
+
+        const orderableDoc = await payload.create({
+          collection,
+          data: {
+            title: 'Base62 new',
+          },
+        })
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [orderableDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: aA.id,
+              key: aA._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const { docs } = await payload.find({
+          collection,
+          sort: '-_order',
+          where: {
+            title: {
+              contains: 'Base62 ',
+            },
+          },
+        })
+
+        expect(docs[0]?.id).toStrictEqual(aa.id)
+        expect(docs[1]?.id).toStrictEqual(aA.id)
+        expect(docs[2]?.id).toStrictEqual(orderableDoc.id)
+        expect(docs[3]?.id).toStrictEqual(AA.id)
+      })
     })
 
     describe('Orderable join', () => {

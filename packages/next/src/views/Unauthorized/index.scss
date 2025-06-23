@@ -6,5 +6,9 @@
       margin: 0;
       margin-block: 0;
     }
+
+    &--with-gutter {
+      margin-top: var(--base);
+    }
   }
 }

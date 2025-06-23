@@ -209,6 +209,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data: result,
             doc: result,
             operation: 'update',
             previousDoc: prevDocWithLocales,
