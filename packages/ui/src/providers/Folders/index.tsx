@@ -647,9 +647,15 @@ export function FolderProvider({
         if (isSelected) {
           return true
         } else if (item.relationTo === folderCollectionSlug) {
+          if (
+            !item.value.folderType ||
+            (Array.isArray(item.value.folderType) && item.value.folderType.length === 0)
+          ) {
+            return false
+          }
           // Disable folders if they do not support ALL of the selected collections
-          return Object.entries(selectedCollectionCounter).some(([slug, count]) => {
-            return !count || !item.value.folderType.includes(slug)
+          return Object.entries(selectedCollectionCounter).some(([slug]) => {
+            return !item.value.folderType.includes(slug)
           })
         } else {
           return !selectedCollectionCounter?.[item.relationTo]
