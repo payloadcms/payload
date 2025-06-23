@@ -79,7 +79,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
     (e, disableModifyingForm = false) => {
       // TODO:
       // There are no built-in fields that pass events into `e`.
-      // Remove in the next major version.
+      // Remove this check in the next major version.
       const isEvent =
         e &&
         typeof e === 'object' &&
