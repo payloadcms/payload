@@ -9,13 +9,14 @@ import type { Props } from './types.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useSidebar } from '../../providers/Sidebar/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
-import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
+import { Tooltip } from '../Tooltip/index.js'
 import { useRelatedCollections } from './useRelatedCollections.js'
 
 const baseClass = 'relationship-add-new'
@@ -39,6 +40,10 @@ export const AddNewRelation: React.FC<Props> = ({
   const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
     !relatedToMany ? relatedCollections[0] : undefined,
   )
+
+  // If this field is in a sidebar we want to make sure it's using the sidebar ref for boundingRef in the Popup
+  // This helps us avoid any overflow related issues
+  const { ref: sidebarRef } = useSidebar()
 
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
@@ -181,6 +186,7 @@ export const AddNewRelation: React.FC<Props> = ({
         {relatedCollections.length > 1 && (
           <Fragment>
             <Popup
+              boundingRef={sidebarRef}
               button={
                 ButtonFromProps ? (
                   ButtonFromProps
