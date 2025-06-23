@@ -5,9 +5,9 @@ import type { Collection } from '../config/types.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { sanitizeWhereQuery } from '../../utilities/sanitizeWhereQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {

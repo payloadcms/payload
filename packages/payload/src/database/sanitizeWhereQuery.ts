@@ -45,7 +45,10 @@ export const sanitizeWhereQuery = ({
         currentFields = field.flattenedFields
       }
 
-      if (field.type === 'relationship' && typeof field.relationTo === 'string') {
+      if (
+        (field.type === 'relationship' || field.type === 'upload') &&
+        typeof field.relationTo === 'string'
+      ) {
         const relatedCollection = payload.collections[field.relationTo]
         if (relatedCollection) {
           currentFields = relatedCollection.config.flattenedFields
