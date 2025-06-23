@@ -370,13 +370,7 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        <LivePreviewProvider
-          breakpoints={breakpoints}
-          // isPopupOpen={isPopupOpen}
-          // openPopupWindow={openPopupWindow}
-          // popupRef={popupRef}
-          url={livePreviewURL}
-        >
+        <LivePreviewProvider breakpoints={breakpoints} url={livePreviewURL}>
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}

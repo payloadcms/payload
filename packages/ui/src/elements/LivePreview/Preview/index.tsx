@@ -24,6 +24,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     fieldSchemaJSON,
     iframeHasLoaded,
     iframeRef,
+    isLivePreviewing,
     popupRef,
     previewWindowType,
     setIframeHasLoaded,
@@ -113,6 +114,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
       <div
         className={[
           baseClass,
+          isLivePreviewing && `${baseClass}--is-live-previewing`,
           breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
         ]
           .filter(Boolean)

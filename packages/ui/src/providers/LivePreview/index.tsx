@@ -5,8 +5,7 @@ import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { usePopupWindow } from '../../hooks/usePopupWindow.js'
-
+import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
@@ -21,22 +20,21 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
-  isPopupOpen?: boolean
-  openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
-  popupRef?: React.RefObject<Window>
   url?: string
 }
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints,
   children,
-  isPopupOpen,
-  openPopupWindow,
-  popupRef,
   url,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(true) // TODO: wire into prefs
+
+  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
+    eventType: 'payload-live-preview',
+    url,
+  })
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [listeningForMessages, setListeningForMessages] = useState(false)

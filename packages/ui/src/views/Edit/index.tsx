@@ -123,7 +123,7 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
-  const { isLivePreviewing, previewWindowType } = useLivePreviewContext()
+  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -449,7 +449,7 @@ export function DefaultEditView({
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,
-        isLivePreviewing && `${baseClass}--live-preview-enabled`,
+        isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -623,7 +623,7 @@ export function DefaultEditView({
               />
               {AfterDocument}
             </div>
-            {isLivePreviewing && !isInDrawer && (
+            {isLivePreviewEnabled && !isInDrawer && (
               <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
             )}
           </div>

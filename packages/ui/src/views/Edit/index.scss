@@ -6,7 +6,7 @@
     display: flex;
     --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04) 0%, transparent 100%);
 
-    &--live-preview-enabled {
+    &--is-live-previewing {
       .collection-edit__main {
         width: 40%;
 

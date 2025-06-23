@@ -254,9 +254,10 @@ export const DocumentControls: React.FC<{
               <button
                 className={`${baseClass}__live-preview-button`}
                 onClick={() => setIsLivePreviewing(!isLivePreviewing)}
+                title={t('general:livePreview')}
                 type="button"
               >
-                <EyeIcon />
+                <EyeIcon active={isLivePreviewing} />
               </button>
             )}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
