@@ -92,7 +92,6 @@ export const createFolderCollection = ({
         },
         hasMany: true,
         options: collectionOptions,
-        required: true,
       },
     ],
     hooks: {

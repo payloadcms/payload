@@ -49,16 +49,19 @@ export const buildFolderField = ({
         }
 
         if (parentFolder && collectionSlug) {
-          const parentAssignedCollectionSlugs: string[] =
-            (parentFolder.folderType as string[]) || []
+          const parentFolderTypes: string[] = (parentFolder.folderType as string[]) || []
+
+          // if the parent folder has no folder types, it accepts all collections
+          if (parentFolderTypes.length === 0) {
+            return true
+          }
 
           // validation for a folder document
           if (collectionSlug === folderSlug) {
-            // ensure the parent accepts ALL assigned collections
-            const folderAssignedCollections: string[] =
-              'folderType' in data ? (data.folderType as string[]) : []
-            const invalidSlugs = folderAssignedCollections.filter((assignedCollection: string) => {
-              return !parentAssignedCollectionSlugs.includes(assignedCollection)
+            // ensure the parent accepts ALL folder types
+            const folderTypes: string[] = 'folderType' in data ? (data.folderType as string[]) : []
+            const invalidSlugs = folderTypes.filter((validCollectionSlug: string) => {
+              return !parentFolderTypes.includes(validCollectionSlug)
             })
             if (invalidSlugs.length === 0) {
               return true
@@ -68,7 +71,7 @@ export const buildFolderField = ({
           }
 
           // validation for a non-folder document
-          if (parentAssignedCollectionSlugs.includes(collectionSlug)) {
+          if (parentFolderTypes.includes(collectionSlug)) {
             return true
           } else {
             return `Folder with ID ${newID} does not allow documents of type ${collectionSlug}`
