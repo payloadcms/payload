@@ -106,9 +106,29 @@ export const getFolderResultsComponentAndData = async ({
         folderWhere,
         folderAssignedCollections.length && payload.config.folders.enableCollectionScoping
           ? {
-              folderType: {
-                in: folderAssignedCollections,
-              },
+              or: [
+                {
+                  folderType: {
+                    in: folderAssignedCollections,
+                  },
+                },
+                // if the folderType is not set, it means it accepts all collections and should appear in the results
+                {
+                  folderType: {
+                    exists: false,
+                  },
+                },
+                {
+                  folderType: {
+                    equals: [],
+                  },
+                },
+                {
+                  folderType: {
+                    equals: null,
+                  },
+                },
+              ],
             }
           : undefined,
       ])
