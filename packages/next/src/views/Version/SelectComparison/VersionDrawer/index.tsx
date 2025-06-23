@@ -3,6 +3,7 @@ import {
   Drawer,
   LoadingOverlay,
   toast,
+  useDocumentInfo,
   useEditDepth,
   useModal,
   useServerFunctions,
@@ -29,6 +30,7 @@ export const VersionDrawerContent: React.FC<{
   drawerSlug: string
 }> = (props) => {
   const { collectionSlug, docID, drawerSlug } = props
+  const { isTrashed } = useDocumentInfo()
   const { closeModal } = useModal()
   const searchParams = useSearchParams()
   const prevSearchParams = useRef(searchParams)
@@ -51,7 +53,13 @@ export const VersionDrawerContent: React.FC<{
             docID,
             drawerSlug,
             paramsOverride: {
-              segments: ['collections', collectionSlug, String(docID), 'versions'],
+              segments: [
+                'collections',
+                collectionSlug,
+                ...(isTrashed ? ['trash'] : []),
+                String(docID),
+                'versions',
+              ],
             },
             redirectAfterDelete: false,
             redirectAfterDuplicate: false,
@@ -75,7 +83,7 @@ export const VersionDrawerContent: React.FC<{
 
       void fetchDocumentView()
     },
-    [closeModal, collectionSlug, drawerSlug, renderDocument, searchParams, t],
+    [closeModal, collectionSlug, drawerSlug, isTrashed, renderDocument, searchParams, t],
   )
 
   useEffect(() => {
