@@ -5,7 +5,7 @@ import type { EditViewProps } from 'payload'
 import React from 'react'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
-import { LinkIcon } from '../../../../icons/Link/index.js'
+import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
 import { XIcon } from '../../../../icons/X/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -118,9 +118,10 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           e.preventDefault()
           setPreviewWindowType('popup')
         }}
+        title="Open in new window"
         type="button"
       >
-        <LinkIcon />
+        <ExternalLinkIcon />
       </a>
     </div>
   )

@@ -15,9 +15,6 @@ export function PreviewButton(props: PreviewButtonClientProps) {
     <Button
       buttonStyle="secondary"
       className={baseClass}
-      icon={'link'}
-      iconPosition="left"
-      // disabled={disabled}
       onClick={() =>
         generatePreviewURL({
           openPreviewWindow: true,

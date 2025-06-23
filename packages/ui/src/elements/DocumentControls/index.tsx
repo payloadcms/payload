@@ -14,7 +14,6 @@ import React, { Fragment, useEffect } from 'react'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
-import { EyeIcon } from '../../icons/Eye/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
@@ -27,15 +26,16 @@ import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { SaveButton } from '../SaveButton/index.js'
-import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
+import './index.scss'
 
 const baseClass = 'doc-controls'
 
@@ -185,7 +185,6 @@ export const DocumentControls: React.FC<{
               )}
             </div>
           ) : null}
-
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -250,16 +249,7 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {BeforeDocumentControls}
-            {isLivePreviewEnabled && !isInDrawer && (
-              <button
-                className={`${baseClass}__live-preview-button`}
-                onClick={() => setIsLivePreviewing(!isLivePreviewing)}
-                title={t('general:livePreview')}
-                type="button"
-              >
-                <EyeIcon active={isLivePreviewing} />
-              </button>
-            )}
+            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}

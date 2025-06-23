@@ -1,0 +1,23 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .live-preview-toggler {
+    background: none;
+    border: none;
+    border: 1px solid currentColor;
+    border-radius: var(--style-radius-s);
+    line-height: var(--btn-line-height);
+    font-size: var(--base-body-size);
+    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.4);
+    cursor: pointer;
+    transition-property: border, color, background;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:hover,
+    &--active {
+      background-color: var(--theme-elevation-1000);
+      color: var(--theme-elevation-0);
+    }
+  }
+}
