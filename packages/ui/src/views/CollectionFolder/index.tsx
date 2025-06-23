@@ -264,8 +264,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
               !smallBreak && (
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
-                  disableBulkEdit={disableBulkEdit}
                   folderAssignedCollections={[collectionSlug]}
+                  disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
                   key="list-selection"
                 />
               ),
