@@ -330,7 +330,7 @@ describe('Query Presets', () => {
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
-    const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+    const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
       hasText: exactText('ID'),
     })
 
@@ -338,7 +338,7 @@ describe('Query Presets', () => {
     await clickListMenuItem({ page, menuItemLabel: 'Reset' })
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/column-selector__column--active/)
+    await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
   test('should only enter modified state when changes are made to an active preset', async () => {
@@ -364,6 +364,7 @@ describe('Query Presets', () => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
+    await openListMenu({ page })
     await clickListMenuItem({ page, menuItemLabel: 'Edit' })
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
@@ -398,6 +399,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
+    await openListMenu({ page })
     await clickListMenuItem({ page, menuItemLabel: 'Create New' })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()

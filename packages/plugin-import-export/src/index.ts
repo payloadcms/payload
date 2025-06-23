@@ -1,8 +1,9 @@
-import type { Config, JobsConfig } from 'payload'
+import type { Config } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
-import type { ImportExportPluginConfig } from './types.js'
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
+import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
 import { getExportCollection } from './getExportCollection.js'
@@ -27,11 +28,7 @@ export const importExportPlugin =
     )
 
     // inject the createExport job into the config
-    config.jobs =
-      config.jobs ||
-      ({
-        tasks: [getCreateCollectionExportTask(config)],
-      } as unknown as JobsConfig) // cannot type jobs config inside of plugins
+    ;((config.jobs ??= {}).tasks ??= []).push(getCreateCollectionExportTask(config))
 
     let collectionsToUpdate = config.collections
 
@@ -51,12 +48,6 @@ export const importExportPlugin =
       if (!components.listMenuItems) {
         components.listMenuItems = []
       }
-      if (!components.edit) {
-        components.edit = {}
-      }
-      if (!components.edit.SaveButton) {
-        components.edit.SaveButton = '@payloadcms/plugin-import-export/rsc#ExportSaveButton'
-      }
       components.listMenuItems.push({
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
@@ -70,7 +61,31 @@ export const importExportPlugin =
       config.i18n = {}
     }
 
-    config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
+    // config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
+
+    /**
+     * Merge plugin translations
+     */
+    const simplifiedTranslations = Object.entries(translations).reduce(
+      (acc, [key, value]) => {
+        acc[key] = value.translations
+        return acc
+      },
+      {} as Record<string, PluginDefaultTranslationsObject>,
+    )
+
+    config.i18n = {
+      ...config.i18n,
+      translations: deepMergeSimple(simplifiedTranslations, config.i18n?.translations ?? {}),
+    }
 
     return config
   }
+
+declare module 'payload' {
+  export interface FieldCustom {
+    'plugin-import-export'?: {
+      toCSV?: ToCSVFunction
+    }
+  }
+}

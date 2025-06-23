@@ -1,14 +1,9 @@
 import type { Payload } from 'payload'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
 import {
   collection1Slug,
   collection2Slug,
-  collectionSlugs,
   podcastCollectionSlug,
   relationOneSlug,
   relationRestrictedSlug,
@@ -17,9 +12,6 @@ import {
   slug,
   videoCollectionSlug,
 } from './slugs.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -178,14 +170,4 @@ export const seed = async (_payload: Payload) => {
       },
     })
   }
-}
-
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-  })
 }

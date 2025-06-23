@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -11,7 +10,6 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
@@ -56,7 +54,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
 
     // If errors are disabled, and access returns false, return null
     if (accessResults === false) {
-      return null
+      return null!
     }
 
     const hasWhereAccess = typeof accessResults === 'object'
@@ -71,7 +69,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
       global: globalConfig.slug,
       limit: 1,
-      locale,
+      locale: locale!,
       req,
       select,
       where: combineQueries({ id: { equals: id } }, accessResults),
@@ -81,7 +79,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findGlobalVersionsArgs.where.and[0].id) {
+    if (!findGlobalVersionsArgs.where?.and?.[0]?.id) {
       throw new NotFound(req.t)
     }
 
@@ -96,7 +94,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
         }
       }
 
-      return null
+      return null!
     }
 
     // Clone the result - it may have come back memoized
@@ -133,17 +131,17 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       collection: null,
       context: req.context,
       currentDepth,
-      depth,
+      depth: depth!,
       doc: result.version,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select: typeof select?.version === 'object' ? select.version : undefined,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

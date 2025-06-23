@@ -195,71 +195,61 @@ export const useQueryPresets = ({
 
   // Memoize so that components aren't re-rendered on query and column changes
   const queryPresetMenuItems = useMemo(() => {
-    const menuItems: React.ReactNode[] = [
+    const hasModifiedPreset = activePreset && modified
+
+    return [
       <PopupListGroupLabel
         key="preset-group-label"
         label={getTranslation(presetConfig?.labels?.plural, i18n)}
       />,
-    ]
-
-    if (activePreset && modified) {
-      menuItems.push(
-        <PopupList.Button
-          onClick={async () => {
-            await refineListData(
-              {
-                columns: transformColumnsToSearchParams(activePreset.columns),
-                where: activePreset.where,
-              },
-              false,
-            )
-          }}
-        >
-          {t('general:reset')}
-        </PopupList.Button>,
-      )
-
-      if (queryPresetPermissions.update) {
-        menuItems.push(
+      <PopupList.ButtonGroup key="preset-group-buttons">
+        {hasModifiedPreset && (
+          <PopupList.Button
+            onClick={async () => {
+              await refineListData(
+                {
+                  columns: transformColumnsToSearchParams(activePreset.columns),
+                  where: activePreset.where,
+                },
+                false,
+              )
+            }}
+          >
+            {t('general:reset')}
+          </PopupList.Button>
+        )}
+        {hasModifiedPreset && queryPresetPermissions.update && (
           <PopupList.Button
             onClick={async () => {
               await saveCurrentChanges()
             }}
           >
-            {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
-          </PopupList.Button>,
-        )
-      }
-    }
-
-    menuItems.push(
-      <PopupList.Button
-        onClick={() => {
-          openCreateNewDrawer()
-        }}
-      >
-        {t('general:createNew')}
-      </PopupList.Button>,
-    )
-
-    if (activePreset && queryPresetPermissions?.delete) {
-      menuItems.push(
-        <Fragment>
-          <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
-            {t('general:delete')}
+            {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
           </PopupList.Button>
-          <PopupList.Button
-            onClick={() => {
-              openDocumentDrawer()
-            }}
-          >
-            {t('general:edit')}
-          </PopupList.Button>
-        </Fragment>,
-      )
-    }
-
-    return menuItems
+        )}
+        <PopupList.Button
+          onClick={() => {
+            openCreateNewDrawer()
+          }}
+        >
+          {t('general:createNew')}
+        </PopupList.Button>
+        {activePreset && queryPresetPermissions?.delete && (
+          <>
+            <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
+              {t('general:delete')}
+            </PopupList.Button>
+            <PopupList.Button
+              onClick={() => {
+                openDocumentDrawer()
+              }}
+            >
+              {t('general:edit')}
+            </PopupList.Button>
+          </>
+        )}
+      </PopupList.ButtonGroup>,
+    ]
   }, [
     activePreset,
     queryPresetPermissions?.delete,

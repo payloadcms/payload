@@ -19,6 +19,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
 import { addJoinTable } from './addJoinTable.js'
 import { getTableAlias } from './getTableAlias.js'
 
@@ -179,6 +180,9 @@ export const getTableColumnFromPath = ({
         })
       }
       case 'blocks': {
+        if (adapter.blocksAsJSON) {
+          break
+        }
         let blockTableColumn: TableColumn
         let newTableName: string
 
@@ -193,8 +197,9 @@ export const getTableColumnFromPath = ({
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as FlattenedBlock | undefined)
 
-            newTableName = adapter.tableNameMap.get(
-              `${tableName}_blocks_${toSnakeCase(block.slug)}`,
+            newTableName = resolveBlockTableName(
+              block,
+              adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
             const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
@@ -220,7 +225,11 @@ export const getTableColumnFromPath = ({
         const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
-          newTableName = adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`)
+          newTableName = resolveBlockTableName(
+            block,
+            adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
+          )
+
           constraintPath = `${constraintPath}${field.name}.%.`
 
           let result: TableColumn
@@ -274,7 +283,7 @@ export const getTableColumnFromPath = ({
               tableName: newTableName,
               value,
             })
-          } catch (error) {
+          } catch (_) {
             // this is fine, not every block will have the field
           }
           if (!result) {
@@ -381,6 +390,18 @@ export const getTableColumnFromPath = ({
             table: aliasRelationshipTable,
           })
 
+          if (newCollectionPath === 'id') {
+            return {
+              columnName: 'parent',
+              constraints,
+              field: {
+                name: 'id',
+                type: adapter.idType === 'uuid' ? 'text' : 'number',
+              } as NumberField | TextField,
+              table: aliasRelationshipTable,
+            }
+          }
+
           const relationshipConfig = adapter.payload.collections[field.collection].config
           const relationshipTableName = adapter.tableNameMap.get(
             toSnakeCase(relationshipConfig.slug),
@@ -430,6 +451,18 @@ export const getTableColumnFromPath = ({
           ),
           table: newAliasTable,
         })
+
+        if (newCollectionPath === 'id') {
+          return {
+            columnName: 'id',
+            constraints,
+            field: {
+              name: 'id',
+              type: adapter.idType === 'uuid' ? 'text' : 'number',
+            } as NumberField | TextField,
+            table: newAliasTable,
+          }
+        }
 
         return getTableColumnFromPath({
           adapter,

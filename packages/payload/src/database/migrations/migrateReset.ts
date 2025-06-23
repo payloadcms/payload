@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -21,6 +20,8 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
 
   const req = await createLocalReq({}, payload)
 
+  migrationFiles.reverse()
+
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
     // Create or update migration in database
@@ -32,7 +33,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       try {
         const start = Date.now()
         await initTransaction(req)
-        const session = payload.db.sessions?.[await req.transactionID]
+        const session = payload.db.sessions?.[await req.transactionID!]
         await migration.down({ payload, req, session })
         await payload.delete({
           collection: 'payload-migrations',

@@ -150,6 +150,18 @@ export const buildSortParam = ({
     sort = [sort]
   }
 
+  // In the case of Mongo, when sorting by a field that is not unique, the results are not guaranteed to be in the same order each time.
+  // So we add a fallback sort to ensure that the results are always in the same order.
+  let fallbackSort = '-id'
+
+  if (timestamps) {
+    fallbackSort = '-createdAt'
+  }
+
+  if (!(sort.includes(fallbackSort) || sort.includes(fallbackSort.replace('-', '')))) {
+    sort.push(fallbackSort)
+  }
+
   const sorting = sort.reduce<Record<string, string>>((acc, item) => {
     let sortProperty: string
     let sortDirection: SortDirection

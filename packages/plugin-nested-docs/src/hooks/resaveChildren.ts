@@ -6,7 +6,7 @@ import type {
   ValidationError,
 } from 'payload'
 
-import { APIError } from 'payload'
+import { APIError, ValidationErrorName } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -96,7 +96,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         req.payload.logger.error(err)
 
         if (
-          (err as ValidationError)?.name === 'ValidationError' &&
+          (err as ValidationError)?.name === ValidationErrorName &&
           (err as ValidationError)?.data?.errors?.length
         ) {
           throw new APIError(

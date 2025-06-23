@@ -142,32 +142,33 @@ import { CallToAction } from '../blocks/CallToAction'
 
 Here's an overview of all the included features:
 
-| Feature Name                    | Included by default | Description                                                                                                                                                                         |
-| ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`BoldFeature`**               | Yes                 | Handles the bold text format                                                                                                                                                        |
-| **`ItalicFeature`**             | Yes                 | Handles the italic text format                                                                                                                                                      |
-| **`UnderlineFeature`**          | Yes                 | Handles the underline text format                                                                                                                                                   |
-| **`StrikethroughFeature`**      | Yes                 | Handles the strikethrough text format                                                                                                                                               |
-| **`SubscriptFeature`**          | Yes                 | Handles the subscript text format                                                                                                                                                   |
-| **`SuperscriptFeature`**        | Yes                 | Handles the superscript text format                                                                                                                                                 |
-| **`InlineCodeFeature`**         | Yes                 | Handles the inline-code text format                                                                                                                                                 |
-| **`ParagraphFeature`**          | Yes                 | Handles paragraphs. Since they are already a key feature of lexical itself, this Feature mainly handles the Slash and Add-Block menu entries for paragraphs                         |
-| **`HeadingFeature`**            | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
-| **`AlignFeature`**              | Yes                 | Allows you to align text left, centered and right                                                                                                                                   |
-| **`IndentFeature`**             | Yes                 | Allows you to indent text with the tab key                                                                                                                                          |
-| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ul)                                                                                                                                                           |
-| **`OrderedListFeature`**        | Yes                 | Adds ordered lists (ol)                                                                                                                                                             |
-| **`ChecklistFeature`**          | Yes                 | Adds checklists                                                                                                                                                                     |
-| **`LinkFeature`**               | Yes                 | Allows you to create internal and external links                                                                                                                                    |
-| **`RelationshipFeature`**       | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
-| **`BlockquoteFeature`**         | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
-| **`UploadFeature`**             | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
-| **`HorizontalRuleFeature`**     | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                 |
-| **`InlineToolbarFeature`**      | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                        |
-| **`FixedToolbarFeature`**       | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                       |
-| **`BlocksFeature`**             | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
-| **`TreeViewFeature`**           | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                |
-| **`EXPERIMENTAL_TableFeature`** | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
+| Feature Name                        | Included by default | Description                                                                                                                                                                         |
+| ----------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BoldFeature`**                   | Yes                 | Handles the bold text format                                                                                                                                                        |
+| **`ItalicFeature`**                 | Yes                 | Handles the italic text format                                                                                                                                                      |
+| **`UnderlineFeature`**              | Yes                 | Handles the underline text format                                                                                                                                                   |
+| **`StrikethroughFeature`**          | Yes                 | Handles the strikethrough text format                                                                                                                                               |
+| **`SubscriptFeature`**              | Yes                 | Handles the subscript text format                                                                                                                                                   |
+| **`SuperscriptFeature`**            | Yes                 | Handles the superscript text format                                                                                                                                                 |
+| **`InlineCodeFeature`**             | Yes                 | Handles the inline-code text format                                                                                                                                                 |
+| **`ParagraphFeature`**              | Yes                 | Handles paragraphs. Since they are already a key feature of lexical itself, this Feature mainly handles the Slash and Add-Block menu entries for paragraphs                         |
+| **`HeadingFeature`**                | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
+| **`AlignFeature`**                  | Yes                 | Allows you to align text left, centered and right                                                                                                                                   |
+| **`IndentFeature`**                 | Yes                 | Allows you to indent text with the tab key                                                                                                                                          |
+| **`UnorderedListFeature`**          | Yes                 | Adds unordered lists (ul)                                                                                                                                                           |
+| **`OrderedListFeature`**            | Yes                 | Adds ordered lists (ol)                                                                                                                                                             |
+| **`ChecklistFeature`**              | Yes                 | Adds checklists                                                                                                                                                                     |
+| **`LinkFeature`**                   | Yes                 | Allows you to create internal and external links                                                                                                                                    |
+| **`RelationshipFeature`**           | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
+| **`BlockquoteFeature`**             | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
+| **`UploadFeature`**                 | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
+| **`HorizontalRuleFeature`**         | Yes                 | Horizontal rules / separators. Basically displays an `<hr>` element                                                                                                                 |
+| **`InlineToolbarFeature`**          | Yes                 | The inline toolbar is the floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                        |
+| **`FixedToolbarFeature`**           | No                  | This classic toolbar is pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                       |
+| **`BlocksFeature`**                 | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`TreeViewFeature`**               | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                |
+| **`EXPERIMENTAL_TableFeature`**     | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
+| **`EXPERIMENTAL_TextStateFeature`** | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
 
 Notice how even the toolbars are features? That's how extensible our lexical editor is - you could theoretically create your own toolbar if you wanted to!
 
@@ -334,4 +335,18 @@ You can customize the placeholder (the text that appears in the editor when it's
     },
   }),
 }
+```
+
+## Detecting empty editor state
+
+When you first type into a rich text field and subsequently delete everything through the admin panel, its value changes from `null` to a JSON object containing an empty paragraph.
+
+If needed, you can reset the field value to `null` programmatically - for example, by using a custom hook to detect when the editor is empty.
+
+This also applies to fields like `text` and `textArea`, which could be stored as either `null` or an empty value in the database. Since the empty value for richText is a JSON object, checking for emptiness is a bit more involved - so Payload provides a utility for it:
+
+```ts
+import { hasText } from '@payloadcms/richtext-lexical/shared'
+
+hasText(richtextData)
 ```

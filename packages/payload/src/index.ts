@@ -1,4 +1,5 @@
-// @ts-strict-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -70,6 +71,7 @@ import type { SupportedLanguages } from '@payloadcms/translations'
 import { Cron } from 'croner'
 
 import type { ClientConfig } from './config/client.js'
+import type { BaseJob } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -258,6 +260,27 @@ export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
 type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
 export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
 
+type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
+  ? 'payload-jobs' extends keyof TypedCollection
+    ? true
+    : false
+  : false
+
+/**
+ * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
+ * If a generated type for the `payload-jobs` collection is not available, falls back to the BaseJob type.
+ *
+ * `input` and `taksStatus` are always present here, as the job afterRead hook will always populate them.
+ */
+export type Job<
+  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+> = HasPayloadJobsType extends true
+  ? {
+      input: BaseJob<TWorkflowSlugOrInput>['input']
+      taskStatus: BaseJob<TWorkflowSlugOrInput>['taskStatus']
+    } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
+  : BaseJob<TWorkflowSlugOrInput>
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -277,13 +300,13 @@ export class BasePayload {
     return auth(this, options)
   }
 
-  authStrategies: AuthStrategy[]
+  authStrategies!: AuthStrategy[]
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
-  config: SanitizedConfig
+  config!: SanitizedConfig
   /**
    * @description Performs count operation
    * @param options
@@ -332,8 +355,22 @@ export class BasePayload {
     return create<TSlug, TSelect>(this, options)
   }
 
-  db: DatabaseAdapter
+  crons: Cron[] = []
+  db!: DatabaseAdapter
+
   decrypt = decrypt
+
+  destroy = async () => {
+    if (this.crons.length) {
+      // Remove all crons from the list before stopping them
+      const cronsToStop = this.crons.splice(0, this.crons.length)
+      await Promise.all(cronsToStop.map((cron) => cron.stop()))
+    }
+
+    if (this.db?.destroy && typeof this.db.destroy === 'function') {
+      await this.db.destroy()
+    }
+  }
 
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DuplicateOptions<TSlug, TSelect>,
@@ -342,14 +379,14 @@ export class BasePayload {
     return duplicate<TSlug, TSelect>(this, options)
   }
 
-  email: InitializedEmailAdapter
-
-  encrypt = encrypt
+  email!: InitializedEmailAdapter
 
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
 
-  extensions: (args: {
+  encrypt = encrypt
+
+  extensions!: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
     result: ExecutionResult
@@ -449,13 +486,13 @@ export class BasePayload {
 
   getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
 
-  globals: Globals
+  globals!: Globals
 
-  importMap: ImportMap
+  importMap!: ImportMap
 
   jobs = getJobsLocalAPI(this)
 
-  logger: Logger
+  logger!: Logger
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
@@ -495,13 +532,13 @@ export class BasePayload {
     return restoreVersion<TSlug>(this, options)
   }
 
-  schema: GraphQLSchema
+  schema!: GraphQLSchema
 
-  secret: string
+  secret!: string
 
-  sendEmail: InitializedEmailAdapter['sendEmail']
+  sendEmail!: InitializedEmailAdapter['sendEmail']
 
-  types: {
+  types!: {
     arrayTypes: any
     blockInputTypes: any
     blockTypes: any
@@ -525,7 +562,7 @@ export class BasePayload {
     return update<TSlug, TSelect>(this, options)
   }
 
-  validationRules: (args: OperationArgs<any>) => ValidationRule[]
+  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
     options: VerifyEmailOptions<TSlug>,
@@ -554,7 +591,7 @@ export class BasePayload {
       })
 
       spawned.on('exit', (code) => {
-        resolve({ code })
+        resolve({ code: code! })
       })
 
       spawned.on('error', (error) => {
@@ -597,7 +634,7 @@ export class BasePayload {
       void checkPayloadDependencies()
     }
 
-    this.importMap = options.importMap
+    this.importMap = options.importMap!
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
@@ -617,7 +654,7 @@ export class BasePayload {
     }
 
     for (const collection of this.config.collections) {
-      let customIDType = undefined
+      let customIDType: string | undefined = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
@@ -649,10 +686,13 @@ export class BasePayload {
       }
     }
 
-    this.blocks = this.config.blocks.reduce((blocks, block) => {
-      blocks[block.slug] = block
-      return blocks
-    }, {})
+    this.blocks = this.config.blocks!.reduce(
+      (blocks, block) => {
+        blocks[block.slug] = block
+        return blocks
+      },
+      {} as Record<string, FlattenedBlock>,
+    )
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -766,7 +806,7 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.autoRun && !isNextBuild()) {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 
@@ -793,6 +833,8 @@ export class BasePayload {
               queue: cronConfig.queue,
             })
           })
+
+          this.crons.push(job)
         }),
       )
     }
@@ -823,6 +865,7 @@ export class BasePayload {
 
 const initialized = new BasePayload()
 
+// eslint-disable-next-line no-restricted-exports
 export default initialized
 
 let cached: {
@@ -830,10 +873,10 @@ let cached: {
   promise: null | Promise<Payload>
   reload: boolean | Promise<void>
   ws: null | WebSocket
-} = global._payload
+} = (global as any)._payload
 
 if (!cached) {
-  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
+  cached = (global as any)._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
 export const reload = async (
@@ -841,24 +884,28 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  if (typeof payload.db.destroy === 'function') {
-    await payload.db.destroy()
-  }
+  await payload.destroy()
 
   payload.config = config
 
-  payload.collections = config.collections.reduce((collections, collection) => {
-    collections[collection.slug] = {
-      config: collection,
-      customIDType: payload.collections[collection.slug]?.customIDType,
-    }
-    return collections
-  }, {})
+  payload.collections = config.collections.reduce(
+    (collections, collection) => {
+      collections[collection.slug] = {
+        config: collection,
+        customIDType: payload.collections[collection.slug]?.customIDType,
+      }
+      return collections
+    },
+    {} as Record<string, any>,
+  )
 
-  payload.blocks = config.blocks.reduce((blocks, block) => {
-    blocks[block.slug] = block
-    return blocks
-  }, {})
+  payload.blocks = config.blocks!.reduce(
+    (blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    },
+    {} as Record<string, FlattenedBlock>,
+  )
 
   payload.globals = {
     config: config.globals,
@@ -883,18 +930,18 @@ export const reload = async (
     })
   }
 
-  await payload.db.init()
+  await payload.db.init?.()
 
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
 
-  global._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  global._payload_schemaMap = null
-  global._payload_clientSchemaMap = null
-  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  global._payload_doNotCacheSchemaMap = true
-  global._payload_doNotCacheClientSchemaMap = true
+  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
+  ;(global as any)._payload_schemaMap = null
+  ;(global as any)._payload_clientSchemaMap = null
+  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  ;(global as any)._payload_doNotCacheSchemaMap = true
+  ;(global as any)._payload_doNotCacheClientSchemaMap = true
 }
 
 export const getPayload = async (
@@ -906,7 +953,7 @@ export const getPayload = async (
 
   if (cached.payload) {
     if (cached.reload === true) {
-      let resolve: () => void
+      let resolve!: () => void
 
       // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
@@ -927,7 +974,6 @@ export const getPayload = async (
     return cached.payload
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
     // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
@@ -973,7 +1019,7 @@ export const getPayload = async (
   } catch (e) {
     cached.promise = null
     // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
-    e.payloadInitError = true
+    ;(e as { payloadInitError?: boolean }).payloadInitError = true
     throw e
   }
 
@@ -1234,6 +1280,9 @@ export {
 } from './fields/config/client.js'
 
 export { sanitizeFields } from './fields/config/sanitize.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
 export type {
   AdminClient,
   ArrayField,
@@ -1349,7 +1398,7 @@ export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
 export { validations } from './fields/validations.js'
 export type {
@@ -1383,6 +1432,8 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export type { FolderSortKeys } from './folders/types.js'
+export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1390,7 +1441,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1402,7 +1452,6 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
 export { findOneOperation } from './globals/operations/findOne.js'
@@ -1449,11 +1498,11 @@ export type {
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1491,7 +1540,7 @@ export {
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
 export { flattenAllFields } from './utilities/flattenAllFields.js'
-export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
+export { flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getBlockSelect } from './utilities/getBlockSelect.js'
@@ -1511,6 +1560,7 @@ export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
+export { parseDocumentID } from './utilities/parseDocumentID.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
@@ -1527,6 +1577,7 @@ export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryK
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
+
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

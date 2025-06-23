@@ -43,7 +43,9 @@ const getInitialDrawerData = ({
   fields: ClientField[]
   segments: string[]
 }) => {
-  const flattenedFields = flattenTopLevelFields(fields)
+  const flattenedFields = flattenTopLevelFields(fields, {
+    keepPresentationalFields: true,
+  })
 
   const path = segments[0]
 
@@ -211,6 +213,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
+        fieldPath={path}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}

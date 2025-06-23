@@ -21,7 +21,6 @@ type Props<T> = {
 } & Omit<RowLabelType<T>, 'data'>
 
 export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, rowNumber }) => {
-  'use no memo'
   const { getDataByPath, getSiblingData } = useWatchForm()
   const collapsibleData = getSiblingData(path)
   const arrayData = getDataByPath(path)

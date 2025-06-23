@@ -41,3 +41,9 @@ yarn-error.log*
 .env
 
 /dev/media
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

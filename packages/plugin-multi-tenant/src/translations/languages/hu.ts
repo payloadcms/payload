@@ -5,6 +5,7 @@ export const huTranslations: PluginDefaultTranslationsObject = {
     'confirm-tenant-switch--body':
       'Ön azon van, hogy megváltoztassa a tulajdonjogot <0>{{fromTenant}}</0>-ről <0>{{toTenant}}</0>-re.',
     'confirm-tenant-switch--heading': 'Erősítse meg a(z) {{tenantLabel}} változtatást',
+    'field-assignedTentant-label': 'Kijelölt Bérlő',
   },
 }
 

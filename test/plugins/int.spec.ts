@@ -17,9 +17,7 @@ describe('Collections - Plugins', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('created pages collection', async () => {

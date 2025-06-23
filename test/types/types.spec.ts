@@ -1,5 +1,7 @@
 import type {
   BulkOperationResult,
+  CustomDocumentViewConfig,
+  DefaultDocumentViewConfig,
   JoinQuery,
   PaginatedDocs,
   SelectType,
@@ -156,6 +158,19 @@ describe('Types testing', () => {
         expect<Post>().type.toHaveProperty('namedGroup')
         expect<NonNullable<Post['namedGroup']>>().type.toHaveProperty('insideNamedGroup')
       })
+    })
+  })
+
+  describe('views', () => {
+    test('default view config', () => {
+      expect<DefaultDocumentViewConfig>().type.not.toBeAssignableWith<{
+        path: string
+      }>()
+
+      expect<CustomDocumentViewConfig>().type.toBeAssignableWith<{
+        Component: string
+        path: string
+      }>()
     })
   })
 })

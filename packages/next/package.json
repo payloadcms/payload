@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.38.0",
+  "version": "3.43.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -15,6 +15,10 @@
       "email": "info@payloadcms.com",
       "url": "https://payloadcms.com"
     }
+  ],
+  "sideEffects": [
+    "*.scss",
+    "*.css"
   ],
   "type": "module",
   "exports": {
@@ -99,28 +103,26 @@
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "4.0.5",
     "sass": "1.77.4",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.3.0",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@next/eslint-plugin-next": "15.3.2",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.2",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
-    "esbuild": "0.24.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-e993439-20250405",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "3.1.0"
+    "swc-plugin-transform-remove-imports": "4.0.4"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",

@@ -117,7 +117,8 @@ export function parseParams({
                 })
 
                 if (
-                  ['json', 'richText'].includes(field.type) &&
+                  (['json', 'richText'].includes(field.type) ||
+                    (field.type === 'blocks' && adapter.blocksAsJSON)) &&
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
@@ -367,7 +368,25 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
+                const orConditions: SQL<unknown>[] = []
+                let resolvedQueryValue = queryValue
+                if (
+                  operator === 'in' &&
+                  Array.isArray(queryValue) &&
+                  queryValue.some((v) => v === null)
+                ) {
+                  orConditions.push(isNull(resolvedColumn))
+                  resolvedQueryValue = queryValue.filter((v) => v !== null)
+                }
+                let constraint = adapter.operators[queryOperator](
+                  resolvedColumn,
+                  resolvedQueryValue,
+                )
+                if (orConditions.length) {
+                  orConditions.push(constraint)
+                  constraint = or(...orConditions)
+                }
+                constraints.push(constraint)
               }
             }
           }

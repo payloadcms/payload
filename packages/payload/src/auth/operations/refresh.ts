@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import url from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -72,7 +71,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url)
+    const parsedURL = url.parse(args.req.url!)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
     const user = await args.req.payload.findByID({
@@ -112,7 +111,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       user._strategy = args.req.user._strategy
     }
 
-    let result: Result
+    let result!: Result
 
     // /////////////////////////////////////
     // refresh hook - Collection
