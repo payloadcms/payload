@@ -190,7 +190,6 @@ export function ContextFolderFileCard({ type, className, index, item }: ContextC
       isSelected={isSelected}
       itemKey={item.itemKey}
       onClick={(event) => {
-        console.log('onItemClick', { isDisabled, isSelected, item: item.itemKey })
         void onItemClick({ event, index, item })
       }}
       onKeyDown={(event) => {
