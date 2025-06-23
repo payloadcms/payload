@@ -531,19 +531,26 @@ jobs:
           - template: blank
             database: mongodb
             templateName: '@payloadcms/template-blank'
+            hasTests: true
           - template: website
             database: mongodb
+            hasTests: false
           - template: with-payload-cloud
             database: mongodb
+            hasTests: false
           - template: with-vercel-mongodb
             database: mongodb
+            hasTests: false
           # Postgres
           - template: with-postgres
             database: postgres
+            hasTests: false
           - template: with-vercel-postgres
             database: postgres
+            hasTests: false
 
           - template: plugin
+            hasTests: false
 
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
@@ -629,14 +636,15 @@ jobs:
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Setup Playwright - Browsers and Dependencies
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        if: matrix.hasTests == true && steps.cache-playwright-browsers.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Setup Playwright - Dependencies-only
-        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        if: matrix.hasTests == true && steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
       - name: Runs Template Int Tests
+        if: matrix.hasTests == true
         run: pnpm --filter ${{ matrix.templateName }} run test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
@@ -645,9 +653,11 @@ jobs:
           MONGODB_URL: mongodb://localhost:27017/payloadtests
 
       - name: Start Template For E2Es
+        if: matrix.hasTests == true
         run: pnpm --filter ${{ matrix.templateName }} start &
 
       - name: Runs Template E2E Tests
+        if: matrix.hasTests == true
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.templateName }}.json pnpm --filter ${{ matrix.templateName }} test:e2e
         env:
           NODE_OPTIONS: --max-old-space-size=8096
