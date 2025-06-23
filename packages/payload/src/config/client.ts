@@ -88,6 +88,9 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
+export const serverOnlyLivePreviewProperties: readonly Partial<ServerOnlyLivePreviewProperties>[] =
+  ['url']
+
 export const createClientConfig = ({
   config,
   i18n,
@@ -124,6 +127,14 @@ export const createClientConfig = ({
 
           if (config.admin.livePreview.breakpoints) {
             clientConfig.admin.livePreview.breakpoints = config.admin.livePreview.breakpoints
+          }
+
+          if (config.admin.livePreview.collections) {
+            clientConfig.admin.livePreview.collections = config.admin.livePreview.collections
+          }
+
+          if (config.admin.livePreview.globals) {
+            clientConfig.admin.livePreview.globals = config.admin.livePreview.globals
           }
         }
 
