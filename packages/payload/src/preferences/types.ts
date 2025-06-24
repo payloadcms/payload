@@ -34,7 +34,7 @@ export type ColumnPreference = {
   active: boolean
 }
 
-export type ListPreferences = {
+export type CollectionPreferences = {
   columns?: ColumnPreference[]
   limit?: number
   preset?: DefaultDocumentIDType
