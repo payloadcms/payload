@@ -25,8 +25,8 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       : { cookie: req.headers.get('cookie')! }
 
     /**
-     * We `fetch` on the `allowList` in the the upload config.`
-     * Otherwise we `safeFetch`
+     * `fetch` on the `allowList` in the the upload config.`
+     * Otherwise `safeFetch`
      * Config example 
      * 
      * Allowlist format:
