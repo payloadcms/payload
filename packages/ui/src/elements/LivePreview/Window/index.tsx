@@ -45,6 +45,10 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   // Or it could be a separate popup window
   // We need to transmit data to both accordingly
   useEffect(() => {
+    if (!isLivePreviewing) {
+      return
+    }
+
     // For performance, do no reduce fields to values until after the iframe or popup has loaded
     if (fields && window && 'postMessage' in window && appIsReady) {
       const values = reduceFieldsToValues(fields, true)
@@ -88,12 +92,17 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     fieldSchemaJSON,
     mostRecentUpdate,
     locale,
+    isLivePreviewing,
   ])
 
   // To support SSR, we transmit a `window.postMessage` event without a payload
   // This is because the event will ultimately trigger a server-side roundtrip
   // i.e., save, save draft, autosave, etc. will fire `router.refresh()`
   useEffect(() => {
+    if (!isLivePreviewing) {
+      return
+    }
+
     const message = {
       type: 'payload-document-event',
     }
@@ -107,7 +116,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     if (previewWindowType === 'iframe' && iframeRef.current) {
       iframeRef.current.contentWindow?.postMessage(message, url)
     }
-  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url])
+  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing])
 
   if (previewWindowType === 'iframe') {
     return (
