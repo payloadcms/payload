@@ -33,7 +33,7 @@ export const Pages: CollectionConfig = {
       custom: {
         'plugin-import-export': {
           toCSV: ({ value, columnName, row, siblingDoc }) => {
-            return value + ' toCSV'
+            return String(value) + ' toCSV'
           },
         },
       },
@@ -85,7 +85,7 @@ export const Pages: CollectionConfig = {
           custom: {
             'plugin-import-export': {
               toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
-                return value + ' toCSV'
+                return String(value) + ' toCSV'
               },
             },
           },
@@ -106,7 +106,7 @@ export const Pages: CollectionConfig = {
               custom: {
                 'plugin-import-export': {
                   toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
-                    return value + ' toCSV'
+                    return String(value) + ' toCSV'
                   },
                 },
               },
@@ -123,7 +123,7 @@ export const Pages: CollectionConfig = {
               custom: {
                 'plugin-import-export': {
                   toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
-                    return value + ' toCSV'
+                    return String(value) + ' toCSV'
                   },
                 },
               },
@@ -202,6 +202,18 @@ export const Pages: CollectionConfig = {
       name: 'excerpt',
       label: 'Excerpt',
       type: 'text',
+    },
+    {
+      name: 'hasOnePolymorphic',
+      type: 'relationship',
+      relationTo: ['users', 'posts'],
+      hasMany: false,
+    },
+    {
+      name: 'hasManyPolymorphic',
+      type: 'relationship',
+      relationTo: ['users', 'posts'],
+      hasMany: true,
     },
   ],
 }
