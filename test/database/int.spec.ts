@@ -165,7 +165,7 @@ describe('database', () => {
           ],
           blocksWithIDs: [
             {
-              blockType: 'block',
+              blockType: 'block-first',
               id: blockID,
             },
           ],
@@ -191,7 +191,7 @@ describe('database', () => {
           ],
           blocksWithIDs: [
             {
-              blockType: 'block',
+              blockType: 'block-first',
               id: blockID,
             },
           ],
@@ -776,7 +776,7 @@ describe('database', () => {
           ],
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'block-second',
               localizedText: 'goodbye',
               text: 'hello',
             },
@@ -2223,6 +2223,7 @@ describe('database', () => {
     })
 
     it('should allow to query by virtual field 2x deep with draft:true', async () => {
+      await payload.delete({ collection: 'virtual-relations', where: {} })
       const category = await payload.create({
         collection: 'categories',
         data: { title: '3-category' },
@@ -2637,54 +2638,6 @@ describe('database', () => {
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 
-  it('should CRUD with blocks as JSON in SQL adapters', async () => {
-    // eslint-disable-next-line jest/no-conditional-in-test
-    if (!('drizzle' in payload.db)) {
-      return
-    }
-
-    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
-    payload.db.blocksAsJSON = true
-    delete payload.db.pool
-    await payload.db.init()
-    await payload.db.connect()
-    expect(payload.db.tables.blocks_docs.testBlocks).toBeDefined()
-    expect(payload.db.tables.blocks_docs_locales.testBlocksLocalized).toBeDefined()
-    const res = await payload.create({
-      collection: 'blocks-docs',
-      data: {
-        testBlocks: [{ blockType: 'cta', text: 'text' }],
-        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
-      },
-    })
-    expect(res.testBlocks[0]?.text).toBe('text')
-    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
-    const res_es = await payload.update({
-      collection: 'blocks-docs',
-      id: res.id,
-      locale: 'es',
-      data: {
-        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
-        testBlocks: [{ blockType: 'cta', text: 'text_updated' }],
-      },
-    })
-    expect(res_es.testBlocks[0]?.text).toBe('text_updated')
-    expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
-    const res_all = await payload.findByID({
-      collection: 'blocks-docs',
-      id: res.id,
-      locale: 'all',
-    })
-    expect(res_all.testBlocks[0]?.text).toBe('text_updated')
-    expect(res_all.testBlocksLocalized.es[0]?.text).toBe('text-localized-es')
-    expect(res_all.testBlocksLocalized.en[0]?.text).toBe('text-localized')
-    payload.db.blocksAsJSON = false
-    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
-    delete payload.db.pool
-    await payload.db.init()
-    await payload.db.connect()
-  })
-
   it('should support in with null', async () => {
     await payload.delete({ collection: 'posts', where: {} })
     const post_1 = await payload.create({
@@ -2741,10 +2694,10 @@ describe('database', () => {
         title: 'title',
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'block-third',
             nested: [
               {
-                blockType: 'block',
+                blockType: 'block-fourth',
                 nested: [],
               },
             ],
@@ -2756,5 +2709,53 @@ describe('database', () => {
     expect(res.blocks).toHaveLength(1)
     expect(res.blocks[0]?.nested).toHaveLength(1)
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
+  })
+
+  it('should CRUD with blocks as JSON in SQL adapters', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (!('drizzle' in payload.db)) {
+      return
+    }
+
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    payload.db.blocksAsJSON = true
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
+    expect(payload.db.tables.blocks_docs.testBlocks).toBeDefined()
+    expect(payload.db.tables.blocks_docs_locales.testBlocksLocalized).toBeDefined()
+    const res = await payload.create({
+      collection: 'blocks-docs',
+      data: {
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
+      },
+    })
+    expect(res.testBlocks[0]?.text).toBe('text')
+    expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+    const res_es = await payload.update({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'es',
+      data: {
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
+        testBlocks: [{ blockType: 'cta', text: 'text_updated' }],
+      },
+    })
+    expect(res_es.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
+    const res_all = await payload.findByID({
+      collection: 'blocks-docs',
+      id: res.id,
+      locale: 'all',
+    })
+    expect(res_all.testBlocks[0]?.text).toBe('text_updated')
+    expect(res_all.testBlocksLocalized.es[0]?.text).toBe('text-localized-es')
+    expect(res_all.testBlocksLocalized.en[0]?.text).toBe('text-localized')
+    payload.db.blocksAsJSON = false
+    process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'false'
+    delete payload.db.pool
+    await payload.db.init()
+    await payload.db.connect()
   })
 })
