@@ -15,7 +15,8 @@ import type {
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import { APIError, Forbidden } from '../../errors/index.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
@@ -139,6 +140,8 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const fullWhere = combineQueries(where, accessResult!)
+
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

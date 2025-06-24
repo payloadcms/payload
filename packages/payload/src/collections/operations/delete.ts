@@ -13,6 +13,7 @@ import type {
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
@@ -106,6 +107,8 @@ export const deleteOperation = async <
     })
 
     const fullWhere = combineQueries(where, accessResult!)
+
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
