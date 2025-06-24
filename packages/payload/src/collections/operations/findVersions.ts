@@ -7,6 +7,7 @@ import type { Collection } from '../config/types.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -85,8 +86,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       }
     }
 
+    sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
+
     const select = sanitizeSelect({
-      fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
+      fields: versionFields,
       forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
       select: incomingSelect,
       versions: true,
