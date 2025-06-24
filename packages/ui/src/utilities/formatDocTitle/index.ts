@@ -32,7 +32,7 @@ export const formatDocTitle = ({
     const useAsTitle = collectionConfig?.admin?.useAsTitle
 
     if (useAsTitle) {
-      title = data?.[useAsTitle] || title
+      title = data?.[useAsTitle] as string
 
       if (title) {
         const fieldConfig = collectionConfig.fields.find(
