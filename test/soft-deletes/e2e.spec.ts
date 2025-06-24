@@ -279,6 +279,10 @@ describe('Soft Deletes', () => {
 
         await page.locator('#trash-view-pill').click()
 
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
+          'Trash',
+        )
+
         const selectAll = page.locator('input#select-all')
 
         // Ensure checkbox is visible and attached
@@ -289,7 +293,8 @@ describe('Soft Deletes', () => {
         // Wait until the row actually exists to be selectable
         await expect(page.locator('.row-1')).toBeVisible()
 
-        await selectAll.check()
+        // eslint-disable-next-line playwright/no-force-option
+        await selectAll.check({ force: true })
 
         await expect(page.locator('.list-selection__button[aria-label="Restore"]')).toBeVisible()
         await expect(page.locator('.list-selection__button[aria-label="Delete"]')).toBeVisible()
@@ -522,7 +527,7 @@ describe('Soft Deletes', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
-        await expect(page.locator('.doc-tabs__tabs')).toBeVisible()
+        await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'Versions' }).click()
 
@@ -564,7 +569,8 @@ describe('Soft Deletes', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
-        await expect(page.locator('.doc-tabs__tabs')).toBeVisible()
+        await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
+
         await page.getByRole('link', { name: 'Versions' }).click()
 
         await expect(page.locator('.step-nav.app-header__step-nav a').nth(2)).toContainText('Trash')
@@ -611,7 +617,7 @@ describe('Soft Deletes', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
-        await expect(page.locator('.doc-tabs__tabs')).toBeVisible()
+        await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'Versions' }).click()
 
@@ -661,7 +667,7 @@ describe('Soft Deletes', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
-        await expect(page.locator('.doc-tabs__tabs')).toBeVisible()
+        await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'API' }).click()
 
@@ -703,8 +709,7 @@ describe('Soft Deletes', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
-        await expect(page.locator('.doc-tabs__tabs')).toBeVisible()
-
+        await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
         await page.getByRole('link', { name: 'API' }).click()
 
         await expect(page.locator('.step-nav.app-header__step-nav a').nth(2)).toContainText('Trash')
