@@ -157,6 +157,7 @@ export function ListEmptyTrashButton({
         })}
         buttonStyle="pill"
         disabled={trashCount === 0}
+        id="empty-trash-button"
         key="empty-trash-button"
         onClick={() => {
           openModal(confirmEmptyTrashSlug)

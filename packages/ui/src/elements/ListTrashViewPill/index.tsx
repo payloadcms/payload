@@ -27,6 +27,7 @@ export function ListTrashViewPill({
       buttonStyle="tab"
       disabled={viewType === 'trash'}
       el={viewType === 'list' || viewType === 'folders' ? 'link' : 'div'}
+      id="trash-view-pill"
       key="trash-view-pill"
       to={formatAdminURL({
         adminRoute: config.routes.admin,
