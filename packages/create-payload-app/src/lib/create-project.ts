@@ -230,6 +230,8 @@ export function updatePackageJSONDependencies(args: {
     (acc, [key, value]) => {
       if (typeof value === 'string' && value.startsWith('workspace:')) {
         acc[key] = `${latestVersion}`
+      } else if (key === 'payload' || key.startsWith('@payloadcms')) {
+        acc[key] = `${latestVersion}`
       } else {
         acc[key] = value
       }
