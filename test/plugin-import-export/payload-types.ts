@@ -674,9 +674,7 @@ export interface TaskCreateCollectionExport {
     userCollection?: string | null;
     exportsCollection?: string | null;
   };
-  output: {
-    success?: boolean | null;
-  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
