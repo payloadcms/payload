@@ -83,7 +83,14 @@ import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import { type JobStats, jobStatsGlobalSlug } from './queues/config/global.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { getQueuesWithSchedules } from './queues/operations/handleSchedules/getQueuesWithSchedules.js'
+import {
+  checkQueueableTimeConstraints,
+  scheduleQueueable,
+} from './queues/operations/handleSchedules/index.js'
+import { createLocalReq } from './utilities/createLocalReq.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -794,36 +801,73 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
-      const DEFAULT_CRON = '* * * * *'
-      const DEFAULT_LIMIT = 10
+    if (this.config.jobs.enabled && !isNextBuild()) {
+      if (this.config.jobs.autoRun) {
+        const DEFAULT_CRON = '* * * * *'
+        const DEFAULT_LIMIT = 10
 
-      const cronJobs =
-        typeof this.config.jobs.autoRun === 'function'
-          ? await this.config.jobs.autoRun(this)
-          : this.config.jobs.autoRun
+        const cronJobs =
+          typeof this.config.jobs.autoRun === 'function'
+            ? await this.config.jobs.autoRun(this)
+            : this.config.jobs.autoRun
 
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+        await Promise.all(
+          cronJobs.map((cronConfig) => {
+            const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
-              if (!shouldAutoRun) {
-                jobAutorunCron.stop()
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+              })
+            })
+
+            this.crons.push(jobAutorunCron)
+          }),
+        )
+      }
+
+      if (this.config.jobs.scheduler === 'cron') {
+        const queuesWithSchedules = getQueuesWithSchedules({
+          jobsConfig: this.config.jobs,
+        })
+
+        for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
+          for (const schedulable of schedules) {
+            const jobScheduleCron = new Cron(schedulable.scheduleConfig.cron, async () => {
+              const stats: JobStats = await this.db.findGlobal({
+                slug: jobStatsGlobalSlug,
+              })
+
+              const queueable = checkQueueableTimeConstraints({
+                queue: queueName,
+                scheduleConfig: schedulable.scheduleConfig,
+                stats,
+                taskConfig: schedulable.taskConfig,
+                workflowConfig: schedulable.workflowConfig,
+              })
+              if (!queueable) {
                 return
               }
-            }
 
-            await this.jobs.run({
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
+              await scheduleQueueable({
+                queueable,
+                req: await createLocalReq({}, this),
+                stats,
+              })
             })
-          })
 
-          this.crons.push(jobAutorunCron)
-        }),
-      )
+            this.crons.push(jobScheduleCron)
+          }
+        }
+      }
     }
 
     return this

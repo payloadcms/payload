@@ -1,14 +1,13 @@
 import { Cron } from 'croner'
 
-import type { Job } from '../../../index.js'
+import type { Job, TaskConfig, WorkflowConfig } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BeforeScheduleFn, Queueable, ScheduleConfig } from '../../config/types/index.js'
-import type { TaskConfig } from '../../config/types/taskTypes.js'
-import type { WorkflowConfig } from '../../config/types/workflowTypes.js'
 
 import { type JobStats, jobStatsGlobalSlug } from '../../config/global.js'
 import { defaultAfterSchedule } from './defaultAfterSchedule.js'
 import { defaultBeforeSchedule } from './defaultBeforeSchedule.js'
+import { getQueuesWithSchedules } from './getQueuesWithSchedules.js'
 
 export type HandleSchedulesResult = {
   errored: Queueable[]
@@ -29,43 +28,9 @@ export async function handleSchedules({
   req: PayloadRequest
 }): Promise<HandleSchedulesResult> {
   const jobsConfig = req.payload.config.jobs
-
-  const tasksWithSchedules =
-    jobsConfig.tasks?.filter((task) => {
-      return task.schedule?.length
-    }) ?? []
-
-  const workflowsWithSchedules =
-    jobsConfig.workflows?.filter((workflow) => {
-      return workflow.schedule?.length
-    }) ?? []
-
-  const queuesWithSchedules: {
-    [queue: string]: {
-      schedules: {
-        scheduleConfig: ScheduleConfig
-        taskConfig?: TaskConfig
-        workflowConfig?: WorkflowConfig
-      }[]
-    }
-  } = {}
-
-  for (const task of tasksWithSchedules) {
-    for (const schedule of task.schedule ?? []) {
-      ;(queuesWithSchedules[schedule.queue] ??= { schedules: [] }).schedules.push({
-        scheduleConfig: schedule,
-        taskConfig: task,
-      })
-    }
-  }
-  for (const workflow of workflowsWithSchedules) {
-    for (const schedule of workflow.schedule ?? []) {
-      ;(queuesWithSchedules[schedule.queue] ??= { schedules: [] }).schedules.push({
-        scheduleConfig: schedule,
-        workflowConfig: workflow,
-      })
-    }
-  }
+  const queuesWithSchedules = getQueuesWithSchedules({
+    jobsConfig,
+  })
 
   const stats: JobStats = await req.payload.db.findGlobal({
     slug: jobStatsGlobalSlug,
@@ -73,42 +38,24 @@ export async function handleSchedules({
   })
 
   /**
-   * Almost last step! Tasks and Workflows added here just need to be constraint-checkec (e.g max. 1 running task etc.),
+   * Almost last step! Tasks and Workflows added here just need to be constraint-checked (e.g max. 1 running task etc.),
    * before we can queue them
    */
-  const workflowsToQueue: Queueable[] = []
-  const tasksToQueue: Queueable[] = []
+  const queueables: Queueable[] = []
 
   // Need to know when that particular job was last scheduled in that particular queue
 
   for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
-    const queueScheduleStats = stats?.stats?.scheduledRuns?.queues?.[queueName]
-
     for (const schedulable of schedules) {
-      const lastScheduledRun = schedulable.taskConfig
-        ? queueScheduleStats?.tasks?.[schedulable.taskConfig.slug]?.lastScheduledRun
-        : queueScheduleStats?.workflows?.[schedulable.workflowConfig?.slug ?? '']?.lastScheduledRun
-
-      const nextRun = new Cron(schedulable.scheduleConfig.cron).nextRun(
-        lastScheduledRun ?? undefined,
-      )
-
-      if (!nextRun) {
-        continue
-      }
-
-      if (schedulable.taskConfig) {
-        tasksToQueue.push({
-          scheduleConfig: schedulable.scheduleConfig,
-          taskConfig: schedulable.taskConfig,
-          waitUntil: nextRun,
-        })
-      } else if (schedulable.workflowConfig) {
-        workflowsToQueue.push({
-          scheduleConfig: schedulable.scheduleConfig,
-          waitUntil: nextRun,
-          workflowConfig: schedulable.workflowConfig,
-        })
+      const queuable = checkQueueableTimeConstraints({
+        queue: queueName,
+        scheduleConfig: schedulable.scheduleConfig,
+        stats,
+        taskConfig: schedulable.taskConfig,
+        workflowConfig: schedulable.workflowConfig,
+      })
+      if (queuable) {
+        queueables.push(queuable)
       }
     }
   }
@@ -121,73 +68,142 @@ export async function handleSchedules({
    * Now queue, but check for constraints (= beforeSchedule) first.
    * Default constraint (= defaultBeforeSchedule): max. 1 running / scheduled task or workflow per queue
    */
-  for (const queueable of [...tasksToQueue, ...workflowsToQueue]) {
-    if (!queueable.taskConfig && !queueable.workflowConfig) {
-      continue
-    }
-
-    const beforeScheduleFn = queueable.scheduleConfig.hooks?.beforeSchedule
-    const afterScheduleFN = queueable.scheduleConfig.hooks?.afterSchedule
-
-    try {
-      const beforeScheduleResult: Awaited<ReturnType<BeforeScheduleFn>> = await (
-        beforeScheduleFn ?? defaultBeforeSchedule
-      )({
-        // @ts-expect-error we know defaultBeforeSchedule will never call itself => pass null
-        defaultBeforeSchedule: beforeScheduleFn ? defaultBeforeSchedule : null,
-        jobStats: stats,
-        queueable,
-        req,
-      })
-
-      if (!beforeScheduleResult.shouldSchedule) {
-        await (afterScheduleFN ?? defaultAfterSchedule)({
-          // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
-          defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
-          jobStats: stats,
-          queueable,
-          req,
-          status: 'skipped',
-        })
+  for (const queueable of queueables) {
+    const { status } = await scheduleQueueable({
+      queueable,
+      req,
+      stats,
+    })
+    switch (status) {
+      case 'error':
+        errored.push(queueable)
+        break
+      case 'skipped':
         skipped.push(queueable)
-        continue
-      }
-
-      const job = (await req.payload.jobs.queue({
-        input: beforeScheduleResult.input ?? {},
-        queue: queueable.scheduleConfig.queue,
-        req,
-        task: queueable?.taskConfig?.slug,
-        waitUntil: beforeScheduleResult.waitUntil,
-        workflow: queueable.workflowConfig?.slug,
-      } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job<false>
-
-      await (afterScheduleFN ?? defaultAfterSchedule)({
-        // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
-        defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
-        job,
-        jobStats: stats,
-        queueable,
-        req,
-        status: 'success',
-      })
-      queued.push(queueable)
-    } catch (error) {
-      await (afterScheduleFN ?? defaultAfterSchedule)({
-        // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
-        defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
-        error: error as Error,
-        jobStats: stats,
-        queueable,
-        req,
-        status: 'error',
-      })
-      errored.push(queueable)
+        break
+      case 'success':
+        queued.push(queueable)
+        break
     }
   }
   return {
     errored,
     queued,
     skipped,
+  }
+}
+
+export function checkQueueableTimeConstraints({
+  queue,
+  scheduleConfig,
+  stats,
+  taskConfig,
+  workflowConfig,
+}: {
+  queue: string
+  scheduleConfig: ScheduleConfig
+  stats: JobStats
+  taskConfig?: TaskConfig
+  workflowConfig?: WorkflowConfig
+}): false | Queueable {
+  const queueScheduleStats = stats?.stats?.scheduledRuns?.queues?.[queue]
+
+  const lastScheduledRun = taskConfig
+    ? queueScheduleStats?.tasks?.[taskConfig.slug]?.lastScheduledRun
+    : queueScheduleStats?.workflows?.[workflowConfig?.slug ?? '']?.lastScheduledRun
+
+  const nextRun = new Cron(scheduleConfig.cron).nextRun(lastScheduledRun ?? undefined)
+
+  if (!nextRun) {
+    return false
+  }
+  return {
+    scheduleConfig,
+    taskConfig,
+    waitUntil: nextRun,
+    workflowConfig,
+  }
+}
+
+export async function scheduleQueueable({
+  queueable,
+  req,
+  stats,
+}: {
+  queueable: Queueable
+  req: PayloadRequest
+  stats: JobStats
+}): Promise<{
+  job?: Job<false>
+  status: 'error' | 'skipped' | 'success'
+}> {
+  if (!queueable.taskConfig && !queueable.workflowConfig) {
+    return {
+      status: 'error',
+    }
+  }
+
+  const beforeScheduleFn = queueable.scheduleConfig.hooks?.beforeSchedule
+  const afterScheduleFN = queueable.scheduleConfig.hooks?.afterSchedule
+
+  try {
+    const beforeScheduleResult: Awaited<ReturnType<BeforeScheduleFn>> = await (
+      beforeScheduleFn ?? defaultBeforeSchedule
+    )({
+      // @ts-expect-error we know defaultBeforeSchedule will never call itself => pass null
+      defaultBeforeSchedule: beforeScheduleFn ? defaultBeforeSchedule : null,
+      jobStats: stats,
+      queueable,
+      req,
+    })
+
+    if (!beforeScheduleResult.shouldSchedule) {
+      await (afterScheduleFN ?? defaultAfterSchedule)({
+        // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
+        defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
+        jobStats: stats,
+        queueable,
+        req,
+        status: 'skipped',
+      })
+      return {
+        status: 'skipped',
+      }
+    }
+
+    const job = (await req.payload.jobs.queue({
+      input: beforeScheduleResult.input ?? {},
+      queue: queueable.scheduleConfig.queue,
+      req,
+      task: queueable?.taskConfig?.slug,
+      waitUntil: beforeScheduleResult.waitUntil,
+      workflow: queueable.workflowConfig?.slug,
+    } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job<false>
+
+    await (afterScheduleFN ?? defaultAfterSchedule)({
+      // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
+      defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
+      job,
+      jobStats: stats,
+      queueable,
+      req,
+      status: 'success',
+    })
+    return {
+      status: 'success',
+    }
+  } catch (error) {
+    await (afterScheduleFN ?? defaultAfterSchedule)({
+      // @ts-expect-error we know defaultAfterchedule will never call itself => pass null
+      defaultAfterSchedule: afterScheduleFN ? defaultAfterSchedule : null,
+      error: error as Error,
+      jobStats: stats,
+      queueable,
+      req,
+      status: 'error',
+    })
+    return {
+      status: 'error',
+    }
   }
 }
