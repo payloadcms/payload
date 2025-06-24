@@ -1,4 +1,4 @@
-/* eslint-disable react-compiler/react-compiler -- TODO: fix */
+ 
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
@@ -435,6 +435,12 @@ export const Form: React.FC<FormProps> = (props) => {
             nonFieldErrors.forEach((err) => {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
+
+            // When there's no field-related errors, don't consider the form as submitted,
+            // to not trigger visible validation.
+            if (!fieldErrors.length && nonFieldErrors.length) {
+              setSubmitted(false)
+            }
 
             return
           }
