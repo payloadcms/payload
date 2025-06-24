@@ -1744,12 +1744,14 @@ describe('database', () => {
 
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name.includes('postgres')) {
-        added_table_before = drizzlePg.pgTable('added_table_before', {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        const t = (payload.db.pgSchema?.table ?? drizzlePg.pgTable) as typeof drizzlePg.pgTable
+        added_table_before = t('added_table_before', {
           id: drizzlePg.serial('id').primaryKey(),
           text: drizzlePg.text('text'),
         })
 
-        added_table_after = drizzlePg.pgTable('added_table_after', {
+        added_table_after = t('added_table_after', {
           id: drizzlePg.serial('id').primaryKey(),
           text: drizzlePg.text('text'),
         })
