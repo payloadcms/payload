@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, Option, SelectField } from '../fields/config/types.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
 import { buildFolderField } from './buildFolderField.js'
 import { foldersSlug } from './constants.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
