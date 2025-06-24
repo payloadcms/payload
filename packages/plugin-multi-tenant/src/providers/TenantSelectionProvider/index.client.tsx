@@ -2,7 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
-import { useAuth } from '@payloadcms/ui'
+import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
@@ -43,6 +43,10 @@ type ContextType = {
    */
   setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
   /**
+   * Used to sync tenants displayed in the tenant selector when updates are made to the tenants collection.
+   */
+  syncTenants: () => Promise<void>
+  /**
    *
    */
   updateTenants: (args: { id: number | string; label: string }) => void
@@ -55,6 +59,7 @@ const Context = createContext<ContextType>({
   setEntityType: () => undefined,
   setModified: () => undefined,
   setTenant: () => null,
+  syncTenants: () => Promise.resolve(),
   updateTenants: () => null,
 })
 
@@ -63,11 +68,15 @@ export const TenantSelectionProviderClient = ({
   initialValue,
   tenantCookie,
   tenantOptions: tenantOptionsFromProps,
+  tenantsCollectionSlug,
+  useAsTitle,
 }: {
   children: React.ReactNode
   initialValue?: number | string
   tenantCookie?: string
   tenantOptions: OptionObject[]
+  tenantsCollectionSlug: string
+  useAsTitle: string
 }) => {
   const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     initialValue,
@@ -75,6 +84,7 @@ export const TenantSelectionProviderClient = ({
   const [modified, setModified] = React.useState<boolean>(false)
   const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
   const { user } = useAuth()
+  const { config } = useConfig()
   const userID = React.useMemo(() => user?.id, [user?.id])
   const [tenantOptions, setTenantOptions] = React.useState<OptionObject[]>(
     () => tenantOptionsFromProps,
@@ -127,19 +137,49 @@ export const TenantSelectionProviderClient = ({
     [deleteCookie, entityType, router, setCookie, tenantOptions],
   )
 
-  const updateTenants = React.useCallback<ContextType['updateTenants']>(({ id, label }) => {
-    setTenantOptions((prev) => {
-      return prev.map((currentTenant) => {
-        if (id === currentTenant.value) {
-          return {
-            label,
-            value: id,
+  const syncTenants = React.useCallback(async () => {
+    try {
+      const req = await fetch(
+        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}?select[${useAsTitle}]=true&id=true&limit=0&depth=0`,
+        {
+          credentials: 'include',
+          method: 'GET',
+        },
+      )
+
+      const result = await req.json()
+
+      if (result.docs) {
+        setTenantOptions(
+          result.docs.map((doc: Record<string, number | string>) => ({
+            label: doc[useAsTitle],
+            value: doc.id,
+          })),
+        )
+      }
+    } catch (e) {
+      toast.error(`Error fetching tenants`)
+    }
+  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, useAsTitle])
+
+  const updateTenants = React.useCallback<ContextType['updateTenants']>(
+    ({ id, label }) => {
+      setTenantOptions((prev) => {
+        return prev.map((currentTenant) => {
+          if (id === currentTenant.value) {
+            return {
+              label,
+              value: id,
+            }
           }
-        }
-        return currentTenant
+          return currentTenant
+        })
       })
-    })
-  }, [])
+
+      void syncTenants()
+    },
+    [syncTenants],
+  )
 
   React.useEffect(() => {
     if (userID && !tenantCookie) {
@@ -172,7 +212,7 @@ export const TenantSelectionProviderClient = ({
       router.refresh()
     }
   }, [userID, tenantCookie, deleteCookie, router])
-  console.log({ tenantOptions })
+
   return (
     <span
       data-selected-tenant-id={selectedTenantID}
@@ -187,6 +227,7 @@ export const TenantSelectionProviderClient = ({
           setEntityType,
           setModified,
           setTenant,
+          syncTenants,
           updateTenants,
         }}
       >

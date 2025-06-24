@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
@@ -302,8 +303,29 @@ test.describe('Multi Tenant', () => {
         .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar'].sort())
     })
 
-    // test('should add tenant to the selector when creating a new tenant', async () => {
-    // })
+    test('should add tenant to the selector when creating a new tenant', async () => {
+      await login({
+        page,
+        serverURL,
+        data: credentials.admin,
+      })
+
+      await page.goto(tenantsURL.create)
+      await wait(300)
+      await expect(page.locator('#field-name')).toBeVisible()
+      await expect(page.locator('#field-domain')).toBeVisible()
+
+      await page.locator('#field-name').fill('House Rules')
+      await page.locator('#field-domain').fill('house-rules.com')
+      await saveDocAndAssert(page)
+
+      // Check the tenant selector
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'House Rules'].sort())
+    })
   })
 })
 
