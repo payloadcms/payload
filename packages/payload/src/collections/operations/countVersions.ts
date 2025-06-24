@@ -2,7 +2,7 @@ import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
