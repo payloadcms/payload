@@ -38,6 +38,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
+  limit?: number
   locale?: string
   requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
@@ -54,6 +55,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     fieldSchema,
     incomingData,
     initialData,
+    limit,
     locale,
     returnNumberOfRequests,
     serverURL,
@@ -84,7 +86,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
+            `${collection}?depth=${depth}&limit=${limit}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())

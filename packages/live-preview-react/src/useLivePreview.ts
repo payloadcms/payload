@@ -16,6 +16,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
    * you can pass in the initial page data from the server.
    */
   initialData: T
+  limit?: number
   serverURL: string
 }): {
   data: T
@@ -25,7 +26,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
    */
   isLoading: boolean
 } => {
-  const { apiRoute, depth, initialData, serverURL } = props
+  const { apiRoute, depth, initialData, limit, serverURL } = props
   const [data, setData] = useState<T>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const hasSentReadyMessage = useRef<boolean>(false)
@@ -41,6 +42,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
       callback: onChange,
       depth,
       initialData,
+      limit,
       serverURL,
     })
 

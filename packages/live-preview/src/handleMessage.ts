@@ -29,10 +29,11 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
   depth?: number
   event: LivePreviewMessageEvent<T>
   initialData: T
+  limit?: number
   requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
+  const { apiRoute, depth, event, initialData, limit, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
     const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
@@ -57,6 +58,7 @@ export const handleMessage = async <T extends Record<string, any>>(args: {
       fieldSchema: _payloadLivePreview.fieldSchema,
       incomingData: data,
       initialData: _payloadLivePreview?.previousData || initialData,
+      limit,
       locale,
       requestHandler,
       serverURL,
