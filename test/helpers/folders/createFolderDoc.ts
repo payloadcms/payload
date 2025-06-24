@@ -18,7 +18,7 @@ export const createFolderDoc = async ({
 
   await selectReactSelectOptions({
     page,
-    selector: '#field-folderType',
+    containerSelector: '#field-folderType',
     options: folderType,
   })
 

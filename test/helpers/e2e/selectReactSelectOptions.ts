@@ -1,21 +1,30 @@
 import type { Page } from '@playwright/test'
 
+import { expect } from '@playwright/test'
+
 type SelectReactOptionsParams = {
-  options: string[] // Array of visible labels to select
+  /**
+   * The container selector for the react-select component.
+   */
+  containerSelector: string
+  /**
+   * Array of options to select from the react-select component.
+   */
+  options: string[]
   page: Page
-  selector: string // Selector for the react-select component
 }
 
 export async function selectReactSelectOptions({
   page,
-  selector,
+  containerSelector,
   options,
 }: SelectReactOptionsParams) {
-  const select = page.locator(selector)
+  const container = page.locator(containerSelector)
+  await expect(container).toBeVisible() // Ensure the select element is visible
 
   for (const optionText of options) {
     // Check if the option is already selected
-    const alreadySelected = await select
+    const alreadySelected = await container
       .locator('.multi-value-label__text', {
         hasText: optionText,
       })
@@ -25,15 +34,14 @@ export async function selectReactSelectOptions({
       continue // Skip if already selected
     }
 
-    // Open the react-select dropdown
-    await select.click()
+    await container.locator('.dropdown-indicator').click()
 
     // Wait for the dropdown menu to appear
-    const menu = page.locator('.rs__menu')
+    const menu = container.locator('.rs__menu')
     await menu.waitFor({ state: 'visible', timeout: 2000 })
 
     // Find and click the desired option by visible text
-    const optionLocator = page.locator('.rs__option', {
+    const optionLocator = container.locator('.rs__option', {
       hasText: optionText,
     })
     if (optionLocator) {
