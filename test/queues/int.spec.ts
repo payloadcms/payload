@@ -1510,5 +1510,17 @@ describe('Queues', () => {
       expect(allSimples.totalDocs).toBe(3)
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
     })
+
+    it('should not auto-schedule through automatic crons if scheduler set to manual', async () => {
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(0)
+    })
   })
 })

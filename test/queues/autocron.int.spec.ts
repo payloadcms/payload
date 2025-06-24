@@ -48,4 +48,40 @@ describe('Queues with scheduler auto', () => {
     }
     payload.config.jobs.deleteJobOnComplete = true
   })
+
+  it('can auto-schedule through automatic crons and autorun jobs', async () => {
+    // Do not call payload.jobs.run() or payload.jobs.handleSchedules() - payload should automatically schedule crons for auto-scheduling
+
+    // Autorun and Autoschedule runs every second - so should have autorun at least twice after 3.5 seconds. Case with the lowest amount of jobs completed,
+    // if autoschedule runs after the first autorun:
+    // Second 1: Autorun runs => no jobs
+    // Second 1: Autoschedule runs => scheduels 1 job
+    // Second 2: Autorun runs => runs 1 job => 1
+    // Second 2: Autoschedule runs => schedules 1 job
+    // Second 3: Autorun runs => runs 1 job => 2
+    // Second 3: Autoschedule runs => schedules 1 job
+    // Status after 3.5 seconds: 2 jobs running, 1 job scheduled
+
+    // Best case - most amounts of jobs completed:
+    // Second 1: Autoschedule runs => schedules 1 job
+    // Second 1: Autorun runs => runs 1 job => 1
+    // Second 2: Autoschedule runs => schedules 1 job
+    // Second 2: Autorun runs => runs 1 job => 2
+    // Second 3: Autoschedule runs => schedules 1 job
+    // Second 3: Autorun runs => runs 1 job => 3
+    // Status after 3.5 seconds: 3 jobs running, no jobs scheduled
+    const minJobsCompleted = 2
+    const maxJobsCompleted = 3
+
+    await new Promise((resolve) => setTimeout(resolve, 3500)) // 3 seconds + 0.5 seconds to ensure the last job has been completed
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBeGreaterThanOrEqual(minJobsCompleted)
+    expect(allSimples.totalDocs).toBeLessThanOrEqual(maxJobsCompleted)
+    expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+  })
 })
