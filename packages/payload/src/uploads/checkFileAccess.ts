@@ -1,7 +1,7 @@
 import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
 
 export const checkFileAccess = async ({

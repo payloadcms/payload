@@ -90,7 +90,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   user?: Document
 }
 
-export async function duplicate<
+export async function duplicateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
 >(

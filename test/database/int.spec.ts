@@ -2222,6 +2222,25 @@ describe('database', () => {
       expect(found.docs[0].id).toBe(doc.id)
     })
 
+    it('should allow to query by virtual field 2x deep with draft:true', async () => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: '3-category' },
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: '3-post', category: category.id },
+      })
+      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const found = await payload.find({
+        collection: 'virtual-relations',
+        where: { postCategoryTitle: { equals: '3-category' } },
+        draft: true,
+      })
+      expect(found.docs).toHaveLength(1)
+      expect(found.docs[0].id).toBe(doc.id)
+    })
+
     it('should allow referenced virtual field in globals', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
       const globalData = await payload.updateGlobal({
