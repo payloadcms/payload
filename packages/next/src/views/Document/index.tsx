@@ -5,7 +5,6 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
-  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -27,6 +26,7 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
@@ -126,6 +126,7 @@ export const renderDocument = async ({
     docPreferences,
     { docPermissions, hasPublishPermission, hasSavePermission },
     { currentEditor, isLocked, lastUpdateTime },
+    entityPreferences,
   ] = await Promise.all([
     // Get document preferences
     getDocPreferences({
@@ -153,6 +154,14 @@ export const renderDocument = async ({
       isEditing,
       req,
     }),
+
+    // get entity preferences
+    getPreferences<{ livePreview: boolean }>(
+      collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
+      payload,
+      req.user.id,
+      req.user.collection,
+    ),
   ])
 
   const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
@@ -335,16 +344,6 @@ export const renderDocument = async ({
         })
       : livePreviewConfig?.url
 
-  const breakpoints: LivePreviewConfig['breakpoints'] = [
-    ...(livePreviewConfig?.breakpoints || []),
-    {
-      name: 'responsive',
-      height: '100%',
-      label: 'Responsive',
-      width: '100%',
-    },
-  ]
-
   return {
     data: doc,
     Document: (
@@ -372,7 +371,12 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        <LivePreviewProvider breakpoints={breakpoints} operation={operation} url={livePreviewURL}>
+        <LivePreviewProvider
+          breakpoints={livePreviewConfig.breakpoints}
+          operation={operation}
+          preferredState={entityPreferences?.value?.livePreview}
+          url={livePreviewURL}
+        >
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}

@@ -1,13 +1,18 @@
 import type { Page } from '@playwright/test'
+import type { Config } from 'payload-types.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+
+import { devUser } from '../credentials.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../helpers/e2e/preferences.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
@@ -41,10 +46,12 @@ describe('Live Preview', () => {
   let pagesURLUtil: AdminUrlUtil
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePostsURLUtil: AdminUrlUtil
+  let payload: PayloadTestSDK<Config>
+  let user: any
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
@@ -52,6 +59,16 @@ describe('Live Preview', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    user = await payload
+      .login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      ?.then((res) => res.user) // TODO: this type is wrong
 
     initPageConsoleErrorCatch(page)
 
@@ -80,6 +97,40 @@ describe('Live Preview', () => {
   test('collection — does not render live preview when creating a new doc', async () => {
     await page.goto(pagesURLUtil.create)
     await expect(page.locator('button#live-preview-toggler')).toBeHidden()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  })
+
+  test('saves live preview state to preferences and loads it on next visit', async () => {
+    await deletePreferences({
+      payload,
+      user,
+      key: `collection-${pagesSlug}`,
+    })
+
+    await navigateToDoc(page, pagesURLUtil)
+
+    const toggler = page.locator('button#live-preview-toggler')
+    await expect(toggler).toBeVisible()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    await toggler.click()
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+
+    await page.reload()
+
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+
+    await toggler.click()
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+
+    await page.reload()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
@@ -237,9 +288,9 @@ describe('Live Preview', () => {
     await expect(() => expect(heightInput).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
     const widthInputValue = await widthInput.getAttribute('value')
-    const width = parseInt(widthInputValue)
+    const width = parseInt(widthInputValue ?? '0')
     const heightInputValue = await heightInput.getAttribute('value')
-    const height = parseInt(heightInputValue)
+    const height = parseInt(heightInputValue ?? '0')
 
     // Allow a tolerance of a couple of pixels
     const tolerance = 2
@@ -312,19 +363,22 @@ describe('Live Preview', () => {
     await expect(() => expect(widthInput).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
 
     await expect(() => expect(heightInput).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const widthInputValue = await widthInput.getAttribute('value')
-    const width = parseInt(widthInputValue)
+    const width = parseInt(widthInputValue ?? '0')
 
     await expect(() => expect(width).toBe(mobileBreakpoint.width)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+
     const heightInputValue = await heightInput.getAttribute('value')
-    const height = parseInt(heightInputValue)
+    const height = parseInt(heightInputValue ?? '0')
 
     await expect(() => expect(height).toBe(mobileBreakpoint.height)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,

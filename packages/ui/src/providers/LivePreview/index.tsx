@@ -3,10 +3,11 @@ import type { LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
@@ -21,7 +22,8 @@ export type LivePreviewProviderProps = {
     width: number
   }
   operation?: 'create' | 'update'
-  url?: string
+  preferredState: boolean
+  url: string
 }
 
 const getAbsoluteUrl = (url) => {
@@ -33,13 +35,27 @@ const getAbsoluteUrl = (url) => {
 }
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
-  breakpoints,
+  breakpoints: incomingBreakpoints,
   children,
   operation,
+  preferredState,
   url: incomingUrl,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
-  const [isLivePreviewing, setIsLivePreviewing] = useState(false) // TODO: wire into prefs
+  const [isLivePreviewing, setIsLivePreviewing] = useState(preferredState)
+
+  const breakpoints: LivePreviewConfig['breakpoints'] = useMemo(
+    () => [
+      ...(incomingBreakpoints || []),
+      {
+        name: 'responsive',
+        height: '100%',
+        label: 'Responsive',
+        width: '100%',
+      },
+    ],
+    [incomingBreakpoints],
+  )
 
   const url =
     incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
@@ -53,11 +69,17 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [listeningForMessages, setListeningForMessages] = useState(false)
+
   const { collectionSlug, globalSlug } = useDocumentInfo()
+
+  const isFirstRender = useRef(true)
+
+  const { setPreference } = usePreferences()
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
   const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
+
   const { config, getEntityConfig } = useConfig()
 
   const [zoom, setZoom] = useState(1)
@@ -178,6 +200,21 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       handleWindowChange('iframe')
     }
   }, [previewWindowType, isPopupOpen, handleWindowChange])
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    void setPreference(
+      collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
+      {
+        livePreview: isLivePreviewing,
+      },
+      true,
+    )
+  }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
 
   return (
     <LivePreviewContext
