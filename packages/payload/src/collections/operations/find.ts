@@ -19,6 +19,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -144,6 +145,7 @@ export const findOperation = async <
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
     let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 
     const sort = sanitizeSortQuery({
       fields: collection.config.flattenedFields,

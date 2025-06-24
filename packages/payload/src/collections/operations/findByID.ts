@@ -18,6 +18,7 @@ import type {
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
@@ -109,6 +110,12 @@ export const findByIDOperation = async <
     const where = { id: { equals: id } }
 
     const fullWhere = combineQueries(where, accessResult)
+
+    sanitizeWhereQuery({
+      fields: collectionConfig.flattenedFields,
+      payload: args.req.payload,
+      where: fullWhere,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
