@@ -1,4 +1,4 @@
-import type { TaskConfig } from 'payload'
+import type { Config } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
@@ -6,8 +6,18 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
 import { seed } from './seed.js'
+import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
+import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'
+import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
+import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
+import { EverySecondTask } from './tasks/EverySecondTask.js'
+import { ExternalTask } from './tasks/ExternalTask.js'
+import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
+import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
+import { ThrowErrorTask } from './tasks/ThrowErrorTask.js'
+import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
+import { UpdatePostTask } from './tasks/UpdatePostTask.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
@@ -28,10 +38,9 @@ import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAn
 import { workflowRetries2TasksRetries0Workflow } from './workflows/workflowRetries2TasksRetries0.js'
 import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workflowRetries2TasksRetriesUndefined.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export default buildConfigWithDefaults({
+export const config: Partial<Config> = {
   collections: [
     {
       slug: 'posts',
@@ -123,308 +132,17 @@ export default buildConfigWithDefaults({
       },
     },
     tasks: [
-      {
-        schedule: [
-          {
-            cron: '* * * * * *',
-            queue: 'autorunSecond',
-            hooks: {
-              beforeSchedule: async (args) => {
-                const result = await args.defaultBeforeSchedule(args) // Handles verifying that there are no jobs already scheduled or processing
-                return {
-                  ...result,
-                  input: {
-                    message: 'This task runs every second',
-                  },
-                }
-              },
-              afterSchedule: async (args) => {
-                await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
-                args.req.payload.logger.info(
-                  'EverySecond task scheduled: ' +
-                    (args.status === 'success'
-                      ? String(args.job.id)
-                      : args.status === 'skipped'
-                        ? 'skipped'
-                        : 'error'),
-                )
-              },
-            },
-          },
-        ],
-        slug: 'EverySecond',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: ({ input, req }) => {
-          req.payload.logger.info(input.message)
-          return {
-            output: {},
-          }
-        },
-      },
-      {
-        retries: 2,
-        slug: 'UpdatePost',
-        interfaceName: 'MyUpdatePostType',
-        inputSchema: [
-          {
-            name: 'post',
-            type: 'relationship',
-            relationTo: 'posts',
-            maxDepth: 0,
-            required: true,
-          },
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'messageTwice',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: updatePostStep1,
-      } as TaskConfig<'UpdatePost'>,
-      {
-        retries: 2,
-        slug: 'UpdatePostStep2',
-        inputSchema: [
-          {
-            name: 'post',
-            type: 'relationship',
-            relationTo: 'posts',
-            maxDepth: 0,
-            required: true,
-          },
-          {
-            name: 'messageTwice',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: updatePostStep2,
-      } as TaskConfig<'UpdatePostStep2'>,
-      {
-        retries: 3,
-        slug: 'CreateSimple',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'shouldFail',
-            type: 'checkbox',
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'simpleID',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: async ({ input, req }) => {
-          if (input.shouldFail) {
-            throw new Error('Failed on purpose')
-          }
-          const newSimple = await req.payload.create({
-            collection: 'simple',
-            req,
-            data: {
-              title: input.message,
-            },
-          })
-          return {
-            output: {
-              simpleID: newSimple.id,
-            },
-          }
-        },
-      } as TaskConfig<'CreateSimple'>,
-      {
-        slug: 'CreateSimpleRetriesUndefined',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'shouldFail',
-            type: 'checkbox',
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'simpleID',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: async ({ input, req }) => {
-          if (input.shouldFail) {
-            throw new Error('Failed on purpose')
-          }
-          const newSimple = await req.payload.create({
-            collection: 'simple',
-            req,
-            data: {
-              title: input.message,
-            },
-          })
-          return {
-            output: {
-              simpleID: newSimple.id,
-            },
-          }
-        },
-      } as TaskConfig<'CreateSimpleRetriesUndefined'>,
-      {
-        slug: 'CreateSimpleRetries0',
-        retries: 0,
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'shouldFail',
-            type: 'checkbox',
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'simpleID',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: async ({ input, req }) => {
-          if (input.shouldFail) {
-            throw new Error('Failed on purpose')
-          }
-          const newSimple = await req.payload.create({
-            collection: 'simple',
-            req,
-            data: {
-              title: input.message,
-            },
-          })
-          return {
-            output: {
-              simpleID: newSimple.id,
-            },
-          }
-        },
-      } as TaskConfig<'CreateSimpleRetries0'>,
-      {
-        retries: 2,
-        slug: 'CreateSimpleWithDuplicateMessage',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'shouldFail',
-            type: 'checkbox',
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'simpleID',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: async ({ input, req }) => {
-          if (input.shouldFail) {
-            throw new Error('Failed on purpose')
-          }
-          const newSimple = await req.payload.create({
-            collection: 'simple',
-            req,
-            data: {
-              title: input.message + input.message,
-            },
-          })
-          return {
-            output: {
-              simpleID: newSimple.id,
-            },
-          }
-        },
-      } as TaskConfig<'CreateSimpleWithDuplicateMessage'>,
-      {
-        retries: 2,
-        slug: 'ExternalTask',
-        inputSchema: [
-          {
-            name: 'message',
-            type: 'text',
-            required: true,
-          },
-        ],
-        outputSchema: [
-          {
-            name: 'simpleID',
-            type: 'text',
-            required: true,
-          },
-        ],
-        handler: path.resolve(dirname, 'runners/externalTask.ts') + '#externalTaskHandler',
-      } as TaskConfig<'ExternalTask'>,
-      {
-        retries: 0,
-        slug: 'ThrowError',
-        inputSchema: [],
-        outputSchema: [],
-        handler: () => {
-          throw new Error('failed')
-        },
-      } as TaskConfig<'ThrowError'>,
-      {
-        retries: 0,
-        slug: 'ReturnError',
-        inputSchema: [],
-        outputSchema: [],
-        handler: () => {
-          return {
-            state: 'failed',
-          }
-        },
-      } as TaskConfig<'ReturnError'>,
-      {
-        retries: 0,
-        slug: 'ReturnCustomError',
-        inputSchema: [
-          {
-            name: 'errorMessage',
-            type: 'text',
-            required: true,
-          },
-        ],
-        outputSchema: [],
-        handler: ({ input }) => {
-          return {
-            state: 'failed',
-            errorMessage: input.errorMessage,
-          }
-        },
-      } as TaskConfig<'ReturnCustomError'>,
+      EverySecondTask,
+      UpdatePostTask,
+      UpdatePostStep2Task,
+      CreateSimpleTask,
+      CreateSimpleRetriesUndefinedTask,
+      CreateSimpleRetries0Task,
+      CreateSimpleWithDuplicateMessageTask,
+      ExternalTask,
+      ThrowErrorTask,
+      ReturnErrorTask,
+      ReturnCustomErrorTask,
     ],
     workflows: [
       updatePostWorkflow,
@@ -457,4 +175,5 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}
+export default buildConfigWithDefaults(config)

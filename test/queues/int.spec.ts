@@ -636,29 +636,6 @@ describe('Queues', () => {
     expect(allSimples.docs[0]?.title).toBe('hello!')
   })
 
-  it('can create and autorun jobs', async () => {
-    await payload.jobs.queue({
-      workflow: 'inlineTaskTest',
-      queue: 'autorunSecond',
-      input: {
-        message: 'hello!',
-      },
-    })
-
-    // Do not call payload.jobs.run()
-
-    // Autorun runs every second - so should definitely be done if we wait 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const allSimples = await payload.find({
-      collection: 'simple',
-      limit: 100,
-    })
-
-    expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
-  })
-
   it('should respect deleteJobOnComplete true default configuration', async () => {
     const { id } = await payload.jobs.queue({
       workflow: 'inlineTaskTest',
@@ -1432,5 +1409,106 @@ describe('Queues', () => {
       expect(logEntry).toBeDefined()
       expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
     }
+  })
+
+  it('can create and autorun jobs', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      queue: 'autorunSecond',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    // Do not call payload.jobs.run()
+
+    // Autorun runs every second - so should definitely be done if we wait 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
+  })
+
+  describe('schedules', () => {
+    it('can auto-schedule through local API and autorun jobs', async () => {
+      // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+      await payload.jobs.handleSchedules()
+
+      // Do not call payload.jobs.run()
+
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(1)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('can auto-schedule through REST API and autorun jobs', async () => {
+      // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+      await restClient.GET('/payload-jobs/handleSchedules', {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+
+      // Do not call payload.jobs.run()
+
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(1)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('ensure scheduler does not schedule more jobs than needed if executed sequentially', async () => {
+      for (let i = 0; i < 10; i++) {
+        await payload.jobs.handleSchedules()
+      }
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(1)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('ensure job is scheduled every second', async () => {
+      for (let i = 0; i < 3; i++) {
+        // Call it twice to test that it only schedules one
+        await payload.jobs.handleSchedules()
+        await payload.jobs.handleSchedules()
+        await new Promise((resolve) => setTimeout(resolve, 1001))
+      }
+
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(3)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
   })
 })
