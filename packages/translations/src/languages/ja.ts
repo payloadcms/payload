@@ -282,6 +282,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     enterAValue: '値を入力',
     error: 'エラー',
     errors: 'エラー',
+    exitLivePreview: 'ライブプレビューを終了する',
     export: '輸出',
     fallbackToDefaultLocale: 'デフォルトロケールへのフォールバック',
     false: '偽',

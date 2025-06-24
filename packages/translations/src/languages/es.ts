@@ -286,6 +286,7 @@ export const esTranslations: DefaultTranslationsObject = {
     enterAValue: 'Introduce un valor',
     error: 'Error',
     errors: 'Errores',
+    exitLivePreview: 'Salir de la vista previa en vivo',
     export: 'Exportar',
     fallbackToDefaultLocale: 'Volver al idioma predeterminado',
     false: 'Falso',

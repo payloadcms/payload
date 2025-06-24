@@ -26,7 +26,6 @@ import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
-import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
@@ -249,8 +248,9 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {BeforeDocumentControls}
-            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
-            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
+            {(collectionConfig?.admin.preview ||
+              globalConfig?.admin.preview ||
+              (isLivePreviewEnabled && !isInDrawer)) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
                 Fallback={<PreviewButton />}

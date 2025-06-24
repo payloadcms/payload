@@ -284,6 +284,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     enterAValue: 'Įveskite reikšmę',
     error: 'Klaida',
     errors: 'Klaidos',
+    exitLivePreview: 'Išeiti iš tiesioginės peržiūros',
     export: 'Eksportas',
     fallbackToDefaultLocale: 'Grįžkite į numatytąją vietovę',
     false: 'Netiesa',

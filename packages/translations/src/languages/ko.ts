@@ -279,6 +279,7 @@ export const koTranslations: DefaultTranslationsObject = {
     enterAValue: '값을 입력하세요',
     error: '오류',
     errors: '오류',
+    exitLivePreview: '실시간 미리보기 종료',
     export: '수출',
     fallbackToDefaultLocale: '기본 locale로 대체',
     false: '거짓',

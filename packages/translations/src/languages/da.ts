@@ -279,6 +279,7 @@ export const daTranslations: DefaultTranslationsObject = {
     enterAValue: 'Indtast en værdi',
     error: 'Fejl',
     errors: 'Fejl',
+    exitLivePreview: 'Afslut Live Preview',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbagefald til standardlokalitet',
     false: 'Falsk',

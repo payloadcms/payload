@@ -287,6 +287,7 @@ export const deTranslations: DefaultTranslationsObject = {
     enterAValue: 'Gib einen Wert ein',
     error: 'Fehler',
     errors: 'Fehler',
+    exitLivePreview: 'Beenden Sie die Live-Vorschau',
     export: 'Export',
     fallbackToDefaultLocale: 'Auf die Standardsprache zurückfallen',
     false: 'Falsch',
