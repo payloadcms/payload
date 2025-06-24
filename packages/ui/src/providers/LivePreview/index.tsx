@@ -58,7 +58,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   )
 
   const url =
-    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+    incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
       ? incomingUrl
       : getAbsoluteUrl(incomingUrl)
 

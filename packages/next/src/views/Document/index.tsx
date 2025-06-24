@@ -372,7 +372,7 @@ export const renderDocument = async ({
         versionCount={versionCount}
       >
         <LivePreviewProvider
-          breakpoints={livePreviewConfig.breakpoints}
+          breakpoints={livePreviewConfig?.breakpoints}
           operation={operation}
           preferredState={entityPreferences?.value?.livePreview}
           url={livePreviewURL}
