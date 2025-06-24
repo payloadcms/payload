@@ -8,7 +8,9 @@ import React from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'
+import './index.scss'
 
+const baseClass = 'login-fields'
 type RenderEmailAndUsernameFieldsProps = {
   className?: string
   loginWithUsername?: false | LoginWithUsernameOptions
@@ -75,7 +77,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
 
   if (showEmailField || showUsernameField) {
     return (
-      <div className={className}>
+      <div className={[baseClass, className && className].filter(Boolean).join(' ')}>
         {showEmailField ? (
           <EmailField
             field={{
@@ -98,7 +100,6 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
               name: 'username',
               admin: {
                 autoComplete: 'off',
-                style: { marginTop: showEmailField ? 'var(--base)' : '' },
               },
               label: t('authentication:username'),
               required: loginWithUsername && loginWithUsername.requireUsername,

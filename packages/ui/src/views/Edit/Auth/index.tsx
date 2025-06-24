@@ -136,8 +136,8 @@ export const Auth: React.FC<Props> = (props) => {
   }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
-    (showPasswordFields: boolean) => {
-      if (showPasswordFields) {
+    (changingPassword: boolean) => {
+      if (changingPassword) {
         setValidateBeforeSubmit(true)
 
         dispatchFields({
@@ -159,7 +159,7 @@ export const Auth: React.FC<Props> = (props) => {
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
-      setChangingPassword(showPasswordFields)
+      setChangingPassword(changingPassword)
     },
     [dispatchFields, t, setValidateBeforeSubmit],
   )
