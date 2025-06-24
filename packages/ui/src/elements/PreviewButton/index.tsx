@@ -26,7 +26,9 @@ export function PreviewButton(props: PreviewButtonClientProps) {
       <Button
         aria-label={isLivePreviewing ? t('general:exitLivePreview') : t('general:livePreview')}
         buttonStyle={isLivePreviewing ? 'primary' : 'secondary'}
-        className={baseClass}
+        className={[baseClass, isLivePreviewing && `${baseClass}--active`]
+          .filter(Boolean)
+          .join(' ')}
         id="live-preview-toggler"
         onClick={(e) => {
           if (docConfig?.admin?.preview && (e.metaKey || e.ctrlKey)) {

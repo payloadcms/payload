@@ -24,6 +24,7 @@ import {
   goToGlobalLivePreview,
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
+  toggleLivePreview,
 } from './helpers.js'
 import {
   desktopBreakpoint,
@@ -112,25 +113,25 @@ describe('Live Preview', () => {
     const toggler = page.locator('button#live-preview-toggler')
     await expect(toggler).toBeVisible()
 
-    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(toggler).not.toHaveClass(/preview-btn--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
 
-    await toggler.click()
-    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
-    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
 
     await page.reload()
 
-    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(toggler).toHaveClass(/preview-btn--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
 
-    await toggler.click()
-    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
-    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
 
     await page.reload()
 
-    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(toggler).not.toHaveClass(/preview-btn--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
@@ -140,7 +141,7 @@ describe('Live Preview', () => {
     await expect(iframe).toBeVisible()
   })
 
-  test('collection — re-renders iframe client-side when form state changes', async () => {
+  test('collection csr — re-renders iframe client-side when form state changes', async () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
 
     const titleField = page.locator('#field-title')
@@ -170,6 +171,57 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
+  test('collection csr — retains live preview connection after toggling off and on', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const titleField = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(titleField).toBeEnabled()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
+
+    // Forces the test to wait for the Next.js route to render before we try editing a field
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: Home')
+
+    const newTitleValue = 'Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    // The iframe should still be showing the updated title
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText(
+      `For Testing: ${newTitleValue}`,
+    )
+
+    // make new changes and ensure they continue to be reflected in the iframe
+    const newTitleValue2 = 'Home (Edited Again)'
+    await titleField.fill(newTitleValue2)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue2}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   test('collection ssr — re-render iframe when save is made', async () => {
     await goToCollectionLivePreview(page, ssrPagesURLUtil)
 
@@ -195,6 +247,60 @@ describe('Live Preview', () => {
 
     await expect(() =>
       expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('collection ssr — retains live preview connection after toggling off and on', async () => {
+    await goToCollectionLivePreview(page, ssrPagesURLUtil)
+
+    const titleField = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
+    await expect(titleField).toBeEnabled()
+
+    const renderedPageTitleLocator = `#${renderedPageTitleID}`
+
+    // Forces the test to wait for the Next.js route to render before we try editing a field
+    await expect(() => expect(frame.locator(renderedPageTitleLocator)).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
+
+    const newTitleValue = 'SSR Home (Edited)'
+
+    await titleField.fill(newTitleValue)
+
+    await saveDocAndAssert(page)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    // The iframe should still be showing the updated title
+    await expect(frame.locator(renderedPageTitleLocator)).toHaveText(
+      `For Testing: ${newTitleValue}`,
+    )
+
+    // make new changes and ensure they continue to be reflected in the iframe
+    const newTitleValue2 = 'SSR Home (Edited Again)'
+    await titleField.fill(newTitleValue2)
+    await saveDocAndAssert(page)
+
+    await expect(() =>
+      expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue2}`),
     ).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })

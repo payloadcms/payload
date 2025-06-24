@@ -7,24 +7,39 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 
+export const toggleLivePreview = async (
+  page: Page,
+  options?: {
+    targetState?: 'off' | 'on'
+  },
+): Promise<void> => {
+  const toggler = page.locator('#live-preview-toggler')
+  await expect(toggler).toBeVisible()
+
+  const isActive = await toggler.evaluate((el) => el.classList.contains('preview-btn--active'))
+
+  if (isActive && (options?.targetState === 'off' || !options?.targetState)) {
+    await toggler.click()
+    await expect(toggler).not.toHaveClass(/preview-btn--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  }
+
+  if (!isActive && (options?.targetState === 'on' || !options?.targetState)) {
+    await toggler.click()
+    await expect(toggler).toHaveClass(/preview-btn--active/)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+  }
+}
+
 export const goToCollectionLivePreview = async (
   page: Page,
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
-  const toggler = page.locator('#live-preview-toggler')
-  await expect(toggler).toBeVisible()
 
-  const isActive = await toggler.evaluate((el) =>
-    el.classList.contains('live-preview-toggler--active'),
-  )
-
-  if (!isActive) {
-    await toggler.click()
-  }
-
-  await expect(toggler).toHaveClass(/live-preview-toggler--active/)
-  await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const goToGlobalLivePreview = async (
@@ -32,21 +47,12 @@ export const goToGlobalLivePreview = async (
   slug: string,
   serverURL: string,
 ): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  await page.goto(global.global(slug))
-  const toggler = page.locator('#live-preview-toggler')
-  await expect(toggler).toBeVisible()
+  const globalUrlUtil = new AdminUrlUtil(serverURL, slug)
+  await page.goto(globalUrlUtil.global(slug))
 
-  const isActive = await toggler.evaluate((el) =>
-    el.classList.contains('live-preview-toggler--active'),
-  )
-
-  if (!isActive) {
-    await toggler.click()
-  }
-
-  await expect(toggler).toHaveClass(/live-preview-toggler--active/)
-  await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
