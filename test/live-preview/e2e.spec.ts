@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
@@ -17,6 +17,7 @@ import {
   ensureDeviceIsLeftAligned,
   goToCollectionLivePreview,
   goToGlobalLivePreview,
+  goToTrashedLivePreview,
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
 } from './helpers.js'
@@ -24,6 +25,7 @@ import {
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
+  postsSlug,
   renderedPageTitleID,
   ssrAutosavePagesSlug,
   ssrPagesSlug,
@@ -39,6 +41,7 @@ describe('Live Preview', () => {
   let serverURL: string
 
   let pagesURLUtil: AdminUrlUtil
+  let postsURLUtil: AdminUrlUtil
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePostsURLUtil: AdminUrlUtil
 
@@ -47,6 +50,7 @@ describe('Live Preview', () => {
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
+    postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
     ssrAutosavePostsURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
@@ -197,6 +201,33 @@ describe('Live Preview', () => {
     })
 
     await saveDocAndAssert(page)
+  })
+
+  test('trash — has tab', async () => {
+    await navigateToTrashedDoc(page, postsURLUtil)
+
+    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
+
+    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+    const href = await livePreviewTab.getAttribute('href')
+    const docURL = page.url()
+    const pathname = new URL(docURL).pathname
+
+    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('trash — has route', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+    await expect(page.locator('.live-preview')).toBeVisible()
+  })
+
+  test('trash - renders iframe', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect(iframe).toBeVisible()
   })
 
   test('collection — should show live-preview view-level action in live-preview view', async () => {
