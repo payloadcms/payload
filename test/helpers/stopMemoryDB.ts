@@ -1,6 +1,10 @@
 /* eslint-disable no-restricted-exports */
 import { spawn } from 'child_process'
 
+/**
+ * WARNING: This file MUST export a default function.
+ * @link https://jestjs.io/docs/configuration#globalteardown-string
+ */
 export default function globalTeardown() {
   try {
     if (global._mongoMemoryServer) {
