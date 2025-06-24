@@ -565,7 +565,10 @@ export function DefaultEditView({
             user={currentEditor}
           />
           <div
-            className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
+            className={[
+              `${baseClass}__main-wrapper`,
+              previewWindowType === 'popup' && `${baseClass}--detached`,
+            ]
               .filter(Boolean)
               .join(' ')}
           >

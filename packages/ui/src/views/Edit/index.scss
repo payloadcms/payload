@@ -2,12 +2,22 @@
 
 @layer payload-default {
   .collection-edit {
-    width: 100%;
-    display: flex;
     --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04) 0%, transparent 100%);
 
-    &--is-live-previewing {
-      .collection-edit__main {
+    &__main-wrapper {
+      width: 100%;
+      display: flex;
+    }
+
+    &__main {
+      width: 100%;
+      container-type: inline-size;
+
+      &--popup-open {
+        width: 100%;
+      }
+
+      &--is-live-previewing {
         width: 40%;
         position: relative;
 
@@ -22,15 +32,6 @@
           pointer-events: none;
           z-index: -1;
         }
-      }
-    }
-
-    &__main {
-      width: 100%;
-      container-type: inline-size;
-
-      &--popup-open {
-        width: 100%;
       }
     }
 
