@@ -75,7 +75,7 @@ export type Options<TSlug extends CollectionSlug> = {
   user?: Document
 }
 
-export default async function findVersionByIDLocal<TSlug extends CollectionSlug>(
+export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> {

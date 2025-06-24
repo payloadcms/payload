@@ -799,9 +799,10 @@ export const getTableColumnFromPath = ({
             `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
           )
 
+          const idColumn = (aliasTable ?? adapter.tables[tableName]).id
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              eq(idColumn, adapter.tables[newTableName].parent),
               eq(adapter.tables[newTableName]._locale, locale),
             ]
 
@@ -816,7 +817,7 @@ export const getTableColumnFromPath = ({
             })
           } else {
             addJoinTable({
-              condition: eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              condition: eq(idColumn, adapter.tables[newTableName].parent),
               joins,
               table: adapter.tables[newTableName],
             })
