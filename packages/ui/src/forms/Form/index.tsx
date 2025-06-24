@@ -436,6 +436,12 @@ export const Form: React.FC<FormProps> = (props) => {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
+            // When there's no field-related errors, don't consider the form as submitted,
+            // to not trigger visible validation.
+            if (!fieldErrors.length && nonFieldErrors.length) {
+              setSubmitted(false)
+            }
+
             return
           }
 
