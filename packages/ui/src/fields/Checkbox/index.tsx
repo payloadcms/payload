@@ -101,7 +101,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
+        Fallback={<FieldError alignCaret="left" path={path} showError={showError} />}
       />
       <CheckboxInput
         AfterInput={AfterInput}
