@@ -74,6 +74,9 @@
     },
     {
       "path": "../packages/ui"
+    },
+    {
+      "path": "../packages/plugin-ecommerce"
     }
   ]
 }
