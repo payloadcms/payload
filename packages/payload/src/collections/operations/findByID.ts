@@ -15,7 +15,7 @@ import type {
   TypeWithID,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'

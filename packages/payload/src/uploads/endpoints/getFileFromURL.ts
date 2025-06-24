@@ -1,6 +1,6 @@
 import type { PayloadHandler } from '../../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
