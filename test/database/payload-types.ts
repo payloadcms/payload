@@ -168,6 +168,7 @@ export interface Category {
   title?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -187,12 +188,12 @@ export interface Post {
               nested?: unknown[] | null;
               id?: string | null;
               blockName?: string | null;
-              blockType: 'block';
+              blockType: 'block-fourth';
             }[]
           | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'block-third';
       }[]
     | null;
   D1?: {
@@ -215,7 +216,7 @@ export interface Post {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'block-first';
       }[]
     | null;
   updatedAt: string;
@@ -369,7 +370,7 @@ export interface CustomSchema {
         localizedText?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'block-second';
       }[]
     | null;
   updatedAt: string;
@@ -702,6 +703,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -716,13 +718,13 @@ export interface PostsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        'block-third'?:
           | T
           | {
               nested?:
                 | T
                 | {
-                    block?:
+                    'block-fourth'?:
                       | T
                       | {
                           nested?: T | {};
@@ -758,7 +760,7 @@ export interface PostsSelect<T extends boolean = true> {
   blocksWithIDs?:
     | T
     | {
-        block?:
+        'block-first'?:
           | T
           | {
               text?: T;
@@ -885,7 +887,7 @@ export interface CustomSchemaSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        'block-second'?:
           | T
           | {
               text?: T;
