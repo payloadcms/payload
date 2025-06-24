@@ -33,6 +33,10 @@ export const sanitizePluginConfig = ({ pluginConfig }: Props): SanitizedEcommerc
     }
   }
 
+  if (typeof config.carts === 'undefined') {
+    config.carts = true
+  }
+
   if (typeof config.orders === 'undefined') {
     config.orders = true
   }

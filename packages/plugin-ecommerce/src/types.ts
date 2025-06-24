@@ -205,8 +205,8 @@ export type CustomersConfig = {
   slug: string
 }
 
-export type SubscriptionsConfig = {
-  subscriptionsCollection?: CollectionOverride
+export type CartsConfig = {
+  cartsCollection?: CollectionOverride
 }
 
 export type InventoryConfig = {
@@ -244,6 +244,12 @@ export type CollectionSlugMap = {
 }
 
 export type EcommercePluginConfig = {
+  /**
+   * Configure the target collection used for carts.
+   *
+   * Defaults to true.
+   */
+  carts?: boolean | CartsConfig
   /**
    * Configure supported currencies and default settings.
    *

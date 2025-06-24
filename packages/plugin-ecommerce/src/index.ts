@@ -4,9 +4,10 @@ import { deepMergeSimple } from 'payload/shared'
 
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types.js'
 
+import { cartsCollection } from './carts/cartsCollection.js'
 import { confirmOrderHandler } from './endpoints/confirmOrder.js'
 import { initiatePaymentHandler } from './endpoints/initiatePayment.js'
-import { cartField } from './fields/cartField.js'
+import { cartItemsField } from './fields/cartItemsField.js'
 import { ordersCollection } from './orders/ordersCollection.js'
 import { productsCollection } from './products/productsCollection.js'
 import { transactionsCollection } from './transactions/transactionsCollection.js'
@@ -25,6 +26,9 @@ export const ecommercePlugin =
     }
 
     const sanitizedPluginConfig = sanitizePluginConfig({ pluginConfig })
+    /**
+     * Used to keep track of the slugs of collections in case they are overridden by the user.
+     */
     const collectionSlugMap = getCollectionSlugMap({ sanitizedPluginConfig })
 
     // Ensure collections exists
@@ -81,6 +85,21 @@ export const ecommercePlugin =
       })
 
       incomingConfig.collections.push(products)
+    }
+
+    if (sanitizedPluginConfig.carts) {
+      const carts = cartsCollection({
+        currenciesConfig,
+        customersSlug: collectionSlugMap.customers,
+        overrides:
+          sanitizedPluginConfig.carts === true
+            ? undefined
+            : sanitizedPluginConfig.carts.cartsCollection,
+        productsSlug: collectionSlugMap.products,
+        variantsSlug: collectionSlugMap.variants,
+      })
+
+      incomingConfig.collections.push(carts)
     }
 
     if (sanitizedPluginConfig.orders) {
@@ -179,7 +198,7 @@ export const ecommercePlugin =
 
     incomingConfig.collections.map((collection) => {
       if (collection.slug === collectionSlugMap.customers) {
-        collection.fields.push(cartField({ overrides: { name: 'cart' } }))
+        collection.fields.push(cartItemsField({ overrides: { name: 'cart' } }))
       }
 
       return collection

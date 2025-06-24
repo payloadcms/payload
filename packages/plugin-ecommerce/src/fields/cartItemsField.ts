@@ -22,7 +22,7 @@ type Props = {
   variantsSlug?: string
 }
 
-export const cartField: (props?: Props) => ArrayField = (props) => {
+export const cartItemsField: (props?: Props) => ArrayField = (props) => {
   const {
     currenciesConfig,
     individualPrices,
@@ -32,7 +32,7 @@ export const cartField: (props?: Props) => ArrayField = (props) => {
   } = props || {}
 
   const field: ArrayField = {
-    name: 'cart',
+    name: 'items',
     type: 'array',
     fields: [
       {

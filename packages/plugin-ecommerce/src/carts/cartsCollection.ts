@@ -18,22 +18,17 @@ type Props = {
    */
   productsSlug?: string
   /**
-   * Slug of the transactions collection, defaults to 'transactions'.
-   */
-  transactionsSlug?: string
-  /**
    * Slug of the variants collection, defaults to 'variants'.
    */
   variantsSlug?: string
 }
 
-export const ordersCollection: (props?: Props) => CollectionConfig = (props) => {
+export const cartsCollection: (props?: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
     customersSlug = 'users',
     overrides,
     productsSlug = 'products',
-    transactionsSlug = 'transactions',
     variantsSlug = 'variants',
   } = props || {}
   const fieldsOverride = overrides?.fields
@@ -54,54 +49,10 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
         // @ts-expect-error - translations are not typed in plugins yet
         t('plugin-ecommerce:customerEmail'),
     },
-    {
-      name: 'transactions',
-      type: 'relationship',
-      hasMany: true,
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:transactions'),
-      relationTo: transactionsSlug,
-    },
-    {
-      name: 'status',
-      type: 'select',
-      defaultValue: 'processing',
-      interfaceName: 'OrderStatus',
-      label: ({ t }) =>
-        // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-ecommerce:status'),
-      options: [
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:processing'),
-          value: 'processing',
-        },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:completed'),
-          value: 'completed',
-        },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:cancelled'),
-          value: 'cancelled',
-        },
-        {
-          // @ts-expect-error - translations are not typed in plugins yet
-          label: ({ t }) => t('plugin-ecommerce:refunded'),
-          value: 'refunded',
-        },
-      ],
-    },
-    ...(currenciesConfig
-      ? [amountField({ currenciesConfig }), currencyField({ currenciesConfig })]
-      : []),
     cartItemsField({
       currenciesConfig,
       individualPrices: true,
       overrides: {
-        name: 'items',
         label: ({ t }) =>
           // @ts-expect-error - translations are not typed in plugins yet
           t('plugin-ecommerce:items'),
@@ -125,7 +76,7 @@ export const ordersCollection: (props?: Props) => CollectionConfig = (props) => 
       : defaultFields
 
   const baseConfig: CollectionConfig = {
-    slug: 'orders',
+    slug: 'carts',
     timestamps: true,
     ...overrides,
     admin: {
