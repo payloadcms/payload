@@ -368,8 +368,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
 
-    // TODO: FIX THIS TEST 23/06
-    it.skip('should create a csv of all fields when fields is empty', async () => {
+    it('should create a csv of all fields when fields is empty', async () => {
       const doc = await payload.create({
         collection: 'exports',
         user,

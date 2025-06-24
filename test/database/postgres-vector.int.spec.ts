@@ -16,8 +16,7 @@ const describeToUse =
     : describe.skip
 
 describeToUse('postgres vector custom column', () => {
-  // TODO: FIX THIS TEST 23/06
-  it.skip('should add a vector column and query it', async () => {
+  it('should add a vector column and query it', async () => {
     const { databaseAdapter } = await import(path.resolve(dirname, '../databaseAdapter.js'))
 
     const init = databaseAdapter.init

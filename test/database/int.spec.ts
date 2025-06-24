@@ -354,8 +354,7 @@ describe('database', () => {
       expect(post.doc.id).toBe(id)
     })
 
-    // TODO: FIX THIS TEST 23/06
-    it.skip('graphQL - accepts ID on create', async () => {
+    it('graphQL - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -2253,8 +2252,7 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
-    // TODO: FIX THIS TEST 23/06
-    it.skip('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({
@@ -2669,8 +2667,7 @@ describe('database', () => {
     expect(docs[2].id).toBe(post_1.id)
   })
 
-  // TODO: FIX THIS TEST 23/06
-  it.skip('should throw specific unique contraint errors', async () => {
+  it('should throw specific unique contraint errors', async () => {
     await payload.create({
       collection: 'unique-fields',
       data: {
@@ -2689,8 +2686,8 @@ describe('database', () => {
       expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
     }
   })
-  // TODO: FIX THIS TEST 23/06
-  it.skip('should support x3 nesting blocks', async () => {
+
+  it('should support x3 nesting blocks', async () => {
     const res = await payload.create({
       collection: 'posts',
       data: {
