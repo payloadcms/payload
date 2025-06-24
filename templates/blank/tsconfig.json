@@ -9,7 +9,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    // "composite": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -42,27 +41,4 @@
   "exclude": [
     "node_modules"
   ],
-  // "references": [
-  //   {
-  //     "path": "../../packages/payload"
-  //   },
-  //   {
-  //     "path": "../../packages/translations"
-  //   },
-  //   {
-  //     "path": "../../packages/ui"
-  //   },
-  //   {
-  //     "path": "../../packages/db-mongodb"
-  //   },
-  //   {
-  //     "path": "../../packages/payload-cloud"
-  //   },
-  //   {
-  //     "path": "../../packages/richtext-lexical"
-  //   },
-  //   {
-  //     "path": "../../packages/next"
-  //   }
-  // ]
 }

@@ -18,7 +18,7 @@
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
-    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
@@ -45,7 +45,7 @@
     "geist": "^1.3.0",
     "graphql": "^16.8.2",
     "lucide-react": "^0.378.0",
-    "next": "15.3.0",
+    "next": "15.3.3",
     "next-sitemap": "^4.2.3",
     "payload": "workspace:*",
     "prism-react-renderer": "^2.3.1",
