@@ -112,7 +112,7 @@
       }
     }
 
-    @container (max-width: 900px) {
+    @include mid-break {
       display: block;
 
       &--has-sidebar {

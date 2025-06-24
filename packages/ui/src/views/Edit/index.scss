@@ -9,6 +9,7 @@
     &--is-live-previewing {
       .collection-edit__main {
         width: 40%;
+        position: relative;
 
         &::after {
           content: ' ';
@@ -48,6 +49,12 @@
         margin-top: 0;
         margin-bottom: var(--base);
       }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .collection-edit {
+      --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
     }
   }
 }

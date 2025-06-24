@@ -17,7 +17,7 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
-import { LivePreview } from '../../elements/LivePreview/Preview/index.js'
+import { LivePreviewWindow } from '../../elements/LivePreview/Preview/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -618,13 +618,14 @@ export function DefaultEditView({
                 Description={Description}
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
+                forceSidebarWrap={isLivePreviewing}
                 readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
                 schemaPathSegments={schemaPathSegments}
               />
               {AfterDocument}
             </div>
             {isLivePreviewEnabled && !isInDrawer && (
-              <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
+              <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
             )}
           </div>
         </Form>

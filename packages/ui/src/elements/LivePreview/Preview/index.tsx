@@ -17,7 +17,7 @@ import './index.scss'
 
 const baseClass = 'live-preview-window'
 
-export const LivePreview: React.FC<EditViewProps> = (props) => {
+export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
     breakpoint,

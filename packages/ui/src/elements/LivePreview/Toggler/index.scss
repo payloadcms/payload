@@ -1,4 +1,4 @@
-@import '~@payloadcms/ui/scss';
+@import '../../../scss/styles.scss';
 
 @layer payload-default {
   .live-preview-toggler {
@@ -16,7 +16,7 @@
 
     &:hover,
     &--active {
-      background-color: var(--theme-elevation-1000);
+      background-color: var(--theme-elevation-800);
       color: var(--theme-elevation-0);
     }
   }
