@@ -123,7 +123,7 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
-export { AssignedToSelect } from '../../elements/FolderView/AssignedToSelect/index.js'
+export { FolderTypeField } from '../../elements/FolderView/FolderTypeField/index.js'
 export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
 

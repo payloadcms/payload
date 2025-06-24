@@ -90,7 +90,7 @@ export const createFolderCollection = ({
                     clientProps: {
                       options: collectionOptions,
                     },
-                    path: '@payloadcms/ui#AssignedToSelect',
+                    path: '@payloadcms/ui#FolderTypeField',
                   },
                 },
                 position: 'sidebar',

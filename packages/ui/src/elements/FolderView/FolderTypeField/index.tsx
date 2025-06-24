@@ -2,7 +2,7 @@ import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 
 import React from 'react'
 
-import type { ReactSelectAdapterProps } from '../../../elements/ReactSelect/types.js'
+import type { ReactSelectAdapterProps } from '../../ReactSelect/types.js'
 
 import { mergeFieldStyles } from '../../../fields/mergeFieldStyles.js'
 import { formatOptions } from '../../../fields/Select/index.js'
@@ -11,7 +11,7 @@ import { useField } from '../../../forms/useField/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
-export const AssignedToSelect = ({
+export const FolderTypeField = ({
   options: allSelectOptions,
   ...props
 }: { options: Option[] } & SelectFieldClientProps) => {
