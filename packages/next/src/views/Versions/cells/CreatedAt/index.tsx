@@ -4,7 +4,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-type CreatedAtCellProps = {
+export type CreatedAtCellProps = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
-import defaultAccess from '../auth/defaultAccess.js'
+import { defaultAccess } from '../auth/defaultAccess.js'
 
 export const lockedDocumentsCollectionSlug = 'payload-locked-documents'
 

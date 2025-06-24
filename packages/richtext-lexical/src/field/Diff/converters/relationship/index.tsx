@@ -4,6 +4,8 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
 import './index.scss'
 
+import { formatAdminURL } from 'payload/shared'
+
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedRelationshipNode } from '../../../../nodeTypes.js'
 
@@ -17,13 +19,15 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
     relationship: async ({ node, populate, providedCSSString }) => {
       let data: (Record<string, any> & TypeWithID) | undefined = undefined
 
+      const id = typeof node.value === 'object' ? node.value.id : node.value
+
       // If there's no valid upload data, populate return an empty string
       if (typeof node.value !== 'object') {
         if (!populate) {
           return ''
         }
         data = await populate<FileData & TypeWithID>({
-          id: node.value,
+          id,
           collectionSlug: node.relationTo,
         })
       } else {
@@ -38,7 +42,7 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
         <div
           className={`${baseClass}${providedCSSString}`}
           data-enable-match="true"
-          data-id={node.value}
+          data-id={id}
           data-slug={node.relationTo}
         >
           <div className={`${baseClass}__card`}>
@@ -56,7 +60,11 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
                 <a
                   className={`${baseClass}__link`}
                   data-enable-match="false"
-                  href={`/${relatedCollection.slug}/${data.id}`}
+                  href={formatAdminURL({
+                    adminRoute: req.payload.config.routes.admin,
+                    path: `/collections/${relatedCollection?.slug}/${data.id}`,
+                    serverURL: req.payload.config.serverURL,
+                  })}
                   rel="noopener noreferrer"
                   target="_blank"
                 >
@@ -64,14 +72,14 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
                 </a>
               </strong>
             ) : (
-              <strong>{node.value as string}</strong>
+              <strong>{id as string}</strong>
             )}
           </div>
         </div>
       )
 
       // Render to HTML
-      const html = ReactDOMServer.renderToString(JSX)
+      const html = ReactDOMServer.renderToStaticMarkup(JSX)
 
       return html
     },

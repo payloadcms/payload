@@ -1,14 +1,12 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type { FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
+'use client'
 
 import { getTranslation } from '@payloadcms/translations'
 import { extractID } from 'payload/shared'
 import React from 'react'
 
-import type { FormatDateArgs } from '../../../utilities/formatDocTitle/formatDateTitle.js'
-
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
@@ -19,42 +17,21 @@ import './index.scss'
 const baseClass = 'folder-file-table'
 
 type Props = {
-  dateFormat: FormatDateArgs['pattern']
-  disabledItems?: Set<FolderDocumentItemKey>
-  documents: FolderOrDocument[]
-  focusedRowIndex: number
-  i18n: I18nClient
-  isMovingItems: boolean
-  onRowClick: (args: {
-    event: React.MouseEvent<Element>
-    index: number
-    item: FolderOrDocument
-  }) => void
-  onRowPress: (args: {
-    event: React.KeyboardEvent<Element>
-    index: number
-    item: FolderOrDocument
-  }) => void
-  selectedItems: Set<FolderDocumentItemKey>
   showRelationCell?: boolean
-  subfolders: FolderOrDocument[]
 }
 
-export function FolderFileTable({
-  dateFormat,
-  disabledItems = new Set(),
-  documents,
-  focusedRowIndex,
-  i18n,
-  isMovingItems,
-  onRowClick,
-  onRowPress,
-  selectedItems,
-  showRelationCell = true,
-  subfolders,
-}: Props) {
+export function FolderFileTable({ showRelationCell = true }: Props) {
+  const {
+    documents,
+    focusedRowIndex,
+    isDragging,
+    onItemClick,
+    onItemKeyPress,
+    selectedItemKeys,
+    subfolders,
+  } = useFolder()
   const { config } = useConfig()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const [relationToMap] = React.useState(() => {
     const map: Record<string, string> = {}
@@ -109,7 +86,11 @@ export function FolderFileTable({
                 }
 
                 if ((name === 'createdAt' || name === 'updatedAt') && value[name]) {
-                  cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
+                  cellValue = formatDate({
+                    date: value[name],
+                    i18n,
+                    pattern: config.admin.dateFormat,
+                  })
                 }
 
                 if (name === 'type') {
@@ -127,9 +108,7 @@ export function FolderFileTable({
                   return cellValue
                 }
               })}
-              disabled={
-                (isMovingItems && selectedItems?.has(itemKey)) || disabledItems?.has(itemKey)
-              }
+              disabled={isDragging && selectedItemKeys?.has(itemKey)}
               dragData={{
                 id: subfolderID,
                 type: 'folder',
@@ -137,19 +116,19 @@ export function FolderFileTable({
               id={subfolderID}
               isDroppable
               isFocused={focusedRowIndex === rowIndex}
-              isSelected={selectedItems.has(itemKey)}
-              isSelecting={selectedItems.size > 0}
+              isSelected={selectedItemKeys.has(itemKey)}
+              isSelecting={selectedItemKeys.size > 0}
               itemKey={itemKey}
               key={`${rowIndex}-${itemKey}`}
               onClick={(event) => {
-                void onRowClick({
+                void onItemClick({
                   event,
                   index: rowIndex,
                   item: subfolder,
                 })
               }}
               onKeyDown={(event) => {
-                void onRowPress({
+                void onItemKeyPress({
                   event,
                   index: rowIndex,
                   item: subfolder,
@@ -173,7 +152,11 @@ export function FolderFileTable({
                 }
 
                 if ((name === 'createdAt' || name === 'updatedAt') && value[name]) {
-                  cellValue = formatDate({ date: value[name], i18n, pattern: dateFormat })
+                  cellValue = formatDate({
+                    date: value[name],
+                    i18n,
+                    pattern: config.admin.dateFormat,
+                  })
                 }
 
                 if (name === 'type') {
@@ -191,26 +174,26 @@ export function FolderFileTable({
                   return cellValue
                 }
               })}
-              disabled={isMovingItems || disabledItems?.has(itemKey)}
+              disabled={isDragging || selectedItemKeys?.has(itemKey)}
               dragData={{
                 id: documentID,
                 type: 'document',
               }}
               id={documentID}
               isFocused={focusedRowIndex === rowIndex}
-              isSelected={selectedItems.has(itemKey)}
-              isSelecting={selectedItems.size > 0}
+              isSelected={selectedItemKeys.has(itemKey)}
+              isSelecting={selectedItemKeys.size > 0}
               itemKey={itemKey}
               key={`${rowIndex}-${itemKey}`}
               onClick={(event) => {
-                void onRowClick({
+                void onItemClick({
                   event,
                   index: rowIndex,
                   item: document,
                 })
               }}
               onKeyDown={(event) => {
-                void onRowPress({
+                void onItemKeyPress({
                   event,
                   index: rowIndex,
                   item: document,

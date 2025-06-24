@@ -1,8 +1,7 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
@@ -33,7 +32,9 @@ const sanitizeJoinFieldQuery = async ({
 }) => {
   const { joinPath } = join
 
-  if (joinsQuery[joinPath] === false) {
+  // TODO: fix any's in joinsQuery[joinPath]
+
+  if ((joinsQuery as any)[joinPath] === false) {
     return
   }
 
@@ -44,15 +45,15 @@ const sanitizeJoinFieldQuery = async ({
     : true
 
   if (accessResult === false) {
-    joinsQuery[joinPath] = false
+    ;(joinsQuery as any)[joinPath] = false
     return
   }
 
-  if (!joinsQuery[joinPath]) {
-    joinsQuery[joinPath] = {}
+  if (!(joinsQuery as any)[joinPath]) {
+    ;(joinsQuery as any)[joinPath] = {}
   }
 
-  const joinQuery = joinsQuery[joinPath]
+  const joinQuery = (joinsQuery as any)[joinPath]
 
   if (!joinQuery.where) {
     joinQuery.where = {}

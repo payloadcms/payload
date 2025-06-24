@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.41.0",
+  "version": "3.43.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -55,6 +55,11 @@
       "import": "./src/utilities/buildTableState.ts",
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
+    },
+    "./utilities/getFolderResultsComponentAndData": {
+      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
     },
     "./utilities/getClientSchemaMap": {
       "import": "./src/utilities/getClientSchemaMap.ts",

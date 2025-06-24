@@ -41,6 +41,7 @@ type RelationshipTableComponentProps = {
   readonly BeforeInput?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
+  readonly fieldPath?: string
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
   readonly initialDrawerData?: DocumentDrawerProps['initialData']
@@ -60,6 +61,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     BeforeInput,
     disableTable = false,
     field,
+    fieldPath,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -300,6 +302,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
             pillStyle="light"
+            size="small"
           >
             {t('general:columns')}
           </Pill>
@@ -342,7 +345,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 orderableFieldName={
                   !field.orderable || Array.isArray(field.collection)
                     ? undefined
-                    : `_${field.collection}_${field.name}_order`
+                    : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
               >
                 <TableColumnsProvider

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import { v4 as uuid } from 'uuid'
 
@@ -233,9 +232,10 @@ export const sanitizeFields = async ({
       }
 
       if (typeof field.validate === 'undefined') {
-        const defaultValidate = validations[field.type]
+        const defaultValidate = validations[field.type as keyof typeof validations]
         if (defaultValidate) {
-          field.validate = (val, options) => defaultValidate(val, { ...field, ...options })
+          field.validate = (val: any, options: any) =>
+            defaultValidate(val, { ...field, ...options })
         } else {
           field.validate = (): true => true
         }
