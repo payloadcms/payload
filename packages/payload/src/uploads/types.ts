@@ -225,7 +225,8 @@ export type UploadConfig = {
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
-   * If an allowList is provided, server-side fetching will be enabled for specified URLs.
+   * If an `allowList` is provided, server-side fetching will be enabled for specified URLs.
+   *
    * @default true (client-side fetching enabled)
    */
   pasteURL?:
