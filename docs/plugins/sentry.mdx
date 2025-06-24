@@ -84,6 +84,28 @@ const config = buildConfig({
 export default config
 ```
 
+## Instrumenting Database Queries
+
+If you want Sentry to capture Postgres query performance traces, you need to inject the Sentry-patched `pg` driver into the Postgres adapter. This ensures Sentry’s instrumentation hooks into your database calls.
+
+```ts
+import * as Sentry from '@sentry/nextjs'
+import { buildConfig } from 'payload'
+import { sentryPlugin } from '@payloadcms/plugin-sentry'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import pg from 'pg'
+
+export default buildConfig({
+  db: postgresAdapter({
+    pool: { connectionString: process.env.DATABASE_URL },
+    pg, // Inject the patched pg driver for Sentry instrumentation
+  }),
+  plugins: [
+    sentryPlugin({ Sentry }),
+  ],
+})
+```
+
 ## Options
 
 - `Sentry` : Sentry | **required**
