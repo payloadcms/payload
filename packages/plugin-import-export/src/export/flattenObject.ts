@@ -28,13 +28,16 @@ export const flattenObject = ({
           } else {
             if (toCSVFunctions?.[newKey]) {
               const columnName = `${newKey}_${index}`
-              row[columnName] = toCSVFunctions[newKey]({
+              const result = toCSVFunctions[newKey]({
                 columnName,
                 doc,
                 row,
                 siblingDoc,
                 value: item,
               })
+              if (typeof result !== 'undefined') {
+                row[columnName] = result
+              }
             } else {
               row[`${newKey}_${index}`] = item
             }
@@ -44,23 +47,29 @@ export const flattenObject = ({
         if (!toCSVFunctions?.[newKey]) {
           flatten(value, newKey)
         } else {
-          row[newKey] = toCSVFunctions[newKey]({
+          const result = toCSVFunctions[newKey]({
             columnName: newKey,
             doc,
             row,
             siblingDoc,
             value,
           })
+          if (typeof result !== 'undefined') {
+            row[newKey] = result
+          }
         }
       } else {
         if (toCSVFunctions?.[newKey]) {
-          row[newKey] = toCSVFunctions[newKey]({
+          const result = toCSVFunctions[newKey]({
             columnName: newKey,
             doc,
             row,
             siblingDoc,
             value,
           })
+          if (typeof result !== 'undefined') {
+            row[newKey] = result
+          }
         } else {
           row[newKey] = value
         }
