@@ -75,7 +75,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 }
 
-export default async function findOneLocal<
+export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
