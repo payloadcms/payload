@@ -259,19 +259,18 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            collectionPreferences={collectionPreferences}
             collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
+            listPreferences={collectionPreferences}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           >
             {RenderServerComponent({
               clientProps: {
                 ...listViewSlots,
-                collectionPreferences,
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
@@ -279,6 +278,7 @@ export const renderListView = async (
                 disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
+                listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,
                 queryPresetPermissions,
