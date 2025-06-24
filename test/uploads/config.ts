@@ -12,6 +12,7 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
+import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
@@ -19,6 +20,7 @@ import {
   allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
@@ -639,6 +641,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
+    AdminUploadControl,
     {
       slug: 'optional-file',
       fields: [],
@@ -828,6 +831,16 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         focalPoint: false,
+      },
+    },
+    {
+      slug: constructorOptionsSlug,
+      fields: [],
+      upload: {
+        constructorOptions: {
+          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+        },
+        staticDir: path.resolve(dirname, './media'),
       },
     },
   ],

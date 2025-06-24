@@ -1,5 +1,10 @@
 import { pathToFileURL } from 'url'
 
+import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
+
+/**
+ * Imports a handler function from a given path.
+ */
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner!: T
   const [runnerPath, runnerImportName] = path.split('#')
@@ -34,4 +39,20 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
   }
 
   return runner
+}
+
+/**
+ * The `handler` property of a task config can either be a function or a path to a module that exports a function.
+ * This function resolves the handler to a function, either by importing it from the path or returning the function directly
+ * if it is already a function.
+ */
+export async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
+  if (!taskConfig) {
+    throw new Error('Task config is required to get the task handler')
+  }
+  if (typeof taskConfig.handler === 'function') {
+    return taskConfig.handler
+  } else {
+    return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
+  }
 }

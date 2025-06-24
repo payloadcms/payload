@@ -15,6 +15,7 @@ export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'
 export const mediaCollectionSlug = 'media'
+export const media2CollectionSlug = 'media2'
 
 export const versionCollectionSlug = 'version-posts'
 
@@ -31,6 +32,7 @@ export const collectionSlugs = [
   postCollectionSlug,
   diffCollectionSlug,
   mediaCollectionSlug,
+  media2CollectionSlug,
   versionCollectionSlug,
   textCollectionSlug,
 ]

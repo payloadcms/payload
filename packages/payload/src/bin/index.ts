@@ -110,10 +110,12 @@ export const bin = async () => {
     const payload = await getPayload({ config })
     const limit = args.limit ? parseInt(args.limit, 10) : undefined
     const queue = args.queue ? args.queue : undefined
+    const allQueues = !!args.allQueues
 
     if (args.cron) {
       new Cron(args.cron, async () => {
         await payload.jobs.run({
+          allQueues,
           limit,
           queue,
         })
@@ -124,6 +126,7 @@ export const bin = async () => {
       return
     } else {
       await payload.jobs.run({
+        allQueues,
         limit,
         queue,
       })

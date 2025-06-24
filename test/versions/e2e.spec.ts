@@ -175,6 +175,36 @@ describe('Versions', () => {
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 
+    test('autosave relationships - should select doc after creating from relationship field', async () => {
+      await page.goto(postURL.create)
+      const autosaveRelationField = page.locator('#field-relationToAutosaves')
+      await expect(autosaveRelationField).toBeVisible()
+      const addNewButton = autosaveRelationField.locator(
+        '.relationship-add-new__add-button.doc-drawer__toggler',
+      )
+      await addNewButton.click()
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
+      await titleField.fill('test')
+      await descriptionField.fill('test')
+
+      const createdDate = await page.textContent(
+        'li:has(p:has-text("Created:")) .doc-controls__value',
+      )
+
+      // wait for modified date and created date to be different
+      await expect(async () => {
+        const modifiedDateLocator = page.locator(
+          'li:has(p:has-text("Last Modified:")) .doc-controls__value',
+        )
+        await expect(modifiedDateLocator).not.toHaveText(createdDate ?? '')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      const closeDrawer = page.locator('.doc-drawer__header-close')
+      await closeDrawer.click()
+      const fieldValue = autosaveRelationField.locator('.value-container')
+      await expect(fieldValue).toContainText('test')
+    })
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
@@ -202,7 +232,7 @@ describe('Versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs')).toBeVisible()
-      await page.locator('.restore-version__button').click()
+      await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
       await expect(page.locator('#field-title')).toHaveValue('v1')
@@ -220,7 +250,7 @@ describe('Versions', () => {
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
-      await expect(page.locator('main.versions')).toContainText('Current Published Version')
+      await expect(page.locator('main.versions')).toContainText('Currently Published')
     })
 
     test('should show unpublished version status in versions view', async () => {
@@ -1245,6 +1275,7 @@ describe('Versions', () => {
     beforeEach(async () => {
       const newPost = await payload.create({
         collection: draftCollectionSlug,
+        depth: 0,
         data: {
           title: 'new post',
           description: 'new description',
@@ -1257,6 +1288,7 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         id: postID,
         draft: true,
+        depth: 0,
         data: {
           title: 'draft post',
           description: 'draft description',
@@ -1272,6 +1304,8 @@ describe('Versions', () => {
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
+        limit: 1,
+        depth: 0,
         where: {
           parent: { equals: postID },
         },
@@ -1282,6 +1316,8 @@ describe('Versions', () => {
       const diffDoc = (
         await payload.find({
           collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
         })
       ).docs[0] as Diff
 
@@ -1290,6 +1326,8 @@ describe('Versions', () => {
       const versionDiff = (
         await payload.findVersions({
           collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
           where: {
             parent: { equals: diffID },
           },
@@ -1299,25 +1337,25 @@ describe('Versions', () => {
       versionDiffID = versionDiff.id
     })
 
-    async function navigateToVersionDiff() {
+    async function navigateToDraftVersionView() {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
-    async function navigateToVersionFieldsDiff() {
+    async function navigateToDiffVersionView() {
       const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
       await page.goto(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     test('should render diff', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
       expect(true).toBe(true)
     })
 
     test('should render diff for nested fields', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1336,7 +1374,7 @@ describe('Versions', () => {
     })
 
     test('should render diff collapser for nested fields', async () => {
-      await navigateToVersionDiff()
+      await navigateToDraftVersionView()
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
@@ -1345,9 +1383,14 @@ describe('Versions', () => {
       const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
       await expect(blocksDiff).toBeVisible()
 
+      // Collapse to show iterable fields change count
+      await blocksDiff.locator('.diff-collapser__toggle-button').first().click()
+
       // Expect iterable change count to be visible
       const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
       await expect(iterableChangeCount).toHaveText('2 changed fields')
+
+      await blocksDiff.locator('.diff-collapser__toggle-button').first().click()
 
       // Expect iterable rows to be visible
       const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
@@ -1357,11 +1400,13 @@ describe('Versions', () => {
       const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
       await expect(firstBlocksDiffRow).toBeVisible()
 
+      await firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first().click()
       // Expect first row change count to be visible
       const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
         .locator('.diff-collapser__field-change-count')
         .first()
       await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+      await firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first().click()
 
       // Expect collapser content to be visible
       const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')
@@ -1385,31 +1430,27 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArray = page.locator('[data-field-path="array.0.textInArray"]')
 
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInArray')
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInArray2')
+      await expect(textInArray.locator('.html-diff__diff-old')).toHaveText('textInArray')
+      await expect(textInArray.locator('.html-diff__diff-new')).toHaveText('textInArray2')
     })
 
     test('correctly renders diff for localized array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArray = page
         .locator('[data-field-path="arrayLocalized"][data-locale="en"]')
         .locator('[data-field-path="arrayLocalized.0.textInArrayLocalized"]')
 
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInArrayLocalized',
-      )
-      await expect(textInArray.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInArrayLocalized2',
-      )
+      await expect(textInArray.locator('.html-diff__diff-old')).toHaveText('textInArrayLocalized')
+      await expect(textInArray.locator('.html-diff__diff-new')).toHaveText('textInArrayLocalized2')
     })
 
     test('correctly renders modified-only diff for localized array fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
@@ -1421,161 +1462,153 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.0.textInBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInBlock')
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText('textInBlock')
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText('textInBlock2')
     })
 
     test('correctly renders diff for collapsibles within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator(
         '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
       )
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInCollapsibleInCollapsibleBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInCollapsibleInCollapsibleBlock2',
       )
     })
 
     test('correctly renders diff for rows within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInRowInCollapsibleBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInRowInCollapsibleBlock2',
       )
     })
 
     test('correctly renders diff for named tabs within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator(
         '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
       )
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInNamedTab1InBlock',
-      )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText('textInNamedTab1InBlock')
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInNamedTab1InBlock2',
       )
     })
 
     test('correctly renders diff for unnamed tabs within block fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
 
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-old')).toHaveText(
         'textInUnnamedTab2InBlock',
       )
-      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInBlock.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab2InBlock2',
       )
     })
 
     test('correctly renders diff for checkbox fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('tr').nth(1).locator('td').nth(1)).toHaveText('true')
-      await expect(checkbox.locator('tr').nth(1).locator('td').nth(3)).toHaveText('false')
+      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
+      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
     })
 
     test('correctly renders diff for code fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const code = page.locator('[data-field-path="code"]')
 
-      await expect(code.locator('tr').nth(1).locator('td').nth(1)).toHaveText('code')
-      await expect(code.locator('tr').nth(1).locator('td').nth(3)).toHaveText('code2')
+      await expect(code.locator('.html-diff__diff-old')).toHaveText('code')
+      await expect(code.locator('.html-diff__diff-new')).toHaveText('code2')
     })
 
     test('correctly renders diff for collapsible fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const collapsible = page.locator('[data-field-path="textInCollapsible"]')
 
-      await expect(collapsible.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInCollapsible',
-      )
-      await expect(collapsible.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInCollapsible2',
-      )
+      await expect(collapsible.locator('.html-diff__diff-old')).toHaveText('textInCollapsible')
+      await expect(collapsible.locator('.html-diff__diff-new')).toHaveText('textInCollapsible2')
     })
 
     test('correctly renders diff for date fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const date = page.locator('[data-field-path="date"]')
 
-      await expect(date.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        '2021-01-01T00:00:00.000Z',
-      )
-      await expect(date.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        '2023-01-01T00:00:00.000Z',
-      )
+      await expect(date.locator('.html-diff__diff-old')).toContainText(' 2021, ')
+      await expect(date.locator('.html-diff__diff-new')).toContainText(' 2023, ')
+      // Do not check for exact date, as it may vary based on
+      // timezone of the test runner which could cause flakiness
     })
 
     test('correctly renders diff for email fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const email = page.locator('[data-field-path="email"]')
 
-      await expect(email.locator('tr').nth(1).locator('td').nth(1)).toHaveText('email@email.com')
-      await expect(email.locator('tr').nth(1).locator('td').nth(3)).toHaveText('email2@email.com')
+      await expect(email.locator('.html-diff__diff-old')).toHaveText('email@email.com')
+      await expect(email.locator('.html-diff__diff-new')).toHaveText('email2@email.com')
     })
 
     test('correctly renders diff for group fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const group = page.locator('[data-field-path="group.textInGroup"]')
 
-      await expect(group.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInGroup')
-      await expect(group.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInGroup2')
+      await expect(group.locator('.html-diff__diff-old')).toHaveText('textInGroup')
+      await expect(group.locator('.html-diff__diff-new')).toHaveText('textInGroup2')
     })
 
     test('correctly renders diff for number fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const number = page.locator('[data-field-path="number"]')
 
-      await expect(number.locator('tr').nth(1).locator('td').nth(1)).toHaveText('1')
-      await expect(number.locator('tr').nth(1).locator('td').nth(3)).toHaveText('2')
+      await expect(number.locator('.html-diff__diff-old')).toHaveText('1')
+      await expect(number.locator('.html-diff__diff-new')).toHaveText('2')
     })
 
     test('correctly renders diff for point fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const point = page.locator('[data-field-path="point"]')
 
-      await expect(point.locator('tr').nth(3).locator('td').nth(1)).toHaveText('2')
-      await expect(point.locator('tr').nth(3).locator('td').nth(3)).toHaveText('3')
+      await expect(point.locator('.html-diff__diff-old')).toHaveText('[\n 1,\n 2\n]')
+      await expect(point.locator('.html-diff__diff-new')).toHaveText('[\n 1,\n 3\n]')
     })
 
     test('correctly renders diff for radio fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const radio = page.locator('[data-field-path="radio"]')
 
-      await expect(radio.locator('tr').nth(1).locator('td').nth(1)).toHaveText('Option 1')
-      await expect(radio.locator('tr').nth(1).locator('td').nth(3)).toHaveText('Option 2')
+      await expect(radio.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expect(radio.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
     test('correctly renders diff for relationship fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const relationship = page.locator('[data-field-path="relationship"]')
 
@@ -1583,23 +1616,24 @@ describe('Versions', () => {
         collection: 'draft-posts',
         sort: 'createdAt',
         limit: 3,
+        depth: 0,
       })
 
-      await expect(relationship.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        String(draftDocs?.docs?.[1]?.id),
-      )
-      await expect(relationship.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        String(draftDocs?.docs?.[2]?.id),
-      )
+      await expect(
+        relationship.locator('.html-diff__diff-old .relationship-diff__info'),
+      ).toHaveText(String(draftDocs?.docs?.[1]?.title))
+      await expect(
+        relationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText(String(draftDocs?.docs?.[2]?.title))
     })
 
     test('correctly renders diff for richtext fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const richtext = page.locator('[data-field-path="richtext"]')
 
-      const oldDiff = richtext.locator('.lexical-diff__diff-old')
-      const newDiff = richtext.locator('.lexical-diff__diff-new')
+      const oldDiff = richtext.locator('.html-diff__diff-old')
+      const newDiff = richtext.locator('.html-diff__diff-new')
 
       const oldHTML =
         `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
@@ -1612,7 +1646,7 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for richtext fields with custom Diff component', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const richtextWithCustomDiff = page.locator('[data-field-path="richtextWithCustomDiff"]')
 
@@ -1620,83 +1654,78 @@ describe('Versions', () => {
     })
 
     test('correctly renders diff for row fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInRow = page.locator('[data-field-path="textInRow"]')
 
-      await expect(textInRow.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textInRow')
-      await expect(textInRow.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInRow2')
+      await expect(textInRow.locator('.html-diff__diff-old')).toHaveText('textInRow')
+      await expect(textInRow.locator('.html-diff__diff-new')).toHaveText('textInRow2')
     })
 
     test('correctly renders diff for select fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const select = page.locator('[data-field-path="select"]')
 
-      await expect(select.locator('tr').nth(1).locator('td').nth(1)).toHaveText('Option 1')
-      await expect(select.locator('tr').nth(1).locator('td').nth(3)).toHaveText('Option 2')
+      await expect(select.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expect(select.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
     test('correctly renders diff for named tabs', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInNamedTab1 = page.locator('[data-field-path="namedTab1.textInNamedTab1"]')
 
-      await expect(textInNamedTab1.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInNamedTab1',
-      )
-      await expect(textInNamedTab1.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInNamedTab12',
-      )
+      await expect(textInNamedTab1.locator('.html-diff__diff-old')).toHaveText('textInNamedTab1')
+      await expect(textInNamedTab1.locator('.html-diff__diff-new')).toHaveText('textInNamedTab12')
     })
 
     test('correctly renders diff for unnamed tabs', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textInUnamedTab2 = page.locator('[data-field-path="textInUnnamedTab2"]')
 
-      await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInUnnamedTab2',
-      )
-      await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+      await expect(textInUnamedTab2.locator('.html-diff__diff-old')).toHaveText('textInUnnamedTab2')
+      await expect(textInUnamedTab2.locator('.html-diff__diff-new')).toHaveText(
         'textInUnnamedTab22',
       )
     })
 
     test('correctly renders diff for text fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const text = page.locator('[data-field-path="text"]')
 
-      await expect(text.locator('tr').nth(1).locator('td').nth(1)).toHaveText('text')
-      await expect(text.locator('tr').nth(1).locator('td').nth(3)).toHaveText('text2')
+      await expect(text.locator('.html-diff__diff-old')).toHaveText('text')
+      await expect(text.locator('.html-diff__diff-new')).toHaveText('text2')
     })
 
     test('correctly renders diff for textArea fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const textArea = page.locator('[data-field-path="textArea"]')
 
-      await expect(textArea.locator('tr').nth(1).locator('td').nth(1)).toHaveText('textArea')
-      await expect(textArea.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textArea2')
+      await expect(textArea.locator('.html-diff__diff-old')).toHaveText('textArea')
+      await expect(textArea.locator('.html-diff__diff-new')).toHaveText('textArea2')
     })
 
     test('correctly renders diff for upload fields', async () => {
-      await navigateToVersionFieldsDiff()
+      await navigateToDiffVersionView()
 
       const upload = page.locator('[data-field-path="upload"]')
 
       const uploadDocs = await payload.find({
         collection: 'media',
         sort: 'createdAt',
+        depth: 0,
         limit: 2,
       })
 
-      await expect(upload.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        String(uploadDocs?.docs?.[0]?.id),
+      await expect(upload.locator('.html-diff__diff-old .upload-diff__info')).toHaveText(
+        String(uploadDocs?.docs?.[0]?.filename),
       )
-      await expect(upload.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        String(uploadDocs?.docs?.[1]?.id),
+      await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
+        String(uploadDocs?.docs?.[1]?.filename),
       )
     })
   })
