@@ -57,7 +57,7 @@ export const formatDocTitle = ({
   }
 
   // richtext lexical case. We convert the first child of root to plain text
-  if (isSerializedLexicalEditor(title)) {
+  if (title && isSerializedLexicalEditor(title)) {
     title = formatLexicalDocTitle(title.root.children?.[0]?.children || [], '')
   }
 
