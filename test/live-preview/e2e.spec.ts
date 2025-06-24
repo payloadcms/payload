@@ -67,18 +67,12 @@ describe('Live Preview', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('collection — has tab', async () => {
+  test('collection — renders toggler', async () => {
     await navigateToDoc(page, pagesURLUtil)
 
-    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
 
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-
-    const href = await livePreviewTab.getAttribute('href')
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
-
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
@@ -88,11 +82,6 @@ describe('Live Preview', () => {
     // locate using aria label "before-document-controls"
     const beforeDocumentControls = page.locator('button[aria-label="before-document-controls"]')
     await expect(beforeDocumentControls).toBeVisible()
-  })
-
-  test('collection — has route', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    await expect(page.locator('.live-preview')).toBeVisible()
   })
 
   test('collection — renders iframe', async () => {
@@ -199,34 +188,18 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection — should show live-preview view-level action in live-preview view', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
-  })
-
-  test('global — should show live-preview view-level action in live-preview view', async () => {
-    await goToGlobalLivePreview(page, 'footer', serverURL)
-    await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
-  })
-
-  test('global — has tab', async () => {
+  test('global — renders toggler', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
 
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
 
-    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
-
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const href = await livePreviewTab.getAttribute('href')
-
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 
-  test('global — has route and renders iframe', async () => {
+  test('global — renders iframe', async () => {
     await goToGlobalLivePreview(page, 'header', serverURL)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()

@@ -12,7 +12,19 @@ export const goToCollectionLivePreview = async (
   urlUtil: AdminUrlUtil,
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
-  await page.goto(`${page.url()}/preview`)
+  const toggler = page.locator('#live-preview-toggler')
+  await expect(toggler).toBeVisible()
+
+  const isActive = await toggler.evaluate((el) =>
+    el.classList.contains('live-preview-toggler--active'),
+  )
+
+  if (!isActive) {
+    await toggler.click()
+  }
+
+  await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+  await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
 }
 
 export const goToGlobalLivePreview = async (
@@ -21,8 +33,20 @@ export const goToGlobalLivePreview = async (
   serverURL: string,
 ): Promise<void> => {
   const global = new AdminUrlUtil(serverURL, slug)
-  const previewURL = `${global.global(slug)}/preview`
-  await page.goto(previewURL)
+  await page.goto(global.global(slug))
+  const toggler = page.locator('#live-preview-toggler')
+  await expect(toggler).toBeVisible()
+
+  const isActive = await toggler.evaluate((el) =>
+    el.classList.contains('live-preview-toggler--active'),
+  )
+
+  if (!isActive) {
+    await toggler.click()
+  }
+
+  await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+  await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
 }
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
