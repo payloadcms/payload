@@ -1453,9 +1453,31 @@ describe('Queues', () => {
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
     })
 
-    it('can auto-schedule through REST API and autorun jobs', async () => {
+    it('can auto-schedule through handleSchedules REST API and autorun jobs', async () => {
       // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
       await restClient.GET('/payload-jobs/handleSchedules', {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+
+      // Do not call payload.jobs.run()
+
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(1)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('can auto-schedule through run?handleSchedules=true REST API and autorun jobs', async () => {
+      // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
+      await restClient.GET('/payload-jobs/run?handleSchedules=true', {
         headers: {
           Authorization: `JWT ${token}`,
         },

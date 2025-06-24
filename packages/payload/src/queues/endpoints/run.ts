@@ -39,8 +39,8 @@ export const runJobsEndpoint: Endpoint = {
       limit,
       queue,
     } = req.query as {
-      allQueues?: boolean
-      handleSchedules?: boolean
+      allQueues?: 'false' | 'true'
+      handleSchedules?: 'false' | 'true'
       limit?: number
       queue?: string
     }
