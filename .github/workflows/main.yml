@@ -650,9 +650,6 @@ jobs:
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
           MONGODB_URL: mongodb://localhost:27017/payloadtests
 
-      - name: Start Template For E2Es
-        run: pnpm --filter ${{ matrix.template }} start &
-
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
