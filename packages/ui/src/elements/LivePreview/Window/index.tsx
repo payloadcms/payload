@@ -38,7 +38,10 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
-  const [fields] = useAllFormFields()
+  const prevIsLivePreviewing =
+    React.useRef<ReturnType<typeof useLivePreviewContext>['isLivePreviewing']>(undefined)
+
+  const [formState] = useAllFormFields()
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
@@ -50,8 +53,8 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     }
 
     // For performance, do no reduce fields to values until after the iframe or popup has loaded
-    if (fields && window && 'postMessage' in window && appIsReady) {
-      const values = reduceFieldsToValues(fields, true)
+    if (formState && window && 'postMessage' in window && appIsReady) {
+      const values = reduceFieldsToValues(formState, true)
 
       // To reduce on large `postMessage` payloads, only send `fieldSchemaToJSON` one time
       // To do this, the underlying JS function maintains a cache of this value
@@ -81,7 +84,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       }
     }
   }, [
-    fields,
+    formState,
     url,
     iframeHasLoaded,
     previewWindowType,
