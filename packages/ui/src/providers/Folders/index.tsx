@@ -71,6 +71,7 @@ export type FolderContextValue = {
   }) => void
   refineFolderData: (args: { query?: FolderQueryParams; updateURL: boolean }) => void
   search: string
+  selectedCollectionCounter?: Record<CollectionSlug, number>
   readonly selectedItemKeys: Set<FolderDocumentItemKey>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
@@ -105,6 +106,7 @@ const Context = React.createContext<FolderContextValue>({
   onItemKeyPress: () => undefined,
   refineFolderData: () => undefined,
   search: '',
+  selectedCollectionCounter: undefined,
   selectedItemKeys: new Set<FolderDocumentItemKey>(),
   setBreadcrumbs: () => {},
   setFocusedRowIndex: () => -1,
@@ -268,7 +270,6 @@ export function FolderProvider({
       if (updateURL) {
         const newQuery = mergeQuery(query)
 
-        console.log('new query', { ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) })
         startRouteTransition(() =>
           router.replace(
             `${qs.stringify({ ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) }, { addQueryPrefix: true })}`,
@@ -642,25 +643,46 @@ export function FolderProvider({
 
   const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(
     (item) => {
+      function folderAcceptsItem({
+        collectionCounter,
+        item,
+      }: {
+        collectionCounter: Record<string, number>
+        item: FolderOrDocument
+      }): boolean {
+        if (
+          !item.value.folderType ||
+          (Array.isArray(item.value.folderType) && item.value.folderType.length === 0)
+        ) {
+          // Enable folder that accept all collections
+          return false
+        }
+
+        // Disable folders that do not accept all of the selected collections
+        return Object.entries(collectionCounter).some(([slug]) => {
+          return !item.value.folderType.includes(slug)
+        })
+      }
+
       if (isDragging) {
         const isSelected = selectedItemKeys.has(item.itemKey)
         if (isSelected) {
           return true
         } else if (item.relationTo === folderCollectionSlug) {
-          if (
-            !item.value.folderType ||
-            (Array.isArray(item.value.folderType) && item.value.folderType.length === 0)
-          ) {
-            return false
-          }
-          // Disable folders if they do not support ALL of the selected collections
-          return Object.entries(selectedCollectionCounter).some(([slug]) => {
-            return !item.value.folderType.includes(slug)
-          })
+          return folderAcceptsItem({ collectionCounter: selectedCollectionCounter, item })
         } else {
-          return !selectedCollectionCounter?.[item.relationTo]
+          // Non folder items are disabled on drag
+          return true
         }
-      } else if (parentFolderContext.selectedItemKeys.has(item.itemKey)) {
+      } else if (parentFolderContext?.selectedCollectionCounter) {
+        // Moving items to folder
+        if (item.relationTo === folderCollectionSlug) {
+          return folderAcceptsItem({
+            collectionCounter: parentFolderContext.selectedCollectionCounter,
+            item,
+          })
+        }
+        // If the item is not a folder, it is disabled on move
         return true
       }
     },
@@ -669,7 +691,7 @@ export function FolderProvider({
       isDragging,
       selectedItemKeys,
       folderCollectionSlug,
-      parentFolderContext.selectedItemKeys,
+      parentFolderContext.selectedCollectionCounter,
     ],
   )
 
@@ -716,6 +738,7 @@ export function FolderProvider({
         onItemKeyPress,
         refineFolderData,
         search,
+        selectedCollectionCounter,
         selectedItemKeys,
         setBreadcrumbs,
         setFocusedRowIndex,

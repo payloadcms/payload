@@ -46,7 +46,6 @@ export function FilterFolderTypePill() {
     )
   })
 
-  console.log({ visibleCollectionSlugs })
   return (
     <CheckboxPopup
       Button={
