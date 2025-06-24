@@ -155,6 +155,8 @@ export const renderDocument = async ({
     }),
   ])
 
+  const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
+
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
     { state: formState },
@@ -178,7 +180,7 @@ export const renderDocument = async ({
       fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
-      operation: (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create',
+      operation,
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
@@ -370,7 +372,7 @@ export const renderDocument = async ({
         unpublishedVersionCount={unpublishedVersionCount}
         versionCount={versionCount}
       >
-        <LivePreviewProvider breakpoints={breakpoints} url={livePreviewURL}>
+        <LivePreviewProvider breakpoints={breakpoints} operation={operation} url={livePreviewURL}>
           {showHeader && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}

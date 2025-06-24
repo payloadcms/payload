@@ -77,11 +77,10 @@ describe('Live Preview', () => {
     })
   })
 
-  test('collection - should render BeforeDocumentControls', async () => {
-    await goToCollectionLivePreview(page, pagesURLUtil)
-    // locate using aria label "before-document-controls"
-    const beforeDocumentControls = page.locator('button[aria-label="before-document-controls"]')
-    await expect(beforeDocumentControls).toBeVisible()
+  test('collection — does not render live preview when creating a new doc', async () => {
+    await page.goto(pagesURLUtil.create)
+    await expect(page.locator('button#live-preview-toggler')).toBeHidden()
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 
   test('collection — renders iframe', async () => {
