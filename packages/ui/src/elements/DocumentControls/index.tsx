@@ -110,7 +110,7 @@ export const DocumentControls: React.FC<{
 
   const globalConfig = getEntityConfig({ globalSlug: slug })
 
-  const { isLivePreviewEnabled, isLivePreviewing, setIsLivePreviewing } = useLivePreviewContext()
+  const { isLivePreviewEnabled } = useLivePreviewContext()
 
   const {
     admin: { dateFormat },

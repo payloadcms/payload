@@ -14,6 +14,7 @@ export const LivePreviewToggler: React.FC = () => {
   return (
     <button
       className={[baseClass, isLivePreviewing && `${baseClass}--active`].filter(Boolean).join(' ')}
+      id="live-preview-toggler"
       onClick={() => setIsLivePreviewing(!isLivePreviewing)}
       title={t('general:livePreview')}
       type="button"

@@ -23,13 +23,26 @@ export type LivePreviewProviderProps = {
   url?: string
 }
 
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
+}
+
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints,
   children,
-  url,
+  url: incomingUrl,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
   const [isLivePreviewing, setIsLivePreviewing] = useState(true) // TODO: wire into prefs
+
+  const url =
+    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+      ? incomingUrl
+      : getAbsoluteUrl(incomingUrl)
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -61,9 +74,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
-  const [fieldSchemaJSON] = useState(() => {
-    return fieldSchemaToJSON(entityConfig.fields, config)
-  })
+  const [fieldSchemaJSON] = useState(() => fieldSchemaToJSON(entityConfig?.fields || [], config))
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -176,7 +187,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         iframeHasLoaded,
         iframeRef,
         isLivePreviewEnabled: Boolean(
-          config?.admin?.livePreview?.collections?.includes(entityConfig.slug) ||
+          (collectionSlug && config?.admin?.livePreview?.collections?.includes(collectionSlug)) ||
+            (globalSlug && config.admin?.livePreview?.globals?.includes(globalSlug)) ||
             entityConfig?.admin?.livePreview,
         ),
         isLivePreviewing,
