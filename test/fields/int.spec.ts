@@ -1396,6 +1396,58 @@ describe('Fields', () => {
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
     })
+
+    it('should throw validation error when "required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized,
+          point,
+        },
+      })
+
+      // try to update the required field to null
+      await expect(() =>
+        payload.update({
+          collection: 'point-fields',
+          data: {
+            point: null,
+          },
+          id: doc.id,
+        }),
+      ).rejects.toThrow('The following field is invalid: Location')
+    })
+
+    it('should not throw validation error when non-"required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized,
+          point,
+        },
+      })
+
+      expect(doc.localized).toEqual(localized)
+
+      // try to update the non-required field to null
+      const updatedDoc = await payload.update({
+        collection: 'point-fields',
+        data: {
+          localized: null,
+        },
+        id: doc.id,
+      })
+
+      expect(updatedDoc.localized).toEqual(undefined)
+    })
   })
 
   describe('checkbox', () => {
