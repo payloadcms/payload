@@ -391,6 +391,12 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
           setSubmitted(true)
 
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setSubmitted(false)
+          }
+
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             errorToast(json.message)
@@ -435,12 +441,6 @@ export const Form: React.FC<FormProps> = (props) => {
             nonFieldErrors.forEach((err) => {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
-
-            // When there's no field-related errors, don't consider the form as submitted,
-            // to not trigger visible validation.
-            if (!fieldErrors.length && nonFieldErrors.length) {
-              setSubmitted(false)
-            }
 
             return
           }
