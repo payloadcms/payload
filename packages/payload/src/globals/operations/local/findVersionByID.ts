@@ -71,8 +71,7 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: Document
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
