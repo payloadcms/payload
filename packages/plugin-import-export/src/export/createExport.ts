@@ -115,20 +115,32 @@ export const createExport = async (args: CreateExportArgs) => {
     if (debug) {
       req.payload.logger.info('Starting download stream')
     }
+
     const encoder = new TextEncoder()
+    let isFirstBatch = true
+    let columns: string[] | undefined
+
     const stream = new Readable({
       async read() {
         let result = await payload.find(findArgs)
-        let isFirstBatch = true
-
         while (result.docs.length > 0) {
           if (debug) {
             req.payload.logger.info(
               `Processing batch ${findArgs.page + 1} with ${result.docs.length} documents`,
             )
           }
+
           const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
-          const csvString = stringify(csvInput, { header: isFirstBatch })
+
+          if (isFirstBatch) {
+            columns = Object.keys(csvInput[0] ?? {})
+          }
+
+          const csvString = stringify(csvInput, {
+            header: isFirstBatch,
+            columns,
+          })
+
           this.push(encoder.encode(csvString))
           isFirstBatch = false
 
