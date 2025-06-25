@@ -6,7 +6,7 @@ import type { PostgresDB } from '@payloadcms/drizzle'
 
 import { cosineDistance, desc, gt, jaccardDistance, l2Distance, lt, sql } from 'drizzle-orm'
 import path from 'path'
-import { buildConfig, type DatabaseAdapterObj, getPayload } from 'payload'
+import { BasePayload, buildConfig, type DatabaseAdapterObj, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)
@@ -75,7 +75,8 @@ describeToUse('postgres vector custom column', () => {
       ],
     })
 
-    const payload = await getPayload({ config })
+    // do not use getPayload to avoid caching and re-using payload instance from previous tests
+    const payload = await new BasePayload().init({ config })
 
     const catEmbedding = [1.5, -0.4, 7.2, 19.6, 20.2]
 
@@ -194,7 +195,7 @@ describeToUse('postgres vector custom column', () => {
       ],
     })
 
-    const payload = await getPayload({ config })
+    const payload = await new BasePayload().init({ config })
 
     // sparse-vector format: '{index:value,...}/dims'
     const catEmbedding = '{1:1,3:2,5:3}/5'
@@ -304,7 +305,8 @@ describeToUse('postgres vector custom column', () => {
       ],
     })
 
-    const payload = await getPayload({ config })
+    // do not use getPayload to avoid caching and re-using payload instance from previous tests
+    const payload = await new BasePayload().init({ config })
 
     const catEmbedding = '10101'
 
