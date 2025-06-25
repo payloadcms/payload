@@ -175,6 +175,7 @@ jobs:
           - supabase
           - sqlite
           - sqlite-uuid
+          - cosmosdb
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -183,19 +184,25 @@ jobs:
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
+      COSMOSDB_CONNECTION_STRING: ${{ secrets.COSMOSDB_CONNECTION_STRING }}
 
     services:
       postgres:
         image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
         env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
           - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+      cosmosdb:
+        image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+        ports:
+          - 8081:8081
+        env:
+          PROTOCOL: https
 
     steps:
       - uses: actions/checkout@v4
@@ -218,18 +225,6 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
@@ -246,6 +241,21 @@ jobs:
         run: |
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
+
+      - name: Set up CosmosDB Emulator (only for CosmosDB tests)
+        if: matrix.database == 'cosmosdb'
+        run: |
+          echo "Waiting for CosmosDB Emulator to be ready..."
+          until curl -k https://localhost:8081/_explorer/emulator.pem; do sleep 5; done
+          curl -k https://localhost:8081/_explorer/emulator.pem > cosmos_emulator.cert
+          sudo cp cosmos_emulator.cert /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+
+      - name: Run tests
+        run: npm test
+        env:
+          COSMOSDB_CONNECTION_STRING: 'mongodb://localhost:10255/?ssl=true&replicaSet=globaldb&retrywrites=false'
+          COSMOSDB_CA_CERT: '/usr/local/share/ca-certificates/cosmos_emulator.cert'
 
       - name: Integration Tests
         run: pnpm test:int

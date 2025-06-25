@@ -48,6 +48,7 @@ export async function buildConfigWithDefaults(
 ): Promise<SanitizedConfig> {
   const config: Config = {
     db: databaseAdapter,
+    indexSortableFields: process.env.PAYLOAD_DATABASE === 'cosmosdb',
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),

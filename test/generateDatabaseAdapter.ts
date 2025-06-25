@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const allDatabaseAdapters = {
+export const allDatabaseAdapters: Record<string, string> = {
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
@@ -94,12 +94,26 @@ export const allDatabaseAdapters = {
         process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   })`,
+  cosmosdb: `
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    ensureIndexes: true,
+    transactionOptions: false,
+    url: process.env.COSMOSDB_CONNECTION_STRING
+    options: {
+      tls: true,
+      tlsCAFile: process.env.COSMOSDB_CA_CERT || '/usr/local/share/ca-certificates/cosmos_emulator.cert',
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+  })`,
 }
 
 /**
  * Write to databaseAdapter.ts
  */
-export function generateDatabaseAdapter(dbAdapter) {
+export function generateDatabaseAdapter(dbAdapter: string) {
   const databaseAdapter = allDatabaseAdapters[dbAdapter]
   if (!databaseAdapter) {
     throw new Error(`Unknown database adapter: ${dbAdapter}`)
