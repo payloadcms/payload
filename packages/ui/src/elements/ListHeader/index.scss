@@ -1,0 +1,48 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .list-header {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    &__content {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      width: 100%;
+    }
+
+    &__title-and-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__title {
+      margin: 0;
+    }
+
+    &__title-actions {
+      margin-bottom: 4px;
+      display: flex;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__actions {
+      margin-bottom: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__after-header-content {
+      width: 100%;
+    }
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

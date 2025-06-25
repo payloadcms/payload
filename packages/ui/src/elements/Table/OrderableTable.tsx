@@ -8,6 +8,7 @@ import { DragOverlay } from '@dnd-kit/core'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
@@ -29,7 +30,8 @@ export const OrderableTable: React.FC<Props> = ({
   columns,
   data: initialData,
 }) => {
-  const { data: listQueryData, handleSortChange, orderableFieldName, query } = useListQuery()
+  const { config } = useConfig()
+  const { data: listQueryData, orderableFieldName, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
@@ -114,7 +116,7 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`/api/reorder`, {
+      const response = await fetch(`${config.routes.api}/reorder`, {
         body: JSON.stringify(jsonBody),
         headers: {
           'Content-Type': 'application/json',
@@ -129,6 +131,14 @@ export const OrderableTable: React.FC<Props> = ({
       if (!response.ok) {
         throw new Error(
           'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
+        )
+      }
+
+      if (response.status === 200 && (await response.json())['message'] === 'initial migration') {
+        throw new Error(
+          'You have enabled "orderable" on a collection with existing documents' +
+            'and this is the first time you have sorted documents. We have run an automatic migration ' +
+            'to add an initial order to the documents. Please refresh the page and try again.',
         )
       }
     } catch (err) {

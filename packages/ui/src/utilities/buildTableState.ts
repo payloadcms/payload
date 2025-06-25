@@ -7,6 +7,7 @@ import type {
   ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
+  ServerFunction,
   Where,
 } from 'payload'
 
@@ -41,9 +42,10 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
-export const buildTableStateHandler = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateResult> => {
+export const buildTableStateHandler: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateResult>
+> = async (args) => {
   const { req } = args
 
   try {
@@ -160,7 +162,7 @@ const buildTableState = async (
   if (!docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
-        throw new APIError('Unexpected array of collectionSlug, parent must be providen')
+        throw new APIError('Unexpected array of collectionSlug, parent must be provided')
       }
 
       const select = {}

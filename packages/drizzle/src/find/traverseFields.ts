@@ -19,12 +19,17 @@ import toSnakeCase from 'to-snake-case'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { operatorMap } from '../queries/operatorMap.js'
+import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
+import {
+  InternalBlockTableNameIndex,
+  resolveBlockTableName,
+} from '../utilities/validateExistingBlockIsIdentical.js'
 
 const flattenAllWherePaths = (where: Where, paths: string[]) => {
   for (const k in where) {
@@ -196,7 +201,13 @@ export const traverseFields = ({
           }
         }
 
-        currentArgs.with[`${path}${field.name}`] = withArray
+        const relationName = getArrayRelationName({
+          field,
+          path: `${path}${field.name}`,
+          tableName: arrayTableName,
+        })
+
+        currentArgs.with[relationName] = withArray
 
         traverseFields({
           _locales: withArray.with._locales,
@@ -241,9 +252,23 @@ export const traverseFields = ({
           }
         }
 
+        if (adapter.blocksAsJSON) {
+          if (select || selectAllOnCurrentLevel) {
+            const fieldPath = `${path}${field.name}`
+
+            if ((isFieldLocalized || parentIsLocalized) && _locales) {
+              _locales.columns[fieldPath] = true
+            } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+              currentArgs.columns[fieldPath] = true
+            }
+          }
+
+          break
+        }
+
         ;(field.blockReferences ?? field.blocks).forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
-          const blockKey = `_blocks_${block.slug}`
+          const blockKey = `_blocks_${block.slug}${!block[InternalBlockTableNameIndex] ? '' : `_${block[InternalBlockTableNameIndex]}`}`
 
           let blockSelect: boolean | SelectType | undefined
 
@@ -283,8 +308,9 @@ export const traverseFields = ({
               with: {},
             }
 
-            const tableName = adapter.tableNameMap.get(
-              `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+            const tableName = resolveBlockTableName(
+              block,
+              adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
             if (typeof blockSelect === 'object') {
@@ -487,7 +513,7 @@ export const traverseFields = ({
           const subQueryAlias = `${columnName}_subquery`
 
           let sqlWhere = eq(
-            adapter.tables[currentTableName].id,
+            sql.raw(`"${currentTableName}"."id"`),
             sql.raw(`"${subQueryAlias}"."${onPath}"`),
           )
 
@@ -551,19 +577,23 @@ export const traverseFields = ({
 
           let joinQueryWhere: Where
 
+          const currentIDRaw = sql.raw(
+            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
+          )
+
           if (Array.isArray(field.targetField.relationTo)) {
             joinQueryWhere = {
               [field.on]: {
                 equals: {
                   relationTo: collectionSlug,
-                  value: rawConstraint(currentIDColumn),
+                  value: rawConstraint(currentIDRaw),
                 },
               },
             }
           } else {
             joinQueryWhere = {
               [field.on]: {
-                equals: rawConstraint(currentIDColumn),
+                equals: rawConstraint(currentIDRaw),
               },
             }
           }

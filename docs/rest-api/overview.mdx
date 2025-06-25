@@ -738,7 +738,7 @@ Payload supports a method override feature that allows you to send GET requests 
 
 ### How to Use
 
-To use this feature, include the `X-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
+To use this feature, include the `X-Payload-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
 
 ### Example
 
@@ -753,7 +753,7 @@ const res = await fetch(`${api}/${collectionSlug}`, {
   headers: {
     'Accept-Language': i18n.language,
     'Content-Type': 'application/x-www-form-urlencoded',
-    'X-HTTP-Method-Override': 'GET',
+    'X-Payload-HTTP-Method-Override': 'GET',
   },
   body: qs.stringify({
     depth: 1,

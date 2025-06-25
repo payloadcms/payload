@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-no-check
 
 /**
  * THIS FILE IS COPIED FROM:
@@ -6,13 +6,14 @@
  *
  * I AM NOT INSTALLING THAT LIBRARY BECAUSE JEST COMPLAINS ABOUT THE ESM MODULE AND THE TESTS FAIL.
  * DO NOT MODIFY IT
+ * ALSO, I'M DISABLING TS WITH `@ts-no-check` BECAUSE THEY DON'T USE STRICT NULL CHECKS IN THAT REPOSITORY
  */
 
 // License: CC0 (no rights reserved).
 
 // This is based on https://observablehq.com/@dgreensp/implementing-fractional-indexing
 
-export const BASE_62_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+export const BASE_36_DIGITS = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 // `a` may be empty string, `b` is null or non-empty string.
 // `a < b` lexicographically if `b` is non-null.
@@ -214,7 +215,7 @@ function decrementInteger(x, digits) {
  * @param {string=} digits
  * @return {string}
  */
-export function generateKeyBetween(a, b, digits = BASE_62_DIGITS) {
+export function generateKeyBetween(a, b, digits = BASE_36_DIGITS) {
   if (a != null) {
     validateOrderKey(a, digits)
   }
@@ -282,7 +283,7 @@ export function generateKeyBetween(a, b, digits = BASE_62_DIGITS) {
  * @param {string} digits
  * @return {string[]}
  */
-export function generateNKeysBetween(a, b, n, digits = BASE_62_DIGITS) {
+export function generateNKeysBetween(a, b, n, digits = BASE_36_DIGITS) {
   if (n === 0) {
     return []
   }

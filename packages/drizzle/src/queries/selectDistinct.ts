@@ -1,5 +1,4 @@
 import type { QueryPromise, SQL } from 'drizzle-orm'
-import type { PgSelect } from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 import type {

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
@@ -40,6 +39,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
+import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
@@ -47,9 +47,11 @@ import type {
   JobsConfig,
   Payload,
   RequestContext,
+  SelectField,
   TypedUser,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -339,29 +341,50 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewComponent` instead.
+ */
+export type EditViewComponent = DocumentViewComponent
 
-export type EditViewConfig = {
+export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
+
+/**
+ * @deprecated
+ * This type will be renamed in v4.
+ * Use `DocumentViewConfig` instead.
+ */
+export type EditViewConfig = DocumentViewConfig
+
+type BaseDocumentViewConfig = {
+  actions?: CustomComponent[]
   meta?: MetaConfig
-} & (
-  | {
-      actions?: CustomComponent[]
-    }
-  | {
-      Component: EditViewComponent
-      path?: string
-    }
-  | {
-      path?: string
-      /**
-       * Add a new Edit View to the admin panel
-       * i.e. you can render a custom view that has no tab, if desired
-       * Or override a specific properties of an existing one
-       * i.e. you can customize the `Default` view tab label, if desired
-       */
-      tab?: DocumentTabConfig
-    }
-)
+  tab?: DocumentTabConfig
+}
+
+/*
+  If your view does not originate from a "known" key, e.g. `myCustomView`, then it is considered a "custom" view and can accept a `path`, etc.
+  To render just a tab component without an accompanying view, you can omit the `path` and `Component` properties altogether.
+*/
+export type CustomDocumentViewConfig =
+  | ({
+      Component: DocumentViewComponent
+      path: string
+    } & BaseDocumentViewConfig)
+  | ({
+      Component?: DocumentViewComponent
+      path?: never
+    } & BaseDocumentViewConfig)
+
+/*
+  If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept a `path`, etc.
+*/
+export type DefaultDocumentViewConfig = {
+  Component?: DocumentViewComponent
+} & BaseDocumentViewConfig
+
+export type DocumentViewConfig = CustomDocumentViewConfig | DefaultDocumentViewConfig
 
 export type Params = { [key: string]: string | string[] | undefined }
 
@@ -676,6 +699,16 @@ export type AfterErrorHookArgs = {
   result?: ErrorResult
 }
 
+export type ImportMapGenerators = Array<
+  (props: {
+    addToImportMap: AddToImportMap
+    baseDir: string
+    config: SanitizedConfig
+    importMap: InternalImportMap
+    imports: Imports
+  }) => void
+>
+
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -783,8 +816,10 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         account?: AdminViewConfig
         /** Replace the admin homepage */
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         dashboard?: AdminViewConfig
       }
     }
@@ -819,15 +854,7 @@ export type Config = {
        * You can use generators to add custom components to the component import map.
        * This allows you to import custom components in the admin panel.
        */
-      generators?: Array<
-        (props: {
-          addToImportMap: AddToImportMap
-          baseDir: string
-          config: SanitizedConfig
-          importMap: InternalImportMap
-          imports: Imports
-        }) => void
-      >
+      generators?: ImportMapGenerators
       /**
        * If Payload cannot find the import map file location automatically,
        * you can manually provide it here.
@@ -846,6 +873,11 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
+      /** The route for the browse by folder view.
+       *
+       * @default '/browse-by-folder'
+       */
+      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -977,6 +1009,11 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
+  /**
+   * Options for folder view within the admin panel
+   * @experimental this feature may change in minor versions until it is fully stable
+   */
+  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1120,6 +1157,7 @@ export type Config = {
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */
@@ -1213,7 +1251,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
-  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
+  jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
@@ -1238,46 +1276,53 @@ export type SanitizedConfig = {
   | 'endpoint'
   | 'globals'
   | 'i18n'
+  | 'jobs'
   | 'localization'
   | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
+/**
+ * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+ * + `root` - `/admin/collections/:collection/:id/**\/*`
+ * @link https://payloadcms.com/docs/custom-components/document-views#document-root
+ */
 export type EditConfigWithRoot = {
   api?: never
   default?: never
   livePreview?: never
-  /**
-   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-   * + `root` - `/admin/collections/:collection/:id/**\/*`
-   */
-  root: Partial<EditViewConfig>
+  root: DefaultDocumentViewConfig
   version?: never
   versions?: never
 }
 
+type KnownEditKeys = 'api' | 'default' | 'livePreview' | 'root' | 'version' | 'versions'
+
+/**
+ * Replace or modify individual nested routes, or add new ones:
+ * + `default` - `/admin/collections/:collection/:id`
+ * + `api` - `/admin/collections/:collection/:id/api`
+ * + `livePreview` - `/admin/collections/:collection/:id/preview`
+ * + `references` - `/admin/collections/:collection/:id/references`
+ * + `relationships` - `/admin/collections/:collection/:id/relationships`
+ * + `versions` - `/admin/collections/:collection/:id/versions`
+ * + `version` - `/admin/collections/:collection/:id/versions/:version`
+ * + `customView` - `/admin/collections/:collection/:id/:path`
+ *
+ * To override the entire Edit View including all nested views, use the `root` key.
+ *
+ * @link https://payloadcms.com/docs/custom-components/document-views
+ */
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig
-  /**
-   * Replace or modify individual nested routes, or add new ones:
-   * + `default` - `/admin/collections/:collection/:id`
-   * + `api` - `/admin/collections/:collection/:id/api`
-   * + `livePreview` - `/admin/collections/:collection/:id/preview`
-   * + `references` - `/admin/collections/:collection/:id/references`
-   * + `relationships` - `/admin/collections/:collection/:id/relationships`
-   * + `versions` - `/admin/collections/:collection/:id/versions`
-   * + `version` - `/admin/collections/:collection/:id/versions/:version`
-   * + `customView` - `/admin/collections/:collection/:id/:path`
-   *
-   * To override the entire Edit View including all nested views, use the `root` key.
-   */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
+  [K in Exclude<string, KnownEditKeys>]: CustomDocumentViewConfig
+} & {
+  api?: DefaultDocumentViewConfig
+  default?: DefaultDocumentViewConfig
+  livePreview?: DefaultDocumentViewConfig
   root?: never
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
+  version?: DefaultDocumentViewConfig
+  versions?: DefaultDocumentViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent

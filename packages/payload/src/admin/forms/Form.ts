@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Validate } from '../../fields/config/types.js'
+import type { Field, Option, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -26,6 +26,13 @@ export type FilterOptionsResult = {
 }
 
 export type FieldState = {
+  /**
+   * This is used to determine if the field was added by the server.
+   * This ensures the field is not ignored by the client when merging form state.
+   * This can happen because the current local state is treated as the source of truth.
+   * See `mergeServerFormState` for more details.
+   */
+  addedByServer?: boolean
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used
@@ -61,17 +68,9 @@ export type FieldState = {
   passesCondition?: boolean
   rows?: Row[]
   /**
-   * The `serverPropsToIgnore` obj is used to prevent the various properties from being overridden across form state requests.
-   * This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
-   * For example:
-   *   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
-   *   2. Another "add row" action will set `requiresRender: true` and queue a form state request
-   *   3. The first request will return with `requiresRender: false`
-   *   4. The second request will be dispatched with `requiresRender: false` but should be `true`
-   * To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
-   * See the `mergeServerFormState` function for implementation details.
+   * The result of running `field.filterOptions` on select fields.
    */
-  serverPropsToIgnore?: Array<keyof FieldState>
+  selectFilterOptions?: Option[]
   valid?: boolean
   validate?: Validate
   value?: unknown

@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -65,9 +66,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a search collection', async () => {
@@ -300,8 +299,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })

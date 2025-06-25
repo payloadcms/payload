@@ -5,8 +5,8 @@ import { pagesSlug } from '../shared.js'
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
   labels: {
-    singular: 'Page',
-    plural: 'Pages',
+    singular: { en: 'Page', es: 'Página' },
+    plural: { en: 'Pages', es: 'Páginas' },
   },
   admin: {
     useAsTitle: 'title',
@@ -25,6 +25,33 @@ export const Pages: CollectionConfig = {
       name: 'localized',
       type: 'text',
       localized: true,
+    },
+    {
+      name: 'custom',
+      type: 'text',
+      defaultValue: 'my custom csv transformer',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row, siblingDoc }) => {
+            return String(value) + ' toCSV'
+          },
+        },
+      },
+    },
+    {
+      name: 'customRelationship',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row }) => {
+            if (value && typeof value === 'object' && 'id' in value && 'email' in value) {
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
+            }
+          },
+        },
+      },
     },
     {
       name: 'group',
@@ -50,6 +77,58 @@ export const Pages: CollectionConfig = {
             {
               name: 'field2',
               type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'custom',
+          type: 'text',
+          defaultValue: 'my custom csv transformer',
+          custom: {
+            'plugin-import-export': {
+              toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                return String(value) + ' toCSV'
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'tabs',
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'No Name',
+          fields: [
+            {
+              name: 'tabToCSV',
+              type: 'text',
+              defaultValue: 'my custom csv transformer',
+              custom: {
+                'plugin-import-export': {
+                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                    return String(value) + ' toCSV'
+                  },
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: 'namedTab',
+          fields: [
+            {
+              name: 'tabToCSV',
+              type: 'text',
+              defaultValue: 'my custom csv transformer',
+              custom: {
+                'plugin-import-export': {
+                  toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
+                    return String(value) + ' toCSV'
+                  },
+                },
+              },
             },
           ],
         },
@@ -99,6 +178,19 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
     },
     {
+      name: 'virtualRelationship',
+      type: 'text',
+      virtual: 'author.name',
+    },
+    {
+      name: 'virtual',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [() => 'virtual value'],
+      },
+    },
+    {
       name: 'hasManyNumber',
       type: 'number',
       hasMany: true,
@@ -112,6 +204,18 @@ export const Pages: CollectionConfig = {
       name: 'excerpt',
       label: 'Excerpt',
       type: 'text',
+    },
+    {
+      name: 'hasOnePolymorphic',
+      type: 'relationship',
+      relationTo: ['users', 'posts'],
+      hasMany: false,
+    },
+    {
+      name: 'hasManyPolymorphic',
+      type: 'relationship',
+      relationTo: ['users', 'posts'],
+      hasMany: true,
     },
   ],
 }

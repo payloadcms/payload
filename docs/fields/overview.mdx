@@ -100,7 +100,7 @@ Here are the available Presentational Fields:
 
 ### Virtual Fields
 
-Virtual fields are used to display data that is not stored in the database. They are useful for displaying computed values that populate within the APi response through hooks, etc.
+Virtual fields are used to display data that is not stored in the database. They are useful for displaying computed values that populate within the API response through hooks, etc.
 
 Here are the available Virtual Fields:
 
@@ -304,6 +304,22 @@ The following additional properties are provided in the `ctx` object:
 | `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                                            |
 | `req`         | The current HTTP request object. Contains `payload`, `user`, etc.                                                                                            |
 | `event`       | Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).                       |
+
+#### Localized and Built-in Error Messages
+
+You can return localized error messages by utilizing the translation function provided in the `req` object:
+
+```ts
+import type { Field } from 'payload'
+
+export const MyField: Field = {
+  type: 'text',
+  name: 'myField',
+  validate: (value, {req: { t }}) => Boolean(value) || t('validation:required'), // highlight-line
+}
+```
+
+This way you can use [Custom Translations](https://payloadcms.com/docs/configuration/i18n#custom-translations) as well as Payload's built in error messages (like `validation:required` used in the example above). For a full list of available translation strings, see the [english translation file](https://github.com/payloadcms/payload/blob/main/packages/translations/src/languages/en.ts) of Payload.
 
 #### Reusing Default Field Validations
 
@@ -541,6 +557,7 @@ The `ctx` object:
 | Property        | Description                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`blockData`** | The nearest parent block's data. If the field is not inside a block, this will be `undefined`.                                                               |
+| **`operation`** | A string relating to which operation the field type is currently executing within.                                                                           |
 | **`path`**      | The full path to the field in the schema, represented as an array of string segments, including array indexes. I.e `['group', 'myArray', '1', 'textField']`. |
 | **`user`**      | The currently authenticated user object.                                                                                                                     |
 

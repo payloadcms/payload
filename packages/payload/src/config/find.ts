@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 
@@ -21,12 +20,12 @@ const getTSConfigPaths = (): {
   srcPath?: string
   tsConfigPath?: string
 } => {
-  const tsConfigResult = getTsconfig()
+  const tsConfigResult = getTsconfig()!
   const tsConfig = tsConfigResult.config
   const tsConfigDir = path.dirname(tsConfigResult.path)
 
   try {
-    const rootConfigDir = path.resolve(tsConfigDir, tsConfig.compilerOptions.baseUrl || '')
+    const rootConfigDir = path.resolve(tsConfigDir, tsConfig.compilerOptions!.baseUrl || '')
     const srcPath = tsConfig.compilerOptions?.rootDir || path.resolve(process.cwd(), 'src')
     const outPath = tsConfig.compilerOptions?.outDir || path.resolve(process.cwd(), 'dist')
     let configPath = tsConfig.compilerOptions?.paths?.['@payload-config']?.[0]

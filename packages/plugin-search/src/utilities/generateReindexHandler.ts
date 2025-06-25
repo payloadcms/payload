@@ -124,27 +124,24 @@ export const generateReindexHandler =
         for (let i = 0; i < totalBatches; i++) {
           const { docs } = await payload.find({
             collection,
+            depth: 0,
             limit: batchSize,
             locale: localeToSync,
             page: i + 1,
             ...defaultLocalApiProps,
           })
 
-          const promises = docs.map((doc) =>
-            syncDocAsSearchIndex({
+          for (const doc of docs) {
+            await syncDocAsSearchIndex({
               collection,
+              data: doc,
               doc,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && aggregateErrors++,
               operation,
               pluginConfig,
               req,
-            }),
-          )
-
-          // Sequentially await promises to avoid transaction issues
-          for (const promise of promises) {
-            await promise
+            })
           }
         }
       }

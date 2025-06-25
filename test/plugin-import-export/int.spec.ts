@@ -1,5 +1,6 @@
 import type { CollectionSlug, Payload } from 'payload'
 
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -30,9 +31,7 @@ describe('@payloadcms/plugin-import-export', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('graphql', () => {
@@ -221,6 +220,68 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].array_1_field2).toStrictEqual('baz')
     })
 
+    it('should create a CSV file with columns matching the order of the fields array', async () => {
+      const fields = ['id', 'group.value', 'group.array.field1', 'title', 'createdAt', 'updatedAt']
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Title ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const buffer = fs.readFileSync(expectedPath)
+      const str = buffer.toString()
+
+      // Assert that the header row matches the fields array
+      expect(str.indexOf('id')).toBeLessThan(str.indexOf('title'))
+      expect(str.indexOf('group_value')).toBeLessThan(str.indexOf('title'))
+      expect(str.indexOf('group_value')).toBeLessThan(str.indexOf('group_array'))
+      expect(str.indexOf('title')).toBeLessThan(str.indexOf('createdAt'))
+      expect(str.indexOf('createdAt')).toBeLessThan(str.indexOf('updatedAt'))
+    })
+
+    it('should create a CSV file with virtual fields', async () => {
+      const fields = ['id', 'virtual', 'virtualRelationship']
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Virtual ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains the expected virtual fields
+      expect(data[0].virtual).toStrictEqual('virtual value')
+      expect(data[0].virtualRelationship).toStrictEqual('name value')
+    })
+
     it('should create a file for collection csv from array.subfield', async () => {
       let doc = await payload.create({
         collection: 'exports',
@@ -305,6 +366,78 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(data[0].blocks_0_blockType).toStrictEqual('hero')
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
+    })
+
+    it('should create a csv of all fields when fields is empty', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: [],
+          format: 'csv',
+          where: {
+            title: { contains: 'Title ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains fields even when the specific fields were not given
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toBeDefined()
+      expect(data[0].createdAt).toBeDefined()
+      expect(data[0].createdAt).toBeDefined()
+    })
+
+    it('should run custom toCSV function on a field', async () => {
+      const fields = [
+        'id',
+        'custom',
+        'group.custom',
+        'customRelationship',
+        'tabToCSV',
+        'namedTab.tabToCSV',
+      ]
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields,
+          format: 'csv',
+          where: {
+            title: { contains: 'Custom ' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // Assert that the csv file contains the expected virtual fields
+      expect(data[0].custom).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].group_custom).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].tabToCSV).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].namedTab_tabToCSV).toStrictEqual('my custom csv transformer toCSV')
+      expect(data[0].customRelationship_id).toBeDefined()
+      expect(data[0].customRelationship_email).toBeDefined()
+      expect(data[0].customRelationship_createdAt).toBeUndefined()
+      expect(data[0].customRelationship).toBeUndefined()
     })
 
     it('should create a JSON file for collection', async () => {
@@ -406,6 +539,40 @@ describe('@payloadcms/plugin-import-export', () => {
       const data = await readCSV(expectedPath)
 
       expect(data[0].title).toStrictEqual('Jobs 0')
+    })
+
+    it('should export polymorphic relationship fields to CSV', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic', 'hasManyPolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // hasOnePolymorphic
+      expect(data[0].hasOnePolymorphic_id).toBeDefined()
+      expect(data[0].hasOnePolymorphic_relationTo).toBe('posts')
+
+      // hasManyPolymorphic
+      expect(data[0].hasManyPolymorphic_0_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
+      expect(data[0].hasManyPolymorphic_1_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
     // disabled so we don't always run a massive test

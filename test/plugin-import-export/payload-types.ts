@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
+    posts: Post;
     exports: Export;
     'exports-tasks': ExportsTask;
     'payload-jobs': PayloadJob;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'exports-tasks': ExportsTasksSelect<false> | ExportsTasksSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -131,6 +133,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -150,6 +153,8 @@ export interface Page {
   id: string;
   title: string;
   localized?: string | null;
+  custom?: string | null;
+  customRelationship?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -160,6 +165,11 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    custom?: string | null;
+  };
+  tabToCSV?: string | null;
+  namedTab?: {
+    tabToCSV?: string | null;
   };
   array?:
     | {
@@ -199,9 +209,43 @@ export interface Page {
       )[]
     | null;
   author?: (string | null) | User;
+  virtualRelationship?: string | null;
+  virtual?: string | null;
   hasManyNumber?: number[] | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
+  hasOnePolymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  hasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -217,7 +261,7 @@ export interface Export {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -253,7 +297,7 @@ export interface ExportsTask {
   limit?: number | null;
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -386,6 +430,10 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
         relationTo: 'exports';
         value: string | Export;
       } | null)
@@ -444,6 +492,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -461,6 +510,8 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   localized?: T;
+  custom?: T;
+  customRelationship?: T;
   group?:
     | T
     | {
@@ -473,6 +524,13 @@ export interface PagesSelect<T extends boolean = true> {
               field2?: T;
               id?: T;
             };
+        custom?: T;
+      };
+  tabToCSV?: T;
+  namedTab?:
+    | T
+    | {
+        tabToCSV?: T;
       };
   array?:
     | T
@@ -500,9 +558,23 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   author?: T;
+  virtualRelationship?: T;
+  virtual?: T;
   hasManyNumber?: T;
   relationship?: T;
   excerpt?: T;
+  hasOnePolymorphic?: T;
+  hasManyPolymorphic?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -635,7 +707,7 @@ export interface TaskCreateCollectionExport {
     limit?: number | null;
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('true' | 'false') | null;
+    drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
     collectionSlug: string;
@@ -652,9 +724,7 @@ export interface TaskCreateCollectionExport {
     userCollection?: string | null;
     exportsCollection?: string | null;
   };
-  output: {
-    success?: boolean | null;
-  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
