@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../types/index.js'
-import type { File, FileData, UploadConfig } from './types.js'
+import type { AllowList, File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
@@ -25,10 +25,10 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       : { cookie: req.headers.get('cookie')! }
 
     /**
-     * `fetch` on the `allowList` in the the upload config.`
+     * `fetch` on the `allowList` in the the upload config.
      * Otherwise `safeFetch`
-     * Config example 
-     * 
+     * Config example
+     *
      * Allowlist format:
      * ```ts
      * Array<{
@@ -39,7 +39,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
           search?: string
         }>
      *```
-     
+
      * Config example:
      * ```ts
      * upload: {
@@ -55,7 +55,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
         },
        ```
      */
-    const allowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
+    const allowList: AllowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
     let res
     if (allowList.length > 0 && isURLAllowed(fileURL, allowList)) {
       // Allowed
