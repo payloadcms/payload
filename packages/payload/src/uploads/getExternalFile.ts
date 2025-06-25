@@ -24,6 +24,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
       : { cookie: req.headers.get('cookie')! }
 
+    const skipSafeFetch: boolean = uploadConfig.skipSafeFetch || false
     /**
      * `fetch` on the `allowList` in the the upload config.
      * Otherwise `safeFetch`
@@ -57,7 +58,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
      */
     const allowList: AllowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
     let res
-    if (allowList.length > 0 && isURLAllowed(fileURL, allowList)) {
+    if (skipSafeFetch || (allowList.length > 0 && isURLAllowed(fileURL, allowList))) {
       // Allowed
       res = await fetch(fileURL, {
         credentials: 'include',
