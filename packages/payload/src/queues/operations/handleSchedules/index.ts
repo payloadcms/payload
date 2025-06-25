@@ -184,6 +184,9 @@ export async function scheduleQueueable({
 
     const job = (await req.payload.jobs.queue({
       input: beforeScheduleResult.input ?? {},
+      meta: {
+        scheduled: true,
+      },
       queue: queueable.scheduleConfig.queue,
       req,
       task: queueable?.taskConfig?.slug,
