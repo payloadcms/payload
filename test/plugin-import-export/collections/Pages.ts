@@ -44,9 +44,11 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, row, siblingDoc, doc }) => {
-            row[`${columnName}_id`] = value.id
-            row[`${columnName}_email`] = value.email
+          toCSV: ({ value, columnName, row }) => {
+            if (value && typeof value === 'object' && 'id' in value && 'email' in value) {
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
+            }
           },
         },
       },
