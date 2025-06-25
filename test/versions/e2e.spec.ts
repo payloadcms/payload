@@ -205,6 +205,7 @@ describe('Versions', () => {
       const fieldValue = autosaveRelationField.locator('.value-container')
       await expect(fieldValue).toContainText('test')
     })
+
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
@@ -838,6 +839,51 @@ describe('Versions', () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('global — should show versions drawer when SelectComparison more option is clicked', async () => {
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title',
+        },
+      })
+      await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          title: 'initial title 2',
+        },
+      })
+
+      const url = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${url.global(draftGlobalSlug)}/versions`)
+
+      const versionsTable = page.locator('.table table')
+      await expect(versionsTable).toBeVisible()
+
+      const versionAnchor = versionsTable.locator('tbody tr.row-1 td.cell-updatedAt a')
+      await expect(versionAnchor).toBeVisible()
+      await versionAnchor.click()
+
+      const compareFromContainer = page.locator(
+        '.view-version__version-from .field-type.compare-version',
+      )
+      await expect(compareFromContainer).toBeVisible()
+
+      const fromSelect = compareFromContainer.locator('.react-select .rs__control')
+      await expect(fromSelect).toBeVisible()
+      await fromSelect.click()
+
+      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      await expect(moreVersions).toBeVisible()
+      await moreVersions.click()
+
+      const versionDrawer = page.locator('dialog.version-drawer')
+      await expect(versionDrawer).toBeVisible()
+
+      const versionsDrawerTableBody = versionDrawer.locator('main.versions table tbody')
+      await expect(versionsDrawerTableBody).toBeVisible()
+      await expect(versionsDrawerTableBody.locator('tr')).toHaveCount(2)
     })
   })
 
