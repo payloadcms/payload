@@ -522,8 +522,8 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  # Build listed templates with packed local packages
-  build-templates:
+  # Build listed templates with packed local packages and then runs their int and e2e tests
+  build-templates-and-run-int-and-e2e-tests:
     runs-on: ubuntu-24.04
     needs: build
     strategy:

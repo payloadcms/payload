@@ -74,11 +74,7 @@ import * as Sentry from '@sentry/nextjs'
 
 const config = buildConfig({
   collections: [Pages, Media],
-  plugins: [
-    sentryPlugin({
-      Sentry,
-    }),
-  ],
+  plugins: [sentryPlugin({ Sentry })],
 })
 
 export default config

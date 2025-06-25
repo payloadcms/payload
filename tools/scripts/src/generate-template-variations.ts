@@ -237,9 +237,7 @@ async function main() {
         sharp,
         storageAdapter: storage,
       }
-      if (name.includes('blank')) {
-        console.log({ configureArgs })
-      }
+
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
