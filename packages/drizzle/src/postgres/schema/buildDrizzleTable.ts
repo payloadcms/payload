@@ -1,6 +1,7 @@
 import type { ForeignKeyBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
 
 import {
+  bit,
   boolean,
   foreignKey,
   halfvec,
@@ -46,6 +47,14 @@ export const buildDrizzleTable = ({
 
   for (const [key, column] of Object.entries(rawTable.columns)) {
     switch (column.type) {
+      case 'bit': {
+        const builder = bit(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
+
       case 'enum':
         if ('locale' in column) {
           columns[key] = adapter.enums.enum__locales(column.name)
@@ -62,7 +71,6 @@ export const buildDrizzleTable = ({
         const builder = halfvec(column.name, { dimensions: column.dimensions })
 
         columns[key] = builder
-
         break
       }
 

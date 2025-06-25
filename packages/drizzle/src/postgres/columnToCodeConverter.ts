@@ -25,6 +25,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   const columnBuilderArgsArray: string[] = []
 
   switch (column.type) {
+    case 'bit':
     case 'halfvec':
     case 'sparsevec':
     case 'vector': {

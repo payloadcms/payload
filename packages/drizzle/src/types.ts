@@ -291,10 +291,16 @@ export type SparseVecRawColumn = {
   type: 'sparsevec'
 } & BaseRawColumn
 
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
+  | BinaryVecRawColumn
   | EnumRawColumn
   | HalfVecRawColumn
   | IntegerRawColumn

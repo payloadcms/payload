@@ -1,9 +1,10 @@
+/* eslint-disable jest/no-conditional-in-test */
 /* eslint-disable jest/expect-expect */
 /* eslint-disable jest/require-top-level-describe */
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { PostgresDB } from '@payloadcms/drizzle'
 
-import { cosineDistance, desc, gt, sql } from 'drizzle-orm'
+import { cosineDistance, desc, gt, jaccardDistance, sql } from 'drizzle-orm'
 import path from 'path'
 import { buildConfig, type DatabaseAdapterObj, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
@@ -134,6 +135,116 @@ describeToUse('postgres vector custom column', () => {
 
   it('should add a halfvec column and query it', async () => {
     await vectorColumnQueryTest('halfvec')
+  })
+
+  it('should add a binaryvec column and query it', async () => {
+    const {
+      databaseAdapter,
+    }: {
+      databaseAdapter: DatabaseAdapterObj<PostgresAdapter>
+    } = await import(path.resolve(dirname, '../databaseAdapter.js'))
+
+    const init = databaseAdapter.init
+
+    // set options
+    databaseAdapter.init = ({ payload }) => {
+      const adapter = init({ payload })
+
+      adapter.extensions = {
+        vector: true,
+      }
+      adapter.beforeSchemaInit = [
+        ({ schema, adapter }) => {
+          if (adapter?.rawTables?.posts?.columns) {
+            adapter.rawTables.posts.columns.embedding = {
+              type: 'bit',
+              dimensions: 5,
+              name: 'embedding',
+            }
+          }
+          return schema
+        },
+      ]
+      return adapter
+    }
+
+    const config = await buildConfig({
+      db: databaseAdapter,
+      secret: 'secret',
+      collections: [
+        {
+          slug: 'users',
+          auth: true,
+          fields: [],
+        },
+        {
+          slug: 'posts',
+          fields: [
+            {
+              type: 'text',
+              name: 'embedding',
+            },
+            {
+              name: 'title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    })
+
+    const payload = await getPayload({ config })
+
+    const catEmbedding = '10101'
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        embedding: '01010',
+        title: 'apple',
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        embedding: '10101',
+        title: 'cat',
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        embedding: '11111',
+        title: 'fruit',
+      },
+    })
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        embedding: '10100',
+        title: 'dog',
+      },
+    })
+
+    const similarity = sql<number>`1 - (${jaccardDistance(payload.db.tables.posts.embedding, catEmbedding)})`
+
+    const db = payload.db.drizzle as PostgresDB
+
+    const res = await db
+      .select()
+      .from(payload.db.tables.posts)
+      .where(gt(similarity, 0.6))
+      .orderBy(desc(similarity))
+
+    // Only cat and dog
+    expect(res).toHaveLength(2)
+
+    // similarity sort
+    expect(res?.[0]?.title).toBe('cat')
+    expect(res?.[1]?.title).toBe('dog')
   })
 
   it('should add a sparsevec column and query it', async () => {
