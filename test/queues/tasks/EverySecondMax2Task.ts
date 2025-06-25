@@ -12,6 +12,7 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
             req,
             taskSlug: queueable.taskConfig?.slug,
             workflowSlug: queueable.workflowConfig?.slug,
+            onlyScheduled: false, // Set to false, used to test it
           })
 
           return {

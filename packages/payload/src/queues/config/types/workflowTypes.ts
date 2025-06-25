@@ -54,6 +54,13 @@ export type BaseJob<
       ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
       : TWorkflowSlugOrInput
   log?: JobLog[]
+  meta?: {
+    [key: string]: unknown
+    /**
+     * If true, this job was queued by the scheduling system.
+     */
+    scheduled?: boolean
+  }
   processing?: boolean
   queue?: string
   taskSlug?: null | TaskType

@@ -5,6 +5,7 @@ import { countRunnableOrActiveJobsForQueue } from './countRunnableOrActiveJobsFo
 export const defaultBeforeSchedule: BeforeScheduleFn = async ({ queueable, req }) => {
   // All tasks in that queue that are either currently processing or can be run
   const runnableOrActiveJobsForQueue = await countRunnableOrActiveJobsForQueue({
+    onlyScheduled: true,
     queue: queueable.scheduleConfig.queue,
     req,
     taskSlug: queueable.taskConfig?.slug,

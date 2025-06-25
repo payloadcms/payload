@@ -1,4 +1,4 @@
-import type { RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -47,6 +47,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args:
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
+          meta?: BaseJob['meta']
           queue?: string
           req?: PayloadRequest
           // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
@@ -56,6 +57,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
+          meta?: BaseJob['meta']
           queue?: string
           req?: PayloadRequest
           task?: never
@@ -98,6 +100,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     }
     if (args.task) {
       data.taskSlug = args.task as string
+    }
+
+    if (args.meta) {
+      data.meta = args.meta
     }
 
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']

@@ -7,18 +7,24 @@ import type { PayloadRequest, Where } from '../../../types/index.js'
  * - have not been started yet
  */
 export async function countRunnableOrActiveJobsForQueue({
+  onlyScheduled = false,
   queue,
   req,
   taskSlug,
   workflowSlug,
 }: {
+  /**
+   * If true, this counts only jobs that have been created through the scheduling system.
+   *
+   * @default false
+   */
+  onlyScheduled?: boolean
   queue: string
   req: PayloadRequest
   taskSlug?: string
   workflowSlug?: string
 }): Promise<number> {
   const and: Where[] = [
-    // TODO: Can we filter only jobs that have been created through the scheduling system?
     {
       queue: {
         equals: queue,
@@ -43,6 +49,13 @@ export async function countRunnableOrActiveJobsForQueue({
     and.push({
       workflowSlug: {
         equals: workflowSlug,
+      },
+    })
+  }
+  if (onlyScheduled) {
+    and.push({
+      'meta.scheduled': {
+        equals: true,
       },
     })
   }
