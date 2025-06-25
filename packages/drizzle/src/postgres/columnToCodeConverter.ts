@@ -26,6 +26,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
 
   switch (column.type) {
     case 'halfvec':
+    case 'sparsevec':
     case 'vector': {
       if (column.dimensions) {
         columnBuilderArgsArray.push(`dimensions: ${column.dimensions}`)

@@ -66,6 +66,14 @@ export const buildDrizzleTable = ({
         break
       }
 
+      case 'sparsevec': {
+        const builder = sparsevec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
+
       case 'timestamp': {
         let builder = timestamp(column.name, {
           mode: column.mode,
