@@ -131,7 +131,7 @@ schedule: [
     cron: '* * * * *', // every minute
     queue: 'reports',
     hooks: {
-      beforeSchedule: async ({ queueable, req ) => {
+      beforeSchedule: async ({ queueable, req }) => {
         const runnableOrActiveJobsForQueue =
           await countRunnableOrActiveJobsForQueue({
             queue: queueable.scheduleConfig.queue,
@@ -143,7 +143,7 @@ schedule: [
 
         // Allow up to 3 simultaneous scheduled jobs and set dynamic input
         return {
-          shouldSchedule: activeJobs < 3,
+          shouldSchedule: runnableOrActiveJobsForQueue < 3,
           input: { text: 'Hi there' },
         }
       },
