@@ -19,6 +19,7 @@ export interface LivePreviewContextType {
   isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
   isPopupOpen: boolean
+  listeningForMessages?: boolean
   measuredDeviceSize: {
     height: number
     width: number

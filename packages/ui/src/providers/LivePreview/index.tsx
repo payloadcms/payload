@@ -234,6 +234,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         ),
         isLivePreviewing,
         isPopupOpen,
+        listeningForMessages,
         measuredDeviceSize,
         openPopupWindow,
         popupRef,
@@ -256,7 +257,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       }}
     >
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
-        {listeningForMessages && children}
+        {children}
       </DndContext>
     </LivePreviewContext>
   )

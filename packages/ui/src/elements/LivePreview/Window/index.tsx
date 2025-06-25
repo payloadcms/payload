@@ -38,9 +38,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
-  const prevIsLivePreviewing =
-    React.useRef<ReturnType<typeof useLivePreviewContext>['isLivePreviewing']>(undefined)
-
   const [formState] = useAllFormFields()
 
   // For client-side apps, send data through `window.postMessage`
