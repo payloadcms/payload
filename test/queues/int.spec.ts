@@ -1565,6 +1565,7 @@ describe('Queues', () => {
       await payload.jobs.run({
         queue: 'autorunSecondMax2',
         limit: 100,
+        silent: true,
       })
 
       const allSimples = await payload.find({
