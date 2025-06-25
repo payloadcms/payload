@@ -42,6 +42,10 @@ export type Args = {
    */
   beforeSchemaInit?: PostgresSchemaHook[]
   /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
+  /**
    * Pass `true` to disale auto database creation if it doesn't exist.
    * @default false
    */

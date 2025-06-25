@@ -20,13 +20,21 @@ export const transformHasManyNumber = ({
   if (withinArrayOrBlockLocale) {
     result = numberRows.reduce((acc, { locale, number }) => {
       if (locale === withinArrayOrBlockLocale) {
+        if (typeof number === 'string') {
+          number = Number(number)
+        }
         acc.push(number)
       }
 
       return acc
     }, [])
   } else {
-    result = numberRows.map(({ number }) => number)
+    result = numberRows.map(({ number }) => {
+      if (typeof number === 'string') {
+        number = Number(number)
+      }
+      return number
+    })
   }
 
   if (locale) {

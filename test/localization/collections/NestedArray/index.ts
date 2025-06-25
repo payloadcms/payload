@@ -48,6 +48,7 @@ export const NestedArray: CollectionConfig = {
             {
               name: 'arrayWithLocalizedRelation',
               type: 'array',
+              dbName: 'arr_rel',
               fields: [
                 {
                   name: 'localizedRelation',

@@ -1,14 +1,14 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { BaseJob } from './types/workflowTypes.js'
+import type { Job } from '../../index.js'
 
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
 export const jobsCollectionSlug = 'payload-jobs'
 
-export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
+export const getDefaultJobsCollection: (config: Config) => CollectionConfig = (config) => {
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
@@ -51,6 +51,9 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       type: 'text',
       required: true,
     },
+    /**
+     * @todo make required in 4.0
+     */
     {
       name: 'input',
       type: 'json',
@@ -238,9 +241,11 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: BaseJob }): BaseJob {
+export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: Job }): Job {
   doc.taskStatus = getJobTaskStatus({
     jobLog: doc.log || [],
   })
+  doc.input = doc.input || {}
+  doc.taskStatus = doc.taskStatus || {}
   return doc
 }

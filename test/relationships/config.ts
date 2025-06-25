@@ -230,6 +230,12 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'select',
+          type: 'select',
+          hasMany: true,
+          options: ['a', 'b', 'c'],
+        },
+        {
           name: 'director',
           type: 'relationship',
           relationTo: 'directors',
