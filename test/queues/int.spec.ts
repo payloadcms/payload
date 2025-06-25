@@ -45,7 +45,7 @@ describe('Queues', () => {
   })
 
   it('will run access control on jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         // Authorization: `JWT ${token}`,
       },
@@ -54,7 +54,7 @@ describe('Queues', () => {
   })
 
   it('will return 200 from jobs runner', async () => {
-    const response = await restClient.GET('/payload-jobs/run', {
+    const response = await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -372,7 +372,7 @@ describe('Queues', () => {
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run()
+      const response = await payload.jobs.run({ silent: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -718,7 +718,7 @@ describe('Queues', () => {
       },
     })
 
-    await restClient.GET('/payload-jobs/run', {
+    await restClient.GET('/payload-jobs/run?silent=true', {
       headers: {
         Authorization: `JWT ${token}`,
       },
@@ -1485,7 +1485,7 @@ describe('Queues', () => {
 
     it('can auto-schedule through run?handleSchedules=true REST API and autorun jobs', async () => {
       // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-      await restClient.GET('/payload-jobs/run?handleSchedules=true', {
+      await restClient.GET('/payload-jobs/run?handleSchedules=true&silent=true', {
         headers: {
           Authorization: `JWT ${token}`,
         },
