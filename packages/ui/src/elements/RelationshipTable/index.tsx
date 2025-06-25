@@ -13,11 +13,9 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
@@ -27,11 +25,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { Popup, PopupList } from '../Popup/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
+import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
-import { RelationshipTablePagination } from './Pagination.js'
 import './index.scss'
+import { RelationshipTablePagination } from './Pagination.js'
 
 const baseClass = 'relationship-table'
 
@@ -102,8 +100,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
+  const isPolymorphic = Array.isArray(relationTo)
+
   const [selectedCollection, setSelectedCollection] = useState(
-    Array.isArray(relationTo) ? undefined : relationTo,
+    isPolymorphic ? undefined : relationTo,
   )
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
@@ -183,10 +183,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 
-  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] =
-    useDocumentDrawer({
-      collectionSlug: selectedCollection,
-    })
+  const [DocumentDrawer, , { closeDrawer, isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    collectionSlug: selectedCollection,
+  })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -225,16 +224,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const canCreate =
     allowCreate !== false &&
-    permissions?.collections?.[Array.isArray(relationTo) ? relationTo[0] : relationTo]?.create
+    permissions?.collections?.[isPolymorphic ? relationTo[0] : relationTo]?.create
 
   useEffect(() => {
-    if (Array.isArray(relationTo) && selectedCollection) {
+    if (isPolymorphic && selectedCollection) {
       openDrawer()
     }
-  }, [selectedCollection, openDrawer, relationTo])
+  }, [selectedCollection, openDrawer, isPolymorphic])
 
   useEffect(() => {
-    if (Array.isArray(relationTo) && !isDrawerOpen && selectedCollection) {
+    if (isPolymorphic && !isDrawerOpen && selectedCollection) {
       setSelectedCollection(undefined)
     }
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
@@ -246,53 +245,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {!Array.isArray(relationTo) && canCreate && (
-            <DocumentDrawerToggler className={`${baseClass}__add-new`}>
-              {i18n.t('fields:addNew')}
-            </DocumentDrawerToggler>
-          )}
-
-          {Array.isArray(relationTo) && (
-            <Fragment>
-              <Popup
-                button={
-                  <Button buttonStyle="none" className={`${baseClass}__add-new-polymorphic`}>
-                    {i18n.t('fields:addNew')}
-                    <PlusIcon />
-                  </Button>
-                }
-                buttonType="custom"
-                horizontalAlign="center"
-                render={({ close: closePopup }) => (
-                  <PopupList.ButtonGroup>
-                    {relationTo.map((relatedCollection) => {
-                      if (permissions.collections[relatedCollection].create) {
-                        return (
-                          <PopupList.Button
-                            className={`${baseClass}__relation-button--${relatedCollection}`}
-                            key={relatedCollection}
-                            onClick={() => {
-                              closePopup()
-                              setSelectedCollection(relatedCollection)
-                            }}
-                          >
-                            {getTranslation(
-                              config.collections.find((each) => each.slug === relatedCollection)
-                                .labels.singular,
-                              i18n,
-                            )}
-                          </PopupList.Button>
-                        )
-                      }
-
-                      return null
-                    })}
-                  </PopupList.ButtonGroup>
-                )}
-                size="medium"
-              />
-            </Fragment>
-          )}
+          <AddNewButton
+            allowCreate={allowCreate !== false}
+            baseClass={baseClass}
+            buttonStyle="none"
+            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ' doc-drawer__toggler'}`}
+            collections={config.collections}
+            i18n={i18n}
+            icon={isPolymorphic ? 'plus' : undefined}
+            label={i18n.t('fields:addNew')}
+            onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+            permissions={permissions}
+            relationTo={relationTo}
+          />
           <Pill
             aria-controls={`${baseClass}-columns`}
             aria-expanded={openColumnSelector}
@@ -317,18 +282,25 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             <div className={`${baseClass}__no-results`}>
               <p>
                 {i18n.t('general:noResults', {
-                  label: Array.isArray(relationTo)
+                  label: isPolymorphic
                     ? i18n.t('general:documents')
                     : getTranslation(collectionConfig?.labels?.plural, i18n),
                 })}
               </p>
-              {canCreate && (
-                <Button onClick={openDrawer}>
-                  {i18n.t('general:createNewLabel', {
-                    label: getTranslation(collectionConfig?.labels?.singular, i18n),
-                  })}
-                </Button>
-              )}
+              <AddNewButton
+                allowCreate={canCreate}
+                baseClass={baseClass}
+                collections={config.collections}
+                i18n={i18n}
+                label={i18n.t('general:createNewLabel', {
+                  label: isPolymorphic
+                    ? i18n.t('general:document')
+                    : getTranslation(collectionConfig?.labels?.singular, i18n),
+                })}
+                onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                permissions={permissions}
+                relationTo={relationTo}
+              />
             </div>
           )}
           {data?.docs && data.docs.length > 0 && (
@@ -349,7 +321,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 }
               >
                 <TableColumnsProvider
-                  collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
+                  collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
                   columnState={columnState}
                   LinkedCellOverride={
                     <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
