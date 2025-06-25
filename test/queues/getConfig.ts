@@ -10,6 +10,7 @@ import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
 import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'
 import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
+import { EverySecondMax2Task } from './tasks/EverySecondMax2Task.js'
 import { EverySecondTask } from './tasks/EverySecondTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
 import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
@@ -133,6 +134,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     tasks: [
       EverySecondTask,
+      EverySecondMax2Task,
       UpdatePostTask,
       UpdatePostStep2Task,
       CreateSimpleTask,

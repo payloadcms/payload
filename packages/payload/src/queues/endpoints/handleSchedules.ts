@@ -42,7 +42,11 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    const { errored, queued, skipped } = await handleSchedules({ req })
+    const { queue } = req.query as {
+      queue?: string
+    }
+
+    const { errored, queued, skipped } = await handleSchedules({ queue, req })
 
     return Response.json(
       {

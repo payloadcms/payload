@@ -15,10 +15,22 @@ import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
-  handleSchedules: async (args?: { req?: PayloadRequest }): Promise<HandleSchedulesResult> => {
+  handleSchedules: async (args?: {
+    // By default, schedule all queues - only scheduling jobs scheduled to be added to the `default` queue would not make sense
+    // here, as you'd usually specify a different queue than `default` here, especially if this is used in combination with autorun.
+    // The `queue` property for setting up schedules is required, and not optional.
+    /**
+     * If you want to only schedule jobs that are set to schedule in a specific queue, set this to the queue name.
+     *
+     * @default all jobs for all queues will be scheduled.
+     */
+    queue?: string
+    req?: PayloadRequest
+  }): Promise<HandleSchedulesResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
     return await handleSchedules({
+      queue: args?.queue,
       req: newReq,
     })
   },

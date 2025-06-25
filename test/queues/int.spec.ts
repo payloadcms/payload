@@ -1513,6 +1513,28 @@ describe('Queues', () => {
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
     })
 
+    it('ensure scheduler does not schedule more jobs than needed if executed sequentially - max. 2 jobs configured', async () => {
+      for (let i = 0; i < 10; i++) {
+        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+      }
+
+      // Wait 1 second to satisfy the waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // autorunSecondMax2 queue is not scheduled to autorun
+      await payload.jobs.run({
+        queue: 'autorunSecondMax2',
+      })
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(2)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second - max 2 per second')
+    })
+
     it('ensure job is scheduled every second', async () => {
       for (let i = 0; i < 3; i++) {
         // Call it twice to test that it only schedules one
@@ -1531,6 +1553,30 @@ describe('Queues', () => {
 
       expect(allSimples.totalDocs).toBe(3)
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('ensure job is scheduled every second - max. 2 jobs configured', async () => {
+      for (let i = 0; i < 3; i++) {
+        // Call it 3x to test that it only schedules two
+        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        // Wait 1 second to satisfy the waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+
+        // autorunSecondMax2 queue is not scheduled to autorun
+        await payload.jobs.run({
+          queue: 'autorunSecondMax2',
+        })
+      }
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(6)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second - max 2 per second')
     })
 
     it('should not auto-schedule through automatic crons if scheduler set to manual', async () => {

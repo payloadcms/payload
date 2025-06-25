@@ -101,6 +101,7 @@ export interface Config {
   jobs: {
     tasks: {
       EverySecond: TaskEverySecond;
+      EverySecondMax2: TaskEverySecondMax2;
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
@@ -266,6 +267,7 @@ export interface PayloadJob {
         taskSlug:
           | 'inline'
           | 'EverySecond'
+          | 'EverySecondMax2'
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
@@ -335,6 +337,7 @@ export interface PayloadJob {
     | (
         | 'inline'
         | 'EverySecond'
+        | 'EverySecondMax2'
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
@@ -561,6 +564,16 @@ export interface PayloadJobsStatsSelect<T extends boolean = true> {
  * via the `definition` "TaskEverySecond".
  */
 export interface TaskEverySecond {
+  input: {
+    message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskEverySecondMax2".
+ */
+export interface TaskEverySecondMax2 {
   input: {
     message: string;
   };
