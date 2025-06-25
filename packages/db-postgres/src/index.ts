@@ -130,7 +130,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
-      logger: true,
+      logger: args.logger,
       operators: operatorMap,
       pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
