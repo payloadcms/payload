@@ -116,8 +116,6 @@ describeToUse('postgres vector custom column', () => {
     // similarity sort
     expect(res[0].title).toBe('cat')
     expect(res[1].title).toBe('dog')
-
-    payload.logger.info(res)
   })
 
   it('should add a halfvec column and query it', async () => {
@@ -220,7 +218,5 @@ describeToUse('postgres vector custom column', () => {
     // similarity sort
     expect(res[0].title).toBe('cat')
     expect(res[1].title).toBe('dog')
-
-    payload.logger.info(res)
   })
 })
