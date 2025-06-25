@@ -2,7 +2,6 @@ import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mon
 
 import mongoose from 'mongoose'
 import {
-  APIError,
   type ArrayField,
   type BlocksField,
   type CheckboxField,
@@ -22,6 +21,7 @@ import {
   type RelationshipField,
   type RichTextField,
   type RowField,
+  type SanitizedCompoundIndex,
   type SanitizedLocalizationConfig,
   type SelectField,
   type Tab,
@@ -128,6 +128,7 @@ const localizeSchema = (
 
 export const buildSchema = (args: {
   buildSchemaOptions: BuildSchemaOptions
+  compoundIndexes?: SanitizedCompoundIndex[]
   configFields: Field[]
   parentIsLocalized?: boolean
   payload: Payload
@@ -165,6 +166,26 @@ export const buildSchema = (args: {
       }
     }
   })
+
+  if (args.compoundIndexes) {
+    for (const index of args.compoundIndexes) {
+      const indexDefinition: Record<string, 1> = {}
+
+      for (const field of index.fields) {
+        if (field.pathHasLocalized && payload.config.localization) {
+          for (const locale of payload.config.localization.locales) {
+            indexDefinition[field.localizedPath.replace('<locale>', locale.code)] = 1
+          }
+        } else {
+          indexDefinition[field.path] = 1
+        }
+      }
+
+      schema.index(indexDefinition, {
+        unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
+      })
+    }
+  }
 
   return schema
 }
@@ -351,36 +372,61 @@ const group: FieldSchemaGenerator<GroupField> = (
   buildSchemaOptions,
   parentIsLocalized,
 ): void => {
-  const formattedBaseSchema = formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized })
+  if (fieldAffectsData(field)) {
+    const formattedBaseSchema = formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized })
 
-  // carry indexSortableFields through to versions if drafts enabled
-  const indexSortableFields =
-    buildSchemaOptions.indexSortableFields &&
-    field.name === 'version' &&
-    buildSchemaOptions.draftsEnabled
+    // carry indexSortableFields through to versions if drafts enabled
+    const indexSortableFields =
+      buildSchemaOptions.indexSortableFields &&
+      field.name === 'version' &&
+      buildSchemaOptions.draftsEnabled
 
-  const baseSchema: SchemaTypeOptions<any> = {
-    ...formattedBaseSchema,
-    type: buildSchema({
-      buildSchemaOptions: {
-        disableUnique: buildSchemaOptions.disableUnique,
-        draftsEnabled: buildSchemaOptions.draftsEnabled,
-        indexSortableFields,
-        options: {
-          _id: false,
-          id: false,
-          minimize: false,
+    const baseSchema: SchemaTypeOptions<any> = {
+      ...formattedBaseSchema,
+      type: buildSchema({
+        buildSchemaOptions: {
+          disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
+          indexSortableFields,
+          options: {
+            _id: false,
+            id: false,
+            minimize: false,
+          },
         },
-      },
-      configFields: field.fields,
-      parentIsLocalized: parentIsLocalized || field.localized,
-      payload,
-    }),
-  }
+        configFields: field.fields,
+        parentIsLocalized: parentIsLocalized || field.localized,
+        payload,
+      }),
+    }
 
-  schema.add({
-    [field.name]: localizeSchema(field, baseSchema, payload.config.localization, parentIsLocalized),
-  })
+    schema.add({
+      [field.name]: localizeSchema(
+        field,
+        baseSchema,
+        payload.config.localization,
+        parentIsLocalized,
+      ),
+    })
+  } else {
+    field.fields.forEach((subField) => {
+      if (fieldIsVirtual(subField)) {
+        return
+      }
+
+      const addFieldSchema = getSchemaGenerator(subField.type)
+
+      if (addFieldSchema) {
+        addFieldSchema(
+          subField,
+          schema,
+          payload,
+          buildSchemaOptions,
+          (parentIsLocalized || field.localized) ?? false,
+        )
+      }
+    })
+  }
 }
 
 const json: FieldSchemaGenerator<JSONField> = (

@@ -36,9 +36,7 @@ describe('Select', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('Local API - Base', () => {
@@ -2153,7 +2151,7 @@ describe('Select', () => {
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
       const query = `query {
         Pages {
-          docs { 
+          docs {
             id,
             content {
               ... on Introduction {
@@ -2161,7 +2159,7 @@ describe('Select', () => {
                   doc {
                     id,
                     additional,
-                    slug, 
+                    slug,
                   }
                 },
                 richTextLexical(depth: 1)
@@ -2334,6 +2332,53 @@ describe('Select', () => {
         slug: page_1.slug,
         relatedPage: null,
       })
+    })
+  })
+
+  it('should force collection select fields with forceSelect', async () => {
+    const { id, text, array, forceSelected } = await payload.create({
+      collection: 'force-select',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findByID({
+      collection: 'force-select',
+      id,
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
+    })
+  })
+
+  it('should force global select fields with forceSelect', async () => {
+    const { forceSelected, id, array, text } = await payload.updateGlobal({
+      slug: 'force-select-global',
+      data: {
+        array: [{ forceSelected: 'text' }],
+        text: 'some-text',
+        forceSelected: 'force-selected',
+      },
+    })
+
+    const response = await payload.findGlobal({
+      slug: 'force-select-global',
+      select: { text: true },
+    })
+
+    expect(response).toStrictEqual({
+      id,
+      forceSelected,
+      text,
+      array,
     })
   })
 })

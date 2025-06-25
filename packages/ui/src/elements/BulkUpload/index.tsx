@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { Drawer, useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
@@ -75,7 +76,9 @@ export function BulkUploadDrawer() {
   return (
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
-        <DrawerContent />
+        <UploadControlsProvider>
+          <DrawerContent />
+        </UploadControlsProvider>
       </FormsManagerProvider>
     </Drawer>
   )
@@ -134,7 +137,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
   }, [])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         collectionSlug: collection,
         currentActivePath,
@@ -164,11 +167,11 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
         {children}
         <BulkUploadDrawer />
       </React.Fragment>
-    </Context.Provider>
+    </Context>
   )
 }
 
-export const useBulkUpload = () => React.useContext(Context)
+export const useBulkUpload = () => React.use(Context)
 
 export function useBulkUploadDrawerSlug() {
   const depth = useDrawerDepth()

@@ -1,3 +1,7 @@
+/* eslint-disable no-restricted-exports */
+
+import type { CollectionSlug, File } from 'payload'
+
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -8,16 +12,20 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
+import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
+  allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
@@ -25,8 +33,10 @@ import {
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
+  withoutEnlargeSlug,
 } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -390,8 +400,33 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
           },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+          },
         ],
         pasteURL: false,
+      },
+    },
+    {
+      slug: allowListMediaSlug,
+      fields: [],
+      upload: {
+        pasteURL: {
+          allowList: [
+            { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: 'localhost', port: '', search: '' },
+            { protocol: 'http', hostname: '[::1]', port: '', search: '' },
+            { protocol: 'http', hostname: '10.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '192.168.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '172.16.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '169.254.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '224.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '0.0.0.0', port: '', search: '' },
+            { protocol: 'http', hostname: '255.255.255.255', port: '', search: '' },
+          ],
+        },
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -481,6 +516,19 @@ export default buildConfigWithDefaults({
           'audio/mpeg',
         ],
         staticDir: path.resolve(dirname, './media/enlarge'),
+      },
+    },
+    {
+      slug: withoutEnlargeSlug,
+      fields: [],
+      upload: {
+        resizeOptions: {
+          width: 1000,
+          height: undefined,
+          fit: 'inside',
+          withoutEnlargement: true,
+        },
+        staticDir: path.resolve(dirname, './media/without-enlarge'),
       },
     },
     {
@@ -593,6 +641,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
+    AdminUploadControl,
     {
       slug: 'optional-file',
       fields: [],
@@ -658,7 +707,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      upload: true,
+      upload: {
+        displayPreview: false,
+      },
     },
     {
       slug: relationPreviewSlug,
@@ -728,6 +779,69 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: 'best-fit',
+      fields: [
+        {
+          name: 'withAdminThumbnail',
+          type: 'upload',
+          relationTo: 'admin-thumbnail-function',
+        },
+        {
+          name: 'withinRange',
+          type: 'upload',
+          relationTo: enlargeSlug,
+        },
+        {
+          name: 'nextSmallestOutOfRange',
+          type: 'upload',
+          relationTo: 'focal-only',
+        },
+        {
+          name: 'original',
+          type: 'upload',
+          relationTo: 'focal-only',
+        },
+      ],
+    },
+    {
+      slug: listViewPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'imageUpload',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageRelationship',
+          type: 'relationship',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+      ],
+    },
+    {
+      slug: threeDimensionalSlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+      },
+    },
+    {
+      slug: constructorOptionsSlug,
+      fields: [],
+      upload: {
+        constructorOptions: {
+          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+        },
+        staticDir: path.resolve(dirname, './media'),
+      },
     },
   ],
   onInit: async (payload) => {
@@ -825,39 +939,39 @@ export default buildConfigWithDefaults({
 
     // Create admin thumbnail media
     await payload.create({
-      collection: AdminThumbnailSize.slug,
+      collection: AdminThumbnailSize.slug as CollectionSlug,
       data: {},
       file: {
         ...audioFile,
         name: 'audio-thumbnail.mp3', // Override to avoid conflicts
-      },
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailSize.slug,
+      collection: AdminThumbnailSize.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `thumb-${imageFile.name}`,
-      },
+        name: `thumb-${imageFile?.name}`,
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailFunction.slug,
+      collection: AdminThumbnailFunction.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `function-image-${imageFile.name}`,
-      },
+        name: `function-image-${imageFile?.name}`,
+      } as File,
     })
 
     await payload.create({
-      collection: AdminThumbnailWithSearchQueries.slug,
+      collection: AdminThumbnailWithSearchQueries.slug as CollectionSlug,
       data: {},
       file: {
         ...imageFile,
-        name: `searchQueries-image-${imageFile.name}`,
-      },
+        name: `searchQueries-image-${imageFile?.name}`,
+      } as File,
     })
 
     // Create media with and without relation preview
@@ -872,8 +986,8 @@ export default buildConfigWithDefaults({
       data: {},
       file: {
         ...imageFile,
-        name: `withoutCacheTags-image-${imageFile.name}`,
-      },
+        name: `withoutCacheTags-image-${imageFile?.name}`,
+      } as File,
     })
 
     const { id: uploadedImageWithoutPreview } = await payload.create({
@@ -901,6 +1015,22 @@ export default buildConfigWithDefaults({
       },
       file: imageFile,
     })
+
+    for (let i = 0; i < 20; i++) {
+      const data = {
+        title: `List View Preview ${i + 1}`,
+        imageUpload: uploadedImageWithPreview,
+        imageRelationship: uploadedImageWithPreview,
+      }
+      if (i > 15) {
+        data.imageUpload = ''
+        data.imageRelationship = ''
+      }
+      await payload.create({
+        collection: listViewPreviewSlug as CollectionSlug,
+        data,
+      })
+    }
   },
   serverURL: undefined,
   upload: {

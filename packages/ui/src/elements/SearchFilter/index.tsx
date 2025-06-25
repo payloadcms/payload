@@ -2,11 +2,34 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 export type SearchFilterProps = {
+  /**
+   * This prop is deprecated and will be removed in the next major version.
+   *
+   * @deprecated
+   */
   fieldName?: string
   handleChange?: (search: string) => void
+  /**
+   * This prop is deprecated and will be removed in the next major version.
+   *
+   * Prefer passing in `searchString` instead.
+   *
+   * @deprecated
+   */
   initialParams?: ParsedQs
   label: string
+  searchQueryParam?: string
+  /**
+   * This prop is deprecated and will be removed in the next major version.
+   *
+   * @deprecated
+   */
   setValue?: (arg: string) => void
+  /**
+   * This prop is deprecated and will be removed in the next major version.
+   *
+   * @deprecated
+   */
   value?: string
 }
 
@@ -20,11 +43,10 @@ import './index.scss'
 const baseClass = 'search-filter'
 
 export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
-  const { handleChange, initialParams, label } = props
+  const { handleChange, initialParams, label, searchQueryParam } = props
+  const searchParam = initialParams?.search || searchQueryParam
   const pathname = usePathname()
-  const [search, setSearch] = useState(
-    typeof initialParams?.search === 'string' ? initialParams?.search : undefined,
-  )
+  const [search, setSearch] = useState(typeof searchParam === 'string' ? searchParam : undefined)
 
   /**
    * Tracks whether the state should be updated based on the search value.
@@ -35,19 +57,17 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
   /**
    * Tracks the previous search value to compare with the current debounced search value.
    */
-  const previousSearch = useRef(
-    typeof initialParams?.search === 'string' ? initialParams?.search : undefined,
-  )
+  const previousSearch = useRef(typeof searchParam === 'string' ? searchParam : undefined)
 
   const debouncedSearch = useDebounce(search, 300)
 
   useEffect(() => {
-    if (initialParams?.search !== previousSearch.current) {
+    if (searchParam !== previousSearch.current) {
       shouldUpdateState.current = false
-      setSearch(initialParams?.search as string)
-      previousSearch.current = initialParams?.search as string
+      setSearch(searchParam as string)
+      previousSearch.current = searchParam as string
     }
-  }, [initialParams?.search, pathname])
+  }, [searchParam, pathname])
 
   useEffect(() => {
     if (debouncedSearch !== previousSearch.current && shouldUpdateState.current) {

@@ -158,6 +158,10 @@ type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
+  /**
+   * Specifies whether or not response headers can be set from this strategy.
+   */
+  canSetHeaders?: boolean
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
@@ -169,7 +173,12 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: null | User
+  user:
+    | ({
+        _strategy?: string
+        collection?: string
+      } & User)
+    | null
 }
 
 export type AuthStrategyFunction = (

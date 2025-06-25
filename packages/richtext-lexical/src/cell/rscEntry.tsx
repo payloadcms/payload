@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'

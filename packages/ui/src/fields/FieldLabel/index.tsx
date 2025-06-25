@@ -14,7 +14,7 @@ import './index.scss'
 
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
-    as: Element = 'label',
+    as: ElementFromProps = 'label',
     hideLocale = false,
     htmlFor: htmlForFromProps,
     label,
@@ -26,13 +26,18 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
 
   const { uuid } = useForm()
   const editDepth = useEditDepth()
+
   const htmlFor = htmlForFromProps || generateFieldID(path, editDepth, uuid)
+
   const { i18n } = useTranslation()
   const { code, label: localLabel } = useLocale()
 
+  const Element =
+    ElementFromProps === 'label' ? (htmlFor ? 'label' : 'span') : ElementFromProps || 'span'
+
   if (label) {
     return (
-      <Element className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
+      <Element className={`field-label${unstyled ? ' unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(label, i18n)}
         {required && !unstyled && <span className="required">*</span>}
         {localized && !hideLocale && (

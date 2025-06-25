@@ -2,33 +2,25 @@
 import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-
-import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
+import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
+import { type DocumentInfoContext, type DocumentInfoProps } from './types.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
 export type * from './types.js'
 
-export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
+export const useDocumentInfo = (): DocumentInfoContext => use(Context)
 
 const DocumentInfo: React.FC<
   {
@@ -83,7 +75,11 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  const [documentTitle, setDocumentTitle] = useState(() =>
+  /**
+   * @deprecated This state will be removed in v4.
+   * This is for performance reasons. Use the `DocumentTitleContext` instead.
+   */
+  const [title, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
       data: { ...(initialData || {}), id },
@@ -153,13 +149,16 @@ const DocumentInfo: React.FC<
           ? `where[globalSlug][equals]=${slug}`
           : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+          credentials: 'include',
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
           await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -184,11 +183,13 @@ const DocumentInfo: React.FC<
           : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         // Check if the document is already locked
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`, {
+          credentials: 'include',
+        })
 
         const { docs } = await request.json()
 
-        if (docs.length > 0) {
+        if (docs?.length > 0) {
           const lockID = docs[0].id
 
           const userData =
@@ -201,6 +202,7 @@ const DocumentInfo: React.FC<
             body: JSON.stringify({
               user: userData,
             }),
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -280,6 +282,10 @@ const DocumentInfo: React.FC<
     [],
   )
 
+  /**
+   * @todo: Remove this in v4
+   * Users should use the `DocumentTitleContext` instead.
+   */
   useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
@@ -351,7 +357,7 @@ const DocumentInfo: React.FC<
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title: documentTitle,
+    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
@@ -360,7 +366,11 @@ const DocumentInfo: React.FC<
     versionCount,
   }
 
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return (
+    <Context value={value}>
+      <DocumentTitleProvider>{children}</DocumentTitleProvider>
+    </Context>
+  )
 }
 
 export const DocumentInfoProvider: React.FC<

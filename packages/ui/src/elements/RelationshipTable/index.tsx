@@ -8,7 +8,7 @@ import {
   type PaginatedDocs,
   type Where,
 } from 'payload'
-import { transformColumnsToPreferences } from 'payload/shared'
+import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -22,17 +22,16 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
-import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -42,6 +41,7 @@ type RelationshipTableComponentProps = {
   readonly BeforeInput?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
+  readonly fieldPath?: string
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
   readonly initialDrawerData?: DocumentDrawerProps['initialData']
@@ -61,6 +61,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     BeforeInput,
     disableTable = false,
     field,
+    fieldPath,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -140,6 +141,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         docs,
         enableRowSelections: false,
+        orderableFieldName:
+          !field.orderable || Array.isArray(field.collection)
+            ? undefined
+            : `_${field.collection}_${field.name}_order`,
         parent,
         query: newQuery,
         renderRowTypes: true,
@@ -154,6 +159,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
+      field.admin.defaultColumns,
+      field.collection,
+      field.name,
+      field.orderable,
       collectionConfig?.admin?.pagination?.defaultLimit,
       collectionConfig?.defaultSort,
       query,
@@ -228,6 +237,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     if (Array.isArray(relationTo) && !isDrawerOpen && selectedCollection) {
       setSelectedCollection(undefined)
     }
+    // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
 
@@ -292,6 +302,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
             pillStyle="light"
+            size="small"
           >
             {t('general:columns')}
           </Pill>
@@ -328,8 +339,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
+                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
+                orderableFieldName={
+                  !field.orderable || Array.isArray(field.collection)
+                    ? undefined
+                    : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
+                }
               >
                 <TableColumnsProvider
                   collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}

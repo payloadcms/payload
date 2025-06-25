@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -14,11 +14,13 @@ import type { TypeWithVersion } from '../versions/types.js'
 export type { TypeWithVersion }
 
 export interface BaseDatabaseAdapter {
+  allowIDOnCreate?: boolean
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction: BeginTransaction
+
   /**
    * Persist the changes made since the start of the transaction.
    */
@@ -28,7 +30,6 @@ export interface BaseDatabaseAdapter {
    * Open the connection to the database
    */
   connect?: Connect
-
   count: Count
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
@@ -53,8 +54,8 @@ export interface BaseDatabaseAdapter {
   deleteMany: DeleteMany
 
   deleteOne: DeleteOne
-
   deleteVersions: DeleteVersions
+
   /**
    * Terminate the connection with the database
    */
@@ -86,16 +87,15 @@ export interface BaseDatabaseAdapter {
    * Run any migration down functions that have been performed
    */
   migrateDown: () => Promise<void>
-
   /**
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
-
   /**
    * Run all migrate down functions
    */
@@ -108,6 +108,7 @@ export interface BaseDatabaseAdapter {
    * Path to read and write migration files from
    */
   migrationDir: string
+
   /**
    * The name of the database adapter
    */
@@ -119,12 +120,12 @@ export interface BaseDatabaseAdapter {
    * @example @payloadcms/db-postgres
    */
   packageName: string
-
   /**
    * reference to the instance of payload
    */
   payload: Payload
   queryDrafts: QueryDrafts
+
   /**
    * Abort any changes since the start of the transaction.
    */
@@ -145,12 +146,13 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
+  updateJobs: UpdateJobs
+
   updateMany: UpdateMany
 
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
-
   upsert: Upsert
 }
 
@@ -205,6 +207,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   locale?: string
   req?: Partial<PayloadRequest>
@@ -216,6 +219,7 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null 
 
 export type FindArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
@@ -368,7 +372,8 @@ export type FindGlobalVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
-  collection: CollectionSlug
+  collection?: CollectionSlug
+  globalSlug?: GlobalSlug
   locale?: string
   req?: Partial<PayloadRequest>
   sort?: {
@@ -531,10 +536,37 @@ export type UpdateManyArgs = {
    */
   returning?: boolean
   select?: SelectType
+  sort?: Sort
   where: Where
 }
 
 export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
+
+export type UpdateJobsArgs = {
+  data: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
+} & (
+  | {
+      id: number | string
+      limit?: never
+      sort?: never
+      where?: never
+    }
+  | {
+      id?: never
+      limit?: number
+      sort?: Sort
+      where: Where
+    }
+)
+
+export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Job[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug
@@ -607,8 +639,15 @@ export type PaginatedDocs<T = any> = {
 }
 
 export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
+  allowIDOnCreate?: boolean
   defaultIDType: 'number' | 'text'
   init: (args: { payload: Payload }) => T
+  /**
+   * The name of the database adapter. For example, "postgres" or "mongoose".
+   *
+   * @todo make required in 4.0
+   */
+  name?: string
 }
 
 export type DBIdentifierName =

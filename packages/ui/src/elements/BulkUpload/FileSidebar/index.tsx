@@ -92,6 +92,7 @@ export function FileSidebar() {
               <Pill
                 className={`${baseClass}__header__addFile`}
                 onClick={() => openModal(addMoreFilesDrawerSlug)}
+                size="small"
               >
                 {t('upload:addFile')}
               </Pill>
@@ -139,7 +140,7 @@ export function FileSidebar() {
                 ))
               : null}
             {forms.map(({ errorCount, formState }, index) => {
-              const currentFile = formState.file.value as File
+              const currentFile = (formState?.file?.value as File) || ({} as File)
 
               return (
                 <div
@@ -159,14 +160,16 @@ export function FileSidebar() {
                   >
                     <Thumbnail
                       className={`${baseClass}__thumbnail`}
-                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : undefined}
+                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : null}
                     />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
-                        {currentFile.name}
+                        {currentFile.name || t('upload:noFile')}
                       </p>
                     </div>
-                    <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    {currentFile instanceof File ? (
+                      <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    ) : null}
                     <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
                       <XIcon />
                     </div>

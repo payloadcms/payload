@@ -4,9 +4,11 @@
     "composite": false,
     "noEmit": true,
     "baseUrl": ".",
-
   },
   "references": [
+    {
+      "path": "./packages/admin-bar"
+    },
     {
       "path": "./packages/create-payload-app"
     },
@@ -60,6 +62,9 @@
     },
     {
       "path": "./packages/plugin-seo"
+    },
+    {
+      "path": "./packages/plugin-import-export"
     },
     {
       "path": "./packages/plugin-stripe"

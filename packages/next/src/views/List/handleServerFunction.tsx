@@ -1,4 +1,4 @@
-import type { ListPreferences, ListQuery, PayloadRequest, VisibleEntities } from 'payload'
+import type { ListPreferences, ListQuery, ServerFunction, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -11,25 +11,29 @@ type RenderListResult = {
   preferences: ListPreferences
 }
 
-export const renderListHandler = async (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  documentDrawerSlug: string
-  drawerSlug?: string
-  enableRowSelections: boolean
-  overrideEntityVisibility?: boolean
-  query: ListQuery
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
-  req: PayloadRequest
-}): Promise<RenderListResult> => {
+export const renderListHandler: ServerFunction<
+  {
+    collectionSlug: string
+    disableActions?: boolean
+    disableBulkDelete?: boolean
+    disableBulkEdit?: boolean
+    disableQueryPresets?: boolean
+    documentDrawerSlug: string
+    drawerSlug?: string
+    enableRowSelections: boolean
+    overrideEntityVisibility?: boolean
+    query: ListQuery
+    redirectAfterDelete: boolean
+    redirectAfterDuplicate: boolean
+  },
+  Promise<RenderListResult>
+> = async (args) => {
   const {
     collectionSlug,
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     overrideEntityVisibility,
@@ -135,6 +139,7 @@ export const renderListHandler = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     i18n,

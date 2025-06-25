@@ -1,6 +1,6 @@
 import type { CollectionSlug, Data, ListQuery } from 'payload'
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 import type { useSelection } from '../../providers/Selection/index.js'
 import type { UseDocumentDrawer } from '../DocumentDrawer/types.js'
@@ -40,14 +40,14 @@ export const ListDrawerContextProvider: React.FC<
   } & ListDrawerContextProps
 > = ({ children, ...rest }) => {
   return (
-    <ListDrawerContext.Provider value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
+    <ListDrawerContext value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
       {children}
-    </ListDrawerContext.Provider>
+    </ListDrawerContext>
   )
 }
 
 export const useListDrawerContext = (): ListDrawerContextType => {
-  const context = useContext(ListDrawerContext)
+  const context = use(ListDrawerContext)
 
   if (!context) {
     throw new Error('useListDrawerContext must be used within a ListDrawerContextProvider')

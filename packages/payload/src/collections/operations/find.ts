@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -16,16 +15,20 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -69,9 +72,9 @@ export const findOperation = async <
           (await hook({
             args,
             collection: args.collection.config,
-            context: args.req.context,
+            context: args.req!.context,
             operation: 'read',
-            req: args.req,
+            req: args.req!,
           })) || args
       }
     }
@@ -90,13 +93,20 @@ export const findOperation = async <
       page,
       pagination = true,
       populate,
-      req: { fallbackLocale, locale, payload },
-      req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
-      sort,
+      sort: incomingSort,
       where,
     } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -113,7 +123,7 @@ export const findOperation = async <
           docs: [],
           hasNextPage: false,
           hasPrevPage: false,
-          limit,
+          limit: limit!,
           nextPage: null,
           page: 1,
           pagingCounter: 1,
@@ -134,12 +144,18 @@ export const findOperation = async <
 
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
-    let fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -148,7 +164,7 @@ export const findOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -158,27 +174,31 @@ export const findOperation = async <
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination: usePagination,
         req,
         select: getQueryDraftsSelect({ select }),
-        sort: getQueryDraftsSort({ collectionConfig, sort }),
+        sort: getQueryDraftsSort({
+          collectionConfig,
+          sort,
+        }),
         where: fullWhere,
       })
     } else {
       await validateQueryPaths({
         collectionConfig,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
-        where,
+        where: where!,
       })
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination,
         req,
@@ -199,7 +219,7 @@ export const findOperation = async <
         const now = new Date().getTime()
 
         const lockedDocuments = await payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: sanitizedLimit,
           overrideAccess: false,
@@ -283,18 +303,18 @@ export const findOperation = async <
           collection: collectionConfig,
           context: req.context,
           currentDepth,
-          depth,
+          depth: depth!,
           doc,
-          draft: draftsEnabled,
-          fallbackLocale,
+          draft: draftsEnabled!,
+          fallbackLocale: fallbackLocale!,
           findMany: true,
           global: null,
-          locale,
-          overrideAccess,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
           populate,
           req,
           select,
-          showHiddenFields,
+          showHiddenFields: showHiddenFields!,
         }),
       ),
     )
@@ -342,7 +362,7 @@ export const findOperation = async <
 
     return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

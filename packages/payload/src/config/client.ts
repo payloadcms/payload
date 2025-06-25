@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -17,6 +16,7 @@ import {
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
+
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
@@ -34,6 +34,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'logger'
   | 'onInit'
   | 'plugins'
+  | 'queryPresets'
   | 'secret'
   | 'sharp'
   | 'typescript'
@@ -83,6 +84,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
+  'queryPresets',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -125,7 +127,7 @@ export const createClientConfig = ({
         break
       case 'blocks': {
         ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
-          blocks: config.blocks,
+          blocks: config.blocks!,
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
@@ -141,6 +143,17 @@ export const createClientConfig = ({
           importMap,
         })
         break
+      case 'folders':
+        if (config.folders) {
+          clientConfig.folders = {
+            slug: config.folders.slug,
+            browseByFolder: config.folders.browseByFolder,
+            debug: config.folders.debug,
+            fieldName: config.folders.fieldName,
+          }
+        }
+        break
+
       case 'globals':
         ;(clientConfig.globals as ClientGlobalConfig[]) = createClientGlobalConfigs({
           defaultIDType: config.db.defaultIDType,
@@ -149,7 +162,6 @@ export const createClientConfig = ({
           importMap,
         })
         break
-
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}
@@ -190,7 +202,7 @@ export const createClientConfig = ({
         }
         break
       default:
-        clientConfig[key] = config[key]
+        ;(clientConfig as any)[key] = config[key as keyof SanitizedConfig]
     }
   }
   return clientConfig as ClientConfig

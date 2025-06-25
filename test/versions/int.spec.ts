@@ -1,8 +1,8 @@
-import type { Payload } from 'payload';
+import type { Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { createLocalReq , ValidationError } from 'payload'
+import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -56,9 +56,7 @@ describe('Versions', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -688,6 +686,62 @@ describe('Versions', () => {
         expect(updateManyResult.errors).toStrictEqual([
           { id: doc.id, message: 'The following field is invalid: Title' },
         ])
+      })
+
+      it('should update with autosave: true', async () => {
+        // Save a draft
+        const { id } = await payload.create({
+          collection: autosaveCollectionSlug,
+          draft: true,
+          data: { title: 'my-title', description: 'some-description', _status: 'draft' },
+        })
+
+        // Autosave the same draft, calls db.updateVersion
+        const updated1 = await payload.update({
+          collection: autosaveCollectionSlug,
+          id,
+          data: {
+            title: 'new-title',
+          },
+          autosave: true,
+          draft: true,
+        })
+
+        const versionsCount = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
+        })
+
+        // This should not create a new version
+        const updated2 = await payload.update({
+          collection: autosaveCollectionSlug,
+          id,
+          data: {
+            title: 'new-title-2',
+          },
+          autosave: true,
+          draft: true,
+        })
+
+        const versionsCountAfter = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
+        })
+
+        expect(versionsCount.totalDocs).toBe(versionsCountAfter.totalDocs)
+        expect(updated1.id).toBe(id)
+        expect(updated1.title).toBe('new-title')
+
+        expect(updated2.id).toBe(id)
+        expect(updated2.title).toBe('new-title-2')
       })
     })
 
@@ -1486,6 +1540,30 @@ describe('Versions', () => {
         expect(globalLocalVersionID).toBeDefined()
       })
 
+      it('ensure global can be published after saving draft', async () => {
+        const draftVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: true,
+          data: {
+            title: 'Draft',
+            _status: 'draft',
+          },
+        })
+        expect(draftVersion.title).toStrictEqual('Draft')
+        expect(draftVersion._status).toStrictEqual('draft')
+
+        const publishedVersion = await payload.updateGlobal({
+          slug: 'max-versions',
+          draft: false,
+          data: {
+            title: 'Published',
+            _status: 'published',
+          },
+        })
+        expect(publishedVersion.title).toStrictEqual('Published')
+        expect(publishedVersion._status).toStrictEqual('published')
+      })
+
       it('should have different createdAt in a new version while the same version.createdAt', async () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
@@ -1527,6 +1605,30 @@ describe('Versions', () => {
         // When creating a new version - updatedAt should match
         expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
+    })
+
+    it('should properly clean up old versions when reached versions.max', async () => {
+      const getLatestVersion = () =>
+        payload
+          .findGlobalVersions({
+            slug: 'max-versions',
+            sort: '-createdAt',
+            limit: 1,
+          })
+          .then((r) => r.docs[0])
+
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' } })
+      const version_1 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' } })
+      const version_2 = await getLatestVersion()
+      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' } })
+      const version_3 = await getLatestVersion()
+      const version_1_deleted = await payload.findGlobalVersionByID({
+        slug: 'max-versions',
+        id: version_1?.id as string,
+        disableErrors: true,
+      })
+      expect(version_1_deleted).toBeFalsy()
     })
 
     describe('Read', () => {

@@ -1,13 +1,12 @@
 import type { AdminViewServerProps } from 'payload'
 
 import { Button, Link } from '@payloadcms/ui'
-import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
+import { Translation } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
-
-export { generateForgotPasswordMetadata } from './meta.js'
 
 export const forgotPasswordBaseClass = 'forgot-password'
 

@@ -1,12 +1,14 @@
 'use client'
 import type {
   ClientUser,
+  Data,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -15,13 +17,13 @@ import { useFormInitializing, useFormProcessing } from '../../forms/Form/context
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { formatDate } from '../../utilities/formatDate.js'
+import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
+import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -37,15 +39,17 @@ const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
+  readonly BeforeDocumentControls?: React.ReactNode
   readonly customComponents?: {
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
   }
-  readonly data?: any
+  readonly data?: Data
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
+  readonly EditMenuItems?: React.ReactNode
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
   readonly id?: number | string
@@ -67,6 +71,7 @@ export const DocumentControls: React.FC<{
   const {
     id,
     slug,
+    BeforeDocumentControls,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -76,6 +81,7 @@ export const DocumentControls: React.FC<{
     data,
     disableActions,
     disableCreate,
+    EditMenuItems,
     hasSavePermission,
     isAccountView,
     isEditing,
@@ -133,14 +139,47 @@ export const DocumentControls: React.FC<{
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
+  const collectionConfigDrafts = collectionConfig?.versions?.drafts
+  const globalConfigDrafts = globalConfig?.versions?.drafts
+
   const autosaveEnabled =
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-    (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
+    (collectionConfigDrafts && collectionConfigDrafts?.autosave) ||
+    (globalConfigDrafts && globalConfigDrafts?.autosave)
+
+  const collectionAutosaveEnabled = collectionConfigDrafts && collectionConfigDrafts?.autosave
+  const globalAutosaveEnabled = globalConfigDrafts && globalConfigDrafts?.autosave
+
+  const showSaveDraftButton =
+    (collectionAutosaveEnabled &&
+      collectionConfigDrafts.autosave !== false &&
+      collectionConfigDrafts.autosave.showSaveDraftButton === true) ||
+    (globalAutosaveEnabled &&
+      globalConfigDrafts.autosave !== false &&
+      globalConfigDrafts.autosave.showSaveDraftButton === true)
+
+  const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
+
+  const showFolderMetaIcon = collectionConfig && collectionConfig.folders
+  const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
+          {showLockedMetaIcon || showFolderMetaIcon ? (
+            <div className={`${baseClass}__meta-icons`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
+              )}
+              {showFolderMetaIcon && config.folders && (
+                <MoveDocToFolder
+                  folderCollectionSlug={config.folders.slug}
+                  folderFieldName={config.folders.fieldName}
+                />
+              )}
+            </div>
+          ) : null}
+
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -154,9 +193,7 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-            {user && readOnlyForIncomingUser && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
+
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
                 {(globalConfig || (collectionConfig && isEditing)) && (
@@ -206,6 +243,7 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
+            {BeforeDocumentControls}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}
@@ -216,7 +254,9 @@ export const DocumentControls: React.FC<{
               <Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <Fragment>
-                    {(unsavedDraftWithValidations || !autosaveEnabled) && (
+                    {(unsavedDraftWithValidations ||
+                      !autosaveEnabled ||
+                      (autosaveEnabled && showSaveDraftButton)) && (
                       <RenderCustomComponent
                         CustomComponent={CustomSaveDraftButton}
                         Fallback={<SaveDraftButton />}
@@ -263,7 +303,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {localization && <CopyLocaleData />}
+                {showCopyToLocale && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (
@@ -307,6 +347,7 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
           )}

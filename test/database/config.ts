@@ -4,10 +4,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
-import { v4 as uuid } from 'uuid'
+import { randomUUID } from 'crypto'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -38,12 +37,68 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug: 'categories',
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
       slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+          // access: { read: () => false },
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          name: 'category',
+        },
+        {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'number',
+          type: 'number',
+        },
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block-third',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'nested',
+                  blocks: [
+                    {
+                      slug: 'block-fourth',
+                      fields: [
+                        {
+                          type: 'blocks',
+                          name: 'nested',
+                          blocks: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
         {
           type: 'tabs',
@@ -143,7 +198,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-first',
               fields: [
                 {
                   name: 'text',
@@ -232,6 +287,11 @@ export default buildConfigWithDefaults({
           name: 'point',
           type: 'point',
           defaultValue: [10, 20],
+        },
+        {
+          name: 'escape',
+          type: 'text',
+          defaultValue: "Thanks, we're excited for you to join us.",
         },
       ],
     },
@@ -396,7 +456,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-second',
               dbName: 'customBlocks',
               fields: [
                 {
@@ -429,6 +489,60 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: 'virtual-relations',
+      admin: { useAsTitle: 'postTitle' },
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: 'post.title',
+        },
+        {
+          name: 'postTitleHidden',
+          type: 'text',
+          virtual: 'post.title',
+          hidden: true,
+        },
+        {
+          name: 'postCategoryTitle',
+          type: 'text',
+          virtual: 'post.category.title',
+        },
+        {
+          name: 'postCategoryID',
+          type: 'json',
+          virtual: 'post.category.id',
+        },
+        {
+          name: 'postID',
+          type: 'json',
+          virtual: 'post.id',
+        },
+        {
+          name: 'postLocalized',
+          type: 'text',
+          virtual: 'post.localized',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+        {
+          name: 'customID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
+        {
+          name: 'customIDValue',
+          type: 'text',
+          virtual: 'customID.id',
+        },
+      ],
+      versions: { drafts: true },
     },
     {
       slug: fieldsPersistanceSlug,
@@ -501,7 +615,7 @@ export default buildConfigWithDefaults({
             beforeChange: [
               ({ value, operation }) => {
                 if (operation === 'create') {
-                  return uuid()
+                  return randomUUID()
                 }
                 return value
               },
@@ -564,8 +678,163 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'compound-indexes',
+      fields: [
+        {
+          name: 'one',
+          type: 'text',
+        },
+        {
+          name: 'two',
+          type: 'text',
+        },
+        {
+          name: 'three',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'four',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      indexes: [
+        {
+          fields: ['one', 'two'],
+          unique: true,
+        },
+        {
+          fields: ['three', 'group.four'],
+          unique: true,
+        },
+      ],
+    },
+    {
+      slug: 'aliases',
+      fields: [
+        {
+          name: 'thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName',
+          dbName: 'shortname',
+          type: 'array',
+          fields: [
+            {
+              name: 'nestedArray',
+              type: 'array',
+              dbName: 'short_nested_1',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'blocks-docs',
+      fields: [
+        {
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocksLocalized',
+        },
+        {
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+          name: 'testBlocks',
+        },
+      ],
+    },
+    {
+      slug: 'unique-fields',
+      fields: [
+        {
+          name: 'slugField',
+          type: 'text',
+          unique: true,
+        },
+      ],
+    },
   ],
   globals: [
+    {
+      slug: 'header',
+      fields: [
+        {
+          name: 'itemsLvl1',
+          type: 'array',
+          dbName: 'header_items_lvl1',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+            {
+              name: 'itemsLvl2',
+              type: 'array',
+              dbName: 'header_items_lvl2',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                },
+                {
+                  name: 'itemsLvl3',
+                  type: 'array',
+                  dbName: 'header_items_lvl3',
+                  fields: [
+                    {
+                      name: 'label',
+                      type: 'text',
+                    },
+                    {
+                      name: 'itemsLvl4',
+                      type: 'array',
+                      dbName: 'header_items_lvl4',
+                      fields: [
+                        {
+                          name: 'label',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     {
       slug: 'global',
       dbName: 'customGlobal',
@@ -592,6 +861,21 @@ export default buildConfigWithDefaults({
         {
           name: 'text',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-relation-global',
+      fields: [
+        {
+          type: 'text',
+          name: 'postTitle',
+          virtual: 'post.title',
+        },
+        {
+          type: 'relationship',
+          name: 'post',
+          relationTo: 'posts',
         },
       ],
     },

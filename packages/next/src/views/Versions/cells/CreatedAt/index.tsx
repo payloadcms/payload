@@ -1,9 +1,10 @@
 'use client'
 import { Link, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
+import { formatDate } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-type CreatedAtCellProps = {
+export type CreatedAtCellProps = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string

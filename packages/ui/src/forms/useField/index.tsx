@@ -23,14 +23,27 @@ import {
   useFormProcessing,
   useFormSubmitted,
 } from '../Form/context.js'
+import { useFieldPath } from '../RenderFields/context.js'
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
-export const useField = <TValue,>(options: Options): FieldType<TValue> => {
-  const { disableFormData = false, hasRows, path, validate } = options
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const {
+    disableFormData = false,
+    hasRows,
+    path: pathFromOptions,
+    potentiallyStalePath,
+    validate,
+  } = options || {}
+
+  const pathFromContext = useFieldPath()
+
+  // This is a workaround for stale props given to server rendered components.
+  // See the notes in the `potentiallyStalePath` type definition for more details.
+  const path = pathFromOptions || pathFromContext || potentiallyStalePath
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -58,11 +71,23 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
 
+  const pathSegments = path ? path.split('.') : []
+
   // Method to return from `useField`, used to
   // update field values from field component(s)
   const setValue = useCallback(
     (e, disableModifyingForm = false) => {
-      const val = e && e.target ? e.target.value : e
+      // TODO:
+      // There are no built-in fields that pass events into `e`.
+      // Remove this check in the next major version.
+      const isEvent =
+        e &&
+        typeof e === 'object' &&
+        typeof e.preventDefault === 'function' &&
+        typeof e.stopPropagation === 'function'
+
+      const val = isEvent ? e.target.value : e
+
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
@@ -103,6 +128,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -112,6 +138,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
       initialValue,
       path,
       rows: field?.rows,
+      selectFilterOptions: field?.selectFilterOptions,
       setValue,
       showError,
       valid: field?.valid,
@@ -154,6 +181,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                 data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {

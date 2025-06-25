@@ -17,7 +17,6 @@ import type {
   TypeWithVersion,
   UpdateGlobalArgs,
   UpdateGlobalVersionArgs,
-  UpdateManyArgs,
   UpdateOneArgs,
   UpdateVersionArgs,
 } from 'payload'
@@ -55,6 +54,7 @@ import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateJobs } from './updateJobs.js'
 import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
@@ -63,8 +63,27 @@ import { upsert } from './upsert.js'
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
+  /**
+   * By default, Payload strips all additional keys from MongoDB data that don't exist
+   * in the Payload schema. If you have some data that you want to include to the result
+   * but it doesn't exist in Payload, you can enable this flag
+   * @default false
+   */
+  allowAdditionalKeys?: boolean
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * import { Types } from 'mongoose'
+   *
+   * const id = new Types.ObjectId().toHexString()
+   * const doc = await payload.create({ collection: 'posts', data: {id, title: "my title"}})
+   * assertEq(doc.id, id)
+   * ```
+   */
+  allowIDOnCreate?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+
   /**
    * If enabled, collation allows for language-specific rules for string comparison.
    * This configuration can include the following options:
@@ -89,8 +108,8 @@ export interface Args {
    * Defaults to disabled.
    */
   collation?: Omit<CollationOptions, 'locale'>
-  collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
 
+  collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
   /** Extra configuration options */
   connectOptions?: {
     /**
@@ -174,6 +193,8 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
+  allowAdditionalKeys = false,
+  allowIDOnCreate = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
   connectOptions,
@@ -206,10 +227,13 @@ export function mongooseAdapter({
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
+      updateJobs,
       updateMany,
       url,
       versions: {},
       // DatabaseAdapter
+      allowAdditionalKeys,
+      allowIDOnCreate,
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       collectionsSchemaOptions,
       commitTransaction,
@@ -249,6 +273,8 @@ export function mongooseAdapter({
   }
 
   return {
+    name: 'mongoose',
+    allowIDOnCreate,
     defaultIDType: 'text',
     init: adapter,
   }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
@@ -99,7 +98,14 @@ export const updateDocument = async <
   const password = data?.password
   const shouldSaveDraft =
     Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !shouldSaveDraft,
+  )
 
   // /////////////////////////////////////
   // Handle potentially locked documents
@@ -224,9 +230,11 @@ export const updateDocument = async <
     context: req.context,
     data: { ...data, id },
     doc: originalDoc,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     docWithLocales: undefined,
     global: null,
     operation: 'update',
+    overrideAccess,
     req,
     skipValidation:
       shouldSaveDraft &&
@@ -375,6 +383,7 @@ export const updateDocument = async <
         (await hook({
           collection: collectionConfig,
           context: req.context,
+          data,
           doc: result,
           operation: 'update',
           previousDoc: originalDoc,

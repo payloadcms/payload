@@ -1,6 +1,6 @@
 import type { User } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 type Args = {

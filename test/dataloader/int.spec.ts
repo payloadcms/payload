@@ -1,6 +1,7 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
+import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -28,13 +29,13 @@ describe('dataloader', () => {
       },
     })
 
-    if (loginResult.token) token = loginResult.token
+    if (loginResult.token) {
+      token = loginResult.token
+    }
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('graphql', () => {
@@ -185,6 +186,28 @@ describe('dataloader', () => {
         relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)
+    })
+  })
+
+  describe('find', () => {
+    it('should call the same query only once in a request', async () => {
+      const req = await createLocalReq({}, payload)
+      const spy = jest.spyOn(payload, 'find')
+
+      const findArgs = {
+        collection: 'items' as CollectionSlug,
+        req,
+        depth: 0,
+        where: {
+          name: { exists: true },
+        },
+      }
+
+      void req.payloadDataLoader.find(findArgs)
+      void req.payloadDataLoader.find(findArgs)
+      await req.payloadDataLoader.find(findArgs)
+
+      expect(spy).toHaveBeenCalledTimes(1)
     })
   })
 })

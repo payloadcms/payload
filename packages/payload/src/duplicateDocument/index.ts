@@ -1,9 +1,8 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { Forbidden } from '../errors/Forbidden.js'
@@ -47,7 +46,7 @@ export const getDuplicateDocumentData = async ({
   // /////////////////////////////////////
   const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
-    locale: req.locale,
+    locale: req.locale!,
     req,
     where: combineQueries({ id: { equals: id } }, accessResults),
   }
@@ -81,7 +80,7 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     doc: duplicatedFromDocWithLocales,
-    overrideAccess,
+    overrideAccess: overrideAccess!,
     req,
   })
 
@@ -95,10 +94,10 @@ export const getDuplicateDocumentData = async ({
     context: req.context,
     depth: 0,
     doc: deepCopyObjectSimple(duplicatedFromDocWithLocales),
-    draft: draftArg,
+    draft: draftArg!,
     fallbackLocale: null,
     global: null,
-    locale: req.locale,
+    locale: req.locale!,
     overrideAccess: true,
     req,
     showHiddenFields: true,

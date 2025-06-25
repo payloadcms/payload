@@ -3,7 +3,7 @@ import type { ClientUser, Where } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useLocale } from '../Locale/index.js'
@@ -20,6 +20,7 @@ type SelectionContext = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   getQueryParams: (additionalParams?: Where) => string
+  getSelectedIds: () => (number | string)[]
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
   setSelection: (id: number | string) => void
@@ -148,6 +149,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     [selectAll, selected, locale, searchParams],
   )
 
+  const getSelectedIds = useCallback(() => {
+    const ids = []
+    for (const [key, value] of selected) {
+      if (value) {
+        ids.push(key)
+      }
+    }
+    return ids
+  }, [selected])
+
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {
       return
@@ -190,9 +201,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
   contextRef.current = {
     count,
     getQueryParams,
+    getSelectedIds,
     selectAll,
     selected,
     setSelection,
@@ -200,7 +213,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     totalDocs,
   }
 
-  return <Context.Provider value={contextRef.current}>{children}</Context.Provider>
+  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
+  return <Context value={contextRef.current}>{children}</Context>
 }
 
-export const useSelection = (): SelectionContext => useContext(Context)
+export const useSelection = (): SelectionContext => use(Context)

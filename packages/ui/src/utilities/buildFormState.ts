@@ -1,7 +1,14 @@
-import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientUser,
+  ErrorResult,
+  FormState,
+  ServerFunction,
+} from 'payload'
 
 import { formatErrors } from 'payload'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -36,9 +43,10 @@ type BuildFormStateErrorResult = {
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
-export const buildFormStateHandler = async (
-  args: BuildFormStateArgs,
-): Promise<BuildFormStateResult> => {
+export const buildFormStateHandler: ServerFunction<
+  BuildFormStateArgs,
+  Promise<BuildFormStateResult>
+> = async (args) => {
   const { req } = args
 
   const incomingUserSlug = req.user?.collection
@@ -107,6 +115,7 @@ export const buildFormState = async (
     globalSlug,
     initialBlockData,
     initialBlockFormState,
+    mockRSCs,
     operation,
     renderAllFields,
     req,
@@ -117,9 +126,12 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    select,
     skipValidation,
     updateLastEdited,
   } = args
+
+  const selectMode = select ? getSelectMode(select) : undefined
 
   let data = incomingData
 
@@ -202,6 +214,7 @@ export const buildFormState = async (
     fields,
     fieldSchemaMap: schemaMap,
     initialBlockData: blockData,
+    mockRSCs,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
@@ -210,6 +223,8 @@ export const buildFormState = async (
     renderFieldFn: renderField,
     req,
     schemaPath,
+    select,
+    selectMode,
     skipValidation,
   })
 

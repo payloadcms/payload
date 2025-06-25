@@ -17,15 +17,17 @@ import { setTimeout } from 'timers/promises'
 import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
+type AdminRoutes = NonNullable<Config['admin']>['routes']
+
 type FirstRegisterArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }
 
 type LoginArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   data?: {
     email: string
@@ -45,7 +47,7 @@ const networkConditions = {
   },
   'Slow 3G': {
     download: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
+    latency: 2500,
     upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
@@ -78,16 +80,14 @@ export async function ensureCompilationIsDone({
   noAutoLogin,
   readyURL,
 }: {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -170,9 +170,7 @@ export async function throttleTest({
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, page, serverURL } = args
 
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
@@ -188,10 +186,19 @@ export async function login(args: LoginArgs): Promise<void> {
 
   const {
     admin: {
-      routes: { createFirstUser, login: incomingLoginRoute },
+      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
     },
-    routes: { admin: incomingAdminRoute },
+    routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
+
+  const logoutRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLogoutRoute,
+  })
+
+  await page.goto(logoutRoute)
+  await wait(500)
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
   const loginRoute = formatAdminURL({
@@ -249,7 +256,7 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
@@ -373,6 +380,11 @@ export async function switchTab(page: Page, selector: string) {
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
 }
 
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+}
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
@@ -462,8 +474,6 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   return describe
 }
 
-type AdminRoutes = Config['admin']['routes']
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -477,7 +487,7 @@ export function getRoutes({
   routes: Config['routes']
 } {
   let routes = defaults.routes
-  let adminRoutes = defaults.admin.routes
+  let adminRoutes = defaults.admin?.routes
 
   if (customAdminRoutes) {
     adminRoutes = {

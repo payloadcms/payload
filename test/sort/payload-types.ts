@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -69,18 +70,31 @@ export interface Config {
     posts: Post;
     drafts: Draft;
     'default-sort': DefaultSort;
+    'non-unique-sort': NonUniqueSort;
     localized: Localized;
+    orderable: Orderable;
+    'orderable-join': OrderableJoin;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'orderable-join': {
+      orderableJoinField1: 'orderable';
+      'group.orderableJoinField': 'orderable';
+      orderableJoinField2: 'orderable';
+      nonOrderableJoinField: 'orderable';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
+    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -140,6 +154,7 @@ export interface Post {
  */
 export interface Draft {
   id: string;
+  _order?: string | null;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -160,6 +175,17 @@ export interface DefaultSort {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort".
+ */
+export interface NonUniqueSort {
+  id: string;
+  title?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized".
  */
 export interface Localized {
@@ -170,6 +196,53 @@ export interface Localized {
   group?: {
     text?: string | null;
     number?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_group_orderableJoinField_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
+  title?: string | null;
+  orderableField?: (string | null) | OrderableJoin;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join".
+ */
+export interface OrderableJoin {
+  id: string;
+  title?: string | null;
+  orderableJoinField1?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  group?: {
+    orderableJoinField?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  orderableJoinField2?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  nonOrderableJoinField?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
   };
   updatedAt: string;
   createdAt: string;
@@ -211,8 +284,20 @@ export interface PayloadLockedDocument {
         value: string | DefaultSort;
       } | null)
     | ({
+        relationTo: 'non-unique-sort';
+        value: string | NonUniqueSort;
+      } | null)
+    | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-join';
+        value: string | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
@@ -282,6 +367,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "drafts_select".
  */
 export interface DraftsSelect<T extends boolean = true> {
+  _order?: T;
   text?: T;
   number?: T;
   number2?: T;
@@ -301,6 +387,16 @@ export interface DefaultSortSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort_select".
+ */
+export interface NonUniqueSortSelect<T extends boolean = true> {
+  title?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized_select".
  */
 export interface LocalizedSelect<T extends boolean = true> {
@@ -313,6 +409,37 @@ export interface LocalizedSelect<T extends boolean = true> {
         text?: T;
         number?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _orderable_orderableJoinField2_order?: T;
+  _orderable_group_orderableJoinField_order?: T;
+  _orderable_orderableJoinField1_order?: T;
+  _order?: T;
+  title?: T;
+  orderableField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join_select".
+ */
+export interface OrderableJoinSelect<T extends boolean = true> {
+  title?: T;
+  orderableJoinField1?: T;
+  group?:
+    | T
+    | {
+        orderableJoinField?: T;
+      };
+  orderableJoinField2?: T;
+  nonOrderableJoinField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

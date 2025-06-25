@@ -134,7 +134,13 @@ export const azureStorage: AzureStoragePlugin =
 
 function azureStorageInternal(
   getStorageClient: () => ContainerClient,
-  { allowContainerCreate, baseURL, connectionString, containerName }: AzureStorageOptions,
+  {
+    allowContainerCreate,
+    baseURL,
+    clientUploads,
+    connectionString,
+    containerName,
+  }: AzureStorageOptions,
 ): Adapter {
   const createContainerIfNotExists = () => {
     void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
@@ -145,6 +151,7 @@ function azureStorageInternal(
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'azure',
+      clientUploads,
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({

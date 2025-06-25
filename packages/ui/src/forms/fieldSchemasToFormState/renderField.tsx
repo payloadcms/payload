@@ -14,7 +14,7 @@ import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
@@ -34,16 +34,25 @@ export const renderField: RenderFieldMethod = ({
   fieldState,
   formState,
   indexPath,
+  lastRenderedPath,
+  mockRSCs,
   operation,
   parentPath,
   parentSchemaPath,
   path,
   permissions,
   preferences,
+  renderAllFields,
   req,
   schemaPath,
   siblingData,
 }) => {
+  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
+
+  if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
+    return
+  }
+
   const clientField = clientFieldSchemaMap
     ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
     : createClientField({
@@ -52,10 +61,6 @@ export const renderField: RenderFieldMethod = ({
         i18n: req.i18n,
         importMap: req.payload.importMap,
       })
-
-  if (fieldIsHiddenOrDisabled(clientField)) {
-    return
-  }
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
@@ -95,6 +100,113 @@ export const renderField: RenderFieldMethod = ({
     req,
     siblingData,
     user: req.user,
+    value: 'name' in fieldConfig && data?.[fieldConfig.name],
+  }
+
+  switch (fieldConfig.type) {
+    case 'array': {
+      fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+
+        const rowPath = `${path}.${rowIndex}`
+
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+
+        row.lastRenderedPath = rowPath
+
+        if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!row.customComponents) {
+            row.customComponents = {}
+          }
+
+          row.customComponents.RowLabel = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component: fieldConfig.admin.components.RowLabel,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: {
+                  ...serverProps,
+                  rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                    rowIndex + 1,
+                  ).padStart(2, '0')}`,
+                  rowNumber: rowIndex + 1,
+                },
+              })
+            : 'Mock'
+        }
+      })
+
+      break
+    }
+
+    case 'blocks': {
+      fieldState?.rows?.forEach((row, rowIndex) => {
+        const rowLastRenderedPath = row.lastRenderedPath
+
+        const rowPath = `${path}.${rowIndex}`
+
+        const rowRequiresRender =
+          renderAllFields || !rowLastRenderedPath || rowLastRenderedPath !== rowPath
+
+        if (!rowRequiresRender) {
+          return
+        }
+
+        row.lastRenderedPath = rowPath
+
+        const blockTypeToMatch: string = row.blockType
+
+        const blockConfig =
+          req.payload.blocks[blockTypeToMatch] ??
+          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+          ) as FlattenedBlock | undefined)
+
+        if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
+          if (!fieldState.rows[rowIndex]?.customComponents) {
+            fieldState.rows[rowIndex].customComponents = {}
+          }
+
+          fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component: blockConfig.admin.components.Label,
+                importMap: req.payload.importMap,
+                key: `${rowIndex}`,
+                serverProps: {
+                  ...serverProps,
+                  blockType: row.blockType,
+                  rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
+                    rowIndex + 1,
+                  ).padStart(2, '0')}`,
+                  rowNumber: rowIndex + 1,
+                },
+              })
+            : 'Mock'
+        }
+      })
+
+      break
+    }
+  }
+
+  if (!requiresRender) {
+    return
+  }
+
+  /**
+   * Set the `lastRenderedPath` equal to the new path of the field, this will prevent it from being rendered again
+   */
+  fieldState.lastRenderedPath = path
+
+  if (fieldIsHiddenOrDisabled(clientField)) {
+    return
   }
 
   /**
@@ -114,70 +226,6 @@ export const renderField: RenderFieldMethod = ({
   }
 
   switch (fieldConfig.type) {
-    case 'array': {
-      fieldState?.rows?.forEach((row, rowIndex) => {
-        if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
-          if (!fieldState.customComponents.RowLabels) {
-            fieldState.customComponents.RowLabels = []
-          }
-
-          fieldState.customComponents.RowLabels[rowIndex] = RenderServerComponent({
-            clientProps,
-            Component: fieldConfig.admin.components.RowLabel,
-            importMap: req.payload.importMap,
-            key: `${rowIndex}`,
-            serverProps: {
-              ...serverProps,
-              rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            },
-          })
-        }
-      })
-
-      break
-    }
-
-    case 'blocks': {
-      fieldState?.rows?.forEach((row, rowIndex) => {
-        const blockTypeToMatch: string = row.blockType
-        const blockConfig =
-          req.payload.blocks[blockTypeToMatch] ??
-          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
-            (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
-          ) as FlattenedBlock | undefined)
-
-        if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
-          if (!fieldState.customComponents) {
-            fieldState.customComponents = {}
-          }
-
-          if (!fieldState.customComponents.RowLabels) {
-            fieldState.customComponents.RowLabels = []
-          }
-
-          fieldState.customComponents.RowLabels[rowIndex] = RenderServerComponent({
-            clientProps,
-            Component: blockConfig.admin.components.Label,
-            importMap: req.payload.importMap,
-            key: `${rowIndex}`,
-            serverProps: {
-              ...serverProps,
-              blockType: row.blockType,
-              rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
-                rowIndex + 1,
-              ).padStart(2, '0')}`,
-              rowNumber: rowIndex + 1,
-            },
-          })
-        }
-      })
-
-      break
-    }
-
     case 'richText': {
       if (!fieldConfig?.editor) {
         throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -195,7 +243,7 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      fieldState.customComponents.Field = (
+      fieldState.customComponents.Field = !mockRSCs ? (
         <WatchCondition path={path}>
           {RenderServerComponent({
             clientProps,
@@ -204,6 +252,8 @@ export const renderField: RenderFieldMethod = ({
             serverProps,
           })}
         </WatchCondition>
+      ) : (
+        'Mock'
       )
 
       break
@@ -219,13 +269,15 @@ export const renderField: RenderFieldMethod = ({
 
           const Component = fieldConfig.admin.components[key]
 
-          fieldState.customComponents[key] = RenderServerComponent({
-            clientProps,
-            Component,
-            importMap: req.payload.importMap,
-            key: `field.admin.components.${key}`,
-            serverProps,
-          })
+          fieldState.customComponents[key] = !mockRSCs
+            ? RenderServerComponent({
+                clientProps,
+                Component,
+                importMap: req.payload.importMap,
+                key: `field.admin.components.${key}`,
+                serverProps,
+              })
+            : 'Mock'
         }
       }
       break
@@ -241,69 +293,82 @@ export const renderField: RenderFieldMethod = ({
       'description' in fieldConfig.admin &&
       typeof fieldConfig.admin?.description === 'function'
     ) {
-      fieldState.customComponents.Description = (
+      fieldState.customComponents.Description = !mockRSCs ? (
         <FieldDescription
           description={fieldConfig.admin?.description({
+            i18n: req.i18n,
             t: req.i18n.t,
           })}
           path={path}
         />
+      ) : (
+        'Mock'
       )
     }
 
     if (fieldConfig.admin?.components) {
       if ('afterInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.AfterInput = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.afterInput,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.afterInput',
-          serverProps,
-        })
+        fieldState.customComponents.AfterInput = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.afterInput,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.afterInput',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('beforeInput' in fieldConfig.admin.components) {
-        fieldState.customComponents.BeforeInput = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.beforeInput,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.beforeInput',
-          serverProps,
-        })
+        fieldState.customComponents.BeforeInput = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.beforeInput,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.beforeInput',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Description' in fieldConfig.admin.components) {
-        fieldState.customComponents.Description = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Description,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Description',
-          serverProps,
-        })
+        fieldState.customComponents.Description = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Description,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Description',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Error' in fieldConfig.admin.components) {
-        fieldState.customComponents.Error = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Error,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Error',
-          serverProps,
-        })
+        fieldState.customComponents.Error = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Error,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Error',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Label' in fieldConfig.admin.components) {
-        fieldState.customComponents.Label = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Label,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Label',
-          serverProps,
-        })
+        fieldState.customComponents.Label = !mockRSCs
+          ? RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Label,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Label',
+              serverProps,
+            })
+          : 'Mock'
       }
 
       if ('Field' in fieldConfig.admin.components) {
-        fieldState.customComponents.Field = (
+        fieldState.customComponents.Field = !mockRSCs ? (
           <WatchCondition path={path}>
             {RenderServerComponent({
               clientProps,
@@ -313,6 +378,8 @@ export const renderField: RenderFieldMethod = ({
               serverProps,
             })}
           </WatchCondition>
+        ) : (
+          'Mock'
         )
       }
     }

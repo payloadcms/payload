@@ -6,7 +6,7 @@ import type {
   ValidationError,
 } from 'payload'
 
-import { APIError } from 'payload'
+import { APIError, ValidationErrorName } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -22,7 +22,6 @@ type ResaveArgs = {
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
   if (draft) {
     // If the parent is a draft, don't resave children
@@ -58,9 +57,11 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       },
     })
 
-    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce<
+      Record<string, JsonObject[]>
+    >((acc, child) => {
       acc[child.id] = acc[child.id] || []
-      acc[child.id].push(child)
+      acc[child.id]!.push(child)
       return acc
     }, {})
 
@@ -95,7 +96,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         req.payload.logger.error(err)
 
         if (
-          (err as ValidationError)?.name === 'ValidationError' &&
+          (err as ValidationError)?.name === ValidationErrorName &&
           (err as ValidationError)?.data?.errors?.length
         ) {
           throw new APIError(

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -16,7 +15,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
@@ -26,6 +25,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
@@ -100,7 +100,7 @@ export const updateByIDOperation = async <
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -125,7 +125,7 @@ export const updateByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
@@ -159,6 +159,12 @@ export const updateByIDOperation = async <
       throwOnMissingFile: false,
     })
 
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     // ///////////////////////////////////////////////
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
@@ -170,20 +176,20 @@ export const updateByIDOperation = async <
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
-      depth,
+      depth: depth!,
       docWithLocales,
       draftArg,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       filesToUpload,
-      locale,
-      overrideAccess,
-      overrideLock,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
+      overrideLock: overrideLock!,
       payload,
       populate,
       publishSpecificLocale,
       req,
-      select,
-      showHiddenFields,
+      select: select!,
+      showHiddenFields: showHiddenFields!,
     })
 
     await unlinkTempFiles({

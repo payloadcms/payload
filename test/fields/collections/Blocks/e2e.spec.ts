@@ -4,19 +4,23 @@ import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
+import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -48,6 +52,11 @@ describe('Block fields', () => {
   })
 
   beforeEach(async () => {
+    /*await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })*/
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
@@ -82,7 +91,7 @@ describe('Block fields', () => {
     const addedRow = page.locator('#field-blocks .blocks-field__row').last()
     await expect(addedRow).toBeVisible()
     await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
-      'Custom Block Label: Content 04',
+      'Custom Block Label: Content 05',
     )
   })
 
@@ -156,7 +165,7 @@ describe('Block fields', () => {
     await duplicateButton.click()
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(4)
+    expect(await blocks.count()).toEqual(5)
   })
 
   test('should save when duplicating subblocks', async () => {
@@ -171,7 +180,7 @@ describe('Block fields', () => {
     await duplicateButton.click()
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(4)
+    expect(await blocks.count()).toEqual(5)
 
     await page.click('#action-save')
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -274,9 +283,10 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Blocks With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Blocks With Min Rows'],
+    })
   })
 
   test('ensure functions passed to blocks field labels property are respected', async () => {
@@ -292,6 +302,8 @@ describe('Block fields', () => {
   describe('row manipulation', () => {
     test('moving rows should immediately move custom row labels', async () => {
       await page.goto(url.create)
+      // Ensure blocks are loaded
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
       // first ensure that the first block has the custom header, and that the second block doesn't
 
@@ -308,6 +320,8 @@ describe('Block fields', () => {
       await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
         'Second block',
       )
+
+      await wait(1000)
 
       await reorderBlocks({
         page,
@@ -326,26 +340,28 @@ describe('Block fields', () => {
     describe('react hooks', () => {
       test('should add 2 new block rows', async () => {
         await page.goto(url.create)
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+        await scrollEntirePage(page)
 
         await page
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 1' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-        const customBlocks = page.locator(
-          '#field-customBlocks input[name="customBlocks.0.block1Title"]',
-        )
-
-        await page.mouse.wheel(0, 1750)
-
-        await customBlocks.scrollIntoViewIfNeeded()
-
-        await expect(customBlocks).toHaveValue('Block 1: Prefilled Title')
+        await expect(
+          page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
+        ).toHaveValue('Block 1: Prefilled Title')
 
         await page
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
@@ -355,6 +371,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Replace Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
@@ -376,6 +394,33 @@ describe('Block fields', () => {
         '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
       )
       expect(await field.count()).toEqual(0)
+    })
+  })
+
+  describe('blockNames', () => {
+    test('should show blockName field', async () => {
+      await page.goto(url.create)
+
+      const blockWithBlockname = page.locator('#field-blocks .blocks-field__rows #blocks-row-1')
+
+      const blocknameField = blockWithBlockname.locator('.section-title')
+
+      await expect(async () => await expect(blocknameField).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(blocknameField).toHaveAttribute('data-value', 'Second block')
+    })
+
+    test("should not show blockName field when it's disabled", async () => {
+      await page.goto(url.create)
+      const blockWithBlockname = page.locator('#field-blocks .blocks-field__rows #blocks-row-3')
+
+      await expect(
+        async () => await expect(blockWithBlockname.locator('.section-title')).toBeHidden(),
+      ).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 
