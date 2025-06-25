@@ -1513,6 +1513,61 @@ describe('Queues', () => {
       expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
     })
 
+    it('ensure scheduler max-one-job condition, by default, ignores jobs not scheduled by scheduler', async () => {
+      for (let i = 0; i < 2; i++) {
+        await payload.jobs.queue({
+          task: 'EverySecond',
+          queue: 'autorunSecond',
+          input: {
+            message: 'This task runs every second',
+          },
+        })
+      }
+      for (let i = 0; i < 10; i++) {
+        await payload.jobs.handleSchedules()
+      }
+      // Autorun runs every second - so should definitely be done if we wait 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(3)
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second')
+    })
+
+    it('ensure scheduler max-one-job condition, respects jobs not scheduled by scheduler due to task setting onlyScheduled: false', async () => {
+      for (let i = 0; i < 2; i++) {
+        await payload.jobs.queue({
+          task: 'EverySecondMax2',
+          queue: 'autorunSecondMax2',
+          input: {
+            message: 'This task runs every second - max 2 per second',
+          },
+        })
+      }
+      for (let i = 0; i < 10; i++) {
+        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+      }
+      // Wait 2 seconds to satisfy waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      await payload.jobs.run({
+        queue: 'autorunSecondMax2',
+        limit: 100,
+      })
+
+      const allSimples = await payload.find({
+        collection: 'simple',
+        limit: 100,
+      })
+
+      expect(allSimples.totalDocs).toBe(2) // Would be 4 by default, if only scheduled jobs were respected in handleSchedules condition
+      expect(allSimples?.docs?.[0]?.title).toBe('This task runs every second - max 2 per second')
+    })
+
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially - max. 2 jobs configured', async () => {
       for (let i = 0; i < 10; i++) {
         await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
