@@ -1,6 +1,7 @@
 import type {
   JsonObject,
   SelectType,
+  Sort,
   StringKeyOf,
   TransformDataWithSelect,
   TypeWithID,
@@ -144,7 +145,7 @@ export type JoinQuery<T extends PayloadGeneratedTypes, TSlug extends CollectionS
                   count?: boolean
                   limit?: number
                   page?: number
-                  sort?: string
+                  sort?: Sort
                   where?: Where
                 }
               | false

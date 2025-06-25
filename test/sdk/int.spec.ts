@@ -1,7 +1,6 @@
 import type { Payload } from 'payload'
 
 import { randomUUID } from 'crypto'
-import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
