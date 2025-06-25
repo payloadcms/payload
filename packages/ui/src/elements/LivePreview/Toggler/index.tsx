@@ -15,6 +15,7 @@ export const LivePreviewToggler: React.FC = () => {
     <button
       aria-label={isLivePreviewing ? t('general:exitLivePreview') : t('general:livePreview')}
       className={[baseClass, isLivePreviewing && `${baseClass}--active`].filter(Boolean).join(' ')}
+      id="live-preview-toggler"
       onClick={() => {
         setIsLivePreviewing(!isLivePreviewing)
       }}

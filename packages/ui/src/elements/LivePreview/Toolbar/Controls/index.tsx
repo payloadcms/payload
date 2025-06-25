@@ -19,6 +19,7 @@ const zoomOptions = [50, 75, 100, 125, 150, 200]
 export const ToolbarControls: React.FC<EditViewProps> = () => {
   const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
     useLivePreviewContext()
+
   const { t } = useTranslation()
 
   const customOption = {

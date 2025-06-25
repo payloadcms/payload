@@ -113,7 +113,7 @@ describe('Live Preview', () => {
     const toggler = page.locator('button#live-preview-toggler')
     await expect(toggler).toBeVisible()
 
-    await expect(toggler).not.toHaveClass(/preview-btn--active/)
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
 
     await toggleLivePreview(page, {
@@ -122,7 +122,7 @@ describe('Live Preview', () => {
 
     await page.reload()
 
-    await expect(toggler).toHaveClass(/preview-btn--active/)
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
 
     await toggleLivePreview(page, {
@@ -131,7 +131,7 @@ describe('Live Preview', () => {
 
     await page.reload()
 
-    await expect(toggler).not.toHaveClass(/preview-btn--active/)
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 

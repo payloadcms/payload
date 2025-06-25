@@ -16,17 +16,19 @@ export const toggleLivePreview = async (
   const toggler = page.locator('#live-preview-toggler')
   await expect(toggler).toBeVisible()
 
-  const isActive = await toggler.evaluate((el) => el.classList.contains('preview-btn--active'))
+  const isActive = await toggler.evaluate((el) =>
+    el.classList.contains('live-preview-toggler--active'),
+  )
 
   if (isActive && (options?.targetState === 'off' || !options?.targetState)) {
     await toggler.click()
-    await expect(toggler).not.toHaveClass(/preview-btn--active/)
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   }
 
   if (!isActive && (options?.targetState === 'on' || !options?.targetState)) {
     await toggler.click()
-    await expect(toggler).toHaveClass(/preview-btn--active/)
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
   }
 }

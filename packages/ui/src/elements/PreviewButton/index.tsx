@@ -16,6 +16,7 @@ export function PreviewButton(props: PreviewButtonClientProps) {
     <button
       aria-label={label}
       className={baseClass}
+      id="preview-button"
       onClick={() => {
         generatePreviewURL({
           openPreviewWindow: true,

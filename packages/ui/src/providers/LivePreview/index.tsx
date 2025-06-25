@@ -57,10 +57,20 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     [incomingBreakpoints],
   )
 
-  const url =
-    incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
-      ? incomingUrl
-      : getAbsoluteUrl(incomingUrl)
+  const [url, setURL] = useState<string>('')
+
+  // This needs to be done in a useEffect to prevent hydration issues
+  // as the URL may not be absolute when passed in as a prop,
+  // and getAbsoluteUrl requires the window object to be available
+  useEffect(
+    () =>
+      setURL(
+        incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
+          ? incomingUrl
+          : getAbsoluteUrl(incomingUrl),
+      ),
+    [incomingUrl],
+  )
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
