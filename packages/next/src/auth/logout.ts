@@ -6,23 +6,19 @@ import { getPayload } from 'payload'
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 
 export async function logout({ config }: { config: any }) {
-  try {
-    const payload = await getPayload({ config })
-    const headers = await nextHeaders()
-    const result = await payload.auth({ headers })
+  const payload = await getPayload({ config })
+  const headers = await nextHeaders()
+  const result = await payload.auth({ headers })
 
-    if (!result.user) {
-      return { message: 'User already logged out', success: true }
-    }
+  if (!result.user) {
+    return { message: 'User already logged out', success: true }
+  }
 
-    const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
+  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
 
-    if (existingCookie) {
-      const cookies = await getCookies()
-      cookies.delete(existingCookie.name)
-      return { message: 'User logged out successfully', success: true }
-    }
-  } catch (e) {
-    throw new Error(`${e}`)
+  if (existingCookie) {
+    const cookies = await getCookies()
+    cookies.delete(existingCookie.name)
+    return { message: 'User logged out successfully', success: true }
   }
 }

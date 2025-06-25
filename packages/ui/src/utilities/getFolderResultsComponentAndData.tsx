@@ -10,8 +10,11 @@ import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
 import { APIError, formatErrors, getFolderData } from 'payload'
 import { buildFolderWhereConstraints } from 'payload/shared'
 
-import { FolderFileTable } from '../elements/FolderView/FolderFileTable/index.js'
-import { ItemCardGrid } from '../elements/FolderView/ItemCardGrid/index.js'
+import {
+  FolderFileTable,
+  ItemCardGrid,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- This component is returned via server functions, it must reference the exports dir
+} from '../exports/client/index.js'
 
 type GetFolderResultsComponentAndDataResult = {
   breadcrumbs?: FolderBreadcrumb[]

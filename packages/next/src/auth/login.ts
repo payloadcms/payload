@@ -2,8 +2,7 @@
 
 import type { CollectionSlug } from 'payload'
 
-import { cookies as getCookies } from 'next/headers.js'
-import { generatePayloadCookie, getPayload } from 'payload'
+import { getPayload } from 'payload'
 
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
@@ -31,6 +30,7 @@ export async function login({ collection, config, email, password, username }: L
   const payload = await getPayload({ config })
 
   const authConfig = payload.collections[collection]?.config.auth
+
   if (!authConfig) {
     throw new Error(`No auth config found for collection: ${collection}`)
   }
@@ -61,26 +61,22 @@ export async function login({ collection, config, email, password, username }: L
     loginData = { email, password }
   }
 
-  try {
-    const result = await payload.login({
-      collection,
-      data: loginData,
+  const result = await payload.login({
+    collection,
+    data: loginData,
+  })
+
+  if (result.token) {
+    await setPayloadAuthCookie({
+      authConfig,
+      cookiePrefix: payload.config.cookiePrefix,
+      token: result.token,
     })
-
-    if (result.token) {
-      await setPayloadAuthCookie({
-        authConfig,
-        cookiePrefix: payload.config.cookiePrefix,
-        token: result.token,
-      })
-    }
-
-    if ('removeTokenFromResponses' in config && config.removeTokenFromResponses) {
-      delete result.token
-    }
-
-    return result
-  } catch (e) {
-    throw new Error(`${e}`)
   }
+
+  if ('removeTokenFromResponses' in config && config.removeTokenFromResponses) {
+    delete result.token
+  }
+
+  return result
 }
