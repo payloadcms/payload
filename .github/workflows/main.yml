@@ -694,7 +694,7 @@ jobs:
     needs:
       - lint
       - build
-      - build-templates
+      - build-and-test-templates
       - tests-unit
       - tests-int
       - tests-e2e
