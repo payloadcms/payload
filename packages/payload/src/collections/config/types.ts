@@ -441,6 +441,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   defaultSort?: Sort
   /**
+   * Disable the bulk edit operation for the collection in the admin panel and the API
+   */
+  disableBulkEdit?: boolean
+  /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
   disableDuplicate?: boolean

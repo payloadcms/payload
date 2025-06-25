@@ -437,6 +437,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].customRelationship_id).toBeDefined()
       expect(data[0].customRelationship_email).toBeDefined()
       expect(data[0].customRelationship_createdAt).toBeUndefined()
+      expect(data[0].customRelationship).toBeUndefined()
     })
 
     it('should create a JSON file for collection', async () => {
@@ -538,6 +539,40 @@ describe('@payloadcms/plugin-import-export', () => {
       const data = await readCSV(expectedPath)
 
       expect(data[0].title).toStrictEqual('Jobs 0')
+    })
+
+    it('should export polymorphic relationship fields to CSV', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic', 'hasManyPolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+      })
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      // hasOnePolymorphic
+      expect(data[0].hasOnePolymorphic_id).toBeDefined()
+      expect(data[0].hasOnePolymorphic_relationTo).toBe('posts')
+
+      // hasManyPolymorphic
+      expect(data[0].hasManyPolymorphic_0_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_0_relationTo).toBe('users')
+      expect(data[0].hasManyPolymorphic_1_value_id).toBeDefined()
+      expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
     // disabled so we don't always run a massive test
