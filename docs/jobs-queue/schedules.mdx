@@ -164,6 +164,6 @@ On serverless platforms, scheduling must be triggered externally since Payload d
 
 For example, on Vercel, you can set up a Vercel Cron to regularly trigger scheduling:
 
-- **Vercel Cron Job:** Configure Vercel Cron to periodically call `POST /api/payload-jobs/handleSchedules`. If you already have vercel cron set up for auto-running, you can also append `?handleSchedules=true` to the `run` endpoint to trigger scheduling.
+- **Vercel Cron Job:** Configure Vercel Cron to periodically call `GET /api/payload-jobs/handleSchedules`. If you [already have vercel cron set up for auto-running](/docs/jobs-queue/queues#endpoint), you can also append `?handleSchedules=true` to the `run` endpoint to trigger scheduling.
 
 Once Jobs are queued, their execution depends entirely on your configured runner setup (e.g., autorun, or manual invocation).
