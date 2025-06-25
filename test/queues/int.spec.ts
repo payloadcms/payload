@@ -220,7 +220,7 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 
-  it('ensure workflows dont limit retries if no retries property is sett', async () => {
+  it('ensure workflows dont limit retries if no retries property is set', async () => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowNoRetriesSet',
