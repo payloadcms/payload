@@ -646,11 +646,11 @@ describe('Sort', () => {
             _order: 'aA',
           },
         })
-        const AA = await payload.create({
+        const a0 = await payload.create({
           collection,
           data: {
-            title: 'Base62 AA',
-            _order: 'AA',
+            title: 'Base62 a0',
+            _order: 'a0',
           },
         })
 
@@ -689,7 +689,7 @@ describe('Sort', () => {
         expect(docs[0]?.id).toStrictEqual(aa.id)
         expect(docs[1]?.id).toStrictEqual(aA.id)
         expect(docs[2]?.id).toStrictEqual(orderableDoc.id)
-        expect(docs[3]?.id).toStrictEqual(AA.id)
+        expect(docs[3]?.id).toStrictEqual(a0.id)
       })
     })
 
