@@ -92,6 +92,7 @@ export const cloudStoragePlugin =
                   ? options.disableLocalStorage
                   : true,
               handlers,
+              skipSafeFetch: true,
             },
           }
         }
