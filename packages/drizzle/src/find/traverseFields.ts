@@ -513,7 +513,7 @@ export const traverseFields = ({
           const subQueryAlias = `${columnName}_subquery`
 
           let sqlWhere = eq(
-            adapter.tables[currentTableName].id,
+            sql.raw(`"${currentTableName}"."id"`),
             sql.raw(`"${subQueryAlias}"."${onPath}"`),
           )
 
@@ -577,19 +577,23 @@ export const traverseFields = ({
 
           let joinQueryWhere: Where
 
+          const currentIDRaw = sql.raw(
+            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
+          )
+
           if (Array.isArray(field.targetField.relationTo)) {
             joinQueryWhere = {
               [field.on]: {
                 equals: {
                   relationTo: collectionSlug,
-                  value: rawConstraint(currentIDColumn),
+                  value: rawConstraint(currentIDRaw),
                 },
               },
             }
           } else {
             joinQueryWhere = {
               [field.on]: {
-                equals: rawConstraint(currentIDColumn),
+                equals: rawConstraint(currentIDRaw),
               },
             }
           }
