@@ -853,6 +853,7 @@ export class BasePayload {
               await this.jobs.run({
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
                 queue: cronConfig.queue,
+                silent: cronConfig.silent,
               })
             })
 

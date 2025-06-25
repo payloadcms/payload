@@ -1,4 +1,5 @@
 import type { PayloadRequest } from '../../index.js'
+import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { WorkflowError } from './index.js'
 
@@ -15,10 +16,20 @@ import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 export async function handleWorkflowError({
   error,
   req,
+  silent = false,
   updateJob,
 }: {
   error: WorkflowError
   req: PayloadRequest
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
   updateJob: UpdateJobFunction
 }): Promise<{
   hasFinalError: boolean
@@ -55,10 +66,12 @@ export async function handleWorkflowError({
 
   const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
 
-  req.payload.logger.error({
-    err: error,
-    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
-  })
+  if (!silent || (typeof silent === 'object' && !silent.error)) {
+    req.payload.logger.error({
+      err: error,
+      msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
+    })
+  }
 
   // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
   // we need to ensure the job is updated to reflect the error

@@ -2,6 +2,7 @@ import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { WorkflowJSON, WorkflowStep } from '../../../config/types/workflowJSONTypes.js'
 import type { WorkflowConfig } from '../../../config/types/workflowTypes.js'
+import type { RunJobsSilent } from '../../../localAPI.js'
 import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
@@ -12,6 +13,15 @@ import { getRunTaskFunction } from '../runJob/getRunTaskFunction.js'
 type Args = {
   job: Job
   req: PayloadRequest
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
   updateJob: UpdateJobFunction
   workflowConfig: WorkflowConfig
   workflowHandler: WorkflowJSON
@@ -24,6 +34,7 @@ export type RunJSONJobResult = {
 export const runJSONJob = async ({
   job,
   req,
+  silent = false,
   updateJob,
   workflowConfig,
   workflowHandler,
@@ -79,6 +90,7 @@ export const runJSONJob = async ({
                   : 'An unhandled error occurred',
               workflowConfig,
             }),
+      silent,
 
       req,
       updateJob,
