@@ -587,7 +587,7 @@ describe('Collections - Uploads', () => {
           )
         },
       )
-      it('should fetch when skipSafeFetch is set to a boolean', async () => {
+      it('should fetch when skipSafeFetch is set with a boolean', async () => {
         await expect(
           payload.create({
             collection: skipSafeFetchMediaSlug as CollectionSlug,
