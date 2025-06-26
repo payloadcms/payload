@@ -264,6 +264,16 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const addFiles = React.useCallback(
     async (files: FileList) => {
+      if (forms.length) {
+        // save the state of the current form before adding new files
+        dispatch({
+          type: 'UPDATE_FORM',
+          errorCount: forms[activeIndex].errorCount,
+          formState: getFormDataRef.current(),
+          index: activeIndex,
+        })
+      }
+
       toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
       if (!hasInitializedState) {
         await initializeSharedFormState()
@@ -271,7 +281,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
-    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay],
+    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay, activeIndex, forms],
   )
 
   const removeThumbnails = React.useCallback((indexes: number[]) => {
