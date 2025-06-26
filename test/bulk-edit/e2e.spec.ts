@@ -521,7 +521,7 @@ test.describe('Bulk Edit', () => {
 
     await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 1; i < postCount; i++) {
+    for (let i = 1; i < postCount + 1; i++) {
       await expect(
         page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
       ).toBeHidden()
@@ -548,7 +548,7 @@ test.describe('Bulk Edit', () => {
 
     await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 1; i < postCount; i++) {
+    for (let i = 1; i < postCount + 1; i++) {
       await expect(
         page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
       ).toBeHidden()
@@ -592,7 +592,7 @@ test.describe('Bulk Edit', () => {
 
     await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 1; i < postCount; i++) {
+    for (let i = 1; i < postCount + 1; i++) {
       await expect(
         page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
       ).toBeHidden()
