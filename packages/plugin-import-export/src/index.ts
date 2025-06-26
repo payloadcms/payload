@@ -66,7 +66,7 @@ export const importExportPlugin =
 
     // config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
 
-    // Injext custom REST endopints
+    // Inject custom REST endpoints into the config
     config.endpoints = config.endpoints || []
     config.endpoints.push({
       handler: async (req) => {
