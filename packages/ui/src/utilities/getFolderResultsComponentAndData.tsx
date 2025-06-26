@@ -13,7 +13,7 @@ import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/sh
 import {
   FolderFileTable,
   ItemCardGrid,
-  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- This component is returned via server functions, it must reference the exports dir
 } from '../exports/client/index.js'
 
 type GetFolderResultsComponentAndDataResult = {
