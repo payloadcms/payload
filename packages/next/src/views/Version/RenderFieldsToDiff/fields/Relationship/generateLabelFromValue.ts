@@ -2,7 +2,7 @@ import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
 
 import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 
-import type { PopulatedRelationshipValue } from './index.js'
+import type { RelationshipValue } from './index.js'
 
 export const generateLabelFromValue = ({
   field,
@@ -15,12 +15,15 @@ export const generateLabelFromValue = ({
   locale: string
   parentIsLocalized: boolean
   req: PayloadRequest
-  value: PopulatedRelationshipValue
+  value: RelationshipValue
 }): string => {
-  let relatedDoc: TypeWithID
+  let relatedDoc: string | TypeWithID
   let valueToReturn: string = ''
 
-  const relationTo: string = 'relationTo' in value ? value.relationTo : (field.relationTo as string)
+  const relationTo: string =
+    typeof value !== 'string' && 'relationTo' in value
+      ? value.relationTo
+      : (field.relationTo as string)
 
   if (typeof value === 'object' && 'relationTo' in value) {
     relatedDoc = value.value
@@ -44,7 +47,11 @@ export const generateLabelFromValue = ({
   if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
     valueToReturn = relatedDoc[useAsTitle]
   } else {
-    valueToReturn = String(relatedDoc.id)
+    valueToReturn = String(
+      typeof relatedDoc !== 'string'
+        ? relatedDoc.id
+        : `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`,
+    )
   }
 
   if (
