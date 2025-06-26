@@ -2327,6 +2327,7 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field without error', async () => {
+      await payload.delete({ collection: fieldsPersistanceSlug, where: {} })
       await payload.create({
         collection: fieldsPersistanceSlug,
         data: {},
