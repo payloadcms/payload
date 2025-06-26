@@ -126,7 +126,7 @@ export const importExportPlugin =
         })
       },
       method: 'post',
-      path: '/csv-preview-data',
+      path: '/preview-data',
     })
 
     /**

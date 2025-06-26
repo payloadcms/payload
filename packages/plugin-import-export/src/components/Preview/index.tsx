@@ -55,7 +55,7 @@ export const Preview = () => {
       }
 
       try {
-        const res = await fetch('/api/csv-preview-data', {
+        const res = await fetch('/api/preview-data', {
           body: JSON.stringify({
             collectionSlug,
             draft,
@@ -65,6 +65,7 @@ export const Preview = () => {
             sort,
             where,
           }),
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
         })
