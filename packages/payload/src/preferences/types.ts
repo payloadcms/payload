@@ -36,6 +36,7 @@ export type ColumnPreference = {
 
 export type ListPreferences = {
   columns?: ColumnPreference[]
+  editViewType?: 'default' | 'live-preview'
   limit?: number
   preset?: DefaultDocumentIDType
   sort?: string

@@ -21,8 +21,8 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
+  isLivePreviewing: boolean
   operation?: 'create' | 'update'
-  preferredState: boolean
   url: string
 }
 
@@ -37,12 +37,12 @@ const getAbsoluteUrl = (url) => {
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,
   children,
+  isLivePreviewing: incomingIsLivePreviewing,
   operation,
-  preferredState,
   url: incomingUrl,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
-  const [isLivePreviewing, setIsLivePreviewing] = useState(preferredState)
+  const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
 
   const breakpoints: LivePreviewConfig['breakpoints'] = useMemo(
     () => [

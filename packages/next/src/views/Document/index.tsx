@@ -5,6 +5,7 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
+  ListPreferences,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -156,7 +157,7 @@ export const renderDocument = async ({
     }),
 
     // get entity preferences
-    getPreferences<{ livePreview: boolean }>(
+    getPreferences<ListPreferences>(
       collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
       payload,
       req.user.id,
@@ -373,8 +374,8 @@ export const renderDocument = async ({
       >
         <LivePreviewProvider
           breakpoints={livePreviewConfig?.breakpoints}
+          isLivePreviewing={entityPreferences?.value?.editViewType === 'live-preview'}
           operation={operation}
-          preferredState={entityPreferences?.value?.livePreview}
           url={livePreviewURL}
         >
           {showHeader && !drawerSlug && (
