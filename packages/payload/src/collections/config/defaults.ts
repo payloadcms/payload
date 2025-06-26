@@ -1,7 +1,7 @@
 import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
 import type { CollectionConfig } from './types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
+import { defaultAccess } from '../../auth/defaultAccess.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.

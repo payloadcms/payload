@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-exports */
-
 import type { CollectionSlug, File } from 'payload'
 
 import path from 'path'
@@ -33,6 +31,7 @@ import {
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  skipSafeFetchMediaSlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -426,6 +425,14 @@ export default buildConfigWithDefaults({
             { protocol: 'http', hostname: '255.255.255.255', port: '', search: '' },
           ],
         },
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
         staticDir: path.resolve(dirname, './media'),
       },
     },

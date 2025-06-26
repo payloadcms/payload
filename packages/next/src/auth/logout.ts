@@ -1,6 +1,6 @@
 'use server'
 
-import type { SanitizedConfig } from 'payload';
+import type { SanitizedConfig } from 'payload'
 
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, logoutOperation } from 'payload'
@@ -14,38 +14,33 @@ export async function logout({
   allSessions?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
 }) {
-  try {
-    const payload = await getPayload({ config })
-    const headers = await nextHeaders()
-    const authResult = await payload.auth({ headers })
+  const payload = await getPayload({ config })
+  const headers = await nextHeaders()
+  const authResult = await payload.auth({ headers })
 
-    if (!authResult.user) {
-      return { message: 'User already logged out', success: true }
-    }
-
-    const { user } = authResult
-    const req = await createLocalReq({ user }, payload)
-    const collection = payload.collections[user.collection]
-
-    const logoutResult = await logoutOperation({
-      allSessions,
-      collection,
-      req,
-    })
-
-    if (!logoutResult) {
-      return { message: 'Logout failed', success: false }
-    }
-
-    const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
-    if (existingCookie) {
-      const cookies = await getCookies()
-      cookies.delete(existingCookie.name)
-    }
-
-    return { message: 'User logged out successfully', success: true }
-  } catch (e) {
-    console.error('Logout error:', e)
-    throw new Error(`${e}`)
+  if (!authResult.user) {
+    return { message: 'User already logged out', success: true }
   }
+
+  const { user } = authResult
+  const req = await createLocalReq({ user }, payload)
+  const collection = payload.collections[user.collection]
+
+  const logoutResult = await logoutOperation({
+    allSessions,
+    collection,
+    req,
+  })
+
+  if (!logoutResult) {
+    return { message: 'Logout failed', success: false }
+  }
+
+  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
+  if (existingCookie) {
+    const cookies = await getCookies()
+    cookies.delete(existingCookie.name)
+  }
+
+  return { message: 'User logged out successfully', success: true }
 }

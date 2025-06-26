@@ -37,10 +37,22 @@ async function main() {
     allTgzs,
   })
 
+  // remove node_modules
+  await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
+  // replace workspace:* from package.json with a real version so that it can be installed with pnpm
+  // without this step, even though the packages are built locally as tars
+  // it will error as it cannot contain workspace dependencies when installing with --ignore-workspace
+  const packageJsonPath = path.join(templatePath, 'package.json')
+  const initialPackageJson = await fs.readFile(packageJsonPath, 'utf-8')
+  const initialPackageJsonObj = JSON.parse(initialPackageJson)
+
+  updatePackageJSONDependencies({ latestVersion: '3.42.0', packageJson: initialPackageJsonObj })
+
+  await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
+
   execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
   execSync('pnpm install --ignore-workspace', execOpts)
 
-  const packageJsonPath = path.join(templatePath, 'package.json')
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
   const packageJsonObj = JSON.parse(packageJson) as {
     dependencies: Record<string, string>
@@ -64,7 +76,7 @@ async function main() {
   packageJsonObj.pnpm = { overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --ignore-workspace --no-frozen-lockfile', execOpts)
+  execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
@@ -80,4 +92,29 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
 
 function header(message: string, opts?: { enable?: boolean }) {
   console.log(chalk.bold.green(`${message}\n`))
+}
+
+/**
+ * Recursively updates a JSON object to replace all instances of `workspace:` with the latest version pinned.
+ *
+ * Does not return and instead modifies the `packageJson` object in place.
+ */
+export function updatePackageJSONDependencies(args: {
+  latestVersion: string
+  packageJson: Record<string, unknown>
+}): void {
+  const { latestVersion, packageJson } = args
+
+  const updatedDependencies = Object.entries(packageJson.dependencies || {}).reduce(
+    (acc, [key, value]) => {
+      if (typeof value === 'string' && value.startsWith('workspace:')) {
+        acc[key] = `${latestVersion}`
+      } else {
+        acc[key] = value
+      }
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+  packageJson.dependencies = updatedDependencies
 }

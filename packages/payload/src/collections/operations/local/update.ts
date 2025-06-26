@@ -263,4 +263,4 @@ async function updateLocal<
   return updateOperation<TSlug, TSelect>(args)
 }
 
-export default updateLocal
+export { updateLocal }

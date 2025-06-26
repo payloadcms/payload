@@ -3,8 +3,7 @@ packages:
   - 'packages/*'
   - 'tools/*'
   - 'test'
+  - 'templates/blank'
+  - 'templates/website'
   # exclude packages that are inside test directories
   # - '!**/test/**'
-
-# Allow all build scripts
-neverBuiltDependencies: []

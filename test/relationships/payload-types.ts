@@ -266,6 +266,7 @@ export interface Screening {
 export interface Movie {
   id: string;
   name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
   updatedAt: string;
   createdAt: string;
@@ -730,6 +731,7 @@ export interface ScreeningsSelect<T extends boolean = true> {
  */
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
+  select?: T;
   director?: T;
   updatedAt?: T;
   createdAt?: T;
