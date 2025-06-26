@@ -36,6 +36,11 @@ export type ToCSVFunction = (args: {
    */
   columnName: string
   /**
+   * Alias for `row`, the object that accumulates CSV output.
+   * Use this to write additional fields into the exported row.
+   */
+  data: Record<string, unknown>
+  /**
    * The top level document
    */
   doc: Document
