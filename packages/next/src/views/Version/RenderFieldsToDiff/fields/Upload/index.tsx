@@ -222,7 +222,7 @@ const UploadDocumentDiff = (args: {
   if (uploadDoc && typeof uploadDoc === 'object') {
     filename = uploadDoc.filename
   } else {
-    filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as string}`
+    filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as number | string}`
   }
 
   let pillLabel: null | string = null

@@ -17,8 +17,8 @@ import { generateLabelFromValue } from './generateLabelFromValue.js'
 const baseClass = 'relationship-diff'
 
 export type RelationshipValue =
-  | { relationTo: string; value: string | TypeWithID }
-  | (string | TypeWithID)
+  | { relationTo: string; value: number | string | TypeWithID }
+  | (number | string | TypeWithID)
 
 export const Relationship: RelationshipFieldDiffServerComponent = ({
   comparisonValue: valueFrom,

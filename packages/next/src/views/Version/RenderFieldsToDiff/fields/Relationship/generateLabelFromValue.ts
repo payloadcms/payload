@@ -17,18 +17,18 @@ export const generateLabelFromValue = ({
   req: PayloadRequest
   value: RelationshipValue
 }): string => {
-  let relatedDoc: string | TypeWithID
+  let relatedDoc: number | string | TypeWithID
   let valueToReturn: string = ''
 
   const relationTo: string =
-    typeof value !== 'string' && 'relationTo' in value
+    typeof value === 'object' && 'relationTo' in value
       ? value.relationTo
       : (field.relationTo as string)
 
   if (typeof value === 'object' && 'relationTo' in value) {
     relatedDoc = value.value
   } else {
-    // Non-polymorphic relationship
+    // Non-polymorphic relationship or deleted document
     relatedDoc = value
   }
 
@@ -48,7 +48,7 @@ export const generateLabelFromValue = ({
     valueToReturn = relatedDoc[useAsTitle]
   } else {
     valueToReturn = String(
-      typeof relatedDoc !== 'string'
+      typeof relatedDoc === 'object'
         ? relatedDoc.id
         : `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`,
     )
