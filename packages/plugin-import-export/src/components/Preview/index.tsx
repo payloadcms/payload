@@ -1,10 +1,9 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { ClientField, FieldAffectingDataClient } from 'payload'
+import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Table, Translation, useConfig, useField, useTranslation } from '@payloadcms/ui'
-import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -14,6 +13,9 @@ import type {
 } from '../../translations/index.js'
 
 import './index.scss'
+import { flattenObject } from '../../export/flattenObject.js'
+import { getCustomFieldFunctions } from '../../export/getCustomFieldFunctions.js'
+import { getSelect } from '../../export/getSelect.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'preview'
@@ -39,16 +41,19 @@ export const Preview = () => {
     (collection) => collection.slug === collectionSlug,
   )
 
+  const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
+
   React.useEffect(() => {
     const fetchData = async () => {
-      if (!collectionSlug) {
+      if (!collectionSlug || !collectionConfig) {
         return
       }
 
       try {
+        // Constructs query string for preview fetch (depth 1 to match export)
         const whereQuery = qs.stringify(
           {
-            depth: 0,
+            depth: 1,
             draft,
             limit: limit > 10 ? 10 : limit,
             sort,
@@ -58,6 +63,7 @@ export const Preview = () => {
             addQueryPrefix: true,
           },
         )
+
         const response = await fetch(`/api/${collectionSlug}${whereQuery}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -65,47 +71,87 @@ export const Preview = () => {
           method: 'GET',
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
-          // TODO: check if this data is in the correct format for the table
-
-          const filteredFields = (collectionConfig?.fields?.filter((field) => {
-            if (!fieldAffectsData(field)) {
-              return false
-            }
-            if (fields?.length > 0) {
-              return fields.includes(field.name)
-            }
-            return true
-          }) ?? []) as FieldAffectingDataClient[]
-
-          setColumns(
-            filteredFields.map((field) => ({
-              accessor: field.name || '',
-              active: true,
-              field: field as ClientField,
-              Heading: getTranslation(field?.label || (field.name as string), i18n),
-              renderedCells: data.docs.map((doc: Record<string, unknown>) => {
-                if (!field.name || !doc[field.name]) {
-                  return null
-                }
-                if (typeof doc[field.name] === 'object') {
-                  return JSON.stringify(doc[field.name])
-                }
-                return String(doc[field.name])
-              }),
-            })) as Column[],
-          )
-          setDataToRender(data.docs)
+        if (!response.ok) {
+          return
         }
+
+        const data = await response.json()
+        setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
+
+        const toCSVFunctions = getCustomFieldFunctions({
+          fields: collectionConfig.fields ?? [],
+          select,
+        })
+
+        // Flatten each doc (deeply nested --> flat row)
+        const flattenedDocs = data.docs.map((doc: Record<string, unknown>) =>
+          flattenObject({
+            doc,
+            fields,
+            toCSVFunctions,
+          }),
+        )
+
+        // Match CSV column ordering by building keys based on fields and regex
+        const fieldToRegex = (field: string): RegExp => {
+          const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
+          return new RegExp(`^${parts.join('_')}`)
+        }
+
+        const allKeys = Object.keys(flattenedDocs[0] || {})
+
+        const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
+
+        // Construct final list of field keys to match field order + meta order
+        const fieldKeys = (
+          Array.isArray(fields) && fields.length > 0
+            ? fields.flatMap((field) => {
+                const regex = fieldToRegex(field)
+                return allKeys.filter((key) => regex.test(key))
+              })
+            : allKeys.filter((key) => !defaultMetaFields.includes(key))
+        ).concat(
+          defaultMetaFields.flatMap((field) => {
+            const regex = fieldToRegex(field)
+            return allKeys.filter((key) => regex.test(key))
+          }),
+        )
+
+        // Build columns based on flattened keys
+        const newColumns: Column[] = fieldKeys.map((key) => ({
+          accessor: key,
+          active: true,
+          field: { name: key } as ClientField,
+          Heading: getTranslation(key, i18n),
+          renderedCells: flattenedDocs.map((doc: Record<string, unknown>) => {
+            const val = doc[key]
+
+            if (val === undefined || val === null) {
+              return null
+            }
+
+            // Avoid ESLint warning by type-checking before calling String()
+            if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+              return String(val)
+            }
+
+            if (Array.isArray(val)) {
+              return val.map(String).join(', ')
+            }
+
+            return JSON.stringify(val)
+          }),
+        }))
+
+        setColumns(newColumns)
+        setDataToRender(flattenedDocs)
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching preview data:', error)
       }
     }
 
     void fetchData()
-  }, [collectionConfig?.fields, collectionSlug, draft, fields, limit, sort, where])
+  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, select, sort, where])
 
   return (
     <div className={baseClass}>

@@ -1,4 +1,5 @@
 import {
+  type ClientField,
   type FlattenedField,
   type SelectIncludeType,
   traverseFields,
@@ -8,7 +9,7 @@ import {
 import type { ToCSVFunction } from '../types.js'
 
 type Args = {
-  fields: FlattenedField[]
+  fields: ClientField[] | FlattenedField[]
   select: SelectIncludeType | undefined
 }
 
@@ -104,7 +105,7 @@ export const getCustomFieldFunctions = ({
     // ref.select = typeof select !== 'undefined' || select[field.name] ? select : {}
   }
 
-  traverseFields({ callback: buildCustomFunctions, fields })
+  traverseFields({ callback: buildCustomFunctions, fields: fields as FlattenedField[] })
 
   return result
 }
