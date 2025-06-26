@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import config from '@payload-config'
 import { generatePageMetadata, NotFoundPage } from '@payloadcms/next/views'
 
-import { importMap } from '../admin/importMap.js'
+import { importMap } from '../importMap.js'
 
 type Args = {
   params: Promise<{

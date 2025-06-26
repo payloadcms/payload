@@ -488,6 +488,112 @@ test.describe('Bulk Edit', () => {
     await expect(field.locator('#field-array__0__noRead')).toBeHidden()
     await expect(field.locator('#field-array__0__noUpdate')).toBeDisabled()
   })
+
+  test('should toggle list selections off on successful publish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` }, { draft: true })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
+    await page.locator('#publish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    // eslint-disable-next-line jest-dom/prefer-checked
+    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+
+    for (let i = 0; i < postCount; i++) {
+      // eslint-disable-next-line jest-dom/prefer-checked
+      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
+        'checked',
+        '',
+      )
+    }
+  })
+
+  test('should toggle list selections off on successful unpublish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}`, _status: 'published' })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+    await page.locator('#unpublish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    // eslint-disable-next-line jest-dom/prefer-checked
+    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+
+    for (let i = 0; i < postCount; i++) {
+      // eslint-disable-next-line jest-dom/prefer-checked
+      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
+        'checked',
+        '',
+      )
+    }
+  })
+
+  test('should toggle list selections off on successful edit', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Edit"]').click()
+
+    const editDrawer = page.locator('dialog#edit-posts')
+    await expect(editDrawer).toBeVisible()
+
+    const fieldSelect = editDrawer.locator('.field-select')
+    await expect(fieldSelect).toBeVisible()
+
+    const fieldSelectControl = fieldSelect.locator('.rs__control')
+    await expect(fieldSelectControl).toBeVisible()
+    await fieldSelectControl.click()
+
+    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    await titleOption.click()
+
+    await editDrawer.locator('input#field-title').fill('test')
+
+    await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    // eslint-disable-next-line jest-dom/prefer-checked
+    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+
+    for (let i = 0; i < postCount; i++) {
+      // eslint-disable-next-line jest-dom/prefer-checked
+      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
+        'checked',
+        '',
+      )
+    }
+  })
 })
 
 async function selectFieldToEdit(

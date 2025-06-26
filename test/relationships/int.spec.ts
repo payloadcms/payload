@@ -429,6 +429,21 @@ describe('Relationships', () => {
         expect(result.docs[0].id).toBe(id)
       })
 
+      it('should allow query hasMany select in relationship', async () => {
+        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
+        const doc = await payload.create({
+          collection: 'directors',
+          data: { name: 'Mega Director', movie },
+        })
+
+        const res = await payload.find({
+          collection: 'directors',
+          where: { 'movie.select': { equals: 'a' } },
+        })
+        expect(res.docs).toHaveLength(1)
+        expect(res.docs[0].id).toBe(doc.id)
+      })
+
       it('should allow 4x deep querying', async () => {
         const movie_1 = await payload.create({
           collection: 'movies',
