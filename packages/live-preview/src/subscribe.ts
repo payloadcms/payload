@@ -7,11 +7,10 @@ export const subscribe = <T extends Record<string, any>>(args: {
   callback: (data: T) => void
   depth?: number
   initialData: T
-  limit?: number
   requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): ((event: MessageEvent) => Promise<void> | void) => {
-  const { apiRoute, callback, depth, initialData, limit, requestHandler, serverURL } = args
+  const { apiRoute, callback, depth, initialData, requestHandler, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
     const mergedData = await handleMessage<T>({
@@ -19,7 +18,6 @@ export const subscribe = <T extends Record<string, any>>(args: {
       depth,
       event,
       initialData,
-      limit,
       requestHandler,
       serverURL,
     })

@@ -38,7 +38,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
-  limit?: number
   locale?: string
   requestHandler?: CollectionPopulationRequestHandler
   returnNumberOfRequests?: boolean
@@ -55,7 +54,6 @@ export const mergeData = async <T extends Record<string, any>>(args: {
     fieldSchema,
     incomingData,
     initialData,
-    limit,
     locale,
     returnNumberOfRequests,
     serverURL,
