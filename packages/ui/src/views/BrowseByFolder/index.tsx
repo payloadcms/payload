@@ -113,6 +113,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     documents,
     folderCollectionConfig,
     folderID,
+    folderType,
     getFolderRoute,
     getSelectedItems,
     lastSelectedIndex,
@@ -321,7 +322,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
-                    folderAssignedCollections={[]}
+                    folderAssignedCollections={folderType || []}
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
@@ -331,7 +332,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                     collectionSlugs={nonFolderCollectionSlugs}
-                    folderAssignedCollections={[]}
+                    folderAssignedCollections={folderType || []}
                     key="create-document"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-document--no-results"
