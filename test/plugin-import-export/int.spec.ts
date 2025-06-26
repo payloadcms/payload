@@ -581,8 +581,8 @@ describe('@payloadcms/plugin-import-export', () => {
       let promises = []
       for (let i = 0; i < 100000; i++) {
         promises.push(
-          payload.create({
-            collectionSlug: 'pages',
+          await payload.create({
+            collection: 'pages',
             data: {
               title: `Array ${i}`,
               blocks: [
