@@ -22,44 +22,54 @@ export const ensureSafeCollectionsChange =
         : undefined
 
       if (removedCollections && removedCollections.length > 0) {
-        const result = await req.payload.findByID({
+        let hasDependentDocuments = false
+        const childDocumentsResult = await req.payload.findByID({
           id: originalDoc.id,
           collection: foldersSlug,
-          depth: 0,
           joins: {
             documentsAndFolders: {
               limit: 100_000_000,
               where: {
                 or: [
-                  // matches documents that are directly related to the removed collections
                   {
                     relationTo: {
                       in: removedCollections,
                     },
                   },
-                  // matches folders that are directly related to the removed collections
-                  {
-                    and: [
-                      {
-                        relationTo: {
-                          equals: foldersSlug,
-                        },
-                      },
-                      {
-                        'folder.folderType': {
-                          in: removedCollections,
-                        },
-                      },
-                    ],
-                  },
                 ],
               },
             },
           },
+          overrideAccess: true,
           req,
         })
 
-        if (result.documentsAndFolders.docs.length > 0) {
+        hasDependentDocuments = childDocumentsResult.documentsAndFolders.docs.length > 0
+
+        // matches folders that are directly related to the removed collections
+        let hasDependentFolders = false
+        if (!hasDependentDocuments) {
+          const childFoldersResult = await req.payload.find({
+            collection: foldersSlug,
+            where: {
+              and: [
+                {
+                  folderType: {
+                    in: removedCollections,
+                  },
+                },
+                {
+                  folder: {
+                    equals: originalDoc.id,
+                  },
+                },
+              ],
+            },
+          })
+          hasDependentFolders = childFoldersResult.totalDocs > 0
+        }
+
+        if (hasDependentDocuments || hasDependentFolders) {
           const translatedLabels = removedCollections.map((collectionSlug) => {
             if (req.payload.collections[collectionSlug]?.config.labels.singular) {
               return getTranslatedLabel(
@@ -71,7 +81,7 @@ export const ensureSafeCollectionsChange =
           })
 
           throw new APIError(
-            `The folder "${data.name}" contains documents that still belong to the following collections: ${translatedLabels.join(', ')}`,
+            `The folder "${data.name}" contains ${hasDependentDocuments ? 'documents' : 'folders'} that still belong to the following collections: ${translatedLabels.join(', ')}`,
             400,
           )
         }

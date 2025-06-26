@@ -1,20 +1,17 @@
-import type { APIError, Payload } from 'payload'
+import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 let payload: Payload
-let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('folders', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -272,7 +269,7 @@ describe('folders', () => {
           expect(updatedParent).not.toBeDefined()
         } catch (e: any) {
           expect(e.message).toBe(
-            'The folder "Parent Folder" contains documents that still belong to the following collections: Drafts',
+            'The folder "Parent Folder" contains folders that still belong to the following collections: Drafts',
           )
         }
       })
