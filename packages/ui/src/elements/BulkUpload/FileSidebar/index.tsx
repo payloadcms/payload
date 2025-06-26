@@ -211,7 +211,6 @@ function SidebarThumbnail({ file, formID }: { file: File; formID: string }) {
 
       try {
         if (isImage(file.type)) {
-          await new Promise((resolve) => setTimeout(resolve, 4000))
           const url = await createThumbnail(file)
           if (!isCancelled) {
             setThumbnailURL(url)
