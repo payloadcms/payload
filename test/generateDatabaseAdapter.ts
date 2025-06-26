@@ -26,8 +26,6 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = mongooseAdapter({
     ...compatabilityOptions.firestore,
-    ensureIndexes: true,
-    disableIndexHints: false,
     url:
       process.env.DATABASE_URI ||
       process.env.MONGODB_MEMORY_SERVER_URI ||
@@ -35,6 +33,11 @@ export const allDatabaseAdapters = {
     collation: {
       strength: 1,
     },
+    // The following options prevent some tests from failing.
+    // More work needed to get tests succeeding without these options.
+    ensureIndexes: true,
+    transactionOptions: {},
+    disableIndexHints: false,
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'

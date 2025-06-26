@@ -23,7 +23,8 @@ export default async () => {
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
   if (
-    (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
+    (!process.env.PAYLOAD_DATABASE ||
+      ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE)) &&
     !global._mongoMemoryServer
   ) {
     console.log('Starting memory db...')
