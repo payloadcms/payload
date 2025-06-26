@@ -98,6 +98,8 @@ export const importExportPlugin =
           draft: draft === 'yes',
           limit: limit && limit > 10 ? 10 : limit,
           locale,
+          overrideAccess: false,
+          req,
           select,
           sort,
           where,
