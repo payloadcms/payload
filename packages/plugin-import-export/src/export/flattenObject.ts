@@ -6,7 +6,7 @@ type Args = {
   doc: Document
   fields?: string[]
   prefix?: string
-  toCSVFunctions?: Record<string, ToCSVFunction>
+  toCSVFunctions: Record<string, ToCSVFunction>
 }
 
 export const flattenObject = ({
