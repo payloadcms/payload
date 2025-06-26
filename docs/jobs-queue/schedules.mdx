@@ -33,10 +33,10 @@ Regularly push or pull updates to or from external APIs.
 
 Payload supports two scheduler modes suitable for different deployment environments:
 
-| Mode     | When to use                                                       | Behaviour                                                                                                                                                       |
-| -------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cron`   | Long-running Node environments                                    | Initializes all cron schedules on Payload startup using [Croner](https://github.com/Hexagon/croner), regularly evaluating and enqueueing Jobs on time.          |
-| `manual` | Ephemeral / serverless environments (Vercel, Netlify, AWS Lambda) | No automatic scheduling occurs. You must explicitly invoke scheduling using `payload.jobs.handleSchedules()` or by calling `/api/payload-jobs/handleSchedules`. |
+| Mode     | When to use                                                       | Behaviour                                                                                                                                                        |
+| -------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cron`   | Long-running Node environments                                    | Initializes all cron schedules on Payload startup using [Croner](https://github.com/Hexagon/croner), regularly evaluating and enqueueing Jobs on time.           |
+| `manual` | Ephemeral / serverless environments (Vercel, Netlify, AWS Lambda) | No automatic scheduling occurs. You must explicitly invoke scheduling using `payload.jobs.handleSchedules()` or by calling `/api/payload-jobs/handle-schedules`. |
 
 Example configuration:
 
@@ -159,11 +159,11 @@ This allows fine-grained control over how many Jobs can run simultaneously and p
 On serverless platforms, scheduling must be triggered externally since Payload does not automatically run cron schedules in ephemeral environments. You have two main ways to trigger scheduling manually:
 
 - **Invoke via Payload's API:** `payload.jobs.handleSchedules()`
-- **Use the REST API endpoint:** `/api/payload-jobs/handleSchedules`
-- **Set the `run` REST API to trigger scheduling:** `POST /api/payload-jobs/run?handleSchedules=true`
+- **Use the REST API endpoint:** `/api/payload-jobs/handle-schedules`
+- **Set the `run` REST API to trigger scheduling:** `GET /api/payload-jobs/run?handleSchedules=true`
 
 For example, on Vercel, you can set up a Vercel Cron to regularly trigger scheduling:
 
-- **Vercel Cron Job:** Configure Vercel Cron to periodically call `GET /api/payload-jobs/handleSchedules`. If you [already have vercel cron set up for auto-running](/docs/jobs-queue/queues#endpoint), you can also append `?handleSchedules=true` to the `run` endpoint to trigger scheduling.
+- **Vercel Cron Job:** Configure Vercel Cron to periodically call `GET /api/payload-jobs/handle-schedules`. If you [already have vercel cron set up for auto-running](/docs/jobs-queue/queues#endpoint), you can also append `?handleSchedules=true` to the `run` endpoint to trigger scheduling.
 
 Once Jobs are queued, their execution depends entirely on your configured runner setup (e.g., autorun, or manual invocation).

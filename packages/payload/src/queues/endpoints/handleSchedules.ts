@@ -4,7 +4,7 @@ import { handleSchedules } from '../operations/handleSchedules/index.js'
 import { configHasJobs } from './run.js'
 
 /**
- * /api/payload-jobs/handleSchedules endpoint
+ * GET /api/payload-jobs/handle-schedules endpoint
  */
 export const handleSchedulesJobsEndpoint: Endpoint = {
   handler: async (req) => {
@@ -59,5 +59,5 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
     )
   },
   method: 'get',
-  path: '/handleSchedules',
+  path: '/handle-schedules',
 }
