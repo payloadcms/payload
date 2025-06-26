@@ -1,11 +1,14 @@
-import type { Config } from 'payload'
+import type { Config, FlattenedField } from 'payload'
 
-import { deepMergeSimple } from 'payload'
+import { addDataAndFileToRequest, deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { ImportExportPluginConfig, ToCSVFunction } from './types.js'
 
+import { flattenObject } from './export/flattenObject.js'
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
+import { getCustomFieldFunctions } from './export/getCustomFieldFunctions.js'
+import { getSelect } from './export/getSelect.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
 
@@ -62,6 +65,64 @@ export const importExportPlugin =
     }
 
     // config.i18n.translations = deepMergeSimple(translations, config.i18n?.translations ?? {})
+
+    // Injext custom REST endopints
+    config.endpoints = config.endpoints || []
+    config.endpoints.push({
+      handler: async (req) => {
+        await addDataAndFileToRequest(req)
+
+        const { collectionSlug, draft, fields, limit, sort, where } = req.data as {
+          collectionSlug: string
+          draft?: boolean
+          fields?: string[]
+          limit?: number
+          sort?: any
+          where?: any
+        }
+
+        const collection = req.payload.collections[collectionSlug]
+        if (!collection) {
+          return Response.json(
+            { error: `Collection with slug ${collectionSlug} not found` },
+            { status: 400 },
+          )
+        }
+
+        const result = await req.payload.find({
+          collection: collectionSlug,
+          depth: 1,
+          draft,
+          limit: limit && limit > 10 ? 10 : limit,
+          sort,
+          where,
+        })
+
+        const docs = result.docs
+
+        const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
+
+        const toCSVFunctions = getCustomFieldFunctions({
+          fields: collection.config.fields as FlattenedField[],
+          select,
+        })
+
+        const transformed = docs.map((doc) =>
+          flattenObject({
+            doc,
+            fields,
+            toCSVFunctions,
+          }),
+        )
+
+        return Response.json({
+          docs: transformed,
+          totalDocs: result.totalDocs,
+        })
+      },
+      method: 'post',
+      path: '/csv-preview-data',
+    })
 
     /**
      * Merge plugin translations

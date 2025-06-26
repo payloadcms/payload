@@ -4,7 +4,6 @@ import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Table, Translation, useConfig, useField, useTranslation } from '@payloadcms/ui'
-import * as qs from 'qs-esm'
 import React from 'react'
 
 import type {
@@ -12,10 +11,8 @@ import type {
   PluginImportExportTranslations,
 } from '../../translations/index.js'
 
-import './index.scss'
-import { flattenObject } from '../../export/flattenObject.js'
-import { getSelect } from '../../export/getSelect.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.scss'
 
 const baseClass = 'preview'
 
@@ -40,8 +37,6 @@ export const Preview = () => {
     (collection) => collection.slug === collectionSlug,
   )
 
-  const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
-
   React.useEffect(() => {
     const fetchData = async () => {
       if (!collectionSlug || !collectionConfig) {
@@ -49,51 +44,34 @@ export const Preview = () => {
       }
 
       try {
-        // Constructs query string for preview fetch (depth 1 to match export)
-        const whereQuery = qs.stringify(
-          {
-            depth: 1,
+        const res = await fetch('/api/csv-preview-data', {
+          body: JSON.stringify({
+            collectionSlug,
             draft,
-            limit: limit > 10 ? 10 : limit,
+            fields,
+            limit,
             sort,
             where,
-          },
-          {
-            addQueryPrefix: true,
-          },
-        )
-
-        const response = await fetch(`/api/${collectionSlug}${whereQuery}`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'GET',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
         })
 
-        if (!response.ok) {
+        if (!res.ok) {
           return
         }
+        const { docs, totalDocs } = await res.json()
 
-        const data = await response.json()
-        setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
+        setResultCount(limit && limit < totalDocs ? limit : totalDocs)
 
-        // Flatten each doc (deeply nested --> flat row)
-        const flattenedDocs = data.docs.map((doc: Record<string, unknown>) =>
-          flattenObject({
-            doc,
-            fields,
-          }),
-        )
+        const allKeys = Object.keys(docs[0] || {})
+        const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
 
         // Match CSV column ordering by building keys based on fields and regex
         const fieldToRegex = (field: string): RegExp => {
           const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
           return new RegExp(`^${parts.join('_')}`)
         }
-
-        const allKeys = Object.keys(flattenedDocs[0] || {})
-
-        const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
 
         // Construct final list of field keys to match field order + meta order
         const fieldKeys = (
@@ -116,7 +94,7 @@ export const Preview = () => {
           active: true,
           field: { name: key } as ClientField,
           Heading: getTranslation(key, i18n),
-          renderedCells: flattenedDocs.map((doc: Record<string, unknown>) => {
+          renderedCells: docs.map((doc: Record<string, unknown>) => {
             const val = doc[key]
 
             if (val === undefined || val === null) {
@@ -137,14 +115,14 @@ export const Preview = () => {
         }))
 
         setColumns(newColumns)
-        setDataToRender(flattenedDocs)
+        setDataToRender(docs)
       } catch (error) {
         console.error('Error fetching preview data:', error)
       }
     }
 
     void fetchData()
-  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, select, sort, where])
+  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, sort, where])
 
   return (
     <div className={baseClass}>
