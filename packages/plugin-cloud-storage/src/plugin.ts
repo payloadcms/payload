@@ -91,9 +91,13 @@ export const cloudStoragePlugin =
                   ? existingCollection.upload.skipSafeFetch
                   : []
 
+              const hasExactLocalhostMatch = existingSkipSafeFetch.some((entry) => {
+                const entryKeys = Object.keys(entry)
+                return entryKeys.length === 1 && entry.hostname === 'localhost'
+              })
+
               const localhostEntry =
-                process.env.NODE_ENV !== 'production' &&
-                !existingSkipSafeFetch.some((entry) => entry.hostname === 'localhost')
+                process.env.NODE_ENV !== 'production' && !hasExactLocalhostMatch
                   ? [{ hostname: 'localhost' }]
                   : []
 
