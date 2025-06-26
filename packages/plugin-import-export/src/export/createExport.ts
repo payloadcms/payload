@@ -1,5 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
+import type { PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
@@ -104,8 +104,6 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.info({ message: 'Find arguments:', findArgs })
   }
 
-  let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
-
   const toCSVFunctions = getCustomFieldFunctions({
     fields: collectionConfig.flattenedFields,
     select,
@@ -115,34 +113,50 @@ export const createExport = async (args: CreateExportArgs) => {
     if (debug) {
       req.payload.logger.info('Starting download stream')
     }
+
     const encoder = new TextEncoder()
+    let isFirstBatch = true
+    let columns: string[] | undefined
+    let page = 1
+
     const stream = new Readable({
       async read() {
-        let result = await payload.find(findArgs)
-        let isFirstBatch = true
+        const result = await payload.find({
+          ...findArgs,
+          page,
+        })
 
-        while (result.docs.length > 0) {
-          if (debug) {
-            req.payload.logger.info(
-              `Processing batch ${findArgs.page + 1} with ${result.docs.length} documents`,
-            )
-          }
-          const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
-          const csvString = stringify(csvInput, { header: isFirstBatch })
-          this.push(encoder.encode(csvString))
-          isFirstBatch = false
-
-          if (!result.hasNextPage) {
-            if (debug) {
-              req.payload.logger.info('Stream complete - no more pages')
-            }
-            this.push(null) // End the stream
-            break
-          }
-
-          findArgs.page += 1
-          result = await payload.find(findArgs)
+        if (debug) {
+          req.payload.logger.info(`Processing batch ${page} with ${result.docs.length} documents`)
         }
+
+        if (result.docs.length === 0) {
+          this.push(null)
+          return
+        }
+
+        const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+
+        if (isFirstBatch) {
+          columns = Object.keys(csvInput[0] ?? {})
+        }
+
+        const csvString = stringify(csvInput, {
+          header: isFirstBatch,
+          columns,
+        })
+
+        this.push(encoder.encode(csvString))
+        isFirstBatch = false
+
+        if (!result.hasNextPage) {
+          if (debug) {
+            req.payload.logger.info('Stream complete - no more pages')
+          }
+          this.push(null) // End the stream
+        }
+
+        page += 1
       },
     })
 
@@ -159,10 +173,14 @@ export const createExport = async (args: CreateExportArgs) => {
   }
   const outputData: string[] = []
   let isFirstBatch = true
+  let page = 1
+  let hasNextPage = true
 
-  while (result.hasNextPage) {
-    findArgs.page += 1
-    result = await payload.find(findArgs)
+  while (hasNextPage) {
+    const result = await payload.find({
+      ...findArgs,
+      page,
+    })
 
     if (debug) {
       req.payload.logger.info(
@@ -178,6 +196,9 @@ export const createExport = async (args: CreateExportArgs) => {
       const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
       outputData.push(jsonInput.join(',\n'))
     }
+
+    hasNextPage = result.hasNextPage
+    page += 1
   }
 
   const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
