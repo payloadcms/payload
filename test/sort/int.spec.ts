@@ -686,6 +686,11 @@ describe('Sort', () => {
           },
         })
 
+        console.log({
+          actual: docs.map((doc) => doc.id),
+          expected: [aa.id, aA.id, orderableDoc.id, a0.id],
+        })
+
         expect(docs[0]?.id).toStrictEqual(aa.id)
         expect(docs[1]?.id).toStrictEqual(aA.id)
         expect(docs[2]?.id).toStrictEqual(orderableDoc.id)
