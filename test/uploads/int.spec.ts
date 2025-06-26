@@ -19,6 +19,7 @@ import {
   mediaSlug,
   reduceSlug,
   relationSlug,
+  skipAllowListSafeFetchMediaSlug,
   skipSafeFetchMediaSlug,
   unstoredMediaSlug,
   usersSlug,
@@ -586,10 +587,27 @@ describe('Collections - Uploads', () => {
           )
         },
       )
-      it('should fetch when skipSafeFetch is enabled', async () => {
+      it('should fetch when skipSafeFetch is set to a boolean', async () => {
         await expect(
           payload.create({
             collection: skipSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+
+      it('should fetch when skipSafeFetch is set with an AllowList', async () => {
+        await expect(
+          payload.create({
+            collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
             data: {
               filename: 'test.png',
               url: 'http://127.0.0.1/file.png',

@@ -31,6 +31,7 @@ import {
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  skipAllowListSafeFetchMediaSlug,
   skipSafeFetchMediaSlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
@@ -433,6 +434,14 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipAllowListSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
         staticDir: path.resolve(dirname, './media'),
       },
     },
