@@ -345,6 +345,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     configWithDefaults.collections!.push(sanitizedJobsCollection)
   }
 
+  if (config.folders !== false && folderEnabledCollections.length) {
+    await addFolderCollection({
+      config: config as unknown as Config,
+      enableCollectionScoping: config.folders!.enableCollectionScoping,
+      folderEnabledCollections,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
+  }
+
   configWithDefaults.collections!.push(
     await sanitizeCollection(
       config as unknown as Config,
@@ -381,16 +391,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         validRelationships,
       ),
     )
-  }
-
-  if (config.folders !== false && folderEnabledCollections.length) {
-    await addFolderCollection({
-      config: config as unknown as Config,
-      enableCollectionScoping: config.folders!.enableCollectionScoping,
-      folderEnabledCollections,
-      richTextSanitizationPromises,
-      validRelationships,
-    })
   }
 
   if (config.serverURL !== '') {
