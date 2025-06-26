@@ -23,7 +23,8 @@ export const Preview = () => {
   const { value: limit } = useField<number>({ path: 'limit' })
   const { value: fields } = useField<string[]>({ path: 'fields' })
   const { value: sort } = useField({ path: 'sort' })
-  const { value: draft } = useField({ path: 'draft' })
+  const { value: draft } = useField({ path: 'drafts' })
+  const { value: locale } = useField({ path: 'locale' })
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
   const [resultCount, setResultCount] = React.useState<any>('')
   const [columns, setColumns] = React.useState<Column[]>([])
@@ -50,6 +51,7 @@ export const Preview = () => {
             draft,
             fields,
             limit,
+            locale,
             sort,
             where,
           }),
@@ -60,6 +62,7 @@ export const Preview = () => {
         if (!res.ok) {
           return
         }
+
         const { docs, totalDocs } = await res.json()
 
         setResultCount(limit && limit < totalDocs ? limit : totalDocs)
@@ -74,19 +77,21 @@ export const Preview = () => {
         }
 
         // Construct final list of field keys to match field order + meta order
-        const fieldKeys = (
+        const selectedKeys =
           Array.isArray(fields) && fields.length > 0
             ? fields.flatMap((field) => {
                 const regex = fieldToRegex(field)
                 return allKeys.filter((key) => regex.test(key))
               })
             : allKeys.filter((key) => !defaultMetaFields.includes(key))
-        ).concat(
-          defaultMetaFields.flatMap((field) => {
-            const regex = fieldToRegex(field)
-            return allKeys.filter((key) => regex.test(key))
-          }),
-        )
+
+        const includedMeta = new Set(selectedKeys)
+        const missingMetaFields = defaultMetaFields.flatMap((field) => {
+          const regex = fieldToRegex(field)
+          return allKeys.filter((key) => regex.test(key) && !includedMeta.has(key))
+        })
+
+        const fieldKeys = [...selectedKeys, ...missingMetaFields]
 
         // Build columns based on flattened keys
         const newColumns: Column[] = fieldKeys.map((key) => ({
@@ -122,7 +127,7 @@ export const Preview = () => {
     }
 
     void fetchData()
-  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, sort, where])
+  }, [collectionConfig, collectionSlug, draft, fields, i18n, limit, locale, sort, where])
 
   return (
     <div className={baseClass}>

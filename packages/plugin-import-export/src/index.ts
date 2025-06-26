@@ -72,11 +72,12 @@ export const importExportPlugin =
       handler: async (req) => {
         await addDataAndFileToRequest(req)
 
-        const { collectionSlug, draft, fields, limit, sort, where } = req.data as {
+        const { collectionSlug, draft, fields, limit, locale, sort, where } = req.data as {
           collectionSlug: string
-          draft?: boolean
+          draft?: 'no' | 'yes'
           fields?: string[]
           limit?: number
+          locale?: string
           sort?: any
           where?: any
         }
@@ -89,18 +90,20 @@ export const importExportPlugin =
           )
         }
 
+        const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
+
         const result = await req.payload.find({
           collection: collectionSlug,
           depth: 1,
-          draft,
+          draft: draft === 'yes',
           limit: limit && limit > 10 ? 10 : limit,
+          locale,
+          select,
           sort,
           where,
         })
 
         const docs = result.docs
-
-        const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
         const toCSVFunctions = getCustomFieldFunctions({
           fields: collection.config.fields as FlattenedField[],
