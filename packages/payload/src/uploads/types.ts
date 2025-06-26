@@ -242,9 +242,9 @@ export type UploadConfig = {
   resizeOptions?: ResizeOptions
   /**
    *  Skip safe fetch when using server-side fetching for external files from these URLs.
-   *  @default undefined
+   *  @default false
    */
-  skipSafeFetch?: AllowList
+  skipSafeFetch?: AllowList | boolean
   /**
    * The directory to serve static files from. Defaults to collection slug.
    * @default undefined

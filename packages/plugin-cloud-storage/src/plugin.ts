@@ -1,11 +1,10 @@
 import type { Config } from 'payload'
 
-import type { PluginOptions } from './types.js'
+import type { AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getBeforeChangeHook } from './hooks/beforeChange.js'
-import { cloudStorageAllowList } from './utilities/cloudStorageAllowList.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -71,6 +70,37 @@ export const cloudStoragePlugin =
             })
           }
 
+          const getSkipSafeFetchSetting = (): AllowList | boolean => {
+            if (options.disablePayloadAccessControl) {
+              return true
+            }
+            const isBooleanTrueSkipSafeFetch =
+              typeof existingCollection.upload === 'object' &&
+              existingCollection.upload.skipSafeFetch === true
+
+            const isAllowListSkipSafeFetch =
+              typeof existingCollection.upload === 'object' &&
+              Array.isArray(existingCollection.upload.skipSafeFetch)
+
+            if (isBooleanTrueSkipSafeFetch) {
+              return true
+            } else if (isAllowListSkipSafeFetch) {
+              return [
+                ...(typeof existingCollection.upload === 'object' &&
+                Array.isArray(existingCollection.upload.skipSafeFetch)
+                  ? existingCollection.upload.skipSafeFetch
+                  : []),
+                ...(process.env.NODE_ENV !== 'production' ? [{ hostname: 'localhost' }] : []),
+              ]
+            }
+
+            if (process.env.NODE_ENV !== 'production') {
+              return [{ hostname: 'localhost' }]
+            }
+
+            return false
+          }
+
           return {
             ...existingCollection,
             fields,
@@ -93,13 +123,7 @@ export const cloudStoragePlugin =
                   ? options.disableLocalStorage
                   : true,
               handlers,
-              skipSafeFetch: [
-                ...(typeof existingCollection.upload === 'object' &&
-                Array.isArray(existingCollection.upload.skipSafeFetch)
-                  ? existingCollection.upload.skipSafeFetch
-                  : []),
-                ...cloudStorageAllowList,
-              ],
+              skipSafeFetch: getSkipSafeFetchSetting(),
             },
           }
         }

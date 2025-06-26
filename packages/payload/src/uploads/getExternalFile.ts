@@ -25,11 +25,14 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       : { cookie: req.headers.get('cookie')! }
 
     // Check if URL is allowed because of skipSafeFetch allowList
-    const skipSafeFetch =
-      uploadConfig.skipSafeFetch && isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
+    const skipSafeFetch: boolean =
+      uploadConfig.skipSafeFetch === true
+        ? uploadConfig.skipSafeFetch
+        : Array.isArray(uploadConfig.skipSafeFetch) &&
+          isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
 
     // Check if URL is allowed because of pasteURL allowList
-    const isAllowedPasteUrl =
+    const isAllowedPasteUrl: boolean | undefined =
       uploadConfig.pasteURL &&
       uploadConfig.pasteURL.allowList &&
       isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
