@@ -25,7 +25,7 @@ export const withoutMetadataSlug = 'without-meta-data'
 export const withOnlyJPEGMetadataSlug = 'with-only-jpeg-meta-data'
 export const customFileNameMediaSlug = 'custom-file-name-media'
 export const allowListMediaSlug = 'allow-list-media'
-
+export const skipSafeFetchMediaSlug = 'skip-safe-fetch-media'
 export const listViewPreviewSlug = 'list-view-preview'
 export const threeDimensionalSlug = 'three-dimensional'
 export const constructorOptionsSlug = 'constructor-options'

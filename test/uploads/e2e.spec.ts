@@ -1145,6 +1145,34 @@ describe('Uploads', () => {
         .first()
       await expect(errorCount).toHaveText('1')
     })
+
+    test('should preserve state when adding additional files to an existing bulk upload', async () => {
+      await page.goto(uploadsTwo.list)
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
+
+      await page.locator('#field-prefix').fill('should-preserve')
+
+      // add another file
+      await page
+        .locator('.file-selections__header__actions button', { hasText: 'Add File' })
+        .click()
+      await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './small.png'))
+
+      const originalFileRow = page
+        .locator('.file-selections__filesContainer .file-selections__fileRowContainer')
+        .nth(1)
+
+      // ensure the original file thumbnail is visible (not using default placeholder svg)
+      await expect(originalFileRow.locator('.thumbnail img')).toBeVisible()
+
+      // navigate to the first file added
+      await originalFileRow.locator('button.file-selections__fileRow').click()
+
+      // ensure the prefix field is still filled with the original value
+      await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+    })
   })
 
   describe('remote url fetching', () => {
