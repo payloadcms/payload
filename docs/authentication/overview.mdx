@@ -201,3 +201,43 @@ API Keys can be enabled on auth collections. These are particularly useful when 
 ### Custom Strategies
 
 There are cases where these may not be enough for your application. Payload is extendable by design so you can wire up your own strategy when you need to. [More details](./custom-strategies).
+
+### Access Control
+
+Default auth fields including `email`, `username`, and `password` can be overridden by defining a custom field with the same name in your collection config. This allows you to customize the field — including access control — while preserving the underlying auth functionality. For example, you might want to restrict the `email` field from being updated once it is created, or only allow it to be read by certain user roles. You can achieve this by redefining the field and setting access rules accordingly.
+
+Here's an example of how to restrict access to default auth fields:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Auth: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  fields: [
+    {
+      name: 'email', // or 'username'
+      type: 'text',
+      access: {
+        create: () => true,
+        read: () => false,
+        update: () => false,
+      },
+    },
+    {
+      name: 'password', // this will be applied to all password-related fields including new password, confirm password.
+      type: 'text',
+      hidden: true, // needed only for the password field to prevent duplication in the Admin panel
+      access: {
+        update: () => false,
+      },
+    },
+  ],
+}
+```
+
+**Note:**
+
+- Access functions will apply across the application — I.e. if `read` access is disabled on `email`, it will not appear in the Admin panel UI or API.
+- Restricting `read` on the `email` or `username` disables the **Unlock** action in the Admin panel as this function requires access to a user-identifying field.
+- When overriding the `password` field, you may need to include `hidden: true` to prevent duplicate fields being displayed in the Admin panel.
