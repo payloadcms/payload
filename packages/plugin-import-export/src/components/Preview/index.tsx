@@ -3,7 +3,14 @@ import type { Column } from '@payloadcms/ui'
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Table, Translation, useConfig, useField, useTranslation } from '@payloadcms/ui'
+import {
+  CodeEditorLazy,
+  Table,
+  Translation,
+  useConfig,
+  useField,
+  useTranslation,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import type {
@@ -25,6 +32,7 @@ export const Preview = () => {
   const { value: sort } = useField({ path: 'sort' })
   const { value: draft } = useField({ path: 'drafts' })
   const { value: locale } = useField({ path: 'locale' })
+  const { value: format } = useField({ path: 'format' })
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
   const [resultCount, setResultCount] = React.useState<any>('')
   const [columns, setColumns] = React.useState<Column[]>([])
@@ -37,6 +45,8 @@ export const Preview = () => {
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
   )
+
+  const isCSV = format === 'csv'
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -147,7 +157,12 @@ export const Preview = () => {
           />
         )}
       </div>
-      {dataToRender && <Table columns={columns} data={dataToRender} />}
+      {dataToRender &&
+        (isCSV ? (
+          <Table columns={columns} data={dataToRender} />
+        ) : (
+          <CodeEditorLazy language="json" readOnly value={JSON.stringify(dataToRender, null, 2)} />
+        ))}
     </div>
   )
 }
