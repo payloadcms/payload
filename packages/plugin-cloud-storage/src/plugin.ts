@@ -5,6 +5,7 @@ import type { PluginOptions } from './types.js'
 import { getFields } from './fields/getFields.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getBeforeChangeHook } from './hooks/beforeChange.js'
+import { cloudStorageAllowList } from './utilities/cloudStorageAllowList.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -92,7 +93,13 @@ export const cloudStoragePlugin =
                   ? options.disableLocalStorage
                   : true,
               handlers,
-              skipSafeFetch: true,
+              skipSafeFetch: [
+                ...(typeof existingCollection.upload === 'object' &&
+                Array.isArray(existingCollection.upload.skipSafeFetch)
+                  ? existingCollection.upload.skipSafeFetch
+                  : []),
+                ...cloudStorageAllowList,
+              ],
             },
           }
         }

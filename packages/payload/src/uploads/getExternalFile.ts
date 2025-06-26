@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../types/index.js'
-import type { AllowList, File, FileData, UploadConfig } from './types.js'
+import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
@@ -24,41 +24,18 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
       : { cookie: req.headers.get('cookie')! }
 
-    const skipSafeFetch: boolean = uploadConfig.skipSafeFetch || false
-    /**
-     * `fetch` on the `allowList` in the the upload config.
-     * Otherwise `safeFetch`
-     * Config example
-     *
-     * Allowlist format:
-     * ```ts
-     * Array<{
-          hostname: string
-          pathname?: string
-          port?: string
-          protocol?: 'http' | 'https'
-          search?: string
-        }>
-     *```
+    // Check if URL is allowed because of skipSafeFetch allowList
+    const skipSafeFetch =
+      uploadConfig.skipSafeFetch && isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
 
-     * Config example:
-     * ```ts
-     * upload: {
-        pasteURL: {
-          allowList: [
-            // Allow a specific URL
-            { protocol: 'https', hostname: 'example.com', port: '', search: '' },
-            // Allow a specific URL with a port
-            { protocol: 'http', hostname: '127.0.0.1', port: '3000', search: '' },
-            // Allow a local address
-            { protocol: 'http', hostname: 'localhost', port: '3000', search: '' },
-          ],
-        },
-       ```
-     */
-    const allowList: AllowList = uploadConfig.pasteURL ? uploadConfig.pasteURL.allowList : []
+    // Check if URL is allowed because of pasteURL allowList
+    const isAllowedPasteUrl =
+      uploadConfig.pasteURL &&
+      uploadConfig.pasteURL.allowList &&
+      isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
+
     let res
-    if (skipSafeFetch || (allowList.length > 0 && isURLAllowed(fileURL, allowList))) {
+    if (skipSafeFetch || isAllowedPasteUrl) {
       // Allowed
       res = await fetch(fileURL, {
         credentials: 'include',

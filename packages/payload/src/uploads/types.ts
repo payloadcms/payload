@@ -226,7 +226,6 @@ export type UploadConfig = {
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
    * If an `allowList` is provided, server-side fetching will be enabled for specified URLs.
-   * Without an `allowList`, the default external file retrieval behavior follows your `skipSafeFetch` option.
    *
    * @default true (client-side fetching enabled)
    */
@@ -242,11 +241,10 @@ export type UploadConfig = {
    */
   resizeOptions?: ResizeOptions
   /**
-   *  Skip safe Fetch when fetching external files.
-   *  If you want to allow specific URLS to be fetched without using `safeFetch`, you can use the `pasteURL.allowList` option.
-   *  @default false
+   *  Skip safe fetch when using server-side fetching for external files from these URLs.
+   *  @default undefined
    */
-  skipSafeFetch?: boolean
+  skipSafeFetch?: AllowList
   /**
    * The directory to serve static files from. Defaults to collection slug.
    * @default undefined
