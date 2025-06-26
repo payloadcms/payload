@@ -596,6 +596,7 @@ describe('Collections - Uploads', () => {
               url: 'http://127.0.0.1/file.png',
             },
           }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
         ).rejects.toThrow(
           expect.objectContaining({
             name: 'FileRetrievalError',
@@ -613,6 +614,7 @@ describe('Collections - Uploads', () => {
               url: 'http://127.0.0.1/file.png',
             },
           }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
         ).rejects.toThrow(
           expect.objectContaining({
             name: 'FileRetrievalError',
