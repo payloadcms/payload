@@ -6,7 +6,7 @@ import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
-import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
@@ -113,9 +113,6 @@ export async function validateSearchParam({
       if ('virtual' in field && field.virtual) {
         if (field.virtual === true) {
           errors.push({ path })
-        } else {
-          constraint[`${field.virtual}` as keyof WhereField] = constraint[path as keyof WhereField]
-          delete constraint[path as keyof WhereField]
         }
       }
 

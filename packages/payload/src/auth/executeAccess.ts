@@ -10,7 +10,7 @@ type OperationArgs = {
   isReadingStaticFile?: boolean
   req: PayloadRequest
 }
-const executeAccess = async (
+export const executeAccess = async (
   { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
   access: Access,
 ): Promise<AccessResult> => {
@@ -40,5 +40,3 @@ const executeAccess = async (
   }
   return false
 }
-
-export default executeAccess
