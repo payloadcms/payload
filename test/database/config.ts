@@ -78,14 +78,14 @@ export default buildConfigWithDefaults({
           name: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-third',
               fields: [
                 {
                   type: 'blocks',
                   name: 'nested',
                   blocks: [
                     {
-                      slug: 'block',
+                      slug: 'block-fourth',
                       fields: [
                         {
                           type: 'blocks',
@@ -198,7 +198,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-first',
               fields: [
                 {
                   name: 'text',
@@ -456,7 +456,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-second',
               dbName: 'customBlocks',
               fields: [
                 {

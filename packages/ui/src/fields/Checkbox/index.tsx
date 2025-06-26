@@ -5,6 +5,7 @@ import type {
   CheckboxFieldValidation,
 } from 'payload'
 
+import { rtlLanguages } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
@@ -16,6 +17,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -47,6 +49,11 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const { uuid } = useForm()
 
   const editDepth = useEditDepth()
+
+  const {
+    i18n: { language },
+  } = useTranslation()
+  const isRTL = (rtlLanguages as readonly string[]).includes(language)
 
   const memoizedValidate: CheckboxFieldValidation = useCallback(
     (value, options) => {
@@ -101,7 +108,9 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
+        Fallback={
+          <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
+        }
       />
       <CheckboxInput
         AfterInput={AfterInput}

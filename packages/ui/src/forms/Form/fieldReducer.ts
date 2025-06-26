@@ -146,6 +146,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         duplicateRowMetadata.id = new ObjectId().toHexString()
       }
 
+      if (rowsMetadata[rowIndex]?.customComponents?.RowLabel) {
+        duplicateRowMetadata.customComponents = {
+          RowLabel: rowsMetadata[rowIndex].customComponents.RowLabel,
+        }
+      }
+
       const duplicateRowState = deepCopyObjectSimpleWithoutReactComponents(rows[rowIndex])
 
       if (duplicateRowState.id) {
