@@ -1455,7 +1455,7 @@ describe('Queues', () => {
 
     it('can auto-schedule through handleSchedules REST API and autorun jobs', async () => {
       // Do not call payload.jobs.queue() - the `EverySecond` task should be scheduled here
-      await restClient.GET('/payload-jobs/handleSchedules', {
+      await restClient.POST('/payload-jobs/handle-schedules', {
         headers: {
           Authorization: `JWT ${token}`,
         },

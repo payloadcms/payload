@@ -129,10 +129,10 @@ export type JobsConfig = {
    * property needs to be set in order for the `schedule` property to work.
    *
    * If set to `cron`, the job system will use cron jobs to run scheduled tasks.
-   * If set to `manual`, you are responsible for handling schedules yourself, for example by calling the `/api/payload-jobs/handleSchedules` endpoints
+   * If set to `manual`, you are responsible for handling schedules yourself, for example by calling the `POST /api/payload-jobs/handle-schedules` endpoints
    *
    * @remark On serverless platforms like Vercel, you should use `manual` to avoid issues with cron jobs not running as expected.
-   * You can then use Vercel Cron to call the `/api/payload-jobs/handleSchedules` endpoint at specified intervals
+   * You can then use Vercel Cron to call the `POST /api/payload-jobs/handle-schedules` endpoint at specified intervals
    *
    * @default 'manual'
    */

@@ -4,7 +4,7 @@ import { handleSchedules } from '../operations/handleSchedules/index.js'
 import { configHasJobs } from './run.js'
 
 /**
- * /api/payload-jobs/handleSchedules endpoint
+ * /api/payload-jobs/handle-schedules endpoint
  */
 export const handleSchedulesJobsEndpoint: Endpoint = {
   handler: async (req) => {
@@ -42,7 +42,7 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    const { queue } = req.query as {
+    const { queue } = ((await req.json?.()) ?? {}) as {
       queue?: string
     }
 
@@ -58,6 +58,6 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       { status: 200 },
     )
   },
-  method: 'get',
-  path: '/handleSchedules',
+  method: 'post',
+  path: '/handle-schedules',
 }
