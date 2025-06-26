@@ -288,11 +288,17 @@ const stripFields = ({
                 let maybeBlock: FlattenedBlock | undefined = undefined
 
                 if (field.blockReferences) {
-                  const maybeBlockReference = field.blockReferences.find(
-                    (each) => typeof each === 'object' && each.slug === data.blockType,
-                  )
-                  if (maybeBlockReference && typeof maybeBlockReference === 'object') {
-                    maybeBlock = maybeBlockReference
+                  const maybeBlockReference = field.blockReferences.find((each) => {
+                    const slug = typeof each === 'string' ? each : each.slug
+                    return slug === data.blockType
+                  })
+
+                  if (maybeBlockReference) {
+                    if (typeof maybeBlockReference === 'object') {
+                      maybeBlock = maybeBlockReference
+                    } else {
+                      maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                    }
                   }
                 }
 
@@ -344,12 +350,17 @@ const stripFields = ({
             let maybeBlock: FlattenedBlock | undefined = undefined
 
             if (field.blockReferences) {
-              const maybeBlockReference = field.blockReferences.find(
-                (each) => typeof each === 'object' && each.slug === data.blockType,
-              )
+              const maybeBlockReference = field.blockReferences.find((each) => {
+                const slug = typeof each === 'string' ? each : each.slug
+                return slug === data.blockType
+              })
 
-              if (maybeBlockReference && typeof maybeBlockReference === 'object') {
-                maybeBlock = maybeBlockReference
+              if (maybeBlockReference) {
+                if (typeof maybeBlockReference === 'object') {
+                  maybeBlock = maybeBlockReference
+                } else {
+                  maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                }
               }
             }
 
