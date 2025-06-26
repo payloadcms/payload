@@ -9,7 +9,6 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { isImage } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -25,7 +24,6 @@ import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
-import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -57,7 +55,6 @@ type FormsManagerContext = {
     errorCount: number
     index: number
   }) => void
-  readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
   readonly updateUploadEdits: (args: UploadEdits) => void
 }
@@ -79,7 +76,6 @@ const Context = React.createContext<FormsManagerContext>({
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
   setFormTotalErrorCount: () => {},
-  thumbnailUrls: [],
   totalErrorCount: 0,
   updateUploadEdits: () => {},
 })
@@ -119,37 +115,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const formsRef = React.useRef(forms)
   formsRef.current = forms
-  const formsCount = forms.length
-
-  const thumbnailUrlsRef = React.useRef<string[]>([])
-  const processedFiles = React.useRef(new Set()) // Track already-processed files
-  const [renderedThumbnails, setRenderedThumbnails] = React.useState<string[]>([])
-
-  React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      const newThumbnails = [...thumbnailUrlsRef.current]
-
-      for (let i = 0; i < formsCount; i++) {
-        const file = formsRef.current[i].formState.file.value as File
-
-        // Skip if already processed
-        if (processedFiles.current.has(file) || !file || !isImage(file.type)) {
-          continue
-        }
-        processedFiles.current.add(file)
-
-        // Generate thumbnail and update ref
-        const thumbnailUrl = await createThumbnail(file)
-        newThumbnails[i] = thumbnailUrl
-        thumbnailUrlsRef.current = newThumbnails
-
-        // Trigger re-render in batches
-        setRenderedThumbnails([...newThumbnails])
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-    })()
-  }, [formsCount])
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
@@ -250,6 +215,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             if (i === activeIndex) {
               return {
                 errorCount: form.errorCount,
+                formID: form.formID,
                 formState: currentFormsData,
                 uploadEdits: form.uploadEdits,
               }
@@ -284,18 +250,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay, activeIndex, forms],
   )
 
-  const removeThumbnails = React.useCallback((indexes: number[]) => {
-    thumbnailUrlsRef.current = thumbnailUrlsRef.current.filter((_, i) => !indexes.includes(i))
-    setRenderedThumbnails([...thumbnailUrlsRef.current])
+  const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
+    dispatch({ type: 'REMOVE_FORM', index })
   }, [])
-
-  const removeFile: FormsManagerContext['removeFile'] = React.useCallback(
-    (index) => {
-      dispatch({ type: 'REMOVE_FORM', index })
-      removeThumbnails([index])
-    },
-    [removeThumbnails],
-  )
 
   const setFormTotalErrorCount: FormsManagerContext['setFormTotalErrorCount'] = React.useCallback(
     ({ errorCount, index }) => {
@@ -314,6 +271,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const currentForms = [...forms]
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
+        formID: currentForms[activeIndex].formID,
         formState: currentFormsData,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
@@ -382,6 +340,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           currentForms[i] = {
             errorCount: fieldErrors.length,
+            formID: currentForms[i].formID,
             formState: fieldReducer(currentForms[i].formState, {
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
@@ -426,10 +385,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         if (typeof onSuccess === 'function') {
           onSuccess(newDocs, errorCount)
         }
-
-        if (remainingForms.length && thumbnailIndexesToRemove.length) {
-          removeThumbnails(thumbnailIndexesToRemove)
-        }
       }
 
       if (errorCount) {
@@ -449,15 +404,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     },
     [
       actionURL,
-      activeIndex,
-      forms,
-      removeThumbnails,
-      onSuccess,
       collectionSlug,
       getUploadHandler,
       t,
+      forms,
+      activeIndex,
       closeModal,
       drawerSlug,
+      onSuccess,
     ],
   )
 
@@ -588,7 +542,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         saveAllDocs,
         setActiveIndex,
         setFormTotalErrorCount,
-        thumbnailUrls: renderedThumbnails,
         totalErrorCount,
         updateUploadEdits,
       }}
