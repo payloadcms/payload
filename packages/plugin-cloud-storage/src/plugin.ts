@@ -85,13 +85,19 @@ export const cloudStoragePlugin =
             if (isBooleanTrueSkipSafeFetch) {
               return true
             } else if (isAllowListSkipSafeFetch) {
-              return [
-                ...(typeof existingCollection.upload === 'object' &&
+              const existingSkipSafeFetch =
+                typeof existingCollection.upload === 'object' &&
                 Array.isArray(existingCollection.upload.skipSafeFetch)
                   ? existingCollection.upload.skipSafeFetch
-                  : []),
-                ...(process.env.NODE_ENV !== 'production' ? [{ hostname: 'localhost' }] : []),
-              ]
+                  : []
+
+              const localhostEntry =
+                process.env.NODE_ENV !== 'production' &&
+                !existingSkipSafeFetch.some((entry) => entry.hostname === 'localhost')
+                  ? [{ hostname: 'localhost' }]
+                  : []
+
+              return [...existingSkipSafeFetch, ...localhostEntry]
             }
 
             if (process.env.NODE_ENV !== 'production') {
