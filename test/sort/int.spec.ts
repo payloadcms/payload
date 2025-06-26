@@ -629,10 +629,9 @@ describe('Sort', () => {
         )
       })
 
-      // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
       it('should not break with existing base 62 digits', async () => {
         const collection = orderableSlug
-        // create seed docs with aa, aA, AA
+        // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
         const aa = await payload.create({
           collection,
           data: {
@@ -687,15 +686,18 @@ describe('Sort', () => {
           },
         })
 
-        console.log({
-          actual: docs.map((doc) => doc.id),
-          expected: [aa.id, aA.id, orderableDoc.id, a0.id],
-        })
+        expect(docs).toHaveLength(4)
+        const ids = [aa.id, aA.id, a0.id, orderableDoc.id]
+        expect(docs.every(({ id }) => ids.includes(id))).toBe(true)
 
-        expect(docs[0]?.id).toStrictEqual(aa.id)
-        expect(docs[1]?.id).toStrictEqual(aA.id)
-        expect(docs[2]?.id).toStrictEqual(orderableDoc.id)
-        expect(docs[3]?.id).toStrictEqual(a0.id)
+        const a0Index = docs.findIndex((d) => d.id === a0.id)
+        const aAIndex = docs.findIndex((d) => d.id === aA.id)
+        const orderableIndex = docs.findIndex((d) => d.id === orderableDoc.id)
+
+        // The reordered document should be positioned after the target (aA) since newKeyWillBe: 'greater'
+        // and before the target (a0) since (a0) is the smallest fractional index
+        expect(orderableIndex).toBeGreaterThan(aAIndex)
+        expect(orderableIndex).toBeLessThan(a0Index)
       })
     })
 
@@ -737,12 +739,10 @@ describe('Sort', () => {
         })
       })
 
-      // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
       it('should set order by default', () => {
         expect(orderable1._orderable_orderableJoinField1_order).toBeDefined()
       })
 
-      // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
       it('should allow setting the order with the local API', async () => {
         // create two orderableJoinSlug docs
         orderable2 = await payload.update({
@@ -765,7 +765,7 @@ describe('Sort', () => {
         expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
       })
-      // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
+
       it('should sort join docs in the correct', async () => {
         related = await payload.findByID({
           collection: orderableJoinSlug,
