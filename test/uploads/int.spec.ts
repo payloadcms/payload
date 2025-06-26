@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -19,6 +19,7 @@ import {
   mediaSlug,
   reduceSlug,
   relationSlug,
+  skipSafeFetchMediaSlug,
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
@@ -585,6 +586,22 @@ describe('Collections - Uploads', () => {
           )
         },
       )
+      it('should fetch when skipSafeFetch is enabled', async () => {
+        await expect(
+          payload.create({
+            collection: skipSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
     })
   })
 
