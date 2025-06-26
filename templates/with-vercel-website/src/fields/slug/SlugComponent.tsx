@@ -29,8 +29,6 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
 
   const { dispatchFields, getDataByPath } = useForm()
 
-  // The value of the checkbox
-  // We're using separate useFormFields to minimise re-renders
   const isLocked = useFormFields(([fields]) => {
     return fields[checkboxFieldPath]?.value as string
   })
@@ -65,29 +63,24 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
     [isLocked, checkboxFieldPath, dispatchFields],
   )
 
-  const readOnly = readOnlyFromProps || isLocked
-
   return (
     <div className="field-type slug-field-component">
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
-
         {!isLocked && (
           <Button className="lock-button" buttonStyle="none" onClick={handleGenerate}>
             Generate
           </Button>
         )}
-
         <Button className="lock-button" buttonStyle="none" onClick={handleLock}>
           {isLocked ? 'Unlock' : 'Lock'}
         </Button>
       </div>
-
       <TextInput
         value={value}
         onChange={setValue}
         path={path || field.name}
-        readOnly={Boolean(readOnly)}
+        readOnly={Boolean(readOnlyFromProps || isLocked)}
       />
     </div>
   )
