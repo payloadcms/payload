@@ -6,6 +6,8 @@ import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
  * /api/payload-jobs/run endpoint
+ *
+ * This endpoint is GET instead of POST to allow it to be used in a Vercel Cron.
  */
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
