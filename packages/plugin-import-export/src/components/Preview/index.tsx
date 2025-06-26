@@ -14,7 +14,6 @@ import type {
 
 import './index.scss'
 import { flattenObject } from '../../export/flattenObject.js'
-import { getCustomFieldFunctions } from '../../export/getCustomFieldFunctions.js'
 import { getSelect } from '../../export/getSelect.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
@@ -78,17 +77,11 @@ export const Preview = () => {
         const data = await response.json()
         setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
 
-        const toCSVFunctions = getCustomFieldFunctions({
-          fields: collectionConfig.fields ?? [],
-          select,
-        })
-
         // Flatten each doc (deeply nested --> flat row)
         const flattenedDocs = data.docs.map((doc: Record<string, unknown>) =>
           flattenObject({
             doc,
             fields,
-            toCSVFunctions,
           }),
         )
 
