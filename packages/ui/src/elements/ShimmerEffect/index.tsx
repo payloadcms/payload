@@ -23,12 +23,8 @@ export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
     <div
       className={['shimmer-effect', className].filter(Boolean).join(' ')}
       style={{
-        height: disableInlineStyles
-          ? undefined
-          : typeof height === 'number'
-            ? `${height}px`
-            : height,
-        width: disableInlineStyles ? undefined : typeof width === 'number' ? `${width}px` : width,
+        height: !disableInlineStyles && (typeof height === 'number' ? `${height}px` : height),
+        width: !disableInlineStyles && (typeof width === 'number' ? `${width}px` : width),
       }}
     >
       <div
