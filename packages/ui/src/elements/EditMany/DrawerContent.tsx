@@ -29,9 +29,9 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.scss'
+import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string
@@ -124,6 +124,10 @@ type EditManyDrawerContentProps = {
    */
   ids?: (number | string)[]
   /**
+   * The function to call after a successful action
+   */
+  onSuccess?: () => void
+  /**
    * Whether all items are selected
    */
   selectAll?: boolean
@@ -143,6 +147,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     count,
     drawerSlug,
     ids,
+    onSuccess: onSuccessFromProps,
     selectAll,
     selectedFields,
     setSelectedFields,
@@ -263,6 +268,10 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     )
     clearRouteCache()
     closeModal(drawerSlug)
+
+    if (typeof onSuccessFromProps === 'function') {
+      onSuccessFromProps()
+    }
   }
 
   const onFieldSelect = useCallback<OnFieldSelect>(

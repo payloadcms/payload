@@ -119,6 +119,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           e.preventDefault()
           setPreviewWindowType('popup')
         }}
+        target="_blank"
         title="Open in new window"
         type="button"
       >
