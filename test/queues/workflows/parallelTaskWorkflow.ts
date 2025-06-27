@@ -18,7 +18,7 @@ export const parallelTaskWorkflow: WorkflowConfig<'parallelTask'> = {
       taskIDs.map(async (taskID) => {
         return await inlineTask(`parallel task ${taskID}`, {
           task: async ({ req }) => {
-            const newSimple = await req.payload.db.create({
+            const newSimple = await req.payload.create({
               collection: 'simple',
               data: {
                 title: 'parallel task ' + taskID,
