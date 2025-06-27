@@ -1,10 +1,11 @@
 import { APIError, type CollectionBeforeValidateHook, type CollectionSlug } from '../../index.js'
+import { extractID } from '../../utilities/extractID.js'
 import { getTranslatedLabel } from '../../utilities/getTranslatedLabel.js'
 
 export const ensureSafeCollectionsChange =
   ({ foldersSlug }: { foldersSlug: CollectionSlug }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
-    if (data?.folderType) {
+    if (Array.isArray(data?.folderType) && data.folderType.length > 0) {
       const folderType = data.folderType as string[]
       const originalAssignedCollections = originalDoc?.folderType as string[] | undefined
       /**
@@ -81,12 +82,43 @@ export const ensureSafeCollectionsChange =
           })
 
           throw new APIError(
-            `The folder "${data.name}" contains ${hasDependentDocuments ? 'documents' : 'folders'} that still belong to the following collections: ${translatedLabels.join(', ')}`,
+            `The folder "${data.name || originalDoc.name}" contains ${hasDependentDocuments ? 'documents' : 'folders'} that still belong to the following collections: ${translatedLabels.join(', ')}`,
             400,
           )
         }
         return data
       }
+    } else if (originalDoc.folder && data?.folder !== null) {
+      // attempting to set the folderType to catch-all, so we need to ensure that the parent allows this
+      let parentFolder
+      try {
+        parentFolder = await req.payload.findByID({
+          id: extractID(data?.folder || originalDoc.folder),
+          collection: foldersSlug,
+          overrideAccess: true,
+          req,
+          select: {
+            name: true,
+            folderType: true,
+          },
+          user: req.user,
+        })
+      } catch (_) {
+        // parent folder does not exist
+      }
+
+      if (
+        parentFolder &&
+        parentFolder?.folderType &&
+        Array.isArray(parentFolder.folderType) &&
+        parentFolder.folderType.length > 0
+      ) {
+        throw new APIError(
+          `The folder "${data?.name || originalDoc.name}" must have folder-type set since its parent folder ${parentFolder?.name ? `"${parentFolder?.name}" ` : ''}has a folder-type set.`,
+          400,
+        )
+      }
     }
+
     return data
   }
