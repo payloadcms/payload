@@ -50,7 +50,7 @@ export const mergeServerFormState = ({
       newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
       incomingField.rows.forEach((row) => {
-        const indexInCurrentState = currentState[path].rows.findIndex(
+        const indexInCurrentState = currentState[path].rows?.findIndex(
           (existingRow) => existingRow.id === row.id,
         )
 
