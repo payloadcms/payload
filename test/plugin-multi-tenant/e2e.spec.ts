@@ -231,8 +231,7 @@ test.describe('Multi Tenant', () => {
       await expect
         .poll(async () => {
           return await getSelectInputValue<false>({
-            page,
-            selector: '.tenant-selector',
+            selectLocator: page.locator('.tenant-selector'),
             multiSelect: false,
           })
         })
@@ -335,16 +334,14 @@ test.describe('Multi Tenant', () => {
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
-    page,
-    selector: '.tenant-selector',
+    selectLocator: page.locator('.tenant-selector'),
   })
 }
 
 async function selectTenant({ page, tenant }: { page: Page; tenant: string }): Promise<void> {
   await openNav(page)
   return selectInput({
-    page,
-    selector: '.tenant-selector',
+    selectLocator: page.locator('.tenant-selector'),
     option: tenant,
     multiSelect: false,
   })
@@ -353,7 +350,6 @@ async function selectTenant({ page, tenant }: { page: Page; tenant: string }): P
 async function clearTenant({ page }: { page: Page }): Promise<void> {
   await openNav(page)
   return clearSelectInput({
-    page,
-    selector: '.tenant-selector',
+    selectLocator: page.locator('.tenant-selector'),
   })
 }

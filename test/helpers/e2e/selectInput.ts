@@ -1,8 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 type SelectReactOptionsParams = {
-  page: Page
-  selector: string // Selector for the react-select component
+  selectLocator: Locator // Locator for the react-select component
 } & (
   | {
       clear?: boolean // Whether to clear the selection before selecting new options
@@ -19,26 +18,22 @@ type SelectReactOptionsParams = {
 )
 
 export async function selectInput({
-  page,
-  selector,
+  selectLocator,
   options,
   option,
   multiSelect = true,
   clear = true,
 }: SelectReactOptionsParams) {
-  const select = page.locator(selector)
-
   if (multiSelect && options) {
     if (clear) {
       await clearSelectInput({
-        page,
-        selector,
+        selectLocator,
       })
     }
 
     for (const optionText of options) {
       // Check if the option is already selected
-      const alreadySelected = await select
+      const alreadySelected = await selectLocator
         .locator('.multi-value-label__text', {
           hasText: optionText,
         })
@@ -46,15 +41,14 @@ export async function selectInput({
 
       if (alreadySelected === 0) {
         await selectOption({
-          page,
-          selector,
+          selectLocator,
           optionText,
         })
       }
     }
   } else if (option) {
     // For single selection, ensure only one option is selected
-    const alreadySelected = await select
+    const alreadySelected = await selectLocator
       .locator('.react-select--single-value', {
         hasText: option,
       })
@@ -62,44 +56,35 @@ export async function selectInput({
 
     if (alreadySelected === 0) {
       await selectOption({
-        page,
-        selector,
+        selectLocator,
         optionText: option,
       })
     }
   }
 }
 
-async function openSelectMenu({
-  page,
-  selector,
-}: {
-  page: Page
-  selector: string
-}): Promise<Locator> {
-  const selectInput = page.locator(selector)
-  // Open the react-select dropdown
-  await selectInput.click()
+export async function openSelectMenu({ selectLocator }: { selectLocator: Locator }): Promise<void> {
+  if (await selectLocator.locator('.rs__menu').isHidden()) {
+    // Open the react-select dropdown
+    await selectLocator.locator('button.dropdown-indicator').click()
+  }
 
   // Wait for the dropdown menu to appear
-  const menu = selectInput.locator('.rs__menu')
+  const menu = selectLocator.locator('.rs__menu')
   await menu.waitFor({ state: 'visible', timeout: 2000 })
-  return selectInput
 }
 
 async function selectOption({
-  page,
-  selector,
+  selectLocator,
   optionText,
 }: {
   optionText: string
-  page: Page
-  selector: string
+  selectLocator: Locator
 }) {
-  const selectorLocator = await openSelectMenu({ page, selector })
+  await openSelectMenu({ selectLocator })
 
   // Find and click the desired option by visible text
-  const optionLocator = selectorLocator.locator('.rs__option', {
+  const optionLocator = selectLocator.locator('.rs__option', {
     hasText: optionText,
   })
 
@@ -110,47 +95,43 @@ async function selectOption({
 
 type GetSelectInputValueFunction = <TMultiSelect = true>(args: {
   multiSelect: TMultiSelect
-  page: Page
-  selector: string
+  selectLocator: Locator
 }) => Promise<TMultiSelect extends true ? string[] : string | undefined>
 
 export const getSelectInputValue: GetSelectInputValueFunction = async ({
-  page,
-  selector,
+  selectLocator,
   multiSelect = false,
 }) => {
-  const select = page.locator(selector)
-
   if (multiSelect) {
     // For multi-select, get all selected options
-    const selectedOptions = await select.locator('.multi-value-label__text').allTextContents()
-    return selectedOptions as any
+    const selectedOptions = await selectLocator
+      .locator('.multi-value-label__text')
+      .allTextContents()
+    return selectedOptions || []
   }
 
   // For single-select, get the selected value
-  const singleValue = await select.locator('.react-select--single-value').textContent()
+  const singleValue = await selectLocator.locator('.react-select--single-value').textContent()
   return (singleValue ?? undefined) as any
 }
 
 export const getSelectInputOptions = async ({
-  page,
-  selector,
+  selectLocator,
 }: {
-  page: Page
-  selector: string
+  selectLocator: Locator
 }): Promise<string[]> => {
-  const selectorLocator = await openSelectMenu({ page, selector })
-  const options = await selectorLocator.locator('.rs__option').allTextContents()
+  await openSelectMenu({ selectLocator })
+  const options = await selectLocator.locator('.rs__option').allTextContents()
   return options.map((option) => option.trim()).filter(Boolean)
 }
 
-export async function clearSelectInput({ page, selector }: { page: Page; selector: string }) {
-  const select = page.locator(selector)
-
+export async function clearSelectInput({ selectLocator }: { selectLocator: Locator }) {
   // Clear the selection if clear is true
-  const clearButton = select.locator('.clear-indicator')
-  const clearButtonCount = await clearButton.count()
-  if (clearButtonCount > 0) {
-    await clearButton.click()
+  const clearButton = selectLocator.locator('.clear-indicator')
+  if (await clearButton.isVisible()) {
+    const clearButtonCount = await clearButton.count()
+    if (clearButtonCount > 0) {
+      await clearButton.click()
+    }
   }
 }
