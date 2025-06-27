@@ -4,18 +4,18 @@ import { buildFolderField } from './buildFolderField.js'
 
 export const addFolderFieldToCollection = ({
   collection,
-  enableCollectionScoping,
+  collectionSpecific,
   folderFieldName,
   folderSlug,
 }: {
   collection: SanitizedCollectionConfig
-  enableCollectionScoping: boolean
+  collectionSpecific: boolean
   folderFieldName: string
   folderSlug: string
 }): void => {
   collection.fields.push(
     buildFolderField({
-      enableCollectionScoping,
+      collectionSpecific,
       folderFieldName,
       folderSlug,
       overrides: {

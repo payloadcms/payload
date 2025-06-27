@@ -170,8 +170,8 @@ export const addDefaultsToConfig = (config: Config): Config => {
       slug: config.folders?.slug ?? foldersSlug,
       browseByFolder: config.folders?.browseByFolder ?? true,
       collectionOverrides: config.folders?.collectionOverrides || undefined,
+      collectionSpecific: config.folders?.collectionSpecific ?? true,
       debug: config.folders?.debug ?? false,
-      enableCollectionScoping: config.folders?.enableCollectionScoping ?? true,
       fieldName: config.folders?.fieldName ?? parentFolderFieldName,
     }
   } else {

@@ -10,16 +10,16 @@ import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange
 import { reparentChildFolder } from './hooks/reparentChildFolder.js'
 
 type CreateFolderCollectionArgs = {
+  collectionSpecific: boolean
   debug?: boolean
-  enableCollectionScoping: boolean
   folderEnabledCollections: CollectionConfig[]
   folderFieldName: string
   slug: string
 }
 export const createFolderCollection = ({
   slug,
+  collectionSpecific,
   debug,
-  enableCollectionScoping,
   folderEnabledCollections,
   folderFieldName,
 }: CreateFolderCollectionArgs): CollectionConfig => {
@@ -60,7 +60,7 @@ export const createFolderCollection = ({
         required: true,
       },
       buildFolderField({
-        enableCollectionScoping,
+        collectionSpecific,
         folderFieldName,
         folderSlug: slug,
         overrides: {
@@ -79,7 +79,7 @@ export const createFolderCollection = ({
         hasMany: true,
         on: folderFieldName,
       },
-      ...(enableCollectionScoping
+      ...(collectionSpecific
         ? [
             {
               name: 'folderType',
@@ -115,7 +115,7 @@ export const createFolderCollection = ({
       ],
       beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
       beforeValidate: [
-        ...(enableCollectionScoping ? [ensureSafeCollectionsChange({ foldersSlug })] : []),
+        ...(collectionSpecific ? [ensureSafeCollectionsChange({ foldersSlug })] : []),
       ],
     },
     labels: {

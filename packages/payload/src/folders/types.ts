@@ -90,17 +90,17 @@ export type RootFoldersConfiguration = {
     collection: CollectionConfig
   }) => CollectionConfig | Promise<CollectionConfig>)[]
   /**
+   * If true, you can scope folders to specific collections.
+   *
+   * @default true
+   */
+  collectionSpecific?: boolean
+  /**
    * Ability to view hidden fields and collections related to folders
    *
    * @default false
    */
   debug?: boolean
-  /**
-   * If true, you can scope folders to specific collections.
-   *
-   * @default true
-   */
-  enableCollectionScoping?: boolean
   /**
    * The Folder field name
    *

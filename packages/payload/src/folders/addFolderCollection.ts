@@ -5,14 +5,14 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { createFolderCollection } from './createFolderCollection.js'
 
 export async function addFolderCollection({
+  collectionSpecific,
   config,
-  enableCollectionScoping,
   folderEnabledCollections,
   richTextSanitizationPromises = [],
   validRelationships = [],
 }: {
+  collectionSpecific: boolean
   config: NonNullable<Config>
-  enableCollectionScoping: boolean
   folderEnabledCollections: CollectionConfig[]
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
   validRelationships?: string[]
@@ -23,8 +23,8 @@ export async function addFolderCollection({
 
   let folderCollectionConfig = createFolderCollection({
     slug: config.folders!.slug as string,
+    collectionSpecific,
     debug: config.folders!.debug,
-    enableCollectionScoping,
     folderEnabledCollections,
     folderFieldName: config.folders!.fieldName as string,
   })
