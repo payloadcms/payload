@@ -88,7 +88,12 @@ export const ensureSafeCollectionsChange =
         }
         return data
       }
-    } else if (originalDoc.folder && data?.folder !== null) {
+    } else if (
+      (data?.folderType === null ||
+        (Array.isArray(data?.folderType) && data?.folderType.length === 0)) &&
+      originalDoc.folder &&
+      data?.folder !== null
+    ) {
       // attempting to set the folderType to catch-all, so we need to ensure that the parent allows this
       let parentFolder
       try {
