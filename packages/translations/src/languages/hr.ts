@@ -282,6 +282,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     enterAValue: 'Unesi vrijednost',
     error: 'Greška',
     errors: 'Greške',
+    exitLivePreview: 'Izađi iz Pregleda uživo',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadani jezik',
     false: 'Netočno',

@@ -277,6 +277,7 @@ export const thTranslations: DefaultTranslationsObject = {
     enterAValue: 'ระบุค่า',
     error: 'ข้อผิดพลาด',
     errors: 'ข้อผิดพลาด',
+    exitLivePreview: 'ออกจากการแสดงตัวอย่างสด',
     export: 'ส่งออก',
     fallbackToDefaultLocale: 'สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น',
     false: 'เท็จ',

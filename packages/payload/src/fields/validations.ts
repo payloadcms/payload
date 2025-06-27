@@ -937,11 +937,19 @@ export type PointFieldValidation = Validate<
 >
 
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
-  const lng = parseFloat(String(value![0]))
-  const lat = parseFloat(String(value![1]))
+  if (value === null) {
+    if (required) {
+      return t('validation:required')
+    }
+
+    return true
+  }
+
+  const lng = parseFloat(String(value[0]))
+  const lat = parseFloat(String(value[1]))
   if (
     required &&
-    ((value![0] && value![1] && typeof lng !== 'number' && typeof lat !== 'number') ||
+    ((value[0] && value[1] && typeof lng !== 'number' && typeof lat !== 'number') ||
       Number.isNaN(lng) ||
       Number.isNaN(lat) ||
       (Array.isArray(value) && value.length !== 2))
@@ -949,7 +957,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
     return t('validation:requiresTwoNumbers')
   }
 
-  if ((value![1] && Number.isNaN(lng)) || (value![0] && Number.isNaN(lat))) {
+  if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
   }
 

@@ -104,14 +104,28 @@ export const TenantSelectionProviderClient = ({
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(({ id, label }) => {
     setTenantOptions((prev) => {
-      return prev.map((currentTenant) => {
-        if (id === currentTenant.value) {
+      const stringID = String(id)
+      let exists = false
+      const updated = prev.map((currentTenant) => {
+        if (stringID === String(currentTenant.value)) {
+          exists = true
           return {
             label,
-            value: id,
+            value: stringID,
           }
         }
         return currentTenant
+      })
+
+      if (!exists) {
+        updated.push({ label, value: stringID })
+      }
+
+      // Sort alphabetically by label (or value as fallback)
+      return updated.sort((a, b) => {
+        const aKey = typeof a.label === 'string' ? a.label : String(a.value)
+        const bKey = typeof b.label === 'string' ? b.label : String(b.value)
+        return aKey.localeCompare(bKey)
       })
     })
   }, [])

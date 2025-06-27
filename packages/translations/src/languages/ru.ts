@@ -284,6 +284,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     enterAValue: 'Введите значение',
     error: 'Ошибка',
     errors: 'Ошибки',
+    exitLivePreview: 'Выйти из режима прямого просмотра',
     export: 'Экспорт',
     fallbackToDefaultLocale: 'Возврат к локали по умолчанию',
     false: 'Ложь',
