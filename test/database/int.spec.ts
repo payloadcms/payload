@@ -32,7 +32,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { seed } from './seed.js'
-import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
+import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -2324,6 +2324,19 @@ describe('database', () => {
       expect(graphqlAsc[0].id).toBe(doc_1.id)
       expect(localAsc[1].id).toBe(doc_2.id)
       expect(localAsc[0].id).toBe(doc_1.id)
+    })
+
+    it('should allow to sort by a virtual field without error', async () => {
+      await payload.delete({ collection: fieldsPersistanceSlug, where: {} })
+      await payload.create({
+        collection: fieldsPersistanceSlug,
+        data: {},
+      })
+      const { docs } = await payload.find({
+        collection: fieldsPersistanceSlug,
+        sort: '-textHooked',
+      })
+      expect(docs).toHaveLength(1)
     })
   })
 

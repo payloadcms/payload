@@ -4,6 +4,7 @@ export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    formID: string
     formState: FormState
     uploadEdits?: UploadEdits
   }[]
@@ -49,6 +50,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.files.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          formID: crypto.randomUUID(),
           formState: {
             ...(action.initialState || {}),
             file: {

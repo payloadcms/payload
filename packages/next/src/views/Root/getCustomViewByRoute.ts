@@ -22,8 +22,10 @@ export const getCustomViewByRoute = ({
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = currentRouteWithAdmin.replace(adminRoute, '')
   let viewKey: string
+
+  const currentRoute =
+    adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
 
   const foundViewConfig =
     (views &&
