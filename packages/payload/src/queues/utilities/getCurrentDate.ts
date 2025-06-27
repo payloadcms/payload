@@ -10,6 +10,12 @@ export const _internal_jobSystemGlobals = {
   shouldAutoSchedule: true,
 }
 
+export function _internal_resetJobSystemGlobals() {
+  _internal_jobSystemGlobals.getCurrentDate = () => new Date()
+  _internal_jobSystemGlobals.shouldAutoRun = true
+  _internal_jobSystemGlobals.shouldAutoSchedule = true
+}
+
 export const getCurrentDate: () => Date = () => {
   return _internal_jobSystemGlobals.getCurrentDate()
 }

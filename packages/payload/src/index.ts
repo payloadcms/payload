@@ -1585,7 +1585,11 @@ export type {
 } from './queues/config/types/workflowTypes.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-export { _internal_jobSystemGlobals, getCurrentDate } from './queues/utilities/getCurrentDate.js'
+export {
+  _internal_jobSystemGlobals,
+  _internal_resetJobSystemGlobals,
+  getCurrentDate,
+} from './queues/utilities/getCurrentDate.js'
 
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
