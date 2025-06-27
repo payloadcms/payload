@@ -46,7 +46,10 @@ export const goToCollectionLivePreview = async (
 
 export const goToTrashedLivePreview = async (page: Page, urlUtil: AdminUrlUtil): Promise<void> => {
   await navigateToTrashedDoc(page, urlUtil)
-  await page.goto(`${page.url()}/preview`)
+
+  await toggleLivePreview(page, {
+    targetState: 'on',
+  })
 }
 
 export const goToGlobalLivePreview = async (

@@ -82,9 +82,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         case 'api':
           fn = generateAPIViewMetadata
           break
-        case 'preview':
-          fn = (args) => generateLivePreviewViewMetadata({ ...args, isReadOnly: true })
-          break
         case 'versions':
           fn = generateVersionsViewMetadata
           break

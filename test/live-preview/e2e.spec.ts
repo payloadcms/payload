@@ -348,31 +348,27 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('trash — has tab', async () => {
+  test('trash — has live-preview toggle', async () => {
     await navigateToTrashedDoc(page, postsURLUtil)
 
-    const livePreviewTab = page.locator('a.doc-tab:has-text("Live Preview")')
+    const livePreviewToggler = page.locator('button#live-preview-toggler')
 
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-
-    const href = await livePreviewTab.getAttribute('href')
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
-
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+    await expect(() => expect(livePreviewToggler).toBeTruthy()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
-  })
-
-  test('trash — has route', async () => {
-    await goToTrashedLivePreview(page, postsURLUtil)
-    await expect(page.locator('.live-preview')).toBeVisible()
   })
 
   test('trash - renders iframe', async () => {
     await goToTrashedLivePreview(page, postsURLUtil)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
+  })
+
+  test('trash - fields should stay read-only', async () => {
+    await goToTrashedLivePreview(page, postsURLUtil)
+
+    const titleField = page.locator('#field-title')
+    await expect(titleField).toBeDisabled()
   })
 
   test('global — renders toggler', async () => {

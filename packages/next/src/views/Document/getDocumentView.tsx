@@ -174,7 +174,6 @@ export const getDocumentView = ({
       }
 
       // --> /collections/:collectionSlug/trash/:id/api
-      // --> /collections/:collectionSlug/trash/:id/preview
       // --> /collections/:collectionSlug/trash/:id/versions
       // --> /collections/:collectionSlug/trash/:id/<custom-segment>
       // --> /collections/:collectionSlug/:id/versions/:version
@@ -185,16 +184,6 @@ export const getDocumentView = ({
             case 'api': {
               if (collectionConfig?.admin?.hideAPIURL !== true) {
                 View = getCustomViewByKey(views, 'api') || DefaultAPIView
-              }
-              break
-            }
-            // --> /collections/:slug/trash/:id/preview
-            case 'preview': {
-              if (
-                collectionConfig?.admin?.livePreview ||
-                config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug)
-              ) {
-                View = getCustomViewByKey(views, 'livePreview') || DefaultLivePreviewView
               }
               break
             }
