@@ -8,6 +8,7 @@ import type { JobRunStatus } from '../runJob/index.js'
 
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
 import { WorkflowError } from '../../../errors/index.js'
+import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getRunTaskFunction } from '../runJob/getRunTaskFunction.js'
 
 type Args = {
@@ -123,7 +124,7 @@ export const runJSONJob = async ({
 
   if (workflowCompleted) {
     await updateJob({
-      completedAt: new Date().toISOString(),
+      completedAt: getCurrentDate().toISOString(),
       processing: false,
       totalTried: (job.totalTried ?? 0) + 1,
     })

@@ -1,6 +1,7 @@
 import type { AfterScheduleFn } from '../../config/types/index.js'
 
 import { type JobStats, jobStatsGlobalSlug } from '../../config/global.js'
+import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 
 type JobStatsScheduledRuns = NonNullable<
   NonNullable<NonNullable<JobStats['stats']>['scheduledRuns']>['queues']
@@ -15,11 +16,11 @@ export const defaultAfterSchedule: AfterScheduleFn = async ({ jobStats, queueabl
   }
   if (queueable.taskConfig) {
     ;(queueConfig.tasks ??= {})[queueable.taskConfig.slug] = {
-      lastScheduledRun: new Date().toISOString(),
+      lastScheduledRun: getCurrentDate().toISOString(),
     }
   } else if (queueable.workflowConfig) {
     ;(queueConfig.workflows ??= {})[queueable.workflowConfig.slug] = {
-      lastScheduledRun: new Date().toISOString(),
+      lastScheduledRun: getCurrentDate().toISOString(),
     }
   }
 
@@ -47,7 +48,7 @@ export const defaultAfterSchedule: AfterScheduleFn = async ({ jobStats, queueabl
     await req.payload.db.createGlobal({
       slug: jobStatsGlobalSlug,
       data: {
-        createdAt: new Date().toISOString(),
+        createdAt: getCurrentDate().toISOString(),
         stats: {
           scheduledRuns: {
             queues: {

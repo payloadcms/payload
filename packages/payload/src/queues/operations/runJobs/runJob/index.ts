@@ -7,6 +7,7 @@ import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 import { handleTaskError } from '../../../errors/handleTaskError.js'
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
 import { JobCancelledError, TaskError, WorkflowError } from '../../../errors/index.js'
+import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getRunTaskFunction } from './getRunTaskFunction.js'
 
 type Args = {
@@ -89,7 +90,7 @@ export const runJob = async ({
 
   // Workflow has completed successfully
   await updateJob({
-    completedAt: new Date().toISOString(),
+    completedAt: getCurrentDate().toISOString(),
     log: job.log,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,

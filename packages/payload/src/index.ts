@@ -139,6 +139,7 @@ import {
   checkQueueableTimeConstraints,
   scheduleQueueable,
 } from './queues/operations/handleSchedules/index.js'
+import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { createLocalReq } from './utilities/createLocalReq.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
@@ -853,6 +854,10 @@ export class BasePayload {
         await Promise.all(
           cronJobs.map((cronConfig) => {
             const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+                return
+              }
+
               if (typeof this.config.jobs.shouldAutoRun === 'function') {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
@@ -882,6 +887,10 @@ export class BasePayload {
         for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
           for (const schedulable of schedules) {
             const jobScheduleCron = new Cron(schedulable.scheduleConfig.cron, async () => {
+              if (!_internal_jobSystemGlobals.shouldAutoSchedule) {
+                return
+              }
+
               const stats: JobStats = await this.db.findGlobal({
                 slug: jobStatsGlobalSlug,
               })
@@ -1550,7 +1559,6 @@ export type {
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
-
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -1564,6 +1572,7 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
+
 export type {
   BaseJob,
   JobLog,
@@ -1576,6 +1585,7 @@ export type {
 } from './queues/config/types/workflowTypes.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+export { _internal_jobSystemGlobals, getCurrentDate } from './queues/utilities/getCurrentDate.js'
 
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'

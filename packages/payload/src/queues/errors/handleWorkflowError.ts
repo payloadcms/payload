@@ -3,6 +3,7 @@ import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { WorkflowError } from './index.js'
 
+import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
 /**
@@ -52,7 +53,7 @@ export async function handleWorkflowError({
     if (job.waitUntil) {
       // Check if waitUntil is in the past
       const waitUntil = new Date(job.waitUntil)
-      if (waitUntil < new Date()) {
+      if (waitUntil < getCurrentDate()) {
         // Outdated waitUntil, remove it
         delete job.waitUntil
       }

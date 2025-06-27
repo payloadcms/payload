@@ -5,6 +5,7 @@ import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { TaskError } from './index.js'
 
+import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
@@ -57,7 +58,7 @@ export async function handleTaskError({
     stack: error.stack,
   }
 
-  const currentDate = new Date()
+  const currentDate = getCurrentDate()
 
   ;(job.log ??= []).push({
     id: new ObjectId().toHexString(),

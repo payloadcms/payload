@@ -9,6 +9,7 @@ import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
 import { JobCancelledError } from '../../errors/index.js'
+import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -130,7 +131,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         },
         {
           waitUntil: {
-            less_than: new Date().toISOString(),
+            less_than: getCurrentDate().toISOString(),
           },
         },
       ],

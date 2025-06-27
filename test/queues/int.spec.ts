@@ -1,6 +1,5 @@
-import type { JobTaskStatus, Payload } from 'payload'
-
 import path from 'path'
+import { _internal_jobSystemGlobals, type JobTaskStatus, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
