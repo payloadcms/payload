@@ -147,6 +147,36 @@ describe('Localization', () => {
         expect(localizedFallback.title.es).toEqual('')
       })
 
+      it('should show correct fallback data for arrays', async () => {
+        const localizedArrayPost = await payload.create({
+          collection: arrayCollectionSlug,
+          data: {
+            items: [
+              {
+                text: 'localized array item',
+              },
+            ],
+          },
+        })
+
+        const resultAllLocales: any = await payload.findByID({
+          id: localizedArrayPost.id,
+          collection: arrayCollectionSlug,
+          locale: 'all',
+        })
+
+        expect(resultAllLocales.items.en[0].text).toEqual('localized array item')
+        expect(resultAllLocales.items.es).toEqual(undefined)
+
+        const resultSpanishLocale: any = await payload.findByID({
+          id: localizedArrayPost.id,
+          collection: arrayCollectionSlug,
+          locale: spanishLocale,
+        })
+
+        expect(resultSpanishLocale.items[0].text).toEqual('localized array item')
+      })
+
       it('should fallback to spanish translation when empty and locale-specific fallback is provided', async () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
