@@ -51,8 +51,7 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
   where?: Where
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
+export async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: CountGlobalVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {

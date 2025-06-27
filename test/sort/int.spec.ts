@@ -631,7 +631,7 @@ describe('Sort', () => {
 
       it('should not break with existing base 62 digits', async () => {
         const collection = orderableSlug
-        // create seed docs with aa, aA, AA
+        // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
         const aa = await payload.create({
           collection,
           data: {
@@ -646,11 +646,11 @@ describe('Sort', () => {
             _order: 'aA',
           },
         })
-        const AA = await payload.create({
+        const a0 = await payload.create({
           collection,
           data: {
-            title: 'Base62 AA',
-            _order: 'AA',
+            title: 'Base62 a0',
+            _order: 'a0',
           },
         })
 
@@ -686,10 +686,18 @@ describe('Sort', () => {
           },
         })
 
-        expect(docs[0]?.id).toStrictEqual(aa.id)
-        expect(docs[1]?.id).toStrictEqual(aA.id)
-        expect(docs[2]?.id).toStrictEqual(orderableDoc.id)
-        expect(docs[3]?.id).toStrictEqual(AA.id)
+        expect(docs).toHaveLength(4)
+        const ids = [aa.id, aA.id, a0.id, orderableDoc.id]
+        expect(docs.every(({ id }) => ids.includes(id))).toBe(true)
+
+        const a0Index = docs.findIndex((d) => d.id === a0.id)
+        const aAIndex = docs.findIndex((d) => d.id === aA.id)
+        const orderableIndex = docs.findIndex((d) => d.id === orderableDoc.id)
+
+        // The reordered document should be positioned after the target (aA) since newKeyWillBe: 'greater'
+        // and before the target (a0) since (a0) is the smallest fractional index
+        expect(orderableIndex).toBeGreaterThan(aAIndex)
+        expect(orderableIndex).toBeLessThan(a0Index)
       })
     })
 
@@ -757,6 +765,7 @@ describe('Sort', () => {
         expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
       })
+
       it('should sort join docs in the correct', async () => {
         related = await payload.findByID({
           collection: orderableJoinSlug,

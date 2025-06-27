@@ -128,8 +128,12 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should unpublish many', async () => {
@@ -154,8 +158,12 @@ test.describe('Bulk Edit', () => {
     await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
     await page.locator('#unpublish-posts #confirm-action').click()
 
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText(
+      'Draft',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText(
+      'Draft',
+    )
   })
 
   test('should update many', async () => {
@@ -234,8 +242,12 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should draft many from drawer', async () => {
@@ -272,8 +284,8 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
   test('should delete all on page', async () => {
@@ -487,6 +499,104 @@ test.describe('Bulk Edit', () => {
     await expect(field.locator('#field-array__0__optional')).toBeVisible()
     await expect(field.locator('#field-array__0__noRead')).toBeHidden()
     await expect(field.locator('#field-array__0__noUpdate')).toBeDisabled()
+  })
+
+  test('should toggle list selections off on successful publish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` }, { draft: true })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
+    await page.locator('#publish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful unpublish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}`, _status: 'published' })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+    await page.locator('#unpublish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful edit', async () => {
+    await deleteAllPosts()
+    const bulkEditValue = 'test'
+
+    const postCount = 3
+    Array.from({ length: postCount }).forEach(async (_, i) => {
+      await createPost({ title: `Post ${i + 1}` })
+    })
+
+    await page.goto(postsUrl.list)
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Edit"]').click()
+
+    const editDrawer = page.locator('dialog#edit-posts')
+    await expect(editDrawer).toBeVisible()
+
+    const fieldSelect = editDrawer.locator('.field-select')
+    await expect(fieldSelect).toBeVisible()
+
+    const fieldSelectControl = fieldSelect.locator('.rs__control')
+    await expect(fieldSelectControl).toBeVisible()
+    await fieldSelectControl.click()
+
+    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    await titleOption.click()
+
+    await editDrawer.locator('input#field-title').fill(bulkEditValue)
+
+    await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
   })
 })
 

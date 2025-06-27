@@ -123,6 +123,8 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
+export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
@@ -385,7 +387,7 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListPreferences } from 'payload'` instead.
+   * Use `import type { CollectionPreferences } from 'payload'` instead.
    */
   ListPreferences,
 } from 'payload'

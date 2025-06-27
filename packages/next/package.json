@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.43.0",
+  "version": "3.44.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -22,6 +22,10 @@
   ],
   "type": "module",
   "exports": {
+    "./css": {
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.js",

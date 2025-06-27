@@ -193,4 +193,4 @@ async function deleteLocal<
   return deleteOperation<TSlug, TSelect>(args)
 }
 
-export default deleteLocal
+export { deleteLocal }

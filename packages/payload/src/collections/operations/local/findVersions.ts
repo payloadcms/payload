@@ -105,7 +105,7 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends CollectionSlug>(
+export async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {

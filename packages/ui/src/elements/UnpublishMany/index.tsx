@@ -15,13 +15,14 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { count, selectAll, selected } = useSelection()
+  const { count, selectAll, selected, toggleAll } = useSelection()
 
   return (
     <UnpublishMany_v4
       {...props}
       count={count}
       ids={Array.from(selected.keys())}
+      onSuccess={() => toggleAll(false)}
       selectAll={selectAll === SelectAllStatus.AllAvailable}
     />
   )
@@ -31,10 +32,18 @@ export const UnpublishMany_v4: React.FC<
   {
     count: number
     ids: (number | string)[]
+    onSuccess?: () => void
     selectAll: boolean
   } & UnpublishManyProps
 > = (props) => {
-  const { collection, collection: { slug, versions } = {}, count, ids, selectAll } = props
+  const {
+    collection,
+    collection: { slug, versions } = {},
+    count,
+    ids,
+    onSuccess,
+    selectAll,
+  } = props
 
   const { t } = useTranslation()
   const { permissions } = useAuth()
@@ -63,6 +72,7 @@ export const UnpublishMany_v4: React.FC<
         collection={collection}
         drawerSlug={drawerSlug}
         ids={ids}
+        onSuccess={onSuccess}
         selectAll={selectAll}
       />
     </React.Fragment>

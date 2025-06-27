@@ -102,6 +102,21 @@ describe('JSON', () => {
     )
   })
 
+  test('should save field with "target" property', async () => {
+    const input = '{"target": "foo"}'
+    await page.goto(url.create)
+    const jsonCodeEditor = page.locator('.json-field .code-editor').first()
+    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
+    await jsonFieldInputArea.fill(input)
+
+    await saveDocAndAssert(page)
+    const jsonField = page.locator('.json-field').first()
+    await expect(jsonField).toContainText('"target": "foo"')
+  })
+
   test('should update', async () => {
     const createdDoc = await payload.create({
       collection: 'json-fields',

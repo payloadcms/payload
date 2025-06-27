@@ -1268,6 +1268,8 @@ export type RichTextField<
 > = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent
       Label?: CustomComponent
     } & Admin['components']
