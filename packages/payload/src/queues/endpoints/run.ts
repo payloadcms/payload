@@ -40,12 +40,16 @@ export const runJobsEndpoint: Endpoint = {
       handleSchedules: handleSchedulesParam,
       limit,
       queue,
+      silent: silentParam,
     } = req.query as {
       allQueues?: 'false' | 'true'
       handleSchedules?: 'false' | 'true'
       limit?: number
       queue?: string
+      silent?: string
     }
+
+    const silent = silentParam === 'true'
 
     const shouldHandleSchedules =
       handleSchedulesParam &&
@@ -65,6 +69,7 @@ export const runJobsEndpoint: Endpoint = {
       req,
       // Access is validated above, so it's safe to override here
       overrideAccess: true,
+      silent,
     }
 
     if (typeof queue === 'string') {

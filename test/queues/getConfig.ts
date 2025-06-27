@@ -109,6 +109,7 @@ export const getConfig: () => Partial<Config> = () => ({
   jobs: {
     autoRun: [
       {
+        silent: true,
         // Every second
         cron: '* * * * * *',
         limit: 100,

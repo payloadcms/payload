@@ -14,6 +14,12 @@ import { handleSchedules, type HandleSchedulesResult } from './operations/handle
 import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
+export type RunJobsSilent =
+  | {
+      error?: boolean
+      info?: boolean
+    }
+  | boolean
 export const getJobsLocalAPI = (payload: Payload) => ({
   handleSchedules: async (args?: {
     // By default, schedule all queues - only scheduling jobs scheduled to be added to the `default` queue would not make sense
@@ -156,6 +162,15 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      * If you want to run them in sequence, set this to true.
      */
     sequential?: boolean
+    /**
+     * If set to true, the job system will not log any output to the console (for both info and error logs).
+     * Can be an option for more granular control over logging.
+     *
+     * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+     *
+     * @default false
+     */
+    silent?: RunJobsSilent
     where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
@@ -168,6 +183,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       queue: args?.queue,
       req: newReq,
       sequential: args?.sequential,
+      silent: args?.silent,
       where: args?.where,
     })
   },
@@ -176,6 +192,15 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     id: number | string
     overrideAccess?: boolean
     req?: PayloadRequest
+    /**
+     * If set to true, the job system will not log any output to the console (for both info and error logs).
+     * Can be an option for more granular control over logging.
+     *
+     * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+     *
+     * @default false
+     */
+    silent?: RunJobsSilent
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
@@ -183,6 +208,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       id: args.id,
       overrideAccess: args.overrideAccess !== false,
       req: newReq,
+      silent: args.silent,
     })
   },
 

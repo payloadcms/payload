@@ -1,11 +1,12 @@
 import type { CollectionConfig, Job } from '../../../index.js'
 import type { Payload, PayloadRequest, Sort } from '../../../types/index.js'
+import type { RunJobsSilent } from '../../localAPI.js'
 import type { RunJobsArgs } from '../../operations/runJobs/index.js'
 import type { JobStats } from '../global.js'
 import type { TaskConfig } from './taskTypes.js'
 import type { WorkflowConfig } from './workflowTypes.js'
 
-export type CronConfig = {
+export type AutorunCronConfig = {
   /**
    * The cron schedule for the job.
    * @default '* * * * *' (every minute).
@@ -35,6 +36,15 @@ export type CronConfig = {
    * The queue name for the job.
    */
   queue?: string
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
 }
 
 export type RunJobAccessArgs = {
@@ -79,7 +89,9 @@ export type JobsConfig = {
    *
    * @remark this property should not be used on serverless platforms like Vercel
    */
-  autoRun?: ((payload: Payload) => CronConfig[] | Promise<CronConfig[]>) | CronConfig[]
+  autoRun?:
+    | ((payload: Payload) => AutorunCronConfig[] | Promise<AutorunCronConfig[]>)
+    | AutorunCronConfig[]
   /**
    * Determine whether or not to delete a job after it has successfully completed.
    */
