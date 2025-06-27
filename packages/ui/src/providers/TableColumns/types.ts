@@ -1,4 +1,4 @@
-import type { Column, ListPreferences } from 'payload'
+import type { CollectionPreferences, Column } from 'payload'
 
 import type { SortColumnProps } from '../../elements/SortColumn/index.js'
 
@@ -27,7 +27,7 @@ export type TableColumnsProviderProps = {
   /**
    * @deprecated
    */
-  readonly listPreferences?: ListPreferences
+  readonly listPreferences?: CollectionPreferences
   /**
    * @deprecated
    */

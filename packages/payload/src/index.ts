@@ -1475,11 +1475,15 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  CollectionPreferences,
+  /**
+   * @deprecated Use `CollectionPreferences` instead.
+   */
+  CollectionPreferences as ListPreferences,
   ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
-  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,
