@@ -1560,20 +1560,18 @@ describe('Queues', () => {
       for (let i = 0; i < 2; i++) {
         await payload.jobs.queue({
           task: 'EverySecondMax2',
-          queue: 'autorunSecondMax2',
           input: {
             message: 'This task runs every second - max 2 per second',
           },
         })
       }
       for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        await payload.jobs.handleSchedules({ queue: 'default' })
       }
       // Wait 2 seconds to satisfy waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
       await payload.jobs.run({
-        queue: 'autorunSecondMax2',
         limit: 100,
         silent: true,
       })
@@ -1590,16 +1588,15 @@ describe('Queues', () => {
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially - max. 2 jobs configured', async () => {
       timeFreeze()
       for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        await payload.jobs.handleSchedules({ queue: 'default' })
       }
 
       // Advance time to satisfy the waitUntil of newly scheduled jobs
       timeTravel(5)
 
-      // autorunSecondMax2 queue is not scheduled to autorun
+      // default queue is not scheduled to autorun
       await payload.jobs.run({
         silent: true,
-        queue: 'autorunSecondMax2',
       })
 
       const allSimples = await payload.find({
@@ -1643,18 +1640,17 @@ describe('Queues', () => {
       for (let i = 0; i < 3; i++) {
         await withoutAutoRun(async () => {
           // Call it 3x to test that it only schedules two
-          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
-          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
-          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+          await payload.jobs.handleSchedules({ queue: 'default' })
+          await payload.jobs.handleSchedules({ queue: 'default' })
+          await payload.jobs.handleSchedules({ queue: 'default' })
         })
 
         // Advance time to satisfy the waitUntil of newly scheduled jobs
         timeTravel(5)
 
-        // autorunSecondMax2 queue is not scheduled to autorun => run manually
+        // default queue is not scheduled to autorun => run manually
         await payload.jobs.run({
           silent: true,
-          queue: 'autorunSecondMax2',
         })
       }
 

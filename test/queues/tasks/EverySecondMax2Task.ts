@@ -1,17 +1,22 @@
-import { countRunnableOrActiveJobsForQueue, type TaskConfig } from 'payload'
+import {
+  countRunnableOrActiveJobsForQueue,
+  type TaskConfig,
+  type TaskType,
+  type WorkflowTypes,
+} from 'payload'
 
 export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
   schedule: [
     {
       cron: '* * * * * *',
-      queue: 'autorunSecondMax2',
+      queue: 'default',
       hooks: {
         beforeSchedule: async ({ queueable, req }) => {
           const runnableOrActiveJobsForQueue = await countRunnableOrActiveJobsForQueue({
             queue: queueable.scheduleConfig.queue,
             req,
-            taskSlug: queueable.taskConfig?.slug,
-            workflowSlug: queueable.workflowConfig?.slug,
+            taskSlug: queueable.taskConfig?.slug as TaskType,
+            workflowSlug: queueable.workflowConfig?.slug as WorkflowTypes,
             onlyScheduled: false, // Set to false, used to test it
           })
 
@@ -26,7 +31,7 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
         afterSchedule: async (args) => {
           await args.defaultAfterSchedule(args) // Handles updating the payload-jobs-stats global
           args.req.payload.logger.info(
-            'autorunSecondMax2 task scheduled: ' +
+            'EverySecondMax2 task scheduled: ' +
               (args.status === 'success'
                 ? String(args.job.id)
                 : args.status === 'skipped'
