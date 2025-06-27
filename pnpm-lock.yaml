@@ -534,8 +534,8 @@ importers:
         specifier: 4.6.1
         version: 4.6.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
       eslint-plugin-jest:
-        specifier: 28.11.0
-        version: 28.11.0(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3)
+        specifier: 29.0.1
+        version: 29.0.1(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3)
       eslint-plugin-jest-dom:
         specifier: 5.5.0
         version: 5.5.0(@testing-library/dom@10.4.0)(eslint@9.22.0(jiti@1.21.6))
@@ -588,8 +588,8 @@ importers:
         specifier: 4.6.1
         version: 4.6.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
       eslint-plugin-jest:
-        specifier: 28.11.0
-        version: 28.11.0(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3)
+        specifier: 29.0.1
+        version: 29.0.1(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3)
       eslint-plugin-jest-dom:
         specifier: 5.5.0
         version: 5.5.0(@testing-library/dom@10.4.0)(eslint@9.22.0(jiti@1.21.6))
@@ -8084,12 +8084,12 @@ packages:
       '@testing-library/dom':
         optional: true
 
-  eslint-plugin-jest@28.11.0:
-    resolution: {integrity: sha512-QAfipLcNCWLVocVbZW8GimKn5p5iiMcgGbRzz8z/P5q7xw+cNEpYqyzFMtIF/ZgF2HLOyy+dYBut+DoYolvqig==}
-    engines: {node: ^16.10.0 || ^18.12.0 || >=20.0.0}
+  eslint-plugin-jest@29.0.1:
+    resolution: {integrity: sha512-EE44T0OSMCeXhDrrdsbKAhprobKkPtJTbQz5yEktysNpHeDZTAL1SfDTNKmcFfJkY6yrQLtTKZALrD3j/Gpmiw==}
+    engines: {node: ^20.12.0 || ^22.0.0 || >=24.0.0}
     peerDependencies:
-      '@typescript-eslint/eslint-plugin': ^6.0.0 || ^7.0.0 || ^8.0.0
-      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
+      '@typescript-eslint/eslint-plugin': ^8.0.0
+      eslint: ^8.57.0 || ^9.0.0
       jest: '*'
     peerDependenciesMeta:
       '@typescript-eslint/eslint-plugin':
@@ -19555,9 +19555,9 @@ snapshots:
     optionalDependencies:
       '@testing-library/dom': 10.4.0
 
-  eslint-plugin-jest@28.11.0(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3):
+  eslint-plugin-jest@29.0.1(@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(jest@30.0.3(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.25.5)))(typescript@5.7.3):
     dependencies:
-      '@typescript-eslint/utils': 8.14.0(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
       eslint: 9.22.0(jiti@1.21.6)
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
