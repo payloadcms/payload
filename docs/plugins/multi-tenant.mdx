@@ -170,6 +170,16 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
       }>
     | string
   /**
+   * Override or disable the TenantSelector shown above the nav.
+   *
+   * - supply a `CustomComponent` → your component is rendered
+   * - supply `null`              → no selector is rendered
+   * - leave it `undefined`       → the default selector is rendered
+   *
+   * @default undefined
+   */
+  tenantSelectorComponent?: CustomComponent | null
+  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'

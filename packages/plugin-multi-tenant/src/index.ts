@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CollectionConfig, Config } from 'payload'
+import type { CollectionConfig, Config, CustomComponent } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
@@ -352,12 +352,16 @@ export const multiTenantPlugin =
     /**
      * Add tenant selector to admin UI
      */
-    incomingConfig.admin.components.beforeNavLinks.push({
-      clientProps: {
-        label: tenantSelectorLabel,
-      },
+    const defaultTenantSelector: CustomComponent = {
+      clientProps: { label: tenantSelectorLabel },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
-    })
+    }
+
+    if (pluginConfig.tenantSelectorComponent !== null) {
+      incomingConfig.admin.components.beforeNavLinks.push(
+        pluginConfig.tenantSelectorComponent ?? defaultTenantSelector,
+      )
+    }
 
     /**
      * Merge plugin translations
