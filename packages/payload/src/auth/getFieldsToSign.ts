@@ -114,14 +114,19 @@ const traverseFields = ({
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string
+  sid?: string
   user: PayloadRequest['user']
 }): Record<string, unknown> => {
-  const { collectionConfig, email, user } = args
+  const { collectionConfig, email, sid, user } = args
 
   const result: Record<string, unknown> = {
     id: user?.id,
     collection: collectionConfig.slug,
     email,
+  }
+
+  if (sid) {
+    result.sid = sid
   }
 
   traverseFields({

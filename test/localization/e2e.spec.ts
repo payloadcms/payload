@@ -122,7 +122,7 @@ describe('Localization', () => {
       await page.locator('#action-save').click()
 
       await page.locator('text=Versions').click()
-      const firstVersion = findTableRow(page, 'Currently Published')
+      const firstVersion = await findTableRow(page, 'Currently Published')
       await firstVersion.locator('a').click()
 
       await expect(page.locator('.view-version__toggle-locales')).toBeVisible()

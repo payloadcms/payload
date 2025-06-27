@@ -284,6 +284,7 @@ export const plTranslations: DefaultTranslationsObject = {
     enterAValue: 'Wpisz wartość',
     error: 'Błąd',
     errors: 'Błędy',
+    exitLivePreview: 'Wyjdź z Podglądu na Żywo',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Powrót do domyślnych ustawień regionalnych',
     false: 'Fałszywe',

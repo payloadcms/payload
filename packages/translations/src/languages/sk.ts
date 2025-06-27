@@ -285,6 +285,7 @@ export const skTranslations: DefaultTranslationsObject = {
     enterAValue: 'Zadajte hodnotu',
     error: 'Chyba',
     errors: 'Chyby',
+    exitLivePreview: 'Ukončiť živý náhľad',
     export: 'Export',
     fallbackToDefaultLocale: 'Zálohovať do predvoleného jazyka',
     false: 'Nepravdivé',

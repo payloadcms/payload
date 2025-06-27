@@ -286,6 +286,7 @@ export const huTranslations: DefaultTranslationsObject = {
     enterAValue: 'Adjon meg egy értéket',
     error: 'Hiba',
     errors: 'Hibák',
+    exitLivePreview: 'Kilépés az Élő Előnézetből',
     export: 'Export',
     fallbackToDefaultLocale: 'Visszatérés az alapértelmezett nyelvhez',
     false: 'Hamis',
