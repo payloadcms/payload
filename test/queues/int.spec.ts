@@ -1,5 +1,12 @@
 import path from 'path'
-import { _internal_jobSystemGlobals, type JobTaskStatus, type Payload } from 'payload'
+import {
+  _internal_jobSystemGlobals,
+  _internal_resetJobSystemGlobals,
+  countRunnableOrActiveJobsForQueue,
+  createLocalReq,
+  type JobTaskStatus,
+  type Payload,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -24,6 +31,10 @@ describe('Queues', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  afterEach(() => {
+    _internal_resetJobSystemGlobals()
   })
 
   beforeEach(async () => {
@@ -1577,12 +1588,13 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially - max. 2 jobs configured', async () => {
+      timeFreeze()
       for (let i = 0; i < 3; i++) {
         await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
       }
 
-      // Wait 1 second to satisfy the waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Advance time to satisfy the waitUntil of newly scheduled jobs
+      timeTravel(5)
 
       // autorunSecondMax2 queue is not scheduled to autorun
       await payload.jobs.run({
@@ -1600,15 +1612,21 @@ describe('Queues', () => {
     })
 
     it('ensure job is scheduled every second', async () => {
+      timeFreeze()
       for (let i = 0; i < 3; i++) {
-        // Call it twice to test that it only schedules one
-        await payload.jobs.handleSchedules()
-        await payload.jobs.handleSchedules()
-        await new Promise((resolve) => setTimeout(resolve, 1001))
-      }
+        await withoutAutoRun(async () => {
+          // Call it twice to test that it only schedules one
+          await payload.jobs.handleSchedules()
+          await payload.jobs.handleSchedules()
+        })
+        timeTravel(2)
 
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+        await waitUntilAutorunIsDone({
+          payload,
+          queue: 'autorunSecond',
+          onlyScheduled: true,
+        })
+      }
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1620,15 +1638,20 @@ describe('Queues', () => {
     })
 
     it('ensure job is scheduled every second - max. 2 jobs configured', async () => {
-      for (let i = 0; i < 3; i++) {
-        // Call it 3x to test that it only schedules two
-        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
-        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
-        await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
-        // Wait 1 second to satisfy the waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+      timeFreeze()
 
-        // autorunSecondMax2 queue is not scheduled to autorun
+      for (let i = 0; i < 3; i++) {
+        await withoutAutoRun(async () => {
+          // Call it 3x to test that it only schedules two
+          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+          await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
+        })
+
+        // Advance time to satisfy the waitUntil of newly scheduled jobs
+        timeTravel(5)
+
+        // autorunSecondMax2 queue is not scheduled to autorun => run manually
         await payload.jobs.run({
           silent: true,
           queue: 'autorunSecondMax2',
@@ -1646,7 +1669,7 @@ describe('Queues', () => {
 
     it('should not auto-schedule through automatic crons if scheduler set to manual', async () => {
       // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Should not flake, as we are expecting nothing to happen
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1657,3 +1680,47 @@ describe('Queues', () => {
     })
   })
 })
+
+async function waitUntilAutorunIsDone({
+  payload,
+  queue,
+  onlyScheduled = false,
+}: {
+  onlyScheduled?: boolean
+  payload: Payload
+  queue: string
+}): Promise<void> {
+  return new Promise((resolve) => {
+    const interval = setInterval(async () => {
+      const count = await countRunnableOrActiveJobsForQueue({
+        queue,
+        req: await createLocalReq({}, payload),
+        onlyScheduled,
+      })
+      if (count === 0) {
+        clearInterval(interval)
+        resolve()
+      }
+    }, 200)
+  })
+}
+
+function timeFreeze() {
+  const curDate = new Date()
+  _internal_jobSystemGlobals.getCurrentDate = () => curDate
+}
+
+function timeTravel(seconds: number) {
+  const curDate = _internal_jobSystemGlobals.getCurrentDate()
+  _internal_jobSystemGlobals.getCurrentDate = () => new Date(curDate.getTime() + seconds * 1000)
+}
+
+async function withoutAutoRun<T>(fn: () => Promise<T>): Promise<T> {
+  const originalValue = _internal_jobSystemGlobals.shouldAutoRun
+  _internal_jobSystemGlobals.shouldAutoRun = false
+  try {
+    return await fn()
+  } finally {
+    _internal_jobSystemGlobals.shouldAutoRun = originalValue
+  }
+}

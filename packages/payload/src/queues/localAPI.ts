@@ -34,6 +34,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     req?: PayloadRequest
   }): Promise<HandleSchedulesResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+    // wait 2s
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     return await handleSchedules({
       queue: args?.queue,
