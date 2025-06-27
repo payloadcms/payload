@@ -2,11 +2,14 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ShimmerEffect, useAllFormFields, useDocumentEvents, useLocale } from '@payloadcms/ui'
 import { reduceFieldsToValues } from 'payload/shared'
 import React, { useEffect } from 'react'
 
-import { useLivePreviewContext } from '../Context/context.js'
+import { useAllFormFields } from '../../../forms/Form/context.js'
+import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
+import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
@@ -14,11 +17,14 @@ import './index.scss'
 
 const baseClass = 'live-preview-window'
 
-export const LivePreview: React.FC<EditViewProps> = (props) => {
+export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
+    breakpoint,
+    fieldSchemaJSON,
     iframeHasLoaded,
     iframeRef,
+    isLivePreviewing,
     popupRef,
     previewWindowType,
     setIframeHasLoaded,
@@ -29,21 +35,23 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
   const { mostRecentUpdate } = useDocumentEvents()
 
-  const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
-
   const prevWindowType =
     React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>(undefined)
 
-  const [fields] = useAllFormFields()
+  const [formState] = useAllFormFields()
 
   // For client-side apps, send data through `window.postMessage`
   // The preview could either be an iframe embedded on the page
   // Or it could be a separate popup window
   // We need to transmit data to both accordingly
   useEffect(() => {
+    if (!isLivePreviewing) {
+      return
+    }
+
     // For performance, do no reduce fields to values until after the iframe or popup has loaded
-    if (fields && window && 'postMessage' in window && appIsReady) {
-      const values = reduceFieldsToValues(fields, true)
+    if (formState && window && 'postMessage' in window && appIsReady) {
+      const values = reduceFieldsToValues(formState, true)
 
       // To reduce on large `postMessage` payloads, only send `fieldSchemaToJSON` one time
       // To do this, the underlying JS function maintains a cache of this value
@@ -73,7 +81,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
       }
     }
   }, [
-    fields,
+    formState,
     url,
     iframeHasLoaded,
     previewWindowType,
@@ -84,12 +92,17 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     fieldSchemaJSON,
     mostRecentUpdate,
     locale,
+    isLivePreviewing,
   ])
 
   // To support SSR, we transmit a `window.postMessage` event without a payload
   // This is because the event will ultimately trigger a server-side roundtrip
   // i.e., save, save draft, autosave, etc. will fire `router.refresh()`
   useEffect(() => {
+    if (!isLivePreviewing) {
+      return
+    }
+
     const message = {
       type: 'payload-document-event',
     }
@@ -103,13 +116,14 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     if (previewWindowType === 'iframe' && iframeRef.current) {
       iframeRef.current.contentWindow?.postMessage(message, url)
     }
-  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url])
+  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing])
 
   if (previewWindowType === 'iframe') {
     return (
       <div
         className={[
           baseClass,
+          isLivePreviewing && `${baseClass}--is-live-previewing`,
           breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
         ]
           .filter(Boolean)

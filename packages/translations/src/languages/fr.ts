@@ -290,6 +290,7 @@ export const frTranslations: DefaultTranslationsObject = {
     enterAValue: 'Entrez une valeur',
     error: 'Erreur',
     errors: 'Erreurs',
+    exitLivePreview: "Quittez l'aperçu en direct",
     export: 'Exportation',
     fallbackToDefaultLocale: 'Retour à la locale par défaut',
     false: 'Faux',

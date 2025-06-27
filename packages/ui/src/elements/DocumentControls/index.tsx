@@ -16,6 +16,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
@@ -25,6 +26,7 @@ import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
@@ -55,6 +57,7 @@ export const DocumentControls: React.FC<{
   readonly id?: number | string
   readonly isAccountView?: boolean
   readonly isEditing?: boolean
+  readonly isInDrawer?: boolean
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly onDrawerCreateNew?: () => void
   /* Only available if `redirectAfterDuplicate` is `false` */
@@ -85,6 +88,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isAccountView,
     isEditing,
+    isInDrawer,
     onDelete,
     onDrawerCreateNew,
     onDuplicate,
@@ -105,6 +109,8 @@ export const DocumentControls: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
   const globalConfig = getEntityConfig({ globalSlug: slug })
+
+  const { isLivePreviewEnabled } = useLivePreviewContext()
 
   const {
     admin: { dateFormat },
@@ -179,7 +185,6 @@ export const DocumentControls: React.FC<{
               )}
             </div>
           ) : null}
-
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -244,6 +249,7 @@ export const DocumentControls: React.FC<{
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {BeforeDocumentControls}
+            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
             {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
               <RenderCustomComponent
                 CustomComponent={CustomPreviewButton}

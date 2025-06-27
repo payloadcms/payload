@@ -1,8 +1,9 @@
 'use client'
 import type React from 'react'
 
-import { useConfig } from '@payloadcms/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useConfig } from '../providers/Config/index.js'
 
 export interface PopupMessage {
   searchParams: {
@@ -27,9 +28,11 @@ export const usePopupWindow = (props: {
   const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
+
   const {
     config: { serverURL },
   } = useConfig()
+
   const popupRef = useRef<null | Window>(null)
 
   // Optionally broadcast messages back out to the parent component

@@ -21,22 +21,6 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
-    components: {
-      edit: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/index.js#BeforeDocumentControlsTest',
-        ],
-      },
-      views: {
-        edit: {
-          livePreview: {
-            actions: [
-              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
-            ],
-          },
-        },
-      },
-    },
     preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [

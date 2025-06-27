@@ -1,13 +1,14 @@
 'use client'
-import type { ClientField, LivePreviewConfig } from 'payload'
+import type { CollectionPreferences, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import { useConfig } from '@payloadcms/ui'
 import { fieldSchemaToJSON } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.js'
-
+import { usePopupWindow } from '../../hooks/usePopupWindow.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { useConfig } from '../Config/index.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -20,31 +21,76 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
-  fieldSchema: ClientField[]
-  isPopupOpen?: boolean
-  openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
-  popupRef?: React.RefObject<Window>
-  url?: string
+  isLivePreviewing: boolean
+  operation?: 'create' | 'update'
+  url: string
+}
+
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
 }
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
-  breakpoints,
+  breakpoints: incomingBreakpoints,
   children,
-  fieldSchema,
-  isPopupOpen,
-  openPopupWindow,
-  popupRef,
-  url,
+  isLivePreviewing: incomingIsLivePreviewing,
+  operation,
+  url: incomingUrl,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
+  const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
+
+  const breakpoints: LivePreviewConfig['breakpoints'] = useMemo(
+    () => [
+      ...(incomingBreakpoints || []),
+      {
+        name: 'responsive',
+        height: '100%',
+        label: 'Responsive',
+        width: '100%',
+      },
+    ],
+    [incomingBreakpoints],
+  )
+
+  const [url, setURL] = useState<string>('')
+
+  // This needs to be done in a useEffect to prevent hydration issues
+  // as the URL may not be absolute when passed in as a prop,
+  // and getAbsoluteUrl requires the window object to be available
+  useEffect(
+    () =>
+      setURL(
+        incomingUrl?.startsWith('http://') || incomingUrl?.startsWith('https://')
+          ? incomingUrl
+          : getAbsoluteUrl(incomingUrl),
+      ),
+    [incomingUrl],
+  )
+
+  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
+    eventType: 'payload-live-preview',
+    url,
+  })
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [listeningForMessages, setListeningForMessages] = useState(false)
 
+  const { collectionSlug, globalSlug } = useDocumentInfo()
+
+  const isFirstRender = useRef(true)
+
+  const { setPreference } = usePreferences()
+
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
   const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
-  const { config } = useConfig()
+
+  const { config, getEntityConfig } = useConfig()
 
   const [zoom, setZoom] = useState(1)
 
@@ -57,12 +103,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     width: 0,
   })
 
+  const entityConfig = getEntityConfig({ collectionSlug, globalSlug })
+
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
-  const [fieldSchemaJSON] = useState(() => {
-    return fieldSchemaToJSON(fieldSchema, config)
-  })
+  const [fieldSchemaJSON] = useState(() => fieldSchemaToJSON(entityConfig?.fields || [], config))
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -165,6 +211,21 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     }
   }, [previewWindowType, isPopupOpen, handleWindowChange])
 
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    void setPreference<CollectionPreferences>(
+      collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
+      {
+        editViewType: isLivePreviewing ? 'live-preview' : 'default',
+      },
+      true,
+    )
+  }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
+
   return (
     <LivePreviewContext
       value={{
@@ -174,7 +235,16 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
+        isLivePreviewEnabled: Boolean(
+          (operation !== 'create' &&
+            collectionSlug &&
+            config?.admin?.livePreview?.collections?.includes(collectionSlug)) ||
+            (globalSlug && config.admin?.livePreview?.globals?.includes(globalSlug)) ||
+            entityConfig?.admin?.livePreview,
+        ),
+        isLivePreviewing,
         isPopupOpen,
+        listeningForMessages,
         measuredDeviceSize,
         openPopupWindow,
         popupRef,
@@ -183,6 +253,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,
+        setIsLivePreviewing,
         setMeasuredDeviceSize,
         setPreviewWindowType: handleWindowChange,
         setSize,
@@ -196,7 +267,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       }}
     >
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
-        {listeningForMessages && children}
+        {children}
       </DndContext>
     </LivePreviewContext>
   )

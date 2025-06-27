@@ -2,10 +2,14 @@
 
 import type { EditViewProps } from 'payload'
 
-import { ChevronIcon, LinkIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React from 'react'
 
-import { useLivePreviewContext } from '../../Context/context.js'
+import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
+import { XIcon } from '../../../../icons/X/index.js'
+import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Popup, PopupList } from '../../../Popup/index.js'
 import { PreviewFrameSizeInput } from '../SizeInput/index.js'
 import './index.scss'
 
@@ -15,6 +19,7 @@ const zoomOptions = [50, 75, 100, 125, 150, 200]
 export const ToolbarControls: React.FC<EditViewProps> = () => {
   const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
     useLivePreviewContext()
+
   const { t } = useTranslation()
 
   const customOption = {
@@ -115,9 +120,10 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           setPreviewWindowType('popup')
         }}
         target="_blank"
+        title="Open in new window"
         type="button"
       >
-        <LinkIcon />
+        <ExternalLinkIcon />
       </a>
     </div>
   )
