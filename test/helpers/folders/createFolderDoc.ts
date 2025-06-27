@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import { selectReactSelectOptions } from '../../helpers/e2e/selectReactSelectOptions.js'
+import { selectInput } from '../../helpers/e2e/selectInput.js'
 export const createFolderDoc = async ({
   folderName,
   page,
@@ -10,21 +10,16 @@ export const createFolderDoc = async ({
   folderType: string[]
   page: Page
 }) => {
-  const folderNameInput = page.locator(
-    '[class*="payload__modal-item--slug-doc-drawer_payload-folders_"] input#field-name',
-  )
+  const drawer = page.locator('dialog .collection-edit--payload-folders')
+  await drawer.locator('input#field-name').fill(folderName)
 
-  await folderNameInput.fill(folderName)
-
-  await selectReactSelectOptions({
-    page,
-    containerSelector: '#field-folderType',
+  await selectInput({
+    multiSelect: true,
     options: folderType,
+    selectLocator: drawer.locator('#field-folderType'),
   })
 
-  const createButton = page
-    .locator('[class*="payload__modal-item--slug-doc-drawer_payload-folders_"]')
-    .getByRole('button', { name: 'Save' })
+  const createButton = drawer.getByRole('button', { name: 'Save' })
   await createButton.click()
 
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')

@@ -265,7 +265,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListCreateNewDocInFolderButton
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
-                  folderAssignedCollections={[]}
+                  folderAssignedCollections={
+                    Array.isArray(folderType) && folderType.length ? folderType : []
+                  }
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -322,7 +324,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
-                    folderAssignedCollections={folderType || []}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) && folderType.length ? folderType : []
+                    }
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
@@ -332,7 +336,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                     collectionSlugs={nonFolderCollectionSlugs}
-                    folderAssignedCollections={folderType || []}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) && folderType.length ? folderType : []
+                    }
                     key="create-document"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-document--no-results"

@@ -1,21 +1,26 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { applyBrowseByFolderTypeFilter } from 'helpers/folders/applyBrowseByFolderTypeFilter.js'
-import { createFolderDoc } from 'helpers/folders/createFolderDoc.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import {
+  getSelectInputOptions,
+  getSelectInputValue,
+  openSelectMenu,
+} from '../helpers/e2e/selectInput.js'
+import { applyBrowseByFolderTypeFilter } from '../helpers/folders/applyBrowseByFolderTypeFilter.js'
 import { clickFolderCard } from '../helpers/folders/clickFolderCard.js'
 import { createFolder } from '../helpers/folders/createFolder.js'
+import { createFolderDoc } from '../helpers/folders/createFolderDoc.js'
 import { createFolderFromDoc } from '../helpers/folders/createFolderFromDoc.js'
 import { expectNoResultsAndCreateFolderButton } from '../helpers/folders/expectNoResultsAndCreateFolderButton.js'
 import { selectFolderAndConfirmMove } from '../helpers/folders/selectFolderAndConfirmMove.js'
 import { selectFolderAndConfirmMoveFromList } from '../helpers/folders/selectFolderAndConfirmMoveFromList.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
@@ -591,6 +596,82 @@ test.describe('Folders', () => {
       await selectFolderAndConfirmMove({ page })
       await expect(page.locator('.payload-toast-container')).toContainText('moved')
       await expect(firstFolderCard).toBeHidden()
+    })
+  })
+
+  test.describe('should inherit fieldType select values from parent folder', () => {
+    test('should scope child folder fieldType options to match parent folder', async () => {
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await createFolder({ folderName: 'Posts and Media', page, folderType: ['Posts', 'Media'] })
+      await clickFolderCard({ folderName: 'Posts and Media', page, doubleClick: true })
+
+      const createNewDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
+        hasText: 'Create New',
+      })
+      await createNewDropdown.click()
+      const createFolderButton = page.locator(
+        '.list-header__title-actions .popup-button-list__button',
+        { hasText: 'Folder' },
+      )
+      await createFolderButton.click()
+
+      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      const titleInput = drawer.locator('#field-name')
+      await titleInput.fill('Should only allow Posts and Media')
+      const selectLocator = drawer.locator('#field-folderType')
+      await expect(selectLocator).toBeVisible()
+
+      // should prefill with Posts and Media
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputValue<true>({ selectLocator, multiSelect: true })
+          return options.sort()
+        })
+        .toEqual(['Posts', 'Media'].sort())
+
+      // should have no more select options available
+      await openSelectMenu({ selectLocator })
+      await expect(
+        selectLocator.locator('.rs__menu-notice', { hasText: 'No options' }),
+      ).toBeVisible()
+    })
+
+    test('should not scope child folder of an unscoped parent folder', async () => {
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+      await createFolder({ folderName: 'All collections', page, folderType: [] })
+      await clickFolderCard({ folderName: 'All collections', page, doubleClick: true })
+
+      const createNewDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
+        hasText: 'Create New',
+      })
+      await createNewDropdown.click()
+      const createFolderButton = page.locator(
+        '.list-header__title-actions .popup-button-list__button',
+        { hasText: 'Folder' },
+      )
+      await createFolderButton.click()
+
+      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      const titleInput = drawer.locator('#field-name')
+      await titleInput.fill('Should allow all collections')
+      const selectLocator = drawer.locator('#field-folderType')
+      await expect(selectLocator).toBeVisible()
+
+      // should not prefill with any options
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputValue<true>({ selectLocator, multiSelect: true })
+          return options
+        })
+        .toEqual([])
+
+      // should have many options
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputOptions({ selectLocator })
+          return options.length
+        })
+        .toBeGreaterThan(4)
     })
   })
 
