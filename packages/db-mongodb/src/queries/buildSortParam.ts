@@ -151,7 +151,7 @@ export const buildSortParam = ({
   }
 
   // We use this flag to determine if the sort is unique or not to decide whether to add a fallback sort.
-  const isUniqueSort = sort.every((item) => {
+  const isUniqueSort = sort.some((item) => {
     const field = getFieldByPath({ fields, path: item })
     return field?.field?.unique
   })
