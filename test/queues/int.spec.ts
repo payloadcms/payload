@@ -2,8 +2,6 @@ import path from 'path'
 import {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
-  countRunnableOrActiveJobsForQueue,
-  createLocalReq,
   type JobTaskStatus,
   type Payload,
 } from 'payload'
@@ -14,6 +12,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
+import { timeFreeze, timeTravel, waitUntilAutorunIsDone, withoutAutoRun } from './utilities.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -1438,10 +1437,10 @@ describe('Queues', () => {
       },
     })
 
-    // Do not call payload.jobs.run({silent: true})
-
-    // Autorun runs every second - so should definitely be done if we wait 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await waitUntilAutorunIsDone({
+      payload,
+      queue: 'autorunSecond',
+    })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1459,8 +1458,11 @@ describe('Queues', () => {
 
       // Do not call payload.jobs.run{silent: true})
 
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1481,8 +1483,11 @@ describe('Queues', () => {
 
       // Do not call payload.jobs.run({silent: true})
 
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1503,8 +1508,11 @@ describe('Queues', () => {
 
       // Do not call payload.jobs.run({silent: true})
 
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1516,11 +1524,17 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially', async () => {
-      for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules()
-      }
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await withoutAutoRun(async () => {
+        for (let i = 0; i < 3; i++) {
+          await payload.jobs.handleSchedules()
+        }
+      })
+
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1532,20 +1546,26 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler max-one-job condition, by default, ignores jobs not scheduled by scheduler', async () => {
-      for (let i = 0; i < 2; i++) {
-        await payload.jobs.queue({
-          task: 'EverySecond',
-          queue: 'autorunSecond',
-          input: {
-            message: 'This task runs every second',
-          },
-        })
-      }
-      for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules()
-      }
-      // Autorun runs every second - so should definitely be done if we wait 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await withoutAutoRun(async () => {
+        for (let i = 0; i < 2; i++) {
+          await payload.jobs.queue({
+            task: 'EverySecond',
+            queue: 'autorunSecond',
+            input: {
+              message: 'This task runs every second',
+            },
+          })
+        }
+        for (let i = 0; i < 3; i++) {
+          await payload.jobs.handleSchedules()
+        }
+      })
+
+      await waitUntilAutorunIsDone({
+        payload,
+        queue: 'autorunSecond',
+        onlyScheduled: true,
+      })
 
       const allSimples = await payload.find({
         collection: 'simple',
@@ -1557,19 +1577,22 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler max-one-job condition, respects jobs not scheduled by scheduler due to task setting onlyScheduled: false', async () => {
-      for (let i = 0; i < 2; i++) {
-        await payload.jobs.queue({
-          task: 'EverySecondMax2',
-          input: {
-            message: 'This task runs every second - max 2 per second',
-          },
-        })
-      }
-      for (let i = 0; i < 3; i++) {
-        await payload.jobs.handleSchedules({ queue: 'default' })
-      }
-      // Wait 2 seconds to satisfy waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      timeFreeze()
+      await withoutAutoRun(async () => {
+        for (let i = 0; i < 2; i++) {
+          await payload.jobs.queue({
+            task: 'EverySecondMax2',
+            input: {
+              message: 'This task runs every second - max 2 per second',
+            },
+          })
+        }
+        for (let i = 0; i < 3; i++) {
+          await payload.jobs.handleSchedules({ queue: 'default' })
+        }
+      })
+
+      timeTravel(20) // Advance time to satisfy the waitUntil of newly scheduled jobs
 
       await payload.jobs.run({
         limit: 100,
@@ -1592,7 +1615,7 @@ describe('Queues', () => {
       }
 
       // Advance time to satisfy the waitUntil of newly scheduled jobs
-      timeTravel(5)
+      timeTravel(20)
 
       // default queue is not scheduled to autorun
       await payload.jobs.run({
@@ -1616,7 +1639,8 @@ describe('Queues', () => {
           await payload.jobs.handleSchedules()
           await payload.jobs.handleSchedules()
         })
-        timeTravel(2)
+        // Advance time to satisfy the waitUntil of newly scheduled jobs
+        timeTravel(20)
 
         await waitUntilAutorunIsDone({
           payload,
@@ -1646,7 +1670,7 @@ describe('Queues', () => {
         })
 
         // Advance time to satisfy the waitUntil of newly scheduled jobs
-        timeTravel(5)
+        timeTravel(20)
 
         // default queue is not scheduled to autorun => run manually
         await payload.jobs.run({
@@ -1657,6 +1681,11 @@ describe('Queues', () => {
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        where: {
+          title: {
+            equals: 'This task runs every second - max 2 per second',
+          },
+        },
       })
 
       expect(allSimples.totalDocs).toBe(6)
@@ -1676,47 +1705,3 @@ describe('Queues', () => {
     })
   })
 })
-
-async function waitUntilAutorunIsDone({
-  payload,
-  queue,
-  onlyScheduled = false,
-}: {
-  onlyScheduled?: boolean
-  payload: Payload
-  queue: string
-}): Promise<void> {
-  return new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      const count = await countRunnableOrActiveJobsForQueue({
-        queue,
-        req: await createLocalReq({}, payload),
-        onlyScheduled,
-      })
-      if (count === 0) {
-        clearInterval(interval)
-        resolve()
-      }
-    }, 200)
-  })
-}
-
-function timeFreeze() {
-  const curDate = new Date()
-  _internal_jobSystemGlobals.getCurrentDate = () => curDate
-}
-
-function timeTravel(seconds: number) {
-  const curDate = _internal_jobSystemGlobals.getCurrentDate()
-  _internal_jobSystemGlobals.getCurrentDate = () => new Date(curDate.getTime() + seconds * 1000)
-}
-
-async function withoutAutoRun<T>(fn: () => Promise<T>): Promise<T> {
-  const originalValue = _internal_jobSystemGlobals.shouldAutoRun
-  _internal_jobSystemGlobals.shouldAutoRun = false
-  try {
-    return await fn()
-  } finally {
-    _internal_jobSystemGlobals.shouldAutoRun = originalValue
-  }
-}

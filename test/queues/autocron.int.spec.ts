@@ -1,6 +1,5 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
+import { _internal_resetJobSystemGlobals, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -30,6 +29,10 @@ describe('Queues with scheduler auto', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  afterEach(() => {
+    _internal_resetJobSystemGlobals()
   })
 
   beforeEach(async () => {
