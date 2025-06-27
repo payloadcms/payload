@@ -2,7 +2,7 @@
 
 import type { RelationshipFieldClientProps } from 'payload'
 
-import { RelationshipField, useField } from '@payloadcms/ui'
+import { RelationshipField, useField, useFormModified } from '@payloadcms/ui'
 import React from 'react'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
@@ -18,7 +18,14 @@ type Props = {
 export const TenantField = (args: Props) => {
   const { debug, unique } = args
   const { setValue, value } = useField<number | string>()
-  const { options, selectedTenantID, setPreventRefreshOnChange, setTenant } = useTenantSelection()
+  const modified = useFormModified()
+  const {
+    options,
+    selectedTenantID,
+    setEntityType: setEntityType,
+    setModified,
+    setTenant,
+  } = useTenantSelection()
 
   const hasSetValueRef = React.useRef(false)
 
@@ -35,18 +42,25 @@ export const TenantField = (args: Props) => {
       hasSetValueRef.current = true
     } else if (!value || value !== selectedTenantID) {
       // Update the field on the document value when the tenant is changed
-      setValue(selectedTenantID)
+      setValue(selectedTenantID, !value || value === selectedTenantID)
     }
   }, [value, selectedTenantID, setTenant, setValue, options, unique])
 
   React.useEffect(() => {
-    if (!unique) {
-      setPreventRefreshOnChange(true)
-    }
+    setEntityType(unique ? 'global' : 'document')
     return () => {
-      setPreventRefreshOnChange(false)
+      setEntityType(undefined)
     }
-  }, [unique, setPreventRefreshOnChange])
+  }, [unique, setEntityType])
+
+  React.useEffect(() => {
+    // sync form modified state with the tenant selection provider context
+    setModified(modified)
+
+    return () => {
+      setModified(false)
+    }
+  }, [modified, setModified])
 
   if (debug) {
     return (

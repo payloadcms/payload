@@ -315,7 +315,8 @@ import type { Field } from 'payload'
 export const MyField: Field = {
   type: 'text',
   name: 'myField',
-  validate: (value, {req: { t }}) => Boolean(value) || t('validation:required'), // highlight-line
+  validate: (value, { req: { t } }) =>
+    Boolean(value) || t('validation:required'), // highlight-line
 }
 ```
 
