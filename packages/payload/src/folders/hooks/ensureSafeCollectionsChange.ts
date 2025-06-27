@@ -7,7 +7,10 @@ export const ensureSafeCollectionsChange =
   async ({ data, originalDoc, req }) => {
     if (Array.isArray(data?.folderType) && data.folderType.length > 0) {
       const folderType = data.folderType as string[]
-      const originalAssignedCollections = originalDoc?.folderType as string[] | undefined
+      const currentlyAssignedCollections: string[] | undefined =
+        Array.isArray(originalDoc?.folderType) && originalDoc.folderType.length > 0
+          ? originalDoc.folderType
+          : undefined
       /**
        * Check if the assigned collections have changed.
        * example:
@@ -18,11 +21,13 @@ export const ensureSafeCollectionsChange =
        * If the user is only expanding the types of documents that can be associated with this folder,
        * we do not need to do anything.
        */
-      const removedCollections = originalAssignedCollections
-        ? originalAssignedCollections.filter((c) => !folderType.includes(c))
-        : undefined
+      const newCollections = currentlyAssignedCollections
+        ? // user is narrowing the current scope of the folder
+          currentlyAssignedCollections.filter((c) => !folderType.includes(c))
+        : // user is adding a scope to the folder
+          data.folderType
 
-      if (removedCollections && removedCollections.length > 0) {
+      if (newCollections && newCollections.length > 0) {
         let hasDependentDocuments = false
         const childDocumentsResult = await req.payload.findByID({
           id: originalDoc.id,
@@ -34,7 +39,7 @@ export const ensureSafeCollectionsChange =
                 or: [
                   {
                     relationTo: {
-                      in: removedCollections,
+                      in: newCollections,
                     },
                   },
                 ],
@@ -56,7 +61,7 @@ export const ensureSafeCollectionsChange =
               and: [
                 {
                   folderType: {
-                    in: removedCollections,
+                    in: newCollections,
                   },
                 },
                 {
@@ -71,7 +76,7 @@ export const ensureSafeCollectionsChange =
         }
 
         if (hasDependentDocuments || hasDependentFolders) {
-          const translatedLabels = removedCollections.map((collectionSlug) => {
+          const translatedLabels = newCollections.map((collectionSlug) => {
             if (req.payload.collections[collectionSlug]?.config.labels.singular) {
               return getTranslatedLabel(
                 req.payload.collections[collectionSlug]?.config.labels.plural,

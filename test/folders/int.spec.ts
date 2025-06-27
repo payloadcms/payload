@@ -196,8 +196,8 @@ describe('folders', () => {
       ).resolves.toBeNull()
     })
 
-    describe('ensureSafeCollectionsChane', () => {
-      it('should prevent removing an assigned collection when documents are of that type', async () => {
+    describe('ensureSafeCollectionsChange', () => {
+      it('should prevent narrowing scope of a folder if it contains documents of a removed type', async () => {
         const sharedFolder = await payload.create({
           collection: 'payload-folders',
           data: {
@@ -239,7 +239,41 @@ describe('folders', () => {
         }
       })
 
-      it('should prevent removing an assigned collection when child folders contain those types', async () => {
+      it('should prevent adding scope to a folder if it contains documents outside of the new scope', async () => {
+        const folderAcceptsAnything = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Anything Goes',
+            folderType: [],
+          },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Post 1',
+            folder: folderAcceptsAnything.id,
+          },
+        })
+
+        try {
+          const scopedFolder = await payload.update({
+            collection: 'payload-folders',
+            id: folderAcceptsAnything.id,
+            data: {
+              folderType: ['posts'],
+            },
+          })
+
+          expect(scopedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Anything Goes" contains documents that still belong to the following collections: Posts',
+          )
+        }
+      })
+
+      it('should prevent narrowing scope of a folder if subfolders are assigned to any of the removed types', async () => {
         const parentFolder = await payload.create({
           collection: 'payload-folders',
           data: {
