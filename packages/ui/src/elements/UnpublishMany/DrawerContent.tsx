@@ -20,6 +20,7 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 type UnpublishManyDrawerContentProps = {
   drawerSlug: string
   ids: (number | string)[]
+  onSuccess?: () => void
   selectAll: boolean
 } & UnpublishManyProps
 
@@ -29,6 +30,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     collection: { slug, labels: { plural, singular } } = {},
     drawerSlug,
     ids,
+    onSuccess,
     selectAll,
   } = props
 
@@ -126,6 +128,11 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
             )
 
             clearRouteCache()
+
+            if (typeof onSuccess === 'function') {
+              onSuccess()
+            }
+
             return null
           }
 
@@ -153,6 +160,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     selectAll,
     clearRouteCache,
     addDefaultError,
+    onSuccess,
   ])
 
   return (

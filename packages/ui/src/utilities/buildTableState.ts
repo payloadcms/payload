@@ -2,9 +2,9 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  CollectionPreferences,
   Column,
   ErrorResult,
-  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
   ServerFunction,
@@ -22,7 +22,7 @@ type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   data: PaginatedDocs
   errors?: never
-  preferences: ListPreferences
+  preferences: CollectionPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -142,10 +142,10 @@ const buildTableState = async (
     }
   }
 
-  const listPreferences = await upsertPreferences<ListPreferences>({
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: Array.isArray(collectionSlug)
       ? `${parent.collectionSlug}-${parent.joinPath}`
-      : `${collectionSlug}-list`,
+      : `collection-${collectionSlug}`,
     req,
     value: {
       columns,
@@ -231,7 +231,7 @@ const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columnPreferences: Array.isArray(collectionSlug) ? listPreferences?.columns : undefined, // TODO, might not be neededcolumns,
+    columnPreferences: Array.isArray(collectionSlug) ? collectionPreferences?.columns : undefined, // TODO, might not be neededcolumns,
     columns,
     docs,
     enableRowSelections,
@@ -253,7 +253,7 @@ const buildTableState = async (
 
   return {
     data,
-    preferences: listPreferences,
+    preferences: collectionPreferences,
     renderedFilters,
     state: columnState,
     Table,

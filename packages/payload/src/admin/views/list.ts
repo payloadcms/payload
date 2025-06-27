@@ -4,7 +4,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
-import type { ListPreferences } from '../../preferences/types.js'
+import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
@@ -30,7 +30,7 @@ export type ListViewServerPropsOnly = {
   collectionConfig: SanitizedCollectionConfig
   data: Data
   limit: number
-  listPreferences: ListPreferences
+  listPreferences: CollectionPreferences
   listSearchableFields: CollectionAdminOptions['listSearchableFields']
 } & ServerProps
 
@@ -48,7 +48,7 @@ export type ListViewClientProps = {
   /**
    * @deprecated
    */
-  listPreferences?: ListPreferences
+  listPreferences?: CollectionPreferences
   newDocumentURL: string
   /**
    * @deprecated
