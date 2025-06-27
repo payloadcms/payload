@@ -104,16 +104,21 @@ export const buildCollectionFolderView = async (
       routes: { admin: adminRoute },
     } = config
 
-    const { breadcrumbs, documents, FolderResultsComponent, subfolders } =
-      await getFolderResultsComponentAndData({
-        browseByFolder: false,
-        collectionsToDisplay: [config.folders.slug, collectionSlug],
-        displayAs: viewPreference,
-        folderAssignedCollections: [collectionSlug],
-        folderID,
-        req: initPageResult.req,
-        sort: sortPreference,
-      })
+    const {
+      breadcrumbs,
+      documents,
+      folderAssignedCollections,
+      FolderResultsComponent,
+      subfolders,
+    } = await getFolderResultsComponentAndData({
+      browseByFolder: false,
+      collectionsToDisplay: [config.folders.slug, collectionSlug],
+      displayAs: viewPreference,
+      folderAssignedCollections: [collectionSlug],
+      folderID,
+      req: initPageResult.req,
+      sort: sortPreference,
+    })
 
     const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.id
 
@@ -182,6 +187,7 @@ export const buildCollectionFolderView = async (
               disableBulkEdit,
               documents,
               enableRowSelections,
+              folderAssignedCollections,
               folderFieldName: config.folders.fieldName,
               folderID: resolvedFolderID || null,
               FolderResultsComponent,

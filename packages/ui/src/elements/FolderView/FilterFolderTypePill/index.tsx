@@ -58,7 +58,6 @@ export function FilterFolderTypePill() {
       }
       key="relation-to-selection-popup"
       onChange={({ selectedValues: relationTo }) => {
-        console.log('Selected relationTo:', relationTo)
         void refineFolderData({ query: { relationTo }, updateURL: true })
       }}
       options={allCollectionOptions}

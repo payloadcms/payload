@@ -5,6 +5,7 @@ import { getTranslatedLabel } from '../../utilities/getTranslatedLabel.js'
 export const ensureSafeCollectionsChange =
   ({ foldersSlug }: { foldersSlug: CollectionSlug }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
+    const currentFolderID = extractID(originalDoc || {})
     if (Array.isArray(data?.folderType) && data.folderType.length > 0) {
       const folderType = data.folderType as string[]
       const currentlyAssignedCollections: string[] | undefined =
@@ -29,34 +30,40 @@ export const ensureSafeCollectionsChange =
 
       if (newCollections && newCollections.length > 0) {
         let hasDependentDocuments = false
-        const childDocumentsResult = await req.payload.findByID({
-          id: originalDoc.id,
-          collection: foldersSlug,
-          joins: {
-            documentsAndFolders: {
-              limit: 100_000_000,
-              where: {
-                or: [
-                  {
-                    relationTo: {
-                      in: newCollections,
+        if (typeof currentFolderID === 'string' || typeof currentFolderID === 'number') {
+          const childDocumentsResult = await req.payload.findByID({
+            id: currentFolderID,
+            collection: foldersSlug,
+            joins: {
+              documentsAndFolders: {
+                limit: 100_000_000,
+                where: {
+                  or: [
+                    {
+                      relationTo: {
+                        in: newCollections,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
-          },
-          overrideAccess: true,
-          req,
-        })
+            overrideAccess: true,
+            req,
+          })
 
-        hasDependentDocuments = childDocumentsResult.documentsAndFolders.docs.length > 0
+          hasDependentDocuments = childDocumentsResult.documentsAndFolders.docs.length > 0
+        }
 
         // matches folders that are directly related to the removed collections
         let hasDependentFolders = false
-        if (!hasDependentDocuments) {
+        if (
+          !hasDependentDocuments &&
+          (typeof currentFolderID === 'string' || typeof currentFolderID === 'number')
+        ) {
           const childFoldersResult = await req.payload.find({
             collection: foldersSlug,
+            limit: 1,
             where: {
               and: [
                 {
@@ -66,7 +73,7 @@ export const ensureSafeCollectionsChange =
                 },
                 {
                   folder: {
-                    equals: originalDoc.id,
+                    equals: currentFolderID,
                   },
                 },
               ],
@@ -96,25 +103,29 @@ export const ensureSafeCollectionsChange =
     } else if (
       (data?.folderType === null ||
         (Array.isArray(data?.folderType) && data?.folderType.length === 0)) &&
-      originalDoc.folder &&
+      originalDoc?.folder !== undefined &&
       data?.folder !== null
     ) {
       // attempting to set the folderType to catch-all, so we need to ensure that the parent allows this
       let parentFolder
-      try {
-        parentFolder = await req.payload.findByID({
-          id: extractID(data?.folder || originalDoc.folder),
-          collection: foldersSlug,
-          overrideAccess: true,
-          req,
-          select: {
-            name: true,
-            folderType: true,
-          },
-          user: req.user,
-        })
-      } catch (_) {
-        // parent folder does not exist
+      const parentFolderID = extractID(data?.folder || originalDoc?.folder || {})
+
+      if (typeof parentFolderID === 'string' || typeof parentFolderID === 'number') {
+        try {
+          parentFolder = await req.payload.findByID({
+            id: parentFolderID,
+            collection: foldersSlug,
+            overrideAccess: true,
+            req,
+            select: {
+              name: true,
+              folderType: true,
+            },
+            user: req.user,
+          })
+        } catch (_) {
+          // parent folder does not exist
+        }
       }
 
       if (

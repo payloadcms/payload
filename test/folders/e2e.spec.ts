@@ -398,7 +398,6 @@ test.describe('Folders', () => {
     test('should resolve folder pills and not get stuck as Loading...', async () => {
       await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
-      await page.reload()
       await expect(folderPill).not.toHaveText('Loading...')
     })
     test('should show updated folder pill after folder change', async () => {
@@ -411,7 +410,6 @@ test.describe('Folders', () => {
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
       await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       await expect(folderPill).toHaveText('Move Into This Folder')
-      await page.reload()
       await folderPill.click()
       const folderBreadcrumb = page.locator('.folderBreadcrumbs__crumb-item', { hasText: 'Folder' })
       await folderBreadcrumb.click()
@@ -479,7 +477,6 @@ test.describe('Folders', () => {
   test.describe('Collection with browse by folders disabled', () => {
     test('should not show omitted collection documents in browse by folder view', async () => {
       await page.goto(OmittedFromBrowseBy.byFolder)
-      await page.reload()
       const folderName = 'Folder without omitted Docs'
       await page.goto(OmittedFromBrowseBy.byFolder)
       await createFolder({

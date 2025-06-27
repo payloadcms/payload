@@ -96,7 +96,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     global: Global;
@@ -136,11 +136,11 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
-  heroImage?: (string | null) | Media;
-  relatedAutosave?: (string | null) | Autosave;
-  folder?: (string | null) | FolderInterface;
+  heroImage?: (number | null) | Media;
+  relatedAutosave?: (number | null) | Autosave;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -149,8 +149,8 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
-  folder?: (string | null) | FolderInterface;
+  id: number;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -168,34 +168,34 @@ export interface Media {
  * via the `definition` "payload-folders".
  */
 export interface FolderInterface {
-  id: string;
+  id: number;
   name: string;
-  folder?: (string | null) | FolderInterface;
+  folder?: (number | null) | FolderInterface;
   documentsAndFolders?: {
     docs?: (
       | {
           relationTo?: 'payload-folders';
-          value: string | FolderInterface;
+          value: number | FolderInterface;
         }
       | {
           relationTo?: 'posts';
-          value: string | Post;
+          value: number | Post;
         }
       | {
           relationTo?: 'media';
-          value: string | Media;
+          value: number | Media;
         }
       | {
           relationTo?: 'drafts';
-          value: string | Draft;
+          value: number | Draft;
         }
       | {
           relationTo?: 'autosave';
-          value: string | Autosave;
+          value: number | Autosave;
         }
       | {
           relationTo?: 'omitted-from-browse-by';
-          value: string | OmittedFromBrowseBy;
+          value: number | OmittedFromBrowseBy;
         }
     )[];
     hasNextPage?: boolean;
@@ -211,9 +211,9 @@ export interface FolderInterface {
  * via the `definition` "drafts".
  */
 export interface Draft {
-  id: string;
+  id: number;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -223,9 +223,9 @@ export interface Draft {
  * via the `definition` "autosave".
  */
 export interface Autosave {
-  id: string;
+  id: number;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -235,9 +235,9 @@ export interface Autosave {
  * via the `definition` "omitted-from-browse-by".
  */
 export interface OmittedFromBrowseBy {
-  id: string;
+  id: number;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
 }
@@ -246,7 +246,7 @@ export interface OmittedFromBrowseBy {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -263,40 +263,40 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'drafts';
-        value: string | Draft;
+        value: number | Draft;
       } | null)
     | ({
         relationTo: 'autosave';
-        value: string | Autosave;
+        value: number | Autosave;
       } | null)
     | ({
         relationTo: 'omitted-from-browse-by';
-        value: string | OmittedFromBrowseBy;
+        value: number | OmittedFromBrowseBy;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'payload-folders';
-        value: string | FolderInterface;
+        value: number | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -306,10 +306,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -329,7 +329,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -462,7 +462,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;

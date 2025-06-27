@@ -60,6 +60,9 @@ export const buildBrowseByFolderView = async (
 
   const foldersSlug = config.folders.slug
 
+  /**
+   * All visiible folder enabled collection slugs that the user has read permissions for.
+   */
   const allowReadCollectionSlugs = browseByFolderSlugsFromArgs.filter(
     (collectionSlug) =>
       permissions?.collections?.[collectionSlug]?.read &&
@@ -77,12 +80,23 @@ export const buildBrowseByFolderView = async (
               : undefined,
         }
       : {}) as ListQuery)
-  const activeCollectionFolderSlugs: string[] =
-    folderID && Array.isArray(query?.relationTo)
-      ? query.relationTo.filter(
-          (slug) => allowReadCollectionSlugs.includes(slug) || slug === foldersSlug,
-        )
-      : [...allowReadCollectionSlugs, foldersSlug]
+
+  /**
+   * If a folderID is provided and the relationTo query param exists,
+   * we filter the collection slugs to only those that are allowed to be read.
+   *
+   * If no folderID is provided, only folders should be active and displayed (the root view).
+   */
+  let collectionsToDisplay: string[] = []
+  if (folderID && Array.isArray(query?.relationTo)) {
+    collectionsToDisplay = query.relationTo.filter(
+      (slug) => allowReadCollectionSlugs.includes(slug) || slug === foldersSlug,
+    )
+  } else if (folderID) {
+    collectionsToDisplay = [...allowReadCollectionSlugs, foldersSlug]
+  } else {
+    collectionsToDisplay = [foldersSlug]
+  }
 
   const {
     routes: { admin: adminRoute },
@@ -110,9 +124,9 @@ export const buildBrowseByFolderView = async (
   const { breadcrumbs, documents, folderAssignedCollections, FolderResultsComponent, subfolders } =
     await getFolderResultsComponentAndData({
       browseByFolder: true,
-      collectionsToDisplay: activeCollectionFolderSlugs,
+      collectionsToDisplay,
       displayAs: viewPreference,
-      folderAssignedCollections: activeCollectionFolderSlugs.filter((slug) => slug !== foldersSlug),
+      folderAssignedCollections: collectionsToDisplay.filter((slug) => slug !== foldersSlug) || [],
       folderID,
       req: initPageResult.req,
       sort: sortPreference,
@@ -161,7 +175,7 @@ export const buildBrowseByFolderView = async (
       : allowReadCollectionSlugs
 
   // Filter down activeCollectionFolderSlugs by the ones the current folder is assingned to
-  const availableActiveCollectionFolderSlugs = activeCollectionFolderSlugs.filter((slug) => {
+  const availableActiveCollectionFolderSlugs = collectionsToDisplay.filter((slug) => {
     if (slug === foldersSlug) {
       return permissions?.collections?.[foldersSlug]?.read
     } else {
@@ -198,6 +212,7 @@ export const buildBrowseByFolderView = async (
             disableBulkEdit,
             documents,
             enableRowSelections,
+            folderAssignedCollections,
             folderFieldName: config.folders.fieldName,
             folderID: resolvedFolderID || null,
             FolderResultsComponent,

@@ -152,6 +152,7 @@ export const MoveDocToFolderButton = ({
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={drawerSlug}
+        //todo this should inherit
         folderAssignedCollections={[collectionSlug]}
         folderCollectionSlug={folderCollectionSlug}
         folderFieldName={folderFieldName}
