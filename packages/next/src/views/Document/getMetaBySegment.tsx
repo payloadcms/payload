@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
-import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  EditConfig,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
@@ -16,6 +21,7 @@ export type GenerateEditViewMetadata = (
   args: {
     collectionConfig?: null | SanitizedCollectionConfig
     globalConfig?: null | SanitizedGlobalConfig
+    req?: PayloadRequest
     view?: keyof EditConfig
   } & Parameters<GenerateViewMetadata>[0],
 ) => Promise<Metadata>
@@ -25,6 +31,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
   config,
   globalConfig,
   params,
+  req,
 }) => {
   const { segments } = params
 
@@ -124,6 +131,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     const { viewKey } = getDocumentView({
       collectionConfig,
       config,
+      doc: {},
       docPermissions: {
         create: true,
         delete: true,
@@ -133,6 +141,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
         update: true,
       },
       globalConfig,
+      req,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 

@@ -18,6 +18,7 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
+  Data,
   DocumentSubViewTypes,
   DocumentTabConfig,
   DocumentViewServerProps,
@@ -353,6 +354,8 @@ export type Endpoint = {
  */
 export type EditViewComponent = DocumentViewComponent
 
+export type ViewCondition = (args: { doc: Data; req: PayloadRequest }) => boolean
+
 export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
 
 /**
@@ -364,6 +367,7 @@ export type EditViewConfig = DocumentViewConfig
 
 type BaseDocumentViewConfig = {
   actions?: CustomComponent[]
+  condition?: ViewCondition
   meta?: MetaConfig
   tab?: DocumentTabConfig
 }

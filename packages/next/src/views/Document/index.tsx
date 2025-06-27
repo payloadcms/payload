@@ -241,8 +241,10 @@ export const renderDocument = async ({
     ;({ View } = getDocumentView({
       collectionConfig,
       config,
+      doc,
       docPermissions,
       globalConfig,
+      req,
       routeSegments: segments,
     }))
   }
@@ -340,10 +342,12 @@ export const renderDocument = async ({
         {showHeader && !drawerSlug && (
           <DocumentHeader
             collectionConfig={collectionConfig}
+            doc={doc}
             globalConfig={globalConfig}
             i18n={i18n}
             payload={payload}
             permissions={permissions}
+            req={req}
           />
         )}
         <HydrateAuthProvider permissions={permissions} />

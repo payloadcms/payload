@@ -62,3 +62,6 @@ export const globalSlugs = [
 ]
 export const with300DocumentsSlug = 'with300documents'
 export const editMenuItemsSlug = 'edit-menu-items'
+export const viewConditionsCollectionSlug = 'view-conditions'
+
+export const viewConditionsGlobalSlug = 'view-conditions-global'
