@@ -1,11 +1,11 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   Data,
   DocumentViewClientProps,
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
-  ListPreferences,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -157,7 +157,7 @@ export const renderDocument = async ({
     }),
 
     // get entity preferences
-    getPreferences<ListPreferences>(
+    getPreferences<CollectionPreferences>(
       collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
       payload,
       req.user.id,
