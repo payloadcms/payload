@@ -16,7 +16,6 @@ export async function loginFunction({ email, password }: LoginArgs) {
       email,
       password,
     })
-    return result
   } catch (error) {
     throw new Error(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }

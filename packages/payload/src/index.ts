@@ -138,6 +138,18 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
+export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { baseAuthFields } from './auth/baseFields/auth.js'
+export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
+export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
+export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
+
+export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'

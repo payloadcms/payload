@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid'
+
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -23,6 +25,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
+import { removeExpiredSessions } from '../removeExpiredSessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -114,7 +117,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    let user
     const { email: unsanitizedEmail, password } = data
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
@@ -204,7 +206,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = usernameConstraint
     }
 
-    user = await payload.db.findOne<any>({
+    let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
@@ -239,6 +241,41 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t)
     }
 
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+      collectionConfig,
+      email: sanitizedEmail!,
+      user,
+    }
+
+    if (collectionConfig.auth.useSessions) {
+      // Add session to user
+      const newSessionID = uuid()
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      const expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      const session = { id: newSessionID, createdAt: now, expiresAt }
+
+      if (!user.sessions?.length) {
+        user.sessions = [session]
+      } else {
+        user.sessions = removeExpiredSessions(user.sessions)
+        user.sessions.push(session)
+      }
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: user,
+        req,
+        returning: false,
+      })
+
+      fieldsToSignArgs.sid = newSessionID
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
+
     if (maxLoginAttemptsEnabled) {
       await resetLoginAttempts({
         collection: collectionConfig,
@@ -247,12 +284,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         req,
       })
     }
-
-    const fieldsToSign = getFieldsToSign({
-      collectionConfig,
-      email: sanitizedEmail!,
-      user,
-    })
 
     // /////////////////////////////////////
     // beforeLogin - Collection

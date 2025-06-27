@@ -74,9 +74,7 @@ import * as Sentry from '@sentry/nextjs'
 
 const config = buildConfig({
   collections: [Pages, Media],
-  plugins: [
-    sentryPlugin({ Sentry })
-  ],
+  plugins: [sentryPlugin({ Sentry })],
 })
 
 export default config
@@ -98,9 +96,7 @@ export default buildConfig({
     pool: { connectionString: process.env.DATABASE_URL },
     pg, // Inject the patched pg driver for Sentry instrumentation
   }),
-  plugins: [
-    sentryPlugin({ Sentry })
-  ],
+  plugins: [sentryPlugin({ Sentry })],
 })
 ```
 

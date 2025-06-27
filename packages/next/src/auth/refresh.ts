@@ -3,33 +3,45 @@
 import type { CollectionSlug } from 'payload'
 
 import { headers as nextHeaders } from 'next/headers.js'
-import { getPayload } from 'payload'
+import { createLocalReq, getPayload, refreshOperation } from 'payload'
 
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
-export async function refresh({ collection, config }: { collection: CollectionSlug; config: any }) {
+export async function refresh({ config }: { config: any }) {
   const payload = await getPayload({ config })
-  const authConfig = payload.collections[collection]?.config.auth
+  const headers = await nextHeaders()
+  const result = await payload.auth({ headers })
 
-  if (!authConfig) {
+  if (!result.user) {
+    throw new Error('Cannot refresh token: user not authenticated')
+  }
+
+  const collection: CollectionSlug | undefined = result.user.collection
+  const collectionConfig = payload.collections[collection]
+
+  if (!collectionConfig?.config.auth) {
     throw new Error(`No auth config found for collection: ${collection}`)
   }
 
-  const { user } = await payload.auth({ headers: await nextHeaders() })
+  const req = await createLocalReq({ user: result.user }, payload)
 
-  if (!user) {
-    throw new Error('User not authenticated')
+  const refreshResult = await refreshOperation({
+    collection: collectionConfig,
+    req,
+  })
+
+  if (!refreshResult) {
+    return { message: 'Token refresh failed', success: false }
   }
 
   const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
-
   if (!existingCookie) {
-    return { message: 'No valid token found', success: false }
+    return { message: 'No valid token found to refresh', success: false }
   }
 
   await setPayloadAuthCookie({
-    authConfig,
+    authConfig: collectionConfig.config.auth,
     cookiePrefix: payload.config.cookiePrefix,
     token: existingCookie.value,
   })
