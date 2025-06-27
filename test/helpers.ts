@@ -361,16 +361,20 @@ export const selectTableRow = async (page: Page, title: string): Promise<void> =
   await expect(page.locator(selector)).toBeChecked()
 }
 
-export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
-  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
-  expect(cell).toBeTruthy()
+  await expect(cell).toBeVisible()
   return cell
 }
 
-export const findTableRow = (page: Page, title: string): Locator => {
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
-  expect(row).toBeTruthy()
+  await expect(row).toBeVisible()
   return row
 }
 
