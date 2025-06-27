@@ -23,6 +23,7 @@ export const parallelTaskWorkflow: WorkflowConfig<'parallelTask'> = {
               data: {
                 title: 'parallel task ' + taskID,
               },
+              req,
             })
             return {
               output: {
