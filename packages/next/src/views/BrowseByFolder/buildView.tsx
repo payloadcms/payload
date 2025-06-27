@@ -155,9 +155,10 @@ export const buildBrowseByFolderView = async (
   // })
 
   // Filter down allCollectionFolderSlugs by the ones the current folder is assingned to
-  const allAvailableCollectionSlugs = folderID
-    ? allowReadCollectionSlugs.filter((slug) => folderAssignedCollections.includes(slug))
-    : allowReadCollectionSlugs
+  const allAvailableCollectionSlugs =
+    folderID && Array.isArray(folderAssignedCollections) && folderAssignedCollections.length
+      ? allowReadCollectionSlugs.filter((slug) => folderAssignedCollections.includes(slug))
+      : allowReadCollectionSlugs
 
   // Filter down activeCollectionFolderSlugs by the ones the current folder is assingned to
   const availableActiveCollectionFolderSlugs = activeCollectionFolderSlugs.filter((slug) => {

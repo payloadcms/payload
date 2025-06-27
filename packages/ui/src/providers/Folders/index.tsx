@@ -658,8 +658,14 @@ export function FolderProvider({
           return false
         }
 
+        const enabledCollectionSlugs = Object.entries(collectionCounter || {})
+        if (enabledCollectionSlugs.length === 0) {
+          // If no collections are selected, enable folders that accept all collections
+          return Boolean(item.value.folderType || item.value.folderType.length > 0)
+        }
+
         // Disable folders that do not accept all of the selected collections
-        return Object.entries(collectionCounter).some(([slug]) => {
+        return enabledCollectionSlugs.some(([slug]) => {
           return !item.value.folderType.includes(slug)
         })
       }
@@ -674,7 +680,11 @@ export function FolderProvider({
           // Non folder items are disabled on drag
           return true
         }
-      } else if (parentFolderContext?.selectedCollectionCounter) {
+      } else if (parentFolderContext?.selectedItemKeys?.size) {
+        // Disable selected items from being navigated to in move to drawer
+        if (parentFolderContext.selectedItemKeys.has(item.itemKey)) {
+          return true
+        }
         // Moving items to folder
         if (item.relationTo === folderCollectionSlug) {
           return folderAcceptsItem({
@@ -691,7 +701,8 @@ export function FolderProvider({
       isDragging,
       selectedItemKeys,
       folderCollectionSlug,
-      parentFolderContext.selectedCollectionCounter,
+      parentFolderContext?.selectedCollectionCounter,
+      parentFolderContext?.selectedItemKeys,
     ],
   )
 

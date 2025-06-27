@@ -50,6 +50,7 @@ export function ListCreateNewDocInFolderButton({
       return acc
     }, []),
   )
+
   if (enabledCollections.length === 0) {
     return null
   }

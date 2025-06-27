@@ -24,7 +24,7 @@ export const addFolderFieldToCollection = ({
           allowEdit: false,
           components: {
             Cell: '@payloadcms/ui/rsc#FolderTableCell',
-            Field: '@payloadcms/ui/rsc#FolderEditField',
+            Field: '@payloadcms/ui/rsc#FolderField',
           },
         },
       },

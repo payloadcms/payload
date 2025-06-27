@@ -40,7 +40,7 @@ export const FolderTypeField = ({
   const { folderType } = useFolder()
 
   const options = React.useMemo(() => {
-    if (!folderType) {
+    if (!folderType || folderType.length === 0) {
       return formatOptions(allSelectOptions)
     }
     return formatOptions(

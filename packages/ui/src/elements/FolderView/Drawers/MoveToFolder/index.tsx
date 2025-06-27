@@ -90,6 +90,7 @@ function LoadFolderData(props: MoveToFolderDrawerProps) {
           browseByFolder: false,
           collectionsToDisplay: [props.folderCollectionSlug],
           displayAs: 'grid',
+          // todo: should be able to pass undefined, empty array or null and get all folders. Need to look at API for this in the server function
           folderAssignedCollections: props.folderAssignedCollections,
           folderID: folderIDToPopulate,
           sort: 'name',
@@ -169,6 +170,7 @@ function Content({
     folderFieldName,
     folderID,
     FolderResultsComponent,
+    folderType,
     getSelectedItems,
     subfolders,
   } = useFolder()
@@ -300,6 +302,7 @@ function Content({
             <FolderDocumentDrawer
               initialData={{
                 [folderFieldName]: folderID,
+                folderType,
               }}
               onSave={(result) => {
                 void onCreateSuccess({
