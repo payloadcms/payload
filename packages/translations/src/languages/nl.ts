@@ -285,6 +285,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     enterAValue: 'Waarde invoeren',
     error: 'Fout',
     errors: 'Fouten',
+    exitLivePreview: 'Verlaat Live Voorbeeld',
     export: 'Exporteren',
     fallbackToDefaultLocale: 'Terugval naar standaardtaal',
     false: 'Onwaar',

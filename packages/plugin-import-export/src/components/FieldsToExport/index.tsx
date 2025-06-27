@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListPreferences, SelectFieldClientComponent } from 'payload'
+import type { CollectionPreferences, SelectFieldClientComponent } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -51,10 +51,11 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
     if (id || !collectionSlug) {
       return
     }
+
     const doAsync = async () => {
       const currentPreferences = await getPreference<{
-        columns: ListPreferences['columns']
-      }>(`${collectionSlug}-list`)
+        columns: CollectionPreferences['columns']
+      }>(`collection-${collectionSlug}`)
 
       const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
       setValue(columns ?? collectionConfig?.admin?.defaultColumns ?? [])

@@ -269,6 +269,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     enterAValue: '輸入一個值',
     error: '錯誤',
     errors: '錯誤',
+    exitLivePreview: '退出即時預覽',
     export: '出口',
     fallbackToDefaultLocale: '回到預設的語言',
     false: '假的',

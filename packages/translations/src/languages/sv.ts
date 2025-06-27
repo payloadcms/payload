@@ -282,6 +282,7 @@ export const svTranslations: DefaultTranslationsObject = {
     enterAValue: 'Ange ett värde',
     error: 'Fel',
     errors: 'Fel',
+    exitLivePreview: 'Avsluta Live förhandsgranskning',
     export: 'Exportera',
     fallbackToDefaultLocale: 'Återgå till standardspråk',
     false: 'Falskt',

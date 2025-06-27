@@ -283,6 +283,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     enterAValue: 'একটি মান লিখুন',
     error: 'ত্রুটি',
     errors: 'ত্রুটিগুলি',
+    exitLivePreview: 'লাইভ প্রিভিউ প্রস্থান করুন',
     export: 'এক্সপোর্ট করুন',
     fallbackToDefaultLocale: 'ডিফল্ট লোকেলে ফিরে যান',
     false: 'মিথ্যা',

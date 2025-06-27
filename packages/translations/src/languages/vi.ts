@@ -281,6 +281,7 @@ export const viTranslations: DefaultTranslationsObject = {
     enterAValue: 'Nhập một giá trị',
     error: 'Lỗi',
     errors: 'Lỗi',
+    exitLivePreview: 'Thoát Xem trực tiếp',
     export: 'Xuất khẩu',
     fallbackToDefaultLocale: 'Ngôn ngữ mặc định',
     false: 'Sai',

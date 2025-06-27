@@ -41,6 +41,7 @@ export default buildConfig({
 | `collation`                | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
 | `allowAdditionalKeys`      | By default, Payload strips all additional keys from MongoDB data that don't exist in the Payload schema. If you have some data that you want to include to the result but it doesn't exist in Payload, you can set this to `true`. Be careful as Payload access control _won't_ work for this data.          |
 | `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                                                                                                                   |
+| `disableFallbackSort`      | Set to `true` to disable the adapter adding a fallback sort when sorting by non-unique fields, this can affect performance in some cases but it ensures a consistent order of results.                                                                                                                       |
 
 ## Access to Mongoose models
 

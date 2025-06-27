@@ -275,6 +275,7 @@ export const heTranslations: DefaultTranslationsObject = {
     enterAValue: 'הזן ערך',
     error: 'שגיאה',
     errors: 'שגיאות',
+    exitLivePreview: 'צא מתצוגה חיה',
     export: 'יצוא',
     fallbackToDefaultLocale: 'חזרה לשפת ברירת המחדל',
     false: 'False',

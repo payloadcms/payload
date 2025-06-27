@@ -269,6 +269,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     enterAValue: '输入一个值',
     error: '错误',
     errors: '错误',
+    exitLivePreview: '退出实时预览',
     export: '导出',
     fallbackToDefaultLocale: '回退到默认语言环境',
     false: '否',

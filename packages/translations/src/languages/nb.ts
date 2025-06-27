@@ -282,6 +282,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     enterAValue: 'Skriv inn en verdi',
     error: 'Feil',
     errors: 'Feil',
+    exitLivePreview: 'Avslutt live forhåndsvisning',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbakestilling til standard språk',
     false: 'Falsk',

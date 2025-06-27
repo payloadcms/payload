@@ -16,6 +16,7 @@ import { useTenantSelection } from '../../providers/TenantSelectionProvider/inde
 export const WatchTenantCollection = () => {
   const { id, collectionSlug } = useDocumentInfo()
   const { title } = useDocumentTitle()
+  const addedNewTenant = React.useRef(false)
 
   const { getEntityConfig } = useConfig()
   const [useAsTitleName] = React.useState(
@@ -23,13 +24,27 @@ export const WatchTenantCollection = () => {
   )
   const titleField = useFormFields(([fields]) => (useAsTitleName ? fields[useAsTitleName] : {}))
 
-  const { updateTenants } = useTenantSelection()
+  const { options, updateTenants } = useTenantSelection()
 
   const syncTenantTitle = useEffectEvent(() => {
     if (id) {
       updateTenants({ id, label: title })
     }
   })
+
+  React.useEffect(() => {
+    if (!id || !title || addedNewTenant.current) {
+      return
+    }
+    // Track tenant creation and add it to the tenant selector
+    const exists = options.some((opt) => opt.value === id)
+    if (!exists) {
+      addedNewTenant.current = true
+      updateTenants({ id, label: title })
+    }
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   React.useEffect(() => {
     // only update the tenant selector when the document saves
