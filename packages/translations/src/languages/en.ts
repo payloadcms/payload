@@ -291,6 +291,7 @@ export const enTranslations = {
     enterAValue: 'Enter a value',
     error: 'Error',
     errors: 'Errors',
+    exitLivePreview: 'Exit Live Preview',
     export: 'Export',
     fallbackToDefaultLocale: 'Fallback to default locale',
     false: 'False',

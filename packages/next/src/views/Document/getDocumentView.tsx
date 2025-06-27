@@ -12,7 +12,6 @@ import type { ViewToRender } from './index.js'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
-import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
@@ -112,7 +111,6 @@ export const getDocumentView = ({
       }
 
       // --> /collections/:collectionSlug/:id/api
-      // --> /collections/:collectionSlug/:id/preview
       // --> /collections/:collectionSlug/:id/versions
       // --> /collections/:collectionSlug/:id/<custom-segment>
       // --> /collections/:collectionSlug/trash/:id
@@ -127,17 +125,6 @@ export const getDocumentView = ({
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
               View = getCustomViewByKey(views, 'api') || DefaultAPIView
-            }
-            break
-          }
-
-          case 'preview': {
-            // --> /collections/:collectionSlug/:id/preview
-            if (
-              (collectionConfig && collectionConfig?.admin?.livePreview) ||
-              config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug)
-            ) {
-              View = getCustomViewByKey(views, 'livePreview') || DefaultLivePreviewView
             }
             break
           }
@@ -319,7 +306,6 @@ export const getDocumentView = ({
 
       case 3: {
         // --> /globals/:globalSlug/api
-        // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/<custom-segment>
         switch (segment3) {
@@ -327,18 +313,6 @@ export const getDocumentView = ({
           case 'api': {
             if (globalConfig?.admin?.hideAPIURL !== true) {
               View = getCustomViewByKey(views, 'api') || DefaultAPIView
-            }
-
-            break
-          }
-
-          case 'preview': {
-            // --> /globals/:globalSlug/preview
-            if (
-              (globalConfig && globalConfig?.admin?.livePreview) ||
-              config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
-            ) {
-              View = getCustomViewByKey(views, 'livePreview') || DefaultLivePreviewView
             }
 
             break

@@ -4,11 +4,12 @@ import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../.
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -75,16 +76,13 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     let fullWhere = combineQueries(where!, accessResults)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { 'version.deletedAt': { exists: false } }
-
-      if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
-      } else {
-        fullWhere = { and: [notTrashedFilter] }
-      }
-    }
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 

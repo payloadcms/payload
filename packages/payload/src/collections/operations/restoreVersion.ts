@@ -4,7 +4,7 @@ import type { FindOneArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
@@ -97,6 +97,13 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     }
     if (!doc && hasWherePolicy) {
       throw new Forbidden(req.t)
+    }
+
+    if (collectionConfig.trash && doc?.deletedAt) {
+      throw new APIError(
+        `Cannot restore a version of a trashed document (ID: ${parentDocID}). Restore the document first.`,
+        httpStatus.FORBIDDEN,
+      )
     }
 
     // /////////////////////////////////////

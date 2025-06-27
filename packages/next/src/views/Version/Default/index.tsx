@@ -238,6 +238,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             <SelectComparison
               collectionSlug={collectionSlug}
               docID={originalDocID}
+              globalSlug={globalSlug}
               onChange={onChangeVersionFrom}
               versionFromID={versionFromID}
               versionFromOptions={versionFromOptions}

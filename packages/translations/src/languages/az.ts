@@ -291,6 +291,7 @@ export const azTranslations: DefaultTranslationsObject = {
     enterAValue: 'Bir dəyər daxil edin',
     error: 'Xəta',
     errors: 'Xətalar',
+    exitLivePreview: 'Canlı Önizləmədən Çıxın',
     export: 'İxrac',
     fallbackToDefaultLocale: 'Standart lokalə keçid',
     false: 'Yalan',

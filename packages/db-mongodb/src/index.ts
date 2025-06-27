@@ -118,6 +118,13 @@ export interface Args {
      */
     useFacet?: boolean
   } & ConnectOptions
+  /**
+   * We add a secondary sort based on `createdAt` to ensure that results are always returned in the same order when sorting by a non-unique field.
+   * This is because MongoDB does not guarantee the order of results, however in very large datasets this could affect performance.
+   *
+   * Set to `true` to disable this behaviour.
+   */
+  disableFallbackSort?: boolean
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   /**
@@ -131,6 +138,7 @@ export interface Args {
    */
   mongoMemoryServer?: MongoMemoryReplSet
   prodMigrations?: Migration[]
+
   transactionOptions?: false | TransactionOptions
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
@@ -198,6 +206,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   collectionsSchemaOptions = {},
   connectOptions,
+  disableFallbackSort = false,
   disableIndexHints = false,
   ensureIndexes = false,
   migrationDir: migrationDirArg,
@@ -251,6 +260,7 @@ export function mongooseAdapter({
       deleteOne,
       deleteVersions,
       destroy,
+      disableFallbackSort,
       find,
       findGlobal,
       findGlobalVersions,

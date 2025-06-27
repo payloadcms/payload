@@ -1,3 +1,4 @@
+/* eslint-disable playwright/no-wait-for-selector */
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
@@ -110,6 +111,46 @@ describe('Array', () => {
     )
 
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+  })
+
+  test('should render custom RowLabel after duplicating array item', async () => {
+    const label = 'test custom row label'
+    const updatedLabel = 'updated custom row label'
+    await loadCreatePage()
+    await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
+
+    await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
+
+    const customRowLabel = page.locator(
+      '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
+    )
+
+    await expect(customRowLabel).toBeVisible()
+    await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+
+    const rowActionsButton = page.locator('#rowLabelAsComponent-row-0 .array-actions__button')
+    await rowActionsButton.click()
+
+    const duplicateButton = page.locator(
+      '#rowLabelAsComponent-row-0 .popup__scroll-container .array-actions__duplicate',
+    )
+    await expect(duplicateButton).toBeVisible()
+    await duplicateButton.click()
+
+    await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
+    await expect(
+      page.locator(
+        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
+      ),
+    ).toBeVisible()
+
+    await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
+    const duplicatedRowLabel = page.locator(
+      '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
+    )
+
+    await expect(duplicatedRowLabel).toBeVisible()
+    await expect(duplicatedRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 
   test('should render default array field within custom component', async () => {

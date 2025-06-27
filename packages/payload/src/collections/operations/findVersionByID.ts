@@ -4,10 +4,11 @@ import type { PayloadRequest, PopulateType, SelectType } from '../../types/index
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -69,15 +70,12 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     let fullWhere = combineQueries(where, accessResults)
 
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { 'version.deletedAt': { exists: false } }
-
-      if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
-      } else {
-        fullWhere = { and: [notTrashedFilter] }
-      }
-    }
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     // /////////////////////////////////////
     // Find by ID

@@ -564,6 +564,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * This allows documents to be marked as deleted without being permanently removed.
    * The `deletedAt` field will be set to the current date and time when a document is trashed.
    *
+   * @experimental This is a beta feature and its behavior may be refined in future releases.
    * @default false
    */
   trash?: boolean
@@ -678,6 +679,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  deletedAt?: string
   docId?: any
   id: number | string
 }

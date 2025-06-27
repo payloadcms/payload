@@ -10,7 +10,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
@@ -18,6 +18,7 @@ import { APIError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -110,16 +111,12 @@ export const deleteOperation = async <
 
     let fullWhere = combineQueries(where, accessResult!)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
-
-      if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
-      } else {
-        fullWhere = { and: [notTrashedFilter] }
-      }
-    }
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
 

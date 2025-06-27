@@ -242,6 +242,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:leaveWithoutSaving',
   'general:light',
   'general:livePreview',
+  'general:exitLivePreview',
   'general:loading',
   'general:locale',
   'general:locales',

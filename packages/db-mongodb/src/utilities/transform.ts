@@ -277,7 +277,9 @@ const stripFields = ({
               continue
             }
 
-            for (const data of localeData) {
+            let hasNull = false
+            for (let i = 0; i < localeData.length; i++) {
+              const data = localeData[i]
               let fields: FlattenedField[] | null = null
 
               if (field.type === 'array') {
@@ -286,11 +288,17 @@ const stripFields = ({
                 let maybeBlock: FlattenedBlock | undefined = undefined
 
                 if (field.blockReferences) {
-                  const maybeBlockReference = field.blockReferences.find(
-                    (each) => typeof each === 'object' && each.slug === data.blockType,
-                  )
-                  if (maybeBlockReference && typeof maybeBlockReference === 'object') {
-                    maybeBlock = maybeBlockReference
+                  const maybeBlockReference = field.blockReferences.find((each) => {
+                    const slug = typeof each === 'string' ? each : each.slug
+                    return slug === data.blockType
+                  })
+
+                  if (maybeBlockReference) {
+                    if (typeof maybeBlockReference === 'object') {
+                      maybeBlock = maybeBlockReference
+                    } else {
+                      maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                    }
                   }
                 }
 
@@ -300,6 +308,9 @@ const stripFields = ({
 
                 if (maybeBlock) {
                   fields = maybeBlock.flattenedFields
+                } else {
+                  localeData[i] = null
+                  hasNull = true
                 }
               }
 
@@ -308,6 +319,10 @@ const stripFields = ({
               }
 
               stripFields({ config, data, fields, reservedKeys })
+            }
+
+            if (hasNull) {
+              fieldData[localeKey] = localeData.filter(Boolean)
             }
 
             continue
@@ -323,7 +338,10 @@ const stripFields = ({
           continue
         }
 
-        for (const data of fieldData) {
+        let hasNull = false
+
+        for (let i = 0; i < fieldData.length; i++) {
+          const data = fieldData[i]
           let fields: FlattenedField[] | null = null
 
           if (field.type === 'array') {
@@ -332,12 +350,17 @@ const stripFields = ({
             let maybeBlock: FlattenedBlock | undefined = undefined
 
             if (field.blockReferences) {
-              const maybeBlockReference = field.blockReferences.find(
-                (each) => typeof each === 'object' && each.slug === data.blockType,
-              )
+              const maybeBlockReference = field.blockReferences.find((each) => {
+                const slug = typeof each === 'string' ? each : each.slug
+                return slug === data.blockType
+              })
 
-              if (maybeBlockReference && typeof maybeBlockReference === 'object') {
-                maybeBlock = maybeBlockReference
+              if (maybeBlockReference) {
+                if (typeof maybeBlockReference === 'object') {
+                  maybeBlock = maybeBlockReference
+                } else {
+                  maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                }
               }
             }
 
@@ -347,6 +370,9 @@ const stripFields = ({
 
             if (maybeBlock) {
               fields = maybeBlock.flattenedFields
+            } else {
+              fieldData[i] = null
+              hasNull = true
             }
           }
 
@@ -355,6 +381,10 @@ const stripFields = ({
           }
 
           stripFields({ config, data, fields, reservedKeys })
+        }
+
+        if (hasNull) {
+          data[field.name] = fieldData.filter(Boolean)
         }
 
         continue

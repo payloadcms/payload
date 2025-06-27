@@ -601,7 +601,7 @@ describe('soft-delete', () => {
         ).rejects.toThrow('Not Found')
       })
 
-      it('should delete a soft-deleted document when softtrashDeletes: true', async () => {
+      it('should delete a soft-deleted document when trash: true', async () => {
         await payload.delete({
           collection: postsSlug,
           id: postsDocTwo.id,
@@ -615,6 +615,33 @@ describe('soft-delete', () => {
 
         expect(allDocs.totalDocs).toEqual(1)
         expect(allDocs.docs[0]?.id).toEqual(postsDocOne.id)
+      })
+    })
+
+    describe('restoreVersion operation', () => {
+      it('should throw error when restoring a version of a trashed document', async () => {
+        // Create a version of postsDocTwo (which is soft-deleted)
+        await payload.update({
+          collection: postsSlug,
+          id: postsDocTwo.id,
+          data: { title: 'Updated Before Restore Attempt' },
+          trash: true,
+        })
+
+        const { docs: versions } = await payload.findVersions({
+          collection: postsSlug,
+          trash: true,
+        })
+        const version = versions.find((v) => v.parent === postsDocTwo.id)
+
+        expect(version).toBeDefined()
+
+        await expect(
+          payload.restoreVersion({
+            collection: postsSlug,
+            id: version!.id,
+          }),
+        ).rejects.toThrow(/Cannot restore a version of a trashed document/i)
       })
     })
   })
@@ -938,6 +965,29 @@ describe('soft-delete', () => {
         expect(res.status).toBe(200)
         const result = await res.json()
         expect(result.doc.id).toBe(postsDocTwo.id)
+      })
+    })
+
+    describe('restoreVersion operation', () => {
+      it('should throw error when restoring a version of a trashed document', async () => {
+        const updateRes = await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true`, {
+          body: JSON.stringify({ title: 'Updated Soft Deleted for Restore Test' }),
+        })
+        expect(updateRes.status).toBe(200)
+
+        const { docs: versions } = await payload.findVersions({
+          collection: postsSlug,
+          trash: true,
+        })
+        const version = versions.find((v) => v.parent === postsDocTwo.id)
+
+        const res = await restClient.POST(`/${postsSlug}/versions/${version!.id}`)
+        const body = await res.json()
+
+        expect(res.status).toBe(403)
+        expect(body.message ?? body.errors?.[0]?.message).toMatch(
+          'Cannot restore a version of a trashed document',
+        )
       })
     })
   })
@@ -1440,7 +1490,6 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
 
-        console.log(res)
         expect(res.errors?.[0]?.message).toMatch(/not found/i)
       })
 
@@ -1456,6 +1505,66 @@ describe('soft-delete', () => {
           .GRAPHQL_POST({ body: JSON.stringify({ query }) })
           .then((r) => r.json())
         expect(res.data.deletePost.id).toBe(postsDocTwo.id)
+      })
+    })
+
+    describe('restoreVersion operation', () => {
+      it('should throw error when restoring a version of a trashed document', async () => {
+        const updateMutation = `
+          mutation {
+            updatePost(id: ${idToString(postsDocTwo.id, payload)}, trash: true, data: {
+              title: "Soft Deleted Version"
+            }) {
+              id
+            }
+          }
+    `
+        await restClient.GRAPHQL_POST({ body: JSON.stringify({ query: updateMutation }) })
+
+        const versionQuery = `
+          query {
+            versionsPosts(
+              trash: true,
+              where: {
+                version__deletedAt: { exists: true }
+              }
+            ) {
+              docs {
+                id
+                parent {
+                  id
+                }
+                version {
+                  deletedAt
+                }
+              }
+            }
+          }
+        `
+        const versionRes = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query: versionQuery }) })
+          .then((r) => r.json())
+
+        const version = versionRes.data.versionsPosts.docs.find((v: any) => v?.version?.deletedAt)
+
+        expect(version?.id).toBeDefined()
+
+        expect(version).toBeDefined()
+
+        const restoreMutation = `
+          mutation {
+            restoreVersionPost(id: ${idToString(version.id, payload)}) {
+              id
+            }
+          }
+        `
+        const restoreRes = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query: restoreMutation }) })
+          .then((r) => r.json())
+
+        expect(restoreRes.errors?.[0]?.message).toMatch(
+          /Cannot restore a version of a trashed document/i,
+        )
       })
     })
   })

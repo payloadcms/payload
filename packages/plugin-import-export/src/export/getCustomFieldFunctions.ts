@@ -42,10 +42,18 @@ export const getCustomFieldFunctions = ({
           // polymorphic single
           // @ts-expect-error ref is untyped
           result[`${ref.prefix}${field.name}`] = ({ data, value }) => {
-            // @ts-expect-error ref is untyped
-            data[`${ref.prefix}${field.name}_id`] = value.id
-            // @ts-expect-error ref is untyped
-            data[`${ref.prefix}${field.name}_relationTo`] = value.relationTo
+            if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+              const relationTo = (value as { relationTo: string; value: { id: number | string } })
+                .relationTo
+              const relatedDoc = (value as { relationTo: string; value: { id: number | string } })
+                .value
+              if (relatedDoc && typeof relatedDoc === 'object') {
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_id`] = relatedDoc.id
+                // @ts-expect-error ref is untyped
+                data[`${ref.prefix}${field.name}_relationTo`] = relationTo
+              }
+            }
             return undefined
           }
         }
@@ -69,15 +77,24 @@ export const getCustomFieldFunctions = ({
             value,
           }: {
             data: Record<string, unknown>
-            value: Record<string, unknown>[]
-          }) =>
-            value.map((val: number | Record<string, unknown> | string, i) => {
-              // @ts-expect-error ref is untyped
-              data[`${ref.prefix}${field.name}_${i}_id`] = val.id
-              // @ts-expect-error ref is untyped
-              data[`${ref.prefix}${field.name}_${i}_relationTo`] = val.relationTo
-              return undefined
-            })
+            value: Array<Record<string, any>> | undefined
+          }) => {
+            if (Array.isArray(value)) {
+              value.forEach((val, i) => {
+                if (val && typeof val === 'object') {
+                  const relationTo = val.relationTo
+                  const relatedDoc = val.value
+                  if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
+                    // @ts-expect-error ref is untyped
+                    data[`${ref.prefix}${field.name}_${i}_id`] = relatedDoc.id
+                    // @ts-expect-error ref is untyped
+                    data[`${ref.prefix}${field.name}_${i}_relationTo`] = relationTo
+                  }
+                }
+              })
+            }
+            return undefined
+          }
         }
       }
     }

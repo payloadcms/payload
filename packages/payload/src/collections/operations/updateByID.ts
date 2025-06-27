@@ -15,13 +15,14 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -141,16 +142,12 @@ export const updateByIDOperation = async <
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
-
-      if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
-      } else {
-        fullWhere = { and: [notTrashedFilter] }
-      }
-    }
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
