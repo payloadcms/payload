@@ -411,8 +411,15 @@ test.describe('Folders', () => {
       await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       await expect(folderPill).toHaveText('Move Into This Folder')
       await folderPill.click()
-      const folderBreadcrumb = page.locator('.folderBreadcrumbs__crumb-item', { hasText: 'Folder' })
-      await folderBreadcrumb.click()
+      const drawerLocator = page.locator('dialog .move-folder-drawer')
+      await drawerLocator
+        .locator('.droppable-button.folderBreadcrumbs__crumb-item', {
+          hasText: 'Folder',
+        })
+        .click()
+      await expect(
+        drawerLocator.locator('.folder-file-card__name', { hasText: 'Move Into This Folder' }),
+      ).toBeVisible()
       await selectFolderAndConfirmMove({ page })
       await expect(folderPill).toHaveText('No Folder')
     })
@@ -601,8 +608,8 @@ test.describe('Folders', () => {
     })
   })
 
-  test.describe('should inherit fieldType select values from parent folder', () => {
-    test('should scope child folder fieldType options to match parent folder', async () => {
+  test.describe('should inherit folderType select values from parent folder', () => {
+    test('should scope folderType select options for: scoped > child folder', async () => {
       await page.goto(`${serverURL}/admin/browse-by-folder`)
       await createFolder({ folderName: 'Posts and Media', page, folderType: ['Posts', 'Media'] })
       await clickFolderCard({ folderName: 'Posts and Media', page, doubleClick: true })
@@ -624,6 +631,67 @@ test.describe('Folders', () => {
       await expect(selectLocator).toBeVisible()
 
       // should prefill with Posts and Media
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputValue<true>({ selectLocator, multiSelect: true })
+          return options.sort()
+        })
+        .toEqual(['Posts', 'Media'].sort())
+
+      // should have no more select options available
+      await openSelectMenu({ selectLocator })
+      await expect(
+        selectLocator.locator('.rs__menu-notice', { hasText: 'No options' }),
+      ).toBeVisible()
+    })
+
+    test('should scope folderType select options for: unscoped > scoped > child folder', async () => {
+      await page.goto(`${serverURL}/admin/browse-by-folder`)
+
+      // create an unscoped parent folder
+      await createFolder({ folderName: 'All collections', page, folderType: [] })
+      await clickFolderCard({ folderName: 'All collections', page, doubleClick: true })
+
+      // create a scoped child folder
+      await createFolder({
+        folderName: 'Posts and Media',
+        page,
+        folderType: ['Posts', 'Media'],
+        fromDropdown: true,
+      })
+      await clickFolderCard({ folderName: 'Posts and Media', page, doubleClick: true })
+
+      await expect(
+        page.locator('.step-nav', {
+          hasText: 'Posts and Media',
+        }),
+      ).toBeVisible()
+
+      const titleActionsLocator = page.locator('.list-header__title-actions')
+      await expect(titleActionsLocator).toBeVisible()
+      const folderDropdown = page.locator(
+        '.list-header__title-actions .create-new-doc-in-folder__action-popup',
+        {
+          hasText: 'Create',
+        },
+      )
+      await expect(folderDropdown).toBeVisible()
+      await folderDropdown.click()
+      const createFolderButton = page.locator(
+        '.list-header__title-actions .popup-button-list__button',
+        {
+          hasText: 'Folder',
+        },
+      )
+      await createFolderButton.click()
+
+      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      const titleInput = drawer.locator('#field-name')
+      await titleInput.fill('Should only allow posts and media')
+      const selectLocator = drawer.locator('#field-folderType')
+      await expect(selectLocator).toBeVisible()
+
+      // should not prefill with any options
       await expect
         .poll(async () => {
           const options = await getSelectInputValue<true>({ selectLocator, multiSelect: true })

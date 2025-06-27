@@ -15,11 +15,12 @@ export async function createFolder({
   folderType = ['Posts'],
 }: Args): Promise<void> {
   if (fromDropdown) {
-    const folderDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
+    const titleActionsLocator = page.locator('.list-header__title-actions')
+    const folderDropdown = titleActionsLocator.locator('.create-new-doc-in-folder__action-popup', {
       hasText: 'Create',
     })
     await folderDropdown.click()
-    const createFolderButton = page.locator('.popup-button-list__button', {
+    const createFolderButton = titleActionsLocator.locator('.popup-button-list__button', {
       hasText: 'Folder',
     })
     await createFolderButton.click()

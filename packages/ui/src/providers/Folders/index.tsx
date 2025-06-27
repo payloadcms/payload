@@ -722,15 +722,16 @@ export function FolderProvider({
         breadcrumbs,
         checkIfItemIsDisabled,
         clearSelections,
-        currentFolder: breadcrumbs?.[0]?.id
-          ? formatFolderOrDocumentItem({
-              folderFieldName,
-              isUpload: false,
-              relationTo: folderCollectionSlug,
-              useAsTitle: folderCollectionConfig.admin.useAsTitle,
-              value: breadcrumbs[breadcrumbs.length - 1],
-            })
-          : null,
+        currentFolder:
+          breadcrumbs?.[breadcrumbs.length - 1]?.id !== undefined
+            ? formatFolderOrDocumentItem({
+                folderFieldName,
+                isUpload: false,
+                relationTo: folderCollectionSlug,
+                useAsTitle: folderCollectionConfig.admin.useAsTitle,
+                value: breadcrumbs[breadcrumbs.length - 1],
+              })
+            : null,
         documents,
         focusedRowIndex,
         folderCollectionConfig,
@@ -738,7 +739,7 @@ export function FolderProvider({
         folderFieldName,
         folderID,
         FolderResultsComponent,
-        folderType: breadcrumbs?.[0]?.folderType,
+        folderType: breadcrumbs?.[breadcrumbs.length - 1]?.folderType,
         getFolderRoute,
         getSelectedItems,
         isDragging,
