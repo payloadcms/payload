@@ -281,6 +281,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     enterAValue: 'Ievadiet vērtību',
     error: 'Kļūda',
     errors: 'Kļūdas',
+    exitLivePreview: 'Iziet no tiešā priekšskatījuma',
     export: 'Eksports',
     fallbackToDefaultLocale: 'Izmantot noklusēto lokalizāciju',
     false: 'Nepatiesi',

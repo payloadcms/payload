@@ -279,6 +279,7 @@ export const etTranslations: DefaultTranslationsObject = {
     enterAValue: 'Sisesta väärtus',
     error: 'Viga',
     errors: 'Vead',
+    exitLivePreview: 'Välju otsevaatest',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Kasuta vaikekeelt',
     false: 'Väär',

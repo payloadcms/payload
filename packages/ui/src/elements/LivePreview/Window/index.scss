@@ -1,8 +1,9 @@
-@import '~@payloadcms/ui/scss';
+@import '../../../scss/styles.scss';
 
 @layer payload-default {
   .live-preview-window {
     background-color: var(--theme-bg);
+    display: none;
     width: 60%;
     flex-shrink: 0;
     flex-grow: 0;
@@ -10,6 +11,10 @@
     top: var(--doc-controls-height);
     height: calc(100vh - var(--doc-controls-height));
     overflow: hidden;
+
+    &--is-live-previewing {
+      display: block;
+    }
 
     &__wrapper {
       display: flex;

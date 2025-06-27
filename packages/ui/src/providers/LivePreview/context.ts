@@ -6,7 +6,7 @@ import type React from 'react'
 
 import { createContext, use } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.js'
+import type { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import type { SizeReducerAction } from './sizeReducer.js'
 
 export interface LivePreviewContextType {
@@ -16,7 +16,10 @@ export interface LivePreviewContextType {
   fieldSchemaJSON?: ReturnType<typeof fieldSchemaToJSON>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement | null>
+  isLivePreviewEnabled: boolean
+  isLivePreviewing: boolean
   isPopupOpen: boolean
+  listeningForMessages?: boolean
   measuredDeviceSize: {
     height: number
     width: number
@@ -28,6 +31,7 @@ export interface LivePreviewContextType {
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
+  setIsLivePreviewing: (isLivePreviewing: boolean) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
@@ -53,6 +57,8 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   fieldSchemaJSON: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
+  isLivePreviewEnabled: undefined,
+  isLivePreviewing: false,
   isPopupOpen: false,
   measuredDeviceSize: {
     height: 0,
@@ -65,6 +71,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setBreakpoint: () => {},
   setHeight: () => {},
   setIframeHasLoaded: () => {},
+  setIsLivePreviewing: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewWindowType: () => {},
   setSize: () => {},
