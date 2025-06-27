@@ -387,7 +387,7 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListPreferences } from 'payload'` instead.
+   * Use `import type { CollectionPreferences } from 'payload'` instead.
    */
   ListPreferences,
 } from 'payload'

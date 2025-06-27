@@ -124,7 +124,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ListPreferences['columns']
+      // map columns from string[] to CollectionPreferences['columns']
       const defaultColumns = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
