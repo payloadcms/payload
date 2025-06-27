@@ -64,12 +64,12 @@ export const DocumentFields: React.FC<Args> = ({
         .join(' ')}
     >
       <div className={`${baseClass}__main`}>
+        {Description ? (
+          <header className={`${baseClass}__header`}>
+            <div className={`${baseClass}__sub-header`}>{Description}</div>
+          </header>
+        ) : null}
         <Gutter className={`${baseClass}__edit`}>
-          {Description ? (
-            <header className={`${baseClass}__header`}>
-              <div className={`${baseClass}__sub-header`}>{Description}</div>
-            </header>
-          ) : null}
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}
