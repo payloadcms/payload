@@ -30,6 +30,7 @@ export const flattenObject = ({
               const columnName = `${newKey}_${index}`
               const result = toCSVFunctions[newKey]({
                 columnName,
+                data: row,
                 doc,
                 row,
                 siblingDoc,
@@ -49,6 +50,7 @@ export const flattenObject = ({
         } else {
           const result = toCSVFunctions[newKey]({
             columnName: newKey,
+            data: row,
             doc,
             row,
             siblingDoc,
@@ -62,6 +64,7 @@ export const flattenObject = ({
         if (toCSVFunctions?.[newKey]) {
           const result = toCSVFunctions[newKey]({
             columnName: newKey,
+            data: row,
             doc,
             row,
             siblingDoc,

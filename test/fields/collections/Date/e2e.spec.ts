@@ -85,6 +85,19 @@ describe('Date', () => {
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
   })
 
+  test('should retain date format in useAsTitle after modifying value', async () => {
+    await page.goto(url.list)
+    await page.locator('.row-1 .cell-default a').click()
+    await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
+
+    const dateField = page.locator('#field-default input')
+    await expect(dateField).toBeVisible()
+    await dateField.fill('02/07/2023')
+
+    await expect(dateField).toHaveValue('02/07/2023')
+    await expect(page.locator('.doc-header__title.render-title')).toContainText('February')
+  })
+
   test('should clear date', async () => {
     await page.goto(url.create)
     const dateField = page.locator('#field-default input')
