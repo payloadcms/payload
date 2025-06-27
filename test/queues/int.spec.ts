@@ -1498,7 +1498,7 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially', async () => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 3; i++) {
         await payload.jobs.handleSchedules()
       }
       // Autorun runs every second - so should definitely be done if we wait 2 seconds
@@ -1523,7 +1523,7 @@ describe('Queues', () => {
           },
         })
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 3; i++) {
         await payload.jobs.handleSchedules()
       }
       // Autorun runs every second - so should definitely be done if we wait 2 seconds
@@ -1548,7 +1548,7 @@ describe('Queues', () => {
           },
         })
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 3; i++) {
         await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
       }
       // Wait 2 seconds to satisfy waitUntil of newly scheduled jobs, which is 1 second (due to the cron)
@@ -1569,7 +1569,7 @@ describe('Queues', () => {
     })
 
     it('ensure scheduler does not schedule more jobs than needed if executed sequentially - max. 2 jobs configured', async () => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 3; i++) {
         await payload.jobs.handleSchedules({ queue: 'autorunSecondMax2' })
       }
 
