@@ -5,6 +5,7 @@ import {
   type JobTaskStatus,
   type Payload,
 } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -29,7 +30,15 @@ describe('Queues', () => {
   })
 
   afterAll(async () => {
+    // Ensure no new crons are scheduled
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
+    // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
+    // Cron function runs may persist after a test has finished
+    await wait(3000)
+    // Now we can destroy the payload instance
     await payload.destroy()
+    _internal_resetJobSystemGlobals()
   })
 
   afterEach(() => {
