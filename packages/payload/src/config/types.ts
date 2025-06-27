@@ -375,7 +375,7 @@ type BaseDocumentViewConfig = {
 export type CustomDocumentViewConfig =
   | ({
       Component: DocumentViewComponent
-      path: string
+      path: `/${string}`
     } & BaseDocumentViewConfig)
   | ({
       Component?: DocumentViewComponent
