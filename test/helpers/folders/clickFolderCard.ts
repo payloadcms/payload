@@ -1,7 +1,5 @@
 import type { Page } from '@playwright/test'
 
-import { wait } from 'payload/shared'
-
 type Args = {
   doubleClick?: boolean
   folderName: string
