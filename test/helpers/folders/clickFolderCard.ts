@@ -24,6 +24,11 @@ export async function clickFolderCard({
   await dragHandleButton.waitFor({ state: 'visible' })
 
   if (doubleClick) {
+    // Release any modifier keys that might be held down from previous tests
+    await page.keyboard.up('Shift')
+    await page.keyboard.up('Control')
+    await page.keyboard.up('Alt')
+    await page.keyboard.up('Meta')
     await dragHandleButton.dblclick()
   } else {
     await dragHandleButton.click()

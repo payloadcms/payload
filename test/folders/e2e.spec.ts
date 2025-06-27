@@ -482,7 +482,12 @@ test.describe('Folders', () => {
       await page.reload()
       const folderName = 'Folder without omitted Docs'
       await page.goto(OmittedFromBrowseBy.byFolder)
-      await createFolder({ folderName, page, fromDropdown: true })
+      await createFolder({
+        folderName,
+        page,
+        fromDropdown: true,
+        folderType: ['Omitted From Browse By', 'Posts'],
+      })
 
       // create document
       await page.goto(OmittedFromBrowseBy.create)
