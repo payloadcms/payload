@@ -7,6 +7,7 @@ import type {
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomStatus,
 } from '../../admin/types.js'
 import type {
   Access,
@@ -108,6 +109,10 @@ export type GlobalAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
     }
     views?: {
       /**

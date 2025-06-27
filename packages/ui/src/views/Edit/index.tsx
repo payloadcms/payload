@@ -51,6 +51,7 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -526,6 +527,7 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={savedDocumentData}
             disableActions={disableActions || isFolderCollection}

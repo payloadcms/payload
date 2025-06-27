@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
@@ -28,6 +29,7 @@ import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
+import { GlobalCustomDocumentControls } from './globals/CustomDocumentControls.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -162,6 +164,7 @@ export default buildConfigWithDefaults({
     CollectionHidden,
     CollectionNotInView,
     CollectionNoApiView,
+    CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
     ReorderTabs,
@@ -187,6 +190,7 @@ export default buildConfigWithDefaults({
     GlobalNotInView,
     GlobalNoApiView,
     Global,
+    GlobalCustomDocumentControls,
     CustomGlobalViews1,
     CustomGlobalViews2,
     GlobalGroup1A,
