@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig } from 'payload'
+import type { CollectionPreferences, LivePreviewConfig } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -217,10 +217,10 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       return
     }
 
-    void setPreference(
+    void setPreference<CollectionPreferences>(
       collectionSlug ? `collection-${collectionSlug}` : `global-${globalSlug}`,
       {
-        livePreview: isLivePreviewing,
+        editViewType: isLivePreviewing ? 'live-preview' : 'default',
       },
       true,
     )
