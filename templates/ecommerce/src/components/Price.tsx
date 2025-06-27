@@ -1,4 +1,3 @@
-import { formatNumberToCurrency } from '@/utilities/formatNumberToCurrency'
 import React from 'react'
 
 type BaseProps = {
@@ -31,7 +30,7 @@ export const Price = ({
   if (amount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {formatNumberToCurrency(amount)}
+        {amount}
       </p>
     )
   }
@@ -39,7 +38,7 @@ export const Price = ({
   if (highestAmount && highestAmount !== lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${formatNumberToCurrency(lowestAmount)} - ${formatNumberToCurrency(highestAmount)}`}
+        {`${lowestAmount} - ${highestAmount}`}
       </p>
     )
   }
@@ -47,7 +46,7 @@ export const Price = ({
   if (lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${formatNumberToCurrency(lowestAmount)}`}
+        {`${lowestAmount}`}
       </p>
     )
   }

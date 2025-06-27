@@ -4,7 +4,6 @@ import { Price } from '@/components/Price'
 import { Button } from '@/components/ui/button'
 import { Order, Product } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
-import { formatNumberToCurrency } from '@/utilities/formatNumberToCurrency'
 import Link from 'next/link'
 
 type Props = {

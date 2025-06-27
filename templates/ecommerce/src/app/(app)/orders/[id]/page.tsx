@@ -12,7 +12,6 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
 import { ChevronLeftIcon } from 'lucide-react'
-import { formatNumberToCurrency } from '@/utilities/formatNumberToCurrency'
 import { ProductItem } from '@/components/ProductItem'
 
 type PageProps = {
@@ -92,7 +91,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
           <div className="">
             <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Total</p>
-            <p className="text-lg">{formatNumberToCurrency(order.total)}</p>
+            <p className="text-lg">{order.total}</p>
           </div>
 
           <div className="grow max-w-1/3">

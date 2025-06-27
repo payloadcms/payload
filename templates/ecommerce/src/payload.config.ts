@@ -1,6 +1,5 @@
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 
-import { Page, Product } from '@/payload-types'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
@@ -23,17 +22,10 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
 import { Media } from '@/collections/Media'
-import { Orders } from '@/collections/Orders'
 import { Pages } from '@/collections/Pages'
-import { Products } from '@/collections/Products'
 import { Users } from '@/collections/Users'
-import { createPaymentIntent } from '@/endpoints/create-payment-intent'
-import { customersProxy } from '@/endpoints/customers'
-import { productsProxy } from '@/endpoints/products'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
-import { paymentSucceeded } from '@/stripe/webhooks/paymentSucceeded'
-import { productUpdated } from '@/stripe/webhooks/productUpdated'
 import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
@@ -60,7 +52,7 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Products, Pages, Categories, Media, Orders],
+  collections: [Users, Pages, Categories, Media],
   // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
@@ -98,24 +90,7 @@ export default buildConfig({
     },
   }),
   //email: nodemailerAdapter(),
-  endpoints: [
-    {
-      handler: productsProxy,
-      method: 'get',
-      path: '/stripe/products',
-    },
-    {
-      handler: createPaymentIntent,
-      method: 'post',
-      path: '/create-payment-intent',
-    },
-    /*
-    {
-      handler: customersProxy,
-      method: 'get',
-      path: '/stripe/customers',
-    }, */
-  ],
+  endpoints: [],
   globals: [Footer, Header],
   plugins: [
     ...plugins,

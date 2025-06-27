@@ -2,7 +2,6 @@ import { OrderStatus } from '@/components/OrderStatus'
 import { Button } from '@/components/ui/button'
 import { Order } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
-import { formatNumberToCurrency } from '@/utilities/formatNumberToCurrency'
 import Link from 'next/link'
 
 type Props = {
@@ -28,7 +27,7 @@ export const OrderItem: React.FC<Props> = ({ order }) => {
         <p className="flex gap-2 text-xs text-primary/80">
           <span>{order.items?.length} Items</span>
           <span>•</span>
-          <span>{formatNumberToCurrency(order.total)}</span>
+          <span>{order.total}</span>
         </p>
       </div>
 

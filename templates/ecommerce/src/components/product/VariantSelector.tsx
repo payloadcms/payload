@@ -1,6 +1,6 @@
 'use client'
 
-import { generateCombinations } from '@/collections/Products/ui/Variants/VariantSelect/buildCombinations'
+// import { generateCombinations } from '@/collections/Products/ui/Variants/VariantSelect/buildCombinations'
 import { Button } from '@/components/ui/button'
 import type { Product } from '@/payload-types'
 
@@ -27,7 +27,7 @@ export function VariantSelector({ product }: { product: Product }) {
   const combinations = useMemo(() => {
     if (!variantOptions) return []
 
-    return generateCombinations(variantOptions)
+    return []
   }, [variants])
 
   return variantOptions?.map((key) => {
