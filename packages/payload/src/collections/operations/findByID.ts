@@ -23,6 +23,7 @@ import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -113,16 +114,12 @@ export const findByIDOperation = async <
 
     let fullWhere = combineQueries(where, accessResult)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
-
-      if (fullWhere?.and) {
-        fullWhere.and.push(notTrashedFilter)
-      } else {
-        fullWhere = { and: [notTrashedFilter] }
-      }
-    }
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     sanitizeWhereQuery({
       fields: collectionConfig.flattenedFields,

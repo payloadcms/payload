@@ -14,6 +14,7 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -111,16 +112,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     let where = combineQueries({ id: { equals: id } }, accessResults)
 
-    // If trash is false, restrict to non-trashed documents only
-    if (collectionConfig.trash && !trash) {
-      const notTrashedFilter = { deletedAt: { exists: false } }
-
-      if (where?.and) {
-        where.and.push(notTrashedFilter)
-      } else {
-        where = { and: [notTrashedFilter] }
-      }
-    }
+    // Exclude trashed documents when trash: false
+    where = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where,
+    })
 
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
