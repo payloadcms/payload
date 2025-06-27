@@ -233,6 +233,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t)
     }
 
+    if (collectionConfig.auth.verify && user._verified === false) {
+      throw new UnverifiedEmail({ t: req.t })
+    }
+
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
       email: sanitizedEmail!,
