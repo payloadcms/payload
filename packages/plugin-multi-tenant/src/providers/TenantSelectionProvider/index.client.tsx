@@ -140,7 +140,7 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}?select[${useAsTitle}]=true&id=true&limit=0&depth=0`,
+        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}?select[${useAsTitle}]=true&limit=0&depth=0`,
         {
           credentials: 'include',
           method: 'GET',
@@ -187,7 +187,7 @@ export const TenantSelectionProviderClient = ({
         // Users with no cookie set and only 1 tenant should set that tenant automatically
         setTenant({ id: tenantOptionsFromProps[0]?.value, refresh: true })
         setTenantOptions(tenantOptionsFromProps)
-      } else if ((!tenantOptions || tenantOptions.length === 0) && tenantOptionsFromProps) {
+      } else if (!tenantOptions && tenantOptionsFromProps) {
         // If there are no tenant options, set them from the props
         setTenantOptions(tenantOptionsFromProps)
       }

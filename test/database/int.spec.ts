@@ -2727,6 +2727,53 @@ describe('database', () => {
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
   })
 
+  it('should ignore blocks that exist in the db but not in the config', async () => {
+    // not possible w/ SQL anyway
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+
+    const res = await payload.db.collections['blocks-docs']?.collection.insertOne({
+      testBlocks: [
+        {
+          id: '1',
+          blockType: 'cta',
+          text: 'valid block',
+        },
+        {
+          id: '2',
+          blockType: 'cta_2',
+          text: 'non-valid block',
+        },
+      ],
+      testBlocksLocalized: {
+        en: [
+          {
+            id: '1',
+            blockType: 'cta',
+            text: 'valid block',
+          },
+          {
+            id: '2',
+            blockType: 'cta_2',
+            text: 'non-valid block',
+          },
+        ],
+      },
+    })
+
+    const doc = await payload.findByID({
+      collection: 'blocks-docs',
+      id: res?.insertedId?.toHexString() as string,
+      locale: 'en',
+    })
+    expect(doc.testBlocks).toHaveLength(1)
+    expect(doc.testBlocks[0].id).toBe('1')
+    expect(doc.testBlocksLocalized).toHaveLength(1)
+    expect(doc.testBlocksLocalized[0].id).toBe('1')
+  })
+
   it('should CRUD with blocks as JSON in SQL adapters', async () => {
     // eslint-disable-next-line jest/no-conditional-in-test
     if (!('drizzle' in payload.db)) {
