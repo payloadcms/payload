@@ -6,6 +6,7 @@ export const ensureSafeCollectionsChange =
   ({ foldersSlug }: { foldersSlug: CollectionSlug }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
     const currentFolderID = extractID(originalDoc || {})
+    const parentFolderID = extractID(data?.folder || originalDoc?.folder || {})
     if (Array.isArray(data?.folderType) && data.folderType.length > 0) {
       const folderType = data.folderType as string[]
       const currentlyAssignedCollections: string[] | undefined =
@@ -26,7 +27,7 @@ export const ensureSafeCollectionsChange =
         ? // user is narrowing the current scope of the folder
           currentlyAssignedCollections.filter((c) => !folderType.includes(c))
         : // user is adding a scope to the folder
-          data.folderType
+          folderType
 
       if (newCollections && newCollections.length > 0) {
         let hasDependentDocuments = false
@@ -103,13 +104,10 @@ export const ensureSafeCollectionsChange =
     } else if (
       (data?.folderType === null ||
         (Array.isArray(data?.folderType) && data?.folderType.length === 0)) &&
-      originalDoc?.folder !== undefined &&
-      data?.folder !== null
+      parentFolderID
     ) {
       // attempting to set the folderType to catch-all, so we need to ensure that the parent allows this
       let parentFolder
-      const parentFolderID = extractID(data?.folder || originalDoc?.folder || {})
-
       if (typeof parentFolderID === 'string' || typeof parentFolderID === 'number') {
         try {
           parentFolder = await req.payload.findByID({

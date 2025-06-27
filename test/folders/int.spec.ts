@@ -307,6 +307,42 @@ describe('folders', () => {
           )
         }
       })
+
+      it('should prevent widening scope on a scoped subfolder', async () => {
+        const unscopedFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            folderType: [],
+          },
+        })
+
+        const level1Folder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Level 1 Folder',
+            folderType: ['posts', 'drafts'],
+            folder: unscopedFolder.id,
+          },
+        })
+
+        try {
+          const level2UnscopedFolder = await payload.create({
+            collection: 'payload-folders',
+            data: {
+              name: 'Level 2 Folder',
+              folder: level1Folder.id,
+              folderType: [],
+            },
+          })
+
+          expect(level2UnscopedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Level 2 Folder" must have folder-type set since its parent folder "Level 1 Folder" has a folder-type set.',
+          )
+        }
+      })
     })
   })
 })
