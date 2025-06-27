@@ -79,6 +79,7 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
     redirectAfterDelete,
@@ -458,7 +459,7 @@ export function DefaultEditView({
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
+          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
@@ -511,6 +512,7 @@ export function DefaultEditView({
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
+              isTrashed={isTrashed}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
@@ -531,7 +533,7 @@ export function DefaultEditView({
               SaveDraftButton,
             }}
             data={savedDocumentData}
-            disableActions={disableActions || isFolderCollection}
+            disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
@@ -539,6 +541,7 @@ export function DefaultEditView({
             id={id}
             isEditing={isEditing}
             isInDrawer={isInDrawer}
+            isTrashed={isTrashed}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
@@ -622,7 +625,7 @@ export function DefaultEditView({
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
                 forceSidebarWrap={isLivePreviewing}
-                readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
                 schemaPathSegments={schemaPathSegments}
               />
               {AfterDocument}

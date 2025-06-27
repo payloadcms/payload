@@ -27,6 +27,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
         user,
       },
     },
+    routeSegments: segments,
     searchParams: { limit, page, sort },
     versions: { disableGutter = false, useVersionDrawerCreatedAtCell = false } = {},
   } = props
@@ -35,6 +36,8 @@ export async function VersionsView(props: DocumentViewServerProps) {
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
+
+  const isTrashed = segments[2] === 'trash'
 
   const {
     localization,
@@ -124,6 +127,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     docs: versionsData?.docs,
     globalConfig,
     i18n,
+    isTrashed,
     latestDraftVersion,
   })
 
@@ -140,6 +144,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
         collectionSlug={collectionSlug}
         globalSlug={globalSlug}
         id={id}
+        isTrashed={isTrashed}
         pluralLabel={pluralLabel}
         useAsTitle={collectionConfig?.admin?.useAsTitle || globalSlug}
         view={i18n.t('version:versions')}
