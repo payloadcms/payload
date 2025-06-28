@@ -38,6 +38,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     transactionOptions: {},
     disableIndexHints: false,
+    useAlternativeDropDatabase: false,
   })`,
   postgres: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
