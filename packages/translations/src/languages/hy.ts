@@ -282,6 +282,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     enterAValue: 'Մուտքագրեք արժեք',
     error: 'Սխալ',
     errors: 'Սխալներ',
+    exitLivePreview: 'Դուրս գալ Live Preview-ից',
     export: 'Արտարժույթ',
     fallbackToDefaultLocale: 'Վերադառնալ լռելյայն լոկալին',
     false: 'Կեղծ',

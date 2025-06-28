@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -19,6 +19,8 @@ import {
   mediaSlug,
   reduceSlug,
   relationSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchMediaSlug,
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
@@ -585,6 +587,41 @@ describe('Collections - Uploads', () => {
           )
         },
       )
+      it('should fetch when skipSafeFetch is set with a boolean', async () => {
+        await expect(
+          payload.create({
+            collection: skipSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
+
+      it('should fetch when skipSafeFetch is set with an AllowList', async () => {
+        await expect(
+          payload.create({
+            collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
+            data: {
+              filename: 'test.png',
+              url: 'http://127.0.0.1/file.png',
+            },
+          }),
+          // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'FileRetrievalError',
+            message: expect.not.stringContaining('unsafe'),
+          }),
+        )
+      })
     })
   })
 

@@ -284,6 +284,7 @@ export const myTranslations: DefaultTranslationsObject = {
     enterAValue: 'တန်ဖိုးတစ်ခုထည့်ပါ။',
     error: 'အမှား',
     errors: 'အမှားများ',
+    exitLivePreview: 'Keluar dari Pratinjau Langsung',
     export: 'တင်ပို့',
     fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
     false: 'မှား',

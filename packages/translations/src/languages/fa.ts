@@ -280,6 +280,7 @@ export const faTranslations: DefaultTranslationsObject = {
     enterAValue: 'یک مقدار وارد کنید',
     error: 'خطا',
     errors: 'خطاها',
+    exitLivePreview: 'خروج از پیش نمایش زنده',
     export: 'صادرات',
     fallbackToDefaultLocale: 'بازگردان پیشفرض زبان',
     false: 'غلط',

@@ -43,7 +43,7 @@ export type DocumentViewClientProps = {
 /**
  * @todo: This should be renamed to `DocumentSubViewType` (singular)
  */
-export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
+export type DocumentSubViewTypes = 'api' | 'default' | 'version' | 'versions'
 
 export type DocumentTabServerPropsOnly = {
   readonly apiURL?: string

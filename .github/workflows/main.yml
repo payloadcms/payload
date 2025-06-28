@@ -315,6 +315,7 @@ jobs:
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-import-export
+          - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
           - sort
@@ -451,6 +452,7 @@ jobs:
           - plugin-cloud-storage
           - plugin-form-builder
           - plugin-import-export
+          - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
           - sort

@@ -286,6 +286,7 @@ export const roTranslations: DefaultTranslationsObject = {
     enterAValue: 'Introduceți o valoare',
     error: 'Eroare',
     errors: 'Erori',
+    exitLivePreview: 'Ieși din Previzualizarea Live',
     export: 'Export',
     fallbackToDefaultLocale: 'Revenire la locația implicită',
     false: 'Fals',

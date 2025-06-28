@@ -13,7 +13,7 @@ export const ReorderTabs: CollectionConfig = {
               order: 100,
             },
           },
-          livePreview: {
+          api: {
             tab: {
               order: 0,
             },

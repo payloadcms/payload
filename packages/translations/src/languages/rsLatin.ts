@@ -282,6 +282,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     enterAValue: 'Unesi vrednost',
     error: 'Greška',
     errors: 'Greške',
+    exitLivePreview: 'Izađite iz Live pregleda',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadati jezik',
     false: 'Lažno',
