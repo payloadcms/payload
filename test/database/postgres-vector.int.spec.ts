@@ -6,17 +6,15 @@ import type { PostgresDB } from '@payloadcms/drizzle'
 
 import { cosineDistance, desc, gt, jaccardDistance, l2Distance, lt, sql } from 'drizzle-orm'
 import path from 'path'
-import { BasePayload, buildConfig, type DatabaseAdapterObj, getPayload } from 'payload'
+import { BasePayload, buildConfig, type DatabaseAdapterObj } from 'payload'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// skip on ci as there db does not have the vector extension
-const describeToUse =
-  process.env.PAYLOAD_DATABASE?.startsWith('postgres') && process.env.CI !== 'true'
-    ? describe
-    : describe.skip
+const describeToUse = process.env.PAYLOAD_DATABASE?.startsWith('postgres')
+  ? describe
+  : describe.skip
 
 describeToUse('postgres vector custom column', () => {
   const vectorColumnQueryTest = async (vectorType: string) => {
