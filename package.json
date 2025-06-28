@@ -151,7 +151,7 @@
     "create-payload-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.7",
-    "drizzle-kit": "0.31.1-ab4d983",
+    "drizzle-kit": "0.31.4",
     "drizzle-orm": "0.44.2",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
