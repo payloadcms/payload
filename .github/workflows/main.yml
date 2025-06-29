@@ -528,7 +528,8 @@ jobs:
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     strategy:
       fail-fast: false
       matrix:
