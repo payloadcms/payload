@@ -107,7 +107,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -529,7 +529,7 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -559,8 +559,6 @@ jobs:
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
-
-    name: ${{ matrix.template }}-${{ matrix.database }}
 
     env:
       POSTGRES_USER: postgres
