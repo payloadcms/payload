@@ -5,9 +5,8 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
-import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import {
@@ -32,7 +31,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type Result = {
   exp?: number
   token?: string
-  user?: User
+  user?: TypedUser
 }
 
 export type Arguments<TSlug extends CollectionSlug> = {

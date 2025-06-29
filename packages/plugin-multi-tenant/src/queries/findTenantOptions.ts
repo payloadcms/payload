@@ -1,11 +1,11 @@
-import type { PaginatedDocs, Payload, User } from 'payload'
+import type { PaginatedDocs, Payload, TypedUser } from 'payload'
 
 type Args = {
   limit: number
   payload: Payload
   tenantsCollectionSlug: string
   useAsTitle: string
-  user?: User
+  user?: TypedUser
 }
 export const findTenantOptions = async ({
   limit,
