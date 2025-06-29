@@ -110,7 +110,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sharp"
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
     ]
   },
   "registry": "https://registry.npmjs.org/"
