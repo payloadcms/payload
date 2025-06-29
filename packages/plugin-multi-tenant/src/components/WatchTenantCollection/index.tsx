@@ -8,6 +8,8 @@ import {
   useDocumentTitle,
   useEffectEvent,
   useFormFields,
+  useFormSubmitted,
+  useOperation,
 } from '@payloadcms/ui'
 import React from 'react'
 
@@ -15,8 +17,9 @@ import { useTenantSelection } from '../../providers/TenantSelectionProvider/inde
 
 export const WatchTenantCollection = () => {
   const { id, collectionSlug } = useDocumentInfo()
+  const operation = useOperation()
+  const submitted = useFormSubmitted()
   const { title } = useDocumentTitle()
-  const addedNewTenant = React.useRef(false)
 
   const { getEntityConfig } = useConfig()
   const [useAsTitleName] = React.useState(
@@ -24,7 +27,7 @@ export const WatchTenantCollection = () => {
   )
   const titleField = useFormFields(([fields]) => (useAsTitleName ? fields[useAsTitleName] : {}))
 
-  const { options, updateTenants } = useTenantSelection()
+  const { syncTenants, updateTenants } = useTenantSelection()
 
   const syncTenantTitle = useEffectEvent(() => {
     if (id) {
@@ -33,26 +36,18 @@ export const WatchTenantCollection = () => {
   })
 
   React.useEffect(() => {
-    if (!id || !title || addedNewTenant.current) {
-      return
-    }
-    // Track tenant creation and add it to the tenant selector
-    const exists = options.some((opt) => opt.value === id)
-    if (!exists) {
-      addedNewTenant.current = true
-      updateTenants({ id, label: title })
-    }
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
-
-  React.useEffect(() => {
     // only update the tenant selector when the document saves
     // → aka when initial value changes
     if (id && titleField?.initialValue) {
-      syncTenantTitle()
+      void syncTenantTitle()
     }
-  }, [id, titleField?.initialValue])
+  }, [id, titleField?.initialValue, syncTenants])
+
+  React.useEffect(() => {
+    if (operation === 'create' && submitted) {
+      void syncTenants()
+    }
+  }, [operation, submitted, syncTenants, id])
 
   return null
 }

@@ -4,11 +4,9 @@ import type {
   AuthOperationsFromCollectionSlug,
   Collection,
   DataFromCollectionSlug,
-  SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
-import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import {
@@ -33,7 +31,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type Result = {
   exp?: number
   token?: string
-  user?: User
+  user?: TypedUser
 }
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -46,24 +44,18 @@ export type Arguments<TSlug extends CollectionSlug> = {
 }
 
 type CheckLoginPermissionArgs = {
-  collection: SanitizedCollectionConfig
   loggingInWithUsername?: boolean
   req: PayloadRequest
   user: any
 }
 
 export const checkLoginPermission = ({
-  collection,
   loggingInWithUsername,
   req,
   user,
 }: CheckLoginPermissionArgs) => {
   if (!user) {
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
-  }
-
-  if (collection.auth.verify && user._verified === false) {
-    throw new UnverifiedEmail({ t: req.t })
   }
 
   if (isUserLocked(new Date(user.lockUntil).getTime())) {
@@ -213,7 +205,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     })
 
     checkLoginPermission({
-      collection: collectionConfig,
       loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
       req,
       user,
@@ -239,6 +230,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       }
 
       throw new AuthenticationError(req.t)
+    }
+
+    if (collectionConfig.auth.verify && user._verified === false) {
+      throw new UnverifiedEmail({ t: req.t })
     }
 
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {

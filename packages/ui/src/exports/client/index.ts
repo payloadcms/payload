@@ -248,7 +248,6 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
-export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -260,6 +259,7 @@ export { CodeBlockIcon } from '../../icons/CodeBlock/index.js'
 export { CopyIcon } from '../../icons/Copy/index.js'
 export { DragHandleIcon } from '../../icons/DragHandle/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
+export { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
@@ -292,6 +292,8 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
+
+export { LivePreviewProvider } from '../../providers/LivePreview/index.js'
 
 export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {

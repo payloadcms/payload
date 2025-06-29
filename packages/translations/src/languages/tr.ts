@@ -285,6 +285,7 @@ export const trTranslations: DefaultTranslationsObject = {
     enterAValue: 'Değer girin',
     error: 'Hata',
     errors: 'Hatalar',
+    exitLivePreview: 'Canlı Önizlemeyi Kapat',
     export: 'İhracat',
     fallbackToDefaultLocale: 'Varsayılan yerel ayara geri dönme',
     false: 'Yanlış',
