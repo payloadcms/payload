@@ -1,5 +1,5 @@
 import { useDraggable } from '@dnd-kit/core'
-import React, { useRef } from 'react'
+import React, { useId, useRef } from 'react'
 
 import './index.scss'
 
@@ -9,7 +9,6 @@ type Props = {
   readonly as?: React.ElementType
   readonly children?: React.ReactNode
   readonly className?: string
-  readonly id: string
   readonly onClick: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly ref?: React.RefObject<HTMLDivElement>
@@ -17,7 +16,6 @@ type Props = {
 }
 
 export const DraggableWithClick = ({
-  id,
   as = 'div',
   children,
   className,
@@ -26,6 +24,7 @@ export const DraggableWithClick = ({
   ref,
   thresholdPixels = 3,
 }: Props) => {
+  const id = useId()
   const { attributes, listeners, setNodeRef } = useDraggable({ id })
   const initialPos = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)

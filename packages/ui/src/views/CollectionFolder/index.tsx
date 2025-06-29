@@ -267,7 +267,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
                   folderAssignedCollections={
-                    Array.isArray(folderType) && folderType.length ? folderType : [collectionSlug]
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
                   }
                   key="list-selection"
                 />
@@ -289,7 +289,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={
-                    Array.isArray(folderType) && folderType.length ? folderType : [collectionSlug]
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
                   }
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
@@ -330,7 +330,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
                     folderAssignedCollections={
-                      Array.isArray(folderType) && folderType.length ? folderType : [collectionSlug]
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
                     }
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
@@ -342,7 +342,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                     collectionSlugs={[collectionSlug]}
                     folderAssignedCollections={
-                      Array.isArray(folderType) && folderType.length ? folderType : [collectionSlug]
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
                     }
                     key="create-document"
                     onCreateSuccess={clearRouteCache}

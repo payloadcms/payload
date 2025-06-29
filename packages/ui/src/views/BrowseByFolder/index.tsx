@@ -266,9 +266,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <ListCreateNewDocInFolderButton
                   buttonLabel={t('general:createNew')}
                   collectionSlugs={allowCreateCollectionSlugs}
-                  folderAssignedCollections={
-                    Array.isArray(folderType) && folderType.length ? folderType : []
-                  }
+                  folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -325,9 +323,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
                     collectionSlugs={[folderCollectionConfig.slug]}
-                    folderAssignedCollections={
-                      Array.isArray(folderType) && folderType.length ? folderType : []
-                    }
+                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
@@ -337,9 +333,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
                     collectionSlugs={nonFolderCollectionSlugs}
-                    folderAssignedCollections={
-                      Array.isArray(folderType) && folderType.length ? folderType : []
-                    }
+                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-document"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-document--no-results"

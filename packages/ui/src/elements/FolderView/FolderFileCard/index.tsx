@@ -99,7 +99,6 @@ export function FolderFileCard({
       {!disabled && (onClick || onKeyDown) && (
         <DraggableWithClick
           className={`${baseClass}__drag-handle`}
-          id={itemKey}
           key={itemKey}
           onClick={onClick}
           onKeyDown={onKeyDown}
