@@ -107,7 +107,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
