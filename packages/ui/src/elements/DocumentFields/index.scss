@@ -45,6 +45,12 @@
       flex-grow: 1;
     }
 
+    &__header {
+      padding: calc(var(--base) * 1) var(--gutter-h);
+      border-bottom: 1px solid var(--theme-elevation-100);
+      border-right: 1px solid var(--theme-elevation-100);
+    }
+
     &__edit {
       padding-top: calc(var(--base) * 1.5);
       padding-bottom: var(--spacing-view-bottom);
@@ -145,6 +151,10 @@
       &__main {
         width: 100%;
         min-height: initial;
+      }
+
+      &__header {
+        padding: calc(var(--base) * 0.75) var(--gutter-h);
       }
 
       &__sidebar-wrap {
