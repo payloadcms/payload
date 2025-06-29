@@ -1,4 +1,4 @@
-name: build
+name: ci
 
 on:
   pull_request:
@@ -528,7 +528,9 @@ jobs:
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
       matrix:
@@ -557,8 +559,6 @@ jobs:
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
-
-    name: ${{ matrix.template }}-${{ matrix.database }}
 
     env:
       POSTGRES_USER: postgres

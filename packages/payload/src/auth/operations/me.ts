@@ -1,8 +1,9 @@
 import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { ClientUser, User } from '../types.js'
+import type { ClientUser } from '../types.js'
 
 export type MeOperationResult = {
   collection?: string
@@ -42,7 +43,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       overrideAccess: false,
       req,
       showHiddenFields: false,
-    })) as User
+    })) as TypedUser
 
     if (user) {
       user.collection = collection.config.slug
