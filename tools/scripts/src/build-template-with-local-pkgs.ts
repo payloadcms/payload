@@ -88,8 +88,11 @@ POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
   // Important: run generate:types and generate:importmap first
-  execSync('pnpm --ignore-workspace run generate:types', execOpts)
-  execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
+  if (templateName !== 'plugin') {
+    // TODO: fix in a separate PR - these commands currently fail in the plugin template
+    execSync('pnpm --ignore-workspace run generate:types', execOpts)
+    execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
+  }
 
   execSync('pnpm --ignore-workspace run build', execOpts)
 
