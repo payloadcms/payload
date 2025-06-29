@@ -1,4 +1,4 @@
-import type { ArrayField } from 'payload'
+import type { ArrayField, Field } from 'payload'
 
 import type { CurrenciesConfig } from '../types.js'
 
@@ -7,6 +7,7 @@ import { currencyField } from './currencyField.js'
 
 type Props = {
   currenciesConfig?: CurrenciesConfig
+  enableVariants?: boolean
   /**
    * Enables individual prices for each item in the cart.
    */
@@ -25,6 +26,7 @@ type Props = {
 export const cartItemsField: (props?: Props) => ArrayField = (props) => {
   const {
     currenciesConfig,
+    enableVariants = false,
     individualPrices,
     overrides,
     productsSlug = 'products',
@@ -43,14 +45,18 @@ export const cartItemsField: (props?: Props) => ArrayField = (props) => {
           t('plugin-ecommerce:product'),
         relationTo: productsSlug,
       },
-      {
-        name: 'variant',
-        type: 'relationship',
-        label: ({ t }) =>
-          // @ts-expect-error - translations are not typed in plugins yet
-          t('plugin-ecommerce:variant'),
-        relationTo: variantsSlug,
-      },
+      ...(enableVariants
+        ? [
+            {
+              name: 'variant',
+              type: 'relationship',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-ecommerce:variant'),
+              relationTo: variantsSlug,
+            } as Field,
+          ]
+        : []),
       {
         name: 'quantity',
         type: 'number',

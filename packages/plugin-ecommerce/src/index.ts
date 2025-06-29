@@ -76,12 +76,11 @@ export const ecommercePlugin =
         currenciesConfig,
         enableVariants: Boolean(productsConfig.variants),
         inventory: sanitizedPluginConfig.inventory,
+        variantsSlug: collectionSlugMap.variants,
+        variantTypesSlug: collectionSlugMap.variantTypes,
         ...('productsCollection' in productsConfig && productsConfig.productsCollection
           ? { overrides: productsConfig.productsCollection }
           : {}),
-
-        variantsSlug: collectionSlugMap.variants,
-        variantTypesSlug: collectionSlugMap.variantTypes,
       })
 
       incomingConfig.collections.push(products)
@@ -196,13 +195,13 @@ export const ecommercePlugin =
       incomingConfig.endpoints = []
     }
 
-    incomingConfig.collections.map((collection) => {
-      if (collection.slug === collectionSlugMap.customers) {
-        collection.fields.push(cartItemsField({ overrides: { name: 'cart' } }))
-      }
+    // incomingConfig.collections.map((collection) => {
+    //   if (collection.slug === collectionSlugMap.customers) {
+    //     collection.fields.push(cartItemsField({ overrides: { name: 'cart' } }))
+    //   }
 
-      return collection
-    })
+    //   return collection
+    // })
 
     // incomingConfig.typescript = {
     //   ...incomingConfig.typescript,

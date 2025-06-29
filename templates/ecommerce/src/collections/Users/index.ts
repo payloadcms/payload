@@ -50,18 +50,6 @@ export const Users: CollectionConfig = {
     },
     tokenExpiration: 1209600,
   },
-  endpoints: [
-    {
-      handler: customerProxy,
-      method: 'get',
-      path: '/:teamID/customer',
-    },
-    {
-      handler: customerProxy,
-      method: 'patch',
-      path: '/:teamID/customer',
-    },
-  ],
   fields: [
     {
       name: 'name',
@@ -95,95 +83,21 @@ export const Users: CollectionConfig = {
       name: 'orders',
       type: 'join',
       collection: 'orders',
-      on: 'orderedBy',
+      on: 'customer',
       admin: {
         allowCreate: false,
         defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
       },
     },
     {
-      name: 'stripeCustomerID',
-      type: 'text',
-      access: {
-        /* create: admins, */
-        read: admins,
-        update: admins,
-      },
-      admin: {
-        position: 'sidebar',
-        readOnly: true,
-      },
-      label: 'Stripe Customer',
-    },
-    {
       name: 'cart',
-      type: 'group',
-      fields: [
-        {
-          name: 'items',
-          type: 'array',
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'product',
-                  type: 'relationship',
-                  relationTo: 'products',
-                },
-                {
-                  name: 'variantID',
-                  type: 'text',
-                },
-                {
-                  name: 'variant',
-                  type: 'text',
-                },
-              ],
-            },
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'unitPrice',
-                  type: 'number',
-                  required: true,
-                },
-                {
-                  name: 'quantity',
-                  type: 'number',
-                  admin: {
-                    step: 1,
-                  },
-                  required: true,
-                  min: 0,
-                },
-              ],
-            },
-            {
-              name: 'url',
-              type: 'text',
-            },
-          ],
-          interfaceName: 'CartItems',
-          label: 'Items',
-        },
-      ],
-      label: 'Cart',
-    },
-    {
-      name: 'skipSync',
-      type: 'checkbox',
+      type: 'join',
+      collection: 'carts',
+      on: 'customer',
       admin: {
-        hidden: true,
-        position: 'sidebar',
-        readOnly: true,
+        allowCreate: false,
+        defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
       },
-      label: 'Skip Sync',
     },
   ],
-  hooks: {
-    beforeChange: [createStripeCustomer],
-  },
-  timestamps: true,
 }

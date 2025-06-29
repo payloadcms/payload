@@ -4,13 +4,15 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { Plugin } from 'payload'
+import { Field, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { stripePlugin } from '@payloadcms/plugin-stripe'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+// import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
 
 import { paymentSucceeded } from '@/stripe/webhooks/paymentSucceeded'
 
@@ -101,6 +103,22 @@ export const plugins: Plugin[] = [
     stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
     webhooks: {
       'payment_intent.succeeded': paymentSucceeded,
+    },
+  }),
+  ecommercePlugin({
+    customers: {
+      slug: 'users',
+    },
+    products: {
+      productsCollection: {
+        fields: ({ defaultFields }) => {
+          const fields: Field[] = [{ name: 'name', type: 'text', required: true }, ...defaultFields]
+
+          console.log({ fields })
+
+          return fields
+        },
+      },
     },
   }),
 

@@ -28,19 +28,15 @@ type Props = {
 export const productsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
     currenciesConfig,
+    enableVariants = false,
     inventory = true,
     overrides,
     variantsSlug = 'variants',
     variantTypesSlug = 'variantTypes',
   } = props || {}
   const fieldsOverride = overrides?.fields
-  const enableVariants = props?.enableVariants ?? false
 
   const defaultFields: Field[] = [
-    {
-      name: 'name',
-      type: 'text',
-    },
     ...(inventory
       ? [
           inventoryField({
@@ -70,11 +66,9 @@ export const productsCollection: (props: Props) => CollectionConfig = (props) =>
     ...overrides,
     admin: {
       defaultColumns: [
-        'name',
         ...(currenciesConfig ? ['prices'] : []),
         ...(enableVariants ? ['variants'] : []),
       ],
-      useAsTitle: 'name',
       ...overrides?.admin,
     },
     fields,

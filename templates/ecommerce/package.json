@@ -25,6 +25,7 @@
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/payload-cloud": "workspace:*",
+    "@payloadcms/plugin-ecommerce": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
