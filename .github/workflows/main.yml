@@ -530,6 +530,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
       matrix:
