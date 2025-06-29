@@ -1,6 +1,6 @@
 import { TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
-import { exec as execOrig, execSync } from 'child_process'
+import { execSync } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -87,8 +87,9 @@ DATABASE_URI=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
-  // Important: run generate:types first
+  // Important: run generate:types and generate:importmap first
   execSync('pnpm --ignore-workspace run generate:types', execOpts)
+  execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
 
   execSync('pnpm --ignore-workspace run build', execOpts)
 
