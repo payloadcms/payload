@@ -327,6 +327,12 @@ async function main() {
       cwd: destDir,
     })
 
+    // Generate types
+    log('Generating types')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace'} generate:types`, {
+      cwd: destDir,
+    })
+
     if (shouldBuild) {
       log('Building...')
       execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace'} build`, { cwd: destDir })
