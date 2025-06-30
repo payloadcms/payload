@@ -264,6 +264,7 @@ export const frTranslations: DefaultTranslationsObject = {
     dark: 'Sombre',
     dashboard: 'Tableau de bord',
     delete: 'Supprimer',
+    deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
     deleting: 'Suppression en cours...',

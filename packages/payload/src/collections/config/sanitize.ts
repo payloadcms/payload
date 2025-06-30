@@ -97,6 +97,7 @@ export const sanitizeCollection = async (
     // add default timestamps fields only as needed
     let hasUpdatedAt: boolean | null = null
     let hasCreatedAt: boolean | null = null
+    let hasDeletedAt: boolean | null = null
 
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
@@ -107,9 +108,13 @@ export const sanitizeCollection = async (
         if (field.name === 'createdAt') {
           hasCreatedAt = true
         }
+
+        if (field.name === 'deletedAt') {
+          hasDeletedAt = true
+        }
       }
 
-      return hasCreatedAt && hasUpdatedAt
+      return hasCreatedAt && hasUpdatedAt && (!sanitized.trash || hasDeletedAt)
     })
 
     if (!hasUpdatedAt) {
@@ -136,6 +141,19 @@ export const sanitizeCollection = async (
         type: 'date',
         index: true,
         label: ({ t }) => t('general:createdAt'),
+      })
+    }
+
+    if (sanitized.trash && !hasDeletedAt) {
+      sanitized.fields.push({
+        name: 'deletedAt',
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+          hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:deletedAt'),
       })
     }
   }
