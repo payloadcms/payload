@@ -281,12 +281,30 @@ export type VectorRawColumn = {
   type: 'vector'
 } & BaseRawColumn
 
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
+export type SparseVecRawColumn = {
+  dimensions?: number
+  type: 'sparsevec'
+} & BaseRawColumn
+
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
+  | BinaryVecRawColumn
   | EnumRawColumn
+  | HalfVecRawColumn
   | IntegerRawColumn
+  | SparseVecRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
   | VectorRawColumn
