@@ -1,6 +1,6 @@
 import { TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
-import { exec as execOrig, execSync } from 'child_process'
+import { execSync } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -46,6 +46,8 @@ async function main() {
   const initialPackageJson = await fs.readFile(packageJsonPath, 'utf-8')
   const initialPackageJsonObj = JSON.parse(initialPackageJson)
 
+  // Update the package.json dependencies to use any specific version instead of `workspace:*`, so that
+  // the next pnpm add command can install the local packages correctly.
   updatePackageJSONDependencies({ latestVersion: '3.42.0', packageJson: initialPackageJsonObj })
 
   await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
@@ -85,7 +87,14 @@ DATABASE_URI=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
-  execSync('pnpm run build', execOpts)
+  // Important: run generate:types and generate:importmap first
+  if (templateName !== 'plugin') {
+    // TODO: fix in a separate PR - these commands currently fail in the plugin template
+    execSync('pnpm --ignore-workspace run generate:types', execOpts)
+    execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
+  }
+
+  execSync('pnpm --ignore-workspace run build', execOpts)
 
   header(`\n🎉 Done!`)
 }

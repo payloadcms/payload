@@ -2,7 +2,7 @@
 import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
-import { useLocale } from 'next-intl';
+import { useLocale } from 'next-intl'
 import React, { Fragment } from 'react'
 
 import type { Post } from '@/payload-types'
@@ -17,7 +17,7 @@ export const Card: React.FC<{
   showCategories?: boolean
   title?: string
 }> = (props) => {
-  const locale = useLocale();
+  const locale = useLocale()
   const { card, link } = useClickableCard({})
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
