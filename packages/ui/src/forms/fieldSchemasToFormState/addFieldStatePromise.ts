@@ -361,13 +361,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               row,
             })
 
-            console.log(
-              isCollapsed,
-              field.admin,
-              preferences?.fields?.[path]?.collapsed,
-              previousRow,
-            )
-
             if (isCollapsed) {
               acc.rows[acc.rows.length - 1].collapsed = true
             }

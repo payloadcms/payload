@@ -39,7 +39,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/live-preview/config.ts"
+        "./test/fields/config.ts"
       ],
       "@payloadcms/admin-bar": [
         "./packages/admin-bar/src"
