@@ -74,11 +74,12 @@ export const Preview = () => {
           return
         }
 
-        const { docs, totalDocs } = await res.json()
+        const { docs, totalDocs }: { docs: Record<string, unknown>[]; totalDocs: number } =
+          await res.json()
 
         setResultCount(limit && limit < totalDocs ? limit : totalDocs)
 
-        const allKeys = Object.keys(docs[0] || {})
+        const allKeys = Array.from(new Set(docs.flatMap((doc) => Object.keys(doc))))
         const defaultMetaFields = ['createdAt', 'updatedAt', '_status', 'id']
 
         // Match CSV column ordering by building keys based on fields and regex
