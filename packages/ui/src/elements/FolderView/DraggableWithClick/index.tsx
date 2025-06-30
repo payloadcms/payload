@@ -79,7 +79,7 @@ export const DraggableWithClick = ({
       className={[baseClass, className, disabled ? `${baseClass}--disabled` : '']
         .filter(Boolean)
         .join(' ')}
-      onKeyDown={disabled ? onKeyDown : undefined}
+      onKeyDown={disabled ? undefined : onKeyDown}
       onPointerDown={disabled ? undefined : onClick ? handlePointerDown : undefined}
       ref={(node) => {
         if (disabled) {

@@ -94,7 +94,7 @@ export function FolderFileCard({
       ]
         .filter(Boolean)
         .join(' ')}
-      disabled={disabled || !(onClick || onKeyDown)}
+      disabled={disabled || (!onClick && !onKeyDown)}
       key={itemKey}
       onClick={onClick}
       onKeyDown={onKeyDown}
