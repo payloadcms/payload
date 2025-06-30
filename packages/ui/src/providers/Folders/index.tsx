@@ -43,6 +43,7 @@ export type FolderContextValue = {
   readonly allCollectionFolderSlugs?: CollectionSlug[]
   allowCreateCollectionSlugs: CollectionSlug[]
   breadcrumbs?: FolderBreadcrumb[]
+  checkIfItemIsDisabled: (item: FolderOrDocument) => boolean
   clearSelections: () => void
   currentFolder?: FolderOrDocument | null
   documents?: FolderOrDocument[]
@@ -52,6 +53,7 @@ export type FolderContextValue = {
   folderFieldName: string
   folderID?: number | string
   FolderResultsComponent: React.ReactNode
+  folderType: CollectionSlug[] | undefined
   getFolderRoute: (toFolderID?: number | string) => string
   getSelectedItems?: () => FolderOrDocument[]
   isDragging: boolean
@@ -69,6 +71,7 @@ export type FolderContextValue = {
   }) => void
   refineFolderData: (args: { query?: FolderQueryParams; updateURL: boolean }) => void
   search: string
+  selectedCollectionCounter?: Record<CollectionSlug, number>
   readonly selectedItemKeys: Set<FolderDocumentItemKey>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFocusedRowIndex: React.Dispatch<React.SetStateAction<number>>
@@ -82,6 +85,7 @@ const Context = React.createContext<FolderContextValue>({
   allCollectionFolderSlugs: [],
   allowCreateCollectionSlugs: [],
   breadcrumbs: [],
+  checkIfItemIsDisabled: () => false,
   clearSelections: () => {},
   currentFolder: null,
   documents: [],
@@ -91,6 +95,7 @@ const Context = React.createContext<FolderContextValue>({
   folderFieldName: 'folder',
   folderID: undefined,
   FolderResultsComponent: null,
+  folderType: undefined,
   getFolderRoute: () => '',
   getSelectedItems: () => [],
   isDragging: false,
@@ -101,11 +106,12 @@ const Context = React.createContext<FolderContextValue>({
   onItemKeyPress: () => undefined,
   refineFolderData: () => undefined,
   search: '',
+  selectedCollectionCounter: undefined,
   selectedItemKeys: new Set<FolderDocumentItemKey>(),
   setBreadcrumbs: () => {},
   setFocusedRowIndex: () => -1,
   setIsDragging: () => false,
-  sort: '_folderOrDocumentTitle',
+  sort: 'name',
   subfolders: [],
 })
 
@@ -191,7 +197,7 @@ export function FolderProvider({
   FolderResultsComponent: InitialFolderResultsComponent,
   onItemClick: onItemClickFromProps,
   search,
-  sort = '_folderOrDocumentTitle',
+  sort = 'name',
   subfolders,
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
@@ -202,6 +208,9 @@ export function FolderProvider({
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
 
+  const currentlySelectedIndexes = React.useRef(new Set<number>())
+
+  const [selectedCollectionCounter, setSelectedCollectionCounter] = React.useState({})
   const [FolderResultsComponent, setFolderResultsComponent] = React.useState(
     InitialFolderResultsComponent || (() => null),
   )
@@ -231,6 +240,7 @@ export function FolderProvider({
     setFocusedRowIndex(-1)
     setSelectedItemKeys(new Set())
     setLastSelectedIndex(undefined)
+    currentlySelectedIndexes.current = new Set()
   }, [])
 
   const mergeQuery = React.useCallback(
@@ -245,6 +255,7 @@ export function FolderProvider({
         ...currentQuery,
         ...newQuery,
         page,
+        relationTo: 'relationTo' in newQuery ? newQuery.relationTo : currentQuery?.relationTo,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
         sort: 'sort' in newQuery ? newQuery.sort : (currentQuery?.sort ?? undefined),
       }
@@ -258,8 +269,11 @@ export function FolderProvider({
     ({ query, updateURL }) => {
       if (updateURL) {
         const newQuery = mergeQuery(query)
+
         startRouteTransition(() =>
-          router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`),
+          router.replace(
+            `${qs.stringify({ ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) }, { addQueryPrefix: true })}`,
+          ),
         )
 
         setCurrentQuery(newQuery)
@@ -335,6 +349,39 @@ export function FolderProvider({
     ],
   )
 
+  const getSelectedItemsData = React.useCallback(
+    (selectedIndexes) => {
+      return [...subfolders, ...documents].reduce(
+        (acc, item, index) => {
+          if (selectedIndexes?.size && selectedIndexes.has(index)) {
+            // add the item key
+            acc.newSelectedItemKeys.add(item.itemKey)
+            // rebuild the selected collection counter
+            if (item.relationTo === folderCollectionSlug) {
+              item.value.folderType?.forEach((collectionSlug) => {
+                if (!acc.newSelectedCollectionCounter[collectionSlug]) {
+                  acc.newSelectedCollectionCounter[collectionSlug] = 0
+                }
+                acc.newSelectedCollectionCounter[collectionSlug] += 1
+              })
+            } else {
+              if (!acc.newSelectedCollectionCounter[item.relationTo]) {
+                acc.newSelectedCollectionCounter[item.relationTo] = 0
+              }
+              acc.newSelectedCollectionCounter[item.relationTo] += 1
+            }
+          }
+          return acc
+        },
+        {
+          newSelectedCollectionCounter: {},
+          newSelectedItemKeys: new Set<FolderDocumentItemKey>(),
+        },
+      )
+    },
+    [subfolders, documents, folderCollectionSlug],
+  )
+
   const onItemKeyPress: FolderContextValue['onItemKeyPress'] = React.useCallback(
     ({ event, index, item }) => {
       const { code, ctrlKey, metaKey, shiftKey } = event
@@ -407,7 +454,7 @@ export function FolderProvider({
           if (allowMultiSelection && isShiftPressed) {
             event.preventDefault()
             newSelectedIndexes = getMetaSelection({
-              currentSelection: newSelectedIndexes,
+              currentSelection: currentlySelectedIndexes.current,
               toggleIndex: index,
             })
             setLastSelectedIndex(index)
@@ -438,14 +485,11 @@ export function FolderProvider({
         return
       }
 
-      setSelectedItemKeys(
-        [...subfolders, ...documents].reduce((acc, item, index) => {
-          if (newSelectedIndexes?.size && newSelectedIndexes.has(index)) {
-            acc.add(item.itemKey)
-          }
-          return acc
-        }, new Set<FolderDocumentItemKey>()),
-      )
+      currentlySelectedIndexes.current = newSelectedIndexes || new Set()
+      const { newSelectedCollectionCounter, newSelectedItemKeys } =
+        getSelectedItemsData(newSelectedIndexes)
+      setSelectedItemKeys(newSelectedItemKeys)
+      setSelectedCollectionCounter(newSelectedCollectionCounter)
 
       if (selectedItemKeys.size === 1 && code === 'Enter') {
         navigateAfterSelection({
@@ -456,12 +500,11 @@ export function FolderProvider({
     },
     [
       allowMultiSelection,
-      documents,
+      totalCount,
+      getSelectedItemsData,
       lastSelectedIndex,
       navigateAfterSelection,
-      subfolders,
-      totalCount,
-      selectedItemKeys,
+      selectedItemKeys.size,
     ],
   )
 
@@ -474,7 +517,7 @@ export function FolderProvider({
 
       if (allowMultiSelection && isCtrlPressed) {
         newSelectedIndexes = getMetaSelection({
-          currentSelection: newSelectedIndexes,
+          currentSelection: currentlySelectedIndexes.current,
           toggleIndex: index,
         })
       } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
@@ -504,14 +547,11 @@ export function FolderProvider({
       }
 
       if (newSelectedIndexes) {
-        setSelectedItemKeys(
-          [...subfolders, ...documents].reduce((acc, item, index) => {
-            if (newSelectedIndexes.size && newSelectedIndexes.has(index)) {
-              acc.add(item.itemKey)
-            }
-            return acc
-          }, new Set<FolderDocumentItemKey>()),
-        )
+        currentlySelectedIndexes.current = newSelectedIndexes || new Set()
+        const { newSelectedCollectionCounter, newSelectedItemKeys } =
+          getSelectedItemsData(newSelectedIndexes)
+        setSelectedItemKeys(newSelectedItemKeys)
+        setSelectedCollectionCounter(newSelectedCollectionCounter)
       }
 
       if (doubleClicked) {
@@ -522,11 +562,10 @@ export function FolderProvider({
       }
     },
     [
-      selectedItemKeys,
       allowMultiSelection,
       lastSelectedIndex,
-      subfolders,
-      documents,
+      selectedItemKeys,
+      getSelectedItemsData,
       navigateAfterSelection,
     ],
   )
@@ -602,6 +641,71 @@ export function FolderProvider({
     [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, serverURL, t],
   )
 
+  const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(
+    (item) => {
+      function folderAcceptsItem({
+        collectionCounter,
+        item,
+      }: {
+        collectionCounter: Record<string, number>
+        item: FolderOrDocument
+      }): boolean {
+        if (
+          !item.value.folderType ||
+          (Array.isArray(item.value.folderType) && item.value.folderType.length === 0)
+        ) {
+          // Enable folder that accept all collections
+          return false
+        }
+
+        const enabledCollectionSlugs = Object.entries(collectionCounter || {})
+        if (enabledCollectionSlugs.length === 0) {
+          // If no collections are selected, enable folders that accept all collections
+          return Boolean(item.value.folderType || item.value.folderType.length > 0)
+        }
+
+        // Disable folders that do not accept all of the selected collections
+        return enabledCollectionSlugs.some(([slug]) => {
+          return !item.value.folderType.includes(slug)
+        })
+      }
+
+      if (isDragging) {
+        const isSelected = selectedItemKeys.has(item.itemKey)
+        if (isSelected) {
+          return true
+        } else if (item.relationTo === folderCollectionSlug) {
+          return folderAcceptsItem({ collectionCounter: selectedCollectionCounter, item })
+        } else {
+          // Non folder items are disabled on drag
+          return true
+        }
+      } else if (parentFolderContext?.selectedItemKeys?.size) {
+        // Disable selected items from being navigated to in move to drawer
+        if (parentFolderContext.selectedItemKeys.has(item.itemKey)) {
+          return true
+        }
+        // Moving items to folder
+        if (item.relationTo === folderCollectionSlug) {
+          return folderAcceptsItem({
+            collectionCounter: parentFolderContext.selectedCollectionCounter,
+            item,
+          })
+        }
+        // If the item is not a folder, it is disabled on move
+        return true
+      }
+    },
+    [
+      selectedCollectionCounter,
+      isDragging,
+      selectedItemKeys,
+      folderCollectionSlug,
+      parentFolderContext?.selectedCollectionCounter,
+      parentFolderContext?.selectedItemKeys,
+    ],
+  )
+
   // If a new component is provided, update the state so children can re-render with the new component
   React.useEffect(() => {
     if (InitialFolderResultsComponent) {
@@ -616,16 +720,18 @@ export function FolderProvider({
         allCollectionFolderSlugs,
         allowCreateCollectionSlugs,
         breadcrumbs,
+        checkIfItemIsDisabled,
         clearSelections,
-        currentFolder: breadcrumbs?.[0]?.id
-          ? formatFolderOrDocumentItem({
-              folderFieldName,
-              isUpload: false,
-              relationTo: folderCollectionSlug,
-              useAsTitle: folderCollectionConfig.admin.useAsTitle,
-              value: breadcrumbs[breadcrumbs.length - 1],
-            })
-          : null,
+        currentFolder:
+          breadcrumbs?.[breadcrumbs.length - 1]?.id !== undefined
+            ? formatFolderOrDocumentItem({
+                folderFieldName,
+                isUpload: false,
+                relationTo: folderCollectionSlug,
+                useAsTitle: folderCollectionConfig.admin.useAsTitle,
+                value: breadcrumbs[breadcrumbs.length - 1],
+              })
+            : null,
         documents,
         focusedRowIndex,
         folderCollectionConfig,
@@ -633,6 +739,7 @@ export function FolderProvider({
         folderFieldName,
         folderID,
         FolderResultsComponent,
+        folderType: breadcrumbs?.[breadcrumbs.length - 1]?.folderType,
         getFolderRoute,
         getSelectedItems,
         isDragging,
@@ -643,6 +750,7 @@ export function FolderProvider({
         onItemKeyPress,
         refineFolderData,
         search,
+        selectedCollectionCounter,
         selectedItemKeys,
         setBreadcrumbs,
         setFocusedRowIndex,
