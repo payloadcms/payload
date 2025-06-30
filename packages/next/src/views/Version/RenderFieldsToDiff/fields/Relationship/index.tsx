@@ -16,7 +16,9 @@ import { generateLabelFromValue } from './generateLabelFromValue.js'
 
 const baseClass = 'relationship-diff'
 
-export type PopulatedRelationshipValue = { relationTo: string; value: TypeWithID } | TypeWithID
+export type RelationshipValue =
+  | { relationTo: string; value: number | string | TypeWithID }
+  | (number | string | TypeWithID)
 
 export const Relationship: RelationshipFieldDiffServerComponent = ({
   comparisonValue: valueFrom,
@@ -41,8 +43,8 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
         parentIsLocalized={parentIsLocalized}
         polymorphic={polymorphic}
         req={req}
-        valueFrom={valueFrom as PopulatedRelationshipValue[] | undefined}
-        valueTo={valueTo as PopulatedRelationshipValue[] | undefined}
+        valueFrom={valueFrom as RelationshipValue[] | undefined}
+        valueTo={valueTo as RelationshipValue[] | undefined}
       />
     )
   }
@@ -56,8 +58,8 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
       parentIsLocalized={parentIsLocalized}
       polymorphic={polymorphic}
       req={req}
-      valueFrom={valueFrom as PopulatedRelationshipValue}
-      valueTo={valueTo as PopulatedRelationshipValue}
+      valueFrom={valueFrom as RelationshipValue}
+      valueTo={valueTo as RelationshipValue}
     />
   )
 }
@@ -70,8 +72,8 @@ export const SingleRelationshipDiff: React.FC<{
   parentIsLocalized: boolean
   polymorphic: boolean
   req: PayloadRequest
-  valueFrom: PopulatedRelationshipValue
-  valueTo: PopulatedRelationshipValue
+  valueFrom: RelationshipValue
+  valueTo: RelationshipValue
 }> = async (args) => {
   const {
     field,
@@ -151,8 +153,8 @@ const ManyRelationshipDiff: React.FC<{
   parentIsLocalized: boolean
   polymorphic: boolean
   req: PayloadRequest
-  valueFrom: PopulatedRelationshipValue[] | undefined
-  valueTo: PopulatedRelationshipValue[] | undefined
+  valueFrom: RelationshipValue[] | undefined
+  valueTo: RelationshipValue[] | undefined
 }> = async ({
   field,
   i18n,
@@ -169,7 +171,7 @@ const ManyRelationshipDiff: React.FC<{
   const fromArr = Array.isArray(valueFrom) ? valueFrom : []
   const toArr = Array.isArray(valueTo) ? valueTo : []
 
-  const makeNodes = (list: PopulatedRelationshipValue[]) =>
+  const makeNodes = (list: RelationshipValue[]) =>
     list.map((val, idx) => (
       <RelationshipDocumentDiff
         field={field}
@@ -234,7 +236,7 @@ const RelationshipDocumentDiff = ({
   relationTo: string
   req: PayloadRequest
   showPill?: boolean
-  value: PopulatedRelationshipValue
+  value: RelationshipValue
 }) => {
   const localeToUse =
     locale ??
