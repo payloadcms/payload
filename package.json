@@ -125,7 +125,7 @@
     "tsconfig.base.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {
-    "@jest/globals": "29.7.0",
+    "@jest/globals": "30.0.3",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "15.3.2",
     "@payloadcms/db-postgres": "workspace:*",
@@ -139,7 +139,7 @@
     "@swc/cli": "0.7.7",
     "@swc/jest": "0.2.38",
     "@types/fs-extra": "^11.0.2",
-    "@types/jest": "29.5.12",
+    "@types/jest": "30.0.0",
     "@types/minimist": "1.2.5",
     "@types/node": "22.15.30",
     "@types/react": "19.1.0",
@@ -159,7 +159,7 @@
     "fs-extra": "10.1.0",
     "globby": "11.1.0",
     "husky": "9.0.11",
-    "jest": "29.7.0",
+    "jest": "30.0.3",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "10.1.4",
