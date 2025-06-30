@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { expect } from '@playwright/test'
+
 type Args = {
   doubleClick?: boolean
   folderName: string
@@ -28,6 +30,7 @@ export async function clickFolderCard({
     await page.keyboard.up('Alt')
     await page.keyboard.up('Meta')
     await folderCard.dblclick()
+    await expect(folderCard).toBeHidden()
   } else {
     await folderCard.click()
   }

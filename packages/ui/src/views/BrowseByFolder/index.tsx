@@ -112,12 +112,12 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
+    dragOverlayItem,
     folderCollectionConfig,
     folderID,
     folderType,
     getFolderRoute,
     getSelectedItems,
-    lastSelectedIndex,
     moveToFolder,
     refineFolderData,
     search,
@@ -353,11 +353,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
         </Gutter>
         {AfterFolderList}
       </div>
-      <DragOverlaySelection
-        allItems={[...subfolders, ...documents]}
-        lastSelected={lastSelectedIndex}
-        selectedCount={selectedItemKeys.size}
-      />
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
+        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+      )}
     </Fragment>
   )
 }

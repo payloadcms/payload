@@ -107,12 +107,12 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
+    dragOverlayItem,
     folderCollectionConfig,
     folderCollectionSlug,
     FolderResultsComponent,
     folderType,
     getSelectedItems,
-    lastSelectedIndex,
     moveToFolder,
     refineFolderData,
     selectedItemKeys,
@@ -366,11 +366,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
         </Gutter>
         {AfterFolderList}
       </div>
-      <DragOverlaySelection
-        allItems={[...subfolders, ...documents]}
-        lastSelected={lastSelectedIndex}
-        selectedCount={selectedItemKeys.size}
-      />
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
+        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+      )}
     </Fragment>
   )
 }
