@@ -81,7 +81,7 @@ export function FolderFileCard({
   }, [isFocused])
 
   return (
-    <div
+    <DraggableWithClick
       className={[
         baseClass,
         className,
@@ -94,17 +94,12 @@ export function FolderFileCard({
       ]
         .filter(Boolean)
         .join(' ')}
+      disabled={disabled || !(onClick || onKeyDown)}
       key={itemKey}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      ref={ref}
     >
-      {!disabled && (onClick || onKeyDown) && (
-        <DraggableWithClick
-          className={`${baseClass}__drag-handle`}
-          key={itemKey}
-          onClick={onClick}
-          onKeyDown={onKeyDown}
-          ref={ref}
-        />
-      )}
       {!disableDrop ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
 
       {type === 'file' ? (
@@ -137,7 +132,7 @@ export function FolderFileCard({
           </Popup>
         ) : null}
       </div>
-    </div>
+    </DraggableWithClick>
   )
 }
 

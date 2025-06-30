@@ -9,6 +9,7 @@ type Props = {
   readonly as?: React.ElementType
   readonly children?: React.ReactNode
   readonly className?: string
+  readonly disabled?: boolean
   readonly onClick: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly ref?: React.RefObject<HTMLDivElement>
@@ -19,13 +20,14 @@ export const DraggableWithClick = ({
   as = 'div',
   children,
   className,
+  disabled = false,
   onClick,
   onKeyDown,
   ref,
   thresholdPixels = 3,
 }: Props) => {
   const id = useId()
-  const { attributes, listeners, setNodeRef } = useDraggable({ id })
+  const { attributes, listeners, setNodeRef } = useDraggable({ id, disabled })
   const initialPos = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
 
@@ -74,10 +76,15 @@ export const DraggableWithClick = ({
       role="button"
       tabIndex={0}
       {...attributes}
-      className={`${baseClass} ${className || ''}`.trim()}
-      onKeyDown={onKeyDown}
-      onPointerDown={onClick ? handlePointerDown : undefined}
+      className={[baseClass, className, disabled ? `${baseClass}--disabled` : '']
+        .filter(Boolean)
+        .join(' ')}
+      onKeyDown={disabled ? onKeyDown : undefined}
+      onPointerDown={disabled ? undefined : onClick ? handlePointerDown : undefined}
       ref={(node) => {
+        if (disabled) {
+          return
+        }
         setNodeRef(node)
         if (ref) {
           ref.current = node
