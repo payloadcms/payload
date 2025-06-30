@@ -1,6 +1,9 @@
 import type {
+  ArrayField,
+  BlocksField,
   BuildFormStateArgs,
   ClientFieldSchemaMap,
+  CollapsedPreferences,
   Data,
   DocumentPreferences,
   Field,
@@ -350,24 +353,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             acc.rows.push(newRow)
 
-            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
+            const isCollapsed = getIsCollapsed({
+              collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+              field,
+              previousRow,
+              row,
+            })
 
-            const collapsed = (() => {
-              if (previousRow) {
-                return previousRow.collapsed ?? false
-              }
-
-              // If previousFormState is undefined, check preferences
-              if (collapsedRowIDsFromPrefs !== undefined) {
-                return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
-              }
-
-              // If neither exists, fallback to `field.admin.initCollapsed`
-              return field.admin.initCollapsed
-            })()
-
-            if (collapsed) {
-              acc.rows[acc.rows.length - 1].collapsed = collapsed
+            if (isCollapsed) {
+              acc.rows[acc.rows.length - 1].collapsed = true
             }
 
             return acc
@@ -541,15 +535,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               acc.rowMetadata.push(newRow)
 
-              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+              const isCollapsed = getIsCollapsed({
+                collapsedPrefs: preferences?.fields?.[path]?.collapsed,
+                field,
+                previousRow,
+                row,
+              })
 
-              const collapsed =
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id)
-
-              if (collapsed) {
-                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = collapsed
+              if (isCollapsed) {
+                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = true
               }
             }
 
@@ -955,4 +949,28 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       siblingData: data,
     })
   }
+}
+
+function getIsCollapsed({
+  collapsedPrefs,
+  field,
+  previousRow,
+  row,
+}: {
+  collapsedPrefs: CollapsedPreferences
+  field: ArrayField | BlocksField
+  previousRow: Row | undefined
+  row: Row
+}): boolean {
+  if (previousRow) {
+    return previousRow.collapsed ?? false
+  }
+
+  // If previousFormState is `undefined`, check preferences
+  if (collapsedPrefs !== undefined) {
+    return collapsedPrefs.includes(row.id) // Check if collapsed in preferences
+  }
+
+  // If neither exists, fallback to `field.admin.initCollapsed`
+  return field.admin.initCollapsed
 }
