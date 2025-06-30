@@ -113,7 +113,7 @@ export function configToSchema(config: SanitizedConfig): {
       variables: args.variableValues,
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
-    ...(config.graphQL.disablePlaygroundInProduction ? [NoProductionIntrospection] : []),
+    ...(config.graphQL.disableIntrospectionInProduction ? [NoProductionIntrospection] : []),
     ...(typeof config?.graphQL?.validationRules === 'function'
       ? config.graphQL.validationRules(args)
       : []),
