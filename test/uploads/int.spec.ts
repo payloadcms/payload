@@ -1,5 +1,6 @@
 import type { CollectionSlug, Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -17,8 +18,10 @@ import {
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  noRestrictedFileTypesSlug,
   reduceSlug,
   relationSlug,
+  restrictedFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchMediaSlug,
   unstoredMediaSlug,
@@ -621,6 +624,40 @@ describe('Collections - Uploads', () => {
             message: expect.not.stringContaining('unsafe'),
           }),
         )
+      })
+    })
+
+    describe('file restrictions', () => {
+      const file: File = {
+        name: `test-${randomUUID()}.html`,
+        data: Buffer.from('<html><script>alert("test")</script></html>'),
+        mimetype: 'text/html',
+        size: 100,
+      }
+      it('should reject files with restricted file types', async () => {
+        await expect(async () =>
+          payload.create({
+            collection: restrictedFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'APIError',
+            message: `File validation failed for ${file.name}: Restricted file type detected`,
+          }),
+        )
+      })
+
+      it('should allow files with restricted file types', async () => {
+        const response = await payload.create({
+          collection: noRestrictedFileTypesSlug as CollectionSlug,
+          data: {},
+          file,
+        })
+
+        expect(response).toBeTruthy()
+        expect(response.filename).toEqual(file.name)
       })
     })
   })

@@ -1,6 +1,6 @@
 import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
@@ -221,7 +221,6 @@ export type UploadConfig = {
    * @default undefined
    */
   modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
-
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
@@ -240,6 +239,10 @@ export type UploadConfig = {
    * @default undefined
    */
   resizeOptions?: ResizeOptions
+  /**
+   * Restrict file types known to be problematic.
+   */
+  restrictedFileTypes?: boolean
   /**
    *  Skip safe fetch when using server-side fetching for external files from these URLs.
    *  @default false
@@ -262,6 +265,11 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+export type checkFileRestrictionsParams = {
+  collection: CollectionConfig
+  file: File
+  req: PayloadRequest
 }
 
 export type SanitizedUploadConfig = {
