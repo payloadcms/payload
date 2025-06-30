@@ -132,7 +132,15 @@ import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import { countVersionsLocal } from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
+import { type JobStats, jobStatsGlobalSlug } from './queues/config/global.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { getQueuesWithSchedules } from './queues/operations/handleSchedules/getQueuesWithSchedules.js'
+import {
+  checkQueueableTimeConstraints,
+  scheduleQueueable,
+} from './queues/operations/handleSchedules/index.js'
+import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { createLocalReq } from './utilities/createLocalReq.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -837,37 +845,82 @@ export class BasePayload {
       throw error
     }
 
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
-      const DEFAULT_CRON = '* * * * *'
-      const DEFAULT_LIMIT = 10
+    if (this.config.jobs.enabled && !isNextBuild()) {
+      if (this.config.jobs.autoRun) {
+        const DEFAULT_CRON = '* * * * *'
+        const DEFAULT_LIMIT = 10
 
-      const cronJobs =
-        typeof this.config.jobs.autoRun === 'function'
-          ? await this.config.jobs.autoRun(this)
-          : this.config.jobs.autoRun
+        const cronJobs =
+          typeof this.config.jobs.autoRun === 'function'
+            ? await this.config.jobs.autoRun(this)
+            : this.config.jobs.autoRun
 
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-              if (!shouldAutoRun) {
-                job.stop()
-
-                return false
+        await Promise.all(
+          cronJobs.map((cronConfig) => {
+            const jobAutorunCron = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+                return
               }
-            }
 
-            await this.jobs.run({
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+                silent: cronConfig.silent,
+              })
             })
-          })
 
-          this.crons.push(job)
-        }),
-      )
+            this.crons.push(jobAutorunCron)
+          }),
+        )
+      }
+
+      if (this.config.jobs.scheduler === 'cron') {
+        const queuesWithSchedules = getQueuesWithSchedules({
+          jobsConfig: this.config.jobs,
+        })
+
+        for (const [queueName, { schedules }] of Object.entries(queuesWithSchedules)) {
+          for (const schedulable of schedules) {
+            const jobScheduleCron = new Cron(schedulable.scheduleConfig.cron, async () => {
+              if (!_internal_jobSystemGlobals.shouldAutoSchedule) {
+                return
+              }
+
+              const stats: JobStats = await this.db.findGlobal({
+                slug: jobStatsGlobalSlug,
+              })
+
+              const queueable = checkQueueableTimeConstraints({
+                queue: queueName,
+                scheduleConfig: schedulable.scheduleConfig,
+                stats,
+                taskConfig: schedulable.taskConfig,
+                workflowConfig: schedulable.workflowConfig,
+              })
+              if (!queueable) {
+                return
+              }
+
+              await scheduleQueueable({
+                queueable,
+                req: await createLocalReq({}, this),
+                stats,
+              })
+            })
+
+            this.crons.push(jobScheduleCron)
+          }
+        }
+      }
     }
 
     return this
@@ -914,8 +967,10 @@ export const reload = async (
   payload: Payload,
   skipImportMapGeneration?: boolean,
 ): Promise<void> => {
-  await payload.destroy()
-
+  if (typeof payload.db.destroy === 'function') {
+    // Only destroy db, as we then later only call payload.db.init and not payload.init
+    await payload.db.destroy()
+  }
   payload.config = config
 
   payload.collections = config.collections.reduce(
@@ -1158,6 +1213,7 @@ export type {
 export type { CompoundIndex } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
+
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1173,7 +1229,6 @@ export { restoreVersionOperation } from './collections/operations/restoreVersion
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
-
 export {
   type ClientConfig,
   createClientConfig,
@@ -1183,6 +1238,7 @@ export {
 } from './config/client.js'
 
 export { defaults } from './config/defaults.js'
+
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1299,8 +1355,8 @@ export {
   ValidationErrorName,
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
-
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export {
   createClientField,
@@ -1308,10 +1364,7 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-
 export { sanitizeFields } from './fields/config/sanitize.js'
-
-export interface FieldCustom extends Record<string, any> {}
 
 export type {
   AdminClient,
@@ -1421,16 +1474,19 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
+export interface FieldCustom extends Record<string, any> {}
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
 
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
-
 export { validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1483,8 +1539,8 @@ export type {
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
@@ -1505,9 +1561,8 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
-export { jobAfterRead } from './queues/config/index.js'
+export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
-
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -1521,6 +1576,7 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
+
 export type {
   BaseJob,
   JobLog,
@@ -1531,7 +1587,13 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+export {
+  _internal_jobSystemGlobals,
+  _internal_resetJobSystemGlobals,
+  getCurrentDate,
+} from './queues/utilities/getCurrentDate.js'
 
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
