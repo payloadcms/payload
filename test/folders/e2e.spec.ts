@@ -171,16 +171,12 @@ test.describe('Folders', () => {
         hasText: 'Move',
       })
       await moveButton.click()
-      const destinationFolder = page
-        .locator('dialog#move-to-folder--list .folder-file-card')
-        .filter({
-          has: page.locator('.folder-file-card__name', { hasText: 'Move Into This Folder' }),
-        })
-        .first()
-      const destinationFolderButton = destinationFolder.locator(
-        'div[role="button"].folder-file-card__drag-handle',
-      )
-      await destinationFolderButton.click()
+      await clickFolderCard({
+        folderName: 'Move Into This Folder',
+        page,
+        doubleClick: true,
+        rootLocator: page.locator('dialog#move-to-folder--list'),
+      })
       const selectButton = page.locator(
         'dialog#move-to-folder--list button[aria-label="Apply Changes"]',
       )
