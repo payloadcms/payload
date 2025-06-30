@@ -53,6 +53,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
+  parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
   rootTableName?: string
@@ -83,6 +84,7 @@ export const getTableColumnFromPath = ({
   fields,
   joins,
   locale: incomingLocale,
+  parentAliasTable,
   parentIsLocalized,
   pathSegments: incomingSegments,
   rootTableName: incomingRootTableName,
@@ -162,6 +164,7 @@ export const getTableColumnFromPath = ({
             table: adapter.tables[newTableName],
           })
         }
+
         return getTableColumnFromPath({
           adapter,
           collectionPath,
@@ -170,6 +173,7 @@ export const getTableColumnFromPath = ({
           fields: field.flattenedFields,
           joins,
           locale,
+          parentAliasTable: aliasTable,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
           rootTableName,
@@ -548,7 +552,10 @@ export const getTableColumnFromPath = ({
           // Join in the relationships table
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
-              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+              eq(
+                (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
+                aliasRelationshipTable.parent,
+              ),
               like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
             ]
 
@@ -566,7 +573,10 @@ export const getTableColumnFromPath = ({
             // Join in the relationships table
             addJoinTable({
               condition: and(
-                eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+                eq(
+                  (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
+                  aliasRelationshipTable.parent,
+                ),
                 like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
               ),
               joins,
