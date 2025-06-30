@@ -28,7 +28,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        collapsed: false,
         isLoading: true,
       }
 
@@ -191,6 +190,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
     case 'MERGE_SERVER_STATE': {
       const { acceptValues, prevStateRef, serverState } = action
+
+      console.log(serverState)
 
       const newState = mergeServerFormState({
         acceptValues,

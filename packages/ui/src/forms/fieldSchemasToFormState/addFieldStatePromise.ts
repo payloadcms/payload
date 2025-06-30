@@ -37,6 +37,7 @@ import {
 import type { RenderFieldMethod } from './types.js'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
+import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -337,10 +338,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rows = []
             }
 
-            const previousRows = previousFormState?.[path]?.rows || []
-
             // First, check if `previousFormState` has a matching row
-            const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
+            const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+              (prevRow) => prevRow.id === row.id,
+            )
 
             const newRow: Row = {
               id: row.id,
@@ -353,12 +354,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             acc.rows.push(newRow)
 
-            const isCollapsed = getIsCollapsed({
+            const isCollapsed = isRowCollapsed({
               collapsedPrefs: preferences?.fields?.[path]?.collapsed,
               field,
               previousRow,
               row,
             })
+
+            console.log(
+              isCollapsed,
+              field.admin,
+              preferences?.fields?.[path]?.collapsed,
+              previousRow,
+            )
 
             if (isCollapsed) {
               acc.rows[acc.rows.length - 1].collapsed = true
@@ -518,10 +526,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              const previousRows = previousFormState?.[path]?.rows || []
-
               // First, check if `previousFormState` has a matching row
-              const previousRow: Row = previousRows.find((prevRow) => prevRow.id === row.id)
+              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+                (prevRow) => prevRow.id === row.id,
+              )
 
               const newRow: Row = {
                 id: row.id,
@@ -535,7 +543,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               acc.rowMetadata.push(newRow)
 
-              const isCollapsed = getIsCollapsed({
+              const isCollapsed = isRowCollapsed({
                 collapsedPrefs: preferences?.fields?.[path]?.collapsed,
                 field,
                 previousRow,
@@ -949,28 +957,4 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       siblingData: data,
     })
   }
-}
-
-function getIsCollapsed({
-  collapsedPrefs,
-  field,
-  previousRow,
-  row,
-}: {
-  collapsedPrefs: CollapsedPreferences
-  field: ArrayField | BlocksField
-  previousRow: Row | undefined
-  row: Row
-}): boolean {
-  if (previousRow) {
-    return previousRow.collapsed ?? false
-  }
-
-  // If previousFormState is `undefined`, check preferences
-  if (collapsedPrefs !== undefined) {
-    return collapsedPrefs.includes(row.id) // Check if collapsed in preferences
-  }
-
-  // If neither exists, fallback to `field.admin.initCollapsed`
-  return field.admin.initCollapsed
 }
