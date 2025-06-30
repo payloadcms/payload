@@ -164,6 +164,7 @@ export const getTableColumnFromPath = ({
         }
         return getTableColumnFromPath({
           adapter,
+          aliasTable,
           collectionPath,
           constraintPath,
           constraints,
