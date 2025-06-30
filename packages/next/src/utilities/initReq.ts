@@ -6,7 +6,7 @@ import type {
   PayloadRequest,
   SanitizedConfig,
   SanitizedPermissions,
-  User,
+  TypedUser,
 } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -37,7 +37,7 @@ type PartialResult = {
   languageCode: AcceptedLanguages
   payload: Payload
   responseHeaders: Headers
-  user: null | User
+  user: null | TypedUser
 }
 
 // Create cache instances for different parts of our application

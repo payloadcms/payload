@@ -17,6 +17,7 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
+import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -24,6 +25,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
@@ -35,8 +37,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import './index.scss'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -121,6 +123,7 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
+  const { isLivePreviewEnabled, isLivePreviewing, previewWindowType } = useLivePreviewContext()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -170,16 +173,6 @@ export function DefaultEditView({
     isLocked: false,
     user: null,
   })
-
-  const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
-
-  if (globalSlug) {
-    classes.push(`global-edit--${globalSlug}`)
-  }
-
-  if (collectionSlug) {
-    classes.push(`collection-edit--${collectionSlug}`)
-  }
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -450,7 +443,17 @@ export function DefaultEditView({
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
 
   return (
-    <main className={classes.filter(Boolean).join(' ')}>
+    <main
+      className={[
+        baseClass,
+        (id || globalSlug) && `${baseClass}--is-editing`,
+        globalSlug && `global-edit--${globalSlug}`,
+        collectionSlug && `collection-edit--${collectionSlug}`,
+        isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <OperationProvider operation={operation}>
         <Form
           action={action}
@@ -535,6 +538,7 @@ export function DefaultEditView({
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            isInDrawer={isInDrawer}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
@@ -560,51 +564,73 @@ export function DefaultEditView({
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
-          <DocumentFields
-            AfterFields={AfterFields}
-            BeforeFields={
-              BeforeFields || (
-                <Fragment>
-                  {auth && (
-                    <Auth
-                      className={`${baseClass}__auth`}
-                      collectionSlug={collectionConfig.slug}
-                      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                      email={savedDocumentData?.email}
-                      loginWithUsername={auth?.loginWithUsername}
-                      operation={operation}
-                      readOnly={!hasSavePermission}
-                      requirePassword={!id}
-                      setValidateBeforeSubmit={setValidateBeforeSubmit}
-                      useAPIKey={auth.useAPIKey}
-                      username={savedDocumentData?.username}
-                      verify={auth.verify}
-                    />
-                  )}
-                  {upload && (
-                    <React.Fragment>
-                      <UploadControlsProvider>
-                        {CustomUpload || (
-                          <Upload
-                            collectionSlug={collectionConfig.slug}
-                            initialState={initialState}
-                            uploadConfig={upload}
-                            UploadControls={UploadControls}
-                          />
-                        )}
-                      </UploadControlsProvider>
-                    </React.Fragment>
-                  )}
-                </Fragment>
-              )
-            }
-            Description={Description}
-            docPermissions={docPermissions}
-            fields={docConfig.fields}
-            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
-            schemaPathSegments={schemaPathSegments}
-          />
-          {AfterDocument}
+          <div
+            className={[
+              `${baseClass}__main-wrapper`,
+              previewWindowType === 'popup' && `${baseClass}--detached`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <div
+              className={[
+                `${baseClass}__main`,
+                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <DocumentFields
+                AfterFields={AfterFields}
+                BeforeFields={
+                  BeforeFields || (
+                    <Fragment>
+                      {auth && (
+                        <Auth
+                          className={`${baseClass}__auth`}
+                          collectionSlug={collectionConfig.slug}
+                          disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                          email={savedDocumentData?.email}
+                          loginWithUsername={auth?.loginWithUsername}
+                          operation={operation}
+                          readOnly={!hasSavePermission}
+                          requirePassword={!id}
+                          setValidateBeforeSubmit={setValidateBeforeSubmit}
+                          useAPIKey={auth.useAPIKey}
+                          username={savedDocumentData?.username}
+                          verify={auth.verify}
+                        />
+                      )}
+                      {upload && (
+                        <React.Fragment>
+                          <UploadControlsProvider>
+                            {CustomUpload || (
+                              <Upload
+                                collectionSlug={collectionConfig.slug}
+                                initialState={initialState}
+                                uploadConfig={upload}
+                                UploadControls={UploadControls}
+                              />
+                            )}
+                          </UploadControlsProvider>
+                        </React.Fragment>
+                      )}
+                    </Fragment>
+                  )
+                }
+                Description={Description}
+                docPermissions={docPermissions}
+                fields={docConfig.fields}
+                forceSidebarWrap={isLivePreviewing}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+                schemaPathSegments={schemaPathSegments}
+              />
+              {AfterDocument}
+            </div>
+            {isLivePreviewEnabled && !isInDrawer && (
+              <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+            )}
+          </div>
         </Form>
       </OperationProvider>
     </main>

@@ -282,6 +282,7 @@ export const caTranslations: DefaultTranslationsObject = {
     enterAValue: 'Introdueix un valor',
     error: 'Error',
     errors: 'Errors',
+    exitLivePreview: 'Sortir de la Vista Previa en Directe',
     export: 'Exportació',
     fallbackToDefaultLocale: 'Torna al idioma per defecte',
     false: 'Fals',

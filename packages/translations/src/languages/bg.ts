@@ -281,6 +281,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     enterAValue: 'Въведи стойност',
     error: 'Грешка',
     errors: 'Грешки',
+    exitLivePreview: 'Излезте от Визуализация в Реално Време',
     export: 'Износ',
     fallbackToDefaultLocale: 'Използвай локализацията, която е по подразбиране',
     false: 'Невярно',

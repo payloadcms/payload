@@ -277,6 +277,7 @@ export const arTranslations: DefaultTranslationsObject = {
     enterAValue: 'أدخل قيمة',
     error: 'خطأ',
     errors: 'أخطاء',
+    exitLivePreview: 'إغلاق المعاينة المباشرة',
     export: 'تصدير',
     fallbackToDefaultLocale: 'الرجوع إلى اللغة الافتراضية',
     false: 'كاذب',
