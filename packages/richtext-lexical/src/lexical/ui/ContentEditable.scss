@@ -32,6 +32,9 @@ $lexical-contenteditable-bottom-padding: 8px;
     > .editor {
     > .ContentEditable__root {
       padding-left: 3rem;
+      &::before {
+        border-left: 1px solid var(--theme-elevation-100);
+      }
     }
   }
 
@@ -48,7 +51,6 @@ $lexical-contenteditable-bottom-padding: 8px;
     height: calc(
       100% - #{$lexical-contenteditable-top-padding} - #{$lexical-contenteditable-bottom-padding}
     );
-    border-left: 1px solid var(--theme-elevation-100);
   }
 
   html[data-theme='light'] {
