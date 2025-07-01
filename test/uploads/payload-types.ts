@@ -78,6 +78,7 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDatum;
     'crop-only': CropOnly;
     'focal-only': FocalOnly;
+    'image-sizes-only': ImageSizesOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
     'allow-list-media': AllowListMedia;
@@ -130,6 +131,7 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDataSelect<false> | WithOnlyJpegMetaDataSelect<true>;
     'crop-only': CropOnlySelect<false> | CropOnlySelect<true>;
     'focal-only': FocalOnlySelect<false> | FocalOnlySelect<true>;
+    'image-sizes-only': ImageSizesOnlySelect<false> | ImageSizesOnlySelect<true>;
     'focal-no-sizes': FocalNoSizesSelect<false> | FocalNoSizesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
@@ -719,6 +721,42 @@ export interface FocalOnly {
       filename?: string | null;
     };
     focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only".
+ */
+export interface ImageSizesOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sizeTwo?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -1540,6 +1578,10 @@ export interface PayloadLockedDocument {
         value: string | FocalOnly;
       } | null)
     | ({
+        relationTo: 'image-sizes-only';
+        value: string | ImageSizesOnly;
+      } | null)
+    | ({
         relationTo: 'focal-no-sizes';
         value: string | FocalNoSize;
       } | null)
@@ -2086,6 +2128,47 @@ export interface FocalOnlySelect<T extends boolean = true> {
               filename?: T;
             };
         focalTest3?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only_select".
+ */
+export interface ImageSizesOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        sizeOne?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        sizeTwo?:
           | T
           | {
               url?: T;

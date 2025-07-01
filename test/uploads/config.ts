@@ -25,6 +25,7 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
@@ -296,6 +297,26 @@ export default buildConfigWithDefaults({
         ],
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './focal-only'),
+      },
+    },
+    {
+      slug: imageSizesOnlySlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
       },
     },
     {
