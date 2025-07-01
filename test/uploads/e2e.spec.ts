@@ -33,6 +33,7 @@ import {
   customUploadFieldSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
@@ -64,6 +65,7 @@ let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
 let listViewPreviewURL: AdminUrlUtil
 let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
+let imageSizesOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
@@ -103,6 +105,7 @@ describe('Uploads', () => {
     listViewPreviewURL = new AdminUrlUtil(serverURL, listViewPreviewSlug)
     mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
+    imageSizesOnlyURL = new AdminUrlUtil(serverURL, imageSizesOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
@@ -870,6 +873,23 @@ describe('Uploads', () => {
 
     expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
+    await page.goto(imageSizesOnlyURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000) // Wait for the save
+
+    await expect(page.locator('.file-field__previewSizes')).toBeVisible()
   })
 
   describe('bulk uploads', () => {
