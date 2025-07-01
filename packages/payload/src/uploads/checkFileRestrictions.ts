@@ -1,12 +1,13 @@
 import { fileTypeFromBuffer } from 'file-type'
 
-import type { checkFileRestrictionsParams } from './types.js'
+import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { APIError } from '../errors/index.js'
+
 /**
  * Restricted file types and their extensions.
  */
-export const RESTRICTED_FILE_EXT_AND_TYPES = [
+export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
   { extensions: ['exe', 'dll'], fileType: 'application/x-msdownload' },
   { extensions: ['exe', 'com', 'app', 'action'], fileType: 'application/x-executable' },
   { extensions: ['bat', 'cmd'], fileType: 'application/x-msdos-program' },

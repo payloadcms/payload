@@ -102,6 +102,11 @@ export type AllowList = Array<{
   search?: string
 }>
 
+export type FileAllowList = Array<{
+  extensions: string[]
+  fileType: string
+}>
+
 type Admin = {
   components?: {
     /**
