@@ -28,6 +28,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
@@ -82,6 +83,7 @@ let constructorOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
+let bulkUploadsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -119,6 +121,7 @@ describe('Uploads', () => {
     withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
+    bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1192,6 +1195,26 @@ describe('Uploads', () => {
 
       // ensure the prefix field is still filled with the original value
       await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+    })
+
+    test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
+      await page.goto(bulkUploadsURL.list)
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+      await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
+
+      await page.locator('#field-title').fill('Upload title 1')
+      const bulkUploadForm = page.locator('.bulk-upload--file-manager')
+      const relationshipField = bulkUploadForm.locator('#field-relationship')
+      await relationshipField.locator('.relationship-add-new__add-button').click()
+
+      const collectionForm = page.locator('.collection-edit')
+      await collectionForm.locator('#field-title').fill('Related Document Title')
+      await saveDocAndAssert(page)
+      await collectionForm.locator('.doc-drawer__header-close').click()
+
+      await expect(bulkUploadForm.locator('.relationship--single-value__text')).toHaveText(
+        'Related Document Title',
+      )
     })
   })
 
