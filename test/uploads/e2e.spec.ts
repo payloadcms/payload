@@ -1169,6 +1169,32 @@ describe('Uploads', () => {
         'Related Document Title',
       )
     })
+
+    test('should reset state once all files are saved successfully from field bulk upload', async () => {
+      await page.goto(uploadsOne.create)
+      const fieldBulkUploadButton = page.locator('#field-hasManyThumbnailUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await fieldBulkUploadButton.click()
+      const fieldBulkUploadDrawer = page.locator(
+        '#hasManyThumbnailUpload-bulk-upload-drawer-slug-1',
+      )
+      await expect(fieldBulkUploadDrawer).toBeVisible()
+      await fieldBulkUploadDrawer
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
+      await fieldBulkUploadDrawer
+        .locator('.bulk-upload--actions-bar button', { hasText: 'Save' })
+        .click()
+      await expect(fieldBulkUploadDrawer).toBeHidden()
+      await fieldBulkUploadButton.click()
+
+      // should show add files dropzone view
+      await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
+    })
   })
 
   describe('remote url fetching', () => {
