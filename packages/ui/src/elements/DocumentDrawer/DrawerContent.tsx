@@ -143,7 +143,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const clearDoc = useCallback(() => {
-    getDocumentView()
+    getDocumentView(undefined, true)
   }, [getDocumentView])
 
   useEffect(() => {
