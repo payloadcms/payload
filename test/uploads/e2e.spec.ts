@@ -28,11 +28,13 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
   customUploadFieldSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
@@ -64,6 +66,7 @@ let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
 let listViewPreviewURL: AdminUrlUtil
 let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
+let imageSizesOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
@@ -80,6 +83,7 @@ let constructorOptionsURL: AdminUrlUtil
 let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
+let bulkUploadsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -103,6 +107,7 @@ describe('Uploads', () => {
     listViewPreviewURL = new AdminUrlUtil(serverURL, listViewPreviewSlug)
     mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
+    imageSizesOnlyURL = new AdminUrlUtil(serverURL, imageSizesOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
@@ -116,6 +121,7 @@ describe('Uploads', () => {
     withoutEnlargementResizeOptionsURL = new AdminUrlUtil(serverURL, withoutEnlargeSlug)
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
+    bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -872,6 +878,23 @@ describe('Uploads', () => {
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
+  test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
+    await page.goto(imageSizesOnlyURL.create)
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.waitForSelector('button#action-save')
+    await page.locator('button#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000) // Wait for the save
+
+    await expect(page.locator('.file-field__previewSizes')).toBeVisible()
+  })
+
   describe('bulk uploads', () => {
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
@@ -1172,6 +1195,26 @@ describe('Uploads', () => {
 
       // ensure the prefix field is still filled with the original value
       await expect(page.locator('#field-prefix')).toHaveValue('should-preserve')
+    })
+
+    test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
+      await page.goto(bulkUploadsURL.list)
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+      await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
+
+      await page.locator('#field-title').fill('Upload title 1')
+      const bulkUploadForm = page.locator('.bulk-upload--file-manager')
+      const relationshipField = bulkUploadForm.locator('#field-relationship')
+      await relationshipField.locator('.relationship-add-new__add-button').click()
+
+      const collectionForm = page.locator('.collection-edit')
+      await collectionForm.locator('#field-title').fill('Related Document Title')
+      await saveDocAndAssert(page)
+      await collectionForm.locator('.doc-drawer__header-close').click()
+
+      await expect(bulkUploadForm.locator('.relationship--single-value__text')).toHaveText(
+        'Related Document Title',
+      )
     })
   })
 
