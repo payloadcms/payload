@@ -62,7 +62,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
 
-  const [fields] = useAllFormFields()
+  const [formState] = useAllFormFields()
   const modified = useFormModified()
   const submitted = useFormSubmitted()
 
@@ -81,11 +81,15 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   )
 
   const [_saving, setSaving] = useState(false)
+
   const saving = useDeferredValue(_saving)
-  const debouncedFields = useDebounce(fields, interval)
-  const fieldRef = useRef(fields)
+
+  const debouncedFormState = useDebounce(formState, interval)
+
+  const formStateRef = useRef(formState)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
+
   /**
    * Track the validation internally so Autosave can determine when to run queue processing again
    * Helps us prevent infinite loops when the queue is processing and the form is invalid
@@ -95,18 +99,15 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
   // after the timeout has executed
-
-  fieldRef.current = fields
+  formStateRef.current = formState
 
   // Store modified in ref so the autosave func
   // can bail out if modified becomes false while
   // timing out during autosave
-
   modifiedRef.current = modified
 
   // Store locale in ref so the autosave func
   // can always retrieve the most to date locale
-
   localeRef.current = locale
 
   const { queueTask } = useQueues()
@@ -158,7 +159,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
           if (url) {
             if (modifiedRef.current) {
-              const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
+              const { data, valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
 
               data._status = 'draft'
 
@@ -294,7 +295,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const didMount = useRef(false)
-  const previousDebouncedFieldValues = useRef(reduceFieldsToValues(debouncedFields))
+  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -308,20 +309,19 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
     /**
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
+     * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
-    const debouncedFieldValues = reduceFieldsToValues(debouncedFields)
+    const { updatedAt: _, ...data } = reduceFieldsToValues(debouncedFormState)
+    const { updatedAt: __, ...prevData } = previousDebouncedData.current
 
-    delete debouncedFieldValues.updatedAt
-    // delete previousDebouncedFieldValues.updatedAt
-
-    if (dequal(debouncedFieldValues, previousDebouncedFieldValues.current)) {
+    if (dequal(data, prevData)) {
       return
     }
 
-    previousDebouncedFieldValues.current = debouncedFieldValues
+    previousDebouncedData.current = data
 
     handleAutosave()
-  }, [debouncedFields])
+  }, [debouncedFormState])
 
   /**
    * If component unmounts, clear the autosave timeout
