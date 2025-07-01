@@ -75,9 +75,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       showPasswordFields =
         passwordPermissions === true ||
-        (typeof passwordPermissions === 'object' &&
-          passwordPermissions.read &&
-          passwordPermissions.update)
+        (typeof passwordPermissions === 'object' && passwordPermissions.update)
     }
   }
 
