@@ -18,10 +18,11 @@ import {
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
-  noRestrictedFileTypesSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationSlug,
-  restrictedFileTypesSlug,
+  restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchMediaSlug,
   unstoredMediaSlug,
@@ -634,24 +635,35 @@ describe('Collections - Uploads', () => {
         mimetype: 'text/html',
         size: 100,
       }
-      it('should reject files with restricted file types', async () => {
+      it('should not allow files with restricted file types', async () => {
         await expect(async () =>
           payload.create({
-            collection: restrictedFileTypesSlug as CollectionSlug,
+            collection: restrictFileTypesSlug as CollectionSlug,
             data: {},
             file,
           }),
         ).rejects.toThrow(
           expect.objectContaining({
             name: 'APIError',
-            message: `File validation failed for ${file.name}: Restricted file type detected`,
+            message: `File type 'text/html' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
           }),
         )
       })
 
-      it('should allow files with restricted file types', async () => {
+      it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
         const response = await payload.create({
-          collection: noRestrictedFileTypesSlug as CollectionSlug,
+          collection: noRestrictFileTypesSlug as CollectionSlug,
+          data: {},
+          file,
+        })
+
+        expect(response).toBeTruthy()
+        expect(response.filename).toEqual(file.name)
+      })
+
+      it('should allow files with restricted file types when mimeTypes are set', async () => {
+        const response = await payload.create({
+          collection: noRestrictFileMimeTypesSlug as CollectionSlug,
           data: {},
           file,
         })

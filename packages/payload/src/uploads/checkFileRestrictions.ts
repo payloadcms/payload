@@ -55,13 +55,13 @@ export const checkFileRestrictions = async ({
       ? uploadConfig.mimeTypes
       : []
 
-  const restrictedFileTypes =
-    uploadConfig && typeof uploadConfig === 'object' && 'restrictedFileTypes' in uploadConfig
-      ? (uploadConfig as { restrictedFileTypes?: boolean }).restrictedFileTypes
+  const allowRestrictedFileTypes =
+    uploadConfig && typeof uploadConfig === 'object' && 'allowRestrictedFileTypes' in uploadConfig
+      ? (uploadConfig as { allowRestrictedFileTypes?: boolean }).allowRestrictedFileTypes
       : false
 
-  // Skip validation if `mimeTypes` are defined in the upload config, or `restrictedFileTypes` are allowed
-  if (restrictedFileTypes || configMimeTypes.length) {
+  // Skip validation if `mimeTypes` are defined in the upload config, or `allowRestrictedFileTypes` are allowed
+  if (allowRestrictedFileTypes || configMimeTypes.length) {
     return
   }
 
@@ -75,19 +75,9 @@ export const checkFileRestrictions = async ({
     (type) => type.fileType === detectedFileMime,
   )
 
-  if (isRestrictedMime) {
-    req.payload.logger.error(
-      `File validation failed for ${file.name}: Restricted file type detected`,
-    )
-    throw new APIError(`File validation failed for ${file.name}: Restricted file type detected`)
-  }
-
-  if (isRestrictedExt) {
-    req.payload.logger.error(
-      `File validation failed for ${file.name}: Restricted file extension detected`,
-    )
-    throw new APIError(
-      `File validation failed for ${file.name}: Restricted file extension detected`,
-    )
+  if (isRestrictedMime || isRestrictedExt) {
+    const errorMessage = `File type '${detectedFileMime}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`
+    req.payload.logger.error(errorMessage)
+    throw new APIError(errorMessage)
   }
 }

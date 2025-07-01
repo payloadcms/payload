@@ -133,6 +133,14 @@ export type UploadConfig = {
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Allow restricted file types known to be problematic.
+   * - If set to `true`, it will allow all file types.
+   * - If set to `false`, it will not allow file types and extensions known to be problematic.
+   * - This setting is overriden by the `mimeTypes` option.
+   * @default false
+   */
+  allowRestrictedFileTypes?: boolean
+  /**
    * Enables bulk upload of files from the list view.
    * @default true
    */
@@ -244,10 +252,6 @@ export type UploadConfig = {
    * @default undefined
    */
   resizeOptions?: ResizeOptions
-  /**
-   * Restrict file types known to be problematic.
-   */
-  restrictedFileTypes?: boolean
   /**
    *  Skip safe fetch when using server-side fetching for external files from these URLs.
    *  @default false
