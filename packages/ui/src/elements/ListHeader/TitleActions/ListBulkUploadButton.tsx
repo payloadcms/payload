@@ -38,7 +38,7 @@ export function ListBulkUploadButton({
     } else {
       setCollectionSlug(collectionSlug)
       openModal(bulkUploadDrawerSlug)
-      setOnSuccess(collectionSlug, () => {
+      setOnSuccess(() => {
         if (typeof onBulkUploadSuccess === 'function') {
           onBulkUploadSuccess()
         } else {

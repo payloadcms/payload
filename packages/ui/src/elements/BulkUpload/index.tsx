@@ -98,7 +98,7 @@ type BulkUploadContext = {
   setInitialFiles: (files: FileList) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
-  setOnSuccess: (path: string, onSuccess: BulkUploadContext['onSuccess']) => void
+  setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
 }
 
 const Context = React.createContext<BulkUploadContext>({

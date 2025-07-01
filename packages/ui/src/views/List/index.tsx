@@ -120,7 +120,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
     openModal(bulkUploadDrawerSlug)
-    setOnSuccess(collectionSlug, () => router.refresh())
+    setOnSuccess(() => router.refresh())
   }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {

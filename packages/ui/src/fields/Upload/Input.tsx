@@ -452,7 +452,7 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   useEffect(() => {
-    setOnSuccess(path, onUploadSuccess)
+    setOnSuccess(onUploadSuccess)
   }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
