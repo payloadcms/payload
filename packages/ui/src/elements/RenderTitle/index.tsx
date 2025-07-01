@@ -30,13 +30,6 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   // Render and invisible character to prevent layout shift when the title populates from context
   const EmptySpace = <Fragment>&nbsp;</Fragment>
-  const titleToRender = idAsTitle ? (
-    <IDLabel className={`${baseClass}__id`} id={id} />
-  ) : title && typeof title === 'string' ? (
-    title
-  ) : (
-    EmptySpace
-  )
 
   return (
     <Tag
@@ -45,7 +38,13 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
         .join(' ')}
       title={title}
     >
-      {isInitializing ? EmptySpace : <Fragment>{titleToRender}</Fragment>}
+      {isInitializing ? (
+        EmptySpace
+      ) : (
+        <Fragment>
+          {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title || EmptySpace}
+        </Fragment>
+      )}
     </Tag>
   )
 }
