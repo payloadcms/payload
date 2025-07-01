@@ -282,6 +282,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     enterAValue: 'Insira um valor',
     error: 'Erro',
     errors: 'Erros',
+    exitLivePreview: 'Sair da Visualização ao Vivo',
     export: 'Exportação',
     fallbackToDefaultLocale: 'Recuo para o local padrão',
     false: 'Falso',

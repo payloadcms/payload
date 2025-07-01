@@ -280,6 +280,7 @@ export const csTranslations: DefaultTranslationsObject = {
     enterAValue: 'Zadejte hodnotu',
     error: 'Chyba',
     errors: 'Chyby',
+    exitLivePreview: 'Opustit živý náhled',
     export: 'Vývoz',
     fallbackToDefaultLocale: 'Zpětné přepnutí do výchozího locale',
     false: 'Nepravda',

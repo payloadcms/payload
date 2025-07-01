@@ -15,7 +15,7 @@ import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy, User } from './auth/types.js'
+import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -138,6 +138,18 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
+export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { baseAuthFields } from './auth/baseFields/auth.js'
+export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
+export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
+export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
+
+export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
@@ -204,7 +216,7 @@ export interface GeneratedTypes {
     }
   }
   localeUntyped: null | string
-  userUntyped: User
+  userUntyped: UntypedUser
 }
 
 // Helper type to resolve the correct type using conditional types
@@ -287,6 +299,10 @@ type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUn
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+/**
+ * @todo rename to `User` in 4.0
+ */
 export type TypedUser = ResolveUserType<GeneratedTypes>
 
 // @ts-expect-error
@@ -1087,7 +1103,7 @@ export type {
   SanitizedFieldPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
-  User,
+  UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
@@ -1475,11 +1491,15 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  CollectionPreferences,
+  /**
+   * @deprecated Use `CollectionPreferences` instead.
+   */
+  CollectionPreferences as ListPreferences,
   ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
-  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,

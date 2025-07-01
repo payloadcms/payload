@@ -281,6 +281,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     enterAValue: 'Введіть значення',
     error: 'Помилка',
     errors: 'Помилки',
+    exitLivePreview: 'Вийти з режиму "Наживо"',
     export: 'Експорт',
     fallbackToDefaultLocale: 'Відновлення локалі за замовчуванням',
     false: 'Неправда',

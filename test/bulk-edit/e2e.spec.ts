@@ -2,7 +2,9 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -128,8 +130,12 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should unpublish many', async () => {
@@ -154,8 +160,12 @@ test.describe('Bulk Edit', () => {
     await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
     await page.locator('#unpublish-posts #confirm-action').click()
 
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText(
+      'Draft',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText(
+      'Draft',
+    )
   })
 
   test('should update many', async () => {
@@ -234,8 +244,12 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should draft many from drawer', async () => {
@@ -272,8 +286,8 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
   test('should delete all on page', async () => {
@@ -482,7 +496,22 @@ test.describe('Bulk Edit', () => {
 
     const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
 
+    await wait(500)
+
     await field.locator('button.array-field__add-row').click()
+
+    const row = page.locator(`#array-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-array__0__optional`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      targetState: 'open',
+      rowIndex: 0,
+      fieldName: 'array',
+    })
 
     await expect(field.locator('#field-array__0__optional')).toBeVisible()
     await expect(field.locator('#field-array__0__noRead')).toBeHidden()
@@ -507,15 +536,12 @@ test.describe('Bulk Edit', () => {
       `Updated ${postCount} Posts successfully.`,
     )
 
-    // eslint-disable-next-line jest-dom/prefer-checked
-    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 0; i < postCount; i++) {
-      // eslint-disable-next-line jest-dom/prefer-checked
-      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
-        'checked',
-        '',
-      )
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
     }
   })
 
@@ -537,20 +563,18 @@ test.describe('Bulk Edit', () => {
       `Updated ${postCount} Posts successfully.`,
     )
 
-    // eslint-disable-next-line jest-dom/prefer-checked
-    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 0; i < postCount; i++) {
-      // eslint-disable-next-line jest-dom/prefer-checked
-      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
-        'checked',
-        '',
-      )
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
     }
   })
 
   test('should toggle list selections off on successful edit', async () => {
     await deleteAllPosts()
+    const bulkEditValue = 'test'
 
     const postCount = 3
     Array.from({ length: postCount }).forEach(async (_, i) => {
@@ -575,7 +599,7 @@ test.describe('Bulk Edit', () => {
     const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 
-    await editDrawer.locator('input#field-title').fill('test')
+    await editDrawer.locator('input#field-title').fill(bulkEditValue)
 
     await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
 
@@ -583,15 +607,12 @@ test.describe('Bulk Edit', () => {
       `Updated ${postCount} Posts successfully.`,
     )
 
-    // eslint-disable-next-line jest-dom/prefer-checked
-    await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
 
-    for (let i = 0; i < postCount; i++) {
-      // eslint-disable-next-line jest-dom/prefer-checked
-      await expect(findTableCell(page, '_select', `Post ${i + 1}`)).not.toHaveAttribute(
-        'checked',
-        '',
-      )
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
     }
   })
 })

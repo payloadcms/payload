@@ -1,4 +1,4 @@
-import type { Payload, User, ViewTypes } from 'payload'
+import type { Payload, TypedUser, ViewTypes } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 
@@ -15,7 +15,7 @@ type Args = {
   tenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user?: User
+  user?: TypedUser
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({

@@ -467,7 +467,7 @@ export const promise = async ({
         })
       } else if (shouldHoistLocalizedValue) {
         siblingDoc[field.name] = null
-      } else {
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
       break
@@ -574,7 +574,7 @@ export const promise = async ({
         })
       } else if (shouldHoistLocalizedValue) {
         siblingDoc[field.name] = null
-      } else {
+      } else if (field.hidden !== true || showHiddenFields === true) {
         siblingDoc[field.name] = []
       }
 

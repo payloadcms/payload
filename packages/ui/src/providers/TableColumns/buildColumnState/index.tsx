@@ -2,12 +2,12 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientComponentProps,
   ClientField,
+  CollectionPreferences,
   CollectionSlug,
   Column,
   DefaultCellComponentProps,
   Document,
   Field,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -38,8 +38,8 @@ import { sortFieldMap } from './sortFieldMap.js'
 export type BuildColumnStateArgs = {
   beforeRows?: Column[]
   clientFields: ClientField[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columnPreferences: CollectionPreferences['columns']
+  columns?: CollectionPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   enableLinkedCell?: boolean
   enableRowSelections: boolean

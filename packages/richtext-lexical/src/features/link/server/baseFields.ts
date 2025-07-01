@@ -5,7 +5,7 @@ import type {
   SanitizedConfig,
   TextField,
   TextFieldSingleValidation,
-  User,
+  TypedUser,
 } from 'payload'
 
 import type { LinkFields } from '../nodes/types.js'
@@ -120,7 +120,7 @@ export const getBaseFields = (
           ? ({ relationTo, user }) => {
               const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
                 .hidden
-              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+              if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
                 return false
               }
               return true

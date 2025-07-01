@@ -172,6 +172,11 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type RootLivePreviewConfig = {
+  collections?: string[]
+  globals?: string[]
+} & LivePreviewConfig
+
 export type OGImageConfig = {
   alt?: string
   height?: number | string
@@ -202,7 +207,7 @@ export type MetaConfig = {
   titleSuffix?: string
 } & DeepClone<Metadata>
 
-export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
 type GeneratePreviewURLOptions = {
   locale: string
@@ -370,7 +375,7 @@ type BaseDocumentViewConfig = {
 export type CustomDocumentViewConfig =
   | ({
       Component: DocumentViewComponent
-      path: string
+      path: `/${string}`
     } & BaseDocumentViewConfig)
   | ({
       Component?: DocumentViewComponent
@@ -861,10 +866,7 @@ export type Config = {
        */
       importMapFile?: string
     }
-    livePreview?: {
-      collections?: string[]
-      globals?: string[]
-    } & LivePreviewConfig
+    livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
@@ -1160,18 +1162,35 @@ export type Config = {
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
-  /** Control the routing structure that Payload binds itself to. */
+  /**
+   * Control the routing structure that Payload binds itself to.
+   * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+   */
   routes?: {
-    /** The route for the admin panel.
-     * @example "/my-admin"
+    /**
+     * The route for the admin panel.
+     * @example "/my-admin" or "/"
      * @default "/admin"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
     admin?: string
-    /** @default "/api"  */
+    /**
+     * The base route for all REST API endpoints.
+     * @default "/api"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     api?: string
-    /** @default "/graphql"  */
+    /**
+     * The base route for all GraphQL endpoints.
+     * @default "/graphql"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQL?: string
-    /** @default "/graphql-playground" */
+    /**
+     * The route for the GraphQL Playground.
+     * @default "/graphql-playground"
+     * @link https://payloadcms.com/docs/admin/overview#root-level-routes
+     */
     graphQLPlayground?: string
   }
   /** Secure string that Payload will use for any encryption workflows */

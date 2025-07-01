@@ -281,6 +281,7 @@ export const slTranslations: DefaultTranslationsObject = {
     enterAValue: 'Vnesite vrednost',
     error: 'Napaka',
     errors: 'Napake',
+    exitLivePreview: 'Izhodi iz živega predogleda',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Uporabi privzeti jezik',
     false: 'Ne',
