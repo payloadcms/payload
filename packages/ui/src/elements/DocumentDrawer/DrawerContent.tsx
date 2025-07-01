@@ -41,7 +41,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { renderDocument } = useServerFunctions()
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const hasRenderedInitialDocument = useRef(false)
 
   const getDocumentView = useCallback(
