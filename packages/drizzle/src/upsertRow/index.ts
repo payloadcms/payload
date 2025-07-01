@@ -13,6 +13,13 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { insertArrays } from './insertArrays.js'
 
+/**
+ * If `id` is provided, it will update the row with that ID.
+ * If `where` is provided, it will update the row that matches the `where`
+ * If neither `id` nor `where` is provided, it will create a new row.
+ *
+ * This function replaces the entire row and does not support partial updates.
+ */
 export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
   adapter,

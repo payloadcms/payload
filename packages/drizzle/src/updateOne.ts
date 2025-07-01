@@ -66,6 +66,13 @@ export const updateOne: UpdateOne = async function updateOne(
     }
   }
 
+  if (!idToUpdate) {
+    // TODO: In 4.0, if returning === false, we should differentiate between:
+    // - No document found to update
+    // - Document found, but returning === false
+    return null
+  }
+
   const result = await upsertRow({
     id: idToUpdate,
     adapter: this,
