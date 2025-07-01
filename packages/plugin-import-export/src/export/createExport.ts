@@ -116,8 +116,9 @@ export const createExport = async (args: CreateExportArgs) => {
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
-    let columns: string[] | undefined
     let page = 1
+    const columnsSet = new Set<string>()
+    const columns: string[] = []
 
     const stream = new Readable({
       async read() {
@@ -135,19 +136,35 @@ export const createExport = async (args: CreateExportArgs) => {
           return
         }
 
-        const csvInput = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
+        const batchRows = result.docs.map((doc) => flattenObject({ doc, fields, toCSVFunctions }))
 
-        if (isFirstBatch) {
-          columns = Object.keys(csvInput[0] ?? {})
-        }
+        // Collect new column keys
+        batchRows.forEach((row) => {
+          Object.keys(row).forEach((key) => {
+            if (!columnsSet.has(key)) {
+              columnsSet.add(key)
+              columns.push(key)
+            }
+          })
+        })
 
-        const csvString = stringify(csvInput, {
+        // Ensure all rows have all columns
+        const paddedRows = batchRows.map((row) => {
+          const fullRow: Record<string, unknown> = {}
+          for (const key of columns) {
+            fullRow[key] = row[key] ?? ''
+          }
+          return fullRow
+        })
+
+        const csvString = stringify(paddedRows, {
           header: isFirstBatch,
           columns,
         })
 
         this.push(encoder.encode(csvString))
         isFirstBatch = false
+        page += 1
 
         if (!result.hasNextPage) {
           if (debug) {
@@ -155,8 +172,6 @@ export const createExport = async (args: CreateExportArgs) => {
           }
           this.push(null) // End the stream
         }
-
-        page += 1
       },
     })
 
