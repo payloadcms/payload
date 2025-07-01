@@ -109,6 +109,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      arrayHasManyPosts: 'posts';
       localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
@@ -240,6 +241,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -309,6 +317,12 @@ export interface Post {
   array?:
     | {
         category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  arrayHasMany?:
+    | {
+        category?: (string | Category)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -401,6 +415,11 @@ export interface Category {
     };
   };
   arrayPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  arrayHasManyPosts?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -971,6 +990,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -997,6 +1023,12 @@ export interface PostsSelect<T extends boolean = true> {
         camelCaseCategory?: T;
       };
   array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  arrayHasMany?:
     | T
     | {
         category?: T;
@@ -1049,6 +1081,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
   polymorphic?: T;

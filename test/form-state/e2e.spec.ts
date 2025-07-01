@@ -88,7 +88,7 @@ test.describe('Form State', () => {
       async () => {
         await addBlock({
           page,
-          blockLabel: 'Text',
+          blockToSelect: 'Text',
           fieldName: 'blocks',
         })
       },

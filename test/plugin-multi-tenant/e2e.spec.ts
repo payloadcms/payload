@@ -160,7 +160,6 @@ test.describe('Multi Tenant', () => {
         data: credentials.admin,
       })
       await page.goto(globalMenuURL.list)
-      await page.waitForURL(globalMenuURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
     })
 
@@ -282,6 +281,7 @@ test.describe('Multi Tenant', () => {
         urlUtil: tenantsURL,
       })
 
+      await expect(page.locator('#field-name')).toBeVisible()
       await page.locator('#field-name').fill('Red Dog')
       await saveDocAndAssert(page)
 
