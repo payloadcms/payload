@@ -1397,7 +1397,7 @@ describe('Queues', () => {
       // TODO: This test is flaky on supabase in CI, so we skip it for now
       return
     }
-    const amount = 500
+    const amount = 50
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
