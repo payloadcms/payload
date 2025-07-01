@@ -15,7 +15,7 @@ import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy, User } from './auth/types.js'
+import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -216,7 +216,7 @@ export interface GeneratedTypes {
     }
   }
   localeUntyped: null | string
-  userUntyped: User
+  userUntyped: UntypedUser
 }
 
 // Helper type to resolve the correct type using conditional types
@@ -299,6 +299,10 @@ type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUn
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+
+/**
+ * @todo rename to `User` in 4.0
+ */
 export type TypedUser = ResolveUserType<GeneratedTypes>
 
 // @ts-expect-error
@@ -1099,7 +1103,7 @@ export type {
   SanitizedFieldPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
-  User,
+  UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
