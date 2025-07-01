@@ -42,7 +42,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
-  const hasRenderedInitialDocument = useRef(false)
+  const hasInitialized = useRef(false)
 
   const getDocumentView = useCallback(
     (docID?: number | string, showLoadingIndicator: boolean = false) => {
@@ -147,9 +147,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView && !hasRenderedInitialDocument.current) {
+    if (!DocumentView && !hasInitialized.current) {
       getDocumentView(existingDocID, true)
-      hasRenderedInitialDocument.current = true
+      hasInitialized.current = true
     }
   }, [DocumentView, getDocumentView, existingDocID])
 
