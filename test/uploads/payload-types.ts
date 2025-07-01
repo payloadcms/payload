@@ -78,9 +78,12 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDatum;
     'crop-only': CropOnly;
     'focal-only': FocalOnly;
+    'image-sizes-only': ImageSizesOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
     'allow-list-media': AllowListMedia;
+    'skip-safe-fetch-media': SkipSafeFetchMedia;
+    'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMedia;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
     'without-enlarge': WithoutEnlarge;
@@ -126,9 +129,12 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDataSelect<false> | WithOnlyJpegMetaDataSelect<true>;
     'crop-only': CropOnlySelect<false> | CropOnlySelect<true>;
     'focal-only': FocalOnlySelect<false> | FocalOnlySelect<true>;
+    'image-sizes-only': ImageSizesOnlySelect<false> | ImageSizesOnlySelect<true>;
     'focal-no-sizes': FocalNoSizesSelect<false> | FocalNoSizesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
+    'skip-safe-fetch-media': SkipSafeFetchMediaSelect<false> | SkipSafeFetchMediaSelect<true>;
+    'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaSelect<false> | SkipAllowListSafeFetchMediaSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
     'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
@@ -722,6 +728,42 @@ export interface FocalOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only".
+ */
+export interface ImageSizesOnly {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sizeTwo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
@@ -743,6 +785,42 @@ export interface FocalNoSize {
  * via the `definition` "allow-list-media".
  */
 export interface AllowListMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-media".
+ */
+export interface SkipSafeFetchMedia {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-allow-list-safe-fetch-media".
+ */
+export interface SkipAllowListSafeFetchMedia {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1402,6 +1480,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -1456,6 +1541,10 @@ export interface PayloadLockedDocument {
         value: string | FocalOnly;
       } | null)
     | ({
+        relationTo: 'image-sizes-only';
+        value: string | ImageSizesOnly;
+      } | null)
+    | ({
         relationTo: 'focal-no-sizes';
         value: string | FocalNoSize;
       } | null)
@@ -1466,6 +1555,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'allow-list-media';
         value: string | AllowListMedia;
+      } | null)
+    | ({
+        relationTo: 'skip-safe-fetch-media';
+        value: string | SkipSafeFetchMedia;
+      } | null)
+    | ({
+        relationTo: 'skip-allow-list-safe-fetch-media';
+        value: string | SkipAllowListSafeFetchMedia;
       } | null)
     | ({
         relationTo: 'animated-type-media';
@@ -1999,6 +2096,47 @@ export interface FocalOnlySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only_select".
+ */
+export interface ImageSizesOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        sizeOne?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        sizeTwo?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "focal-no-sizes_select".
  */
 export interface FocalNoSizesSelect<T extends boolean = true> {
@@ -2200,6 +2338,40 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "allow-list-media_select".
  */
 export interface AllowListMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-media_select".
+ */
+export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-allow-list-safe-fetch-media_select".
+ */
+export interface SkipAllowListSafeFetchMediaSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2907,6 +3079,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
