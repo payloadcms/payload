@@ -366,13 +366,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       setIsUploading(false)
 
       const remainingForms = []
-      const thumbnailIndexesToRemove = []
 
       currentForms.forEach(({ errorCount }, i) => {
         if (errorCount) {
           remainingForms.push(currentForms[i])
-        } else {
-          thumbnailIndexesToRemove.push(i)
         }
       })
 

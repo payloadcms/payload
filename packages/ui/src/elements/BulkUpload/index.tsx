@@ -118,7 +118,13 @@ const Context = React.createContext<BulkUploadContext>({
   setOnCancel: () => null,
   setOnSuccess: () => null,
 })
-export function BulkUploadProvider({ children }: { readonly children: React.ReactNode }) {
+export function BulkUploadProvider({
+  children,
+  drawerSlugPrefix,
+}: {
+  readonly children: React.ReactNode
+  readonly drawerSlugPrefix?: string
+}) {
   const [collection, setCollection] = React.useState<string>()
   const [onSuccessFunctionMap, setOnSuccessFunctionMap] =
     React.useState<Record<string, BulkUploadContext['onSuccess']>>()
@@ -126,7 +132,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
   const [currentActivePath, setCurrentActivePath] = React.useState<string>(undefined)
-  const drawerSlug = useBulkUploadDrawerSlug()
+  const drawerSlug = `${drawerSlugPrefix ? `${drawerSlugPrefix}-` : ''}${useBulkUploadDrawerSlug()}`
 
   const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
     setCollection(slug)
