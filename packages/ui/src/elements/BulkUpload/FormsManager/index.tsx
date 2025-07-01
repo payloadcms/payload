@@ -118,7 +118,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
-  const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+  const { collectionSlug, drawerSlug, initialFiles, onSuccess, setInitialFiles } = useBulkUpload()
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -398,8 +398,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           totalErrorCount: remainingForms.reduce((acc, { errorCount }) => acc + errorCount, 0),
         },
       })
+
+      if (remainingForms.length === 0) {
+        setInitialFiles(undefined)
+      }
     },
     [
+      setInitialFiles,
       actionURL,
       collectionSlug,
       getUploadHandler,
