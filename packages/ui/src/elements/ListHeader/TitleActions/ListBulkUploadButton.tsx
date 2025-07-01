@@ -27,12 +27,7 @@ export function ListBulkUploadButton({
    */
   openBulkUpload?: () => void
 }) {
-  const {
-    drawerSlug: bulkUploadDrawerSlug,
-    setCollectionSlug,
-    setCurrentActivePath,
-    setOnSuccess,
-  } = useBulkUpload()
+  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
   const { t } = useTranslation()
   const { openModal } = useModal()
   const router = useRouter()
@@ -42,7 +37,6 @@ export function ListBulkUploadButton({
       openBulkUploadFromProps()
     } else {
       setCollectionSlug(collectionSlug)
-      setCurrentActivePath(collectionSlug)
       openModal(bulkUploadDrawerSlug)
       setOnSuccess(collectionSlug, () => {
         if (typeof onBulkUploadSuccess === 'function') {
@@ -58,7 +52,6 @@ export function ListBulkUploadButton({
     bulkUploadDrawerSlug,
     openModal,
     setCollectionSlug,
-    setCurrentActivePath,
     setOnSuccess,
     onBulkUploadSuccess,
     openBulkUploadFromProps,
