@@ -3,7 +3,7 @@
 @layer payload-default {
   .clear-indicator {
     cursor: pointer;
-    display: flex;
+    // display: flex;
 
     &:focus-visible {
       outline: var(--accessibility-outline);
