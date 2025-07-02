@@ -31,3 +31,4 @@ export const skipAllowListSafeFetchMediaSlug = 'skip-allow-list-safe-fetch-media
 export const listViewPreviewSlug = 'list-view-preview'
 export const threeDimensionalSlug = 'three-dimensional'
 export const constructorOptionsSlug = 'constructor-options'
+export const bulkUploadsSlug = 'bulk-uploads'
