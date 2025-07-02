@@ -8,6 +8,7 @@ const dirname = path.dirname(filename)
 export const tgzToPkgNameMap = {
   payload: 'payload-*',
   '@payloadcms/admin-bar': 'payloadcms-admin-bar-*',
+  '@payloadcms/db-d1-sqlite': 'payloadcms-db-d1-sqlite-*',
   '@payloadcms/db-mongodb': 'payloadcms-db-mongodb-*',
   '@payloadcms/db-postgres': 'payloadcms-db-postgres-*',
   '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
