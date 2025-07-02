@@ -199,15 +199,8 @@ describe('Uploads', () => {
     await page.locator('.upload-relationship-details__edit').nth(0).click()
     await page.locator('.file-details__remove').click()
 
-    const fileChooserPromise = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooser = await fileChooserPromise
-    await wait(1000)
-    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
-
-    await page.locator('button#action-save').nth(1).click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    await saveDocAndAssert(page, '.doc-drawer button#action-save')
 
     await page.locator('.doc-drawer__header-close').click()
 
@@ -695,16 +688,8 @@ describe('Uploads', () => {
   test('should upload image with metadata', async () => {
     await page.goto(withMetadataURL.create)
 
-    const fileChooserPromise = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooser = await fileChooserPromise
-    await wait(1000)
-    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
-
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    await saveDocAndAssert(page)
 
     const mediaID = page.url().split('/').pop()
 
@@ -716,22 +701,16 @@ describe('Uploads', () => {
 
     const acceptableFileSizes = [9431, 9435]
 
-    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeOne.filesize)
+    await expect
+      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeOne.filesize))
+      .toBe(true)
   })
 
   test('should upload image without metadata', async () => {
     await page.goto(withoutMetadataURL.create)
 
-    const fileChooserPromise = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooser = await fileChooserPromise
-    await wait(1000)
-    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
-
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    await saveDocAndAssert(page)
 
     const mediaID = page.url().split('/').pop()
 
@@ -743,22 +722,16 @@ describe('Uploads', () => {
 
     const acceptableFileSizes = [2424, 2445]
 
-    expect(acceptableFileSizes).toContain(mediaDoc.sizes.sizeTwo.filesize)
+    await expect
+      .poll(() => acceptableFileSizes.includes(mediaDoc.sizes.sizeTwo.filesize))
+      .toBe(true)
   })
 
   test('should only upload image with metadata if jpeg mimetype', async () => {
     await page.goto(withOnlyJPEGMetadataURL.create)
 
-    const fileChooserPromiseForJPEG = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooserForJPEG = await fileChooserPromiseForJPEG
-    await wait(1000)
-    await fileChooserForJPEG.setFiles(path.join(dirname, 'test-image.jpg'))
-
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    await saveDocAndAssert(page)
 
     const jpegMediaID = page.url().split('/').pop()
 
@@ -771,20 +744,14 @@ describe('Uploads', () => {
     const acceptableFileSizesForJPEG = [9554, 9575]
 
     // without metadata appended, the jpeg image filesize would be 2424
-    expect(acceptableFileSizesForJPEG).toContain(jpegMediaDoc.sizes.sizeThree.filesize)
+    await expect
+      .poll(() => acceptableFileSizesForJPEG.includes(jpegMediaDoc.sizes.sizeThree.filesize))
+      .toBe(true)
 
     await page.goto(withOnlyJPEGMetadataURL.create)
 
-    const fileChooserPromiseForWEBP = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooserForWEBP = await fileChooserPromiseForWEBP
-    await wait(1000)
-    await fileChooserForWEBP.setFiles(path.join(dirname, 'animated.webp'))
-
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'animated.webp'))
+    await saveDocAndAssert(page)
 
     const webpMediaID = page.url().split('/').pop()
 
@@ -795,7 +762,7 @@ describe('Uploads', () => {
     })
 
     // With metadata, the animated image filesize would be 218762
-    expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
+    await expect.poll(() => webpMediaDoc.sizes.sizeThree.filesize).toBe(211638)
   })
 
   test('should show custom upload component', async () => {
@@ -831,7 +798,8 @@ describe('Uploads', () => {
     const filename = page.locator('[id^="doc-drawer_admin-thumbnail-size"] .file-field__filename')
     await expect(filename).toHaveValue('test-image.png')
 
-    await page.waitForSelector('[id^="doc-drawer_admin-thumbnail-size"] #action-save')
+    await expect(page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save')).toBeVisible()
+
     await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -839,10 +807,12 @@ describe('Uploads', () => {
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
     // Ensure the URL starts correctly
-    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    await expect
+      .poll(() => href)
+      .toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
-    expect(href).not.toMatch(/-\d+x\d+\.png$/)
+    await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
   })
 
   test('should show original image url on a hasMany upload card for an upload with adminThumbnail defined', async () => {
@@ -853,23 +823,29 @@ describe('Uploads', () => {
     })
     await hasManyThumbnailButton.click()
 
-    const hasManyThumbnailModal = page.locator('#bulk-upload-drawer-slug-1')
+    const hasManyThumbnailModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
     await expect(hasManyThumbnailModal).toBeVisible()
 
-    await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-      path.resolve(dirname, './test-image.png'),
-    ])
+    await hasManyThumbnailModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
 
-    const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+    const saveButton = hasManyThumbnailModal.locator(
+      '.bulk-upload--actions-bar__saveButtons button',
+    )
     await saveButton.click()
 
-    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toBeVisible()
     const itemCount = await page
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
       .count()
-    expect(itemCount).toEqual(1)
+    await expect.poll(() => itemCount).toBe(1)
 
-    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a'),
+    ).toBeVisible()
     const href = await page
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
@@ -913,36 +889,37 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
-      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-        path.resolve(dirname, './image.png'),
-        path.resolve(dirname, './test-image.png'),
-      ])
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
 
-      await page
+      await bulkUploadModal
         .locator('.bulk-upload--file-manager .render-fields #field-prefix')
         .fill('prefix-one')
 
-      const nextImageChevronButton = page.locator(
+      const nextImageChevronButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
       await nextImageChevronButton.click()
 
-      await page
+      await bulkUploadModal
         .locator('.bulk-upload--file-manager .render-fields #field-prefix')
         .fill('prefix-two')
 
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
-      const itemCount = await page
-        .locator('#field-hasManyUpload .upload--has-many__dragItem')
-        .count()
-      expect(itemCount).toEqual(2)
+      const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
+      await expect(items).toHaveCount(2)
+      await expect(items.nth(0)).toBeVisible()
+      await expect(items.nth(1)).toBeVisible()
 
       await saveDocAndAssert(page)
     })
@@ -967,29 +944,27 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
-      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-        path.resolve(dirname, './test-pdf.pdf'),
-      ])
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([path.resolve(dirname, './test-pdf.pdf')])
 
-      await page
+      await bulkUploadModal
         .locator('.bulk-upload--file-manager .render-fields #field-prefix')
         .fill('prefix-one')
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
-      const itemCount = await page
-        .locator('#field-hasManyUpload .upload--has-many__dragItem')
-        .count()
-      expect(itemCount).toEqual(1)
+      const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
+      await expect(items).toHaveCount(1)
+      await expect(items.nth(0)).toBeVisible()
 
       await saveDocAndAssert(page)
 
       // Assert no console errors occurred for this test only
-      expect(consoleErrorsFromPage).toEqual([])
+      await expect.poll(() => consoleErrorsFromPage).toEqual([])
 
       // Reset global behavior for other tests
       stopCollectingErrorsFromPage()
@@ -1013,34 +988,37 @@ describe('Uploads', () => {
 
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
-      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-        path.resolve(dirname, './image.png'),
-        path.resolve(dirname, './test-image.png'),
-      ])
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
 
-      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      await page.locator('.edit-many-bulk-uploads__form .react-select').click({ delay: 100 })
-      const options = page.locator('.rs__option')
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__form .react-select')
+        .click({ delay: 100 })
+      const options = editManyBulkUploadModal.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
 
-      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
-      await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
-      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
 
-      const itemCount = await page
-        .locator('#field-hasManyUpload .upload--has-many__dragItem')
-        .count()
-      expect(itemCount).toEqual(2)
+      const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
+      await expect(items).toHaveCount(2)
+      await expect(items.nth(0)).toBeVisible()
+      await expect(items.nth(1)).toBeVisible()
 
       await saveDocAndAssert(page)
     })
@@ -1062,37 +1040,39 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
-      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-        path.resolve(dirname, './image.png'),
-        path.resolve(dirname, './test-image.png'),
-      ])
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
 
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
 
-      const errorCount = page
-        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
-        .first()
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('3')
 
-      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      const fieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
       await fieldSelector.click({ delay: 100 })
-      const options = page.locator('.rs__option')
+      const options = editManyBulkUploadModal.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
 
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText(
@@ -1119,53 +1099,51 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
-      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
-        path.resolve(dirname, './image.png'),
-        path.resolve(dirname, './test-image.png'),
-      ])
+      await bulkUploadModal
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
 
-      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      const fieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
       await fieldSelector.click({ delay: 100 })
-      const options = page.locator('.rs__option')
+      const options = editManyBulkUploadModal.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
-      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+      await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
 
-      await page
-        .locator('#bulk-upload-drawer-slug-1 .file-field__upload .file-field__remove')
-        .click()
+      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
 
-      const chevronRight = page.locator(
-        '#bulk-upload-drawer-slug-1 .bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      const chevronRight = bulkUploadModal.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
 
       await chevronRight.click()
 
       await expect(
-        page
-          .locator(
-            '#bulk-upload-drawer-slug-1 .file-selections .file-selections__fileRow .file-selections__fileName',
-          )
+        bulkUploadModal
+          .locator('.file-selections .file-selections__fileRow .file-selections__fileName')
           .first(),
       ).toContainText('No file')
 
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      const errorCount = page
-        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
-        .first()
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
     })
 
@@ -1215,6 +1193,32 @@ describe('Uploads', () => {
       await expect(bulkUploadForm.locator('.relationship--single-value__text')).toHaveText(
         'Related Document Title',
       )
+    })
+
+    test('should reset state once all files are saved successfully from field bulk upload', async () => {
+      await page.goto(uploadsOne.create)
+      const fieldBulkUploadButton = page.locator('#field-hasManyThumbnailUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await fieldBulkUploadButton.click()
+      const fieldBulkUploadDrawer = page.locator(
+        '#hasManyThumbnailUpload-bulk-upload-drawer-slug-1',
+      )
+      await expect(fieldBulkUploadDrawer).toBeVisible()
+      await fieldBulkUploadDrawer
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-image.png'),
+        ])
+      await fieldBulkUploadDrawer
+        .locator('.bulk-upload--actions-bar button', { hasText: 'Save' })
+        .click()
+      await expect(fieldBulkUploadDrawer).toBeHidden()
+      await fieldBulkUploadButton.click()
+
+      // should show add files dropzone view
+      await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
     })
   })
 
@@ -1314,12 +1318,8 @@ describe('Uploads', () => {
       const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
         const { dragX, dragY, focalX, focalY } = positions[position]
         await page.goto(mediaURL.create)
-        // select and upload file
-        const fileChooserPromise = page.waitForEvent('filechooser')
-        await page.getByText('Select a file').click()
-        const fileChooser = await fileChooserPromise
-        await wait(1000)
-        await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+        await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
 
         await page.locator('.file-field__edit').click()
 
@@ -1342,10 +1342,7 @@ describe('Uploads', () => {
 
         // apply crop
         await page.locator('button:has-text("Apply Changes")').click()
-        await page.waitForSelector('button#action-save')
-        await page.locator('button#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-        await wait(1000) // Wait for the save
+        await saveDocAndAssert(page)
       }
 
       await createFocalCrop(page, 'bottom-right') // green square
@@ -1373,12 +1370,7 @@ describe('Uploads', () => {
     test('should update image alignment based on focal point', async () => {
       const updateFocalPosition = async (page: Page) => {
         await page.goto(focalOnlyURL.create)
-        // select and upload file
-        const fileChooserPromise = page.waitForEvent('filechooser')
-        await page.getByText('Select a file').click()
-        const fileChooser = await fileChooserPromise
-        await wait(1000)
-        await fileChooser.setFiles(path.join(dirname, 'horizontal-squares.jpg'))
+        await page.setInputFiles('input[type="file"]', path.join(dirname, 'horizontal-squares.jpg'))
 
         await page.locator('.file-field__edit').click()
 
@@ -1388,10 +1380,7 @@ describe('Uploads', () => {
 
         // apply focal point
         await page.locator('button:has-text("Apply Changes")').click()
-        await page.waitForSelector('button#action-save')
-        await page.locator('button#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-        await wait(1000) // Wait for the save
+        await saveDocAndAssert(page)
       }
 
       await updateFocalPosition(page) // red square
@@ -1404,17 +1393,13 @@ describe('Uploads', () => {
       })
 
       // without focal point update this generated size was equal to 1736
-      expect(redDoc.sizes.focalTest.filesize).toEqual(1586)
+      await expect.poll(() => redDoc.sizes.focalTest.filesize).toBe(1586)
     })
 
     test('should resize image after crop if resizeOptions defined', async () => {
       await page.goto(animatedTypeMediaURL.create)
 
-      const fileChooserPromise = page.waitForEvent('filechooser')
-      await page.getByText('Select a file').click()
-      const fileChooser = await fileChooserPromise
-      await wait(1000)
-      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
 
       await page.locator('.file-field__edit').click()
 
@@ -1426,10 +1411,7 @@ describe('Uploads', () => {
       await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
 
       await page.locator('button:has-text("Apply Changes")').click()
-      await page.waitForSelector('button#action-save')
-      await page.locator('button#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await wait(1000) // Wait for the save
+      await saveDocAndAssert(page)
 
       const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
       await expect(resizeOptionMedia).toContainText('200x200')
@@ -1505,25 +1487,14 @@ describe('Uploads', () => {
   test('should skip applying resizeOptions after updating an image if resizeOptions.withoutEnlargement is true and the original image size is smaller than the dimensions defined in resizeOptions', async () => {
     await page.goto(withoutEnlargementResizeOptionsURL.create)
 
-    const fileChooserPromise = page.waitForEvent('filechooser')
-    await page.getByText('Select a file').click()
-    const fileChooser = await fileChooserPromise
-    await wait(1000)
-    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
-
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    await saveDocAndAssert(page)
 
     await page.locator('.file-field__edit').click()
 
     // no need to make any changes to the image if resizeOptions.withoutEnlargement is actually being respected now
     await page.locator('button:has-text("Apply Changes")').click()
-    await page.waitForSelector('button#action-save')
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await wait(1000)
+    await saveDocAndAssert(page)
 
     const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
 
@@ -1546,10 +1517,7 @@ describe('Uploads', () => {
     test('should select an image within target range', async () => {
       await page.goto(bestFitURL.create)
       await page.locator('#field-withinRange button.upload__createNewToggler').click()
-      const fileChooserPromise = page.waitForEvent('filechooser')
-      await page.getByText('Select a file').click()
-      const fileChooser = await fileChooserPromise
-      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute('src', '/api/enlarge/file/test-image-180x50.jpg')
@@ -1558,10 +1526,7 @@ describe('Uploads', () => {
     test('should select next smallest image outside of range but smaller than original', async () => {
       await page.goto(bestFitURL.create)
       await page.locator('#field-nextSmallestOutOfRange button.upload__createNewToggler').click()
-      const fileChooserPromise = page.waitForEvent('filechooser')
-      await page.getByText('Select a file').click()
-      const fileChooser = await fileChooserPromise
-      await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/test-image-400x300.jpg')
@@ -1570,10 +1535,7 @@ describe('Uploads', () => {
     test('should select original if smaller than next available size', async () => {
       await page.goto(bestFitURL.create)
       await page.locator('#field-original button.upload__createNewToggler').click()
-      const fileChooserPromise = page.waitForEvent('filechooser')
-      await page.getByText('Select a file').click()
-      const fileChooser = await fileChooserPromise
-      await fileChooser.setFiles(path.join(dirname, 'small.png'))
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute('src', '/api/focal-only/file/small.png')
