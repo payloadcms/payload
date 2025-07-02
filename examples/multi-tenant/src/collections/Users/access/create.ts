@@ -14,6 +14,10 @@ export const createAccess: Access<User> = ({ req }) => {
     return true
   }
 
+  if (!isSuperAdmin(req.user) && req.data?.roles?.includes('super-admin')) {
+    return false
+  }
+
   const adminTenantAccessIDs = getUserTenantIDs(req.user, 'tenant-admin')
 
   const requestedTenants: Tenant['id'][] =
