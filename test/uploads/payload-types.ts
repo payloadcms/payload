@@ -111,6 +111,8 @@ export interface Config {
     'list-view-preview': ListViewPreview;
     'three-dimensional': ThreeDimensional;
     'constructor-options': ConstructorOption;
+    'bulk-uploads': BulkUpload;
+    'simple-relationship': SimpleRelationship;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -162,6 +164,8 @@ export interface Config {
     'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
     'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
+    'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
+    'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1467,6 +1471,39 @@ export interface ConstructorOption {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads".
+ */
+export interface BulkUpload {
+  id: string;
+  title: string;
+  relationship?: {
+    relationTo: 'simple-relationship';
+    value: string | SimpleRelationship;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-relationship".
+ */
+export interface SimpleRelationship {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1671,6 +1708,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'constructor-options';
         value: string | ConstructorOption;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads';
+        value: string | BulkUpload;
+      } | null)
+    | ({
+        relationTo: 'simple-relationship';
+        value: string | SimpleRelationship;
       } | null)
     | ({
         relationTo: 'users';
@@ -3064,6 +3109,34 @@ export interface ConstructorOptionsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads_select".
+ */
+export interface BulkUploadsSelect<T extends boolean = true> {
+  title?: T;
+  relationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-relationship_select".
+ */
+export interface SimpleRelationshipSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

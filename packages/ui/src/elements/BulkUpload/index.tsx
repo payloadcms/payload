@@ -8,6 +8,7 @@ import React from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
+import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { Drawer, useDrawerDepth } from '../Drawer/index.js'
@@ -77,7 +78,9 @@ export function BulkUploadDrawer() {
     <Drawer gutter={false} Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
         <UploadControlsProvider>
-          <DrawerContent />
+          <EditDepthProvider>
+            <DrawerContent />
+          </EditDepthProvider>
         </UploadControlsProvider>
       </FormsManagerProvider>
     </Drawer>
