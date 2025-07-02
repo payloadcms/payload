@@ -329,7 +329,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         ),
       )
 
-      config.jobs.enabledStats = true
+      config.jobs.stats = true
     }
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)

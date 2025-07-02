@@ -34,7 +34,7 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    if (!jobsConfig.enabledStats) {
+    if (!jobsConfig.stats) {
       return Response.json(
         {
           message:

@@ -63,7 +63,7 @@ export type SanitizedJobsConfig = {
    * If set to `true`, a payload-job-stats global exists.
    * This property is automatically set during sanitization.
    */
-  enabledStats?: boolean
+  stats?: boolean
 } & JobsConfig
 export type JobsConfig = {
   /**

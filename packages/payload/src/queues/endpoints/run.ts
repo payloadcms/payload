@@ -56,7 +56,7 @@ export const runJobsEndpoint: Endpoint = {
       !(typeof handleSchedulesParam === 'string' && handleSchedulesParam === 'false')
 
     if (shouldHandleSchedules) {
-      if (!jobsConfig.enabledStats) {
+      if (!jobsConfig.stats) {
         throw new Error(
           'The jobs stats global is not enabled, but is required to use the run endpoint with schedules.',
         )

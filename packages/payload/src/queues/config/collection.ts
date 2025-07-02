@@ -243,7 +243,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
     lockDocuments: false,
   }
 
-  if (jobsConfig.enabledStats) {
+  if (jobsConfig.stats) {
     // TODO: In 4.0, this should be added by default.
     jobsCollection.fields.push({
       name: 'meta',
