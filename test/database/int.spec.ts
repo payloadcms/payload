@@ -1586,6 +1586,66 @@ describe('database', () => {
       expect(docs?.[0]?.title).toBe('updated')
       expect(docs?.[4]?.title).toBe('updated')
     })
+
+    it('ensure updateOne does not create new document if `where` query has no results', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            equals: 'does not exist',
+          },
+        },
+      })
+
+      const allPosts = await payload.db.find({
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      expect(allPosts.docs).toHaveLength(0)
+    })
+
+    it('ensure updateMany does not create new document if `where` query has no results', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            equals: 'does not exist',
+          },
+        },
+      })
+
+      const allPosts = await payload.db.find({
+        collection: postsSlug,
+        pagination: false,
+      })
+
+      expect(allPosts.docs).toHaveLength(0)
+    })
   })
 
   describe('Error Handler', () => {
