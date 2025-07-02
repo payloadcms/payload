@@ -42,14 +42,16 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
-  const hasRenderedDocument = useRef(false)
+  const hasInitialized = useRef(false)
 
   const getDocumentView = useCallback(
-    (docID?: number | string) => {
+    (docID?: number | string, showLoadingIndicator: boolean = false) => {
       const controller = handleAbortRef(abortGetDocumentViewRef)
 
       const fetchDocumentView = async () => {
-        setIsLoading(true)
+        if (showLoadingIndicator) {
+          setIsLoading(true)
+        }
 
         try {
           const result = await renderDocument({
@@ -141,13 +143,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const clearDoc = useCallback(() => {
-    getDocumentView()
+    getDocumentView(undefined, true)
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView && !hasRenderedDocument.current) {
-      getDocumentView(existingDocID)
-      hasRenderedDocument.current = true
+    if (!DocumentView && !hasInitialized.current) {
+      getDocumentView(existingDocID, true)
+      hasInitialized.current = true
     }
   }, [DocumentView, getDocumentView, existingDocID])
 

@@ -304,15 +304,16 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       setUploadStatus('failed')
     }
   }, [
-    fileUrl,
-    uploadConfig,
-    setUploadStatus,
-    handleFileChange,
-    useServerSideFetch,
+    api,
     collectionSlug,
+    fileUrl,
+    handleFileChange,
     id,
     serverURL,
-    api,
+    setUploadStatus,
+    uploadConfig,
+    uploadControlFileName,
+    useServerSideFetch,
   ])
 
   useEffect(() => {

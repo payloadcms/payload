@@ -1,9 +1,10 @@
 'use client'
-import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
+import type { ClientUser, DocumentPreferences } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
@@ -45,12 +46,11 @@ const DocumentInfo: React.FC<
     versionCount: versionCountFromProps,
   } = props
 
-  const [docPermissions, setDocPermissions] =
-    useState<SanitizedDocumentPermissions>(docPermissionsFromProps)
+  const [docPermissions, setDocPermissions] = useControllableState(docPermissionsFromProps)
 
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
+  const [hasSavePermission, setHasSavePermission] = useControllableState(hasSavePermissionFromProps)
 
-  const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
+  const [hasPublishPermission, setHasPublishPermission] = useControllableState(
     hasPublishPermissionFromProps,
   )
 
@@ -101,15 +101,24 @@ const DocumentInfo: React.FC<
     unpublishedVersionCountFromProps,
   )
 
-  const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(isLockedFromProps)
-  const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
-  const [savedDocumentData, setSavedDocumentData] = useState(initialData)
-  const [uploadStatus, setUploadStatus] = useState<'failed' | 'idle' | 'uploading'>('idle')
+  const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
+    isLockedFromProps,
+  )
+  const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
+    currentEditorFromProps,
+  )
+  const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
+  const [savedDocumentData, setSavedDocumentData] = useControllableState(initialData)
+  const [uploadStatus, setUploadStatus] = useControllableState<'failed' | 'idle' | 'uploading'>(
+    'idle',
+  )
 
-  const updateUploadStatus = useCallback((status: 'failed' | 'idle' | 'uploading') => {
-    setUploadStatus(status)
-  }, [])
+  const updateUploadStatus = useCallback(
+    (status: 'failed' | 'idle' | 'uploading') => {
+      setUploadStatus(status)
+    },
+    [setUploadStatus],
+  )
 
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
@@ -170,7 +179,7 @@ const DocumentInfo: React.FC<
         console.error('Failed to unlock the document', error)
       }
     },
-    [serverURL, api, globalSlug],
+    [serverURL, api, globalSlug, setDocumentIsLocked],
   )
 
   const updateDocumentEditor = useCallback(
@@ -279,7 +288,7 @@ const DocumentInfo: React.FC<
     (json) => {
       setSavedDocumentData(json)
     },
-    [],
+    [setSavedDocumentData],
   )
 
   /**

@@ -5,6 +5,7 @@ import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,7 +14,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
+  // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
@@ -84,7 +85,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      blockLabel: 'Content',
+      blockToSelect: 'Content',
     })
 
     // ensure the block was appended to the rows
@@ -186,6 +187,53 @@ describe('Block fields', () => {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
+  test('should initialize block rows with collapsed state', async () => {
+    await page.goto(url.create)
+
+    await addBlock({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      blockToSelect: 'Localized Content',
+    })
+
+    const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
+  })
+
+  test('should not collapse block rows on input change', async () => {
+    await page.goto(url.create)
+
+    await addBlock({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      blockToSelect: 'Localized Content',
+    })
+
+    const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      fieldName: 'collapsedByDefaultBlocks',
+      targetState: 'open',
+      rowIndex: 4,
+    })
+
+    await page.locator('input#field-collapsedByDefaultBlocks__4__text').fill('Hello, world!')
+
+    // wait for form state to return, in the future can wire this into watch network requests (if needed)
+    await wait(1000)
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--open/)
+    await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeVisible()
+  })
+
   test('should use i18n block labels', async () => {
     await page.goto(url.create)
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
@@ -193,7 +241,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'i18nBlocks',
-      blockLabel: 'Text en',
+      blockToSelect: 'Text en',
     })
 
     // ensure the block was appended to the rows
@@ -210,7 +258,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      blockLabel: 'Content',
+      blockToSelect: 'Content',
     })
 
     await expect(
@@ -226,7 +274,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      blockLabel: 'Block A',
+      blockToSelect: 'Block A',
     })
 
     await page
@@ -245,7 +293,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      blockLabel: 'Block B',
+      blockToSelect: 'Block B',
     })
 
     await page
@@ -274,7 +322,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithMinRows',
-      blockLabel: 'Block With Min Row',
+      blockToSelect: 'Block With Min Row',
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
