@@ -1,4 +1,3 @@
-/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
@@ -111,6 +110,7 @@ export const Form: React.FC<FormProps> = (props) => {
    */
   const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
+
   const [processing, setProcessing] = useState(false)
   const [backgroundProcessing, setBackgroundProcessing] = useState(false)
 

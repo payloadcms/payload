@@ -12,28 +12,37 @@ import { SortColumn } from '@payloadcms/ui'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'
-import { CreatedAtCell } from './cells/CreatedAt/index.js'
+import { CreatedAtCell, type CreatedAtCellProps } from './cells/CreatedAt/index.js'
 import { IDCell } from './cells/ID/index.js'
 
 export const buildVersionColumns = ({
   collectionConfig,
+  CreatedAtCellOverride,
+  currentlyPublishedVersion,
   docID,
   docs,
   globalConfig,
   i18n: { t },
   latestDraftVersion,
-  latestPublishedVersion,
 }: {
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
+  CreatedAtCellOverride?: React.ComponentType<CreatedAtCellProps>
+  currentlyPublishedVersion?: {
+    id: number | string
+    updatedAt: string
+  }
   docID?: number | string
   docs: PaginatedDocs<TypeWithVersion<any>>['docs']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-  latestDraftVersion?: string
-  latestPublishedVersion?: string
+  latestDraftVersion?: {
+    id: number | string
+    updatedAt: string
+  }
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
+
+  const CreatedAtCellComponent = CreatedAtCellOverride ?? CreatedAtCell
 
   const columns: Column[] = [
     {
@@ -46,7 +55,7 @@ export const buildVersionColumns = ({
       Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
       renderedCells: docs.map((doc, i) => {
         return (
-          <CreatedAtCell
+          <CreatedAtCellComponent
             collectionSlug={collectionConfig?.slug}
             docID={docID}
             globalSlug={globalConfig?.slug}
@@ -88,9 +97,9 @@ export const buildVersionColumns = ({
       renderedCells: docs.map((doc, i) => {
         return (
           <AutosaveCell
+            currentlyPublishedVersion={currentlyPublishedVersion}
             key={i}
             latestDraftVersion={latestDraftVersion}
-            latestPublishedVersion={latestPublishedVersion}
             rowData={doc}
           />
         )

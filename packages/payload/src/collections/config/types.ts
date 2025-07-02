@@ -328,10 +328,14 @@ export type CollectionAdminOptions = {
     listMenuItems?: CustomComponent[]
     views?: {
       /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       * Replace, modify, or add new "document" views.
+       * @link https://payloadcms.com/docs/custom-components/document-views
        */
       edit?: EditConfig
+      /**
+       * Replace or modify the "list" view.
+       * @link https://payloadcms.com/docs/custom-components/list-view
+       */
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
@@ -436,6 +440,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Default field to sort by in collection list view
    */
   defaultSort?: Sort
+  /**
+   * Disable the bulk edit operation for the collection in the admin panel and the API
+   */
+  disableBulkEdit?: boolean
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */

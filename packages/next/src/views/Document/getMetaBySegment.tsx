@@ -6,11 +6,10 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAPIViewMetadata } from '../API/metadata.js'
 import { generateEditViewMetadata } from '../Edit/metadata.js'
-import { generateLivePreviewViewMetadata } from '../LivePreview/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
   args: {
@@ -50,10 +49,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           // `/:collection/:id/api`
           fn = generateAPIViewMetadata
           break
-        case 'preview':
-          // `/:collection/:id/preview`
-          fn = generateLivePreviewViewMetadata
-          break
         case 'versions':
           // `/:collection/:id/versions`
           fn = generateVersionsViewMetadata
@@ -89,10 +84,6 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           // `/:global/api`
           fn = generateAPIViewMetadata
           break
-        case 'preview':
-          // `/:global/preview`
-          fn = generateLivePreviewViewMetadata
-          break
         case 'versions':
           // `/:global/versions`
           fn = generateVersionsViewMetadata
@@ -121,11 +112,18 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       isEditing,
     })
   } else {
-    const { viewKey } = getViewsFromConfig({
+    const { viewKey } = getDocumentView({
       collectionConfig,
       config,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
       globalConfig,
-      overrideDocPermissions: true,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
     })
 

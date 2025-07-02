@@ -77,7 +77,17 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // update field values from field component(s)
   const setValue = useCallback(
     (e, disableModifyingForm = false) => {
-      const val = e && e.target ? e.target.value : e
+      // TODO:
+      // There are no built-in fields that pass events into `e`.
+      // Remove this check in the next major version.
+      const isEvent =
+        e &&
+        typeof e === 'object' &&
+        typeof e.preventDefault === 'function' &&
+        typeof e.stopPropagation === 'function'
+
+      const val = isEvent ? e.target.value : e
+
       dispatchField({
         type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),

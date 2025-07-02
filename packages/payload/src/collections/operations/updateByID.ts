@@ -15,7 +15,7 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'

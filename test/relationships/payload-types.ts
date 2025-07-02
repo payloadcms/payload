@@ -266,7 +266,14 @@ export interface Screening {
 export interface Movie {
   id: string;
   name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
+  array?:
+    | {
+        director?: (string | Director)[] | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -280,6 +287,7 @@ export interface Director {
   name?: string | null;
   localized?: string | null;
   movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -311,6 +319,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -729,7 +744,14 @@ export interface ScreeningsSelect<T extends boolean = true> {
  */
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
+  select?: T;
   director?: T;
+  array?:
+    | T
+    | {
+        director?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -742,6 +764,7 @@ export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
   localized?: T;
   movies?: T;
+  movie?: T;
   directors?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -902,6 +925,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

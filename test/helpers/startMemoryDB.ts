@@ -8,9 +8,12 @@ declare global {
   var _mongoMemoryServer: MongoMemoryReplSet | undefined
 }
 
+/**
+ * WARNING: This file MUST export a default function.
+ * @link https://jestjs.io/docs/configuration#globalsetup-string
+ */
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
-  // @ts-expect-error
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'

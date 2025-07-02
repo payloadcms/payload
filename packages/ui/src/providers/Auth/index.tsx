@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, User } from 'payload'
+import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
@@ -22,7 +23,7 @@ export type UserWithToken<T = ClientUser> = {
 }
 
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | User>
+  fetchFullUser: () => Promise<null | TypedUser>
   logOut: () => Promise<boolean>
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
@@ -255,17 +256,23 @@ export function AuthProvider({
     return null
   }, [serverURL, apiRoute, userSlug, i18n.language, setNewUser])
 
+  const fetchFullUserEvent = useEffectEvent(fetchFullUser)
+
   // On mount, get user and set
   useEffect(() => {
-    void fetchFullUser()
-  }, [fetchFullUser])
+    void fetchFullUserEvent()
+  }, [])
 
-  // When location changes, refresh cookie
-  useEffect(() => {
+  const refreshCookieEvent = useEffectEvent(() => {
     if (id) {
       refreshCookie()
     }
-  }, [debouncedLocationChange, refreshCookie, id])
+  })
+
+  // When location changes, refresh cookie
+  useEffect(() => {
+    refreshCookieEvent()
+  }, [debouncedLocationChange])
 
   useEffect(() => {
     setLastLocationChange(Date.now())

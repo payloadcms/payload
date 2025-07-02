@@ -65,6 +65,13 @@
     // SIZE
     ////////////////////////////////
 
+    &--size-xsmall {
+      --popup-width: 80px;
+      .popup__content {
+        @include shadow-sm;
+      }
+    }
+
     &--size-small {
       --popup-width: 100px;
       .popup__content {
@@ -89,6 +96,10 @@
     ////////////////////////////////
     /// BUTTON SIZE
     ////////////////////////////////
+
+    &--button-size-xsmall {
+      --button-size-offset: -12px;
+    }
 
     &--button-size-small {
       --button-size-offset: -8px;

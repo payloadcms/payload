@@ -1,5 +1,3 @@
-/* eslint-disable no-restricted-exports */
-
 import type { CollectionSlug, File } from 'payload'
 
 import path from 'path'
@@ -12,16 +10,22 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
+import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
+import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import {
+  allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
+  constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
+  imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
@@ -30,6 +34,8 @@ import {
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  skipAllowListSafeFetchMediaSlug,
+  skipSafeFetchMediaSlug,
   threeDimensionalSlug,
   unstoredMediaSlug,
   versionSlug,
@@ -294,6 +300,26 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: imageSizesOnlySlug,
+      fields: [],
+      upload: {
+        crop: false,
+        focalPoint: false,
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+      },
+    },
+    {
       slug: focalNoSizesSlug,
       fields: [],
       upload: {
@@ -403,6 +429,43 @@ export default buildConfigWithDefaults({
           },
         ],
         pasteURL: false,
+      },
+    },
+    {
+      slug: allowListMediaSlug,
+      fields: [],
+      upload: {
+        pasteURL: {
+          allowList: [
+            { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: 'localhost', port: '', search: '' },
+            { protocol: 'http', hostname: '[::1]', port: '', search: '' },
+            { protocol: 'http', hostname: '10.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '192.168.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '172.16.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '169.254.1.1', port: '', search: '' },
+            { protocol: 'http', hostname: '224.0.0.1', port: '', search: '' },
+            { protocol: 'http', hostname: '0.0.0.0', port: '', search: '' },
+            { protocol: 'http', hostname: '255.255.255.255', port: '', search: '' },
+          ],
+        },
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: true,
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    {
+      slug: skipAllowListSafeFetchMediaSlug,
+      fields: [],
+      upload: {
+        skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -617,6 +680,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailFunction,
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
+    AdminUploadControl,
     {
       slug: 'optional-file',
       fields: [],
@@ -808,6 +872,18 @@ export default buildConfigWithDefaults({
         focalPoint: false,
       },
     },
+    {
+      slug: constructorOptionsSlug,
+      fields: [],
+      upload: {
+        constructorOptions: {
+          limitInputPixels: 100, // set lower than the collection upload fileSize limit default to test
+        },
+        staticDir: path.resolve(dirname, './media'),
+      },
+    },
+    BulkUploadsCollection,
+    SimpleRelationshipCollection,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')

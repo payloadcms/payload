@@ -2,6 +2,7 @@ import type {
   CollectionSlug,
   ErrorResult,
   GetFolderResultsComponentAndDataArgs,
+  ServerFunction,
   Where,
 } from 'payload'
 import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
@@ -9,8 +10,11 @@ import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
 import { APIError, formatErrors, getFolderData } from 'payload'
 import { buildFolderWhereConstraints } from 'payload/shared'
 
-import { FolderFileTable } from '../elements/FolderView/FolderFileTable/index.js'
-import { ItemCardGrid } from '../elements/FolderView/ItemCardGrid/index.js'
+import {
+  FolderFileTable,
+  ItemCardGrid,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- This component is returned via server functions, it must reference the exports dir
+} from '../exports/client/index.js'
 
 type GetFolderResultsComponentAndDataResult = {
   breadcrumbs?: FolderBreadcrumb[]
@@ -31,11 +35,10 @@ type GetFolderResultsComponentAndDataErrorResult = {
   | ErrorResult
 )
 
-export const getFolderResultsComponentAndDataHandler = async (
-  args: GetFolderResultsComponentAndDataArgs,
-): Promise<
-  GetFolderResultsComponentAndDataErrorResult | GetFolderResultsComponentAndDataResult
-> => {
+export const getFolderResultsComponentAndDataHandler: ServerFunction<
+  GetFolderResultsComponentAndDataArgs,
+  Promise<GetFolderResultsComponentAndDataErrorResult | GetFolderResultsComponentAndDataResult>
+> = async (args) => {
   const { req } = args
 
   try {

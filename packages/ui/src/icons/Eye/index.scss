@@ -1,0 +1,20 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--eye {
+    height: $baseline;
+    width: $baseline;
+    shape-rendering: auto;
+    vector-effect: non-scaling-stroke;
+
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 0.75;
+    }
+
+    .fill {
+      fill: currentColor;
+    }
+  }
+}

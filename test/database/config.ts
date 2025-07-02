@@ -38,6 +38,7 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'categories',
+      versions: { drafts: true },
       fields: [
         {
           type: 'text',
@@ -71,6 +72,33 @@ export default buildConfigWithDefaults({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block-third',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'nested',
+                  blocks: [
+                    {
+                      slug: 'block-fourth',
+                      fields: [
+                        {
+                          type: 'blocks',
+                          name: 'nested',
+                          blocks: [],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
         {
           type: 'tabs',
@@ -170,7 +198,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-first',
               fields: [
                 {
                   name: 'text',
@@ -428,7 +456,7 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           blocks: [
             {
-              slug: 'block',
+              slug: 'block-second',
               dbName: 'customBlocks',
               fields: [
                 {

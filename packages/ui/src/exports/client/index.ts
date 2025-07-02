@@ -62,6 +62,8 @@ export { DrawerContentContainer } from '../../elements/DrawerContentContainer/in
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
+export { AnimateHeight } from '../../elements/AnimateHeight/index.js'
+export { PillSelector, type SelectablePill } from '../../elements/PillSelector/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
 export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
@@ -70,6 +72,7 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -120,6 +123,8 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
+export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
@@ -243,7 +248,6 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
-export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -255,6 +259,7 @@ export { CodeBlockIcon } from '../../icons/CodeBlock/index.js'
 export { CopyIcon } from '../../icons/Copy/index.js'
 export { DragHandleIcon } from '../../icons/DragHandle/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
+export { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
@@ -277,6 +282,8 @@ export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/War
 
 // providers
 export {
+  type RenderDocumentResult,
+  type RenderDocumentServerFunction,
   ServerFunctionsProvider,
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
@@ -285,6 +292,8 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
+
+export { LivePreviewProvider } from '../../providers/LivePreview/index.js'
 
 export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {
@@ -296,6 +305,7 @@ export { DocumentEventsProvider, useDocumentEvents } from '../../providers/Docum
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
+export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,
@@ -379,7 +389,7 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListPreferences } from 'payload'` instead.
+   * Use `import type { CollectionPreferences } from 'payload'` instead.
    */
   ListPreferences,
 } from 'payload'
@@ -392,3 +402,5 @@ export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
 
 export { parseSearchParams } from '../../utilities/parseSearchParams.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
+export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
+export { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'

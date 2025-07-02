@@ -17,7 +17,6 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -428,6 +427,48 @@ describe('Relationships', () => {
 
         expect(result.totalDocs).toBe(1)
         expect(result.docs[0].id).toBe(id)
+      })
+
+      it('should allow query hasMany select in relationship', async () => {
+        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
+        const doc = await payload.create({
+          collection: 'directors',
+          data: { name: 'Mega Director', movie },
+        })
+
+        const res = await payload.find({
+          collection: 'directors',
+          where: { 'movie.select': { equals: 'a' } },
+        })
+        expect(res.docs).toHaveLength(1)
+        expect(res.docs[0].id).toBe(doc.id)
+      })
+
+      it('should allow 4x deep querying', async () => {
+        const movie_1 = await payload.create({
+          collection: 'movies',
+          data: { name: 'random_movie_1' },
+        })
+        const director_1 = await payload.create({
+          collection: 'directors',
+          data: { name: 'random_director_1', movie: movie_1.id },
+        })
+        const movie_2 = await payload.create({
+          collection: 'movies',
+          data: { name: 'random_movie_2', director: director_1.id },
+        })
+        const director_2 = await payload.create({
+          collection: 'directors',
+          data: { name: 'random_director_2', movie: movie_2.id },
+        })
+
+        const res = await payload.find({
+          collection: 'directors',
+          where: { 'movie.director.movie.name': { equals: 'random_movie_1' } },
+        })
+
+        expect(res.totalDocs).toBe(1)
+        expect(res.docs[0].id).toBe(director_2.id)
       })
 
       describe('hasMany relationships', () => {
@@ -1108,6 +1149,29 @@ describe('Relationships', () => {
 
       expect(result.totalDocs).toBe(1)
       expect(result.docs[0]!.id).toBe(doc.id)
+    })
+
+    it('should allow querying hasMany in array', async () => {
+      const director = await payload.create({
+        collection: 'directors',
+        data: { name: 'Test Director1337' },
+      })
+      const movie = await payload.create({
+        collection: 'movies',
+        data: { array: [{ director: [director.id] }] },
+      })
+      const res = await payload.find({
+        collection: 'movies',
+        where: { 'array.director': { equals: director.id } },
+      })
+      expect(res.docs).toHaveLength(1)
+      expect(res.docs[0].id).toBe(movie.id)
+      const res2 = await payload.find({
+        collection: 'movies',
+        where: { 'array.director.name': { equals: 'Test Director1337' } },
+      })
+      expect(res2.docs).toHaveLength(1)
+      expect(res2.docs[0].id).toBe(movie.id)
     })
 
     describe('Nested Querying Separate Collections', () => {

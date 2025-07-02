@@ -1,12 +1,12 @@
+import { v4 as uuid } from 'uuid'
+
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
   DataFromCollectionSlug,
-  SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
-import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import {
@@ -23,6 +23,7 @@ import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
+import { removeExpiredSessions } from '../removeExpiredSessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -30,7 +31,7 @@ import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 export type Result = {
   exp?: number
   token?: string
-  user?: User
+  user?: TypedUser
 }
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -43,24 +44,18 @@ export type Arguments<TSlug extends CollectionSlug> = {
 }
 
 type CheckLoginPermissionArgs = {
-  collection: SanitizedCollectionConfig
   loggingInWithUsername?: boolean
   req: PayloadRequest
   user: any
 }
 
 export const checkLoginPermission = ({
-  collection,
   loggingInWithUsername,
   req,
   user,
 }: CheckLoginPermissionArgs) => {
   if (!user) {
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
-  }
-
-  if (collection.auth.verify && user._verified === false) {
-    throw new UnverifiedEmail({ t: req.t })
   }
 
   if (isUserLocked(new Date(user.lockUntil).getTime())) {
@@ -114,7 +109,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     // Login
     // /////////////////////////////////////
 
-    let user
     const { email: unsanitizedEmail, password } = data
     const loginWithUsername = collectionConfig.auth.loginWithUsername
 
@@ -204,14 +198,13 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       whereConstraint = usernameConstraint
     }
 
-    user = await payload.db.findOne<any>({
+    let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
       where: whereConstraint,
     })
 
     checkLoginPermission({
-      collection: collectionConfig,
       loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
       req,
       user,
@@ -239,6 +232,45 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new AuthenticationError(req.t)
     }
 
+    if (collectionConfig.auth.verify && user._verified === false) {
+      throw new UnverifiedEmail({ t: req.t })
+    }
+
+    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+      collectionConfig,
+      email: sanitizedEmail!,
+      user,
+    }
+
+    if (collectionConfig.auth.useSessions) {
+      // Add session to user
+      const newSessionID = uuid()
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      const expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      const session = { id: newSessionID, createdAt: now, expiresAt }
+
+      if (!user.sessions?.length) {
+        user.sessions = [session]
+      } else {
+        user.sessions = removeExpiredSessions(user.sessions)
+        user.sessions.push(session)
+      }
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: user,
+        req,
+        returning: false,
+      })
+
+      fieldsToSignArgs.sid = newSessionID
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
+
     if (maxLoginAttemptsEnabled) {
       await resetLoginAttempts({
         collection: collectionConfig,
@@ -247,12 +279,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         req,
       })
     }
-
-    const fieldsToSign = getFieldsToSign({
-      collectionConfig,
-      email: sanitizedEmail!,
-      user,
-    })
 
     // /////////////////////////////////////
     // beforeLogin - Collection
