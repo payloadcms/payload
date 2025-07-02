@@ -2256,6 +2256,7 @@ describe('database', () => {
     })
 
     it('should allow to sort by a virtual field with a reference to an ID', async () => {
+      await payload.delete({ collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({
         collection: 'categories-custom-id',
         data: { id: 1 },
