@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import AutosaveWithDraftButtonPosts from './collections/AutosaveWithDraftButton.js'
-import AutosaveWithValidate from './collections/AutosaveWithValidate.js'
+import AutosaveWithDraftValidate from './collections/AutosaveWithDraftValidate.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
@@ -41,7 +41,7 @@ export default buildConfigWithDefaults({
     Posts,
     AutosavePosts,
     AutosaveWithDraftButtonPosts,
-    AutosaveWithValidate,
+    AutosaveWithDraftValidate,
     DraftPosts,
     DraftWithMax,
     DraftsWithValidate,

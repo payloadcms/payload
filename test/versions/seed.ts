@@ -8,7 +8,7 @@ import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   diffCollectionSlug,
   draftCollectionSlug,
   media2CollectionSlug,
@@ -141,7 +141,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: autosaveWithValidateCollectionSlug,
+    collection: autosaveWithDraftValidateSlug,
     data: {
       title: 'Initial seeded title',
     },

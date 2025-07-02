@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -384,12 +385,43 @@ describe('Array', () => {
     await expect(page.locator('#custom-text-field')).toBeVisible()
   })
 
-  test('should not re-close initCollapsed true array rows on input in create new view', async () => {
-    await loadCreatePage()
+  test('should initialize array rows with collapsed state', async () => {
+    await page.goto(url.create)
+
     await page.locator('#field-collapsedArray >> .array-field__add-row').click()
-    await page.locator('#field-collapsedArray__0__text').fill('test')
-    const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
-    await expect(collapsedArrayRow).toBeHidden()
+
+    const row = page.locator(`#collapsedArray-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedArray__0__text`)).toBeHidden()
+  })
+
+  test('should not collapse array rows on input change', async () => {
+    await page.goto(url.create)
+
+    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+
+    const row = page.locator(`#collapsedArray-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-collapsedArray__0__text`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      rowIndex: 0,
+      fieldName: 'collapsedArray',
+      targetState: 'open',
+    })
+
+    await page.locator('input#field-collapsedArray__0__text').fill('Hello, world!')
+
+    // wait for form state to return, in the future can wire this into watch network requests (if needed)
+    await wait(1000)
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--open/)
+    await expect(page.locator(`#field-collapsedArray__0__text`)).toBeVisible()
   })
 
   describe('sortable arrays', () => {
