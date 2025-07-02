@@ -2,7 +2,9 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
+import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config, Post } from './payload-types.js'
@@ -494,7 +496,22 @@ test.describe('Bulk Edit', () => {
 
     const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
 
+    await wait(500)
+
     await field.locator('button.array-field__add-row').click()
+
+    const row = page.locator(`#array-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-array__0__optional`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      targetState: 'open',
+      rowIndex: 0,
+      fieldName: 'array',
+    })
 
     await expect(field.locator('#field-array__0__optional')).toBeVisible()
     await expect(field.locator('#field-array__0__noRead')).toBeHidden()

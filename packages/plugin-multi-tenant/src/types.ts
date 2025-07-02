@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
+import type { ArrayField, CollectionSlug, Field, RelationshipField, TypedUser } from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -138,7 +138,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
   /**
    * Opt out of adding access constraints to the tenants collection
@@ -165,4 +165,4 @@ export type UserWithTenantsField = {
         tenant: number | string | Tenant
       }[]
     | null
-} & User
+} & TypedUser

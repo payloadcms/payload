@@ -1,5 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, User, Where } from 'payload'
+import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
@@ -38,7 +38,7 @@ export type CreateExportArgs = {
   download?: boolean
   input: Export
   req: PayloadRequest
-  user?: User
+  user?: TypedUser
 }
 
 export const createExport = async (args: CreateExportArgs) => {

@@ -4,7 +4,7 @@ import type {
   AccessResult,
   AllOperations,
   CollectionConfig,
-  User,
+  TypedUser,
   Where,
 } from 'payload'
 
@@ -53,7 +53,7 @@ export const withTenantAccess =
       args.req.user &&
       args.req.user.collection === adminUsersSlug &&
       !userHasAccessToAllTenants(
-        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
+        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
       )
     ) {
       const tenantConstraint = getTenantAccess({
