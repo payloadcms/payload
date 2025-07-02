@@ -147,7 +147,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             : `_${field.collection}_${field.name}_order`,
         parent,
         query: newQuery,
-        renderRowTypes: true,
+        renderRowTypes: isPolymorphic,
         tableAppearance: 'condensed',
       })
 
@@ -170,6 +170,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       getTableState,
       relationTo,
       parent,
+      isPolymorphic,
     ],
   )
 
