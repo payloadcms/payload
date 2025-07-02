@@ -60,7 +60,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const { onSave: onSaveFromDocumentDrawer } = useDocumentDrawerContext()
 
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
+  const { dispatchFields, isValid, setBackgroundProcessing, setIsValid } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
@@ -89,12 +89,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const formStateRef = useRef(formState)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
-
-  /**
-   * Track the validation internally so Autosave can determine when to run queue processing again
-   * Helps us prevent infinite loops when the queue is processing and the form is invalid
-   */
-  const isValidRef = useRef(isValid)
 
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
@@ -166,7 +160,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               const skipSubmission =
                 submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-              if (!skipSubmission && isValidRef.current) {
+              if (!skipSubmission) {
                 let res
 
                 try {
@@ -251,10 +245,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                       toast.error(err.message || i18n.t('error:unknown'))
                     })
 
-                    // Set valid to false internally so the queue doesn't process
-                    isValidRef.current = false
                     setIsValid(false)
-                    setSubmitted(true)
                     hideIndicator()
                     return
                   }
@@ -265,9 +256,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                   // Manually update the data since this function doesn't fire the `submit` function from useForm
                   if (document) {
                     setIsValid(true)
-
-                    // Reset internal state allowing the queue to process
-                    isValidRef.current = true
                     updateSavedDocumentData(document)
                   }
                 }
@@ -283,11 +271,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           setBackgroundProcessing(false)
         },
         beforeProcess: () => {
-          if (!isValidRef.current) {
-            isValidRef.current = true
-            return false
-          }
-
           setBackgroundProcessing(true)
         },
       },
@@ -311,14 +294,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
      * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
-    const { updatedAt: _, ...data } = reduceFieldsToValues(debouncedFormState)
-    const { updatedAt: __, ...prevData } = previousDebouncedData.current
+    const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
+    const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
 
-    if (dequal(data, prevData)) {
+    if (dequal(formData, prevFormData)) {
       return
     }
 
-    previousDebouncedData.current = data
+    previousDebouncedData.current = formData
 
     handleAutosave()
   }, [debouncedFormState])
