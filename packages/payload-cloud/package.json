@@ -51,7 +51,7 @@
     "nodemailer": "6.9.16"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
+    "@types/jest": "30.0.0",
     "@types/nodemailer": "6.4.17",
     "payload": "workspace:*"
   },
