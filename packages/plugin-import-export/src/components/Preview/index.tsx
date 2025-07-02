@@ -97,13 +97,10 @@ export const Preview = () => {
               })
             : allKeys.filter((key) => !defaultMetaFields.includes(key))
 
-        const includedMeta = new Set(selectedKeys)
-        const missingMetaFields = defaultMetaFields.flatMap((field) => {
-          const regex = fieldToRegex(field)
-          return allKeys.filter((key) => regex.test(key) && !includedMeta.has(key))
-        })
-
-        const fieldKeys = [...selectedKeys, ...missingMetaFields]
+        const fieldKeys =
+          Array.isArray(fields) && fields.length > 0
+            ? selectedKeys // strictly only what was selected
+            : [...selectedKeys, ...defaultMetaFields.filter((key) => allKeys.includes(key))]
 
         // Build columns based on flattened keys
         const newColumns: Column[] = fieldKeys.map((key) => ({
