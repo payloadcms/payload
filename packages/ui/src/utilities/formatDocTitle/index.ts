@@ -10,6 +10,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import { formatDate } from './formatDateTitle.js'
 import { formatLexicalDocTitle, isSerializedLexicalEditor } from './formatLexicalDocTitle.js'
+import { formatRelationshipTitle } from './formatRelationshipTitle.js'
 
 export const formatDocTitle = ({
   collectionConfig,
@@ -40,6 +41,7 @@ export const formatDocTitle = ({
         )
 
         const isDate = fieldConfig?.type === 'date'
+        const isRelationship = fieldConfig?.type === 'relationship'
 
         if (isDate) {
           const dateFormat =
@@ -47,6 +49,11 @@ export const formatDocTitle = ({
             dateFormatFromConfig
 
           title = formatDate({ date: title, i18n, pattern: dateFormat }) || title
+        }
+
+        if (isRelationship) {
+          const formattedRelationshipTitle = formatRelationshipTitle(data[useAsTitle])
+          title = formattedRelationshipTitle
         }
       }
     }
