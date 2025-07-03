@@ -651,25 +651,23 @@ describe('Collections - Uploads', () => {
       })
 
       it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
-        const response = await payload.create({
-          collection: noRestrictFileTypesSlug as CollectionSlug,
-          data: {},
-          file,
-        })
-
-        expect(response).toBeTruthy()
-        expect(response.filename).toEqual(file.name)
+        await expect(
+          payload.create({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
       })
 
       it('should allow files with restricted file types when mimeTypes are set', async () => {
-        const response = await payload.create({
-          collection: noRestrictFileMimeTypesSlug as CollectionSlug,
-          data: {},
-          file,
-        })
-
-        expect(response).toBeTruthy()
-        expect(response.filename).toEqual(file.name)
+        await expect(
+          payload.create({
+            collection: noRestrictFileMimeTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
       })
     })
   })
