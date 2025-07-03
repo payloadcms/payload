@@ -20,7 +20,7 @@ let user: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('soft-delete', () => {
+describe('trash', () => {
   beforeAll(async () => {
     const initResult = await initPayloadInt(dirname)
 
