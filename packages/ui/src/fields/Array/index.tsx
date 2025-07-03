@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -27,6 +27,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -35,6 +36,7 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
+    field,
     field: {
       name,
       admin: { className, description, isSortable = true } = {},
@@ -196,6 +198,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
@@ -215,6 +219,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent
