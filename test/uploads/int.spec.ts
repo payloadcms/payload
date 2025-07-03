@@ -1,5 +1,6 @@
 import type { CollectionSlug, Payload } from 'payload'
 
+import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -17,8 +18,11 @@ import {
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  noRestrictFileMimeTypesSlug,
+  noRestrictFileTypesSlug,
   reduceSlug,
   relationSlug,
+  restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchMediaSlug,
   unstoredMediaSlug,
@@ -621,6 +625,49 @@ describe('Collections - Uploads', () => {
             message: expect.not.stringContaining('unsafe'),
           }),
         )
+      })
+    })
+
+    describe('file restrictions', () => {
+      const file: File = {
+        name: `test-${randomUUID()}.html`,
+        data: Buffer.from('<html><script>alert("test")</script></html>'),
+        mimetype: 'text/html',
+        size: 100,
+      }
+      it('should not allow files with restricted file types', async () => {
+        await expect(async () =>
+          payload.create({
+            collection: restrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).rejects.toThrow(
+          expect.objectContaining({
+            name: 'APIError',
+            message: `File type 'text/html' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+          }),
+        )
+      })
+
+      it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
+      })
+
+      it('should allow files with restricted file types when mimeTypes are set', async () => {
+        await expect(
+          payload.create({
+            collection: noRestrictFileMimeTypesSlug as CollectionSlug,
+            data: {},
+            file,
+          }),
+        ).resolves.not.toThrow()
       })
     })
   })
