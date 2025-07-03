@@ -124,7 +124,7 @@ export const renderDocument = async ({
     throw new Error('not-found')
   }
 
-  const isTrashedDoc = typeof (doc as Record<string, unknown>)?.deletedAt === 'string'
+  const isTrashedDoc = typeof doc?.deletedAt === 'string'
 
   const [
     docPreferences,

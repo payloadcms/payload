@@ -133,7 +133,7 @@ export const renderListView = async (
       where: (query?.where as Where) || undefined,
     })
 
-    if (query?.trash === 'true' || query?.trash === true) {
+    if (query?.trash === true) {
       where = {
         and: [
           where,

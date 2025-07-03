@@ -274,10 +274,7 @@ export const getRouteData = ({
       } else if (isCollection && matchedCollection) {
         initPageOptions.routeParams.collection = matchedCollection.slug
 
-        const isTrashRoute = segmentThree === 'trash'
-        const isTrashDocRoute = segmentThree === 'trash' && typeof segmentFour === 'string'
-
-        if (isTrashDocRoute) {
+        if (segmentThree === 'trash' && typeof segmentFour === 'string') {
           // --> /collections/:collectionSlug/trash/:id (read-only)
           // --> /collections/:collectionSlug/trash/:id/api
           // --> /collections/:collectionSlug/trash/:id/preview
@@ -302,7 +299,7 @@ export const getRouteData = ({
             serverProps,
             viewKeyArg: documentSubViewType,
           })
-        } else if (isTrashRoute) {
+        } else if (segmentThree === 'trash') {
           // --> /collections/:collectionSlug/trash
           ViewToRender = {
             Component: TrashView,
