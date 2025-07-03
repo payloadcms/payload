@@ -38,6 +38,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
@@ -50,7 +51,7 @@ import {
   autoSaveGlobalSlug,
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
-  autosaveWithValidateCollectionSlug,
+  autosaveWithDraftValidateSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -82,7 +83,7 @@ describe('Versions', () => {
   let serverURL: string
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
-  let autosaveWithValidateURL: AdminUrlUtil
+  let autosaveWithDraftValidateURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
@@ -103,11 +104,12 @@ describe('Versions', () => {
   })
 
   beforeEach(async () => {
-    /* await throttleTest({
-      page,
-      context,
-      delay: 'Slow 4G',
-    }) */
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -121,7 +123,7 @@ describe('Versions', () => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -1059,7 +1061,7 @@ describe('Versions', () => {
 
   describe('Collections with draft validation', () => {
     beforeAll(() => {
-      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
       draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
     })
 
@@ -1173,7 +1175,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - can save', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1191,7 +1193,7 @@ describe('Versions', () => {
 
     test('- with autosave - can safely trigger validation errors and then continue editing', async () => {
       // This test has to make sure we don't enter an infinite loop when draft.validate is on and we have autosave enabled
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       const titleField = page.locator('#field-title')
       await titleField.fill('Initial')
@@ -1213,7 +1215,7 @@ describe('Versions', () => {
     })
 
     test('- with autosave - shows a prevent leave alert when form is submitted but invalid', async () => {
-      await page.goto(autosaveWithValidateURL.create)
+      await page.goto(autosaveWithDraftValidateURL.create)
 
       // Flag to check against if window alert has been displayed and dismissed since we can only check via events
       let alertDisplayed = false

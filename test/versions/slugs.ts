@@ -2,7 +2,7 @@ export const autosaveCollectionSlug = 'autosave-posts'
 
 export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
 
-export const autosaveWithValidateCollectionSlug = 'autosave-with-validate-posts'
+export const autosaveWithDraftValidateSlug = 'autosave-with-validate-posts'
 
 export const customIDSlug = 'custom-ids'
 
