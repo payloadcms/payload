@@ -255,6 +255,7 @@ export const faTranslations: DefaultTranslationsObject = {
     dark: 'تاریک',
     dashboard: 'پیشخوان',
     delete: 'حذف',
+    deletedAt: 'حذف شده در',
     deletedCountSuccessfully: 'تعداد {{count}} {{label}} با موفقیت پاک گردید.',
     deletedSuccessfully: 'با موفقیت حذف شد.',
     deleting: 'در حال حذف...',

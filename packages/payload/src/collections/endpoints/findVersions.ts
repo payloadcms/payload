@@ -12,7 +12,7 @@ import { findVersionsOperation } from '../operations/findVersions.js'
 
 export const findVersionsHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, limit, page, pagination, populate, select, sort, where } = req.query as {
+  const { depth, limit, page, pagination, populate, select, sort, trash, where } = req.query as {
     depth?: string
     limit?: string
     page?: string
@@ -20,6 +20,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     populate?: Record<string, unknown>
     select?: Record<string, unknown>
     sort?: string
+    trash?: string
     where?: Where
   }
 
@@ -33,6 +34,7 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
     req,
     select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
+    trash: trash === 'true',
     where,
   })
 

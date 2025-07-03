@@ -252,6 +252,7 @@ export const thTranslations: DefaultTranslationsObject = {
     dark: 'มืด',
     dashboard: 'แดชบอร์ด',
     delete: 'ลบ',
+    deletedAt: 'ถูกลบที่',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'ลบสำเร็จ',
     deleting: 'กำลังลบ...',

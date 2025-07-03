@@ -252,6 +252,7 @@ export const arTranslations: DefaultTranslationsObject = {
     dark: 'غامق',
     dashboard: 'لوحة التّحكّم',
     delete: 'حذف',
+    deletedAt: 'تم الحذف في',
     deletedCountSuccessfully: 'تمّ حذف {{count}} {{label}} بنجاح.',
     deletedSuccessfully: 'تمّ الحذف بنجاح.',
     deleting: 'يتمّ الحذف...',
