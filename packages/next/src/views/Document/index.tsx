@@ -6,6 +6,7 @@ import type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewComponent,
+  LivePreviewConfig,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -91,7 +92,6 @@ export const renderDocument = async ({
       payload: {
         config,
         config: {
-          admin: { livePreview: livePreviewConfig },
           routes: { admin: adminRoute, api: apiRoute },
           serverURL,
         },
@@ -327,6 +327,22 @@ export const renderDocument = async ({
     ...documentSlots,
     documentSubViewType,
     viewType,
+  }
+
+  let livePreviewConfig: LivePreviewConfig = config.admin.livePreview
+
+  if (collectionConfig) {
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(collectionConfig.admin.livePreview || {}),
+    }
+  }
+
+  if (globalConfig) {
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(globalConfig.admin.livePreview || {}),
+    }
   }
 
   const livePreviewURL =
