@@ -1,6 +1,7 @@
 import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
+import { RelationalQueryBuilder } from 'drizzle-orm/pg-core/query-builders/query'
 import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
@@ -488,6 +489,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
+
+  // If no document is found, return the input data + inserted row
+  // This can happen when using read replicas
+  if (!doc) {
+    return { ...data, ...insertedRow } as T
+  }
 
   // //////////////////////////////////
   // TRANSFORM DATA
