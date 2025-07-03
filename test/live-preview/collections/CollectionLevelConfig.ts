@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { collectionLevelConfigSlug } from '../shared.js'
-import { formatLivePreviewURL } from '../utilities/formatLivePreviewURL.js'
 
 export const CollectionLevelConfig: CollectionConfig = {
   slug: collectionLevelConfigSlug,
@@ -9,7 +8,7 @@ export const CollectionLevelConfig: CollectionConfig = {
     description: "Live Preview is enabled on this collection's own config, not the root config.",
     useAsTitle: 'title',
     livePreview: {
-      url: formatLivePreviewURL,
+      url: 'http://localhost:3000/live-preview',
     },
   },
   access: {

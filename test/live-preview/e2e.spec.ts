@@ -147,7 +147,7 @@ describe('Live Preview', () => {
     await page.goto(collURL.create)
     await page.locator('#field-title').fill('Collection Level Config')
     await saveDocAndAssert(page)
-    await goToCollectionLivePreview(page, collURL)
+    await toggleLivePreview(page)
     await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
   })
 
