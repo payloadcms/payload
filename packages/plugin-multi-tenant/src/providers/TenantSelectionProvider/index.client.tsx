@@ -187,7 +187,15 @@ export const TenantSelectionProviderClient = ({
         // Users with no cookie set and only 1 tenant should set that tenant automatically
         setTenant({ id: tenantOptionsFromProps[0]?.value, refresh: true })
         setTenantOptions(tenantOptionsFromProps)
-      } else if ((!tenantOptions || tenantOptions.length === 0) && tenantOptionsFromProps) {
+      } else if (
+        (!tenantOptions || tenantOptions.length === 0) &&
+        tenantOptionsFromProps.length > 0
+      ) {
+        // If there are no tenant options, set them from the props
+        setTenantOptions(tenantOptionsFromProps)
+      }
+    } else if (userID && tenantCookie) {
+      if ((!tenantOptions || tenantOptions.length === 0) && tenantOptionsFromProps.length > 0) {
         // If there are no tenant options, set them from the props
         setTenantOptions(tenantOptionsFromProps)
       }
