@@ -1,10 +1,15 @@
 'use client'
 
-import { Button, SaveButton, useConfig, useForm, useTranslation } from '@payloadcms/ui'
+import { Button, SaveButton, Translation, useConfig, useForm, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
+import type {
+  PluginImportExportTranslationKeys,
+  PluginImportExportTranslations,
+} from '../../translations/index.js'
+
 export const ExportSaveButton: React.FC = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation<PluginImportExportTranslations, PluginImportExportTranslationKeys>()
   const {
     config: {
       routes: { api },
@@ -65,7 +70,7 @@ export const ExportSaveButton: React.FC = () => {
     <React.Fragment>
       <SaveButton label={label}></SaveButton>
       <Button onClick={handleDownload} size="medium" type="button">
-        Download
+        <Translation i18nKey="upload:download" t={t} />
       </Button>
     </React.Fragment>
   )

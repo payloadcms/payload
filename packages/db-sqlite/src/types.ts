@@ -32,6 +32,14 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
    * This ensures that the same ID cannot be reused from previously deleted rows.
    */
@@ -42,6 +50,10 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   client: Config
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string

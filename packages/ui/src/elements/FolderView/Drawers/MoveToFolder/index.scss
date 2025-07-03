@@ -1,0 +1,26 @@
+@layer payload-default {
+  .move-folder-drawer {
+    &__body-section {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: var(--base);
+    }
+
+    &__breadcrumbs-section {
+      padding: calc(var(--base) * 0.75) var(--gutter-h);
+      border-bottom: 1px solid var(--theme-elevation-100);
+      display: flex;
+      justify-content: space-between;
+
+      .move-folder-drawer__add-folder-button {
+        margin-left: var(--base);
+      }
+    }
+
+    &__folder-breadcrumbs-root {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 2);
+    }
+  }
+}

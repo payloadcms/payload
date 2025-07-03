@@ -1,13 +1,10 @@
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.js'
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
+import type { resetPasswordOperation } from '../../auth/operations/resetPassword.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type {
-  AfterOperationHook,
-  SanitizedCollectionConfig,
-  SelectFromCollectionSlug,
-} from '../config/types.js'
+import type { SanitizedCollectionConfig, SelectFromCollectionSlug } from '../config/types.js'
 import type { countOperation } from './count.js'
 import type { countVersionsOperation } from './countVersions.js'
 import type { createOperation } from './create.js'
@@ -36,6 +33,7 @@ export type AfterOperationMap<TOperationGeneric extends CollectionSlug> = {
   forgotPassword: typeof forgotPasswordOperation
   login: typeof loginOperation<TOperationGeneric>
   refresh: typeof refreshOperation
+  resetPassword: typeof resetPasswordOperation<TOperationGeneric>
   update: typeof updateOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
   updateByID: typeof updateByIDOperation<
     TOperationGeneric,
@@ -97,6 +95,11 @@ export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
       args: Parameters<AfterOperationMap<TOperationGeneric>['refresh']>[0]
       operation: 'refresh'
       result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['refresh']>>
+    }
+  | {
+      args: Parameters<AfterOperationMap<TOperationGeneric>['resetPassword']>[0]
+      operation: 'resetPassword'
+      result: Awaited<ReturnType<AfterOperationMap<TOperationGeneric>['resetPassword']>>
     }
   | {
       args: Parameters<AfterOperationMap<TOperationGeneric>['update']>[0]

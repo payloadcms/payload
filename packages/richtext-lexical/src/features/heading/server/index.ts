@@ -7,7 +7,7 @@ import type { Spread } from 'lexical'
 import { HeadingNode } from '@lexical/rich-text'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
@@ -71,7 +71,7 @@ export const HeadingFeature = createServerFeature<
                 })
                 const style = [
                   node.format ? `text-align: ${node.format};` : '',
-                  node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
+                  node.indent > 0 ? `padding-inline-start: ${Number(node.indent) * 2}rem;` : '',
                 ]
                   .filter(Boolean)
                   .join(' ')

@@ -5,6 +5,7 @@ export const slug = 'posts'
 export const unrestrictedSlug = 'unrestricted'
 export const readOnlySlug = 'read-only-collection'
 export const readOnlyGlobalSlug = 'read-only-global'
+export const hooksSlug = 'hooks'
 
 export const userRestrictedCollectionSlug = 'user-restricted-collection'
 export const fullyRestrictedSlug = 'fully-restricted'
@@ -24,3 +25,5 @@ export const disabledSlug = 'disabled'
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'
 export const publicUserEmail = 'public-user@payloadcms.com'
 export const publicUsersSlug = 'public-users'
+
+export const authSlug = 'auth-collection'

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../index.js'
-import type { Payload, PayloadRequest } from '../../../types/index.js'
+import type { Payload, PayloadRequest, Sort } from '../../../types/index.js'
+import type { RunJobsArgs } from '../../operations/runJobs/index.js'
 import type { TaskConfig } from './taskTypes.js'
 import type { WorkflowConfig } from './workflowTypes.js'
 
@@ -9,18 +10,20 @@ export type CronConfig = {
    * @default '* * * * *' (every minute).
    *
    * @example
-   *     ┌───────────── minute (0 - 59)
-   *     │ ┌───────────── hour (0 - 23)
-   *     │ │ ┌───────────── day of the month (1 - 31)
-   *     │ │ │ ┌───────────── month (1 - 12)
-   *     │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
-   *     │ │ │ │ │
-   *     │ │ │ │ │
-   *  - '0 * * * *' every hour at minute 0
-   *  - '0 0 * * *' daily at midnight
-   *  - '0 0 * * 0' weekly at midnight on Sundays
-   *  - '0 0 1 * *' monthly at midnight on the 1st day of the month
-   *  - '0/5 * * * *' every 5 minutes
+   *     ┌───────────── (optional) second (0 - 59)
+   *     │ ┌───────────── minute (0 - 59)
+   *     │ │ ┌───────────── hour (0 - 23)
+   *     │ │ │ ┌───────────── day of the month (1 - 31)
+   *     │ │ │ │ ┌───────────── month (1 - 12)
+   *     │ │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+   *     │ │ │ │ │ │
+   *     │ │ │ │ │ │
+   *  - '* 0 * * * *' every hour at minute 0
+   *  - '* 0 0 * * *' daily at midnight
+   *  - '* 0 0 * * 0' weekly at midnight on Sundays
+   *  - '* 0 0 1 * *' monthly at midnight on the 1st day of the month
+   *  - '* 0/5 * * * *' every 5 minutes
+   *  - '* * * * * *' every second
    */
   cron?: string
   /**
@@ -39,6 +42,13 @@ export type RunJobAccessArgs = {
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
 
+export type SanitizedJobsConfig = {
+  /**
+   * If set to `true`, the job system is enabled and a payload-jobs collection exists.
+   * This property is automatically set during sanitization.
+   */
+  enabled?: boolean
+} & JobsConfig
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -57,7 +67,10 @@ export type JobsConfig = {
    */
   addParentToTaskLog?: boolean
   /**
-   * Queue cron jobs automatically on payload initialization.
+   * Allows you to configure cron jobs that automatically run queued jobs
+   * at specified intervals. Note that this does not _queue_ new jobs - only
+   * _runs_ jobs that are already in the specified queue.
+   *
    * @remark this property should not be used on serverless platforms like Vercel
    */
   autoRun?: ((payload: Payload) => CronConfig[] | Promise<CronConfig[]>) | CronConfig[]
@@ -68,7 +81,11 @@ export type JobsConfig = {
   /**
    * Specify depth for retrieving jobs from the queue.
    * This should be as low as possible in order for job retrieval
-   * to be as efficient as possible. Defaults to 0.
+   * to be as efficient as possible. Setting it to anything higher than
+   * 0 will drastically affect performance, as less efficient database
+   * queries will be used.
+   *
+   * @default 0
    */
   depth?: number
   /**
@@ -76,6 +93,31 @@ export type JobsConfig = {
    * a new collection.
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
+  /**
+   * Adjust the job processing order using a Payload sort string. This can be set globally or per queue.
+   *
+   * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+   *
+   * @default all jobs for all queues will be executed in FIFO order.
+   */
+  processingOrder?:
+    | ((args: RunJobsArgs) => Promise<Sort> | Sort)
+    | {
+        default?: Sort
+        queues: {
+          [queue: string]: Sort
+        }
+      }
+    | Sort
+  /**
+   * By default, the job system uses direct database calls for optimal performance.
+   * If you added custom hooks to your jobs collection, you can set this to true to
+   * use the standard Payload API for all job operations. This is discouraged, as it will
+   * drastically affect performance.
+   *
+   * @default false
+   */
+  runHooks?: boolean
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
@@ -86,7 +128,7 @@ export type JobsConfig = {
   /**
    * Define all possible tasks here
    */
-  tasks: TaskConfig<any>[]
+  tasks?: TaskConfig<any>[]
   /**
    * Define all the workflows here. Workflows orchestrate the flow of multiple tasks.
    */

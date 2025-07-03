@@ -22,9 +22,10 @@ export type ServerFunctionClientArgs = {
 
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown
 
-export type ServerFunction = (
-  args: DefaultServerFunctionArgs & ServerFunctionClientArgs['args'],
-) => Promise<unknown> | unknown
+export type ServerFunction<
+  TArgs extends object = Record<string, unknown>,
+  TReturnType = Promise<unknown> | unknown,
+> = (args: DefaultServerFunctionArgs & TArgs) => TReturnType
 
 export type ServerFunctionConfig = {
   fn: ServerFunction
@@ -41,24 +42,26 @@ export type ServerFunctionHandler = (
 export type ListQuery = {
   /*
    * This is an of strings, i.e. `['title', '-slug']`
-   * Use `transformColumnsToPreferences` to convert it back and forth
+   * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
   limit?: string
   page?: string
+  preset?: number | string
   /*
     When provided, is automatically injected into the `where` object
   */
   search?: string
   sort?: Sort
   where?: Where
-}
+} & Record<string, unknown>
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
   columns?: ColumnPreference[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
     id: number | string
@@ -68,4 +71,17 @@ export type BuildTableStateArgs = {
   renderRowTypes?: boolean
   req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
+}
+
+export type BuildCollectionFolderViewResult = {
+  View: React.ReactNode
+}
+
+export type GetFolderResultsComponentAndDataArgs = {
+  activeCollectionSlugs: CollectionSlug[]
+  browseByFolder: boolean
+  displayAs: 'grid' | 'list'
+  folderID: number | string | undefined
+  req: PayloadRequest
+  sort: string
 }

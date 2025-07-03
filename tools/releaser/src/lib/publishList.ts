@@ -9,6 +9,7 @@ export const packagePublishList = [
   'ui',
   'next',
   'graphql',
+  'admin-bar',
   'live-preview',
   'live-preview-react',
   'live-preview-vue',

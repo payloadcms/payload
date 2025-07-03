@@ -2,6 +2,8 @@ import type {
   CollectionConfig,
   DateField,
   Field,
+  FlattenedBlock,
+  FlattenedField,
   JoinField,
   RelationshipField,
   SanitizedConfig,
@@ -10,7 +12,7 @@ import type {
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { traverseFields } from 'payload'
+import { flattenAllFields, traverseFields } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
@@ -228,6 +230,171 @@ type Args = {
   validateRelationships?: boolean
 }
 
+const stripFields = ({
+  config,
+  data,
+  fields,
+  reservedKeys = [],
+}: {
+  config: SanitizedConfig
+  data: any
+  fields: FlattenedField[]
+  reservedKeys?: string[]
+}) => {
+  for (const k in data) {
+    if (!fields.some((field) => field.name === k) && !reservedKeys.includes(k)) {
+      delete data[k]
+    }
+  }
+
+  for (const field of fields) {
+    reservedKeys = []
+    const fieldData = data[field.name]
+    if (!fieldData || typeof fieldData !== 'object') {
+      continue
+    }
+
+    if (field.type === 'blocks') {
+      reservedKeys.push('blockType')
+    }
+
+    if ('flattenedFields' in field || 'blocks' in field) {
+      if (field.localized && config.localization) {
+        for (const localeKey in fieldData) {
+          if (!config.localization.localeCodes.some((code) => code === localeKey)) {
+            delete fieldData[localeKey]
+            continue
+          }
+
+          const localeData = fieldData[localeKey]
+
+          if (!localeData || typeof localeData !== 'object') {
+            continue
+          }
+
+          if (field.type === 'array' || field.type === 'blocks') {
+            if (!Array.isArray(localeData)) {
+              continue
+            }
+
+            let hasNull = false
+            for (let i = 0; i < localeData.length; i++) {
+              const data = localeData[i]
+              let fields: FlattenedField[] | null = null
+
+              if (field.type === 'array') {
+                fields = field.flattenedFields
+              } else {
+                let maybeBlock: FlattenedBlock | undefined = undefined
+
+                if (field.blockReferences) {
+                  const maybeBlockReference = field.blockReferences.find((each) => {
+                    const slug = typeof each === 'string' ? each : each.slug
+                    return slug === data.blockType
+                  })
+
+                  if (maybeBlockReference) {
+                    if (typeof maybeBlockReference === 'object') {
+                      maybeBlock = maybeBlockReference
+                    } else {
+                      maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                    }
+                  }
+                }
+
+                if (!maybeBlock) {
+                  maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+                }
+
+                if (maybeBlock) {
+                  fields = maybeBlock.flattenedFields
+                } else {
+                  localeData[i] = null
+                  hasNull = true
+                }
+              }
+
+              if (!fields) {
+                continue
+              }
+
+              stripFields({ config, data, fields, reservedKeys })
+            }
+
+            if (hasNull) {
+              fieldData[localeKey] = localeData.filter(Boolean)
+            }
+
+            continue
+          } else {
+            stripFields({ config, data: localeData, fields: field.flattenedFields, reservedKeys })
+          }
+        }
+        continue
+      }
+
+      if (field.type === 'array' || field.type === 'blocks') {
+        if (!Array.isArray(fieldData)) {
+          continue
+        }
+
+        let hasNull = false
+
+        for (let i = 0; i < fieldData.length; i++) {
+          const data = fieldData[i]
+          let fields: FlattenedField[] | null = null
+
+          if (field.type === 'array') {
+            fields = field.flattenedFields
+          } else {
+            let maybeBlock: FlattenedBlock | undefined = undefined
+
+            if (field.blockReferences) {
+              const maybeBlockReference = field.blockReferences.find((each) => {
+                const slug = typeof each === 'string' ? each : each.slug
+                return slug === data.blockType
+              })
+
+              if (maybeBlockReference) {
+                if (typeof maybeBlockReference === 'object') {
+                  maybeBlock = maybeBlockReference
+                } else {
+                  maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
+                }
+              }
+            }
+
+            if (!maybeBlock) {
+              maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+            }
+
+            if (maybeBlock) {
+              fields = maybeBlock.flattenedFields
+            } else {
+              fieldData[i] = null
+              hasNull = true
+            }
+          }
+
+          if (!fields) {
+            continue
+          }
+
+          stripFields({ config, data, fields, reservedKeys })
+        }
+
+        if (hasNull) {
+          data[field.name] = fieldData.filter(Boolean)
+        }
+
+        continue
+      } else {
+        stripFields({ config, data: fieldData, fields: field.flattenedFields, reservedKeys })
+      }
+    }
+  }
+}
+
 export const transform = ({
   adapter,
   data,
@@ -256,6 +423,15 @@ export const transform = ({
     if (data.id instanceof Types.ObjectId) {
       data.id = data.id.toHexString()
     }
+
+    if (!adapter.allowAdditionalKeys) {
+      stripFields({
+        config,
+        data,
+        fields: flattenAllFields({ cache: true, fields }),
+        reservedKeys: ['id', 'globalType'],
+      })
+    }
   }
 
   if (operation === 'write' && globalSlug) {
@@ -279,6 +455,7 @@ export const transform = ({
         for (const locale of config.localization.localeCodes) {
           sanitizeDate({
             field,
+            locale,
             ref: fieldRef,
             value: fieldRef[locale],
           })

@@ -18,11 +18,11 @@ export async function createVersion<T extends TypeWithID>(
     parent,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
-    returning,
   }: CreateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)

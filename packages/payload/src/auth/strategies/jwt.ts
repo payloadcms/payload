@@ -1,14 +1,14 @@
-// @ts-strict-ignore
 import { jwtVerify } from 'jose'
 
 import type { Payload, Where } from '../../types/index.js'
-import type { AuthStrategyFunction, User } from '../index.js'
+import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
 
 type JWTToken = {
   collection: string
   id: string
+  sid?: string
 }
 
 async function autoLogin({
@@ -20,7 +20,7 @@ async function autoLogin({
   payload: Payload
   strategyName?: string
 }): Promise<{
-  user: null | User
+  user: AuthStrategyResult['user']
 }> {
   if (
     typeof payload?.config?.admin?.autoLogin !== 'object' ||
@@ -52,22 +52,22 @@ async function autoLogin({
 
   const user = (
     await payload.find({
-      collection: collection.config.slug,
-      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      collection: collection!.config.slug,
+      depth: isGraphQL ? 0 : collection!.config.auth.depth,
       limit: 1,
       pagination: false,
       where,
     })
-  ).docs[0]
+  ).docs[0] as AuthStrategyResult['user']
 
   if (!user) {
     return { user: null }
   }
-  user.collection = collection.config.slug
+  user.collection = collection!.config.slug
   user._strategy = strategyName
 
   return {
-    user: user as User,
+    user,
   }
 }
 
@@ -94,17 +94,29 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
     const { payload: decodedPayload } = await jwtVerify<JWTToken>(token, secretKey)
     const collection = payload.collections[decodedPayload.collection]
 
-    const user = await payload.findByID({
+    const user = (await payload.findByID({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
-      depth: isGraphQL ? 0 : collection.config.auth.depth,
-    })
+      depth: isGraphQL ? 0 : collection!.config.auth.depth,
+    })) as AuthStrategyResult['user']
 
-    if (user && (!collection.config.auth.verify || user._verified)) {
-      user.collection = collection.config.slug
+    if (user && (!collection!.config.auth.verify || user._verified)) {
+      if (collection!.config.auth.useSessions) {
+        const existingSession = (user.sessions || []).find(({ id }) => id === decodedPayload.sid)
+
+        if (!existingSession || !decodedPayload.sid) {
+          return {
+            user: null,
+          }
+        }
+
+        user._sid = decodedPayload.sid
+      }
+
+      user.collection = collection!.config.slug
       user._strategy = strategyName
       return {
-        user: user as User,
+        user,
       }
     } else {
       if (headers.get('DisableAutologin') !== 'true') {

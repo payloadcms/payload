@@ -38,17 +38,21 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
 
   const { filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
 
+  const previewAllowed = uploadConfig.displayPreview ?? true
+
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail
-          // size="small"
-          className={`${baseClass}__thumbnail`}
-          doc={doc}
-          fileSrc={thumbnailURL || url}
-          imageCacheTag={imageCacheTag}
-          uploadConfig={uploadConfig}
-        />
+        {previewAllowed && (
+          <Thumbnail
+            // size="small"
+            className={`${baseClass}__thumbnail`}
+            doc={doc}
+            fileSrc={thumbnailURL || url}
+            imageCacheTag={imageCacheTag}
+            uploadConfig={uploadConfig}
+          />
+        )}
         <div className={`${baseClass}__main-detail`}>
           <FileMeta
             filename={filename as string}
@@ -59,7 +63,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             width={width as number}
           />
 
-          {(enableAdjustments || customUploadActions) && (
+          {(enableAdjustments || (hasImageSizes && doc.filename) || customUploadActions) && (
             <UploadActions
               customActions={customUploadActions}
               enableAdjustments={Boolean(enableAdjustments)}

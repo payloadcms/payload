@@ -1,7 +1,16 @@
-import type { FieldAffectingData, Payload, User } from 'payload'
+/* eslint-disable jest/no-conditional-in-test */
+import type {
+  BasePayload,
+  EmailFieldValidation,
+  FieldAffectingData,
+  Payload,
+  SanitizedConfig,
+  User,
+} from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -32,9 +41,7 @@ describe('Auth', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('GraphQL - admin user', () => {
@@ -731,7 +738,7 @@ describe('Auth', () => {
 
     it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
       const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
-        // eslint-disable-next-line jest/no-conditional-in-test
+
         .filter((field) => 'name' in field && field.name)
         .map((field) => (field as FieldAffectingData).name)
 
@@ -745,6 +752,7 @@ describe('Auth', () => {
         'hash',
         'loginAttempts',
         'lockUntil',
+        'sessions',
       ])
     })
 
@@ -777,6 +785,20 @@ describe('Auth', () => {
       })
 
       expect(response.status).toBe(403)
+    })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
     })
   })
 
@@ -967,6 +989,279 @@ describe('Auth', () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('Email - format validation', () => {
+    const mockT = jest.fn((key) => key) // Mocks translation function
+
+    const mockContext: Parameters<EmailFieldValidation>[1] = {
+      // @ts-expect-error: Mocking context for email validation
+      req: {
+        payload: {
+          collections: {} as Record<string, never>,
+          config: {} as SanitizedConfig,
+        } as unknown as BasePayload,
+        t: mockT,
+      },
+      required: true,
+      siblingData: {},
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
+    }
+    it('should allow standard formatted emails', () => {
+      expect(emailValidation('user@example.com', mockContext)).toBe(true)
+      expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
+      expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
+      expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
+    })
+
+    it('should not allow emails with double quotes', () => {
+      expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with spaces', () => {
+      expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with consecutive dots', () => {
+      expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with invalid domains', () => {
+      expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow domains starting or ending with a hyphen', () => {
+      expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+  })
+
+  describe('Sessions', () => {
+    it('should set a session on a user', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(authenticated.token).toBeTruthy()
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: authenticated.user.id,
+          },
+        },
+      })
+
+      expect(Array.isArray(user.docs[0]?.sessions)).toBeTruthy()
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      expect(decoded.sid).toBeDefined()
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      expect(matchedSession).toBeDefined()
+      expect(matchedSession?.createdAt).toBeDefined()
+      expect(matchedSession?.expiresAt).toBeDefined()
+    })
+
+    it('should log out a user and delete only the session being logged out', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const authenticated2 = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+      expect(decoded.sid).toBeDefined()
+
+      const remainingSessions = user.docs[0]?.sessions ?? []
+
+      const loggedOutSession = remainingSessions.find(({ id }) => id === decoded.sid)
+      expect(loggedOutSession).toBeUndefined()
+
+      const decoded2 = jwtDecode<{ sid: string }>(String(authenticated2.token))
+      expect(decoded2.sid).toBeDefined()
+
+      const existingSession = remainingSessions.find(({ id }) => id === decoded2.sid)
+      expect(existingSession?.id).toStrictEqual(decoded2.sid)
+    })
+
+    it('should refresh an existing session', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      const refreshed = await restClient
+        .POST(`/${slug}/refresh-token`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      const refreshedUser = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decodedRefreshed = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+
+      const matchedRefreshedSession = refreshedUser.docs[0]?.sessions?.find(
+        ({ id }) => id === decodedRefreshed.sid,
+      )
+
+      expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
+
+      expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
+        new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
+      )
+    })
+
+    it('should not authenticate a user who has a JWT but its session has been terminated', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await restClient.POST(`/${slug}/logout?allSessions=true`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const remainingSessions = user.docs[0]?.sessions
+      expect(remainingSessions).toHaveLength(0)
+
+      const meQuery = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(meQuery.user).toBeNull()
+    })
+
+    it('should clean up expired sessions when logging in', async () => {
+      const userWithExpiredSession = await payload.create({
+        collection: slug,
+        data: {
+          email: `${devUser.email}.au`,
+          password: devUser.password,
+          roles: ['admin'],
+          sessions: [
+            {
+              id: uuid(),
+              createdAt: new Date().toDateString(),
+              expiresAt: new Date(new Date().getTime() - 5000).toDateString(), // Set an expired session
+            },
+          ],
+        },
+      })
+
+      expect(userWithExpiredSession.sessions).toHaveLength(1)
+
+      await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const user2 = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      expect(user2.docs[0]?.sessions).toHaveLength(1)
     })
   })
 })

@@ -55,6 +55,7 @@ export type UploadInputProps = {
   readonly customUploadActions?: React.ReactNode[]
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
+  readonly displayPreview?: boolean
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
@@ -85,6 +86,7 @@ export function UploadInput(props: UploadInputProps) {
     className,
     Description,
     description,
+    displayPreview,
     Error,
     filterOptions: filterOptionsFromProps,
     hasMany,
@@ -116,14 +118,8 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const { openModal } = useModal()
-  const {
-    drawerSlug,
-    setCollectionSlug,
-    setCurrentActivePath,
-    setInitialFiles,
-    setMaxFiles,
-    setOnSuccess,
-  } = useBulkUpload()
+  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
+    useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
@@ -187,6 +183,10 @@ export function UploadInput(props: UploadInputProps) {
 
   const populateDocs = React.useCallback<PopulateDocs>(
     async (ids, relatedCollectionSlug) => {
+      if (!ids.length) {
+        return
+      }
+
       const query: {
         [key: string]: unknown
         where: Where
@@ -212,7 +212,7 @@ export function UploadInput(props: UploadInputProps) {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-HTTP-Method-Override': 'GET',
+          'X-Payload-HTTP-Method-Override': 'GET',
         },
         method: 'POST',
       })
@@ -288,7 +288,6 @@ export function UploadInput(props: UploadInputProps) {
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
-      setCurrentActivePath(path)
       openModal(drawerSlug)
     },
     [
@@ -300,8 +299,6 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       maxRows,
       setMaxFiles,
-      path,
-      setCurrentActivePath,
     ],
   )
 
@@ -455,7 +452,7 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   useEffect(() => {
-    setOnSuccess(path, onUploadSuccess)
+    setOnSuccess(onUploadSuccess)
   }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
@@ -495,6 +492,7 @@ export function UploadInput(props: UploadInputProps) {
           <>
             {populatedDocs && populatedDocs?.length > 0 ? (
               <UploadComponentHasMany
+                displayPreview={displayPreview}
                 fileDocs={populatedDocs}
                 isSortable={isSortable && !readOnly}
                 onRemove={onRemove}
@@ -516,6 +514,7 @@ export function UploadInput(props: UploadInputProps) {
           <>
             {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
               <UploadComponentHasOne
+                displayPreview={displayPreview}
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}

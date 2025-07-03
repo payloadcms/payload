@@ -1,10 +1,12 @@
-import type { FormState } from 'payload'
+import type { FormState, UploadEdits } from 'payload'
 
 export type State = {
   activeIndex: number
   forms: {
     errorCount: number
+    formID: string
     formState: FormState
+    uploadEdits?: UploadEdits
   }[]
   totalErrorCount: number
 }
@@ -21,6 +23,7 @@ type Action =
       index: number
       type: 'UPDATE_FORM'
       updatedFields?: Record<string, unknown>
+      uploadEdits?: UploadEdits
     }
   | {
       files: FileList
@@ -47,6 +50,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       for (let i = 0; i < action.files.length; i++) {
         newForms[i] = {
           errorCount: 0,
+          formID: crypto.randomUUID(),
           formState: {
             ...(action.initialState || {}),
             file: {
@@ -55,6 +59,7 @@ export function formsManagementReducer(state: State, action: Action): State {
               value: action.files[i],
             },
           },
+          uploadEdits: {},
         }
       }
 
@@ -116,6 +121,10 @@ export function formsManagementReducer(state: State, action: Action): State {
         formState: {
           ...updatedForms[action.index].formState,
           ...action.formState,
+        },
+        uploadEdits: {
+          ...updatedForms[action.index].uploadEdits,
+          ...action.uploadEdits,
         },
       }
 

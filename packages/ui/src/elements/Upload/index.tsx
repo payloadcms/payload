@@ -1,6 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,13 +14,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import { FileDetails } from '../FileDetails/index.js'
 import './index.scss'
+import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
@@ -49,6 +51,7 @@ export const UploadActions = ({
   mimeType,
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
+  const { openModal } = useModal()
 
   const fileTypeIsAdjustable =
     isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
@@ -62,14 +65,30 @@ export const UploadActions = ({
       {fileTypeIsAdjustable && (
         <React.Fragment>
           {enablePreviewSizes && (
-            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__previewSizes`}
+              margin={false}
+              onClick={() => {
+                openModal(sizePreviewSlug)
+              }}
+              size="small"
+            >
               {t('upload:previewSizes')}
-            </DrawerToggler>
+            </Button>
           )}
           {enableAdjustments && (
-            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__edit`}
+              margin={false}
+              onClick={() => {
+                openModal(editDrawerSlug)
+              }}
+              size="small"
+            >
               {t('upload:editImage')}
-            </DrawerToggler>
+            </Button>
           )}
         </React.Fragment>
       )}
@@ -88,10 +107,50 @@ export type UploadProps = {
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly UploadControls?: React.ReactNode
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  return (
+    <UploadControlsProvider>
+      <Upload_v4
+        {...props}
+        resetUploadEdits={resetUploadEdits}
+        updateUploadEdits={updateUploadEdits}
+        uploadEdits={uploadEdits}
+      />
+    </UploadControlsProvider>
+  )
+}
+
+export type UploadProps_v4 = {
+  readonly resetUploadEdits?: () => void
+  readonly updateUploadEdits?: (args: UploadEdits) => void
+  readonly uploadEdits?: UploadEdits
+} & UploadProps
+
+export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
+  const {
+    collectionSlug,
+    customActions,
+    initialState,
+    onChange,
+    resetUploadEdits,
+    updateUploadEdits,
+    uploadConfig,
+    UploadControls,
+    uploadEdits,
+  } = props
+
+  const {
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+    uploadControlFile,
+    uploadControlFileName,
+    uploadControlFileUrl,
+  } = useUploadControls()
 
   const {
     config: {
@@ -102,7 +161,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
@@ -130,12 +188,15 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
       setValue(newFile)
       setShowUrlInput(false)
+      setUploadControlFileUrl('')
+      setUploadControlFileName(null)
+      setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
       }
     },
-    [onChange, setValue],
+    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -174,7 +235,16 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setFileUrl('')
     resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange, resetUploadEdits])
+    setUploadControlFileUrl('')
+    setUploadControlFileName(null)
+    setUploadControlFile(null)
+  }, [
+    handleFileChange,
+    resetUploadEdits,
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+  ])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
@@ -184,7 +254,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     [setModified, updateUploadEdits],
   )
 
-  const handleUrlSubmit = async () => {
+  const handleUrlSubmit = useCallback(async () => {
     if (!fileUrl || uploadConfig?.pasteURL === false) {
       return
     }
@@ -199,7 +269,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
       }
 
       const blob = await clientResponse.blob()
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange(file)
@@ -233,7 +303,18 @@ export const Upload: React.FC<UploadProps> = (props) => {
       toast.error('The provided URL is not allowed.')
       setUploadStatus('failed')
     }
-  }
+  }, [
+    api,
+    collectionSlug,
+    fileUrl,
+    handleFileChange,
+    id,
+    serverURL,
+    setUploadStatus,
+    uploadConfig,
+    uploadControlFileName,
+    useServerSideFetch,
+  ])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
@@ -270,9 +351,26 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
 
-  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
-    return null
-  }
+  useEffect(() => {
+    const handleControlFileUrl = async () => {
+      if (uploadControlFileUrl) {
+        setFileUrl(uploadControlFileUrl)
+        await handleUrlSubmit()
+      }
+    }
+
+    void handleControlFileUrl()
+  }, [uploadControlFileUrl, handleUrlSubmit])
+
+  useEffect(() => {
+    const handleControlFile = () => {
+      if (uploadControlFile) {
+        handleFileChange(uploadControlFile)
+      }
+    }
+
+    void handleControlFile()
+  }, [uploadControlFile, handleFileChange])
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -327,6 +425,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                         buttonStyle="pill"
                         onClick={() => {
                           setShowUrlInput(true)
+                          setUploadControlFileUrl('')
+                          setUploadControlFile(null)
+                          setUploadControlFileName(null)
                         }}
                         size="small"
                       >
@@ -334,8 +435,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                       </Button>
                     </Fragment>
                   )}
-                </div>
 
+                  {UploadControls ? UploadControls : null}
+                </div>
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>
@@ -352,6 +454,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     setFileUrl(e.target.value)
                   }}
                   ref={urlInputRef}
+                  title={fileUrl}
                   type="text"
                   value={fileUrl}
                 />
@@ -374,6 +477,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
+                  setUploadControlFileUrl('')
+                  setUploadControlFile(null)
+                  setUploadControlFileName(null)
                 }}
                 round
                 tooltip={t('general:cancel')}
@@ -393,6 +499,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
+                  title={filename || value.name}
                   type="text"
                   value={filename || value.name}
                 />

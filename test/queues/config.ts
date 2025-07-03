@@ -7,11 +7,14 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
+import { failsImmediatelyWorkflow } from './workflows/failsImmediately.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
+import { inlineTaskTestDelayedWorkflow } from './workflows/inlineTaskTestDelayed.js'
 import { longRunningWorkflow } from './workflows/longRunning.js'
 import { noRetriesSetWorkflow } from './workflows/noRetriesSet.js'
+import { parallelTaskWorkflow } from './workflows/parallelTaskWorkflow.js'
 import { retries0Workflow } from './workflows/retries0.js'
 import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
 import { retriesRollbackTestWorkflow } from './workflows/retriesRollbackTest.js'
@@ -28,6 +31,7 @@ import { workflowRetries2TasksRetriesUndefinedWorkflow } from './workflows/workf
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// eslint-disable-next-line no-restricted-exports
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -94,6 +98,16 @@ export default buildConfigWithDefaults({
     },
   },
   jobs: {
+    autoRun: [
+      {
+        // Every second
+        cron: '* * * * * *',
+        limit: 100,
+        queue: 'autorunSecond', // name of the queue
+      },
+      // add as many cron jobs as you want
+    ],
+    shouldAutoRun: () => true,
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       return {
         ...defaultJobsCollection,
@@ -102,6 +116,11 @@ export default buildConfigWithDefaults({
           hidden: false,
         },
       }
+    },
+    processingOrder: {
+      queues: {
+        lifo: '-createdAt',
+      },
     },
     tasks: [
       {
@@ -375,17 +394,20 @@ export default buildConfigWithDefaults({
       workflowRetries2TasksRetriesUndefinedWorkflow,
       workflowRetries2TasksRetries0Workflow,
       inlineTaskTestWorkflow,
+      failsImmediatelyWorkflow,
+      inlineTaskTestDelayedWorkflow,
       externalWorkflow,
       retriesBackoffTestWorkflow,
       subTaskWorkflow,
       subTaskFailsWorkflow,
       longRunningWorkflow,
+      parallelTaskWorkflow,
     ],
   },
   editor: lexicalEditor(),
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   typescript: {

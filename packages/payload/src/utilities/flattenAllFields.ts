@@ -7,7 +7,7 @@ import type {
   FlattenedJoinField,
 } from '../fields/config/types.js'
 
-import { tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
@@ -16,14 +16,41 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
-export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedField[] => {
+const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
+
+/**
+ * Flattens all fields in a collection, preserving the nested field structure.
+ * @param cache
+ * @param fields
+ */
+export const flattenAllFields = ({
+  cache,
+  fields,
+}: {
+  /** Allows you to get FlattenedField[] from Field[] anywhere without performance overhead by caching. */
+  cache?: boolean
+  fields: Field[]
+}): FlattenedField[] => {
+  if (cache) {
+    const maybeFields = flattenedFieldsCache.get(fields)
+    if (maybeFields) {
+      return maybeFields
+    }
+  }
+
   const result: FlattenedField[] = []
 
   for (const field of fields) {
     switch (field.type) {
       case 'array':
       case 'group': {
-        result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        if (fieldAffectsData(field)) {
+          result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        } else {
+          for (const nestedField of flattenAllFields({ fields: field.fields })) {
+            result.push(nestedField)
+          }
+        }
         break
       }
 
@@ -96,6 +123,8 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
       }
     }
   }
+
+  flattenedFieldsCache.set(fields, result)
 
   return result
 }

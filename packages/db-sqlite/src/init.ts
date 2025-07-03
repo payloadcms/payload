@@ -28,7 +28,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
   for (const tableName in this.rawTables) {
-    buildDrizzleTable({ adapter, locales, rawTable: this.rawTables[tableName] })
+    buildDrizzleTable({ adapter, locales: locales!, rawTable: this.rawTables[tableName]! })
   }
 
   buildDrizzleRelations({
@@ -36,4 +36,9 @@ export const init: Init = async function init(this: SQLiteAdapter) {
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  this.schema = {
+    ...this.tables,
+    ...this.relations,
+  }
 }

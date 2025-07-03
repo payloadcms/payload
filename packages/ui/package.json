@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.26.0",
+  "version": "3.45.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -16,7 +16,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -32,6 +35,16 @@
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx"
     },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
@@ -52,6 +65,11 @@
       "import": "./src/utilities/buildTableState.ts",
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
+    },
+    "./utilities/getFolderResultsComponentAndData": {
+      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
     },
     "./utilities/getClientSchemaMap": {
       "import": "./src/utilities/getClientSchemaMap.ts",
@@ -119,6 +137,7 @@
     "@date-fns/tz": "1.2.0",
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
+    "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
@@ -140,24 +159,23 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.2",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
-    "esbuild": "0.24.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
+    "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0",
+    "next": "^15.2.3",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"

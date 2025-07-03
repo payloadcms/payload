@@ -1,13 +1,20 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
-import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Where,
+} from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
   depth?: number
@@ -35,7 +42,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     populate,
     req: { fallbackLocale, locale },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -44,11 +51,17 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Retrieve and execute access
     // /////////////////////////////////////
 
-    let accessResult: AccessResult
+    let accessResult!: AccessResult
 
     if (!overrideAccess) {
       accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
+
+    const select = sanitizeSelect({
+      fields: globalConfig.flattenedFields,
+      forceSelect: globalConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Perform database operation
@@ -56,7 +69,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
     let doc = await req.payload.db.findGlobal({
       slug,
-      locale,
+      locale: locale!,
       req,
       select,
       where: overrideAccess ? undefined : (accessResult as Where),
@@ -69,7 +82,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Include Lock Status if required
     // /////////////////////////////////////
     if (includeLockStatus && slug) {
-      let lockStatus = null
+      let lockStatus: JsonObject | null = null
 
       try {
         const lockDocumentsProp = globalConfig?.lockDocuments
@@ -80,7 +93,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         const lockDurationInMilliseconds = lockDuration * 1000
 
         const lockedDocument = await req.payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: 1,
           overrideAccess: false,
@@ -103,7 +116,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         })
 
         if (lockedDocument && lockedDocument.docs.length > 0) {
-          lockStatus = lockedDocument.docs[0]
+          lockStatus = lockedDocument.docs[0]!
         }
       } catch {
         // swallow error
@@ -165,17 +178,17 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     doc = await afterRead({
       collection: null,
       context: req.context,
-      depth,
+      depth: depth!,
       doc,
       draft: draftEnabled,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale,
+      locale: locale!,
       overrideAccess,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////

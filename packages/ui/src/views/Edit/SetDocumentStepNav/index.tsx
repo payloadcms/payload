@@ -10,7 +10,7 @@ import type { StepNavItem } from '../../../elements/StepNav/index.js'
 import { useStepNav } from '../../../elements/StepNav/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../../providers/EditDepth/index.js'
+import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useEntityVisibility } from '../../../providers/EntityVisibility/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -27,7 +27,9 @@ export const SetDocumentStepNav: React.FC<{
 
   const view: string | undefined = props?.view || undefined
 
-  const { isEditing, isInitializing, title } = useDocumentInfo()
+  const { isEditing, isInitializing } = useDocumentInfo()
+  const { title } = useDocumentTitle()
+
   const { isEntityVisible } = useEntityVisibility()
   const isVisible = isEntityVisible({ collectionSlug, globalSlug })
 
@@ -40,8 +42,6 @@ export const SetDocumentStepNav: React.FC<{
       routes: { admin: adminRoute },
     },
   } = useConfig()
-
-  const drawerDepth = useEditDepth()
 
   useEffect(() => {
     const nav: StepNavItem[] = []
@@ -91,9 +91,7 @@ export const SetDocumentStepNav: React.FC<{
         })
       }
 
-      if (drawerDepth <= 1) {
-        setStepNav(nav)
-      }
+      setStepNav(nav)
     }
   }, [
     setStepNav,
@@ -109,7 +107,6 @@ export const SetDocumentStepNav: React.FC<{
     collectionSlug,
     globalSlug,
     view,
-    drawerDepth,
     isVisible,
   ])
 

@@ -3,6 +3,7 @@ import type { JSONFieldClientComponent } from 'payload'
 
 import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -27,10 +28,11 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       localized,
       required,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
+
   const [jsonError, setJsonError] = useState<string>()
   const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
   const [editorKey, setEditorKey] = useState<string>('')
@@ -46,12 +48,14 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -78,8 +82,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
       const uri = jsonSchema.uri
       const newUri = uri.includes('?')
-        ? `${uri}&${crypto.randomUUID()}`
-        : `${uri}?${crypto.randomUUID()}`
+        ? `${uri}&${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
+        : `${uri}?${crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
 
       editor.setModel(
         monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
@@ -90,7 +94,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) {
+      if (readOnly || disabled) {
         return
       }
       inputChangeFromRef.current = 'user'
@@ -103,7 +107,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue],
+    [readOnly, disabled, setValue],
   )
 
   useEffect(() => {
@@ -128,7 +132,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -153,7 +157,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={readOnly || disabled}
           value={initialStringValue}
           wrapperProps={{
             id: `field-${path?.replace(/\./g, '__')}`,

@@ -1,4 +1,4 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .LexicalEditorTheme__hr {
@@ -16,7 +16,7 @@
     background-color: var(--theme-elevation-250);
   }
 
-  .LexicalEditorTheme__hr.selected {
+  .LexicalEditorTheme__hr.LexicalEditorTheme__hrSelected {
     outline: 2px solid var(--theme-success-250);
     user-select: none;
   }

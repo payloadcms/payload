@@ -1,15 +1,30 @@
-import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
+import * as AWS from '@aws-sdk/client-s3'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+
+export type SignedDownloadsConfig =
+  | {
+      /** @default 7200 */
+      expiresIn?: number
+      shouldUseSignedURL?(args: {
+        collection: CollectionConfig
+        filename: string
+        req: PayloadRequest
+      }): boolean | Promise<boolean>
+    }
+  | boolean
 
 interface Args {
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
+  signedDownloads?: SignedDownloadsConfig
 }
 
 // Type guard for NodeJS.Readable streams
@@ -24,6 +39,12 @@ const isNodeReadableStream = (body: unknown): body is Readable => {
   )
 }
 
+const destroyStream = (object: AWS.GetObjectOutput | undefined) => {
+  if (object?.Body && isNodeReadableStream(object.Body)) {
+    object.Body.destroy()
+  }
+}
+
 // Convert a stream into a promise that resolves with a Buffer
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const streamToBuffer = async (readableStream: any) => {
@@ -34,27 +55,50 @@ const streamToBuffer = async (readableStream: any) => {
   return Buffer.concat(chunks)
 }
 
-export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({
+  bucket,
+  collection,
+  getStorageClient,
+  signedDownloads,
+}: Args): StaticHandler => {
   return async (req, { params: { clientUploadContext, filename } }) => {
+    let object: AWS.GetObjectOutput | undefined = undefined
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
 
       const key = path.posix.join(prefix, filename)
 
-      const object = await getStorageClient().getObject({
+      if (signedDownloads && !clientUploadContext) {
+        let useSignedURL = true
+        if (
+          typeof signedDownloads === 'object' &&
+          typeof signedDownloads.shouldUseSignedURL === 'function'
+        ) {
+          useSignedURL = await signedDownloads.shouldUseSignedURL({ collection, filename, req })
+        }
+
+        if (useSignedURL) {
+          const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+          const signedUrl = await getSignedUrl(
+            // @ts-expect-error mismatch versions
+            getStorageClient(),
+            command,
+            typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
+          )
+          return Response.redirect(signedUrl, 302)
+        }
+      }
+
+      object = await getStorageClient().getObject({
         Bucket: bucket,
         Key: key,
       })
-
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
 
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
-        const response = new Response(null, {
+        return new Response(null, {
           headers: new Headers({
             'Accept-Ranges': String(object.AcceptRanges),
             'Content-Length': String(object.ContentLength),
@@ -63,13 +107,6 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
           }),
           status: 304,
         })
-
-        // Manually destroy stream before returning cached results to close socket
-        if (object.Body && isNodeReadableStream(object.Body)) {
-          object.Body.destroy()
-        }
-
-        return response
       }
 
       // On error, manually destroy stream to close socket
@@ -97,8 +134,13 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         status: 200,
       })
     } catch (err) {
+      if (err instanceof AWS.NoSuchKey) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
+    } finally {
+      destroyStream(object)
     }
   }
 }

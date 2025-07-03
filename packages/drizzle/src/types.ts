@@ -37,10 +37,7 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
-import type { ChainedMethods } from './find/chainMethods.js'
 import type { Operators } from './queries/operatorMap.js'
-
-export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -279,14 +276,38 @@ export type IntegerRawColumn = {
   type: 'integer'
 } & BaseRawColumn
 
+export type VectorRawColumn = {
+  dimensions?: number
+  type: 'vector'
+} & BaseRawColumn
+
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
+export type SparseVecRawColumn = {
+  dimensions?: number
+  type: 'sparsevec'
+} & BaseRawColumn
+
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
+  | BinaryVecRawColumn
   | EnumRawColumn
+  | HalfVecRawColumn
   | IntegerRawColumn
+  | SparseVecRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
+  | VectorRawColumn
 
 export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
 
@@ -312,6 +333,7 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
 }) => void
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
+  blocksAsJSON?: boolean
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -320,8 +342,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-  execute: Execute<unknown>
 
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }
@@ -371,3 +393,8 @@ export type RelationMap = Map<
     type: 'many' | 'one'
   }
 >
+
+/**
+ * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ */
+export type { ChainedMethods } from './find/chainMethods.js'

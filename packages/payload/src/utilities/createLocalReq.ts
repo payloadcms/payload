@@ -1,6 +1,4 @@
-// @ts-strict-ignore
-import type { User } from '../auth/types.js'
-import type { Payload, RequestContext, TypedLocale } from '../index.js'
+import type { Payload, RequestContext, TypedLocale, TypedUser } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
@@ -8,7 +6,7 @@ import { getLocalI18n } from '../translations/getLocalI18n.js'
 import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
 
 function getRequestContext(
-  req: Partial<PayloadRequest> = { context: null } as PayloadRequest,
+  req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
   context: RequestContext = {},
 ): RequestContext {
   if (req.context) {
@@ -41,14 +39,14 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
     const urlToUse =
-      req?.url || req.payload.config?.serverURL
-        ? `${req.payload.config.serverURL}${urlSuffix || ''}`
+      req?.url || req.payload?.config?.serverURL
+        ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
         : fallbackURL
 
     try {
       urlObject = new URL(urlToUse)
     } catch (_err) {
-      req.payload.logger.error(
+      req.payload?.logger.error(
         `Failed to create URL object from URL: ${urlToUse}, falling back to ${fallbackURL}`,
       )
 
@@ -86,23 +84,23 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
   }
 }
 
-type CreateLocalReq = (
-  options: {
-    context?: RequestContext
-    fallbackLocale?: false | TypedLocale
-    locale?: string
-    req?: Partial<PayloadRequest>
-    urlSuffix?: string
-    user?: User
-  },
-  payload: Payload,
-) => Promise<PayloadRequest>
+export type CreateLocalReqOptions = {
+  context?: RequestContext
+  fallbackLocale?: false | TypedLocale
+  locale?: string
+  req?: Partial<PayloadRequest>
+  urlSuffix?: string
+  user?: TypedUser
+}
+
+type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
   payload,
-) => {
+): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
+
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = localization.defaultLocale
@@ -112,12 +110,12 @@ export const createLocalReq: CreateLocalReq = async (
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       locale: req.locale,
       localization,
     })
 
-    req.fallbackLocale = sanitizedFallback
+    req.fallbackLocale = sanitizedFallback!
   }
 
   const i18n =

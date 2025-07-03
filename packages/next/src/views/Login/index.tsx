@@ -2,14 +2,12 @@ import type { AdminViewServerProps, ServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
+import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
-
-export { generateLoginMetadata } from './meta.js'
-
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
@@ -27,8 +25,10 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
     routes: { admin },
   } = config
 
+  const redirectUrl = getSafeRedirect({ fallbackTo: admin, redirectTo: searchParams.redirect })
+
   if (user) {
-    redirect((searchParams.redirect as string) || admin)
+    redirect(redirectUrl)
   }
 
   const collectionConfig = payload?.collections?.[userSlug]?.config

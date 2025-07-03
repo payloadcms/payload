@@ -2,6 +2,7 @@
 import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
@@ -12,8 +13,6 @@ import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import { reduceFields } from './reduceFields.js'
-import { transformWhereQuery } from './transformWhereQuery.js'
-import validateWhereQuery from './validateWhereQuery.js'
 import './index.scss'
 
 const baseClass = 'where-builder'
@@ -61,7 +60,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
-          [field.value]: {
+          [String(field.value)]: {
             [defaultOperator]: undefined,
           },
         })
@@ -69,7 +68,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.push({
           and: [
             {
-              [field.value]: {
+              [String(field.value)]: {
                 [defaultOperator]: undefined,
               },
             },
@@ -84,22 +83,29 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const updateCondition: UpdateCondition = React.useCallback(
     async ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
-      const existingRowCondition = conditions[orIndex].and[andIndex]
+      const existingCondition = conditions[orIndex].and[andIndex]
 
       const defaults = fieldTypes[field.field.type]
       const operator = incomingOperator || defaults.operators[0].value
 
-      if (typeof existingRowCondition === 'object' && field.value) {
-        const value = valueArg ?? existingRowCondition?.[operator]
+      if (typeof existingCondition === 'object' && field.value) {
+        const value = valueArg ?? existingCondition?.[operator]
 
-        const newRowCondition = {
-          [field.value]: { [operator]: value },
+        const valueChanged = value !== existingCondition?.[String(field.value)]?.[String(operator)]
+
+        const operatorChanged =
+          operator !== Object.keys(existingCondition?.[String(field.value)] || {})?.[0]
+
+        if (valueChanged || operatorChanged) {
+          const newRowCondition = {
+            [String(field.value)]: { [operator]: value },
+          }
+
+          const newConditions = [...conditions]
+          newConditions[orIndex].and[andIndex] = newRowCondition
+
+          await handleWhereChange({ or: newConditions })
         }
-
-        const newConditions = [...conditions]
-        newConditions[orIndex].and[andIndex] = newRowCondition
-
-        await handleWhereChange({ or: newConditions })
       }
     },
     [conditions, handleWhereChange],
@@ -179,7 +185,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={async () => {
               await addCondition({
                 andIndex: 0,
-                field: reducedFields[0],
+                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                 orIndex: conditions.length,
                 relation: 'or',
               })

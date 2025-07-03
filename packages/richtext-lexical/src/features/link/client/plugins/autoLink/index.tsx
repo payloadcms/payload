@@ -187,11 +187,13 @@ function $createAutoLinkNode_(
 
   const linkNode = $createAutoLinkNode({ fields })
   if (nodes.length === 1) {
-    const split = (
-      startIndex === 0 ? nodes[0]?.splitText(endIndex) : nodes[0]?.splitText(startIndex, endIndex)
-    )!
-
-    const [linkTextNode, remainingTextNode] = split
+    const remainingTextNode = nodes[0]!
+    let linkTextNode: TextNode | undefined
+    if (startIndex === 0) {
+      ;[linkTextNode] = remainingTextNode.splitText(endIndex)
+    } else {
+      ;[, linkTextNode] = remainingTextNode.splitText(startIndex, endIndex)
+    }
     if (linkTextNode) {
       const textNode = $createTextNode(match.text)
       textNode.setFormat(linkTextNode.getFormat())

@@ -1,5 +1,6 @@
-import type { CreateOptions } from 'mongoose'
 import type { Create } from 'payload'
+
+import { type CreateOptions, Types } from 'mongoose'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -29,6 +30,15 @@ export const create: Create = async function create(
 
   if (customIDType) {
     data._id = data.id
+  } else if (this.allowIDOnCreate && data.id) {
+    try {
+      data._id = new Types.ObjectId(data.id as string)
+    } catch (error) {
+      this.payload.logger.error(
+        `It appears you passed ID to create operation data but it cannot be sanitized to ObjectID, value - ${JSON.stringify(data.id)}`,
+      )
+      throw error
+    }
   }
 
   try {

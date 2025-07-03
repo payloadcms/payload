@@ -31,6 +31,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -42,7 +43,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
-  let src: string = ''
+  let src: null | string = null
 
   /**
    * If an imageCacheTag is provided, append it to the fileSrc
@@ -81,6 +82,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc

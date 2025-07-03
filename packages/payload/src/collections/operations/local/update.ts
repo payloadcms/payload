@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
@@ -7,10 +6,12 @@ import type {
   PayloadRequest,
   PopulateType,
   SelectType,
+  Sort,
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
   RequiredDataFromCollectionSlug,
@@ -131,6 +132,12 @@ export type ByIDOptions<
    */
   limit?: never
   /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: never
+  /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
@@ -148,6 +155,12 @@ export type ManyOptions<
    * Limit documents to update
    */
   limit?: number
+  /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: Sort
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
@@ -205,6 +218,7 @@ async function updateLocal<
     publishSpecificLocale,
     select,
     showHiddenFields,
+    sort,
     where,
   } = options
 
@@ -216,8 +230,8 @@ async function updateLocal<
     )
   }
 
-  const req = await createLocalReq(options, payload)
-  req.file = file ?? (await getFileByPath(filePath))
+  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {
     id,
@@ -237,13 +251,16 @@ async function updateLocal<
     req,
     select,
     showHiddenFields,
+    sort,
     where,
   }
 
   if (options.id) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return updateByIDOperation<TSlug, TSelect>(args)
   }
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   return updateOperation<TSlug, TSelect>(args)
 }
 
-export default updateLocal
+export { updateLocal }

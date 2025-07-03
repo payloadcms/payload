@@ -47,7 +47,7 @@ const networkConditions = {
   },
   'Slow 3G': {
     download: ((500 * 1000) / 8) * 0.8,
-    latency: 400 * 5,
+    latency: 2500,
     upload: ((500 * 1000) / 8) * 0.8,
   },
   'Slow 4G': {
@@ -185,9 +185,20 @@ export async function login(args: LoginArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
-    admin: { routes: { createFirstUser, login: incomingLoginRoute } = {} },
+    admin: {
+      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
+    },
     routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
+
+  const logoutRoute = formatAdminURL({
+    serverURL,
+    adminRoute: incomingAdminRoute,
+    path: incomingLogoutRoute,
+  })
+
+  await page.goto(logoutRoute)
+  await wait(500)
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
   const loginRoute = formatAdminURL({
@@ -237,7 +248,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(
   page: Page,
-  selector = '#action-save',
+  selector: '#access-save' | '#action-publish' | '#action-save-draft' | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
@@ -245,7 +256,7 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
@@ -350,16 +361,20 @@ export const selectTableRow = async (page: Page, title: string): Promise<void> =
   await expect(page.locator(selector)).toBeChecked()
 }
 
-export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
-  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
-  expect(cell).toBeTruthy()
+  await expect(cell).toBeVisible()
   return cell
 }
 
-export const findTableRow = (page: Page, title: string): Locator => {
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
-  expect(row).toBeTruthy()
+  await expect(row).toBeVisible()
   return row
 }
 
@@ -367,6 +382,11 @@ export async function switchTab(page: Page, selector: string) {
   await page.locator(selector).click()
   await wait(300)
   await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+}
+
+export const openColumnControls = async (page: Page) => {
+  await page.locator('.list-controls__toggle-columns').click()
+  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 }
 
 /**

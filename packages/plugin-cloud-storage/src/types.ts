@@ -63,6 +63,7 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -79,6 +80,14 @@ export interface GeneratedAdapter {
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
+
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
 
 export type GenerateFileURL = (args: {
   collection: CollectionConfig

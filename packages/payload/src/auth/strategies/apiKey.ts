@@ -1,9 +1,9 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { Where } from '../../types/index.js'
-import type { AuthStrategyFunction, User } from '../index.js'
+import type { AuthStrategyFunction } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
@@ -46,14 +46,14 @@ export const APIKeyAuthentication =
 
         if (userQuery.docs && userQuery.docs.length > 0) {
           const user = userQuery.docs[0]
-          user.collection = collectionConfig.slug
-          user._strategy = 'api-key'
+          user!.collection = collectionConfig.slug
+          user!._strategy = 'api-key'
 
           return {
-            user: user as User,
+            user: user as TypedUser,
           }
         }
-      } catch (err) {
+      } catch (ignore) {
         return { user: null }
       }
     }

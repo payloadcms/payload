@@ -24,9 +24,7 @@ describe('Queues', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -43,6 +41,7 @@ describe('Queues', () => {
     if (data.token) {
       token = data.token
     }
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('will run access control on jobs runner', async () => {
@@ -184,7 +183,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflow-level retries are respected', async () => {
@@ -220,8 +218,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont limit retries if no retries property is sett', async () => {
@@ -257,8 +253,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont retry if retries set to 0, even if individual tasks have retries > 0 set', async () => {
@@ -294,8 +288,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows dont retry if neither workflows nor tasks have retries set', async () => {
@@ -331,8 +323,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows retry if workflows have retries set and tasks do not have retries set, due to tasks inheriting workflow retries', async () => {
@@ -368,8 +358,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflows do not retry if workflows have retries set and tasks have retries set to 0', async () => {
@@ -405,8 +393,6 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(0)
-
-    payload.config.jobs.deleteJobOnComplete = true
   })
 
   /*
@@ -494,7 +480,7 @@ describe('Queues', () => {
       id: job.id,
     })
     expect(jobAfterRun.totalTried).toBe(5)
-    expect((jobAfterRun.taskStatus as JobTaskStatus).inline['1'].totalTried).toBe(5)
+    expect((jobAfterRun.taskStatus as JobTaskStatus).inline?.['1']?.totalTried).toBe(5)
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(4)
@@ -520,7 +506,7 @@ describe('Queues', () => {
         if (index === arr.length - 1) {
           return null
         }
-        return new Date(arr[index + 1]).getTime() - new Date(time).getTime()
+        return new Date(arr[index + 1] as string).getTime() - new Date(time).getTime()
       })
       .filter((p) => p !== null)
 
@@ -529,8 +515,106 @@ describe('Queues', () => {
     expect(durations[1]).toBeGreaterThan(600)
     expect(durations[2]).toBeGreaterThan(1200)
     expect(durations[3]).toBeGreaterThan(2400)
+  })
 
-    payload.config.jobs.deleteJobOnComplete = true
+  it('ensure jobs run in FIFO order by default', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 1')
+    expect(allSimples.docs?.[1]?.title).toBe('task 2')
+  })
+
+  it('ensure jobs can run LIFO if processingOrder is passed', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+      processingOrder: '-createdAt',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 2')
+    expect(allSimples.docs?.[1]?.title).toBe('task 1')
+  })
+
+  it('ensure job config processingOrder using queues object is respected', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      queue: 'lifo',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      queue: 'lifo',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+      queue: 'lifo',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 2')
+    expect(allSimples.docs?.[1]?.title).toBe('task 1')
   })
 
   it('can create new inline jobs', async () => {
@@ -549,24 +633,62 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('hello!')
+    expect(allSimples.docs[0]?.title).toBe('hello!')
+  })
+
+  it('can create and autorun jobs', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      queue: 'autorunSecond',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    // Do not call payload.jobs.run()
+
+    // Autorun runs every second - so should definitely be done if we wait 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 
   it('should respect deleteJobOnComplete true default configuration', async () => {
     const { id } = await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       input: {
-        message: 'hello!',
+        message: 'deleteJobOnComplete test',
       },
     })
 
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(before.id).toBe(id)
+    expect(before?.id).toBe(id)
 
     await payload.jobs.run()
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after).toBeNull()
+  })
+
+  it('should not delete failed jobs if deleteJobOnComplete is true', async () => {
+    const { id } = await payload.jobs.queue({
+      workflow: 'failsImmediately',
+      input: {},
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before?.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after?.id).toBe(id)
   })
 
   it('should respect deleteJobOnComplete false configuration', async () => {
@@ -579,14 +701,12 @@ describe('Queues', () => {
     })
 
     const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(before.id).toBe(id)
+    expect(before?.id).toBe(id)
 
     await payload.jobs.run()
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
-    expect(after.id).toBe(id)
-
-    payload.config.jobs.deleteJobOnComplete = true
+    expect(after?.id).toBe(id)
   })
 
   it('can queue single tasks', async () => {
@@ -605,7 +725,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
   it('can queue and run via the endpoint single tasks without workflows', async () => {
@@ -630,7 +750,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
     payload.config.jobs.workflows = workflowsRef
   })
 
@@ -764,8 +884,8 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(8)
-    expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[7].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
+    expect(allSimples.docs[7]?.title).toBe('from single task')
   })
 
   it('can queue single tasks hundreds of times', async () => {
@@ -791,9 +911,8 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(numberOfTasks) // Default limit: 10
-    expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[numberOfTasks - 1].title).toBe('from single task')
-    payload.config.jobs.deleteJobOnComplete = true
+    expect(allSimples.docs[0]?.title).toBe('from single task')
+    expect(allSimples.docs[numberOfTasks - 1]?.title).toBe('from single task')
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
@@ -814,8 +933,8 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(10) // Default limit: 10
-    expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[9].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
+    expect(allSimples.docs[9]?.title).toBe('from single task')
   })
 
   it('ensure jobs run limit can be customized', async () => {
@@ -838,9 +957,9 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(42) // Default limit: 10
-    expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[30].title).toBe('from single task')
-    expect(allSimples.docs[41].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
+    expect(allSimples.docs[30]?.title).toBe('from single task')
+    expect(allSimples.docs[41]?.title).toBe('from single task')
   })
 
   it('can queue different kinds of single tasks multiple times', async () => {
@@ -905,7 +1024,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('external')
+    expect(allSimples.docs[0]?.title).toBe('external')
   })
 
   it('can queue external workflow that is running external task', async () => {
@@ -924,13 +1043,13 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('externalWorkflow')
+    expect(allSimples.docs[0]?.title).toBe('externalWorkflow')
   })
 
   it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: string = null
+    let lastJobID: null | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -939,6 +1058,9 @@ describe('Queues', () => {
         },
       })
       lastJobID = job.id
+    }
+    if (!lastJobID) {
+      throw new Error('No job ID found after queuing jobs')
     }
 
     await payload.jobs.runByID({
@@ -951,7 +1073,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
 
     const allCompletedJobs = await payload.find({
       collection: 'payload-jobs',
@@ -964,13 +1086,13 @@ describe('Queues', () => {
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
-    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+    expect(allCompletedJobs.docs[0]?.id).toBe(lastJobID)
   })
 
   it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
-    let lastJobID: string = null
+    let lastJobID: null | string = null
     for (let i = 0; i < 3; i++) {
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -979,6 +1101,9 @@ describe('Queues', () => {
         },
       })
       lastJobID = job.id
+    }
+    if (!lastJobID) {
+      throw new Error('No job ID found after queuing jobs')
     }
 
     await payload.jobs.run({
@@ -995,7 +1120,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('from single task')
+    expect(allSimples.docs[0]?.title).toBe('from single task')
 
     const allCompletedJobs = await payload.find({
       collection: 'payload-jobs',
@@ -1008,7 +1133,7 @@ describe('Queues', () => {
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
-    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+    expect(allCompletedJobs.docs[0]?.id).toBe(lastJobID)
   })
 
   it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
@@ -1037,7 +1162,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('from single task 2')
+    expect(allSimples.docs[0]?.title).toBe('from single task 2')
 
     const allCompletedJobs = await payload.find({
       collection: 'payload-jobs',
@@ -1050,7 +1175,7 @@ describe('Queues', () => {
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
-    expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
+    expect((allCompletedJobs.docs[0]?.input as any).message).toBe('from single task 2')
   })
 
   it('can run sub-tasks', async () => {
@@ -1070,24 +1195,24 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(2)
-    expect(allSimples.docs[0].title).toBe('hello!')
-    expect(allSimples.docs[1].title).toBe('hello!')
+    expect(allSimples.docs[0]?.title).toBe('hello!')
+    expect(allSimples.docs[1]?.title).toBe('hello!')
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
     })
 
-    expect(jobAfterRun.log[0].taskID).toBe('create doc 1')
+    expect(jobAfterRun?.log?.[0]?.taskID).toBe('create doc 1')
     //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
     // jobAfterRun.log[0].parent should not exist
-    expect(jobAfterRun.log[0].parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[0]?.parent).toBeUndefined()
 
-    expect(jobAfterRun.log[1].taskID).toBe('create doc 2')
+    expect(jobAfterRun?.log?.[1]?.taskID).toBe('create doc 2')
     //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
-    expect(jobAfterRun.log[1].parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[1]?.parent).toBeUndefined()
 
-    expect(jobAfterRun.log[2].taskID).toBe('create two docs')
+    expect(jobAfterRun?.log?.[2]?.taskID).toBe('create two docs')
   })
 
   it('ensure successful sub-tasks are not retried', async () => {
@@ -1116,7 +1241,7 @@ describe('Queues', () => {
     })
 
     expect(allSimples.totalDocs).toBe(1)
-    expect(allSimples.docs[0].title).toBe('hello!')
+    expect(allSimples?.docs?.[0]?.title).toBe('hello!')
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1218,8 +1343,8 @@ describe('Queues', () => {
 
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun.log[0].error.message).toBe('failed')
-    expect(jobAfterRun.log[0].state).toBe('failed')
+    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('failed')
+    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
   })
 
   it('can tasks return error', async () => {
@@ -1239,8 +1364,8 @@ describe('Queues', () => {
 
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun.log[0].error.message).toBe('failed')
-    expect(jobAfterRun.log[0].state).toBe('failed')
+    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('Task handler returned a failed state')
+    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
   })
 
   it('can tasks return error with custom error message', async () => {
@@ -1262,7 +1387,50 @@ describe('Queues', () => {
 
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun.log[0].error.message).toBe('custom error message')
-    expect(jobAfterRun.log[0].state).toBe('failed')
+    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('custom error message')
+    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
+  })
+
+  it('can reliably run workflows with parallel tasks', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (process.env.PAYLOAD_DATABASE === 'supabase') {
+      // TODO: This test is flaky on supabase in CI, so we skip it for now
+      return
+    }
+    const amount = 50
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'parallelTask',
+      input: {
+        amount,
+      },
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(amount)
+
+    const simpleDocs = await payload.find({
+      collection: 'simple',
+      limit: amount,
+      depth: 0,
+    })
+    expect(simpleDocs.docs).toHaveLength(amount)
+
+    // Ensure all docs are created (= all tasks are run once)
+    for (let i = 1; i <= simpleDocs.docs.length; i++) {
+      const simpleDoc = simpleDocs.docs.find((doc) => doc.title === `parallel task ${i}`)
+      const logEntry = jobAfterRun?.log?.find((log) => log.taskID === `parallel task ${i}`)
+      expect(simpleDoc).toBeDefined()
+      expect(logEntry).toBeDefined()
+      expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
+    }
   })
 })

@@ -1,7 +1,7 @@
-// @ts-strict-ignore
 import url from 'url'
+import { v4 as uuid } from 'uuid'
 
-import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
+import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -11,11 +11,18 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
+import { removeExpiredSessions } from '../removeExpiredSessions.js'
 
 export type Result = {
   exp: number
   refreshedToken: string
   setCookie?: boolean
+  /** @deprecated
+   * use:
+   * ```ts
+   * user._strategy
+   * ```
+   */
   strategy?: string
   user: Document
 }
@@ -64,7 +71,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url)
+    const parsedURL = url.parse(args.req.url!)
     const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
     const user = await args.req.payload.findByID({
@@ -74,11 +81,37 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       req: args.req,
     })
 
-    if (user) {
-      user.collection = args.req.user.collection
+    const sid = args.req.user._sid
+
+    if (collectionConfig.auth.useSessions && !collectionConfig.auth.disableLocalStrategy) {
+      if (!Array.isArray(user.sessions) || !sid) {
+        throw new Forbidden(args.req.t)
+      }
+
+      const existingSession = user.sessions.find(({ id }) => id === sid)
+
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      await req.payload.db.updateOne({
+        id: user.id,
+        collection: collectionConfig.slug,
+        data: {
+          ...user,
+          sessions: removeExpiredSessions(user.sessions),
+        },
+        req,
+        returning: false,
+      })
     }
 
-    let result: Result
+    if (user) {
+      user.collection = args.req.user.collection
+      user._strategy = args.req.user._strategy
+    }
+
+    let result!: Result
 
     // /////////////////////////////////////
     // refresh hook - Collection
@@ -97,6 +130,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       const fieldsToSign = getFieldsToSign({
         collectionConfig,
         email: user?.email as string,
+        sid,
         user: args?.req?.user,
       })
 
@@ -110,6 +144,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         exp,
         refreshedToken,
         setCookie: true,
+        /** @deprecated
+         * use:
+         * ```ts
+         * user._strategy
+         * ```
+         */
         strategy: args.req.user._strategy,
         user,
       }

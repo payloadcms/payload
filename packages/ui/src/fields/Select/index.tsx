@@ -38,6 +38,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         description,
         isClearable = true,
         isSortable = true,
+        placeholder,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -46,7 +47,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -64,17 +65,20 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
+    selectFilterOptions,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
-      if (!readOnly) {
+      if (!readOnly || disabled) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
@@ -93,7 +97,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, hasMany, setValue, onChangeFromProps],
+    [readOnly, disabled, hasMany, setValue, onChangeFromProps],
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
@@ -106,6 +110,14 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       Description={Description}
       description={description}
       Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ value }) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
@@ -116,7 +128,8 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={readOnly}
+      placeholder={placeholder}
+      readOnly={readOnly || disabled}
       required={required}
       showError={showError}
       style={styles}

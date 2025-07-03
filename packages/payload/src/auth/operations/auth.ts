@@ -6,6 +6,10 @@ import { executeAuthStrategies } from '../executeAuthStrategies.js'
 import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
+  /**
+   * Specify if it's possible for auth strategies to set headers within this operation.
+   */
+  canSetHeaders?: boolean
   headers: Request['headers']
   req?: Omit<PayloadRequest, 'user'>
 }
@@ -17,12 +21,13 @@ export type AuthResult = {
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
-  const { headers } = args
+  const { canSetHeaders, headers } = args
   const req = args.req as PayloadRequest
   const { payload } = req
 
   try {
     const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders,
       headers,
       payload,
     })

@@ -25,6 +25,19 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
+      name: 'fieldWithOperationCondition',
+      type: 'text',
+      admin: {
+        condition: (data, siblingData, { operation }) => {
+          if (operation === 'create') {
+            return true
+          }
+
+          return false
+        },
+      },
+    },
+    {
       name: 'customFieldWithField',
       type: 'text',
       admin: {
@@ -177,6 +190,63 @@ const ConditionalLogic: CollectionConfig = {
               admin: {
                 condition: (data) => data.enableConditionalFields,
               },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'arrayOne',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'arrayTwo',
+          type: 'array',
+          fields: [
+            {
+              name: 'selectOptions',
+              type: 'select',
+              defaultValue: 'optionOne',
+              options: [
+                {
+                  label: 'Option One',
+                  value: 'optionOne',
+                },
+                {
+                  label: 'Option Two',
+                  value: 'optionTwo',
+                },
+              ],
+            },
+            {
+              name: 'arrayThree',
+              type: 'array',
+              fields: [
+                {
+                  name: 'numberField',
+                  type: 'number',
+                  admin: {
+                    condition: (data, siblingData, { path }) => {
+                      // Ensure path has enough depth
+                      if (path.length < 5) {
+                        return false
+                      }
+
+                      const arrayOneIndex = parseInt(String(path[1]), 10)
+                      const arrayTwoIndex = parseInt(String(path[3]), 10)
+
+                      const arrayOneItem = data.arrayOne?.[arrayOneIndex]
+                      const arrayTwoItem = arrayOneItem?.arrayTwo?.[arrayTwoIndex]
+
+                      return arrayTwoItem?.selectOptions === 'optionTwo'
+                    },
+                  },
+                },
+              ],
             },
           ],
         },
