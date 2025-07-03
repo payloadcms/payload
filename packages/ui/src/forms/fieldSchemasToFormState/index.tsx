@@ -67,6 +67,7 @@ type Args = {
    * to be able to determine if custom fields need to be re-rendered.
    */
   previousFormState?: FormState
+  readOnly?: boolean
   /**
    * If renderAllFields is true, then no matter what is in previous form state,
    * all custom fields will be re-rendered.
@@ -94,6 +95,7 @@ export const fieldSchemasToFormState = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn,
   req,
@@ -152,6 +154,7 @@ export const fieldSchemasToFormState = async ({
       permissions,
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,

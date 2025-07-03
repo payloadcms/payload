@@ -22,6 +22,7 @@ import {
   ListBulkUploadButton,
   ListCreateNewDocInFolderButton,
 } from '../../elements/ListHeader/TitleActions/index.js'
+import { ListTrashViewPill } from '../../elements/ListTrashViewPill/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
@@ -33,8 +34,8 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListSelection } from './ListSelection/index.js'
 import './index.scss'
+import { ListSelection } from './ListSelection/index.js'
 
 const baseClass = 'collection-folder-list'
 
@@ -266,6 +267,13 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
                   key="list-selection"
+                />
+              ),
+              collectionConfig.trash && (
+                <ListTrashViewPill
+                  collectionConfig={collectionConfig}
+                  key="list-header-trash-view-button"
+                  viewType="folders"
                 />
               ),
               config.folders && collectionConfig.folders && (

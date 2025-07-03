@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import React, { Fragment, useCallback } from 'react'
 
@@ -7,6 +7,7 @@ import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
+import { RestoreMany } from '../../../elements/RestoreMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { SelectAllStatus, useSelection } from '../../../providers/Selection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -16,6 +17,7 @@ export type ListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   label: string
+  viewType?: ViewTypes
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
@@ -23,6 +25,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
   label,
+  viewType,
 }) => {
   const { count, getSelectedIds, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
@@ -32,6 +35,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   if (count === 0) {
     return null
   }
+
+  const isTrashView = collectionConfig?.trash && viewType === 'trash'
 
   return (
     <ListSelection_v4
@@ -49,7 +54,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         ) : null,
       ].filter(Boolean)}
       SelectionActions={[
-        !disableBulkEdit && (
+        !disableBulkEdit && !isTrashView && (
           <Fragment key="bulk-actions">
             <EditMany_v4
               collection={collectionConfig}
@@ -74,7 +79,12 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             />
           </Fragment>
         ),
-        !disableBulkDelete && <DeleteMany collection={collectionConfig} key="bulk-delete" />,
+        isTrashView && (
+          <RestoreMany collection={collectionConfig} key="bulk-restore" viewType={viewType} />
+        ),
+        !disableBulkDelete && (
+          <DeleteMany collection={collectionConfig} key="bulk-delete" viewType={viewType} />
+        ),
       ].filter(Boolean)}
     />
   )

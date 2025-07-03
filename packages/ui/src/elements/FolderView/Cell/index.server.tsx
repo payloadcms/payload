@@ -20,6 +20,7 @@ export const FolderTableCell = (props: DefaultServerCellComponentProps) => {
       docTitle={titleToRender}
       folderCollectionSlug={props.payload.config.folders.slug}
       folderFieldName={props.payload.config.folders.fieldName}
+      viewType={props.viewType}
     />
   )
 }

@@ -126,6 +126,7 @@ export type FindArgs<
   pagination?: boolean
   showHiddenFields?: boolean
   sort?: string
+  trash?: boolean
   user?: TypeWithID
   where?: Where
 } & BaseArgs
@@ -148,5 +149,6 @@ export type DeleteArgs<
   collection: TSlug
   id?: string
   overrideAccess?: boolean
+  trash?: boolean
   where?: Where
 } & BaseArgs

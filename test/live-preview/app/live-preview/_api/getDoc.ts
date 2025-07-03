@@ -26,12 +26,13 @@ export const getDoc = async <T>(args: {
       depth,
       where,
       draft,
+      trash: true, // Include trashed documents
     })
 
     if (docs[0]) {
       return docs[0] as T
     }
-  } catch (err) {
+  } catch (err: Error | any) {
     throw new Error(`Error getting doc: ${err.message}`)
   }
 
