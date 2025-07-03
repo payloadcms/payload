@@ -68,14 +68,13 @@ export const checkFileRestrictions = async ({
   const detectedFileType = await fileTypeFromBuffer(file.data)
   const detectedFileMime = detectedFileType ? detectedFileType.mime : file.mimetype
 
-  const isRestrictedExt = RESTRICTED_FILE_EXT_AND_TYPES.some((type) =>
-    type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext)),
-  )
-  const isRestrictedMime = RESTRICTED_FILE_EXT_AND_TYPES.some(
-    (type) => type.fileType === detectedFileMime,
-  )
+  const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
+    const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
+    const hasRestrictedMime = type.fileType === detectedFileMime
+    return hasRestrictedExt || hasRestrictedMime
+  })
 
-  if (isRestrictedMime || isRestrictedExt) {
+  if (isRestricted) {
     const errorMessage = `File type '${detectedFileMime}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`
     req.payload.logger.error(errorMessage)
     throw new APIError(errorMessage)
