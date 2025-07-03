@@ -319,8 +319,8 @@ jobs:
           - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
-          - soft-deletes
           - sort
+          - trash
           - versions
           - uploads
     env:
@@ -457,8 +457,8 @@ jobs:
           - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
-          - soft-deletes
           - sort
+          - trash
           - versions
           - uploads
     env:

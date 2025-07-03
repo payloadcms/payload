@@ -140,9 +140,9 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm tsx --no-deprecation test/dev.ts soft-deletes",
+      "command": "pnpm tsx --no-deprecation test/dev.ts trash",
       "cwd": "${workspaceFolder}",
-      "name": "Run Dev Soft Deletes",
+      "name": "Run Dev Trash",
       "request": "launch",
       "type": "node-terminal"
     },
