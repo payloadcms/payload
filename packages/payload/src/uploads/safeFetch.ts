@@ -31,7 +31,6 @@ const isSafeIp = (ip: string) => {
  * @returns
  */
 const isSafe = async (hostname: string) => {
-  // return isSafeIp(hostname)
   try {
     if (ipaddr.isValid(hostname)) {
       return isSafeIp(hostname)
@@ -81,14 +80,16 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
         // The desired message we want to bubble up is in the cause
         throw new Error(error.cause.message)
       } else {
-        let stringifiedUrl: string | undefined | URL = undefined
-        if (typeof unverifiedUrl === 'string' || unverifiedUrl instanceof URL) {
+        let stringifiedUrl: string | undefined = undefined
+        if (typeof unverifiedUrl === 'string') {
           stringifiedUrl = unverifiedUrl
+        } else if (unverifiedUrl instanceof URL) {
+          stringifiedUrl = unverifiedUrl.toString()
         } else if (unverifiedUrl instanceof Request) {
           stringifiedUrl = unverifiedUrl.url
         }
 
-        throw new Error(`Failed to fetch from ${String(stringifiedUrl)}, ${error.message}`)
+        throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`)
       }
     }
     throw error
