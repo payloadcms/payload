@@ -104,7 +104,7 @@ export type AllowList = Array<{
 
 export type FileAllowList = Array<{
   extensions: string[]
-  fileType: string
+  mimeType: string
 }>
 
 type Admin = {
