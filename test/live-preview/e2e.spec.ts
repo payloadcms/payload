@@ -27,6 +27,7 @@ import {
   toggleLivePreview,
 } from './helpers.js'
 import {
+  collectionLevelConfigSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -139,6 +140,15 @@ describe('Live Preview', () => {
     await goToCollectionLivePreview(page, pagesURLUtil)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
+  })
+
+  test('collection - respect collection-level live preview config', async () => {
+    const collURL = new AdminUrlUtil(serverURL, collectionLevelConfigSlug)
+    await page.goto(collURL.create)
+    await page.locator('#field-title').fill('Collection Level Config')
+    await saveDocAndAssert(page)
+    await goToCollectionLivePreview(page, collURL)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
   })
 
   test('collection csr — re-renders iframe client-side when form state changes', async () => {
