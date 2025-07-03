@@ -31,7 +31,7 @@ let pagesDocOne: PageType
 let postsDocOne: Post
 let postsDocTwo: Post
 
-describe('Soft Deletes', () => {
+describe('Trash', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
