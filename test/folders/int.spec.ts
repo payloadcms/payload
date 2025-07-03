@@ -3,18 +3,15 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 let payload: Payload
-let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('folders', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -23,7 +20,7 @@ describe('folders', () => {
 
   beforeEach(async () => {
     await payload.delete({
-      collection: 'posts',
+      collection: 'payload-folders',
       depth: 0,
       where: {
         id: {
@@ -48,6 +45,7 @@ describe('folders', () => {
         collection: 'payload-folders',
         data: {
           name: 'Parent Folder',
+          folderType: ['posts'],
         },
       })
       const folderIDFromParams = parentFolder.id
@@ -57,6 +55,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 1',
           folder: folderIDFromParams,
+          folderType: ['posts'],
         },
       })
 
@@ -65,6 +64,7 @@ describe('folders', () => {
         data: {
           name: 'Nested 2',
           folder: folderIDFromParams,
+          folderType: ['posts'],
         },
       })
 
@@ -73,7 +73,7 @@ describe('folders', () => {
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
     })
   })
 
@@ -82,6 +82,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -108,7 +109,7 @@ describe('folders', () => {
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
+      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
     })
   })
 
@@ -117,6 +118,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -124,6 +126,7 @@ describe('folders', () => {
       const childFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          folderType: ['posts'],
           name: 'Child Folder',
           folder: parentFolder,
         },
@@ -153,6 +156,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -168,6 +172,7 @@ describe('folders', () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
+          folderType: ['posts'],
           name: 'Parent Folder',
         },
       })
@@ -176,6 +181,7 @@ describe('folders', () => {
         data: {
           name: 'Child Folder',
           folder: parentFolder,
+          folderType: ['posts'],
         },
       })
 
@@ -188,6 +194,155 @@ describe('folders', () => {
           disableErrors: true,
         }),
       ).resolves.toBeNull()
+    })
+
+    describe('ensureSafeCollectionsChange', () => {
+      it('should prevent narrowing scope of a folder if it contains documents of a removed type', async () => {
+        const sharedFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Posts and Drafts Folder',
+            folderType: ['posts', 'drafts'],
+          },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Post 1',
+            folder: sharedFolder.id,
+          },
+        })
+
+        await payload.create({
+          collection: 'drafts',
+          data: {
+            title: 'Post 1',
+            folder: sharedFolder.id,
+          },
+        })
+
+        try {
+          const updatedFolder = await payload.update({
+            collection: 'payload-folders',
+            id: sharedFolder.id,
+            data: {
+              folderType: ['posts'],
+            },
+          })
+
+          expect(updatedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Posts and Drafts Folder" contains documents that still belong to the following collections: Drafts',
+          )
+        }
+      })
+
+      it('should prevent adding scope to a folder if it contains documents outside of the new scope', async () => {
+        const folderAcceptsAnything = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Anything Goes',
+            folderType: [],
+          },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'Post 1',
+            folder: folderAcceptsAnything.id,
+          },
+        })
+
+        try {
+          const scopedFolder = await payload.update({
+            collection: 'payload-folders',
+            id: folderAcceptsAnything.id,
+            data: {
+              folderType: ['posts'],
+            },
+          })
+
+          expect(scopedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Anything Goes" contains documents that still belong to the following collections: Posts',
+          )
+        }
+      })
+
+      it('should prevent narrowing scope of a folder if subfolders are assigned to any of the removed types', async () => {
+        const parentFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            folderType: ['posts', 'drafts'],
+          },
+        })
+
+        await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            folderType: ['posts', 'drafts'],
+            folder: parentFolder.id,
+          },
+        })
+
+        try {
+          const updatedParent = await payload.update({
+            collection: 'payload-folders',
+            id: parentFolder.id,
+            data: {
+              folderType: ['posts'],
+            },
+          })
+
+          expect(updatedParent).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Parent Folder" contains folders that still belong to the following collections: Drafts',
+          )
+        }
+      })
+
+      it('should prevent widening scope on a scoped subfolder', async () => {
+        const unscopedFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Parent Folder',
+            folderType: [],
+          },
+        })
+
+        const level1Folder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: 'Level 1 Folder',
+            folderType: ['posts', 'drafts'],
+            folder: unscopedFolder.id,
+          },
+        })
+
+        try {
+          const level2UnscopedFolder = await payload.create({
+            collection: 'payload-folders',
+            data: {
+              name: 'Level 2 Folder',
+              folder: level1Folder.id,
+              folderType: [],
+            },
+          })
+
+          expect(level2UnscopedFolder).not.toBeDefined()
+        } catch (e: any) {
+          expect(e.message).toBe(
+            'The folder "Level 2 Folder" must have folder-type set since its parent folder "Level 1 Folder" has a folder-type set.',
+          )
+        }
+      })
     })
   })
 })

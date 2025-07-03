@@ -182,6 +182,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     deleteFolder: 'Ištrinti aplanką',
     folderName: 'Aplanko pavadinimas',
     folders: 'Aplankai',
+    folderTypeDescription:
+      'Pasirinkite, kokio tipo rinkinio dokumentai turėtų būti leidžiami šiame aplanke.',
     itemHasBeenMoved: '{{title}} buvo perkeltas į {{folderName}}',
     itemHasBeenMovedToRoot: '{{title}} buvo perkeltas į pagrindinį katalogą',
     itemsMovedToFolder: '{{title}} perkeltas į {{folderName}}',

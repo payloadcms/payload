@@ -6,7 +6,7 @@ import './index.scss'
 
 const baseClass = 'folder-edit-field'
 
-export const FolderEditField = (props: RelationshipFieldServerProps) => {
+export const FolderField = (props: RelationshipFieldServerProps) => {
   if (props.payload.config.folders === false) {
     return null
   }

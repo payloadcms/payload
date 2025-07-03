@@ -1,7 +1,7 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React from 'react'
+import React, { useId } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -28,7 +28,7 @@ export type CheckboxInputProps = {
 export const inputBaseClass = 'checkbox-input'
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
-  id,
+  id: idFromProps,
   name,
   AfterInput,
   BeforeInput,
@@ -43,6 +43,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   readOnly,
   required,
 }) => {
+  const fallbackID = useId()
+  const id = idFromProps || fallbackID
   return (
     <div
       className={[
