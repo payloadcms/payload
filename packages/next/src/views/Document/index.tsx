@@ -329,20 +329,10 @@ export const renderDocument = async ({
     viewType,
   }
 
-  let livePreviewConfig: LivePreviewConfig = config.admin.livePreview
-
-  if (collectionConfig) {
-    livePreviewConfig = {
-      ...(livePreviewConfig || {}),
-      ...(collectionConfig.admin.livePreview || {}),
-    }
-  }
-
-  if (globalConfig) {
-    livePreviewConfig = {
-      ...(livePreviewConfig || {}),
-      ...(globalConfig.admin.livePreview || {}),
-    }
+  const livePreviewConfig: LivePreviewConfig = {
+    ...(config.admin.livePreview || {}),
+    ...(collectionConfig?.admin?.livePreview || {}),
+    ...(globalConfig?.admin?.livePreview || {}),
   }
 
   const livePreviewURL =
