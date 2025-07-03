@@ -3,6 +3,7 @@
 @layer payload-default {
   .dropdown-indicator {
     cursor: pointer;
+    display: flex;
     @include btn-reset;
 
     &:focus-visible {
