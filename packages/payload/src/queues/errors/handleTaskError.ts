@@ -1,9 +1,11 @@
 import ObjectIdImport from 'bson-objectid'
 
 import type { PayloadRequest } from '../../index.js'
+import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { TaskError } from './index.js'
 
+import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
 
@@ -13,10 +15,20 @@ const ObjectId = (ObjectIdImport.default ||
 export async function handleTaskError({
   error,
   req,
+  silent = false,
   updateJob,
 }: {
   error: TaskError
   req: PayloadRequest
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
   updateJob: UpdateJobFunction
 }): Promise<{
   hasFinalError: boolean
@@ -46,7 +58,7 @@ export async function handleTaskError({
     stack: error.stack,
   }
 
-  const currentDate = new Date()
+  const currentDate = getCurrentDate()
 
   ;(job.log ??= []).push({
     id: new ObjectId().toHexString(),
@@ -102,12 +114,14 @@ export async function handleTaskError({
       waitUntil: job.waitUntil,
     })
 
-    req.payload.logger.error({
-      err: error,
-      job,
-      msg: `Error running task ${taskID}. Attempt ${job.totalTried} - max retries reached`,
-      taskSlug,
-    })
+    if (!silent || (typeof silent === 'object' && !silent.error)) {
+      req.payload.logger.error({
+        err: error,
+        job,
+        msg: `Error running task ${taskID}. Attempt ${job.totalTried} - max retries reached`,
+        taskSlug,
+      })
+    }
     return {
       hasFinalError: true,
     }
@@ -135,12 +149,14 @@ export async function handleTaskError({
     retriesConfig: workflowConfig.retries,
   })
 
-  req.payload.logger.error({
-    err: error,
-    job,
-    msg: `Error running task ${taskID}. Attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
-    taskSlug,
-  })
+  if (!silent || (typeof silent === 'object' && !silent.error)) {
+    req.payload.logger.error({
+      err: error,
+      job,
+      msg: `Error running task ${taskID}. Attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
+      taskSlug,
+    })
+  }
 
   // Update job's waitUntil only if this waitUntil is later than the current one
   if (waitUntil && (!job.waitUntil || waitUntil > new Date(job.waitUntil))) {
