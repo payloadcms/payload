@@ -1,7 +1,6 @@
 import type { TypeWithID } from 'payload'
 
 import { eq } from 'drizzle-orm'
-import { RelationalQueryBuilder } from 'drizzle-orm/pg-core/query-builders/query'
 import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
