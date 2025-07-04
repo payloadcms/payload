@@ -15,6 +15,8 @@ import React from 'react'
 
 const baseClass = 'upload-diff'
 
+type UploadDoc = (FileData & TypeWithID) | string
+
 export const Upload: UploadFieldDiffServerComponent = (args) => {
   const {
     comparisonValue: valueFrom,
@@ -34,8 +36,8 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
         locale={locale}
         nestingLevel={nestingLevel}
         req={req}
-        valueFrom={valueFrom as any}
-        valueTo={valueTo as any}
+        valueFrom={valueFrom as UploadDoc[]}
+        valueTo={valueTo as UploadDoc[]}
       />
     )
   }
@@ -47,8 +49,8 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
       locale={locale}
       nestingLevel={nestingLevel}
       req={req}
-      valueFrom={valueFrom as any}
-      valueTo={valueTo as any}
+      valueFrom={valueFrom as UploadDoc}
+      valueTo={valueTo as UploadDoc}
     />
   )
 }
@@ -59,8 +61,8 @@ export const HasManyUploadDiff: React.FC<{
   locale: string
   nestingLevel?: number
   req: PayloadRequest
-  valueFrom: Array<FileData & TypeWithID>
-  valueTo: Array<FileData & TypeWithID>
+  valueFrom: Array<UploadDoc>
+  valueTo: Array<UploadDoc>
 }> = async (args) => {
   const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
   const ReactDOMServer = (await import('react-dom/server')).default
@@ -74,7 +76,7 @@ export const HasManyUploadDiff: React.FC<{
     ? valueFrom.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
-          key={uploadDoc.id}
+          key={typeof uploadDoc === 'object' ? uploadDoc.id : uploadDoc}
           relationTo={field.relationTo}
           req={req}
           showCollectionSlug={showCollectionSlug}
@@ -86,7 +88,7 @@ export const HasManyUploadDiff: React.FC<{
     ? valueTo.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
-          key={uploadDoc.id}
+          key={typeof uploadDoc === 'object' ? uploadDoc.id : uploadDoc}
           relationTo={field.relationTo}
           req={req}
           showCollectionSlug={showCollectionSlug}
@@ -138,8 +140,8 @@ export const SingleUploadDiff: React.FC<{
   locale: string
   nestingLevel?: number
   req: PayloadRequest
-  valueFrom: FileData & TypeWithID
-  valueTo: FileData & TypeWithID
+  valueFrom: UploadDoc
+  valueTo: UploadDoc
 }> = async (args) => {
   const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
 
@@ -204,12 +206,24 @@ const UploadDocumentDiff = (args: {
   relationTo: string
   req: PayloadRequest
   showCollectionSlug?: boolean
-  uploadDoc: FileData & TypeWithID
+  uploadDoc: UploadDoc
 }) => {
   const { i18n, relationTo, req, showCollectionSlug, uploadDoc } = args
 
-  const thumbnailSRC: string =
-    ('thumbnailURL' in uploadDoc && (uploadDoc?.thumbnailURL as string)) || uploadDoc?.url || ''
+  let thumbnailSRC: string = ''
+  if (uploadDoc && typeof uploadDoc === 'object' && 'thumbnailURL' in uploadDoc) {
+    thumbnailSRC =
+      (typeof uploadDoc.thumbnailURL === 'string' && uploadDoc.thumbnailURL) ||
+      (typeof uploadDoc.url === 'string' && uploadDoc.url) ||
+      ''
+  }
+
+  let filename: string
+  if (uploadDoc && typeof uploadDoc === 'object') {
+    filename = uploadDoc.filename
+  } else {
+    filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as number | string}`
+  }
 
   let pillLabel: null | string = null
 
@@ -224,12 +238,12 @@ const UploadDocumentDiff = (args: {
     <div
       className={`${baseClass}`}
       data-enable-match="true"
-      data-id={uploadDoc?.id}
+      data-id={typeof uploadDoc === 'object' ? uploadDoc?.id : uploadDoc}
       data-relation-to={relationTo}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__thumbnail`}>
-          {thumbnailSRC?.length ? <img alt={uploadDoc?.filename} src={thumbnailSRC} /> : <File />}
+          {thumbnailSRC?.length ? <img alt={filename} src={thumbnailSRC} /> : <File />}
         </div>
         {pillLabel && (
           <div className={`${baseClass}__pill`} data-enable-match="false">
@@ -237,7 +251,7 @@ const UploadDocumentDiff = (args: {
           </div>
         )}
         <div className={`${baseClass}__info`} data-enable-match="false">
-          <strong>{uploadDoc?.filename}</strong>
+          <strong>{filename}</strong>
         </div>
       </div>
     </div>
