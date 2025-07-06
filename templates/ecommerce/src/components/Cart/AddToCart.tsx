@@ -1,64 +1,59 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import type { Product } from '@/payload-types'
+import type { Product, Variant } from '@/payload-types'
 
-import { useCart } from '@/providers/Cart'
+import { useCart, useCurrency } from '@payloadcms/plugin-ecommerce/react'
 import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useMemo } from 'react'
 
-type ProductVariant = NonNullable<Product['variants']>[number]
-
 type Props = {
   product: Product
-  variants?: ProductVariant[]
 }
 
-export function AddToCart({ product, variants }: Props) {
-  const { addItemToCart, cart } = useCart()
+export function AddToCart({ product }: Props) {
+  const { addItem, cart } = useCart()
   const searchParams = useSearchParams()
 
   const selectedVariantId = searchParams.get('variant')
 
+  const variants = product.variants?.docs || []
+
   const productUrl = useMemo(() => {
     const base = `/product/${product.slug}`
 
-    if (selectedVariantId) {
-      const variant = variants?.find((variant) => variant.id === selectedVariantId)
+    // if (selectedVariantId) {
+    //   const variant = variants?.find((variant) => variant.id === selectedVariantId)
 
-      if (!variant) {
-        return base
-      }
+    //   if (!variant) {
+    //     return base
+    //   }
 
-      const variantOptions = variant.options.map((option) => `${option.slug}=${option.slug}`)
-      return `${base}?variant=${selectedVariantId}&${variantOptions.join('&')}`
-    } else {
-      return base
-    }
+    //   const variantOptions = variant.options.map((option) => `${option.slug}=${option.slug}`)
+    //   return `${base}?variant=${selectedVariantId}&${variantOptions.join('&')}`
+    // } else {
+    //   return base
+    // }
   }, [product.slug, selectedVariantId, variants])
 
   const addToCart = useCallback(
     (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
-      let unitPrice = product.price || 0
+      let unitPrice = product.priceInUSD || 0
 
-      if (selectedVariantId && product.enableVariants && product?.variants?.length) {
-        const variant = product?.variants?.find((variant) => variant.id === selectedVariantId)
-        unitPrice = variant?.price || 0
-      }
+      // if (selectedVariantId && product.enableVariants && product?.variants?.length) {
+      //   const variant = product?.variants?.find((variant) => variant.id === selectedVariantId)
+      //   unitPrice = variant?.price || 0
+      // }
 
-      addItemToCart({
-        id: selectedVariantId ?? product.id,
-        product,
-        quantity: 1,
-        url: productUrl,
-        unitPrice,
+      addItem({
+        product: product.id,
         variant: selectedVariantId ?? undefined,
       })
     },
-    [addItemToCart, product, productUrl, selectedVariantId],
+    [addItem, product, productUrl, selectedVariantId],
   )
 
   const disabled = useMemo<boolean>(() => {
@@ -67,17 +62,17 @@ export function AddToCart({ product, variants }: Props) {
         return true
       }
 
-      const variant = product.variants?.find((variant) => variant.id === selectedVariantId)
+      // const variant = product.variants?.find((variant) => variant.id === selectedVariantId)
 
-      if (!variant) {
-        return true
-      }
+      // if (!variant) {
+      //   return true
+      // }
 
-      if (variant.stock === 0) {
-        return true
-      }
+      // if (variant.stock === 0) {
+      //   return true
+      // }
     } else {
-      if (product.stock === 0) {
+      if (product.inventory === 0) {
         return true
       }
     }

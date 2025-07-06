@@ -1,14 +1,15 @@
 import type { Product } from '@/payload-types'
 
 export const productMousepad: Partial<Product> = {
-  stock: 64,
+  inventory: 64,
+  priceInUSDEnabled: true,
+  priceInUSD: 1999,
   meta: {
     title: 'Mouse pad | Payload Ecommerce Template',
     image: '{{IMAGE_1}}',
     description:
       'Upgrade your workspace with our premium mousepad, designed for precision and comfort. Made with the best materials on the market.',
   },
-  skipSync: false,
   _status: 'published',
   layout: [],
   description: {
@@ -44,6 +45,5 @@ export const productMousepad: Partial<Product> = {
   },
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
   categories: ['{{CATEGORY_1}}'],
-  price: 2999,
   title: 'Mouse pad',
 }

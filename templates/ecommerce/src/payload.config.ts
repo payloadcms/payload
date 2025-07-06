@@ -1,13 +1,7 @@
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
-import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
-import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
-import { redirectsPlugin } from '@payloadcms/plugin-redirects'
-import { seoPlugin } from '@payloadcms/plugin-seo'
-import { stripePlugin } from '@payloadcms/plugin-stripe'
+
 import {
   BoldFeature,
   ItalicFeature,

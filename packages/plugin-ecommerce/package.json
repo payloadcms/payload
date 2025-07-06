@@ -109,7 +109,8 @@
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "qs-esm": "7.0.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

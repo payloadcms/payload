@@ -1,25 +1,27 @@
 'use client'
-import type { DefaultDocumentIDType } from 'payload'
+import type { DefaultDocumentIDType, TypedCollection, TypedUser } from 'payload'
 
+import * as qs from 'qs-esm'
 import React, {
   createContext,
   use,
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
 } from 'react'
 
 import type { CartClient, CartItemClient, Currency } from '../../types.js'
-import type { ContextProps, EcommerceContext } from './types.js'
+import type { ContextProps, EcommerceContext as EcommerceContextType } from './types.js'
 
 import { cartReducer } from './reducer.js'
 
-const initialCart = new Map<string, CartItemClient>()
+const initialCart = ''
 
-const defaultContext: EcommerceContext = {
-  addItem: () => {},
+const defaultContext: EcommerceContextType = {
+  addItem: () => new Promise((resolve) => resolve()),
   cart: initialCart,
   clearCart: () => {},
   confirmOrder: async () => {},
@@ -39,7 +41,7 @@ const defaultContext: EcommerceContext = {
   subTotal: 0,
 }
 
-const EcommerceContext = createContext<EcommerceContext>(defaultContext)
+const EcommerceContext = createContext<EcommerceContextType>(defaultContext)
 
 const defaultLocalStorage = {
   key: 'cart',
@@ -47,7 +49,18 @@ const defaultLocalStorage = {
 
 export const EcommerceProvider: React.FC<ContextProps> = ({
   children,
-  currenciesConfig,
+  currenciesConfig = {
+    defaultCurrency: 'USD',
+    supportedCurrencies: [
+      {
+        code: 'USD',
+        decimals: 2,
+        label: 'US Dollar',
+        symbol: '$',
+      },
+    ],
+  },
+  customersSlug = 'users',
   paymentMethods = [],
   syncLocalStorage = true,
 }) => {
@@ -63,14 +76,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
    * The payment data received from the payment initiation process, this is then threaded through to the payment confirmation process.
    * Useful for storing things like payment intent IDs, session IDs, etc.
    */
-  const [paymentData, setPaymentData] = useState<EcommerceContext['paymentData']>({})
+  const [paymentData, setPaymentData] = useState<EcommerceContextType['paymentData']>({})
+
+  const [user, setUser] = useState<null | TypedUser>(null)
 
   const hasRendered = useRef(false)
-  const [subTotal, setSubTotal] = useState(0)
-  const [cart, dispatchCart] = useReducer(
-    cartReducer,
-    new Map<DefaultDocumentIDType, CartItemClient>(),
-  )
+
+  /**
+   * The ID of the cart associated with the current session.
+   * This is used to identify the cart in the database or local storage.
+   * It can be null if no cart has been created yet.
+   */
+  const [cartID, setCartID] = useState<DefaultDocumentIDType>()
+  const [cart, setCart] = useState<TypedCollection['carts']>()
 
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     () =>
@@ -81,62 +99,291 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<null | string>(null)
 
-  const updateSubTotal = useCallback(
-    ({ cart }: { cart: EcommerceContext['cart'] }) => {
-      let newSubTotal = 0
-      const priceField = `priceIn${selectedCurrency.code.toUpperCase()}`
+  const cartQuery = useMemo(() => {
+    const priceField = `priceIn${selectedCurrency.code}`
 
-      for (const item of cart.values()) {
-        let itemPrice = item.product?.[priceField] || 0
+    return {
+      depth: 2,
+      populate: {
+        products: {
+          slug: true,
+          [priceField]: true,
+          title: true,
+        },
+        variants: {
+          [priceField]: true,
+          title: true,
+        },
+      },
+      select: {
+        items: true,
+        subtotal: true,
+      },
+    }
+  }, [selectedCurrency.code])
 
-        if (item.variant) {
-          itemPrice = item.variant[priceField] || itemPrice
-        }
+  const createCart = useCallback(
+    async (initialData: Record<string, unknown>) => {
+      const query = qs.stringify(cartQuery)
 
-        if (itemPrice > 0) {
-          newSubTotal += itemPrice * item.quantity
-        }
+      const response = await fetch(`/api/carts?${query}`, {
+        body: JSON.stringify({
+          ...initialData,
+          currency: selectedCurrency.code,
+          customer: user?.id,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to create cart: ${errorText}`)
       }
 
-      setSubTotal(newSubTotal)
+      const data = await response.json()
 
-      return newSubTotal
+      if (data.error) {
+        throw new Error(`Cart creation error: ${data.error}`)
+      }
+
+      return data.doc as TypedCollection['carts']
     },
-    [selectedCurrency],
+    [cartQuery, selectedCurrency.code, user?.id],
+  )
+
+  const getCart = useCallback(
+    async (cartID: DefaultDocumentIDType) => {
+      const query = qs.stringify(cartQuery)
+
+      const response = await fetch(`/api/carts/${cartID}?${query}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'GET',
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch cart: ${errorText}`)
+      }
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(`Cart fetch error: ${data.error}`)
+      }
+
+      return data as TypedCollection['carts']
+    },
+    [cartQuery],
+  )
+
+  const updateCart = useCallback(
+    async (cartID: DefaultDocumentIDType, data: Partial<TypedCollection['carts']>) => {
+      const query = qs.stringify(cartQuery)
+
+      const response = await fetch(`/api/carts/${cartID}?${query}`, {
+        body: JSON.stringify(data),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to update cart: ${errorText}`)
+      }
+
+      const updatedCart = await response.json()
+      setCart(updatedCart.doc as TypedCollection['carts'])
+    },
+    [cartQuery],
   )
 
   useEffect(() => {
-    const updatedSubTotal = updateSubTotal({ cart })
-
-    if (syncLocalStorage && hasRendered.current) {
-      const cartArray = Array.from(cart.values())
-
-      localStorage.setItem(localStorageConfig.key, JSON.stringify(cartArray))
-      localStorage.setItem('subTotal', JSON.stringify(updatedSubTotal))
+    if (hasRendered.current) {
+      if (syncLocalStorage && cartID) {
+        localStorage.setItem(localStorageConfig.key, cartID as string)
+      }
     }
-  }, [cart, localStorageConfig.key, syncLocalStorage, updateSubTotal])
+  }, [cartID, localStorageConfig.key, syncLocalStorage])
 
-  const addItem: EcommerceContext['addItem'] = useCallback((item) => {
-    dispatchCart({ type: 'ADD_ITEM', payload: item })
+  const addItem: EcommerceContextType['addItem'] = useCallback(
+    async (item, quantity = 1) => {
+      if (cartID) {
+        const existingCart = await getCart(cartID)
+
+        if (!existingCart) {
+          // console.error(`Cart with ID "${cartID}" not found`)
+
+          setCartID(undefined)
+          setCart(undefined)
+          return
+        }
+
+        // Check if the item already exists in the cart
+        const existingItemIndex = existingCart.items.findIndex((cartItem) => {
+          const productID =
+            typeof cartItem.product === 'object' ? cartItem.product.id : item.product
+          const variantID =
+            cartItem.variant && typeof cartItem.variant === 'object'
+              ? cartItem.variant.id
+              : item.variant
+
+          return (
+            productID === item.product &&
+            (item.variant && variantID ? variantID === item.variant : true)
+          )
+        })
+
+        let updatedItems = [...existingCart.items]
+        if (existingItemIndex !== -1) {
+          // If the item exists, update its quantity
+          updatedItems[existingItemIndex].quantity =
+            updatedItems[existingItemIndex].quantity + quantity
+
+          // Update the cart with the new items
+          await updateCart(cartID, {
+            items: updatedItems,
+          })
+        } else {
+          // If the item does not exist, add it to the cart
+          updatedItems = [...existingCart.items, { ...item, quantity }]
+        }
+
+        // Update the cart with the new items
+        await updateCart(cartID, {
+          items: updatedItems,
+        })
+      } else {
+        // If no cartID exists, create a new cart
+        const newCart = await createCart({ items: [{ ...item, quantity }] })
+
+        setCartID(newCart.id)
+        setCart(newCart)
+      }
+    },
+    [cartID, createCart, getCart, updateCart],
+  )
+
+  const removeItem: EcommerceContextType['removeItem'] = useCallback(
+    async (targetID) => {
+      if (!cartID) {
+        return
+      }
+
+      const existingCart = await getCart(cartID)
+
+      if (!existingCart) {
+        // console.error(`Cart with ID "${cartID}" not found`)
+        setCartID(undefined)
+        setCart(undefined)
+        return
+      }
+
+      // Check if the item already exists in the cart
+      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+
+      if (existingItemIndex !== -1) {
+        // If the item exists, remove it from the cart
+        const updatedItems = [...existingCart.items]
+        updatedItems.splice(existingItemIndex, 1)
+
+        // Update the cart with the new items
+        await updateCart(cartID, {
+          items: updatedItems,
+        })
+      }
+    },
+    [cartID, getCart, updateCart],
+  )
+
+  const incrementItem: EcommerceContextType['incrementItem'] = useCallback(
+    async (targetID) => {
+      if (!cartID) {
+        return
+      }
+
+      const existingCart = await getCart(cartID)
+
+      if (!existingCart) {
+        // console.error(`Cart with ID "${cartID}" not found`)
+        setCartID(undefined)
+        setCart(undefined)
+        return
+      }
+
+      // Check if the item already exists in the cart
+      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+
+      let updatedItems = [...existingCart.items]
+
+      if (existingItemIndex !== -1) {
+        // If the item exists, increment its quantity
+        updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity + 1 // Increment by 1
+        // Update the cart with the new items
+        await updateCart(cartID, {
+          items: updatedItems,
+        })
+      } else {
+        // If the item does not exist, add it to the cart with quantity 1
+        updatedItems = [...existingCart.items, { product: targetID, quantity: 1 }]
+        // Update the cart with the new items
+        await updateCart(cartID, {
+          items: updatedItems,
+        })
+      }
+    },
+    [cartID, getCart, updateCart],
+  )
+
+  const decrementItem: EcommerceContextType['decrementItem'] = useCallback(
+    async (targetID) => {
+      if (!cartID) {
+        return
+      }
+
+      const existingCart = await getCart(cartID)
+
+      if (!existingCart) {
+        // console.error(`Cart with ID "${cartID}" not found`)
+        setCartID(undefined)
+        setCart(undefined)
+        return
+      }
+
+      // Check if the item already exists in the cart
+      const existingItemIndex = existingCart.items.findIndex((cartItem) => cartItem.id === targetID)
+
+      const updatedItems = [...existingCart.items]
+
+      if (existingItemIndex !== -1) {
+        // If the item exists, decrement its quantity
+        updatedItems[existingItemIndex].quantity = updatedItems[existingItemIndex].quantity - 1 // Decrement by 1
+
+        // If the quantity reaches 0, remove the item from the cart
+        if (updatedItems[existingItemIndex].quantity <= 0) {
+          updatedItems.splice(existingItemIndex, 1)
+        }
+
+        // Update the cart with the new items
+        await updateCart(cartID, {
+          items: updatedItems,
+        })
+      }
+    },
+    [cartID, getCart, updateCart],
+  )
+
+  const clearCart: EcommerceContextType['clearCart'] = useCallback(async () => {
+    // dispatchCart({ type: 'CLEAR_CART' })
   }, [])
 
-  const removeItem: EcommerceContext['removeItem'] = useCallback((targetID) => {
-    dispatchCart({ type: 'REMOVE_ITEM', payload: targetID })
-  }, [])
-
-  const incrementItem: EcommerceContext['incrementItem'] = useCallback((targetID) => {
-    dispatchCart({ type: 'INCREMENT_QUANTITY', payload: targetID })
-  }, [])
-
-  const decrementItem: EcommerceContext['decrementItem'] = useCallback((targetID) => {
-    dispatchCart({ type: 'DECREMENT_QUANTITY', payload: targetID })
-  }, [])
-
-  const clearCart: EcommerceContext['clearCart'] = useCallback(() => {
-    dispatchCart({ type: 'CLEAR_CART' })
-  }, [])
-
-  const setCurrency: EcommerceContext['setCurrency'] = useCallback(
+  const setCurrency: EcommerceContextType['setCurrency'] = useCallback(
     (currency) => {
       if (selectedCurrency.code === currency) {
         return
@@ -152,7 +399,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [currenciesConfig.supportedCurrencies, selectedCurrency.code],
   )
 
-  const initiatePayment = useCallback<EcommerceContext['initiatePayment']>(
+  const initiatePayment = useCallback<EcommerceContextType['initiatePayment']>(
     async (paymentMethodID, options) => {
       const paymentMethod = paymentMethods.find((pm) => pm.name === paymentMethodID)
 
@@ -203,7 +450,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [cart, paymentMethods, selectedCurrency.code],
   )
 
-  const confirmOrder = useCallback<EcommerceContext['initiatePayment']>(
+  const confirmOrder = useCallback<EcommerceContextType['initiatePayment']>(
     async (paymentMethodID, options) => {
       if (!cart || cart.size === 0) {
         throw new Error(`Cart is empty.`)
@@ -258,29 +505,68 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     [cart, paymentData, paymentMethods, selectedCurrency.code],
   )
 
+  const getUser = useCallback(async () => {
+    try {
+      const query = qs.stringify({
+        depth: 0,
+        select: {
+          id: true,
+        },
+      })
+
+      const response = await fetch(`/api/users/me?${query}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch user: ${errorText}`)
+      }
+      const userData = await response.json()
+      if (userData.error) {
+        throw new Error(`User fetch error: ${userData.error}`)
+      }
+
+      if (userData.user) {
+        setUser(userData.user)
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error)
+      setUser(null)
+    }
+  }, [])
+
   // If localStorage is enabled, we can add logic to persist the cart state
   useEffect(() => {
-    if (syncLocalStorage && !hasRendered.current) {
-      const storedCart = localStorage.getItem(localStorageConfig.key)
-      if (storedCart) {
-        const parsedCart: CartClient = JSON.parse(storedCart)
-
-        if (Array.isArray(parsedCart) && parsedCart.length > 0) {
-          const cartMap = new Map<DefaultDocumentIDType, CartItemClient>()
-
-          for (const item of parsedCart) {
-            const key = item.variantID || item.productID
-            if (key) {
-              cartMap.set(key, item)
-            }
-          }
-          dispatchCart({ type: 'MERGE_CART', payload: parsedCart })
+    if (!hasRendered.current) {
+      if (syncLocalStorage) {
+        const storedCart = localStorage.getItem(localStorageConfig.key)
+        if (storedCart) {
+          getCart(storedCart)
+            .then((fetchedCart) => {
+              console.log('Fetched cart from localStorage:', fetchedCart)
+              setCart(fetchedCart)
+              setCartID(storedCart as DefaultDocumentIDType)
+            })
+            .catch((error) => {
+              // console.error('Error fetching cart from localStorage:', error)
+              // If there's an error fetching the cart, we can clear it from localStorage
+              localStorage.removeItem(localStorageConfig.key)
+              // setCartID(undefined)
+              // setCart(undefined)
+            })
         }
       }
 
+      void getUser()
+
       hasRendered.current = true
     }
-  }, [localStorageConfig.key, syncLocalStorage])
+  }, [getCart, getUser, localStorageConfig.key, syncLocalStorage])
 
   return (
     <EcommerceContext
@@ -297,7 +583,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         removeItem,
         selectedPaymentMethod,
         setCurrency,
-        subTotal,
       }}
     >
       {children}
@@ -306,7 +591,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 }
 
 export const useEcommerce = () => {
-  const context = use(EcommerceContext)
+  const context = use<EcommerceContextType<any>>(EcommerceContext)
 
   if (!context) {
     throw new Error('useEcommerce must be used within an EcommerceProvider')
@@ -347,14 +632,13 @@ export const useCurrency = () => {
 }
 
 export const useCart = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem, subTotal } =
-    useEcommerce()
+  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } = useEcommerce()
 
-  if (!cart) {
+  if (!addItem) {
     throw new Error('useCart must be used within an EcommerceProvider')
   }
 
-  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem, subTotal }
+  return { addItem, cart, clearCart, decrementItem, incrementItem, removeItem }
 }
 
 export const usePayments = () => {

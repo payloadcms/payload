@@ -1,8 +1,9 @@
+'use client'
+import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
 import React from 'react'
 
 type BaseProps = {
   className?: string
-  currencyCode: string
   currencyCodeClassName?: string
 }
 
@@ -23,14 +24,15 @@ type Props = BaseProps & (PriceFixed | PriceRange)
 export const Price = ({
   amount,
   className,
-  currencyCode = 'usd',
   highestAmount,
   lowestAmount,
 }: Props & React.ComponentProps<'p'>) => {
+  const { formatCurrency } = useCurrency()
+
   if (amount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {amount}
+        {formatCurrency(amount)}
       </p>
     )
   }
@@ -38,7 +40,7 @@ export const Price = ({
   if (highestAmount && highestAmount !== lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${lowestAmount} - ${highestAmount}`}
+        {`${formatCurrency(lowestAmount)} - ${formatCurrency(highestAmount)}`}
       </p>
     )
   }
@@ -46,7 +48,7 @@ export const Price = ({
   if (lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${lowestAmount}`}
+        {`${formatCurrency(lowestAmount)}`}
       </p>
     )
   }

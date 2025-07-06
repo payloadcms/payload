@@ -1,14 +1,13 @@
 'use client'
 
-import type { CartItem } from '@/providers/Cart/reducer'
-
-import { useCart } from '@/providers/Cart'
+import type { CartItem } from '@/components/Cart'
+import { useCart } from '@payloadcms/plugin-ecommerce/react'
 import clsx from 'clsx'
 import { XIcon } from 'lucide-react'
 import React from 'react'
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
-  const { deleteItemFromCart } = useCart()
+  const { removeItem } = useCart()
   const itemId = item.id
 
   return (
@@ -25,7 +24,7 @@ export function DeleteItemButton({ item }: { item: CartItem }) {
         disabled={!itemId}
         onClick={(e: React.FormEvent<HTMLButtonElement>) => {
           e.preventDefault()
-          if (itemId) deleteItemFromCart(itemId)
+          if (itemId) removeItem(itemId)
         }}
         type="button"
       >

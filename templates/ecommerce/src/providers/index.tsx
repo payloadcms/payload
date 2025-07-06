@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/providers/Auth'
-import { CartProvider } from '@/providers/Cart'
+import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/react'
+import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import React from 'react'
 
 import { HeaderThemeProvider } from './HeaderTheme'
@@ -12,7 +13,15 @@ export const Providers: React.FC<{
     <ThemeProvider>
       <AuthProvider>
         <HeaderThemeProvider>
-          <CartProvider>{children}</CartProvider>
+          <EcommerceProvider
+            paymentMethods={[
+              stripeAdapterClient({
+                publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+              }),
+            ]}
+          >
+            {children}
+          </EcommerceProvider>
         </HeaderThemeProvider>
       </AuthProvider>
     </ThemeProvider>

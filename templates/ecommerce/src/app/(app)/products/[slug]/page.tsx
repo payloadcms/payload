@@ -63,22 +63,25 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const variants = product.enableVariants ? product?.variants : []
+  console.log({ product })
 
   const metaImage = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
-    ? variants?.some((variant) => variant?.stock > 0)
-    : product.stock! > 0
+    ? product?.variants?.docs?.some((variant) => {
+        if (typeof variant !== 'object') return false
+        return variant.inventory && variant?.inventory > 0
+      })
+    : product.inventory! > 0
 
-  let price = product.price
+  let price = product.priceInUSD
 
-  if (product.enableVariants && product?.variants?.length) {
-    price = product.variants?.reduce((acc, variant) => {
-      if (variant?.price > acc) {
-        return variant.price
+  if (product.enableVariants && product?.variants?.docs?.length) {
+    price = product?.variants?.docs?.reduce((acc, variant) => {
+      if (typeof variant === 'object' && variant?.priceInUSD && variant?.priceInUSD > acc) {
+        return variant.priceInUSD
       }
       return acc
-    }, product.price || 0)
+    }, product.priceInUSD || 0)
   }
 
   const productJsonLd = {
@@ -181,13 +184,21 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
 
   const result = await payload.find({
     collection: 'products',
-    depth: 2,
+    depth: 3,
     draft,
     limit: 1,
     overrideAccess: false,
     where: {
       slug: {
         equals: slug,
+      },
+    },
+    populate: {
+      variants: {
+        title: true,
+        priceInUSD: true,
+        inventory: true,
+        options: true,
       },
     },
   })

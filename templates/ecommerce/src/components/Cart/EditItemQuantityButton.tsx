@@ -1,14 +1,13 @@
 'use client'
 
-import type { CartItem } from '@/providers/Cart/reducer'
-
-import { useCart } from '@/providers/Cart'
+import { CartItem } from '@/components/Cart'
+import { useCart } from '@payloadcms/plugin-ecommerce/react'
 import clsx from 'clsx'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 import React from 'react'
 
 export function EditItemQuantityButton({ type, item }: { item: CartItem; type: 'minus' | 'plus' }) {
-  const { decrementQuantity, incrementQuantity } = useCart()
+  const { decrementItem, incrementItem } = useCart()
 
   return (
     <form>
@@ -27,9 +26,9 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
 
           if (item.id) {
             if (type === 'plus') {
-              incrementQuantity(item.id)
+              incrementItem(item.id)
             } else {
-              decrementQuantity(item.id)
+              decrementItem(item.id)
             }
           }
         }}

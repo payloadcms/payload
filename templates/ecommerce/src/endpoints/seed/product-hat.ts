@@ -1,56 +1,14 @@
-import type { Product } from '@/payload-types'
+import type { Product, Variant } from '@/payload-types'
 
 export const productHat: Partial<Product> = {
-  variantOptions: [
-    {
-      label: 'Color',
-      slug: 'color',
-      options: [
-        {
-          label: 'Black',
-          slug: 'black',
-          group: 'color',
-        },
-        {
-          label: 'White',
-          slug: 'white',
-          group: 'color',
-        },
-      ],
-    },
-  ],
-  variants: [
-    {
-      active: true,
-      options: [
-        {
-          value: 'black',
-          slug: 'color',
-        },
-      ],
-      price: 2122,
-      stock: 423,
-    },
-    {
-      active: true,
-      options: [
-        {
-          value: 'white',
-          slug: 'color',
-        },
-      ],
-      price: 1299,
-      stock: 889,
-    },
-  ],
-  stock: 0,
+  enableVariants: true,
+  variantTypes: ['{{VARIANT_TYPE_COLOR}}'],
   meta: {
     title: 'Hat | Payload Ecommerce Template',
     image: '{{IMAGE_1}}',
     description:
       'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
   },
-  skipSync: false,
   _status: 'published',
   layout: [],
   categories: ['{{CATEGORY_1}}'],
@@ -85,11 +43,17 @@ export const productHat: Partial<Product> = {
       version: 1,
     },
   },
-  enableVariants: true,
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
-  price: 1999,
-  publishedOn: '2025-01-21T00:01:06.661Z',
   title: 'Hat',
   slug: 'hat',
   relatedProducts: ['{{RELATED_PRODUCT_1}}'],
+}
+
+export const variantHat: Partial<Variant> = {
+  product: '{{PRODUCT}}',
+  options: ['{{VARIANT_OPTION}}'],
+  inventory: 365,
+  priceInUSDEnabled: true,
+  priceInUSD: 2500,
+  _status: 'published',
 }

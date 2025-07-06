@@ -1,3 +1,4 @@
+'use client'
 import type { Product } from '@/payload-types'
 
 import RichText from '@/components/RichText'
@@ -6,26 +7,34 @@ import { Price } from '@/components/Price'
 import React, { Suspense } from 'react'
 
 import { VariantSelector } from './VariantSelector'
+import { useCurrency } from '@payloadcms/plugin-ecommerce/react'
 
 export function ProductDescription({ product }: { product: Product }) {
+  const { currency } = useCurrency()
   let amount = 0,
     lowestAmount = 0,
-    highestAmount = 0,
-    currency = 'usd'
+    highestAmount = 0
 
-  const hasVariants = product.enableVariants && product.variants?.length
+  const priceField = `priceIn${currency.code}`
+  const hasVariants = product.enableVariants && Boolean(product.variants?.docs?.length)
 
   if (hasVariants) {
-    const variantsOrderedByPrice = product.variants?.sort((a, b) => {
-      return a.price - b.price
-    })
+    const variantsOrderedByPrice = product.variants?.docs
+      ?.filter((variant) => variant && typeof variant === 'object')
+      .sort((a, b) => {
+        if (typeof a === 'object' && typeof b === 'object' && a.priceInUSD && b.priceInUSD) {
+          return a[priceField] - b[priceField]
+        }
+
+        return 0
+      })
 
     if (variantsOrderedByPrice) {
-      lowestAmount = variantsOrderedByPrice[0].price
-      highestAmount = variantsOrderedByPrice[variantsOrderedByPrice.length - 1].price
+      lowestAmount = variantsOrderedByPrice[0][priceField]
+      highestAmount = variantsOrderedByPrice[variantsOrderedByPrice.length - 1][priceField]
     }
-  } else if (product.price) {
-    amount = product.price
+  } else if (product[priceField]) {
+    amount = product[priceField]
   }
 
   return (
@@ -34,23 +43,16 @@ export function ProductDescription({ product }: { product: Product }) {
         <h1 className="text-2xl font-medium">{product.title}</h1>
         <div className="uppercase font-mono">
           {hasVariants ? (
-            <Price
-              currencyCode={currency}
-              highestAmount={highestAmount}
-              lowestAmount={lowestAmount}
-            />
+            <Price highestAmount={highestAmount} lowestAmount={lowestAmount} />
           ) : (
-            <Price amount={amount} currencyCode={currency} />
+            <Price amount={amount} />
           )}
         </div>
       </div>
-
       {product.description ? (
         <RichText className="" data={product.description} enableGutter={false} />
       ) : null}
-
       <hr />
-
       {hasVariants && (
         <>
           <Suspense fallback={null}>
@@ -60,10 +62,9 @@ export function ProductDescription({ product }: { product: Product }) {
           <hr />
         </>
       )}
-
       <div className="flex items-center justify-between">
         <Suspense fallback={null}>
-          <AddToCart product={product} variants={product?.variants || []} />
+          <AddToCart product={product} />
         </Suspense>
       </div>
     </div>

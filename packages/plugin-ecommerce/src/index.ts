@@ -84,21 +84,22 @@ export const ecommercePlugin =
       })
 
       incomingConfig.collections.push(products)
-    }
 
-    if (sanitizedPluginConfig.carts) {
-      const carts = cartsCollection({
-        currenciesConfig,
-        customersSlug: collectionSlugMap.customers,
-        overrides:
-          sanitizedPluginConfig.carts === true
-            ? undefined
-            : sanitizedPluginConfig.carts.cartsCollection,
-        productsSlug: collectionSlugMap.products,
-        variantsSlug: collectionSlugMap.variants,
-      })
+      if (sanitizedPluginConfig.carts) {
+        const carts = cartsCollection({
+          currenciesConfig,
+          customersSlug: collectionSlugMap.customers,
+          enableVariants: Boolean(productsConfig.variants),
+          overrides:
+            sanitizedPluginConfig.carts === true
+              ? undefined
+              : sanitizedPluginConfig.carts.cartsCollection,
+          productsSlug: collectionSlugMap.products,
+          variantsSlug: collectionSlugMap.variants,
+        })
 
-      incomingConfig.collections.push(carts)
+        incomingConfig.collections.push(carts)
+      }
     }
 
     if (sanitizedPluginConfig.orders) {

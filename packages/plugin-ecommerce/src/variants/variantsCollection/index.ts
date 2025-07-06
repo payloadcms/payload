@@ -108,7 +108,10 @@ export const variantsCollection: (props: Props) => CollectionConfig = (props) =>
     fields,
     hooks: {
       ...overrides?.hooks,
-      beforeChange: [beforeChange(), ...(overrides?.hooks?.beforeChange || [])],
+      beforeChange: [
+        beforeChange({ productsSlug, variantOptionsSlug }),
+        ...(overrides?.hooks?.beforeChange || []),
+      ],
     },
   }
 

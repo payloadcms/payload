@@ -1,27 +1,32 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
-export const variantsCollectionBeforeChange: () => CollectionBeforeChangeHook =
-  () =>
+type Props = {
+  productsSlug: string
+  variantOptionsSlug: string
+}
+
+export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeChangeHook =
+  ({ productsSlug, variantOptionsSlug }) =>
   async ({ data, req }) => {
     if (data?.options?.length && data.options.length > 0) {
       const titleArray = []
       const productID = data.product
       const product = await req.payload.findByID({
         id: productID,
-        collection: 'products',
+        collection: productsSlug,
         depth: 0,
         select: {
-          name: true,
+          title: true,
           variantTypes: true,
         },
       })
 
-      titleArray.push(product.name)
+      titleArray.push(product.title)
 
       for (const option of data.options) {
         const variantOption = await req.payload.findByID({
           id: option,
-          collection: 'variantOptions',
+          collection: variantOptionsSlug,
           depth: 0,
           select: {
             label: true,

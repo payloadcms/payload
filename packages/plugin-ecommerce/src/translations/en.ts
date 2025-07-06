@@ -33,6 +33,7 @@ export const en: GenericTranslationsObject = {
     quantity: 'Quantity',
     refunded: 'Refunded',
     status: 'Status',
+    subtotal: 'Subtotal',
     succeeded: 'Succeeded',
     transactions: 'Transactions',
     variant: 'Variant',

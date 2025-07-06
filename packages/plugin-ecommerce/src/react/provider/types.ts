@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType } from 'payload'
+import type { DefaultDocumentIDType, TypedCollection } from 'payload'
 import type React from 'react'
 
 import type {
@@ -21,9 +21,16 @@ export type ContextProps = {
   children?: React.ReactNode
   /**
    * The configuration for currencies used in the ecommerce context.
-   * This is required to handle currency formatting and calculations even if you only use a single currency.
+   * This is used to handle currency formatting and calculations, defaults to USD.
    */
-  currenciesConfig: CurrenciesConfig
+  currenciesConfig?: CurrenciesConfig
+  /**
+   * The slug for the customers collection.
+   * This is used in fetch requests to identify the customers collection.
+   *
+   * Defaults to 'users'.
+   */
+  customersSlug?: string
   /**
    * Supported payment methods for the ecommerce context.
    */
@@ -35,19 +42,34 @@ export type ContextProps = {
   syncLocalStorage?: boolean | SyncLocalStorageConfig
 }
 
-export type EcommerceContext = {
+type CartItemArgument = {
+  /**
+   * The ID of the product to add to the cart. Always required.
+   */
+  product: DefaultDocumentIDType
+  /**
+   * The ID of the variant to add to the cart. Optional, if not provided, the product will be added without a variant.
+   */
+  variant?: DefaultDocumentIDType
+}
+
+export type EcommerceContext<TCart = TypedCollection['carts']> = {
   /**
    * Add an item to the cart.
    */
-  addItem: (item: CartItemClient) => void
+  addItem: (item: CartItemArgument, quantity?: number) => Promise<void>
   /**
-   * The current cart state, represented as a Map where the key is the variant ID or product ID.
+   * The current data of the cart.
    */
-  cart: Map<DefaultDocumentIDType, CartItemClient>
+  cart?: TypedCollection['carts']
+  /**
+   * The ID of the current cart corresponding to the cart in the database or local storage.
+   */
+  cartID?: DefaultDocumentIDType
   /**
    * Clear the cart, removing all items.
    */
-  clearCart: () => void
+  clearCart: () => Promise<void>
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
@@ -67,12 +89,12 @@ export type EcommerceContext = {
    * If the item has a variantID, it will be used; otherwise, productID will be used.
    * If quantity reaches 0, the item will be removed from the cart.
    */
-  decrementItem: (item: DefaultDocumentIDType) => void
+  decrementItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
    * Increment an item in the cart by its variant ID or product ID.
    * If the item has a variantID, it will be used; otherwise, productID will be used.
    */
-  incrementItem: (item: DefaultDocumentIDType) => void
+  incrementItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
@@ -90,7 +112,7 @@ export type EcommerceContext = {
    * Remove an item from the cart by its variant ID or product ID.
    * If the item has a variantID, it will be used; otherwise, productID will be used.
    */
-  removeItem: (item: DefaultDocumentIDType) => void
+  removeItem: (item: DefaultDocumentIDType) => Promise<void>
   /**
    * The name of the currently selected payment method.
    * This is used to determine which payment method to use when initiating a payment.
@@ -101,11 +123,6 @@ export type EcommerceContext = {
    * This will update the currency used for pricing and calculations.
    */
   setCurrency: (currency: string) => void
-  /**
-   * The subtotal of the cart, calculated as the sum of all item prices multiplied by their quantities.
-   * This does not include taxes or shipping costs.
-   */
-  subTotal: number
 }
 
 export type CartAction =

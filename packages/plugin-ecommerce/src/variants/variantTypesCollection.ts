@@ -29,7 +29,9 @@ export const variantTypesCollection: (props?: Props) => CollectionConfig = (prop
       name: 'options',
       type: 'join',
       collection: variantOptionsSlug,
+      maxDepth: 2,
       on: 'variantType',
+      orderable: true,
     },
   ]
 

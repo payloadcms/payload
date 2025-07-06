@@ -6,10 +6,14 @@ import { amountField } from './amountField.js'
 import { currencyField } from './currencyField.js'
 
 type Props = {
+  /**
+   * Include this in order to enable support for currencies per item in the cart.
+   */
   currenciesConfig?: CurrenciesConfig
   enableVariants?: boolean
   /**
    * Enables individual prices for each item in the cart.
+   * Defaults to false.
    */
   individualPrices?: boolean
   overrides?: Partial<ArrayField>
