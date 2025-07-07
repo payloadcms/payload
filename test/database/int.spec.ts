@@ -2927,4 +2927,14 @@ describe('database', () => {
     await payload.db.init()
     await payload.db.connect()
   })
+
+  it('should update simple', async () => {
+    const post = await payload.create({ collection: 'posts', data: { title: 'hello' } })
+    const res = await payload.db.updateOne({
+      where: { id: { equals: post.id } },
+      data: { title: 'hello updated' },
+      collection: 'posts',
+    })
+    expect(res.title).toBe('hello updated')
+  })
 })
