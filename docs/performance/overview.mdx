@@ -1,7 +1,7 @@
 ---
 title: Performance
-label: Performance
-order: 70
+label: Overview
+order: 10
 desc: Ensure your Payload app runs as quickly and efficiently as possible.
 keywords: performance, optimization, indexes, depth, select, block references, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -243,9 +243,13 @@ await payload.db.updateOne({
 
 ## Optimizing your APIs
 
+When querying data through Payload APIs, the request lifecycle includes running hooks, access control, validations, and other operations that can add significant overhead to the request.
+
+To optimize your APIs, any custom logic should be as efficient as possible. This includes writing efficient hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
+
 ### Writing efficient hooks
 
-Ensure that your [Hooks](../hooks/overview) are optimized and efficient. Avoid long-running operations in hooks, as they can slow down the request-response cycle.
+[Hooks](../hooks/overview) are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
 
 For example, the `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
 
@@ -268,22 +272,22 @@ Instead, you could defer some expensive operations to a `beforeChange` or `after
   hooks: {
     beforeChange: [
       async () => {
-        // expensive logic is okay here
+        // expensive logic is "better" here, but should still be avoided if possible
       },
     ],
   },
 }
 ```
 
+If your hook executes a long-running task that doesn't affect the response in any way, consider [offloading it to the job queue](#offloading-long-running-tasks).
+
 ### Preventing memory leaks
 
-It is possible for hooks to call themselves recursively, which can lead to memory leaks and crash your server.
+Use [Hook Context](../hooks/context) to prevent hooks from calling themselves recursively, which can lead to memory leaks and potentially crash your server.
 
-This may happen if you make a Payload API call within a hook, which triggers the same hook again.
+For example, if you make a Payload API call within a hook that queries the same collection, it could trigger that same hook again.
 
-To prevent this, use the `context` object to track the state of your hooks.
-
-For example, you can set a flag in the `context` object to indicate that a hook has already run:
+To prevent this, use the `context` object to track the state of your hooks:
 
 ```ts
 {
@@ -293,6 +297,7 @@ For example, you can set a flag in the `context` object to indicate that a hook 
         if (context.myHookRan) {
           return
         }
+
         context.myHookRan = true
 
         // your hook logic here
@@ -302,17 +307,15 @@ For example, you can set a flag in the `context` object to indicate that a hook 
 }
 ```
 
-[Full details](../hooks/context).
-
-### Offload long-running tasks
+### Offloading long-running tasks
 
 For long running tasks that don't directly affect the API responses, you can offload to the job queue.
 
 To go even further, run your jobs on another server!
 
-### Writing custom validations
+### Optimizing custom validations
 
-If your validation functions are asynchronous or computationally expensive, ensure they only run when necessary.
+If your validation functions are asynchronous or computationally expensive, [ensure they only run when necessary](../field/overview#async-field-validations).
 
 For example, if your validation needs to query the database or some external API, ensure it only runs when the document is saved, not on every change in the Admin.
 
@@ -331,15 +334,13 @@ To do this, use the `event` arg in your validation function:
 }
 ```
 
-Full details [here](../field/overview#async-field-validations).
-
 ### Using block references
 
-Use [block references]() to share the same block across multiple fields without bloating the config. This can significantly reduce the amount of data sent from the server to the client, improving performance of the Admin Panel.
+Use [Block References](../fields/blocks#block-references) to share the same block across multiple fields without bloating the config. This will reduce the number of fields to traverse when processing permissions, etc. and can can significantly reduce the amount of data sent from the server to the client in the Admin Panel.
 
-// This also speeds up auth (permissions) when it goes to build up the obj. because it has less iteration of fields to do.
+For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field.
 
-For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field:
+To do this, use the `blockReferences` option in your blocks field:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -388,19 +389,11 @@ const config = buildConfig({
 })
 ```
 
-Full details [here](../fields/blocks#block-references).
-
-## Push
-
-// `push: true` (by default its on in development) only effects relational database, skips migrations. But can make local dev slower if database is far away.
-
 ## Within the Admin Panel
 
 ### listSearchableFields
 
-## Development
-
-### Turbopack
+### Enable Turbopack
 
 <Banner type="warning">
   **Note:** In the future this will be the default. Use as your own risk.
@@ -408,7 +401,7 @@ Full details [here](../fields/blocks#block-references).
 
 Add --turbo to your dev script.
 
-### devBundleServerPackages
+### Only bundle server packages in production
 
 <Banner type="warning">
   **Note:** This is enabled by default in `create-payload-app` since v3.28.0. If
