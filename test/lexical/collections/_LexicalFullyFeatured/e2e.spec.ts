@@ -55,7 +55,9 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Paste URL').click()
     await lexical.drawer
       .locator('.file-field__remote-file')
-      .fill('https://payloadcms.com/images/universal-truth.jpg')
+      .fill(
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
+      )
     await lexical.drawer.getByText('Add file').click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(3)
