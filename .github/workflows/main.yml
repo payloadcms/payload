@@ -754,4 +754,4 @@ jobs:
       - name: Analyze esbuild bundle size
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json'
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

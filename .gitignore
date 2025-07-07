@@ -25,6 +25,7 @@ meta_shared.json
 packages/payload/esbuild
 packages/ui/esbuild
 packages/next/esbuild
+packages/richtext-lexical/esbuild
 
 .turbo
 
