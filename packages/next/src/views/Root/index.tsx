@@ -76,6 +76,19 @@ export const RootPage = async ({
     }
   }
 
+  // Redirect `${adminRoute}/globals` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'globals') {
+    const { viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute: '/globals',
+    })
+
+    // Only redirect if there's NO custom view configured for /globals
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
+  }
+
   const {
     browseByFolderSlugs,
     DefaultView,
