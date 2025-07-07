@@ -98,10 +98,6 @@ jobs:
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
-      - run: pnpm run build:esbuild -- esbuild # Run esbuild to analyze bundle size by analyze: step
-        env:
-          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
-
       - name: Cache build
         uses: actions/cache@v4
         with:
@@ -751,9 +747,11 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-      # Call this action after the build
+      - run: pnpm run build:esbuild -- esbuild # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
       - name: Analyze esbuild bundle size
-        # uses: exoego/esbuild-bundle-analyzer@main # If you prefer nightly!
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: 'out/meta.json'
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json'
