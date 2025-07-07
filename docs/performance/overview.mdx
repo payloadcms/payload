@@ -12,7 +12,7 @@ With this in mind, Payload provides several options and best practices to help y
 
 Whether you're building an app or troubleshooting an existing one, follow these guidelines to ensure that it runs as quickly and efficiently as possible—from the API to the Admin Panel.
 
-## Database Proximity
+## Database proximity
 
 The proximity of your database to your server can significantly impact performance. Ensure that your database is hosted in the same region as your server to minimize latency and improve response times.
 
@@ -247,7 +247,7 @@ When querying data through Payload APIs, the request lifecycle includes running 
 
 To optimize your APIs, any custom logic should be as efficient as possible. This includes writing efficient hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
 
-### Writing efficient hooks
+### Write efficient hooks
 
 [Hooks](../hooks/overview) are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
 
@@ -281,7 +281,7 @@ Instead, you could defer some expensive operations to a `beforeChange` or `after
 
 If your hook executes a long-running task that doesn't affect the response in any way, consider [offloading it to the job queue](#offloading-long-running-tasks).
 
-### Preventing memory leaks
+### Prevent memory leaks
 
 Use [Hook Context](../hooks/context) to prevent hooks from calling themselves recursively, which can lead to memory leaks and potentially crash your server.
 
@@ -307,13 +307,13 @@ To prevent this, use the `context` object to track the state of your hooks:
 }
 ```
 
-### Offloading long-running tasks
+### Offload long-running tasks
 
 For long running tasks that don't directly affect the API responses, you can offload to the job queue.
 
 To go even further, run your jobs on another server!
 
-### Optimizing custom validations
+### Optimize custom validations
 
 If your validation functions are asynchronous or computationally expensive, [ensure they only run when necessary](../field/overview#async-field-validations).
 
@@ -334,7 +334,24 @@ To do this, use the `event` arg in your validation function:
 }
 ```
 
-### Using block references
+## Use a cached Payload instance
+
+Ensure that you do not instantiate Payload unnecessarily. Instead, Payload provides a caching mechanism to reuse the same instance across your app.
+
+To do this, use the `getPayload` function to get the cached instance of Payload:
+
+```ts
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+const myFunction = async () => {
+  const payload = await getPayload({ config })
+
+  // use payload here
+}
+```
+
+## Block references
 
 Use [Block References](../fields/blocks#block-references) to share the same block across multiple fields without bloating the config. This will reduce the number of fields to traverse when processing permissions, etc. and can can significantly reduce the amount of data sent from the server to the client in the Admin Panel.
 
@@ -389,9 +406,53 @@ const config = buildConfig({
 })
 ```
 
-## Within the Admin Panel
+## Selectively bundle UI components in your front-end
 
-### listSearchableFields
+If your front-end imports from `@payloadcms/ui`, ensure that you do not bundle the entire package as this can significantly increase your bundle size.
+
+To do this, use direct imports from the package instead:
+
+```ts
+import { Button } from '@payloadcms/ui/elements/Button'
+```
+
+If building custom components within the Admin Panel, however, this does not apply and will actually cause duplicate modules and React conflicts.
+
+Use the standard import:
+
+```ts
+import { Button } from '@payloadcms/ui'
+```
+
+<Banner type="success">
+  **Tip:** Use
+  [`@next/bundle-analyzer`](https://nextjs.org/docs/app/guides/package-bundling)
+  to analyze your component tree and identify unnecessary re-renders or large
+  components that could be optimized.
+</Banner>
+
+## Optimizing custom components
+
+### Reduce initial HTML size
+
+With Server Components, be aware of what is being sent to through the server/client boundary.
+
+For example, all props sent from the server to the client are serialized and sent through the network. To avoid this, you must be explicit about what props are sent to the client.
+
+To do this, prefer server components and only send the necessary props to the client. This will also offset some JS execution to the server.
+
+<Banner type="success">
+  **Tip:** Use [React Suspense](https://react.dev/reference/react/Suspense) to
+  progressively load components and improve perceived performance.
+</Banner>
+
+### Prevent unnecessary re-renders
+
+useFormFields instead of useFields
+
+## Optimizing local development
+
+Everything mentioned above applies to local development as well, but there are a few additional steps you can take to optimize your local development experience.
 
 ### Enable Turbopack
 
@@ -399,7 +460,15 @@ const config = buildConfig({
   **Note:** In the future this will be the default. Use as your own risk.
 </Banner>
 
-Add --turbo to your dev script.
+Add `--turbo` to your dev script to significantly speed up your local development server start time.
+
+```json
+{
+  "scripts": {
+    "dev": "next dev --turbo"
+  }
+}
+```
 
 ### Only bundle server packages in production
 
@@ -423,38 +492,3 @@ const nextConfig = {
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
 ```
-
-## getPayload
-
-// getPayload // use the cache!!
-
-## Bundles!
-
-In your front-end, import directly using the module path.
-
-In Admin Panel, doesn't matter. Otherwise you will duplicate the component and get React errors due to conflicting React.
-
-In server components, be aware of what is being sent to the client. Everything is sent through the network!!!
-
-// bundle analyzer?! maybe mention it. Prefer ESM?
-
-https://nextjs.org/docs/app/guides/package-bundling
-
-## Components
-
-useFormFields instead of useFields
-
-## Server components
-
-// Be weary of making db calls! Duh...
-
-// You can offset some JS execution by using server components instead of client components.
-
-Use streaming too! This will provide fast initial loads.
-
-## Debugging
-
-// FAQs
-// High memory usage
-// High CPU usage
-// The best way to debug is to simply
