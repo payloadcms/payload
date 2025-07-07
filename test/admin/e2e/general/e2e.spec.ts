@@ -358,6 +358,15 @@ describe('General', () => {
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
     })
+
+    test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
+      const collectionsURL = `${serverURL}/admin/collections`
+      await page.goto(collectionsURL)
+      // Should redirect to dashboard
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .toMatch(`${serverURL}/admin`)
+    })
   })
 
   describe('navigation', () => {

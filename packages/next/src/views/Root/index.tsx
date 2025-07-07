@@ -62,6 +62,11 @@ export const RootPage = async ({
 
   const searchParams = await searchParamsPromise
 
+  // Redirect `${adminRoute}/collections` to `${adminRoute}`
+  if (segments.length === 1 && segments[0] === 'collections') {
+    redirect(adminRoute)
+  }
+
   const {
     browseByFolderSlugs,
     DefaultView,
