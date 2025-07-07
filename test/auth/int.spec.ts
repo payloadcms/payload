@@ -990,6 +990,53 @@ describe('Auth', () => {
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
     })
+
+    it('should reset the login attempts after a successful login', async () => {
+      async function attemptLogin(email: string, password: string) {
+        return payload.login({
+          collection: slug,
+          data: {
+            email,
+            password,
+          },
+          overrideAccess: false,
+        })
+      }
+
+      // fail 1
+      try {
+        const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+        expect(failedLogin).toBeUndefined()
+      } catch (error) {
+        expect((error as Error).message).toBe('The email or password provided is incorrect.')
+      }
+
+      // successful login 1
+      const successfulLogin = await attemptLogin(devUser.email, devUser.password)
+      expect(successfulLogin).toBeDefined()
+
+      // fail 2
+      try {
+        const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+        expect(failedLogin).toBeUndefined()
+      } catch (error) {
+        expect((error as Error).message).toBe('The email or password provided is incorrect.')
+      }
+
+      // successful login 2 without exceeding attempts
+      const successfulLogin2 = await attemptLogin(devUser.email, devUser.password)
+      expect(successfulLogin2).toBeDefined()
+
+      const user = await payload.findByID({
+        collection: slug,
+        id: successfulLogin2.user.id,
+        overrideAccess: true,
+        showHiddenFields: true,
+      })
+
+      expect(user.loginAttempts).toBe(0)
+      expect(user.lockUntil).toBeNull()
+    })
   })
 
   describe('Email - format validation', () => {
