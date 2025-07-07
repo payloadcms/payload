@@ -583,7 +583,7 @@ describe('Uploads', () => {
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
     await expect(genericUploadImage).toHaveAttribute(
       'src',
-      'https://payloadcms.com/images/universal-truth.jpg',
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
     )
   })
 
@@ -1510,7 +1510,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        'https://payloadcms.com/images/universal-truth.jpg',
+        'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
     })
 
