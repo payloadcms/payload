@@ -64,7 +64,7 @@ export const promise = async <T>({
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
     // Run field beforeDuplicate hooks
-    if (Array.isArray(field.hooks?.beforeDuplicate)) {
+    if (Array.isArray('hooks' in field && field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
         const localeData: JsonObject = {}
 
@@ -89,8 +89,10 @@ export const promise = async <T>({
           }
 
           let hookResult
-          for (const hook of field.hooks.beforeDuplicate) {
-            hookResult = await hook(beforeDuplicateArgs)
+          if ('hooks' in field) {
+            for (const hook of field.hooks.beforeDuplicate) {
+              hookResult = await hook(beforeDuplicateArgs)
+            }
           }
 
           if (typeof hookResult !== 'undefined') {
@@ -120,8 +122,10 @@ export const promise = async <T>({
         }
 
         let hookResult
-        for (const hook of field.hooks.beforeDuplicate) {
-          hookResult = await hook(beforeDuplicateArgs)
+        if ('hooks' in field) {
+          for (const hook of field.hooks.beforeDuplicate) {
+            hookResult = await hook(beforeDuplicateArgs)
+          }
         }
 
         if (typeof hookResult !== 'undefined') {
