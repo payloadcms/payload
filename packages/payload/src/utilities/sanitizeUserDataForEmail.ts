@@ -17,8 +17,13 @@ export function sanitizeUserDataForEmail(data: unknown, maxLength = 100): string
     return ''
   }
 
+  // Decode HTML numeric entities like &#x3C; or &#60;
+  const decodedEntities = data
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+
   // Remove HTML tags
-  const noTags = data.replace(/<[^>]+>/g, '')
+  const noTags = decodedEntities.replace(/<[^>]+>/g, '')
 
   // Remove control characters except common whitespace
   const noControls = [...noTags]
