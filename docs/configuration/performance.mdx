@@ -10,19 +10,15 @@ Payload is designed with performance in mind, but its customizability means that
 
 With this in mind, Payload provides several options and best practices to help you optimize your app's specific performance needs.
 
-Here are some tips to ensure your Payload app runs as quickly and efficiently as possible.
+Here are some tips to ensure your Payload app runs as quickly and efficiently as possible, broken down into three categories:
 
-- [Indexes](#indexes)
-- [Depth](#depth)
-- [Select](#select)
-- [Returning](#returning)
-- [Hooks](#hooks)
-- [Validations](#validations)
-- [Block References](#block-references)
-- [Turbopack](#turbopack)
-- [devBundleServerPackages](#devbundleserverpackages)
+- [Database](#database)
+- [API](#api)
+- [Development](#development)
 
-## Indexes
+## Database
+
+### Indexes
 
 If a field's data is queried often, build an index for that field to produce faster queries.
 
@@ -48,7 +44,7 @@ export MyCollection: CollectionConfig = {
 }
 ```
 
-## Depth
+### Depth
 
 Use [Depth](../queries/depth) to only populate the necessary levels of relationships. This can significantly reduce the database overhead and response size by skipping unnecessary population of related documents.
 
@@ -92,7 +88,7 @@ const config = buildConfig({
 })
 ```
 
-## Select
+### Select
 
 Use the [Select API](../queries/select) to limit the fields returned in your queries. This can significantly reduce the computational overhead by not processing unneeded fields, as well as reduce the size of the response by not returning unneeded data.
 
@@ -122,7 +118,7 @@ This will return:
 }
 ```
 
-## Returning
+### Returning
 
 To prevent unnecessary database computation and reduce the size of the response, you can set `returning: false` in your API requests if you don't need the updated document returned.
 
@@ -137,7 +133,27 @@ await payload.update({
 })
 ```
 
-## Hooks
+### Limit
+
+Use the `limit` option in your queries to restrict the number of documents returned. This can help reduce the amount of data sent over the network and improve response times.
+
+For example, if you are querying for a specific document and only need one result, set `limit: 1`:
+
+```ts
+await payload.find({
+  collection: 'posts',
+  where: {
+    title: { equals: 'My Post' },
+  },
+  // highlight-start
+  limit: 1,
+  // highlight-end
+})
+```
+
+## API
+
+### Hooks
 
 Ensure that your [Hooks](../hooks/overview) are optimized and efficient. Avoid long-running operations in hooks, as they can slow down the request-response cycle.
 
@@ -169,7 +185,7 @@ Instead, you could defer some expensive operations to a `beforeChange` or `after
 }
 ```
 
-## Validations
+### Validations
 
 If your validation functions are asynchronous or computationally expensive, ensure they only run when necessary.
 
@@ -192,15 +208,68 @@ To do this, use the `event` arg in your validation function:
 
 Full details [here](../field/overview#async-field-validations).
 
-## Block References
+### Block References
 
-Use [block references]() to share the same block across multiple fields without bloating the config.
+Use [block references]() to share the same block across multiple fields without bloating the config. This can significantly reduce the amount of data sent from the server to the client, improving performance of the Admin Panel.
 
-## Turbopack
+For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  blocks: [
+    {
+      slug: 'TextBlock',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // highlight-start
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+          // highlight-end
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // highlight-start
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+          // highlight-end
+        },
+      ],
+    },
+  ],
+})
+```
+
+Full details [here](../fields/blocks#block-references).
+
+## Development
+
+### Turbopack
 
 <Banner type="warning">**Note:**</Banner>
 
-## devBundleServerPackages
+### devBundleServerPackages
 
 <Banner type="warning">
   **Note:** This is enabled by default in `create-payload-app` since v3.28.0. If
