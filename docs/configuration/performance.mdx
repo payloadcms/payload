@@ -10,19 +10,17 @@ Payload is designed with performance in mind, but its customizability means that
 
 With this in mind, Payload provides several options and best practices to help you optimize your app's specific performance needs.
 
-Here are some tips to ensure your Payload app runs as quickly and efficiently as possible, broken down into three categories:
+Whether you're building an app or troubleshooting an existing one, follow these guidelines to ensure that it runs as quickly and efficiently as possible—from the API to the Admin Panel.
 
-- [Database](#database)
-- [API](#api)
-- [Development](#development)
+## Database Proximity
 
-## Database
+The proximity of your database to your server can significantly impact performance. Ensure that your database is hosted in the same region as your server to minimize latency and improve response times.
 
-### Indexes
+## Indexing your fields
 
-If a field's data is queried often, build an index for that field to produce faster queries.
+If a particular field is queried often, build an [Index](../database/overview) for that field to produce faster queries.
 
-When your query runs, the database will not search the entire document for that one field, but will instead use the index to quickly locate the data.
+When your query runs, the database will not search the entire document to find that one field, but will instead use the index to quickly locate the data.
 
 This is done on the field level by setting the `index` option to `true` in your field's config:
 
@@ -44,13 +42,25 @@ export MyCollection: CollectionConfig = {
 }
 ```
 
+<Banner type="success">
+  **Tip:** If you're using MongoDB, you can use [MongoDB
+  Compass](https://www.mongodb.com/products/compass) to visualize and manage
+  your indexes.
+</Banner>
+
+## Querying your data
+
+There are several ways to optimize your [Queries](../queries/overview). Many of these options directly impact overall database overhead, response sizes, and/or computational load and can significantly improve performance.
+
+When building queries, combine as many of these options together as possible. This will ensure your queries are as efficient as they can be.
+
 ### Depth
 
-Use [Depth](../queries/depth) to only populate the necessary levels of relationships. This can significantly reduce the database overhead and response size by skipping unnecessary population of related documents.
+Use [Depth](../queries/depth) to only populate the necessary levels of relationships. This will skip any unnecessary population of nested relationships.
 
-For example, if you have a relationship field with `hasMany: true` and 10 documents are selected, all 10 of those additional documents will be queried and returned.
+For example, a depth of `0` means no relationships are populated. Only the IDs of those related documents are returned. Those relationships are not queried, processed, or returned in the response.
 
-A depth of `0` means no relationships are populated. Only the IDs of related documents are returned.
+To do this, set `depth: 0` in your query:
 
 ```ts
 await payload.find({
@@ -90,9 +100,9 @@ const config = buildConfig({
 
 ### Select
 
-Use the [Select API](../queries/select) to limit the fields returned in your queries. This can significantly reduce the computational overhead by not processing unneeded fields, as well as reduce the size of the response by not returning unneeded data.
+Use the [Select API](../queries/select) to limit the fields returned in your queries. This will skip the processing of any unspecified fields, e.g. running field hooks, and will significantly reduce the size of the response by returning only specified fields.
 
-When selecting fields, only the specified fields are returned.
+To do this, set the `select` option in your query:
 
 ```ts
 await payload.find({
@@ -118,32 +128,58 @@ This will return:
 }
 ```
 
-### Returning
+### Populate
 
-To prevent unnecessary database computation and reduce the size of the response, you can set `returning: false` in your API requests if you don't need the updated document returned.
+// populate on the request
+// per-collection: `defaultPopulate`
+
+### Pagination
+
+For queries that do not require pagination, you can [disable it to improve performance](../queries/pagination##disabling-pagination-within-local-api). This will reduce the overhead of pagination calculations.
+
+For example, if you are querying for a specific document by an exact slug, you might want to disable pagination.
+
+To do this, set `pagination: false` in your query:
 
 ```ts
-await payload.update({
-  collection: 'posts',
-  id: post.id,
-  data: { title: 'New Title' },
-  // highlight-start
-  returning: false,
-  // highlight-end
-})
+import type { Payload } from 'payload'
+
+const getPost = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: 'post-1',
+      },
+    },
+    // highlight-start
+    pagination: false,
+    // highlight-end
+  })
+
+  return posts
+}
 ```
+
+<Banner type="warning">
+  **Note:** This only applies to `find` operations within the Local API.
+</Banner>
 
 ### Limit
 
-Use the `limit` option in your queries to restrict the number of documents returned. This can help reduce the amount of data sent over the network and improve response times.
+Use the `limit` option in your queries to restrict the number of documents returned. This will reduce the number database lookups.
 
-For example, if you are querying for a specific document and only need one result, set `limit: 1`:
+For example, if you are querying for a specific document and can rely on the first match, set `limit: 1`.
+
+To do this, set the `limit` option in your query:
 
 ```ts
 await payload.find({
   collection: 'posts',
   where: {
-    title: { equals: 'My Post' },
+    slug: {
+      equals: 'post-1',
+    },
   },
   // highlight-start
   limit: 1,
@@ -151,9 +187,63 @@ await payload.find({
 })
 ```
 
-## API
+<Banner type="success">
+  **Tip:** Combine `limit` with `pagination: false` to further optimize your
+  queries.
+</Banner>
 
-### Hooks
+### Make direct database calls
+
+<Banner type="warning">
+  **Warning:** Direct database calls bypass all hooks and validations. Only use
+  this method when you are certain that the operation is safe and does not
+  require any of these features.
+</Banner>
+
+Making direct database calls can significantly improve performance for certain operations by completely skipping hooks, validations, and other overhead associated with Payload APIs.
+
+For example, this can be especially useful for the `update` operation, where you might otherwise need to make multiple API calls to fetch, update, and fetch again. Making a direct database call can reduce this to a single operation.
+
+To do this, use the `payload.db` methods:
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: {
+    title: 'New Title',
+  },
+})
+```
+
+<Banner type="warning">
+  **Note:** Direct database methods do not start a
+  [transaction](../database/transactions). You have to start that yourself.
+</Banner>
+
+#### Returning
+
+To prevent unnecessary database computation and reduce the size of the response, you can also set `returning: false` in your direct database calls if you don't need the updated document returned to you.
+
+```ts
+await payload.db.updateOne({
+  collection: 'posts',
+  id: post.id,
+  data: { title: 'New Title' }, // See note above ^ about Postgres
+  // highlight-start
+  returning: false,
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  **Note:** The `returning` option is only available on direct-to-db methods.
+  E.g. those on the `payload.db` object. It is not exposed to the Local API.
+</Banner>
+
+## Optimizing your APIs
+
+### Writing efficient hooks
 
 Ensure that your [Hooks](../hooks/overview) are optimized and efficient. Avoid long-running operations in hooks, as they can slow down the request-response cycle.
 
@@ -185,7 +275,42 @@ Instead, you could defer some expensive operations to a `beforeChange` or `after
 }
 ```
 
-### Validations
+### Preventing memory leaks
+
+It is possible for hooks to call themselves recursively, which can lead to memory leaks and crash your server.
+
+This may happen if you make a Payload API call within a hook, which triggers the same hook again.
+
+To prevent this, use the `context` object to track the state of your hooks.
+
+For example, you can set a flag in the `context` object to indicate that a hook has already run:
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async ({ context }) => {
+        if (context.myHookRan) {
+          return
+        }
+        context.myHookRan = true
+
+        // your hook logic here
+      },
+    ],
+  },
+}
+```
+
+[Full details](../hooks/context).
+
+### Offload long-running tasks
+
+For long running tasks that don't directly affect the API responses, you can offload to the job queue.
+
+To go even further, run your jobs on another server!
+
+### Writing custom validations
 
 If your validation functions are asynchronous or computationally expensive, ensure they only run when necessary.
 
@@ -208,9 +333,11 @@ To do this, use the `event` arg in your validation function:
 
 Full details [here](../field/overview#async-field-validations).
 
-### Block References
+### Using block references
 
 Use [block references]() to share the same block across multiple fields without bloating the config. This can significantly reduce the amount of data sent from the server to the client, improving performance of the Admin Panel.
+
+// This also speeds up auth (permissions) when it goes to build up the obj. because it has less iteration of fields to do.
 
 For example, if you have a block that is used in multiple fields, you can define it once and reference it in each field:
 
@@ -263,11 +390,23 @@ const config = buildConfig({
 
 Full details [here](../fields/blocks#block-references).
 
+## Push
+
+// `push: true` (by default its on in development) only effects relational database, skips migrations. But can make local dev slower if database is far away.
+
+## Within the Admin Panel
+
+### listSearchableFields
+
 ## Development
 
 ### Turbopack
 
-<Banner type="warning">**Note:**</Banner>
+<Banner type="warning">
+  **Note:** In the future this will be the default. Use as your own risk.
+</Banner>
+
+Add --turbo to your dev script.
 
 ### devBundleServerPackages
 
@@ -291,3 +430,38 @@ const nextConfig = {
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
 ```
+
+## getPayload
+
+// getPayload // use the cache!!
+
+## Bundles!
+
+In your front-end, import directly using the module path.
+
+In Admin Panel, doesn't matter. Otherwise you will duplicate the component and get React errors due to conflicting React.
+
+In server components, be aware of what is being sent to the client. Everything is sent through the network!!!
+
+// bundle analyzer?! maybe mention it. Prefer ESM?
+
+https://nextjs.org/docs/app/guides/package-bundling
+
+## Components
+
+useFormFields instead of useFields
+
+## Server components
+
+// Be weary of making db calls! Duh...
+
+// You can offset some JS execution by using server components instead of client components.
+
+Use streaming too! This will provide fast initial loads.
+
+## Debugging
+
+// FAQs
+// High memory usage
+// High CPU usage
+// The best way to debug is to simply

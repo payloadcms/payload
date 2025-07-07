@@ -64,3 +64,33 @@ All Payload APIs support the pagination controls below. With them, you can creat
 ### Disabling pagination within Local API
 
 For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation.
+
+<Banner type="success">
+  **Tip:** Setting `pagination: false` is a performance optimization! This will
+  reduce the overhead of pagination calculations and improve query speed.
+</Banner>
+
+To do this, set `pagination: false` in your query:
+
+```ts
+import type { Payload } from 'payload'
+
+const getPost = async (payload: Payload) => {
+  const posts = await payload.find({
+    collection: 'posts',
+    where: {
+      title: { equals: 'My Post' },
+    },
+    // highlight-start
+    pagination: false,
+    // highlight-end
+  })
+
+  return posts
+}
+```
+
+<Banner type="warning">
+  **Reminder:** By default, any query with `limit: 0` will automatically disable
+  pagination for you.
+</Banner>

@@ -8,7 +8,13 @@ keywords: query, documents, pagination, documentation, Content Management System
 
 Documents in Payload can have relationships to other Documents. This is true for both [Collections](../configuration/collections) as well as [Globals](../configuration/globals). When you query a Document, you can specify the depth at which to populate any of its related Documents either as full objects, or only their IDs.
 
-Depth will optimize the performance of your application by limiting the amount of processing made in the database and significantly reducing the amount of data returned. Since Documents can be infinitely nested or recursively related, it's important to be able to control how deep your API populates.
+Since Documents can be infinitely nested or recursively related, it's important to be able to control how deep your API populates.
+
+<Banner type="success">
+  Depth will optimize the performance of your application by limiting the amount
+  of processing made in the database and significantly reducing the amount of
+  data returned.
+</Banner>
 
 For example, when you specify a `depth` of `0`, the API response might look like this:
 
