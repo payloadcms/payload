@@ -120,7 +120,18 @@ export const renderDocument = async ({
     }))
 
   if (isEditing && !doc) {
-    throw new Error('not-found')
+    // If it's a collection document that doesn't exist, redirect to collection list
+    if (collectionSlug) {
+      const redirectURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
+        serverURL,
+      })
+      redirect(redirectURL)
+    } else {
+      // For globals or other cases, keep the 404 behavior
+      throw new Error('not-found')
+    }
   }
 
   const [

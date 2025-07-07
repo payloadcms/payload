@@ -87,6 +87,7 @@ export const enTranslations = {
     deletingFile: 'There was an error deleting file.',
     deletingTitle:
       'There was an error while deleting {{title}}. Please check your connection and try again.',
+    documentNotFound: 'The document with ID {{id}} does not exist or may have been deleted.',
     emailOrPasswordIncorrect: 'The email or password provided is incorrect.',
     followingFieldsInvalid_one: 'The following field is invalid:',
     followingFieldsInvalid_other: 'The following fields are invalid:',

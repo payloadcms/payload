@@ -358,6 +358,19 @@ describe('General', () => {
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
     })
+
+    test('should redirect from non-existent document ID to collection list', async () => {
+      const nonExistentDocURL = `${serverURL}/admin/collections/${postsCollectionSlug}/999999`
+      await page.goto(nonExistentDocURL)
+      // Should redirect to collection list with notFound query parameter
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .toMatch(`${serverURL}/admin/collections/${postsCollectionSlug}?notFound=999999`)
+
+      // Should show warning banner about document not found
+      await expect(page.locator('.banner--type-error')).toBeVisible()
+      await expect(page.locator('.banner--type-error')).toContainText('999999')
+    })
   })
 
   describe('navigation', () => {
