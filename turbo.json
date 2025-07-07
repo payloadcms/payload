@@ -10,9 +10,9 @@
       "dependsOn": ["^build"],
       "outputs": ["./dist/**"]
     },
-    "build:esbuild": {
+    "build:bundleforanalyze": {
       "cache": true,
-      "dependsOn": ["^build:esbuild"],
+      "dependsOn": ["^build:bundleforanalyze"],
       "outputs": ["./esbuild/**"]
     },
     "dev": {

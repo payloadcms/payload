@@ -9,6 +9,8 @@ import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
 const directoryArg = process.argv[2] || 'dist'
 
+const shouldSplit = process.argv.includes('--no-split') ? false : true
+
 const removeCSSImports = {
   name: 'remove-css-imports',
   setup(build) {
@@ -64,6 +66,11 @@ const useClientPlugin = {
 }
 
 async function build() {
+  // Create directoryArg if it doesn't exist
+  if (!fs.existsSync(directoryArg)) {
+    await fs.promises.mkdir(directoryArg, { recursive: true })
+  }
+
   // Bundle only the .scss files into a single css file
   await esbuild.build({
     entryPoints: ['src/exports/client/index.ts'],
@@ -92,7 +99,7 @@ async function build() {
     outdir: `${directoryArg}/exports/client_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: true,
+    splitting: shouldSplit,
     write: true, // required for useClientPlugin
     banner: {
       js: `// Workaround for react-datepicker and other cjs dependencies potentially inserting require("react") statements

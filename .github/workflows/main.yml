@@ -747,7 +747,7 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-      - run: pnpm run build:esbuild -- esbuild # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+      - run: pnpm run build:esbuild # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 

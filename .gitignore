@@ -23,6 +23,7 @@ meta_index.json
 meta_shared.json
 
 packages/payload/esbuild
+packages/ui/esbuild
 
 .turbo
 
