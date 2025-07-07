@@ -1,5 +1,5 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { ClientBlock, ClientField, JsonObject } from 'payload'
+import type { ClientBlock, ClientField, FormStateWithoutComponents } from 'payload'
 
 export type ClipboardCopyBlocksSchema = {
   schemaBlocks: ClientBlock[]
@@ -21,15 +21,16 @@ export type ClipboardCopyFieldsData = {
 
 export type ClipboardCopyData = {
   path: string
+  rowIndex?: number
 } & (ClipboardCopyBlocksData | ClipboardCopyFieldsData)
 
 export type ClipboardCopyActionArgs = {
-  getDataToCopy: () => JsonObject | JsonObject[]
+  getDataToCopy: () => FormStateWithoutComponents
   t: TFunction
 } & ClipboardCopyData
 
 export type ClipboardPasteData = {
-  data: JsonObject | JsonObject[]
+  data: FormStateWithoutComponents
   path: string
 } & (ClipboardCopyBlocksData | ClipboardCopyFieldsData)
 

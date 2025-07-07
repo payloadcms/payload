@@ -15,9 +15,9 @@ import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import {
-  getFormStateFromClipboardRows,
-  getSubFieldStateFromClipboardRow,
-} from '../../elements/ClipboardAction/getFormStateFromClipboardRows.js'
+  getFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/getFormStateFromClipboard.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
@@ -71,12 +71,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
     addFieldRow,
     dispatchFields,
-    getDataByPath,
-    getField,
     getFields,
     moveFieldRow,
     removeFieldRow,
-    replaceFieldRow,
     replaceState,
     setModified,
   } = useForm()
@@ -219,11 +216,18 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const copyRow = useCallback(
     async (rowIndex: number) => {
+      const formState = { ...getFields() }
       const clipboardResult = await clipboardCopy({
         type,
         fields,
-        getDataToCopy: () => getDataByPath(`${path}.${rowIndex}`),
+        getDataToCopy: () =>
+          reduceFormStateByPath({
+            formState,
+            path,
+            rowIndex,
+          }),
         path,
+        rowIndex,
         t,
       })
 
@@ -233,25 +237,22 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         toast.success(t('general:copied'))
       }
     },
-    [fields, getDataByPath, path, t, type],
+    [fields, getFields, path, t, type],
   )
 
   const pasteRow = useCallback(
     async (rowIndex: number) => {
-      const rowId = getField(path).rows[rowIndex].id
-
+      const formState = { ...getFields() }
       const pasteArgs = {
-        onPaste: ({ data: dataFromClipboard }) => {
-          const subFieldState = getSubFieldStateFromClipboardRow({
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const newState = getFormStateFromClipboard({
             dataFromClipboard,
-            rowId,
-          })
-          replaceFieldRow({
+            formState,
             path,
             rowIndex,
-            schemaPath,
-            subFieldState,
           })
+          replaceState(newState)
+          setModified(true)
         },
         path,
         schemaFields: fields,
@@ -264,20 +265,30 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [fields, getField, path, replaceFieldRow, schemaPath, t],
+    [fields, getFields, path, replaceState, setModified, t],
   )
 
   const pasteField = useCallback(
-    ({ data: dataFromClipboard }: ClipboardPasteData) => {
-      const newState = getFormStateFromClipboardRows({
+    (dataFromClipboard: ClipboardPasteData) => {
+      const formState = { ...getFields() }
+      const newState = getFormStateFromClipboard({
         dataFromClipboard,
-        formState: { ...getFields() },
+        formState,
         path,
       })
       replaceState(newState)
       setModified(true)
     },
     [getFields, path, replaceState, setModified],
+  )
+
+  const getDataToCopy = useCallback(
+    () =>
+      reduceFormStateByPath({
+        formState: { ...getFields() },
+        path,
+      }),
+    [getFields, path],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
@@ -355,7 +366,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 className={`${baseClass}__header-action`}
                 disableCopy={!(rows?.length > 0)}
                 fields={fields}
-                getDataToCopy={() => getDataByPath(path)}
+                getDataToCopy={getDataToCopy}
                 onPaste={pasteField}
                 path={path}
                 type={type}

@@ -1,6 +1,6 @@
 'use client'
 
-import type { JsonObject } from 'payload'
+import type { FormStateWithoutComponents } from 'payload'
 
 import { type FC, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -20,7 +20,7 @@ type Props = {
   copyClassName?: string
   disableCopy?: boolean
   disablePaste?: boolean
-  getDataToCopy: () => JsonObject | JsonObject[]
+  getDataToCopy: () => FormStateWithoutComponents
   isRow?: boolean
   onPaste: OnPasteFn
   pasteClassName?: string

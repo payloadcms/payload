@@ -4,13 +4,8 @@ import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 
 import type { ClipboardPasteActionValidateArgs } from './types.js'
 
-export function isClipboardDataValid({
-  data,
-  fieldPath,
-  path,
-  ...args
-}: ClipboardPasteActionValidateArgs) {
-  if (typeof data === 'undefined' || !path || !args.type || !arePathsEquivalent(path, fieldPath)) {
+export function isClipboardDataValid({ data, path, ...args }: ClipboardPasteActionValidateArgs) {
+  if (typeof data === 'undefined' || !path || !args.type) {
     return false
   }
 
@@ -32,9 +27,9 @@ export function isClipboardFieldsValid({
   fieldsFromConfig,
 }: {
   fieldsFromClipboard: ClientField[]
-  fieldsFromConfig: ClientField[]
+  fieldsFromConfig?: ClientField[]
 }) {
-  if (fieldsFromClipboard.length !== fieldsFromConfig.length) {
+  if (!fieldsFromConfig || fieldsFromClipboard.length !== fieldsFromConfig?.length) {
     return false
   }
 
@@ -72,9 +67,13 @@ export function isClipboardBlocksValid({
   blocksFromConfig,
 }: {
   blocksFromClipboard: ClientBlock[]
-  blocksFromConfig: ClientBlock[]
+  blocksFromConfig?: ClientBlock[]
 }) {
-  const configBlockMap = new Map(blocksFromConfig.map((block) => [block.slug, block]))
+  const configBlockMap = new Map(blocksFromConfig?.map((block) => [block.slug, block]))
+
+  if (!configBlockMap.size) {
+    return false
+  }
 
   const checkedSlugs = new Set<string>()
 

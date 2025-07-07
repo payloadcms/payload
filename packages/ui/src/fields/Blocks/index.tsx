@@ -11,9 +11,9 @@ import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import {
-  getFormStateFromClipboardRows,
-  getSubFieldStateFromClipboardRow,
-} from '../../elements/ClipboardAction/getFormStateFromClipboardRows.js'
+  getFormStateFromClipboard,
+  reduceFormStateByPath,
+} from '../../elements/ClipboardAction/getFormStateFromClipboard.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
@@ -73,12 +73,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const {
     addFieldRow,
     dispatchFields,
-    getDataByPath,
-    getField,
     getFields,
     moveFieldRow,
     removeFieldRow,
-    replaceFieldRow,
     replaceState,
     setModified,
   } = useForm()
@@ -227,8 +224,14 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       const clipboardResult = await clipboardCopy({
         type,
         blocks: clientBlocks,
-        getDataToCopy: () => getDataByPath(`${path}.${rowIndex}`),
+        getDataToCopy: () =>
+          reduceFormStateByPath({
+            formState: { ...getFields() },
+            path,
+            rowIndex,
+          }),
         path,
+        rowIndex,
         t,
       })
 
@@ -238,25 +241,22 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         toast.success(t('general:copied'))
       }
     },
-    [clientBlocks, getDataByPath, path, t, type],
+    [clientBlocks, path, t, type, getFields],
   )
 
   const pasteRow = useCallback(
     async (rowIndex: number) => {
-      const rowId = getField(path).rows[rowIndex].id
-
       const pasteArgs = {
-        onPaste: ({ data: dataFromClipboard }) => {
-          const subFieldState = getSubFieldStateFromClipboardRow({
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = getFormStateFromClipboard({
             dataFromClipboard,
-            rowId,
-          })
-          replaceFieldRow({
+            formState,
             path,
             rowIndex,
-            schemaPath,
-            subFieldState,
           })
+          replaceState(newState)
+          setModified(true)
         },
         path,
         schemaBlocks: clientBlocks,
@@ -269,14 +269,15 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [clientBlocks, getField, path, replaceFieldRow, schemaPath, t],
+    [clientBlocks, getFields, path, replaceState, setModified, t],
   )
 
   const pasteBlocks = useCallback(
-    (clipboard: ClipboardPasteData) => {
-      const newState = getFormStateFromClipboardRows({
-        dataFromClipboard: clipboard.data,
-        formState: { ...getFields() },
+    (dataFromClipboard: ClipboardPasteData) => {
+      const formState = { ...getFields() }
+      const newState = getFormStateFromClipboard({
+        dataFromClipboard,
+        formState,
         path,
       })
       replaceState(newState)
@@ -351,10 +352,15 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
             <li>
               <ClipboardAction
-                blocks={clientBlocks} // here
+                blocks={clientBlocks}
                 className={`${baseClass}__header-action`}
                 disableCopy={!(rows?.length > 0)}
-                getDataToCopy={() => getDataByPath(path)}
+                getDataToCopy={() =>
+                  reduceFormStateByPath({
+                    formState: { ...getFields() },
+                    path,
+                  })
+                }
                 onPaste={pasteBlocks}
                 path={path}
                 type={type}
