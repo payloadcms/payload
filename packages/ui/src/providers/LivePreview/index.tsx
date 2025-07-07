@@ -226,6 +226,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     )
   }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
 
+  const isLivePreviewEnabled = Boolean(
+    operation !== 'create' &&
+      ((collectionSlug && config?.admin?.livePreview?.collections?.includes(collectionSlug)) ||
+        (globalSlug && config.admin?.livePreview?.globals?.includes(globalSlug)) ||
+        entityConfig?.admin?.livePreview),
+  )
+
   return (
     <LivePreviewContext
       value={{
@@ -235,13 +242,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
-        isLivePreviewEnabled: Boolean(
-          (operation !== 'create' &&
-            collectionSlug &&
-            config?.admin?.livePreview?.collections?.includes(collectionSlug)) ||
-            (globalSlug && config.admin?.livePreview?.globals?.includes(globalSlug)) ||
-            entityConfig?.admin?.livePreview,
-        ),
+        isLivePreviewEnabled,
         isLivePreviewing,
         isPopupOpen,
         listeningForMessages,

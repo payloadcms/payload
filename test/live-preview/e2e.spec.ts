@@ -27,6 +27,7 @@ import {
   toggleLivePreview,
 } from './helpers.js'
 import {
+  collectionLevelConfigSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -99,6 +100,22 @@ describe('Live Preview', () => {
     await page.goto(pagesURLUtil.create)
     await expect(page.locator('button#live-preview-toggler')).toBeHidden()
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  })
+
+  test('collection - does not enable live preview is collections that are not configured', async () => {
+    const usersURL = new AdminUrlUtil(serverURL, 'users')
+    await navigateToDoc(page, usersURL)
+    const toggler = page.locator('#live-preview-toggler')
+    await expect(toggler).toBeHidden()
+  })
+
+  test('collection - respect collection-level live preview config', async () => {
+    const collURL = new AdminUrlUtil(serverURL, collectionLevelConfigSlug)
+    await page.goto(collURL.create)
+    await page.locator('#field-title').fill('Collection Level Config')
+    await saveDocAndAssert(page)
+    await toggleLivePreview(page)
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
   })
 
   test('saves live preview state to preferences and loads it on next visit', async () => {

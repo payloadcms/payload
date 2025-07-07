@@ -7,11 +7,11 @@ const dirname = path.dirname(filename)
 
 async function build() {
   const resultIndex = await esbuild.build({
-    entryPoints: ['src/exports/index.ts'],
+    entryPoints: ['src/index.ts'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outfile: 'dist/exports/index.js',
+    outfile: 'dist/index.js',
     splitting: false,
     external: [
       'lodash',
