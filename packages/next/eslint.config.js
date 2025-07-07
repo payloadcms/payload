@@ -19,7 +19,7 @@ export const index = [
         tsconfigRootDir: import.meta.dirname,
         projectService: {
           // See comment in packages/eslint-config/index.mjs
-          allowDefaultProject: ['bundleScss.js', 'bundle.js'],
+          allowDefaultProject: ['bundleScss.js', 'bundle.js', 'babel.config.cjs'],
         },
       },
     },
