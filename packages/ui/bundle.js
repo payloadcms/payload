@@ -151,7 +151,7 @@ function require(m) {
   console.log('client.ts bundled successfully')
 
   const resultShared = await esbuild.build({
-    entryPoints: ['src/exports/shared/index.ts'],
+    entryPoints: ['dist/exports/shared/index.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',

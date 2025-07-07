@@ -10,7 +10,7 @@ const directoryArg = process.argv[2] || 'dist'
 
 async function build() {
   const resultIndex = await esbuild.build({
-    entryPoints: ['src/index.ts'],
+    entryPoints: ['dist/index.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',
@@ -36,7 +36,7 @@ async function build() {
   console.log('payload server bundled successfully')
 
   const resultShared = await esbuild.build({
-    entryPoints: ['src/exports/shared.ts'],
+    entryPoints: ['dist/exports/shared.js'],
     bundle: true,
     platform: 'node',
     format: 'esm',
