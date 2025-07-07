@@ -7,9 +7,6 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
-import { objectToFrontmatter } from '@payloadcms/richtext-lexical'
-import { randomUUID } from 'crypto'
-import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -2810,13 +2807,29 @@ describe('database', () => {
   })
 
   it('should update simple', async () => {
-    const post = await payload.create({ collection: 'posts', data: { title: 'hello' } })
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        text: 'other text (should not be nuked)',
+        title: 'hello',
+        group: { text: 'in group' },
+        tab: { text: 'in tab' },
+      },
+    })
     const res = await payload.db.updateOne({
       where: { id: { equals: post.id } },
-      data: { title: 'hello updated' },
+      data: {
+        title: 'hello updated',
+        group: { text: 'in group updated' },
+        tab: { text: 'in tab updated' },
+      },
       collection: 'posts',
     })
+
     expect(res.title).toBe('hello updated')
+    expect(res.text).toBe('other text (should not be nuked)')
+    expect(res.group.text).toBe('in group updated')
+    expect(res.tab.text).toBe('in tab updated')
   })
 
   it('should support x3 nesting blocks', async () => {

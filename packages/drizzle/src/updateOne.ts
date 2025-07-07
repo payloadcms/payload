@@ -14,6 +14,10 @@ import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
+/**
+ * Checks whether we should use the upsertRow function for the passed data and otherwise use a simple SQL SET call.
+ * We need to use upsertRow only when the data has arrays, blocks, hasMany select/text/number, localized fields, complex relationships.
+ */
 const shouldUseUpsertRow = ({
   data,
   fields,
@@ -155,6 +159,7 @@ export const updateOne: UpdateOne = async function updateOne(
   await drizzle
     .update(this.tables[tableName])
     .set(row)
+    // TODO: we can skip fetching idToUpdate here with using the incoming where
     .where(eq(this.tables[tableName].id, idToUpdate))
 
   if (returning === false) {
