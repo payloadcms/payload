@@ -1,0 +1,224 @@
+---
+title: Performance
+label: Performance
+order: 70
+desc: Ensure your Payload app runs as quickly and efficiently as possible.
+keywords: performance, optimization, indexes, depth, select, block references, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload is designed with performance in mind, but its customizability means that there are many ways to configure your app that can impact performance.
+
+With this in mind, Payload provides several options and best practices to help you optimize your app's specific performance needs.
+
+Here are some tips to ensure your Payload app runs as quickly and efficiently as possible.
+
+- [Indexes](#indexes)
+- [Depth](#depth)
+- [Select](#select)
+- [Returning](#returning)
+- [Hooks](#hooks)
+- [Validations](#validations)
+- [Block References](#block-references)
+- [Turbopack](#turbopack)
+- [devBundleServerPackages](#devbundleserverpackages)
+
+## Indexes
+
+If a field's data is queried often, build an index for that field to produce faster queries.
+
+When your query runs, the database will not search the entire document for that one field, but will instead use the index to quickly locate the data.
+
+This is done on the field level by setting the `index` option to `true` in your field's config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      index: true,
+      // highlight-end
+    },
+  ]
+}
+```
+
+## Depth
+
+Use [Depth](../queries/depth) to only populate the necessary levels of relationships. This can significantly reduce the database overhead and response size by skipping unnecessary population of related documents.
+
+For example, if you have a relationship field with `hasMany: true` and 10 documents are selected, all 10 of those additional documents will be queried and returned.
+
+A depth of `0` means no relationships are populated. Only the IDs of related documents are returned.
+
+```ts
+await payload.find({
+  collection: 'posts',
+  // highlight-start
+  depth: 0,
+  // highlight-end
+})
+```
+
+This will return:
+
+```json
+{
+  "docs": [
+    {
+      "id": "123",
+      "title": "My Post",
+      "author": "456" // only the ID of the related document is returned
+    }
+  ]
+}
+```
+
+Similarly, you can set `defaultDepth` in your root config to set the default depth for all queries.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  defaultDepth: 0,
+  // highlight-end
+})
+```
+
+## Select
+
+Use the [Select API](../queries/select) to limit the fields returned in your queries. This can significantly reduce the computational overhead by not processing unneeded fields, as well as reduce the size of the response by not returning unneeded data.
+
+When selecting fields, only the specified fields are returned.
+
+```ts
+await payload.find({
+  collection: 'posts',
+  // highlight-start
+  select: {
+    title: true,
+  },
+  // highlight-end
+})
+```
+
+This will return:
+
+```json
+{
+  "docs": [
+    {
+      "id": "123", // The ID is always returned
+      "title": "My Post" // only the title field is returned
+    }
+  ]
+}
+```
+
+## Returning
+
+To prevent unnecessary database computation and reduce the size of the response, you can set `returning: false` in your API requests if you don't need the updated document returned.
+
+```ts
+await payload.update({
+  collection: 'posts',
+  id: post.id,
+  data: { title: 'New Title' },
+  // highlight-start
+  returning: false,
+  // highlight-end
+})
+```
+
+## Hooks
+
+Ensure that your [Hooks](../hooks/overview) are optimized and efficient. Avoid long-running operations in hooks, as they can slow down the request-response cycle.
+
+For example, the `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
+
+```ts
+{
+  hooks: {
+    beforeRead: [
+      async () => {
+        // avoid expensive logic here
+      },
+    ],
+  },
+}
+```
+
+Instead, you could defer some expensive operations to a `beforeChange` or `afterChange` hook, which only run on write operations.
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async () => {
+        // expensive logic is okay here
+      },
+    ],
+  },
+}
+```
+
+## Validations
+
+If your validation functions are asynchronous or computationally expensive, ensure they only run when necessary.
+
+For example, if your validation needs to query the database or some external API, ensure it only runs when the document is saved, not on every change in the Admin.
+
+To do this, use the `event` arg in your validation function:
+
+```ts
+{
+  name: 'title',
+  type: 'text',
+  validate: async (value, { event }) => {
+    if (event === 'submit') {
+      // perform expensive validation
+    }
+    return true;
+  },
+}
+```
+
+Full details [here](../field/overview#async-field-validations).
+
+## Block References
+
+Use [block references]() to share the same block across multiple fields without bloating the config.
+
+## Turbopack
+
+<Banner type="warning">**Note:**</Banner>
+
+## devBundleServerPackages
+
+<Banner type="warning">
+  **Note:** This is enabled by default in `create-payload-app` since v3.28.0. If
+  you created your app after this version, you don't need to do anything.
+</Banner>
+
+By default, Next.js bundles both server and client code. However, during development, bundling certain server packages isn't necessary.
+
+Payload has thousands of modules, slowing down compilation.
+
+Setting this option skips bundling Payload server modules during development. Fewer files to compile means faster compilation speeds.
+
+To do this, add the `devBundleServerPackages` option to `withPayload` in your `next.config.js` file:
+
+```ts
+const nextConfig = {
+  // your existing next config
+}
+
+export default withPayload(nextConfig, { devBundleServerPackages: false })
+```

@@ -369,7 +369,9 @@ import {
 
 Custom validation functions can also be asynchronous depending on your needs. This makes it possible to make requests to external services or perform other miscellaneous asynchronous logic.
 
-When writing async validation functions, it is important to consider the performance implications. Validations are executed on every change to the field, so they should be as lightweight as possible. If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run the validation on form submission.
+When writing async or computationally heavy validation functions, it is important to consider the performance implications. Within the Admin Panel, validations are executed on every change to the field, so they should be as lightweight as possible.
+
+If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run the validation on form submission.
 
 To write asynchronous validation functions, use the `async` keyword to define your function:
 
