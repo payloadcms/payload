@@ -155,7 +155,7 @@ function require(m) {
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: `${directoryArg}/exports/shared`,
+    outdir: `${directoryArg}/exports/shared_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: false,
