@@ -55,6 +55,7 @@ export const updateOne: UpdateOne = async function updateOne(
   try {
     if (returning === false) {
       await Model.updateOne(query, data, options)
+      transform({ adapter: this, data, fields, operation: 'read' })
       return null
     } else {
       result = await Model.findOneAndUpdate(query, data, options)
