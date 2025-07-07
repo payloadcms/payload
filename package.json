@@ -14,6 +14,7 @@
     "build:all": "turbo build --filter \"!blank\" --filter \"!website\"",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
+    "build:bundle-for-analysis": "turbo run build:bundle-for-analysis",
     "build:clean": "pnpm clean:build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\" --filter \"!@payloadcms/storage-*\" --filter \"!blank\" --filter \"!website\"",
     "build:core:force": "pnpm clean:build && pnpm build:core --no-cache --force",
