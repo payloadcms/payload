@@ -17,6 +17,7 @@ import React from 'react'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
 export type GenerateViewMetadata = (args: {
@@ -64,7 +65,15 @@ export const RootPage = async ({
 
   // Redirect `${adminRoute}/collections` to `${adminRoute}`
   if (segments.length === 1 && segments[0] === 'collections') {
-    redirect(adminRoute)
+    const { viewKey } = getCustomViewByRoute({
+      config,
+      currentRoute: '/collections',
+    })
+
+    // Only redirect if there's NO custom view configured for /collections
+    if (!viewKey) {
+      redirect(adminRoute)
+    }
   }
 
   const {

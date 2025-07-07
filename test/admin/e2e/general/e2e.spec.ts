@@ -362,10 +362,7 @@ describe('General', () => {
     test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
       const collectionsURL = `${serverURL}/admin/collections`
       await page.goto(collectionsURL)
-      // Should redirect to dashboard
-      await expect
-        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-        .toMatch(`${serverURL}/admin`)
+      await expect(page.getByText('Custom View').first()).toBeVisible()
     })
   })
 
