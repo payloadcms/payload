@@ -196,9 +196,6 @@ export const reduceFields = ({
 
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
-      // Deduplication: preserve the first field seen for this path to ensure custom-defined fields override system-injected ones
-      const existingIndex = reduced.findIndex((f) => f.value === fieldPath)
-
       const formattedField: ReducedField = {
         label: formattedLabel,
         plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
@@ -208,10 +205,7 @@ export const reduceFields = ({
         operators,
       }
 
-      if (existingIndex === -1) {
-        reduced.push(formattedField)
-      }
-
+      reduced.push(formattedField)
       return reduced
     }
     return reduced
