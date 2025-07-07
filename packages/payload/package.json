@@ -17,7 +17,8 @@
     "payload",
     "react",
     "self hosted",
-    "typescript"
+    "typescript",
+    "force ci"
   ],
   "homepage": "https://payloadcms.com",
   "bugs": {
