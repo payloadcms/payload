@@ -144,8 +144,6 @@ export const updateOne: UpdateOne = async function updateOne(
     return result
   }
 
-  this.payload.logger.info('HERE')
-
   const { row } = transformForWrite({
     adapter: this,
     data,
