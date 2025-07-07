@@ -220,8 +220,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const copyRow = useCallback(
-    async (rowIndex: number) => {
-      const clipboardResult = await clipboardCopy({
+    (rowIndex: number) => {
+      const clipboardResult = clipboardCopy({
         type,
         blocks: clientBlocks,
         getDataToCopy: () =>
@@ -245,7 +245,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const pasteRow = useCallback(
-    async (rowIndex: number) => {
+    (rowIndex: number) => {
       const pasteArgs = {
         onPaste: (dataFromClipboard: ClipboardPasteData) => {
           const formState = { ...getFields() }
@@ -263,7 +263,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         t,
       }
 
-      const clipboardResult = await clipboardPaste(pasteArgs)
+      const clipboardResult = clipboardPaste(pasteArgs)
 
       if (typeof clipboardResult === 'string') {
         toast.error(clipboardResult)

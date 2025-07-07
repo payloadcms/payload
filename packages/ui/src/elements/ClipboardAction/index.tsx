@@ -41,8 +41,8 @@ export const ClipboardAction: FC<Props> = ({
 
   const classes = [`${baseClass}__popup`, className].filter(Boolean).join(' ')
 
-  const handleCopy = useCallback(async () => {
-    const clipboardResult = await clipboardCopy({
+  const handleCopy = useCallback(() => {
+    const clipboardResult = clipboardCopy({
       path,
       t,
       ...rest,
@@ -55,8 +55,8 @@ export const ClipboardAction: FC<Props> = ({
     }
   }, [t, rest, path])
 
-  const handlePaste = useCallback(async () => {
-    const clipboardResult = await clipboardPaste(
+  const handlePaste = useCallback(() => {
+    const clipboardResult = clipboardPaste(
       rest.type === 'array'
         ? {
             onPaste,

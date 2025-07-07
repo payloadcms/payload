@@ -7,7 +7,9 @@ import type {
 
 import { isClipboardDataValid } from './isClipboardDataValid.js'
 
-export async function clipboardCopy(args: ClipboardCopyActionArgs): Promise<string | true> {
+const localStorageClipboardKey = '_payloadClipboard'
+
+export function clipboardCopy(args: ClipboardCopyActionArgs): string | true {
   const { getDataToCopy, t, ...rest } = args
 
   const dataToWrite = {
@@ -16,28 +18,30 @@ export async function clipboardCopy(args: ClipboardCopyActionArgs): Promise<stri
   }
 
   try {
-    await navigator.clipboard.writeText(JSON.stringify(dataToWrite))
+    localStorage.setItem(localStorageClipboardKey, JSON.stringify(dataToWrite))
     return true
   } catch (_err) {
     return t('error:unableToCopy')
   }
 }
 
-export async function clipboardPaste({
+export function clipboardPaste({
   onPaste,
   path: fieldPath,
   t,
   ...args
-}: ClipboardPasteActionArgs): Promise<string | true> {
+}: ClipboardPasteActionArgs): string | true {
   let dataToPaste: ClipboardPasteData
 
   try {
-    const jsonFromClipboard = await navigator.clipboard.readText()
+    const jsonFromClipboard = localStorage.getItem(localStorageClipboardKey)
+
+    if (!jsonFromClipboard) {
+      return t('error:invalidClipboardData')
+    }
+
     dataToPaste = JSON.parse(jsonFromClipboard)
   } catch (_err) {
-    if (_err instanceof DOMException && _err.name === 'NotAllowedError') {
-      return t('error:insufficientClipboardPermissions')
-    }
     return t('error:invalidClipboardData')
   }
 
