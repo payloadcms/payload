@@ -9,34 +9,35 @@ export function reduceFormStateByPath({
   path: string
   rowIndex?: number
 }) {
-  const result: Record<string, FieldState> = {}
+  const filteredState: Record<string, FieldState> = {}
+  const prefix = typeof rowIndex !== 'number' ? path : `${path}.${rowIndex}`
 
   for (const key in formState) {
-    if (
-      Object.hasOwn(formState, key) &&
-      key.startsWith(typeof rowIndex !== 'number' ? path : `${path}.${rowIndex}`)
-    ) {
-      result[key] = { ...formState[key] }
-      if (result[key] && 'customComponents' in result[key]) {
-        delete result[key].customComponents
-      }
-
-      if (Array.isArray(result[key].rows)) {
-        for (const row of result[key].rows) {
-          if (row && typeof row === 'object' && 'customComponents' in row) {
-            delete row.customComponents
-          }
-        }
-      }
+    if (!key.startsWith(prefix)) {
+      continue
     }
+
+    const { customComponents: _, validate: __, ...field } = formState[key]
+
+    if (Array.isArray(field.rows)) {
+      field.rows = field.rows.map((row) => {
+        if (!row || typeof row !== 'object') {
+          return row
+        }
+        const { customComponents: _, ...serializableRow } = row
+        return serializableRow
+      })
+    }
+
+    filteredState[key] = field
   }
 
-  return result
+  return filteredState
 }
 
 export function getFormStateFromClipboard({
   dataFromClipboard: clipboardData,
-  formState,
+  formState: formStateFromArgs,
   path,
   rowIndex,
 }: {
@@ -55,6 +56,7 @@ export function getFormStateFromClipboard({
     rowIndex: rowIndexFromClipboard,
   } = clipboardData
 
+  const formState = { ...formStateFromArgs }
   const copyFromField = typeof rowIndexFromClipboard !== 'number'
   const pasteIntoField = typeof rowIndex !== 'number'
   const fromRowToField = !copyFromField && pasteIntoField
@@ -80,12 +82,14 @@ export function getFormStateFromClipboard({
   if (fromRowToField) {
     const lastRenderedPath = `${path}.0`
     const rowIDFromClipboard = dataFromClipboard[`${pathToReplace}.id`].value as string
-    const rowID = formState[path].rows?.length
+    const hasRows = formState[path].rows?.length
+    const rowID = hasRows
       ? (formState[`${lastRenderedPath}.id`].value as string)
       : rowIDFromClipboard
 
     formState[path].rows = [
       {
+        ...(hasRows ? formState[path].rows[0] : {}),
         id: rowID,
         isLoading: false,
         lastRenderedPath,
@@ -95,11 +99,10 @@ export function getFormStateFromClipboard({
     formState[path].initialValue = 1
     formState[path].disableFormData = true
 
-    const firstElementPathPrefix = `${path}.0`
     for (const fieldPath in formState) {
       if (
         fieldPath !== path &&
-        !fieldPath.startsWith(firstElementPathPrefix) &&
+        !fieldPath.startsWith(lastRenderedPath) &&
         fieldPath.startsWith(path)
       ) {
         delete formState[fieldPath]
@@ -107,16 +110,24 @@ export function getFormStateFromClipboard({
     }
   }
 
-  for (const fieldPath in dataFromClipboard) {
+  for (const clipboardPath in dataFromClipboard) {
     // Pasting a row id, skip overwriting
-    if ((!pasteIntoField && fieldPath.endsWith('.id')) || !fieldPath.startsWith(pathToReplace)) {
+    if (
+      (!pasteIntoField && clipboardPath.endsWith('.id')) ||
+      !clipboardPath.startsWith(pathToReplace)
+    ) {
       continue
     }
 
-    const newPath = fieldPath.replace(pathToReplace, targetSegment)
+    const newPath = clipboardPath.replace(pathToReplace, targetSegment)
+
+    const customComponents = formState[newPath]?.customComponents
+    const validate = formState[newPath]?.validate
 
     formState[newPath] = {
-      ...dataFromClipboard[fieldPath],
+      customComponents,
+      validate,
+      ...dataFromClipboard[clipboardPath],
     }
   }
 
