@@ -7,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { randomUUID } from 'crypto'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
