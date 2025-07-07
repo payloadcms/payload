@@ -7,6 +7,8 @@ const dirname = path.dirname(filename)
 import { sassPlugin } from 'esbuild-sass-plugin'
 import { commonjs } from '@hyrious/esbuild-plugin-commonjs'
 
+const directoryArg = process.argv[2] || 'dist'
+
 const removeCSSImports = {
   name: 'remove-css-imports',
   setup(build) {
@@ -73,7 +75,7 @@ async function build() {
   })
 
   try {
-    fs.renameSync('dist-styles/index.css', 'dist/styles.css')
+    fs.renameSync('dist-styles/index.css', `${directoryArg}/styles.css`)
     fs.rmdirSync('dist-styles', { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css and dist-styles: ${err}`)
@@ -87,7 +89,7 @@ async function build() {
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports/client_optimized',
+    outdir: `${directoryArg}/exports/client_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: true,
@@ -146,7 +148,7 @@ function require(m) {
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outdir: 'dist/exports/shared',
+    outdir: `${directoryArg}/exports/shared`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
     splitting: false,

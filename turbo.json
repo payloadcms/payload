@@ -10,6 +10,11 @@
       "dependsOn": ["^build"],
       "outputs": ["./dist/**"]
     },
+    "build:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build:esbuild"],
+      "outputs": ["./esbuild/**"]
+    },
     "dev": {
       "cache": false
     },

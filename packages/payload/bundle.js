@@ -5,13 +5,16 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const directoryArg = process.argv[2] || 'dist'
+
+
 async function build() {
   const resultIndex = await esbuild.build({
     entryPoints: ['src/index.ts'],
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outfile: 'dist/index.js',
+    outfile: `${directoryArg}/index.js`,
     splitting: false,
     external: [
       'lodash',
@@ -37,7 +40,7 @@ async function build() {
     bundle: true,
     platform: 'node',
     format: 'esm',
-    outfile: 'dist/exports/shared.js',
+    outfile: `${directoryArg}/exports/shared.js`,
     splitting: false,
     external: [
       'lodash',
