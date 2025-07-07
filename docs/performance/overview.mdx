@@ -137,7 +137,7 @@ This will return:
 
 For queries that do not require pagination, you can [disable it to improve performance](../queries/pagination##disabling-pagination-within-local-api). This will reduce the overhead of pagination calculations.
 
-For example, if you are querying for a specific document by an exact slug, you might want to disable pagination.
+For example, if you are querying for a specific document by an exact slug, you might want to disable pagination as you can reliably expect only one document to match.
 
 To do this, set `pagination: false` in your query:
 
@@ -169,7 +169,7 @@ const getPost = async (payload: Payload) => {
 
 Use the `limit` option in your queries to restrict the number of documents returned. This will reduce the number database lookups.
 
-For example, if you are querying for a specific document and can rely on the first match, set `limit: 1`.
+Similar to disabling pagination, if you are querying for a specific document and can reliably expect only one document to match, you can set a limit of `1`.
 
 To do this, set the `limit` option in your query:
 
@@ -200,9 +200,9 @@ await payload.find({
   require any of these features.
 </Banner>
 
-Making direct database calls can significantly improve performance for certain operations by completely skipping hooks, validations, and other overhead associated with Payload APIs.
+Making direct database calls can significantly improve performance by bypassing much of the request lifecycle such as hooks, validations, and other overhead associated with Payload APIs.
 
-For example, this can be especially useful for the `update` operation, where you might otherwise need to make multiple API calls to fetch, update, and fetch again. Making a direct database call can reduce this to a single operation.
+For example, this can be especially useful for the `update` operation, where Payload would otherwise need to make multiple API calls to fetch, update, and fetch again. Making a direct database call can reduce this to a single operation.
 
 To do this, use the `payload.db` methods:
 
@@ -245,9 +245,9 @@ await payload.db.updateOne({
 
 When querying data through Payload APIs, the request lifecycle includes running hooks, access control, validations, and other operations that can add significant overhead to the request.
 
-To optimize your APIs, any custom logic should be as efficient as possible. This includes writing efficient hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
+To optimize your APIs, any custom logic should be as efficient as possible. This includes writing lightweight hooks, preventing memory leaks, offloading long-running tasks, and optimizing custom validations.
 
-### Write efficient hooks
+### Write lightweight hooks
 
 [Hooks](../hooks/overview) are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
 
@@ -279,7 +279,7 @@ Instead, you could defer some expensive operations to a `beforeChange` or `after
 }
 ```
 
-If your hook executes a long-running task that doesn't affect the response in any way, consider [offloading it to the job queue](#offloading-long-running-tasks).
+To take this one step further, if your hook executes a long-running task that doesn't affect the response in any way, consider [offloading it to the job queue](#offloading-long-running-tasks). That will free up the request to continue processing without waiting for the task to complete.
 
 ### Prevent memory leaks
 
@@ -309,9 +309,16 @@ To prevent this, use the `context` object to track the state of your hooks:
 
 ### Offload long-running tasks
 
-For long running tasks that don't directly affect the API responses, you can offload to the job queue.
+For long running tasks that don't directly affect the API responses, you can offload them to the [Job Queue](../jobs-queue/overview).
 
-To go even further, run your jobs on another server!
+For example, if you need to send an email or process a large file, you can queue a job to handle that task instead of doing it in the hook.
+
+This will allow the request to continue processing without waiting for the task to complete.
+
+<Banner type="success">
+  **Tip:** To go even further, run your jobs on another server. This will free
+  up your main server to handle requests without being bogged down by jobs.
+</Banner>
 
 ### Optimize custom validations
 
@@ -448,7 +455,20 @@ To do this, prefer server components and only send the necessary props to the cl
 
 ### Prevent unnecessary re-renders
 
-useFormFields instead of useFields
+Subscribing your component to form state can cause unnecessary re-renders if the entire form state is subscribed to.
+
+To do this, use the [`useFormFields`](../admin/react-hooks) hook instead of `useFields` when you only need to access specific fields.
+
+```ts
+'use client'
+import { useFormFields } from '@payloadcms/ui'
+
+const MyComponent: TextFieldClientComponent = ({ path }) => {
+  const value = useFormFields(([fields, dispatch]) => fields[path])
+
+  // ...
+}
+```
 
 ## Optimizing local development
 
