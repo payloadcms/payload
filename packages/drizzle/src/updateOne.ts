@@ -122,7 +122,7 @@ export const updateOne: UpdateOne = async function updateOne(
     return null
   }
 
-  if (shouldUseUpsertRow({ data, fields: collection.flattenedFields })) {
+  if (!idToUpdate || shouldUseUpsertRow({ data, fields: collection.flattenedFields })) {
     const result = await upsertRow({
       id: idToUpdate,
       adapter: this,
