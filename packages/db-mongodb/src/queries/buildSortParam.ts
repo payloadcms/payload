@@ -77,6 +77,9 @@ const relationshipSort = ({
     ) {
       const relationshipPath = segments.slice(0, i + 1).join('.')
       let sortFieldPath = segments.slice(i + 1, segments.length).join('.')
+      if (sortFieldPath.endsWith('.id')) {
+        sortFieldPath = sortFieldPath.split('.').slice(0, -1).join('.')
+      }
       if (Array.isArray(field.relationTo)) {
         throw new APIError('Not supported')
       }

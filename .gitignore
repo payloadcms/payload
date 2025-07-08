@@ -22,6 +22,11 @@ meta_server.json
 meta_index.json
 meta_shared.json
 
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
 .turbo
 
 # Ignore test directory media folder/files

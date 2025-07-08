@@ -2315,6 +2315,52 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
+    it('should allow to sort by a virtual field with a reference to an ID', async () => {
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const category_1 = await payload.create({
+        collection: 'categories-custom-id',
+        data: { id: 1 },
+      })
+      const category_2 = await payload.create({
+        collection: 'categories-custom-id',
+        data: { id: 2 },
+      })
+      const post_1 = await payload.create({
+        collection: 'posts',
+        data: { categoryCustomID: category_1.id, title: 'p-1' },
+      })
+      const post_2 = await payload.create({
+        collection: 'posts',
+        data: { categoryCustomID: category_2.id, title: 'p-2' },
+      })
+      const virtual_1 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_1.id },
+      })
+      const virtual_2 = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post_2.id },
+      })
+
+      const res = (
+        await payload.find({
+          collection: 'virtual-relations',
+          sort: 'postCategoryCustomID',
+        })
+      ).docs
+      expect(res[0].id).toBe(virtual_1.id)
+      expect(res[1].id).toBe(virtual_2.id)
+
+      const res2 = (
+        await payload.find({
+          collection: 'virtual-relations',
+          sort: '-postCategoryCustomID',
+        })
+      ).docs
+      expect(res2[1].id).toBe(virtual_1.id)
+      expect(res2[0].id).toBe(virtual_2.id)
+    })
+
     it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
