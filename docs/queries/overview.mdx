@@ -60,7 +60,7 @@ The following operators are available for use in queries:
 <Banner type="success">
   **Tip:** If you know your users will be querying on certain fields a lot, add
   `index: true` to the Field Config. This will speed up searches using that
-  field immensely.
+  field immensely. [More details](../database/indexes).
 </Banner>
 
 ### And / Or Logic
@@ -201,4 +201,4 @@ When querying data through Payload APIs, there are a few strategies you can use 
 - **Limit**: Set the [Limit](./pagination#limit) when you can reliably predict the number of matched documents
 - **Select**: Use the [Select API](./select) to skip unnecessary fields
 - **Pagination**: [Disable Pagination](./pagination#disabling-pagination) for queries that do not require it
-- **Indexes**: Use [Indexes](../configuration/fields#index) on fields that are queried often
+- **Indexes**: Use [Indexes](../database/indexes) on fields that are queried often
