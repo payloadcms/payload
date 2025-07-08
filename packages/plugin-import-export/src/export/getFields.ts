@@ -132,30 +132,14 @@ export const getFields = (config: Config): Field[] => {
           ],
         },
         {
-          // virtual field for the UI component to modify the hidden `where` field
           name: 'selectionToUse',
           type: 'radio',
-          defaultValue: 'all',
-          // @ts-expect-error - this is not correctly typed in plugins right now
-          label: ({ t }) => t('plugin-import-export:field-selectionToUse-label'),
-          options: [
-            {
-              // @ts-expect-error - this is not correctly typed in plugins right now
-              label: ({ t }) => t('plugin-import-export:selectionToUse-currentSelection'),
-              value: 'currentSelection',
+          admin: {
+            components: {
+              Field: '@payloadcms/plugin-import-export/rsc#SelectionToUseField',
             },
-            {
-              // @ts-expect-error - this is not correctly typed in plugins right now
-              label: ({ t }) => t('plugin-import-export:selectionToUse-currentFilters'),
-              value: 'currentFilters',
-            },
-            {
-              // @ts-expect-error - this is not correctly typed in plugins right now
-              label: ({ t }) => t('plugin-import-export:selectionToUse-allDocuments'),
-              value: 'all',
-            },
-          ],
-          virtual: true,
+          },
+          options: [],
         },
         {
           name: 'fields',
@@ -183,12 +167,8 @@ export const getFields = (config: Config): Field[] => {
         {
           name: 'where',
           type: 'json',
-          admin: {
-            components: {
-              Field: '@payloadcms/plugin-import-export/rsc#WhereField',
-            },
-          },
           defaultValue: {},
+          hidden: true,
         },
       ],
       // @ts-expect-error - this is not correctly typed in plugins right now
