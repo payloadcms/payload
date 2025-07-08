@@ -69,8 +69,6 @@ jobs:
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Lint
         run: pnpm lint -- --quiet
@@ -85,8 +83,6 @@ jobs:
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm run build:all
         env:
@@ -110,7 +106,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -135,7 +130,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -197,7 +191,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -320,7 +313,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -455,7 +447,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -559,7 +550,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -657,7 +647,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -717,7 +706,6 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
