@@ -121,6 +121,7 @@
       "prettier --write",
       "eslint --cache --fix"
     ],
+    "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
     "tsconfig.base.json": "node scripts/reset-tsconfig.js"
   },
@@ -173,7 +174,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "rimraf": "6.0.1",
-    "sharp": "0.34.2",
+    "sharp": "0.32.6",
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
