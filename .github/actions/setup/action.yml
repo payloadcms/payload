@@ -77,12 +77,23 @@ runs:
         echo "STORE_PATH=$STORE_PATH" >> $GITHUB_ENV
         echo "Pnpm store path resolved to: $STORE_PATH"
 
+    - name: Compute Cache Key
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.pnpm-install-cache-key }}" ]; then
+          PNPM_INSTALL_CACHE_KEY="${{ inputs.pnpm-install-cache-key }}"
+        else
+          PNPM_INSTALL_CACHE_KEY="pnpm-store-$(hashFiles '**/pnpm-lock.yaml')"
+        fi
+        echo "Computed PNPM_INSTALL_CACHE_KEY: $PNPM_INSTALL_CACHE_KEY"
+        echo "PNPM_INSTALL_CACHE_KEY=$PNPM_INSTALL_CACHE_KEY" >> $GITHUB_ENV
+
     - name: Restore pnpm install cache
       if: ${{ inputs.pnpm-restore-cache == 'true' }}
       uses: actions/cache@v4
       with:
         path: ${{ env.STORE_PATH }}
-        key: ${{ inputs.pnpm-install-cache-key || 'pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}' }}
+        key: ${{ env.PNPM_INSTALL_CACHE_KEY }}
         restore-keys: |
           pnpm-store-${{ env.PNPM_VERSION }}-
           pnpm-store-
@@ -94,5 +105,5 @@ runs:
 
       # Set the cache key output
     - run: |
-        echo "pnpm-install-cache-key=${{ inputs.pnpm-install-cache-key || 'pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}' }}" >> $GITHUB_ENV
+        echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
       shell: bash
