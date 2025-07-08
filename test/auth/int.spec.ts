@@ -1023,6 +1023,136 @@ describe('Auth', () => {
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
     })
+
+    describe('Login Attempts', () => {
+      async function attemptLogin(email: string, password: string) {
+        return payload.login({
+          collection: slug,
+          data: {
+            email,
+            password,
+          },
+          overrideAccess: false,
+        })
+      }
+
+      it('should reset the login attempts after a successful login', async () => {
+        // fail 1
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // successful login 1
+        const successfulLogin = await attemptLogin(devUser.email, devUser.password)
+        expect(successfulLogin).toBeDefined()
+
+        // fail 2
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // successful login 2 without exceeding attempts
+        const successfulLogin2 = await attemptLogin(devUser.email, devUser.password)
+        expect(successfulLogin2).toBeDefined()
+
+        const user = await payload.findByID({
+          collection: slug,
+          id: successfulLogin2.user.id,
+          overrideAccess: true,
+          showHiddenFields: true,
+        })
+
+        expect(user.loginAttempts).toBe(0)
+        expect(user.lockUntil).toBeNull()
+      })
+
+      it('should lock the user after too many failed login attempts', async () => {
+        const now = new Date()
+        // fail 1
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // fail 2
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // fail 3
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          expect((error as Error).message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        }
+
+        const userQuery = await payload.find({
+          collection: slug,
+          overrideAccess: true,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        expect(userQuery.docs[0]).toBeDefined()
+
+        if (userQuery.docs[0]) {
+          const user = userQuery.docs[0]
+          expect(user.loginAttempts).toBe(2)
+          expect(user.lockUntil).toBeDefined()
+          expect(typeof user.lockUntil).toBe('string')
+          if (typeof user.lockUntil === 'string') {
+            expect(new Date(user.lockUntil).getTime()).toBeGreaterThan(now.getTime())
+          }
+        }
+      })
+
+      it('should allow force unlocking of a user', async () => {
+        await payload.unlock({
+          collection: slug,
+          data: {
+            email: devUser.email,
+          } as any,
+          overrideAccess: true,
+        })
+
+        const userQuery = await payload.find({
+          collection: slug,
+          overrideAccess: true,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        expect(userQuery.docs[0]).toBeDefined()
+
+        if (userQuery.docs[0]) {
+          const user = userQuery.docs[0]
+          expect(user.loginAttempts).toBe(0)
+          expect(user.lockUntil).toBeNull()
+        }
+      })
+    })
   })
 
   describe('Email - format validation', () => {
