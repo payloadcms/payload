@@ -17,8 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -72,8 +70,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Lint
@@ -90,8 +86,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm run build:all
@@ -114,8 +108,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -141,8 +133,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -205,8 +195,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -330,8 +318,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -467,8 +453,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -573,8 +557,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -673,8 +655,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -735,8 +715,6 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
           pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
