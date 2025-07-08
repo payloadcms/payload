@@ -578,30 +578,36 @@ export function FolderProvider({
   )
 
   const onItemClick: FolderContextValue['onItemClick'] = React.useCallback(
-    ({ event, item: currentItem }) => {
+    ({ event, item: clickedItem }) => {
       let doubleClicked: boolean = false
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
-      const isCurrentlySelected = selectedItemKeys.has(currentItem.itemKey)
+      const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
       const allItems = [...subfolders, ...documents]
-      const currentItemIndex = allItems.findIndex((item) => item.itemKey === currentItem.itemKey)
+      const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
       if (allowMultiSelection && isCtrlPressed) {
         event.preventDefault()
-        updateSelections({
-          indexes: allItems.reduce((acc, item, idx) => {
-            if (item.itemKey === currentItem.itemKey) {
-              if (isCurrentlySelected) {
-                return acc
-              } else {
-                acc.push(idx)
-              }
-            } else if (selectedItemKeys.has(item.itemKey)) {
+        let overlayItemKey: FolderDocumentItemKey | undefined
+        const indexes = allItems.reduce((acc, item, idx) => {
+          if (item.itemKey === clickedItem.itemKey) {
+            if (isCurrentlySelected && event.type !== 'pointermove') {
+              return acc
+            } else {
               acc.push(idx)
+              overlayItemKey = item.itemKey
             }
-            return acc
-          }, []),
-        })
+          } else if (selectedItemKeys.has(item.itemKey)) {
+            acc.push(idx)
+          }
+          return acc
+        }, [])
+
+        updateSelections({ indexes })
+
+        if (overlayItemKey) {
+          setDragOverlayItem(getItem(overlayItemKey))
+        }
       } else if (allowMultiSelection && isShiftPressed) {
         if (currentItemIndex !== -1) {
           const selectedIndexes = handleShiftSelection(currentItemIndex)
@@ -612,34 +618,32 @@ export function FolderProvider({
         if (!isCurrentlySelected) {
           updateSelections({
             indexes: allItems.reduce((acc, item, idx) => {
-              if (item.itemKey === currentItem.itemKey) {
-                acc.push(idx)
-              } else if (selectedItemKeys.has(item.itemKey)) {
+              if (item.itemKey === clickedItem.itemKey) {
                 acc.push(idx)
               }
               return acc
             }, []),
           })
         }
-        setDragOverlayItem(getItem(currentItem.itemKey))
+        setDragOverlayItem(getItem(clickedItem.itemKey))
       } else {
         // Normal click - select single item
         const now = Date.now()
         doubleClicked =
-          now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === currentItem.itemKey
+          now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
         lastClickTime.current = now
         if (!doubleClicked) {
           updateSelections({
             indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
           })
         }
-        setDragOverlayItem(getItem(currentItem.itemKey))
+        setDragOverlayItem(getItem(clickedItem.itemKey))
       }
 
       if (doubleClicked) {
         navigateAfterSelection({
-          collectionSlug: currentItem.relationTo,
-          docID: extractID(currentItem.value),
+          collectionSlug: clickedItem.relationTo,
+          docID: extractID(clickedItem.value),
         })
       }
     },
