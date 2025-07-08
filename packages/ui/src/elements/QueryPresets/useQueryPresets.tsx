@@ -12,6 +12,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { useListDrawer } from '../ListDrawer/index.js'
+import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
@@ -198,7 +199,7 @@ export const useQueryPresets = ({
 
     if (hasModifiedPreset) {
       items.push(
-        <button
+        <ListSelectionButton
           id="reset-preset"
           key="reset"
           onClick={async () => {
@@ -213,13 +214,13 @@ export const useQueryPresets = ({
           type="button"
         >
           {t('general:reset')}
-        </button>,
+        </ListSelectionButton>,
       )
     }
 
     if (hasModifiedPreset && queryPresetPermissions.update) {
       items.push(
-        <button
+        <ListSelectionButton
           id="save-preset"
           key="save"
           onClick={async () => {
@@ -228,12 +229,12 @@ export const useQueryPresets = ({
           type="button"
         >
           {activePreset?.isShared ? t('general:updateForEveryone') : t('general:save')}
-        </button>,
+        </ListSelectionButton>,
       )
     }
 
     items.push(
-      <button
+      <ListSelectionButton
         id="create-new-preset"
         onClick={() => {
           openCreateNewDrawer()
@@ -241,22 +242,22 @@ export const useQueryPresets = ({
         type="button"
       >
         {t('general:newLabel', { label: presetConfig?.labels?.singular })}
-      </button>,
+      </ListSelectionButton>,
     )
 
     if (activePreset && queryPresetPermissions?.delete) {
       items.push(
-        <button
+        <ListSelectionButton
           id="delete-preset"
           onClick={() => openModal(confirmDeletePresetModalSlug)}
           type="button"
         >
           {t('general:delete')}
-        </button>,
+        </ListSelectionButton>,
       )
 
       items.push(
-        <button
+        <ListSelectionButton
           id="edit-preset"
           onClick={() => {
             openDocumentDrawer()
@@ -264,7 +265,7 @@ export const useQueryPresets = ({
           type="button"
         >
           {t('general:edit')}
-        </button>,
+        </ListSelectionButton>,
       )
     }
 

@@ -7,29 +7,50 @@
       align-items: center;
       justify-content: space-between;
       gap: base(0.5);
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
+      padding: base(0.4) base(0.6) base(0.4) base(0.3);
+    }
+
+    &__outer-wrap--with-presets {
+      background-color: transparent;
+      border-radius: 0;
+      padding: 0;
     }
 
     &__wrap {
-      flex-grow: 1;
       display: flex;
       align-items: center;
-      background-color: var(--theme-elevation-50);
-      border-radius: var(--style-radius-m);
-      padding: base(0.6);
-      gap: base(0.6);
+      gap: base(0.5);
+      flex-grow: 1;
     }
 
     &__wrap--with-presets {
-      max-width: 50%;
+      flex-grow: 0;
+
+      .list-controls__search {
+        max-width: 400px;
+        flex-grow: 1;
+      }
     }
 
-    &__presets {
+    &__search {
       display: flex;
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
+      padding: base(0.3) base(0.4);
       gap: base(0.6);
-      align-items: center;
+      flex-grow: 1;
     }
 
     &__preset-controls {
+      display: flex;
+      gap: base(0.6);
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    &__preset-menu-items {
       display: flex;
       gap: base(0.6);
 
@@ -58,10 +79,6 @@
       border-radius: 0;
     }
 
-    &__modified {
-      color: var(--theme-elevation-500);
-    }
-
     &__buttons-wrap {
       display: flex;
       align-items: center;
@@ -78,6 +95,9 @@
       &__outer-wrap {
         flex-direction: column;
         align-items: stretch;
+        background-color: transparent;
+        border-radius: 0;
+        padding: 0;
       }
 
       &__wrap {
@@ -87,6 +107,16 @@
         background-color: unset;
         padding: 0;
         position: relative;
+      }
+
+      &__wrap--with-presets {
+        .list-controls__search {
+          max-width: unset;
+        }
+      }
+
+      &__preset-menu-items {
+        display: none;
       }
 
       .icon--search {
@@ -99,7 +129,7 @@
       .search-filter {
         width: 100%;
         input {
-          padding: base(0.4) base(2);
+          padding: 0 base(1.5);
         }
       }
 

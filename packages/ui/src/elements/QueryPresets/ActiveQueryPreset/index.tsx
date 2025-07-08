@@ -7,7 +7,7 @@ import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
+import { Pill } from '../../Pill/index.js'
 import './index.scss'
 
 const baseClass = 'active-query-preset'
@@ -29,14 +29,14 @@ export function ActiveQueryPreset({
   })
 
   return (
-    <Button
-      buttonStyle="pill"
+    <Pill
       className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
       id="select-preset"
       onClick={() => {
         openPresetListDrawer()
       }}
-      size="large"
+      pillStyle="light"
+      size="medium"
     >
       <div className={`${baseClass}__label`}>
         {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
@@ -69,6 +69,6 @@ export function ActiveQueryPreset({
           </div>
         ) : null}
       </div>
-    </Button>
+    </Pill>
   )
 }

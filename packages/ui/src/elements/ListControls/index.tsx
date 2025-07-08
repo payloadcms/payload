@@ -17,11 +17,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { Pill } from '../Pill/index.js'
+import { ActiveQueryPreset } from '../QueryPresets/ActiveQueryPreset/index.js'
+import { useQueryPresets } from '../QueryPresets/useQueryPresets.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import { ActiveQueryPreset } from './ActiveQueryPreset/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
-import { useQueryPresets } from './useQueryPresets.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -142,15 +142,22 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   return (
     <Fragment>
       <div className={baseClass}>
-        <div className={`${baseClass}__outer-wrap`}>
+        <div
+          className={[
+            `${baseClass}__outer-wrap`,
+            isQueryPresetsEnabled && `${baseClass}__outer-wrap--with-presets`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {isQueryPresetsEnabled && (
-            <div className={`${baseClass}__presets`}>
+            <div className={`${baseClass}__preset-controls`}>
               <ActiveQueryPreset
                 activePreset={activePreset}
                 openPresetListDrawer={openPresetListDrawer}
                 resetPreset={resetPreset}
               />
-              <div className={`${baseClass}__preset-controls`}>
+              <div className={`${baseClass}__preset-menu-items`}>
                 {queryPresetMenuItems.map((item, i) => (
                   <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
                 ))}
@@ -165,16 +172,15 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               .filter(Boolean)
               .join(' ')}
           >
-            <SearchIcon />
-            <SearchFilter
-              handleChange={handleSearchChange}
-              key={collectionSlug}
-              label={searchLabelTranslated.current}
-              searchQueryParam={query?.search}
-            />
-            {activePreset && hasModifiedPreset ? (
-              <div className={`${baseClass}__modified`}>Modified</div>
-            ) : null}
+            <div className={`${baseClass}__search`}>
+              <SearchIcon />
+              <SearchFilter
+                handleChange={handleSearchChange}
+                key={collectionSlug}
+                label={searchLabelTranslated.current}
+                searchQueryParam={query?.search}
+              />
+            </div>
             <div className={`${baseClass}__buttons`}>
               <div className={`${baseClass}__buttons-wrap`}>
                 {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
@@ -188,7 +194,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                       setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                     }
                     pillStyle="light"
-                    size="small"
+                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
                   >
                     {t('general:columns')}
                   </Pill>
@@ -203,7 +209,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                       setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)
                     }
                     pillStyle="light"
-                    size="small"
+                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
                   >
                     {t('general:filters')}
                   </Pill>
@@ -216,7 +222,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                     icon={<ChevronIcon />}
                     onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                     pillStyle="light"
-                    size="small"
+                    size={isQueryPresetsEnabled ? 'medium' : 'small'}
                   >
                     {t('general:sort')}
                   </Pill>
