@@ -40,7 +40,7 @@ jobs:
           echo "Vulnerabilities found."
           cat audit_output.json
           # echo audit_dependencies.outputs.audit_output
-          echo audit_output: ${{ steps.audit_dependencies.outputs.audit_output }}
+          echo "${{ steps.audit_dependencies.outputs.audit_output }}"
 
       - name: Slack notification on failure
         if: failure()
@@ -49,13 +49,22 @@ jobs:
           webhook: ${{ secrets.SLACK_TEST_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "🚨 *Dependency Vulnerabilities Found"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "Actionable vulnerabilities found: ${{ steps.audit_dependencies.outputs.audit_output }}"
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            {
+              "text": "🚨 *Dependency Vulnerabilities Found*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Actionable vulnerabilities found: ${{ steps.audit_dependencies.outputs.audit_output }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: ${{ job.status }}\n<${{ github.event.pull_request.html_url || github.event.head_commit.url }}|View Details>"
+                  }
+                }
+              ]
+            }
