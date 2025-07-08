@@ -26,7 +26,7 @@
     }
 
     &__wrap--with-presets {
-      flex-grow: 0;
+      justify-content: flex-end;
 
       .list-controls__search {
         max-width: 400px;
