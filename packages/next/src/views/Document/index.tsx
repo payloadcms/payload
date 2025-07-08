@@ -329,8 +329,12 @@ export const renderDocument = async ({
     viewType,
   }
 
+  const isLivePreviewEnabledAtRoot =
+    config.admin?.livePreview?.collections?.includes(collectionSlug) ||
+    config.admin?.livePreview?.globals?.includes(globalSlug)
+
   const livePreviewConfig: LivePreviewConfig = {
-    ...(config.admin.livePreview || {}),
+    ...(isLivePreviewEnabledAtRoot ? config.admin.livePreview : {}),
     ...(collectionConfig?.admin?.livePreview || {}),
     ...(globalConfig?.admin?.livePreview || {}),
   }
