@@ -31,6 +31,7 @@ jobs:
         id: audit_dependencies
         run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
 
-      - name: Echo output
+      - name: Failure output
+        if: failure()
         run: |
           echo "Vulnerabilities found: ${{ steps.audit_dependencies.outputs.vulnerabilities }}"
