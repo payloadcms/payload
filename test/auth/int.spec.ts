@@ -1090,6 +1090,35 @@ describe('Auth', () => {
           }
         }
       })
+
+      it('should allow force unlocking of a user', async () => {
+        await payload.unlock({
+          collection: slug,
+          data: {
+            email: devUser.email,
+          } as any,
+          overrideAccess: true,
+        })
+
+        const userQuery = await payload.find({
+          collection: slug,
+          overrideAccess: true,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        expect(userQuery.docs[0]).toBeDefined()
+
+        if (userQuery.docs[0]) {
+          const user = userQuery.docs[0]
+          expect(user.loginAttempts).toBe(0)
+          expect(user.lockUntil).toBeNull()
+        }
+      })
     })
   })
 
