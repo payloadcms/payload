@@ -83,7 +83,7 @@ runs:
         if [ -n "${{ inputs.pnpm-install-cache-key }}" ]; then
           PNPM_INSTALL_CACHE_KEY="${{ inputs.pnpm-install-cache-key }}"
         else
-          PNPM_INSTALL_CACHE_KEY="pnpm-store-$(hashFiles '**/pnpm-lock.yaml')"
+          PNPM_INSTALL_CACHE_KEY="pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
         fi
         echo "Computed PNPM_INSTALL_CACHE_KEY: $PNPM_INSTALL_CACHE_KEY"
         echo "PNPM_INSTALL_CACHE_KEY=$PNPM_INSTALL_CACHE_KEY" >> $GITHUB_ENV
