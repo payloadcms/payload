@@ -1,5 +1,6 @@
 import type { Dispatcher } from 'undici'
 
+import { lookup } from 'dns/promises'
 import ipaddr from 'ipaddr.js'
 import { Agent, fetch as undiciFetch } from 'undici'
 
@@ -24,12 +25,26 @@ const isSafeIp = (ip: string) => {
   return true
 }
 
+/**
+ * Checks if a hostname or IP address is safe to fetch from.
+ * @param hostname a hostname or IP address
+ * @returns
+ */
+const isSafe = async (hostname: string) => {
+  try {
+    if (ipaddr.isValid(hostname)) {
+      return isSafeIp(hostname)
+    }
+
+    const { address } = await lookup(hostname)
+    return isSafeIp(address)
+  } catch (_ignore) {
+    return false
+  }
+}
+
 const ssrfFilterInterceptor: Dispatcher.DispatcherComposeInterceptor = (dispatch) => {
   return (opts, handler) => {
-    const url = new URL(opts.origin?.toString() + opts.path)
-    if (!isSafeIp(url.hostname)) {
-      throw new Error(`Blocked unsafe attempt to ${url}`)
-    }
     return dispatch(opts, handler)
   }
 }
@@ -40,11 +55,20 @@ const safeDispatcher = new Agent().compose(ssrfFilterInterceptor)
  * A "safe" version of undici's fetch that prevents SSRF attacks.
  *
  * - Utilizes a custom dispatcher that filters out requests to unsafe IP addresses.
+ * - Validates domain names by resolving them to IP addresses and checking if they're safe.
  * - Undici was used because it supported interceptors as well as "credentials: include". Native fetch
  */
 export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
-  const [url, options] = args
+  const [unverifiedUrl, options] = args
+
   try {
+    const url = new URL(unverifiedUrl)
+
+    const isHostnameSafe = await isSafe(url.hostname)
+    if (!isHostnameSafe) {
+      throw new Error(`Blocked unsafe attempt to ${url.toString()}`)
+    }
+
     return await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
@@ -56,11 +80,13 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
         // The desired message we want to bubble up is in the cause
         throw new Error(error.cause.message)
       } else {
-        let stringifiedUrl: string | undefined | URL = undefined
-        if (typeof url === 'string' || url instanceof URL) {
-          stringifiedUrl = url
-        } else if (url instanceof Request) {
-          stringifiedUrl = url.url
+        let stringifiedUrl: string | undefined = undefined
+        if (typeof unverifiedUrl === 'string') {
+          stringifiedUrl = unverifiedUrl
+        } else if (unverifiedUrl instanceof URL) {
+          stringifiedUrl = unverifiedUrl.toString()
+        } else if (unverifiedUrl instanceof Request) {
+          stringifiedUrl = unverifiedUrl.url
         }
 
         throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`)

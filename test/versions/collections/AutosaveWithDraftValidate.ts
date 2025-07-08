@@ -1,12 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { autosaveWithValidateCollectionSlug } from '../slugs.js'
+import { autosaveWithDraftValidateSlug } from '../slugs.js'
 
-const AutosaveWithValidatePosts: CollectionConfig = {
-  slug: autosaveWithValidateCollectionSlug,
+const AutosaveWithDraftValidate: CollectionConfig = {
+  slug: autosaveWithDraftValidateSlug,
   labels: {
-    singular: 'Autosave with Validate Post',
-    plural: 'Autosave with Validate Posts',
+    singular: 'Autosave with Draft Validate',
+    plural: 'Autosave with Draft Validate',
   },
   admin: {
     useAsTitle: 'title',
@@ -30,4 +30,4 @@ const AutosaveWithValidatePosts: CollectionConfig = {
   ],
 }
 
-export default AutosaveWithValidatePosts
+export default AutosaveWithDraftValidate
