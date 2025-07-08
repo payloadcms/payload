@@ -587,6 +587,8 @@ describe('Collections - Uploads', () => {
             hostname = hostname.slice(1, -1)
           }
 
+          // Here we're essentially mocking our own DNS provider, to get 'https://www.payloadcms.com/test.png' to resolve to the IP
+          // we'd like to test for
           // @ts-expect-error this does not need to be mocked 100% correctly
           _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
             // eslint-disable-next-line jest/no-conditional-in-test
@@ -600,7 +602,7 @@ describe('Collections - Uploads', () => {
                 filename: 'test.png',
                 // Need to pass a domain for lookup to be called. We monkey patch the IP lookup function above
                 // to return the IP address we want to test.
-                url: 'https://www.payloadcms.com/file.png',
+                url: 'https://www.payloadcms.com/test.png',
               },
             }),
           ).rejects.toThrow(
